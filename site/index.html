@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>공사장 | BYPASS</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='30' height='30' rx='6' fill='%230F5A3A'/%3E%3Cpath d='M6 22h4c0-11 12-11 12 0h4' fill='none' stroke='%23EE6A1F' stroke-width='3' stroke-linecap='round'/%3E%3Crect x='13' y='17' width='6' height='7' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/bypass.css">
+</head>
+<body class="is-checking">
+
+<a class="skip" href="#main">본문 바로가기</a>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="BYPASS 처음으로">
+      <svg class="brand-mark" viewBox="0 0 42 42" aria-hidden="true">
+        <rect x="1" y="1" width="40" height="40" rx="8" fill="#0F5A3A"/>
+        <rect x="4.5" y="4.5" width="33" height="33" rx="5" fill="none" stroke="#fff" stroke-width="1.6"/>
+        <path d="M9 28h5c0-13 14-13 14 0h5" fill="none" stroke="#EE6A1F" stroke-width="3.6" stroke-linecap="round"/>
+        <rect x="17.5" y="21" width="7" height="9" fill="#fff"/>
+      </svg>
+      <span>
+        <span class="brand-name">BYPASS</span>
+        <span class="brand-sub">느린 시스템의 실용적 대안 마련국</span>
+      </span>
+    </a>
+    <div class="head-actions">
+      <span class="head-user"><strong data-name></strong> 님</span>
+      <button type="button" class="head-pill" data-logout>로그아웃</button>
+    </div>
+  </div>
+</header>
+
+<div class="barrier" aria-hidden="true"></div>
+<p class="checking" role="status" data-checking>출입 확인 중…</p>
+
+<main id="main">
+
+  <section class="site-hero" aria-labelledby="page-title">
+    <div class="wrap">
+      <div class="site-hero-copy">
+        <p class="sign-code">BYPASS 회원 전용 구역</p>
+        <h1 id="page-title">공사장</h1>
+        <p class="lead"><strong data-name></strong> 님, 어서 오세요. 새 길과 우회로를 만드는 현장입니다.</p>
+      </div>
+      <!-- 관계자 외 출입금지 바리케이드. 확인 도장이 이미 찍혀 있다. -->
+      <svg class="gate" viewBox="0 0 300 222" role="img" aria-label="‘관계자 외 출입금지’ 표지판에 ‘관계자 확인’ 도장이 찍혀 있습니다.">
+        <defs>
+          <pattern id="gate-stripes" patternUnits="userSpaceOnUse" width="28" height="28" patternTransform="rotate(45)">
+            <rect width="28" height="28" fill="#fff"/>
+            <rect width="14" height="28" fill="#EE6A1F"/>
+          </pattern>
+          <filter id="gate-ink" x="-5%" y="-5%" width="110%" height="110%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise"/>
+            <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.15" result="speckle"/>
+            <feComposite in="SourceGraphic" in2="speckle" operator="in"/>
+          </filter>
+        </defs>
+        <!-- 다리 -->
+        <path d="M54 150 L30 222 M54 150 L78 222 M246 150 L222 222 M246 150 L270 222" stroke="#5C635E" stroke-width="9"/>
+        <!-- 표지판 기둥 -->
+        <rect x="68" y="100" width="8" height="24" fill="#5C635E"/>
+        <rect x="224" y="100" width="8" height="24" fill="#5C635E"/>
+        <!-- 가로대 -->
+        <rect x="5" y="120" width="290" height="36" rx="4" fill="url(#gate-stripes)" stroke="#1C211E" stroke-width="3"/>
+        <!-- 표지판 -->
+        <rect x="12" y="4" width="276" height="100" rx="8" fill="#fff" stroke="#1C211E" stroke-width="4"/>
+        <rect x="20" y="12" width="260" height="84" rx="4" fill="none" stroke="#1C211E" stroke-width="1.5"/>
+        <text x="114" y="46" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-size="23" font-weight="900" fill="#1C211E">관계자 외</text>
+        <text x="114" y="83" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-size="33" font-weight="900" letter-spacing="3" fill="#1C211E">출입금지</text>
+        <!-- 확인 도장 -->
+        <g transform="rotate(-14 240 54)" filter="url(#gate-ink)" fill="#0F5A3A">
+          <circle cx="240" cy="54" r="33" fill="none" stroke="#0F5A3A" stroke-width="3.6"/>
+          <circle cx="240" cy="54" r="27.5" fill="none" stroke="#0F5A3A" stroke-width="1.3"/>
+          <text x="240" y="45" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-size="11.5" font-weight="900" letter-spacing="1">관계자</text>
+          <text x="240" y="69" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-size="21" font-weight="900" letter-spacing="1">확인</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section class="desk" aria-label="공사장 구역">
+    <div class="wrap">
+
+      <div class="banner on-green" role="status" data-welcome hidden>
+        <p>가입이 완료되었습니다. 공사장 출입이 허가되었습니다.</p>
+        <button type="button" class="banner-close" data-welcome-close>닫기</button>
+      </div>
+
+      <div class="desk-grid">
+
+        <!-- A구역: 내 정보 -->
+        <article class="card" aria-labelledby="c-info">
+          <div class="card-head"><p class="card-no">A구역</p><h2 id="c-info">내 정보</h2></div>
+          <div class="card-body">
+            <dl class="info">
+              <div><dt>아이디</dt><dd data-username></dd></div>
+              <div><dt>이름</dt><dd data-name></dd></div>
+              <div><dt>회원 구분</dt><dd><span class="role" data-role></span></dd></div>
+              <div><dt>가입일</dt><dd data-joined></dd></div>
+            </dl>
+            <div class="card-foot">
+              <button type="button" class="btn btn-secondary btn-small" data-logout>로그아웃</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- B구역: 내 제보 (6단계에서 실제 제보와 연결) -->
+        <article class="card" aria-labelledby="c-report">
+          <div class="card-head"><p class="card-no">B구역</p><h2 id="c-report">내 제보</h2></div>
+          <div class="card-body">
+            <div class="empty">
+              <p class="empty-title">아직 공사할 곳이 없습니다.</p>
+              <p class="empty-text">불편한 점을 제보해 주시면<br>처리 상황이 이곳에 표시됩니다.</p>
+              <a class="btn btn-primary btn-small" href="/?report=1">불편 제보하기</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- C구역: 공지 (지금은 여기서 직접 고칩니다) -->
+        <article class="card" aria-labelledby="c-notice">
+          <div class="card-head"><p class="card-no">C구역</p><h2 id="c-notice">공지</h2></div>
+          <div class="card-body">
+            <ul class="notices">
+              <li>
+                <span class="n-date">2026. 10. 20. · 운영진</span>
+                <span class="n-title"><span class="badge badge-new">신설</span>회원 전용 페이지 ‘공사장’이 문을 열었습니다.</span>
+              </li>
+              <li>
+                <span class="n-date">2026. 10. 20. · 운영진</span>
+                <span class="n-title">동아리가 만든 앱을 모아 보는 ‘발명한 지름길 모음’을 준비하고 있습니다.</span>
+              </li>
+              <li>
+                <span class="n-date">상시 · 운영진</span>
+                <span class="n-title">비밀번호를 잊으셨다면 운영진에게 문의해 주세요.</span>
+              </li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- D구역: 부원 전용 (회원 구분이 부원·운영진이면 열림) -->
+        <article class="card card-locked" aria-labelledby="c-crew" data-crew-card>
+          <div class="card-head"><p class="card-no">D구역</p><h2 id="c-crew">부원 전용</h2></div>
+          <div class="card-body">
+            <div data-crew-locked>
+              <div class="lock-band" aria-hidden="true"></div>
+              <p class="lock-title">공사 예정 구역</p>
+              <p class="lock-text">부원으로 등록되면 이번 주 회의 안건과 자료실이 열립니다. 부원 등록은 운영진이 처리합니다.</p>
+              <ul class="zone-list">
+                <li>이번 주 회의 안건 <span class="zone-state">잠김</span></li>
+                <li>자료실 <span class="zone-state">잠김</span></li>
+              </ul>
+            </div>
+            <div data-crew-open hidden>
+              <ul class="zone-list">
+                <li>이번 주 회의 안건 <span class="zone-state">아직 올라온 안건이 없습니다</span></li>
+                <li>자료실 <span class="zone-state">준비 중</span></li>
+              </ul>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <p class="foot-name"><strong>BYPASS</strong>느린 시스템의 실용적 대안 마련국</p>
+    <p class="foot-note">본 사이트는 국립목포해양대학교 학생 자율 동아리 BYPASS가 운영하며, 대학 행정 부서 및 정부 기관과 무관합니다.</p>
+  </div>
+</footer>
+
+<script src="/assets/vendor/supabase-js-2.117.2.js"></script>
+<script src="/assets/auth.js"></script>
+<script>
+(async function () {
+  const B = window.BYPASS;
+  const checking = document.querySelector('[data-checking]');
+  const toLogin = () => location.replace('/login/?next=' + encodeURIComponent('/site/'));
+
+  if (!B.sb) { checking.textContent = B.unavailableText; return; }
+
+  const { data: { session } } = await B.sb.auth.getSession();
+  if (!session) { toLogin(); return; }
+
+  const user = session.user;
+  const profile = B.profileOf(user);
+  const role = B.roleOf(user);
+
+  document.querySelectorAll('[data-name]').forEach(el => { el.textContent = profile.name; });
+  document.querySelector('[data-username]').textContent = profile.username;
+  document.querySelector('[data-joined]').textContent = B.dateText(user.created_at);
+  const roleEl = document.querySelector('[data-role]');
+  roleEl.textContent = role.label;
+  if (role.key !== 'general') roleEl.classList.add('role-' + role.key);
+
+  if (role.key !== 'general') {
+    document.querySelector('[data-crew-card]').classList.remove('card-locked');
+    document.querySelector('[data-crew-locked]').hidden = true;
+    document.querySelector('[data-crew-open]').hidden = false;
+  }
+
+  // 가입 직후 환영 안내
+  const params = new URLSearchParams(location.search);
+  if (params.get('welcome') === '1') {
+    const banner = document.querySelector('[data-welcome]');
+    banner.hidden = false;
+    banner.querySelector('[data-welcome-close]').addEventListener('click', () => { banner.hidden = true; });
+    history.replaceState(null, '', location.pathname);
+  }
+
+  checking.remove();
+  document.body.classList.remove('is-checking');
+
+  // 로그아웃
+  let leaving = false;
+  document.querySelectorAll('[data-logout]').forEach(btn => btn.addEventListener('click', async () => {
+    leaving = true;
+    btn.disabled = true;
+    try { await B.sb.auth.signOut({ scope: 'local' }); } finally { location.replace('/'); }
+  }));
+
+  // 다른 탭에서 로그아웃하면 이 탭도 나가기
+  B.sb.auth.onAuthStateChange(event => {
+    if (event === 'SIGNED_OUT' && !leaving) toLogin();
+  });
+})();
+</script>
+</body>
+</html>

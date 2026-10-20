@@ -78,11 +78,25 @@
   .site-nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 26px; }
   .site-nav a { color: var(--ink); text-decoration: none; font-weight: 700; font-size: 15px; white-space: nowrap; }
   .site-nav a:hover { text-decoration: underline; text-decoration-color: var(--green); text-decoration-thickness: 2px; }
+  /* 계정 버튼: 로그인 / 공사장 */
+  .site-head .wrap { position: relative; }
+  .site-nav { margin-left: auto; }
+  .nav-account {
+    flex-shrink: 0; display: inline-block; padding: 7px 14px; border-radius: 7px;
+    font-weight: 700; font-size: 15px; line-height: 1.3; white-space: nowrap; text-decoration: none;
+    background: var(--white); color: var(--green); box-shadow: inset 0 0 0 2px var(--green);
+  }
+  .nav-account:hover { background: var(--green-tint); }
+  @media (max-width: 1000px) { .site-nav ul { gap: 20px; } }
   @media (max-width: 900px) {
     .site-head .wrap { flex-direction: column; align-items: flex-start; gap: 12px; }
     .site-nav { width: 100%; overflow-x: auto; }
     .site-nav ul { gap: 20px; padding-bottom: 4px; }
+    .site-nav { margin-left: 0; }
+    .nav-account { position: absolute; top: 22px; right: 24px; }
   }
+  @media (max-width: 600px) { .nav-account { right: 16px; } }
+  @media (max-width: 380px) { .brand-sub { display: none; } }
 
   /* 첫 화면: 우회도로 안내 표지 */
   .hero { border-bottom: 6px solid var(--post); }
@@ -572,6 +586,7 @@
         <li><a href="#faq">자주 묻는 질문</a></li>
       </ul>
     </nav>
+    <a class="nav-account" id="nav-account" href="/login/">로그인</a>
   </div>
 </header>
 
@@ -1058,6 +1073,27 @@
       receipt.querySelector('h3').focus();
     });
   });
+
+  /* ===== 주소로 대화상자 열기: /?report=1, /?join=1 ===== */
+  const openParams = new URLSearchParams(location.search);
+  const openKey = ['report', 'join'].find(k => openParams.get(k) === '1');
+  if (openKey) {
+    const dlg = document.getElementById(openKey + '-dialog');
+    resetDialog(dlg);
+    dlg.showModal();
+    history.replaceState(null, '', location.pathname + location.hash);
+  }
+
+  /* ===== 머리글 계정 링크: 로그인한 상태면 '공사장' =====
+     Supabase 라이브러리를 불러오지 않고, 브라우저에 저장된 로그인 기록만 확인한다. */
+  try {
+    const saved = JSON.parse(localStorage.getItem('sb-itzdjdgjqcpmxdfssfel-auth-token') || 'null');
+    if (saved && saved.refresh_token) {
+      const account = document.getElementById('nav-account');
+      account.textContent = '공사장';
+      account.href = '/site/';
+    }
+  } catch (e) { /* 저장소를 쓸 수 없으면 '로그인' 그대로 */ }
 </script>
 </body>
 </html>

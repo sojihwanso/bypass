@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>로그인 | BYPASS</title>
+<meta name="description" content="BYPASS 사이트 로그인.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='30' height='30' rx='6' fill='%230F5A3A'/%3E%3Cpath d='M6 22h4c0-11 12-11 12 0h4' fill='none' stroke='%23EE6A1F' stroke-width='3' stroke-linecap='round'/%3E%3Crect x='13' y='17' width='6' height='7' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/bypass.css">
+</head>
+<body>
+
+<a class="skip" href="#main">본문 바로가기</a>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="BYPASS 처음으로">
+      <svg class="brand-mark" viewBox="0 0 42 42" aria-hidden="true">
+        <rect x="1" y="1" width="40" height="40" rx="8" fill="#0F5A3A"/>
+        <rect x="4.5" y="4.5" width="33" height="33" rx="5" fill="none" stroke="#fff" stroke-width="1.6"/>
+        <path d="M9 28h5c0-13 14-13 14 0h5" fill="none" stroke="#EE6A1F" stroke-width="3.6" stroke-linecap="round"/>
+        <rect x="17.5" y="21" width="7" height="9" fill="#fff"/>
+      </svg>
+      <span>
+        <span class="brand-name">BYPASS</span>
+        <span class="brand-sub">느린 시스템의 실용적 대안 마련국</span>
+      </span>
+    </a>
+    <div class="head-actions">
+      <a class="head-pill" href="/join/">회원가입</a>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="auth-main">
+  <div class="wrap">
+    <section class="panel" aria-labelledby="page-title">
+      <div class="panel-head on-green">
+        <p class="panel-code">BYPASS 회원 안내</p>
+        <h1 id="page-title">로그인</h1>
+      </div>
+      <div class="panel-body">
+        <form id="login-form" novalidate>
+          <label class="field-label" for="f-id" style="margin-top:4px">아이디</label>
+          <input class="input" id="f-id" name="username" type="text" required maxlength="20"
+                 autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+
+          <label class="field-label" for="f-pw">비밀번호</label>
+          <div class="pw">
+            <input class="input" id="f-pw" name="password" type="password" required autocomplete="current-password">
+            <button type="button" class="pw-toggle" data-pw-toggle aria-controls="f-pw" aria-pressed="false">보기</button>
+          </div>
+
+          <p class="form-error" role="alert" hidden></p>
+          <div class="form-actions"><button type="submit" class="btn btn-primary">로그인</button></div>
+          <p class="hint" style="margin-top:14px;text-align:center">비밀번호를 잊으셨다면 운영진에게 문의해 주세요.<br>비밀번호 찾기는 아직 우회로가 개통되지 않았습니다.</p>
+        </form>
+        <p class="panel-alt">아직 회원이 아니신가요? <a href="/join/">회원가입</a></p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <p class="foot-name"><strong>BYPASS</strong>느린 시스템의 실용적 대안 마련국</p>
+    <p class="foot-note">본 사이트는 국립목포해양대학교 학생 자율 동아리 BYPASS가 운영하며, 대학 행정 부서 및 정부 기관과 무관합니다.</p>
+  </div>
+</footer>
+
+<script src="/assets/vendor/supabase-js-2.117.2.js"></script>
+<script src="/assets/auth.js"></script>
+<script>
+(async function () {
+  const B = window.BYPASS;
+  const form = document.getElementById('login-form');
+  const idInput = document.getElementById('f-id');
+  const pwInput = document.getElementById('f-pw');
+  const errorBox = form.querySelector('.form-error');
+  const submit = form.querySelector('[type="submit"]');
+  const next = B.safeNext(new URLSearchParams(location.search).get('next'), '/site/');
+
+  B.bindPasswordToggles(form);
+
+  function showError(text, field) {
+    errorBox.textContent = text;
+    errorBox.hidden = false;
+    if (field) { field.setAttribute('aria-invalid', 'true'); field.focus(); }
+  }
+
+  if (!B.sb) { showError(B.unavailableText); submit.disabled = true; return; }
+
+  // 이미 로그인한 사람은 바로 이동
+  const { data: { session } } = await B.sb.auth.getSession();
+  if (session) { location.replace(next); return; }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    errorBox.hidden = true;
+    [idInput, pwInput].forEach(f => f.removeAttribute('aria-invalid'));
+
+    const id = B.normalizeId(idInput.value);
+    const pw = pwInput.value;
+    if (!id && !pw) {
+      idInput.setAttribute('aria-invalid', 'true');
+      showError('필수 항목이 누락되었습니다. 본 국도 이 문구를 쓰게 되어 유감입니다.', pwInput);
+      idInput.focus();
+      return;
+    }
+    if (!id) { showError('아이디를 입력해 주세요.', idInput); return; }
+    if (!pw) { showError('비밀번호를 입력해 주세요.', pwInput); return; }
+
+    B.setBusy(submit, true, '확인 중…');
+    let result;
+    try {
+      result = await B.sb.auth.signInWithPassword({ email: B.idToEmail(id), password: pw });
+    } catch (err) {
+      result = { error: err };
+    }
+    if (result.error) {
+      B.setBusy(submit, false);
+      pwInput.value = '';
+      showError(B.errorText(result.error, 'login'), result.error.code === 'invalid_credentials' ? pwInput : null);
+      return;
+    }
+    location.replace(next);
+  });
+})();
+</script>
+</body>
+</html>
