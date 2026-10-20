@@ -1,0 +1,1063 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BYPASS | 느린 시스템의 실용적 대안 마련국</title>
+<meta name="description" content="BYPASS는 국립목포해양대학교 바이브 코딩 동아리입니다. 학교생활의 불필요한 절차를 AI와 코드로 우회합니다.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='30' height='30' rx='6' fill='%230F5A3A'/%3E%3Cpath d='M6 22h4c0-11 12-11 12 0h4' fill='none' stroke='%23EE6A1F' stroke-width='3' stroke-linecap='round'/%3E%3Crect x='13' y='17' width='6' height='7' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ground: #E4E6E1;      /* 콘크리트 바탕 */
+    --pave: #D3D7D0;        /* 보도 경계 */
+    --white: #FFFFFF;
+    --ink: #1C211E;
+    --muted: #4A534E;
+    --rule: #C3C8C1;
+    --post: #8E958F;
+    --post-dark: #5C635E;
+    --green: #0F5A3A;       /* 안내 표지 녹색 */
+    --green-deep: #0A4029;
+    --green-tint: #E3ECE6;
+    --orange: #EE6A1F;      /* 우회·임시 표지, 상태 배지 (면 전용) */
+    --orange-ink: #A8420A;  /* 흰 바탕 위 주황 글자 */
+    --asphalt: #3A403C;
+    --vms: #1F2421;
+    --amber: #FFB13B;
+    --sans: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.7;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--green); text-underline-offset: 3px; }
+  :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  .on-green :focus-visible { outline-color: #fff; }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  @media (max-width: 600px) { .wrap { padding: 0 16px; } }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  .skip {
+    position: absolute; left: 16px; top: -60px; z-index: 10;
+    background: var(--ink); color: #fff; padding: 10px 16px; font-weight: 700; text-decoration: none;
+  }
+  .skip:focus { top: 8px; }
+
+  /* 운영 상태: 도로 전광판 */
+  .vms { background: var(--vms); color: var(--amber); font-size: 15px; line-height: 1.5; font-weight: 700; border-bottom: 4px solid var(--post-dark); }
+  .vms .wrap { display: flex; align-items: center; gap: 14px; padding-top: 10px; padding-bottom: 10px; }
+  .vms-label { flex-shrink: 0; border: 1.5px solid var(--amber); border-radius: 3px; padding: 0 8px; font-size: 13px; line-height: 1.7; }
+
+  /* 머리글 */
+  .site-head .wrap { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-top: 18px; padding-bottom: 18px; }
+  .brand { display: flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; }
+  .brand-mark { width: 42px; height: 42px; flex-shrink: 0; }
+  .brand-name { display: block; font-weight: 900; font-size: 22px; line-height: 1.1; letter-spacing: 0.03em; }
+  .brand-sub { display: block; font-size: 13px; font-weight: 500; color: var(--muted); line-height: 1.4; margin-top: 3px; }
+  .site-nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 26px; }
+  .site-nav a { color: var(--ink); text-decoration: none; font-weight: 700; font-size: 15px; white-space: nowrap; }
+  .site-nav a:hover { text-decoration: underline; text-decoration-color: var(--green); text-decoration-thickness: 2px; }
+  @media (max-width: 900px) {
+    .site-head .wrap { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .site-nav { width: 100%; overflow-x: auto; }
+    .site-nav ul { gap: 20px; padding-bottom: 4px; }
+  }
+
+  /* 첫 화면: 우회도로 안내 표지 */
+  .hero { border-bottom: 6px solid var(--post); }
+  .hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 590px); gap: 48px; align-items: center; padding-top: 40px; }
+  .hero-copy { padding-bottom: 72px; }
+  .sign-code {
+    display: inline-block; margin: 0 0 26px;
+    border: 2px solid var(--green); border-radius: 5px; background: var(--white);
+    color: var(--green); font-weight: 700; font-size: 14px; line-height: 1.6; padding: 3px 10px;
+  }
+  .hero h1 {
+    margin: 0 0 24px;
+    font-weight: 900;
+    font-size: clamp(2.05rem, 4.1vw, 3.3rem);
+    line-height: 1.22;
+    letter-spacing: -0.035em;
+  }
+  .identity { margin: 0 0 34px; font-size: clamp(1.05rem, 1.5vw, 1.2rem); line-height: 1.75; max-width: 27em; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .scene { display: block; width: 100%; height: auto; align-self: end; }
+  .scene text { font-family: var(--sans); }
+  @media (max-width: 900px) {
+    .hero .wrap { grid-template-columns: 1fr; gap: 8px; padding-top: 28px; }
+    .hero h1 { font-size: clamp(2.05rem, 6vw, 3rem); }
+    .hero-copy { padding-bottom: 28px; }
+    .scene { max-width: 560px; }
+  }
+
+  /* 버튼: 안내 표지의 안쪽 흰 테두리를 그대로 */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--sans); font-weight: 700; font-size: 17px; line-height: 1.2;
+    padding: 16px 24px; border-radius: 10px; border: 0; cursor: pointer; text-decoration: none;
+  }
+  .btn-primary { --bg: var(--green); background: var(--bg); color: #fff; box-shadow: inset 0 0 0 4px var(--bg), inset 0 0 0 6px #fff; }
+  .btn-primary:hover { --bg: var(--green-deep); }
+  .btn-secondary { background: var(--white); color: var(--green); box-shadow: inset 0 0 0 2.5px var(--green); }
+  .btn-secondary:hover { background: var(--green-tint); }
+  .on-green .btn-primary { --bg: #fff; color: var(--green); box-shadow: inset 0 0 0 4px #fff, inset 0 0 0 6px var(--green); }
+  .on-green .btn-primary:hover { --bg: var(--green-tint); }
+  .on-green .btn-secondary { background: transparent; color: #fff; box-shadow: inset 0 0 0 2.5px #fff; }
+  .on-green .btn-secondary:hover { background: var(--green-deep); }
+
+  /* 공통 섹션 */
+  .sec { padding: 96px 0; }
+  .sec-title { margin: 0 0 40px; font-weight: 900; font-size: clamp(1.7rem, 3.2vw, 2.45rem); line-height: 1.3; letter-spacing: -0.03em; }
+  .note { font-size: 15px; color: var(--muted); margin: 26px 0 0; }
+  @media (max-width: 600px) { .sec { padding: 68px 0; } .sec-title { margin-bottom: 30px; } }
+
+  /* 명칭 안내: 머리글자 명칭 표지 */
+  .sec-lead { margin: -24px 0 32px; font-size: 18px; line-height: 1.7; }
+  .name-sign {
+    background: var(--green); color: #fff; border-radius: 20px; padding: 38px 34px 30px;
+    box-shadow: inset 0 0 0 8px var(--green), inset 0 0 0 11px #fff;
+  }
+  .acro { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .acro li { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 8px 4px; }
+  .acro li + li { border-left: 2px solid rgba(255, 255, 255, 0.3); }
+  .acro-letter { font-weight: 900; font-size: clamp(3.2rem, 6.4vw, 4.8rem); line-height: 1; letter-spacing: -0.02em; }
+  .acro-word { margin-top: 14px; font-weight: 700; font-size: 16px; line-height: 1.4; white-space: nowrap; }
+  .acro-prep { font-weight: 500; color: rgba(255, 255, 255, 0.78); margin-right: 5px; }
+  .acro-gloss { margin-top: 12px; background: #fff; color: var(--green); border-radius: 4px; padding: 1px 10px; font-weight: 900; font-size: 15px; line-height: 1.6; white-space: nowrap; }
+  .name-full { margin-top: 30px; padding-top: 20px; border-top: 3px solid #fff; text-align: center; }
+  .name-full p { margin: 0; }
+  .name-en { font-size: 15px; font-weight: 500; letter-spacing: 0.01em; }
+  .name-ko { margin-top: 2px !important; font-size: clamp(1.25rem, 2.4vw, 1.6rem); font-weight: 900; letter-spacing: -0.01em; }
+  @media (max-width: 900px) {
+    .acro { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 26px; }
+    .acro li + li { border-left: 0; }
+  }
+  @media (max-width: 520px) {
+    .name-sign { padding: 30px 18px 24px; border-radius: 16px; box-shadow: inset 0 0 0 6px var(--green), inset 0 0 0 9px #fff; }
+    .acro { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 22px; }
+    .acro-word { font-size: 15px; }
+    .sec-lead { font-size: 17px; }
+  }
+
+  /* 설치 규정: 흰 규정 안내판 */
+  .rule-board {
+    position: relative; max-width: 900px; margin: 0 auto;
+    background: var(--white); border: 4px solid var(--ink); border-radius: 12px;
+    padding: 40px 52px 34px;
+  }
+  .rule-board::before, .rule-board::after, .rule-body::before, .rule-body::after {
+    content: ""; position: absolute; width: 11px; height: 11px; border-radius: 50%;
+    background: var(--ground); border: 2px solid var(--post);
+  }
+  .rule-board::before { top: 12px; left: 12px; }
+  .rule-board::after { top: 12px; right: 12px; }
+  .rule-body::before { bottom: 12px; left: 12px; }
+  .rule-body::after { bottom: 12px; right: 12px; }
+  .rule-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 4px 20px; padding-bottom: 16px; border-bottom: 4px solid var(--ink); }
+  .rule-head h2 { margin: 0; font-weight: 900; font-size: clamp(1.7rem, 3.2vw, 2.45rem); line-height: 1.3; letter-spacing: -0.03em; }
+  .rule-date { font-size: 15px; font-weight: 500; color: var(--muted); }
+  .article { display: grid; grid-template-columns: 9.2em 1fr; gap: 4px 24px; padding: 20px 0; border-bottom: 1px solid var(--rule); }
+  .article:last-child { border-bottom: 0; padding-bottom: 6px; }
+  .article-no { font-weight: 900; color: var(--green); font-size: 17px; }
+  .article p { margin: 0; }
+  .items { list-style: none; margin: 14px 0 0; padding: 0; counter-reset: item; }
+  .items li { counter-increment: item; display: grid; grid-template-columns: 38px 1fr; gap: 0 4px; padding: 9px 0; }
+  .items li::before {
+    content: counter(item); width: 26px; height: 26px; margin-top: 2px; border-radius: 5px;
+    background: var(--green); color: #fff; font-weight: 900; font-size: 14px; line-height: 26px; text-align: center;
+  }
+  .items .example { display: block; font-size: 15px; color: var(--muted); }
+  @media (max-width: 600px) {
+    .rule-board { padding: 32px 20px 26px; border-width: 3px; }
+    .article { grid-template-columns: 1fr; }
+  }
+
+  /* 처리 절차: 고속도로 출구 순서 */
+  .sec-process { overflow-x: clip; padding-bottom: 0; }
+  .exits { list-style: none; margin: 0; padding: 0 0 104px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; position: relative; }
+  .exits::before {
+    content: ""; position: absolute; bottom: 0; left: calc(50% - 50vw); width: 100vw; height: 64px;
+    background: var(--asphalt); border-top: 4px solid #fff; border-bottom: 4px solid #fff;
+  }
+  .exits::after {
+    content: ""; position: absolute; bottom: 30px; left: calc(50% - 50vw); width: 100vw; height: 4px;
+    background: repeating-linear-gradient(90deg, #fff 0 34px, transparent 34px 64px);
+  }
+  .exit { position: relative; display: flex; flex-direction: column; }
+  .exit::before, .exit::after {
+    content: ""; position: absolute; top: 100%; width: 10px; height: 40px; background: var(--post);
+  }
+  .exit::before { left: 24%; }
+  .exit::after { right: 24%; }
+  .exit-tab {
+    align-self: flex-start; margin-left: 16px; padding: 3px 14px 2px;
+    background: var(--green); color: #fff; border: 2.5px solid #fff; border-bottom: 0; border-radius: 9px 9px 0 0;
+    font-weight: 700; font-size: 15px; line-height: 1.5; position: relative; top: 2px;
+  }
+  .exit-sign {
+    flex: 1; display: flex; flex-direction: column;
+    background: var(--green); color: #fff; border-radius: 14px; padding: 22px 22px 22px;
+    box-shadow: inset 0 0 0 5px var(--green), inset 0 0 0 7.5px #fff;
+  }
+  .exit-sign h3 { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; font-weight: 900; font-size: 32px; line-height: 1.2; letter-spacing: -0.02em; }
+  .exit-sign h3 svg { width: 34px; height: 34px; }
+  .exit-sign p { margin: 0; font-size: 16px; line-height: 1.65; }
+  .exit-sign .exit-due { margin-top: auto; padding-top: 16px; }
+  .exit-due span { display: inline-block; background: #fff; color: var(--green); border-radius: 4px; padding: 2px 9px; font-size: 14px; font-weight: 700; line-height: 1.6; }
+  .exit-due b { font-weight: 900; }
+  .exit-detour .exit-tab { background: var(--orange); color: var(--ink); border-color: var(--ink); }
+  .exit-detour .exit-sign { background: var(--orange); color: var(--ink); box-shadow: inset 0 0 0 5px var(--orange), inset 0 0 0 7.5px var(--ink); }
+  @media (max-width: 900px) {
+    .sec-process { padding-bottom: 68px; }
+    .exits { grid-template-columns: 1fr; gap: 26px; padding: 0 0 0 76px; }
+    .exits::before { top: -12px; bottom: -12px; left: 0; width: 48px; height: auto; border: 0; border-left: 4px solid #fff; border-right: 4px solid #fff; }
+    .exits::after { top: -12px; bottom: -12px; left: 22px; width: 4px; height: auto; background: repeating-linear-gradient(180deg, #fff 0 30px, transparent 30px 56px); }
+    .exit::before { top: auto; bottom: 34px; left: -28px; width: 28px; height: 10px; }
+    .exit::after { display: none; }
+    .exit-tab { margin-left: 14px; }
+  }
+
+  /* 처리 현황: 노변 안내판 (네 장을 한 줄에) */
+  #dockets { padding: 76px 0 72px; }
+  #dockets .sec-title { margin-bottom: 34px; }
+  .boards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 20px; border-bottom: 6px solid var(--post); }
+  .board-unit { display: flex; flex-direction: column; }
+  .board { position: relative; flex: 1; display: flex; flex-direction: column; background: var(--white); border: 3px solid var(--green); border-radius: 10px; }
+  .board-head { background: var(--green); color: #fff; border-radius: 6px 6px 0 0; padding: 10px 14px 11px; }
+  .board-no { margin: 0; padding-right: 62px; font-size: 12.5px; font-weight: 700; line-height: 1.5; color: #D5E4DB; }
+  .board-head h3 { margin: 2px 0 0; font-weight: 900; font-size: 18px; line-height: 1.35; }
+  .board-rejected .board-head { border-top: 10px solid transparent; background: var(--green) padding-box; position: relative; }
+  .board-rejected .board-head::before {
+    content: ""; position: absolute; left: 0; right: 0; top: -10px; height: 10px; border-radius: 6px 6px 0 0;
+    background: repeating-linear-gradient(-45deg, var(--orange) 0 10px, #fff 10px 20px);
+  }
+  .specimen {
+    position: absolute; top: -11px; right: 10px; transform: rotate(-5deg);
+    background: var(--orange); color: var(--ink); border: 2px solid var(--ink); border-radius: 4px;
+    font-weight: 900; font-size: 13px; line-height: 1.5; padding: 1px 9px; letter-spacing: 0.08em;
+  }
+  .board dl { margin: 0; padding: 2px 14px 0; }
+  .board dl div { padding: 9px 0; border-bottom: 1px solid var(--rule); }
+  .board dt { font-weight: 700; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+  .board dd { margin: 1px 0 0; font-size: 14.5px; line-height: 1.55; }
+  .board-foot { position: relative; margin-top: auto; min-height: 98px; padding: 12px 14px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .board-link { font-weight: 700; font-size: 14px; }
+  .badge { display: inline-block; border-radius: 4px; font-weight: 900; font-size: 13.5px; letter-spacing: 0.1em; padding: 0 9px 0 10px; line-height: 1.75; }
+  .badge-done { background: var(--orange); color: var(--ink); }
+  .badge-rejected { background: var(--white); color: var(--orange-ink); border: 2px dashed var(--orange-ink); line-height: 1.6; }
+  .badge-new { background: var(--green); color: #fff; }
+  .done-seal {
+    position: absolute; right: 6px; bottom: 4px; width: 110px; height: 110px;
+    color: var(--orange); transform: rotate(var(--r, -11deg)); mix-blend-mode: multiply; pointer-events: none;
+  }
+  .open-seal {
+    position: absolute; right: 4px; bottom: 6px; width: 128px; height: 106px;
+    transform: rotate(-6deg); mix-blend-mode: multiply; pointer-events: none;
+  }
+  .legs { flex: none; height: 34px; position: relative; }
+  .legs::before, .legs::after { content: ""; position: absolute; top: 0; bottom: 0; width: 9px; background: var(--post); }
+  .legs::before { left: 22%; }
+  .legs::after { right: 22%; }
+  .swipe-hint { display: none; margin: 12px 0 0; font-size: 14px; font-weight: 700; color: var(--muted); }
+  @media (max-width: 1060px) {
+    .boards { gap: 0 14px; }
+    .board-head h3 { font-size: 17px; }
+    .board-link { font-size: 13px; }
+    .done-seal { width: 98px; height: 98px; }
+    .open-seal { width: 110px; height: 92px; }
+  }
+  @media (max-width: 900px) {
+    .boards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; border-bottom: 0; }
+    .board-unit { border-bottom: 6px solid var(--post); padding-top: 16px; }
+  }
+  /* 휴대폰: 안내판을 옆으로 넘겨 보는 한 줄 */
+  @media (max-width: 640px) {
+    #dockets { padding: 60px 0; }
+    .boards {
+      grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 78%; gap: 0 14px;
+      overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 16px; overscroll-behavior-x: contain;
+      margin: 0 -16px; padding: 14px 16px 0; border-bottom: 6px solid var(--post);
+    }
+    .board-unit { border-bottom: 0; padding-top: 0; scroll-snap-align: start; }
+    .legs { height: 24px; }
+    .swipe-hint { display: block; }
+  }
+
+  /* 도도새 직인 안내: 규정 안내판과 같은 볼트 고정 안내판 */
+  .sec-seal { padding-top: 0; }
+  .seal-board { max-width: 960px; padding: 44px 52px 40px; }
+  .seal-body { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 48px; align-items: center; }
+  .seal-figure { margin: 0; display: flex; flex-direction: column; align-items: center; }
+  .seal-figure svg { width: 220px; height: 220px; color: var(--orange); transform: rotate(-8deg); mix-blend-mode: multiply; }
+  .seal-figure figcaption { margin-top: 10px; font-size: 14px; font-weight: 700; color: var(--muted); }
+  .seal-text h2 { margin: 0 0 18px; padding-bottom: 14px; border-bottom: 4px solid var(--ink); font-weight: 900; font-size: clamp(1.6rem, 2.8vw, 2.1rem); line-height: 1.3; letter-spacing: -0.03em; }
+  .seal-text p { margin: 0 0 12px; }
+  .seal-lead { font-weight: 700; font-size: 18px; }
+  .seal-spec { margin: 18px 0 0; border-top: 2px solid var(--ink); }
+  .seal-spec div { display: grid; grid-template-columns: 6.2em 1fr; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+  .seal-spec dt { font-weight: 900; color: var(--green); font-size: 15px; line-height: 1.75; }
+  .seal-spec dd { margin: 0; font-size: 16px; line-height: 1.65; }
+  @media (max-width: 760px) {
+    .seal-board { padding: 34px 22px 28px; }
+    .seal-body { grid-template-columns: 1fr; gap: 20px; }
+    .seal-figure svg { width: 176px; height: 176px; }
+  }
+  @media (max-width: 600px) { .seal-board { border-width: 3px; } }
+
+  /* 부원 모집: 큰 안내 표지 */
+  .recruit-sign {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); gap: 44px; align-items: start;
+    background: var(--green); color: #fff; border-radius: 22px; padding: 52px 52px 52px;
+    box-shadow: inset 0 0 0 10px var(--green), inset 0 0 0 14px #fff;
+  }
+  .recruit-sign h2 { margin: 0 0 22px; font-weight: 900; font-size: clamp(1.75rem, 3.3vw, 2.5rem); line-height: 1.3; letter-spacing: -0.03em; }
+  .lead-line { margin: 0 0 34px; font-size: clamp(1.15rem, 1.9vw, 1.4rem); font-weight: 700; line-height: 1.65; }
+  .plate { background: var(--white); color: var(--ink); border-radius: 8px; padding: 6px 22px; }
+  .req { width: 100%; border-collapse: collapse; }
+  .req caption { text-align: left; font-weight: 900; font-size: 18px; padding: 14px 0 10px; border-bottom: 3px solid var(--ink); }
+  .req th, .req td { text-align: left; vertical-align: top; padding: 12px 0; border-bottom: 1px solid var(--rule); font-size: 16px; line-height: 1.65; }
+  .req tr:last-child th, .req tr:last-child td { border-bottom: 0; }
+  .req th { width: 7.6em; padding-right: 16px; color: var(--green); font-weight: 900; }
+  .tbd { color: var(--muted); }
+  .keep { display: inline-block; }
+  @media (max-width: 900px) {
+    .recruit-sign { grid-template-columns: 1fr; gap: 30px; padding: 40px 30px 34px; }
+  }
+  @media (max-width: 600px) {
+    .recruit-sign { padding: 34px 22px 26px; border-radius: 18px; box-shadow: inset 0 0 0 7px var(--green), inset 0 0 0 10px #fff; }
+    .plate { padding: 4px 16px; }
+    .req th, .req td { display: block; width: auto; padding: 0; border: 0; }
+    .req th { padding-top: 12px; }
+    .req td { padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+    .req tr:last-child td { border-bottom: 0; }
+  }
+
+  /* 업무 범위: 금지 안내판 / 자주 묻는 질문 */
+  .scope-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 64px; align-items: start; }
+  @media (max-width: 900px) { .scope-grid { grid-template-columns: 1fr; gap: 64px; } }
+  .ban-board { background: var(--white); border: 9px solid var(--ink); border-radius: 18px; padding: 28px 30px 30px; }
+  .ban-article { display: grid; grid-template-columns: 64px 1fr; gap: 18px; align-items: start; padding-bottom: 22px; margin-bottom: 20px; border-bottom: 3px solid var(--ink); }
+  .ban-article svg { width: 64px; height: 64px; color: var(--orange-ink); }
+  .ban-article p { margin: 0; font-size: 20px; font-weight: 700; line-height: 1.55; }
+  .ban-article b { display: block; font-size: 15px; font-weight: 900; color: var(--green); margin-bottom: 4px; }
+  .ban-lead { margin: 0 0 8px; font-weight: 700; }
+  .ban-list { list-style: none; margin: 0; padding: 0; }
+  .ban-list li { display: grid; grid-template-columns: 30px 1fr; gap: 8px; padding: 9px 0; }
+  .ban-list svg { width: 22px; height: 22px; margin-top: 3px; color: var(--orange-ink); }
+  .ban-list .example { color: var(--muted); }
+
+  .faq details { border-bottom: 2px solid var(--rule); }
+  .faq details:first-of-type { border-top: 2px solid var(--ink); }
+  .faq summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 2.2em 1fr 1.5em; align-items: baseline; padding: 18px 0; font-weight: 700; font-size: 17px; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; font-weight: 500; font-size: 24px; line-height: 1; color: var(--green); justify-self: end; }
+  .faq details[open] summary::after { content: "\2212"; }
+  .faq .q { font-weight: 900; color: var(--green); }
+  .faq details p { margin: 0; padding: 0 1.5em 20px 2.2em; }
+
+  /* 바닥글: 도로 끝 */
+  .site-foot { position: relative; background: var(--vms); color: #E6E9E5; padding: 64px 0 60px; font-size: 15px; border-top: 6px solid var(--post); }
+  .site-foot::before {
+    content: ""; position: absolute; top: 22px; left: 0; right: 0; height: 4px;
+    background: repeating-linear-gradient(90deg, #E6E9E5 0 34px, transparent 34px 64px);
+  }
+  .site-foot .wrap { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap; }
+  .foot-info { max-width: 50em; }
+  .foot-info p { margin: 0 0 10px; }
+  .foot-name { font-size: 16px; }
+  .foot-name strong { font-weight: 900; letter-spacing: 0.03em; margin-right: 8px; color: #fff; }
+  .foot-meta { margin: 18px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 16px; color: #B7BEB9; }
+  .foot-meta dt { font-weight: 700; }
+  .foot-meta dd { margin: 0; }
+  .caution { display: flex; flex-direction: column; align-items: center; width: 210px; background: linear-gradient(var(--post-dark), var(--post-dark)) center 60px / 10px calc(100% - 60px) no-repeat; }
+  .caution svg { width: 132px; height: 132px; display: block; }
+  .caution-plate { margin: -2px 0 0; background: var(--white); color: var(--ink); border-radius: 6px; padding: 10px 14px; font-size: 14px; font-weight: 700; line-height: 1.5; text-align: center; }
+  .caution-post { height: 44px; }
+
+  /* 제보·합류 대화상자: 표지판 형식 */
+  .form-dialog {
+    width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px);
+    padding: 0; border: 5px solid var(--green); border-radius: 16px;
+    background: var(--white); color: var(--ink);
+  }
+  .form-dialog::backdrop { background: rgba(28, 33, 30, 0.55); }
+  .dlg-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    background: var(--green); color: #fff; padding: 16px 22px 16px 24px;
+  }
+  .dlg-head h2 { margin: 0; font-size: 24px; font-weight: 900; line-height: 1.3; }
+  .dlg-close { background: transparent; border: 2px solid #fff; color: #fff; font: inherit; font-size: 14px; font-weight: 700; padding: 3px 12px; border-radius: 6px; cursor: pointer; }
+  .dlg-close:hover { background: var(--green-deep); }
+  .dlg-body { padding: 22px 26px 28px; }
+  @media (max-width: 600px) { .dlg-body { padding: 20px 18px 24px; } .dlg-head { padding: 14px 16px 14px 18px; } }
+  .dlg-notice { margin: 0 0 4px; padding: 12px 14px; background: var(--green-tint); border-radius: 6px; font-size: 15px; }
+  .field-label { display: block; margin: 18px 0 8px; font-weight: 700; font-size: 16px; }
+  .opt { font-weight: 400; color: var(--muted); }
+  .form-dialog input, .form-dialog textarea {
+    width: 100%; font: inherit; font-size: 16px; color: var(--ink);
+    background: #fff; border: 1.5px solid var(--post-dark); border-radius: 4px; padding: 11px 12px;
+  }
+  .form-dialog textarea { resize: vertical; min-height: 84px; }
+  .form-dialog input::placeholder, .form-dialog textarea::placeholder { color: #6A716C; }
+  .form-dialog [aria-invalid="true"] { border: 2.5px solid var(--orange-ink); background: #FFF6F0; }
+  .hint { margin: 6px 0 0; font-size: 14px; color: var(--muted); }
+  .form-error {
+    margin: 20px 0 0; padding: 11px 14px; border-radius: 6px;
+    background: var(--orange); color: var(--ink); font-weight: 700; font-size: 15px; line-height: 1.55;
+    box-shadow: inset 0 0 0 3px var(--orange), inset 0 0 0 5px var(--ink);
+  }
+  .dlg-actions { margin-top: 24px; }
+  .dlg-actions .btn { width: 100%; }
+
+  /* 접수 표지: 경첩에 매달린 표지가 내려와 걸림 */
+  .receipt { text-align: center; padding-top: 4px; }
+  .rsg { perspective: 900px; display: flex; flex-direction: column; align-items: center; }
+  .rsg-bar { width: 260px; height: 10px; border-radius: 5px; background: var(--post-dark); }
+  .rsg-hangers { display: flex; justify-content: space-between; width: 168px; height: 14px; }
+  .rsg-hangers span { width: 6px; background: var(--post-dark); }
+  .rsg-panel {
+    display: grid; justify-items: center; gap: 2px; width: 248px; padding: 16px 18px 18px;
+    background: var(--green); color: #fff; border-radius: 12px;
+    box-shadow: inset 0 0 0 5px var(--green), inset 0 0 0 7.5px #fff;
+    transform-origin: 50% -14px;
+  }
+  .rsg-code { font-size: 13px; font-weight: 700; }
+  .rsg-main { font-size: 34px; font-weight: 900; letter-spacing: -0.01em; line-height: 1.3; }
+  .rsg-no { margin-top: 6px; background: #fff; color: var(--green); border-radius: 4px; padding: 1px 10px; font-size: 16px; font-weight: 900; letter-spacing: 0.04em; }
+  .rsg-date { font-size: 13px; font-weight: 500; margin-top: 4px; }
+  .rsg-panel.is-updated { animation: swing 1s cubic-bezier(0.3, 0.7, 0.4, 1) both; }
+  @keyframes swing {
+    0% { transform: rotateX(-96deg); }
+    45% { transform: rotateX(16deg); }
+    68% { transform: rotateX(-7deg); }
+    86% { transform: rotateX(2.5deg); }
+    100% { transform: rotateX(0deg); }
+  }
+  @media (prefers-reduced-motion: reduce) { .rsg-panel.is-updated { animation: none; } }
+  .receipt h3 { margin: 24px 0 10px; font-size: 21px; font-weight: 900; line-height: 1.45; }
+  .receipt h3:focus { outline: none; }
+  .receipt p { margin: 0 0 6px; }
+  .receipt-no strong { font-weight: 900; font-size: 18px; letter-spacing: 0.03em; }
+  .receipt .btn { margin-top: 22px; min-width: 160px; }
+</style>
+</head>
+<body>
+
+<!-- 공통 그래픽: 도도새, 우회 기호, 금지 기호 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="dodo" viewBox="0 0 100 100">
+      <g fill="currentColor">
+        <ellipse cx="44" cy="60" rx="27" ry="23"/>
+        <path d="M51 45 C55 37 58 31 61 25 L72 30 C68 36 66 44 64 53 Z"/>
+        <circle cx="66" cy="26" r="10"/>
+        <path d="M72 20 C83 19 93 24 95 32 C96 38 91 41 88 37 C86 34 82 33 74 33 Z"/>
+        <path d="M19 52 C10 47 7 40 11 34 C14 43 20 46 23 46 Z"/>
+        <path d="M37 80 L35 92 L27 95 L41 95 L42 81 Z"/>
+        <path d="M51 80 L51 92 L44 95 L58 95 L56 81 Z"/>
+      </g>
+      <circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/>
+      <path d="M32 55 C40 50 51 54 54 64" fill="none" stroke="#EE6A1F" stroke-width="2.6" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="bypass" viewBox="0 0 32 32">
+      <rect x="12" y="17" width="8" height="9" fill="currentColor"/>
+      <path d="M3 22h6c0-12 14-12 14 0h6M26 19l3 3-3 3" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="ban" viewBox="0 0 32 32">
+      <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="4"/>
+      <path d="M7 7 L25 25" stroke="currentColor" stroke-width="4"/>
+    </symbol>
+    <pattern id="stripes" patternUnits="userSpaceOnUse" width="22" height="22" patternTransform="rotate(45)">
+      <rect width="11" height="22" fill="#EE6A1F"/>
+    </pattern>
+    <!-- 처리 완료 직인 -->
+    <symbol id="dodo-plain" viewBox="0 0 100 100">
+      <g fill="currentColor">
+        <ellipse cx="44" cy="60" rx="27" ry="23"/>
+        <path d="M51 45 C55 37 58 31 61 25 L72 30 C68 36 66 44 64 53 Z"/>
+        <circle cx="66" cy="26" r="10"/>
+        <path d="M72 20 C83 19 93 24 95 32 C96 38 91 41 88 37 C86 34 82 33 74 33 Z"/>
+        <path d="M19 52 C10 47 7 40 11 34 C14 43 20 46 23 46 Z"/>
+        <path d="M37 80 L35 92 L27 95 L41 95 L42 81 Z"/>
+        <path d="M51 80 L51 92 L44 95 L58 95 L56 81 Z"/>
+      </g>
+      <circle cx="68" cy="23.5" r="2" fill="#fff"/>
+      <path d="M32 55 C40 50 51 54 54 64" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+    </symbol>
+    <path id="seal-top" d="M25 100 A75 75 0 0 1 175 100"/>
+    <path id="seal-bottom" d="M13 100 A87 87 0 0 0 187 100"/>
+    <filter id="ink" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise"/>
+      <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.15" result="speckle"/>
+      <feComposite in="SourceGraphic" in2="speckle" operator="in"/>
+    </filter>
+    <symbol id="done-seal" viewBox="0 0 200 200">
+      <g filter="url(#ink)">
+        <circle cx="100" cy="100" r="94" fill="none" stroke="currentColor" stroke-width="5"/>
+        <circle cx="100" cy="100" r="64" fill="none" stroke="currentColor" stroke-width="2.5"/>
+        <text font-size="17.5" font-weight="900" letter-spacing="0.5" text-anchor="middle" fill="currentColor"><textPath href="#seal-top" startOffset="50%">이 업무 방식은 도도새와</textPath></text>
+        <text font-size="17.5" font-weight="900" letter-spacing="0.5" text-anchor="middle" fill="currentColor"><textPath href="#seal-bottom" startOffset="50%">함께 멸종했어야 합니다</textPath></text>
+        <text x="22" y="104" font-size="11" text-anchor="middle" fill="currentColor">★</text>
+        <text x="178" y="104" font-size="11" text-anchor="middle" fill="currentColor">★</text>
+        <use href="#dodo-plain" x="62" y="42" width="76" height="76"/>
+        <text x="100" y="150" text-anchor="middle" font-size="17" font-weight="900" letter-spacing="3" fill="currentColor">처리 완료</text>
+      </g>
+    </symbol>
+    <!-- 신설 개통 인장: 새로 만든 앱·서비스에 찍는다 -->
+    <mask id="open-behind" maskUnits="userSpaceOnUse" x="0" y="0" width="240" height="200"><rect width="240" height="200" fill="#fff"/><path d="M4 70.5 H140 Q166 70.5 178 84" fill="none" stroke="#000" stroke-width="17.8"/><path d="M236 70.5 H222 Q206 70.5 198.5 86" fill="none" stroke="#000" stroke-width="17.8"/></mask><mask id="open-near" maskUnits="userSpaceOnUse" x="0" y="0" width="240" height="200"><path d="M4 70.5 H140 Q166 70.5 178 84" fill="none" stroke="#fff" stroke-width="17.8"/><path d="M236 70.5 H222 Q206 70.5 198.5 86" fill="none" stroke="#fff" stroke-width="17.8"/></mask><mask id="open-ros-hole"><rect width="240" height="200" fill="#fff"/><circle cx="104" cy="70" r="8.5" fill="#000"/></mask><symbol id="open-seal" viewBox="0 0 240 200"><g filter="url(#ink)" fill="#0F5A3A"><rect x="4" y="4" width="232" height="192" rx="18" fill="none" stroke="#0F5A3A" stroke-width="6"/>
+<rect x="14" y="14" width="212" height="172" rx="11" fill="none" stroke="#0F5A3A" stroke-width="2.2"/>
+<text x="104" y="40" text-anchor="middle" font-size="13.5" font-weight="900" letter-spacing="5">BYPASS</text><g mask="url(#open-ros-hole)">
+<circle cx="119" cy="70" r="7"/><circle cx="116.1" cy="78.8" r="7"/><circle cx="108.6" cy="84.3" r="7"/><circle cx="99.4" cy="84.3" r="7"/><circle cx="91.9" cy="78.8" r="7"/>
+<circle cx="89" cy="70" r="7"/><circle cx="91.9" cy="61.2" r="7"/><circle cx="99.4" cy="55.7" r="7"/><circle cx="108.6" cy="55.7" r="7"/><circle cx="116.1" cy="61.2" r="7"/>
+<circle cx="104" cy="70" r="15"/></g>
+<circle cx="104" cy="70" r="4.2"/>
+<path d="M99 86 L92 110 L98 106 L101 112 L105 88 Z"/>
+<path d="M109 86 L116 110 L110 106 L107 112 L103 88 Z"/><g mask="url(#open-behind)"><path d="M194.63 41.56 L198.31 98.73 L199.31 98.71 L200.22 41.43 Z"/></g><path d="M4 70.5 H140 Q166 70.5 178 84" fill="none" stroke="#0F5A3A" stroke-width="13"/><path d="M236 70.5 H222 Q206 70.5 198.5 86" fill="none" stroke="#0F5A3A" stroke-width="13"/><path d="M197.43 41.49 L196.21 28.11" fill="none" stroke="#0F5A3A" stroke-width="2.8" stroke-linecap="round"/><circle cx="195.70" cy="22.53" r="5.6" fill="none" stroke="#0F5A3A" stroke-width="2.8"/><path d="M197.43 41.49 L206.28 31.38" fill="none" stroke="#0F5A3A" stroke-width="2.8" stroke-linecap="round"/><circle cx="209.97" cy="27.17" r="5.6" fill="none" stroke="#0F5A3A" stroke-width="2.8"/><g mask="url(#open-near)" fill="#fff"><path d="M195.14 39.87 L164.16 87.31 L164.98 87.89 L199.71 43.12 Z" stroke="#fff" stroke-width="2.6" paint-order="stroke" stroke-linejoin="round"/></g><path d="M195.14 39.87 L164.16 87.31 L164.98 87.89 L199.71 43.12 Z"/><circle cx="197.43" cy="41.49" r="2.3"/><text x="120" y="142" text-anchor="middle" font-size="33" font-weight="900" letter-spacing="2">신설 개통</text>
+<text x="120" y="164" text-anchor="middle" font-size="13" font-weight="700">이 길은 원래 지도에</text>
+<text x="120" y="180" text-anchor="middle" font-size="13" font-weight="700">없었습니다</text></g></symbol>
+  </defs>
+</svg>
+
+<a class="skip" href="#main">본문 바로가기</a>
+
+<div class="vms" role="status">
+  <div class="wrap">
+    <span class="vms-label">운영 상태</span>
+    <span id="status-text">본 국은 현재 정상 운영 중입니다. 제보는 상시 접수합니다.</span>
+  </div>
+</div>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="BYPASS 처음으로">
+      <svg class="brand-mark" viewBox="0 0 42 42" aria-hidden="true">
+        <rect x="1" y="1" width="40" height="40" rx="8" fill="#0F5A3A"/>
+        <rect x="4.5" y="4.5" width="33" height="33" rx="5" fill="none" stroke="#fff" stroke-width="1.6"/>
+        <path d="M9 28h5c0-13 14-13 14 0h5" fill="none" stroke="#EE6A1F" stroke-width="3.6" stroke-linecap="round"/>
+        <rect x="17.5" y="21" width="7" height="9" fill="#fff"/>
+      </svg>
+      <span>
+        <span class="brand-name">BYPASS</span>
+        <span class="brand-sub">느린 시스템의 실용적 대안 마련국</span>
+      </span>
+    </a>
+    <nav class="site-nav" aria-label="주 메뉴">
+      <ul>
+        <li><a href="#statute">설치 규정</a></li>
+        <li><a href="#process">처리 절차</a></li>
+        <li><a href="#dockets">처리 현황</a></li>
+        <li><a href="#recruit">부원 모집</a></li>
+        <li><a href="#scope">업무 범위</a></li>
+        <li><a href="#faq">자주 묻는 질문</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ① 첫 화면 -->
+  <section class="hero" id="top" aria-labelledby="hero-title">
+    <div class="wrap">
+      <div class="hero-copy">
+        <p class="sign-code">BYPASS 안내 제2026-001호</p>
+        <h1 id="hero-title">귀하의 반복 업무는<br>우회 대상으로 지정되었습니다.</h1>
+        <p class="identity">BYPASS는 국립목포해양대학교 바이브 코딩 동아리입니다.<br>학교생활의 불필요한 절차를 AI와 코드로 우회합니다.</p>
+        <div class="actions" id="hero-actions">
+          <button type="button" class="btn btn-primary" id="cta-report" data-open="report">불편 제보하기</button>
+          <button type="button" class="btn btn-secondary" id="cta-join" data-open="join">BYPASS 합류하기</button>
+        </div>
+      </div>
+
+      <svg class="scene" viewBox="0 0 640 690" role="img" aria-labelledby="scene-title">
+        <title id="scene-title">우회도로 안내 표지. 업무 완료로 가는 원래 도로인 불필요한 절차는 구불구불 돌아가는 상습 정체 구간이며, BYPASS 우회도로가 그 도로의 두 지점을 직선으로 바로 잇습니다. 그 앞의 임시 표지: 불필요한 절차 공사 중, 우회하십시오.</title>
+        <!-- 지주 -->
+        <rect x="146" y="508" width="18" height="182" fill="#8E958F"/>
+        <rect x="476" y="508" width="18" height="182" fill="#8E958F"/>
+        <!-- 안내 표지 판 -->
+        <rect x="6" y="6" width="628" height="508" rx="26" fill="#0F5A3A" stroke="#0A4029" stroke-width="3"/>
+        <rect x="19" y="19" width="602" height="482" rx="15" fill="none" stroke="#fff" stroke-width="5"/>
+        <!-- 목적지 -->
+        <text x="300" y="96" text-anchor="middle" font-size="58" font-weight="900" fill="#fff" letter-spacing="-1">업무 완료</text>
+        <text x="444" y="95" font-size="32" font-weight="700" fill="#fff">0.3km</text>
+        <text x="300" y="131" text-anchor="middle" font-size="23" font-weight="500" fill="#fff">Done</text>
+        <!-- 원래 도로: 불필요한 절차 (아래에서 들어와 구불구불 돌아 목적지로) -->
+        <path d="M300 501 V480 A30 30 0 0 1 330 450 H430 A31 31 0 0 0 430 388 H110 A31 31 0 0 1 110 326 H430 A31 31 0 0 0 430 264 H330 A30 30 0 0 1 300 234 V204" fill="none" stroke="#fff" stroke-width="22"/>
+        <path d="M300 150 L264 210 L336 210 Z" fill="#fff"/>
+        <text x="60" y="262" font-size="26" font-weight="900" fill="#fff">불필요한 절차</text>
+        <text x="60" y="292" font-size="20" font-weight="500" fill="#fff">(상습 정체 구간)</text>
+        <!-- BYPASS: 원래 도로의 두 지점을 곧게 잇는 우회도로. 가운데 두 굽이는 고가로 건너뛴다 -->
+        <rect x="356" y="308" width="48" height="98" fill="#0F5A3A"/>
+        <rect x="361" y="264" width="38" height="186" fill="#fff"/>
+        <rect x="367" y="264" width="26" height="186" fill="#EE6A1F"/>
+        <path d="M371 372 L380 358 L389 372" fill="none" stroke="#1C211E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+        <path d="M371 398 L380 384 L389 398" fill="none" stroke="#1C211E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+        <!-- 우회도로 명칭 -->
+        <rect x="488" y="334" width="118" height="42" rx="6" fill="#EE6A1F"/>
+        <text x="547" y="364" text-anchor="middle" font-size="23" font-weight="900" fill="#1C211E" letter-spacing="1.5">BYPASS</text>
+        <text x="547" y="406" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">우회도로</text>
+
+        <!-- 임시 표지와 거치대 -->
+        <path d="M58 640 L44 688 M212 640 L226 688" stroke="#5C635E" stroke-width="8" stroke-linecap="round"/>
+        <rect x="22" y="466" width="226" height="178" rx="10" fill="#EE6A1F" stroke="#B4500F" stroke-width="2"/>
+        <rect x="32" y="476" width="206" height="158" rx="5" fill="none" stroke="#1C211E" stroke-width="4"/>
+        <text x="135" y="512" text-anchor="middle" font-size="22" font-weight="900" fill="#1C211E">불필요한 절차</text>
+        <text x="135" y="566" text-anchor="middle" font-size="46" font-weight="900" fill="#1C211E" letter-spacing="2">공사 중</text>
+        <line x1="44" y1="584" x2="226" y2="584" stroke="#1C211E" stroke-width="3"/>
+        <text x="122" y="620" text-anchor="middle" font-size="24" font-weight="900" fill="#1C211E">우회하십시오</text>
+        <path d="M204 624 V609 H221 M215 603 L222 609 L215 615" fill="none" stroke="#1C211E" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- 명칭 안내 -->
+  <section class="sec sec-name" id="name" aria-labelledby="name-title">
+    <div class="wrap">
+      <h2 class="sec-title" id="name-title">명칭 안내</h2>
+      <p class="sec-lead">BYPASS는 영문 명칭의 머리글자를 딴 약칭입니다.</p>
+      <div class="name-sign">
+        <ol class="acro">
+          <li><span class="acro-letter" aria-hidden="true">B</span><span class="acro-word" lang="en">Bureau</span><span class="acro-gloss">국(局)</span></li>
+          <li><span class="acro-letter" aria-hidden="true">Y</span><span class="acro-word" lang="en"><span class="acro-prep">for</span>Yielding</span><span class="acro-gloss">마련하는</span></li>
+          <li><span class="acro-letter" aria-hidden="true">P</span><span class="acro-word" lang="en">Practical</span><span class="acro-gloss">실용적</span></li>
+          <li><span class="acro-letter" aria-hidden="true">A</span><span class="acro-word" lang="en">Alternatives</span><span class="acro-gloss">대안</span></li>
+          <li><span class="acro-letter" aria-hidden="true">S</span><span class="acro-word" lang="en"><span class="acro-prep">to</span>Slow</span><span class="acro-gloss">느린</span></li>
+          <li><span class="acro-letter" aria-hidden="true">S</span><span class="acro-word" lang="en">Systems</span><span class="acro-gloss">시스템</span></li>
+        </ol>
+        <div class="name-full">
+          <p class="name-en" lang="en">Bureau for Yielding Practical Alternatives to Slow Systems</p>
+          <p class="name-ko">느린 시스템의 실용적 대안 마련국</p>
+        </div>
+      </div>
+      <p class="note">※ for와 to는 전치사이므로 약칭에서 제외하였습니다.<br>※ 영어 bypass에는 ‘우회도로’라는 뜻도 있습니다. 의도한 것입니다.</p>
+    </div>
+  </section>
+
+  <!-- ② 설치 규정 -->
+  <section class="sec" id="statute" aria-labelledby="statute-title">
+    <div class="wrap">
+      <div class="rule-board">
+        <div class="rule-body">
+          <div class="rule-head">
+            <h2 id="statute-title">BYPASS 설치 규정</h2>
+            <span class="rule-date">[제정 2026. 10. 19.]</span>
+          </div>
+          <div class="article">
+            <span class="article-no">제1조(목적)</span>
+            <p>이 국은 불필요한 절차를 불필요한 절차 없이 우회함을 목적으로 한다.</p>
+          </div>
+          <div class="article">
+            <span class="article-no">제2조(정의)</span>
+            <p>“불필요한 절차”란 더 나은 방법이 이미 존재함에도 사람이 손으로 반복하는 일을 말한다.</p>
+          </div>
+          <div class="article">
+            <span class="article-no">제3조(우회 대상)</span>
+            <div>
+              <p>다음 각 호의 업무를 1차 우회 대상으로 지정한다.</p>
+              <ol class="items">
+                <li><span><strong>중복 입력</strong>: 이미 제출한 정보를 재차 요구하는 행위<span class="example">예: 신청서마다 학번과 계좌번호를 다시 쓰는 일</span></span></li>
+                <li><span><strong>과다 이동</strong>: 업무 하나를 위해 여러 화면을 거치게 하는 행위<span class="example">예: 공지 하나를 찾으려고 게시판 여러 곳을 확인하는 일</span></span></li>
+                <li><span><strong>정보 은닉</strong>: 존재하나 찾을 수 없도록 배치된 정보<span class="example">예: 분명히 공지됐다는데 아무도 위치를 모르는 일정</span></span></li>
+                <li><span><strong>수기 계산</strong>: 컴퓨터가 할 일을 사람이 하는 행위<span class="example">예: 졸업까지 남은 학점을 손으로 세는 일</span></span></li>
+              </ol>
+            </div>
+          </div>
+          <div class="article">
+            <span class="article-no">제4조(추가 지정)</span>
+            <p>우회 대상은 제보에 따라 수시로 추가 지정한다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ 처리 절차 -->
+  <section class="sec sec-process" id="process" aria-labelledby="process-title">
+    <div class="wrap">
+      <h2 class="sec-title" id="process-title">민원 대신, 우회로를 만듭니다.</h2>
+      <ol class="exits">
+        <li class="exit">
+          <span class="exit-tab">출구 1</span>
+          <div class="exit-sign">
+            <h3>접수</h3>
+            <p>제보를 받으면 접수번호를 발급합니다.</p>
+            <p class="exit-due"><span>처리 기한 <b>즉시</b></span></p>
+          </div>
+        </li>
+        <li class="exit">
+          <span class="exit-tab">출구 2</span>
+          <div class="exit-sign">
+            <h3>심의</h3>
+            <p>주 1회 정기 회의에서 처리 여부를 결정합니다.</p>
+            <p class="exit-due"><span>처리 기한 <b>7일 이내 결과 공개</b></span></p>
+          </div>
+        </li>
+        <li class="exit exit-detour">
+          <span class="exit-tab">출구 3</span>
+          <div class="exit-sign">
+            <h3><svg aria-hidden="true"><use href="#bypass"/></svg>우회</h3>
+            <p>AI와 코드로 더 쉬운 방법을 만듭니다.</p>
+          </div>
+        </li>
+        <li class="exit">
+          <span class="exit-tab">출구 4</span>
+          <div class="exit-sign">
+            <h3>배포</h3>
+            <p>실제로 써 보고, 불편이 남아 있으면 재접수합니다.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ④ 처리 현황 -->
+  <section class="sec" id="dockets" aria-labelledby="dockets-title">
+    <div class="wrap">
+      <h2 class="sec-title" id="dockets-title">안건 처리 현황</h2>
+      <!-- 견본 안내판: 실제 안건 내용으로 교체. 안건이 하나도 없으면 아래 문구를 쓴다.
+           <p><strong>제1호 안건을 접수 중입니다.</strong> 처리 내역은 처리 즉시 이곳에 공고됩니다. 먼저 우회하고 싶은 업무가 있다면 제보해 주십시오.</p> -->
+      <div class="boards">
+        <div class="board-unit">
+          <article class="board" aria-labelledby="bd1">
+            <div class="board-head"><p class="board-no">제0-1호 (창립 전)</p><h3 id="bd1">졸업이수학점 계산기</h3></div>
+            <span class="specimen">견본</span>
+            <dl><div><dt>기존 절차</dt><dd>졸업요건표와 성적표를 나란히 놓고 직접 계산</dd></div><div><dt>개선 후</dt><dd>과목 유형별 이수 학점과 남은 학점을 한 화면에 표시</dd></div></dl>
+            <div class="board-foot"><span class="badge badge-done">완료</span><a class="board-link" href="#">통지서 전문 보기</a><svg class="done-seal" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
+          </article>
+          <div class="legs" aria-hidden="true"></div>
+        </div>
+        <div class="board-unit">
+          <article class="board" aria-labelledby="bd2">
+            <div class="board-head"><p class="board-no">제0-2호 (창립 전)</p><h3 id="bd2">시간표 조회 앱</h3></div>
+            <span class="specimen">견본</span>
+            <dl><div><dt>기존 절차</dt><dd>강의 목록을 하나씩 열어 시간을 맞춰 봄</dd></div><div><dt>개선 후</dt><dd>개설 강의를 시간표 형태로 바로 조회</dd></div></dl>
+            <div class="board-foot"><span class="badge badge-done">완료</span><a class="board-link" href="#">통지서 전문 보기</a><svg class="done-seal" style="--r: 7deg" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
+          </article>
+          <div class="legs" aria-hidden="true"></div>
+        </div>
+        <div class="board-unit">
+          <article class="board" aria-labelledby="bd3">
+            <div class="board-head"><p class="board-no">제0-3호 (신설)</p><h3 id="bd3">빈 강의실 지도</h3></div>
+            <span class="specimen">견본</span>
+            <dl><div><dt>기존 절차</dt><dd>해당 없음 (전례 없음)</dd></div><div><dt>신설 내용</dt><dd>시간대별로 비어 있는 강의실을 지도에 표시</dd></div></dl>
+            <div class="board-foot"><span class="badge badge-new">신설 개통</span><a class="board-link" href="#">통지서 전문 보기</a><svg class="open-seal" role="img" aria-label="신설 개통 인장. 개통 리본이 잘려 있고, '이 길은 원래 지도에 없었습니다'라고 새겨져 있습니다."><use href="#open-seal"/></svg></div>
+          </article>
+          <div class="legs" aria-hidden="true"></div>
+        </div>
+        <div class="board-unit">
+          <article class="board board-rejected" aria-labelledby="bd4">
+            <div class="board-head"><p class="board-no">제0-4호</p><h3 id="bd4">강의동 이동 불편</h3></div>
+            <span class="specimen">견본</span>
+            <dl><div><dt>접수 내용</dt><dd>비 오는 날 강의동까지 걸어가야 함</dd></div><div><dt>반려 사유</dt><dd>해당 불편은 절차가 아닌 날씨에 기인함.</dd></div></dl>
+            <div class="board-foot"><span class="badge badge-rejected">반려</span></div>
+          </article>
+          <div class="legs" aria-hidden="true"></div>
+        </div>
+      </div>
+      <p class="swipe-hint">옆으로 넘겨 다른 안건을 보십시오.</p>
+      <p class="note">※ 기존 업무를 우회한 안건에는 도도새 직인을, 새로 만든 안건에는 신설 개통 인장을 찍습니다.<br>※ 위 통지서는 견본입니다. 처리 내역은 처리 즉시 이곳에 공고됩니다.</p>
+    </div>
+  </section>
+
+  <!-- 도도새 직인 안내 -->
+  <section class="sec sec-seal" id="seal" aria-labelledby="seal-title">
+    <div class="wrap">
+      <div class="rule-board seal-board">
+        <div class="rule-body seal-body">
+          <figure class="seal-figure">
+            <svg role="img" aria-label="도도새 직인. 둘레에 '이 업무 방식은 도도새와 함께 멸종했어야 합니다', 가운데에 도도새와 '처리 완료'가 새겨져 있습니다."><use href="#done-seal"/></svg>
+            <figcaption>인영(印影)</figcaption>
+          </figure>
+          <div class="seal-text">
+            <h2 id="seal-title">도도새 직인 안내</h2>
+            <p class="seal-lead">처리를 마친 안건에는 도도새 직인을 찍습니다.</p>
+            <p>도도새는 모리셔스섬에 살던 날지 못하는 새로, 17세기 말에 멸종하였습니다. 영어 관용구 ‘as dead as a dodo’는 완전히 사라져 다시 볼 수 없는 것을 뜻합니다. 본 국이 우회한 업무 방식도 이와 같이 되어야 한다는 뜻에서 도도새를 상징으로 정하였습니다.</p>
+            <dl class="seal-spec">
+              <div><dt>인영 문구</dt><dd>이 업무 방식은 도도새와 함께 멸종했어야 합니다.</dd></div>
+              <div><dt>날인 대상</dt><dd>처리 완료 안건. 반려 안건에는 날인하지 않습니다.</dd></div>
+              <div><dt>인주 색상</dt><dd>주황. 우회도로 표지와 같은 색입니다.</dd></div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ 부원 공개 모집 -->
+  <section class="sec" id="recruit" aria-labelledby="recruit-title">
+    <div class="wrap">
+      <div class="recruit-sign on-green">
+        <div>
+          <h2 id="recruit-title">비효율에 유난히 <span class="keep">예민한 분을 모십니다.</span></h2>
+          <p class="lead-line">코딩 경험이 없어도 <span class="keep">직접 만들 수 있습니다.</span><br>그게 바이브 코딩입니다.</p>
+          <div class="actions">
+            <button type="button" class="btn btn-primary" data-open="join">합류 신청하기</button>
+            <button type="button" class="btn btn-secondary" data-open="report">불편 제보하기</button>
+          </div>
+        </div>
+        <div class="plate">
+          <table class="req">
+            <caption>부원 모집 요강</caption>
+            <tbody>
+              <tr><th scope="row">지원 자격</th><td>국립목포해양대학교 재학생. 전공, 학년, 코딩 경험 무관</td></tr>
+              <tr><th scope="row">우대 사항</th><td>같은 일을 세 번 반복하면 참을 수 없는 분<br>이미 엑셀 매크로를 몰래 만들어 본 분</td></tr>
+              <tr><th scope="row">주요 업무</th><td>정기 심의 회의 참석, 안건별 소규모 제작</td></tr>
+              <tr><th scope="row">모집 기간</th><td class="tbd">추후 공고</td></tr>
+              <tr><th scope="row">활동 일시·장소</th><td class="tbd">추후 공고</td></tr>
+              <tr><th scope="row">제출 서류</th><td>없음. 본 국은 불필요한 서류를 요구하지 않습니다.</td></tr>
+              <tr><th scope="row">문의</th><td class="tbd">추후 공고</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑥ 업무 범위 및 FAQ -->
+  <section class="sec" aria-label="업무 범위 및 자주 묻는 질문">
+    <div class="wrap">
+      <div class="scope-grid">
+        <div id="scope">
+          <h2 class="sec-title">업무 범위</h2>
+          <div class="ban-board">
+            <div class="ban-article">
+              <svg aria-hidden="true"><use href="#ban"/></svg>
+              <p><b>설치 규정 제5조(금지)</b>이 국은 절차를 우회하며, 규칙을 우회하지 아니한다.</p>
+            </div>
+            <p class="ban-lead">다음 안건은 접수하지 않습니다.</p>
+            <ul class="ban-list">
+              <li><svg aria-hidden="true"><use href="#ban"/></svg><span>학교 시스템의 보안이나 인증을 우회하는 일 <span class="example"><br>(예: 수강신청 매크로)</span></span></li>
+              <li><svg aria-hidden="true"><use href="#ban"/></svg><span>출석, 평가 등 공정성을 해치는 자동화</span></li>
+              <li><svg aria-hidden="true"><use href="#ban"/></svg><span>타인의 개인정보를 수집하거나 이용하는 도구</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="faq" id="faq">
+          <h2 class="sec-title">자주 묻는 질문</h2>
+          <details>
+            <summary><span class="q">Q.</span><span>코딩을 전혀 몰라도 됩니까?</span></summary>
+            <p>됩니다. AI와 함께 만드는 방법은 활동하며 함께 익힙니다.</p>
+          </details>
+          <details>
+            <summary><span class="q">Q.</span><span>공식 행정기관입니까?</span></summary>
+            <p>아닙니다. 학생 자율 동아리이며 행정 권한이 없습니다.<br>진지한 것은 말투뿐입니다.</p>
+          </details>
+          <details>
+            <summary><span class="q">Q.</span><span>어떤 불편을 제보할 수 있습니까?</span></summary>
+            <p>학교생활에서 손으로 반복하는 일이라면 무엇이든 가능합니다.<br>단, 제5조에 해당하는 안건은 제외합니다.</p>
+          </details>
+          <details>
+            <summary><span class="q">Q.</span><span>제보하면 반드시 처리됩니까?</span></summary>
+            <p>모든 안건은 심의하나, 모두 처리하지는 않습니다.<br>결과는 처리 현황에 공개합니다.</p>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ⑦ 바닥글 -->
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-info">
+      <p class="foot-name"><strong>BYPASS</strong>느린 시스템의 실용적 대안 마련국</p>
+      <p>본 사이트는 국립목포해양대학교 학생 자율 동아리 BYPASS가 운영하며, 대학 행정 부서 및 정부 기관과 무관합니다.</p>
+      <dl class="foot-meta">
+        <dt>연락처</dt><dd>추후 공고</dd>
+        <dt>최종 개정</dt><dd>2026. 10. 19.</dd>
+      </dl>
+    </div>
+    <div class="caution">
+      <svg viewBox="0 0 132 132" aria-hidden="true">
+        <path d="M66 4 L128 66 L66 128 L4 66 Z" fill="#EE6A1F" stroke="#1C211E" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M66 15 L117 66 L66 117 L15 66 Z" fill="none" stroke="#1C211E" stroke-width="4" stroke-linejoin="round"/>
+        <use href="#dodo" x="34" y="32" width="64" height="64" style="color:#1C211E"/>
+      </svg>
+      <p class="caution-plate">이 업무 방식은 도도새와 함께 멸종했어야 합니다.</p>
+      <span class="caution-post" aria-hidden="true"></span>
+    </div>
+  </div>
+</footer>
+
+<!-- 불편 제보 대화상자 -->
+<dialog class="form-dialog" id="report-dialog" aria-labelledby="report-title">
+  <div class="dlg-head on-green">
+    <h2 id="report-title">불편 제보</h2>
+    <button type="button" class="dlg-close" data-close>닫기</button>
+  </div>
+  <div class="dlg-body">
+    <form novalidate>
+      <p class="dlg-notice">본 양식은 세 개 항목만 요구합니다. 그 이상은 설치 규정 제1조에 위배되기 때문입니다.</p>
+      <label class="field-label" for="r-what">무엇이 불편합니까?</label>
+      <textarea id="r-what" name="what" rows="3" required placeholder="예: 신청서마다 학번과 계좌번호를 다시 씁니다."></textarea>
+      <label class="field-label" for="r-how">지금은 어떻게 하고 있습니까?</label>
+      <textarea id="r-how" name="how" rows="3" required></textarea>
+      <label class="field-label" for="r-contact">연락처 <span class="opt">(선택)</span></label>
+      <input id="r-contact" name="contact" type="text" autocomplete="email" placeholder="이메일 또는 전화번호" aria-describedby="r-contact-hint">
+      <p class="hint" id="r-contact-hint">연락처는 처리 결과 회신에만 쓰며, 처리가 끝나면 파기합니다.</p>
+      <p class="form-error" role="alert" hidden>필수 항목이 누락되었습니다. 본 국도 이 문구를 쓰게 되어 유감입니다.</p>
+      <div class="dlg-actions"><button type="submit" class="btn btn-primary">제보 제출하기</button></div>
+    </form>
+    <div class="receipt" hidden>
+      <div class="rsg" aria-hidden="true">
+        <span class="rsg-bar"></span>
+        <span class="rsg-hangers"><span></span><span></span></span>
+        <div class="rsg-panel">
+          <span class="rsg-code">BYPASS 접수 안내</span>
+          <span class="rsg-main">접수 완료</span>
+          <span class="rsg-no" data-no></span>
+          <span class="rsg-date" data-date></span>
+        </div>
+      </div>
+      <h3 tabindex="-1">귀하의 제보가 정상 접수되었습니다.</h3>
+      <p class="receipt-no">접수번호 <strong data-no></strong></p>
+      <p>심의 결과는 7일 이내 처리 현황에 공고됩니다.</p>
+      <button type="button" class="btn btn-primary" data-close>확인</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- 합류 신청 대화상자 -->
+<dialog class="form-dialog" id="join-dialog" aria-labelledby="join-title">
+  <div class="dlg-head on-green">
+    <h2 id="join-title">합류 신청</h2>
+    <button type="button" class="dlg-close" data-close>닫기</button>
+  </div>
+  <div class="dlg-body">
+    <form novalidate>
+      <p class="dlg-notice">본 신청서는 네 개 항목만 요구합니다. 그중 하나는 선택입니다.</p>
+      <label class="field-label" for="j-name">이름</label>
+      <input id="j-name" name="name" type="text" autocomplete="name" required>
+      <label class="field-label" for="j-contact">연락처</label>
+      <input id="j-contact" name="contact" type="text" autocomplete="email" required placeholder="이메일 또는 전화번호" aria-describedby="j-contact-hint">
+      <p class="hint" id="j-contact-hint">연락처는 합류 안내에만 씁니다.</p>
+      <label class="field-label" for="j-major">학과 <span class="opt">(선택)</span></label>
+      <input id="j-major" name="major" type="text">
+      <label class="field-label" for="j-want">하고 싶은 것 한 줄</label>
+      <input id="j-want" name="want" type="text" required placeholder="예: 공지 알림을 한곳으로 모으고 싶습니다.">
+      <p class="form-error" role="alert" hidden>필수 항목이 누락되었습니다. 본 국도 이 문구를 쓰게 되어 유감입니다.</p>
+      <div class="dlg-actions"><button type="submit" class="btn btn-primary">합류 신청하기</button></div>
+    </form>
+    <div class="receipt" hidden>
+      <div class="rsg" aria-hidden="true">
+        <span class="rsg-bar"></span>
+        <span class="rsg-hangers"><span></span><span></span></span>
+        <div class="rsg-panel">
+          <span class="rsg-code">BYPASS 접수 안내</span>
+          <span class="rsg-main">접수 완료</span>
+          <span class="rsg-no" data-no></span>
+          <span class="rsg-date" data-date></span>
+        </div>
+      </div>
+      <h3 tabindex="-1">귀하의 합류 신청이 정상 접수되었습니다.</h3>
+      <p class="receipt-no">접수번호 <strong data-no></strong></p>
+      <p>결과는 기재하신 연락처로 안내합니다.</p>
+      <button type="button" class="btn btn-primary" data-close>확인</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  /* ===== 운영 설정 =====
+     OPERATING_STATE: 'normal'(평시) | 'recruiting'(모집 기간) | 'exam'(시험 기간)
+     모집 기간에는 첫 화면의 메인 버튼이 '합류'로 바뀐다. */
+  const OPERATING_STATE = 'normal';
+  const STATUS_TEXT = {
+    normal: '본 국은 현재 정상 운영 중입니다. 제보는 상시 접수합니다.',
+    recruiting: '2026학년도 BYPASS 부원 공개 모집 중 (~ MM. DD.)',
+    exam: '시험 기간 중 본 국의 심의 업무가 일시 정지됩니다. 접수는 계속됩니다.'
+  };
+
+  document.getElementById('status-text').textContent = STATUS_TEXT[OPERATING_STATE];
+
+  if (OPERATING_STATE === 'recruiting') {
+    const report = document.getElementById('cta-report');
+    const join = document.getElementById('cta-join');
+    report.classList.replace('btn-primary', 'btn-secondary');
+    join.classList.replace('btn-secondary', 'btn-primary');
+    report.parentNode.insertBefore(join, report);
+  }
+
+  /* ===== 제보·합류 대화상자 ===== */
+  const now = new Date();
+  const dateText = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}.`;
+  let receiptSeq = 0;
+
+  function resetDialog(dlg) {
+    const form = dlg.querySelector('form');
+    form.reset();
+    form.hidden = false;
+    form.querySelector('.form-error').hidden = true;
+    form.querySelectorAll('[aria-invalid]').forEach(f => f.removeAttribute('aria-invalid'));
+    dlg.querySelector('.receipt').hidden = true;
+  }
+
+  document.querySelectorAll('[data-open]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dlg = document.getElementById(btn.dataset.open + '-dialog');
+      resetDialog(dlg);
+      dlg.showModal();
+    });
+  });
+
+  document.querySelectorAll('.form-dialog').forEach(dlg => {
+    dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+    dlg.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => dlg.close()));
+
+    const form = dlg.querySelector('form');
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const required = [...form.querySelectorAll('[required]')];
+      const missing = required.filter(f => !f.value.trim());
+      required.forEach(f => f.setAttribute('aria-invalid', missing.includes(f) ? 'true' : 'false'));
+      const error = form.querySelector('.form-error');
+      if (missing.length) {
+        error.hidden = false;
+        missing[0].focus();
+        return;
+      }
+      error.hidden = true;
+
+      // TODO: 실제 전송 연결 (구글 폼, Formspree, 자체 서버 등).
+      // 지금은 화면에서만 접수 처리되며, 입력 내용은 어디에도 저장되지 않는다.
+
+      receiptSeq += 1;
+      const seq = String(receiptSeq).padStart(3, '0');
+      const receipt = dlg.querySelector('.receipt');
+      receipt.querySelectorAll('[data-no]').forEach(el => { el.textContent = `BYP-${now.getFullYear()}-${seq}`; });
+      receipt.querySelector('[data-date]').textContent = dateText;
+
+      form.hidden = true;
+      receipt.hidden = false;
+      const panel = receipt.querySelector('.rsg-panel');
+      panel.classList.remove('is-updated');
+      void panel.offsetWidth;
+      panel.classList.add('is-updated');
+      receipt.querySelector('h3').focus();
+    });
+  });
+</script>
+</body>
+</html>
