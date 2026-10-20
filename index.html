@@ -106,6 +106,16 @@
     .site-nav { width: 100%; overflow-x: auto; }
     .site-nav ul { gap: 20px; padding-bottom: 4px; }
     .site-nav { margin-left: 0; }
+    /* 가로 메뉴: 스크롤바는 숨기고, 더 넘길 수 있는 쪽 끝을 흐리게 */
+    .site-nav {
+      scrollbar-width: none; overscroll-behavior-x: contain;
+      --fade-l: 0px; --fade-r: 40px;
+      -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent);
+              mask-image: linear-gradient(to right, transparent, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent);
+    }
+    .site-nav::-webkit-scrollbar { display: none; }
+    .site-nav.is-scrolled { --fade-l: 28px; }
+    .site-nav.at-end { --fade-r: 0px; }
     .nav-account { position: absolute; top: 22px; right: 24px; }
   }
   @media (max-width: 600px) { .nav-account { right: 16px; } }
@@ -326,6 +336,8 @@
       overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 16px; overscroll-behavior-x: contain;
       margin: 0 -16px; padding: 14px 16px 0; border-bottom: 6px solid var(--post);
     }
+    .boards { scrollbar-width: none; }
+    .boards::-webkit-scrollbar { display: none; }
     .board-unit { border-bottom: 0; padding-top: 0; scroll-snap-align: start; }
     .legs { height: 24px; }
     .swipe-hint { display: block; }
@@ -1107,6 +1119,37 @@
       account.href = '/site/';
     }
   } catch (e) { /* 저장소를 쓸 수 없으면 '로그인' 그대로 */ }
+
+  /* ===== 가로로 넘기는 줄(메뉴·처리 현황): 스크롤바 대신 =====
+     넘길 수 있는 쪽 끝만 흐리게 하고, 마우스 휠을 굴려도 옆으로 넘어가게 한다. */
+  const siteNav = document.querySelector('.site-nav');
+  function updateNavFade() {
+    const max = siteNav.scrollWidth - siteNav.clientWidth;
+    siteNav.classList.toggle('is-scrolled', siteNav.scrollLeft > 2);
+    siteNav.classList.toggle('at-end', siteNav.scrollLeft >= max - 2);
+  }
+  siteNav.addEventListener('scroll', updateNavFade, { passive: true });
+  window.addEventListener('resize', updateNavFade);
+  updateNavFade();
+
+  document.querySelectorAll('.site-nav, .boards').forEach(row => {
+    row.addEventListener('wheel', e => {
+      if (e.ctrlKey || Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;  // 확대·가로 스크롤은 그대로
+      const max = row.scrollWidth - row.clientWidth;
+      if (max <= 0) return;                                               // 넘길 게 없으면 페이지 스크롤
+      const goingRight = e.deltaY > 0;
+      if ((goingRight && row.scrollLeft >= max - 1) || (!goingRight && row.scrollLeft <= 0)) return;  // 끝에 닿으면 페이지 스크롤
+      e.preventDefault();
+      const dy = e.deltaMode === 1 ? e.deltaY * 32 : e.deltaY;            // 줄 단위 휠 보정
+      if (!row.classList.contains('boards')) { row.scrollBy({ left: dy }); return; }
+      // 안내판은 한 장씩 맞춰 서므로(scroll-snap), 작은 움직임은 모았다가 한 장씩 넘긴다.
+      row._acc = (row._acc || 0) + dy;
+      if (Math.abs(row._acc) < 40) return;
+      const card = row.firstElementChild.offsetWidth + parseFloat(getComputedStyle(row).columnGap || 0);
+      row.scrollBy({ left: Math.sign(row._acc) * card, behavior: 'smooth' });
+      row._acc = 0;
+    }, { passive: false });
+  });
 </script>
 </body>
 </html>
