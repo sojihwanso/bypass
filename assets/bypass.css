@@ -328,3 +328,7 @@ a { color: var(--green); text-underline-offset: 3px; }
   .member-grid > li.inbox-state { grid-column: 1 / -1; }
   .member-grid > li:last-child { border-bottom: 1px solid var(--rule); padding-bottom: 14px; }
 }
+
+/* ===== 회원가입: 비밀번호 확인란 일치 표시 ===== */
+.hint.is-ok { color: var(--green); font-weight: 700; }
+.hint.is-bad { color: var(--orange-ink); font-weight: 700; }
