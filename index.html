@@ -414,6 +414,23 @@
   .req tr:last-child th, .req tr:last-child td { border-bottom: 0; }
   .req th { width: 7.6em; padding-right: 16px; color: var(--green); font-weight: 900; }
   .tbd { color: var(--muted); }
+  /* 문의 창구: 카카오톡 1:1 오픈채팅 */
+  .ask-btn {
+    display: inline-flex; align-items: center; gap: 10px; padding: 7px 14px 7px 9px; border-radius: 10px;
+    background: var(--green); color: #fff; text-decoration: none; line-height: 1.25;
+    box-shadow: inset 0 0 0 3px var(--green), inset 0 0 0 5px #fff;
+  }
+  .ask-btn:hover { background: var(--green-deep); box-shadow: inset 0 0 0 3px var(--green-deep), inset 0 0 0 5px #fff; }
+  .ask-icon { width: 40px; height: 36px; flex: none; }
+  .ask-text { display: flex; flex-direction: column; }
+  .ask-small { font-size: 12.5px; font-weight: 500; opacity: .85; }
+  .ask-big { font-size: 16.5px; font-weight: 900; }
+  .ask-arrow { font-size: 20px; font-weight: 700; margin-left: 2px; transition: transform .15s; }
+  .ask-btn:hover .ask-arrow { transform: translateX(3px); }
+  .ask-note { display: block; margin-top: 8px; font-size: 14.5px; color: var(--muted); }
+  .foot-ask { color: #fff; font-weight: 700; text-decoration-color: var(--amber); text-underline-offset: 4px; }
+  .foot-ask:hover { color: var(--amber); }
+
   .keep { display: inline-block; }
   @media (max-width: 900px) {
     .recruit-sign { grid-template-columns: 1fr; gap: 30px; padding: 40px 30px 34px; }
@@ -916,7 +933,7 @@
               <tr><th scope="row">모집 기간</th><td class="tbd">언제나</td></tr>
               <tr><th scope="row">활동 일시·장소</th><td class="tbd">추후 공고</td></tr>
               <tr><th scope="row">제출 서류</th><td>없음. 본 국은 불필요한 서류를 요구하지 않습니다.</td></tr>
-              <tr><th scope="row">문의</th><td class="tbd">추후 공고</td></tr>
+              <tr><th scope="row">문의</th><td><a class="ask-btn" href="https://open.kakao.com/o/snJ3HuTi" target="_blank" rel="noopener"><svg class="ask-icon" viewBox="0 0 40 36" aria-hidden="true"><path d="M20 3C10 3 3 9.2 3 16.6c0 4.6 2.8 8.6 7 11l-1.6 6.1 7-4.3c1.5.3 3 .4 4.6.4 10 0 17-6.2 17-13.6S30 3 20 3Z" fill="#FFE14A" stroke="#1C211E" stroke-width="2.6" stroke-linejoin="round"/><text x="20" y="21.5" text-anchor="middle" font-size="12.5" font-weight="900" fill="#1C211E" font-family="Noto Sans KR, sans-serif">1:1</text></svg><span class="ask-text"><span class="ask-small">카카오톡 오픈채팅</span><span class="ask-big">1:1 문의 창구</span></span><span class="ask-arrow" aria-hidden="true">→</span><span class="sr-only"> (새 창)</span></a><span class="ask-note">합류·제보·궁금한 점 무엇이든. 운영진이 답합니다.</span></td></tr>
             </tbody>
           </table>
         </div>
@@ -975,7 +992,7 @@
       <p class="foot-name"><strong>BYPASS</strong>느린 시스템의 실용적 대안 마련국</p>
       <p>본 사이트는 국립목포해양대학교 학생 자율 동아리 BYPASS가 운영하며, 대학 행정 부서 및 정부 기관과 무관합니다.</p>
       <dl class="foot-meta">
-        <dt>연락처</dt><dd>추후 공고</dd>
+        <dt>연락처</dt><dd><a class="foot-ask" href="https://open.kakao.com/o/snJ3HuTi" target="_blank" rel="noopener">카카오톡 1:1 오픈채팅 ‘문의 창구’<span class="sr-only"> (새 창)</span> <span aria-hidden="true">→</span></a></dd>
         <dt>최종 개정</dt><dd>2026. 10. 19.</dd>
       </dl>
     </div>
