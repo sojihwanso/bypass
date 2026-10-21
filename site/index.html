@@ -98,6 +98,11 @@
   <section class="desk" aria-label="공사장 구역">
     <div class="wrap">
 
+      <div class="banner banner-warn" role="alert" data-mustchange hidden>
+        <p>임시 비밀번호로 들어오셨습니다. A구역에서 본인만 아는 비밀번호로 바로 바꿔 주십시오.</p>
+        <button type="button" class="banner-close" data-mustchange-go>지금 바꾸기</button>
+      </div>
+
       <div class="banner on-green" role="status" data-welcome hidden>
         <p>가입이 완료되었습니다. 공사장 출입이 허가되었습니다.</p>
         <button type="button" class="banner-close" data-welcome-close>닫기</button>
@@ -115,7 +120,32 @@
               <div><dt>회원 구분</dt><dd><span class="role" data-role></span></dd></div>
               <div><dt>가입일</dt><dd data-joined></dd></div>
             </dl>
+            <form class="pw-change" data-pw-form novalidate hidden>
+              <label class="field-label" for="pw-now">현재 비밀번호</label>
+              <div class="pw">
+                <input class="input" id="pw-now" type="password" required autocomplete="current-password">
+                <button type="button" class="pw-toggle" data-pw-toggle aria-controls="pw-now" aria-pressed="false">보기</button>
+              </div>
+              <label class="field-label" for="pw-new">새 비밀번호</label>
+              <div class="pw">
+                <input class="input" id="pw-new" type="password" required minlength="8" autocomplete="new-password" aria-describedby="pw-new-hint">
+                <button type="button" class="pw-toggle" data-pw-toggle aria-controls="pw-new" aria-pressed="false">보기</button>
+              </div>
+              <p class="hint" id="pw-new-hint">8자 이상.</p>
+              <label class="field-label" for="pw-new2">새 비밀번호 확인</label>
+              <div class="pw">
+                <input class="input" id="pw-new2" type="password" required minlength="8" autocomplete="new-password">
+                <button type="button" class="pw-toggle" data-pw-toggle aria-controls="pw-new2" aria-pressed="false">보기</button>
+              </div>
+              <p class="form-error" role="alert" hidden></p>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-small">비밀번호 바꾸기</button>
+                <button type="button" class="btn btn-secondary btn-small" data-pw-cancel>취소</button>
+              </div>
+            </form>
+            <p class="pw-done" role="status" data-pw-done hidden>비밀번호를 바꿨습니다. 다음 로그인부터 새 비밀번호를 쓰세요.</p>
             <div class="card-foot">
+              <button type="button" class="btn btn-secondary btn-small" data-pw-open>비밀번호 바꾸기</button>
               <button type="button" class="btn btn-secondary btn-small" data-logout>로그아웃</button>
             </div>
           </div>
@@ -283,6 +313,65 @@
   const user = session.user;
   const profile = B.profileOf(user);
   const role = B.roleOf(user);
+
+  /* ===== A구역: 비밀번호 바꾸기 =====
+     현재 비밀번호로 한 번 더 로그인해 본 뒤에 바꾼다. (자리를 비운 사이 남이 바꾸지 못하도록) */
+  const pwForm = document.querySelector('[data-pw-form]');
+  const pwOpen = document.querySelector('[data-pw-open]');
+  const pwDone = document.querySelector('[data-pw-done]');
+  const pwErr = pwForm.querySelector('.form-error');
+  const [pwNow, pwNew, pwNew2] = ['pw-now', 'pw-new', 'pw-new2'].map(id => document.getElementById(id));
+  const mustChange = Boolean(user.user_metadata && user.user_metadata.must_change_password);
+  B.bindPasswordToggles(pwForm);
+
+  function openPwForm() {
+    pwForm.hidden = false; pwDone.hidden = true; pwOpen.hidden = true;
+    pwForm.reset(); pwErr.hidden = true;
+    [pwNow, pwNew, pwNew2].forEach(f => f.removeAttribute('aria-invalid'));
+    pwForm.scrollIntoView({ block: 'center' });
+    pwNow.focus();
+  }
+  function closePwForm() { pwForm.hidden = true; pwOpen.hidden = false; }
+  function pwFail(text, field) {
+    pwErr.textContent = text; pwErr.hidden = false;
+    if (field) { field.setAttribute('aria-invalid', 'true'); field.focus(); }
+  }
+  pwOpen.addEventListener('click', openPwForm);
+  pwForm.querySelector('[data-pw-cancel]').addEventListener('click', closePwForm);
+
+  pwForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    pwErr.hidden = true;
+    [pwNow, pwNew, pwNew2].forEach(f => f.removeAttribute('aria-invalid'));
+    if (!pwNow.value) return pwFail('현재 비밀번호를 입력해 주세요.', pwNow);
+    if (pwNew.value.length < B.PW_MIN) return pwFail(`새 비밀번호는 ${B.PW_MIN}자 이상이어야 합니다.`, pwNew);
+    if (pwNew.value !== pwNew2.value) return pwFail('새 비밀번호 두 칸이 서로 다릅니다.', pwNew2);
+    if (pwNew.value === pwNow.value) return pwFail('지금 쓰는 비밀번호와 다른 비밀번호를 정해 주세요.', pwNew);
+
+    const submitBtn = pwForm.querySelector('[type="submit"]');
+    B.setBusy(submitBtn, true, '바꾸는 중…');
+    const check = await B.sb.auth.signInWithPassword({ email: user.email, password: pwNow.value });
+    if (check.error) {
+      B.setBusy(submitBtn, false);
+      return pwFail(check.error.code === 'invalid_credentials' ? '현재 비밀번호가 맞지 않습니다.' : B.errorText(check.error, 'login'), pwNow);
+    }
+    const { error } = await B.sb.auth.updateUser({ password: pwNew.value, data: { must_change_password: false } });
+    B.setBusy(submitBtn, false);
+    if (error) {
+      const text = error.code === 'same_password' ? '지금 쓰는 비밀번호와 다른 비밀번호를 정해 주세요.'
+        : error.code === 'weak_password' ? `비밀번호가 너무 약합니다. ${B.PW_MIN}자 이상, 짐작하기 어렵게 정해 주세요.`
+        : '비밀번호를 바꾸지 못했습니다. 잠시 후 다시 시도해 주세요.';
+      return pwFail(text, pwNew);
+    }
+    closePwForm(); pwDone.hidden = false;
+    document.querySelector('[data-mustchange]').hidden = true;
+  });
+
+  if (mustChange) {
+    const warn = document.querySelector('[data-mustchange]');
+    warn.hidden = false;
+    warn.querySelector('[data-mustchange-go]').addEventListener('click', openPwForm);
+  }
 
   document.querySelectorAll('[data-name]').forEach(el => { el.textContent = profile.name; });
   document.querySelector('[data-username]').textContent = profile.username;
@@ -489,9 +578,43 @@
       sel.disabled = true;
       const err = await changeRole(m, next);
       sel.disabled = false;
-      if (err) { sel.value = prev; alertLine(li, err); } else { alertLine(li, `${ROLE_LABEL[next]}(으)로 바꿨습니다.`, true); }
+      if (err) { sel.value = prev; alertLine(li, err); } else { alertLine(li, `${ROLE_LABEL[next]}(으)로 바꿨습니다.`, true); resetBtn.hidden = next === 'staff'; }
     });
-    li.append(sel);
+
+    // 비밀번호를 잊은 회원: 임시 비밀번호 발급 (운영진에게는 발급 불가)
+    const resetBtn = el('button', 'mini-btn', '임시 비밀번호');
+    resetBtn.type = 'button';
+    resetBtn.setAttribute('aria-label', `${m.display_name} 임시 비밀번호 발급`);
+    resetBtn.hidden = m.role === 'staff';
+    let armed = null;
+    resetBtn.addEventListener('click', async () => {
+      if (!armed) {
+        resetBtn.textContent = '발급할까요?'; resetBtn.classList.add('mini-danger', 'is-armed');
+        armed = setTimeout(() => { armed = null; resetBtn.textContent = '임시 비밀번호'; resetBtn.classList.remove('mini-danger', 'is-armed'); }, 4000);
+        return;
+      }
+      clearTimeout(armed); armed = null;
+      resetBtn.disabled = true; resetBtn.textContent = '발급 중…';
+      const { data, error } = await B.sb.rpc('reset_member_password', { p_user: m.id });
+      resetBtn.disabled = false; resetBtn.textContent = '임시 비밀번호'; resetBtn.classList.remove('mini-danger', 'is-armed');
+      if (error) { alertLine(li, error.message && /[가-힣]/.test(error.message) ? error.message : '발급하지 못했습니다.'); return; }
+      li.querySelectorAll(':scope > .temp-pw').forEach(x => x.remove());
+      const box = el('div', 'temp-pw');
+      box.setAttribute('role', 'status');
+      const code = el('span', 'temp-pw-code', data);
+      const copy = el('button', 'mini-btn', '복사');
+      copy.type = 'button';
+      copy.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(data); copy.textContent = '복사됨'; } catch (e) { copy.textContent = '직접 복사해 주세요'; }
+      });
+      box.append(el('b', null, `${m.display_name} 님 임시 비밀번호 `), code, copy,
+        el('span', null, ' 아이디 ' + m.username + ' 와 함께 1:1 문의 창구로 본인에게만 전달하세요. 로그인하면 바로 바꾸라는 안내가 뜹니다. 새로고침하면 다시 볼 수 없습니다.'));
+      li.append(box);
+    });
+
+    const tools = el('div', 'member-tools');
+    tools.append(sel, resetBtn);
+    li.append(tools);
     return li;
   }
 
