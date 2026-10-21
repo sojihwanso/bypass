@@ -283,20 +283,19 @@
   .boards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 20px; border-bottom: 6px solid var(--post); }
   .board-unit { display: flex; flex-direction: column; }
   .board { position: relative; flex: 1; display: flex; flex-direction: column; background: var(--white); border: 3px solid var(--green); border-radius: 10px; }
-  .board-head { position: relative; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; background: var(--green); color: #fff; border-radius: 6px 6px 0 0; padding: 10px 12px 11px 14px; }
-  .board-title { min-width: 0; }
-  .board-no { margin: 0; font-size: 12.5px; font-weight: 700; line-height: 1.5; color: #D5E4DB; }
+  .board-head { background: var(--green); color: #fff; border-radius: 6px 6px 0 0; padding: 10px 14px 11px; }
+  .board-no { margin: 0; padding-right: 62px; font-size: 12.5px; font-weight: 700; line-height: 1.5; color: #D5E4DB; }
   .board-head h3 { margin: 2px 0 0; font-weight: 900; font-size: 18px; line-height: 1.35; }
-  .board-head .badge {
-    flex: none; margin: -2px -2px 0 0; transform: rotate(6deg); transform-origin: 60% 40%;
+  /* 상태 스티커: 안내판 위 모서리에 걸쳐 붙임 */
+  .board > .badge {
+    position: absolute; top: -12px; right: 10px; z-index: 2; transform: rotate(-5deg);
     border: 2px solid var(--ink); border-radius: 5px; box-shadow: 2px 3px 0 var(--ink);
-    font-size: 14.5px; line-height: 1.6; padding: 1px 10px 1px 11px;
+    font-size: 14.5px; line-height: 1.6; padding: 1px 10px 1px 11px; transition: transform .2s ease;
   }
-  .board-head .badge-done { background: var(--orange); color: var(--ink); }
-  .board-head .badge-rejected { background: #fff; color: var(--orange-ink); border: 2px dashed var(--orange-ink); box-shadow: 2px 3px 0 rgba(0,0,0,.35); transform: rotate(-5deg); }
-  .board:hover .board-head .badge { transform: rotate(0deg) translateY(-2px); }
-  .board-head .badge { transition: transform .2s ease; }
-  @media (prefers-reduced-motion: reduce) { .board-head .badge { transition: none; } }
+  .board > .badge-done { background: var(--orange); color: var(--ink); }
+  .board > .badge-rejected { background: #fff; color: var(--orange-ink); border: 2px dashed var(--orange-ink); box-shadow: 2px 3px 0 rgba(0,0,0,.35); transform: rotate(4deg); }
+  .board:hover > .badge { transform: rotate(0deg) translateY(-2px); }
+  @media (prefers-reduced-motion: reduce) { .board > .badge { transition: none; } }
   .board-rejected .board-head { border-top: 10px solid transparent; background: var(--green) padding-box; position: relative; }
   .board-rejected .board-head::before {
     content: ""; position: absolute; left: 0; right: 0; top: -10px; height: 10px; border-radius: 6px 6px 0 0;
@@ -813,7 +812,8 @@
       <div class="boards">
         <div class="board-unit">
           <article class="board" aria-labelledby="bd1">
-            <div class="board-head"><div class="board-title"><p class="board-no">제0-1호 (창립 전)</p><h3 id="bd1">수강플래너</h3></div><span class="badge badge-done">완료</span></div>
+            <div class="board-head"><p class="board-no">제0-1호 (창립 전)</p><h3 id="bd1">수강플래너</h3></div>
+            <span class="badge badge-done">완료</span>
             <dl><div><dt>기존 절차</dt><dd>강의 목록을 하나씩 열어 시간이 겹치는지 맞춰 봄</dd></div><div><dt>개선 후</dt><dd>과목을 검색해 담으면 시간표로 바로 보이고, 계획을 여러 개 비교·공유</dd></div></dl>
             <div class="board-foot"><a class="board-go" href="https://mymmu.my/" target="_blank" rel="noopener">우회로 바로가기<span class="sr-only"> (수강플래너, 새 창)</span> <span aria-hidden="true">→</span></a><svg class="done-seal" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
           </article>
@@ -821,7 +821,8 @@
         </div>
         <div class="board-unit">
           <article class="board" aria-labelledby="bd2">
-            <div class="board-head"><div class="board-title"><p class="board-no">제0-2호 (창립 전)</p><h3 id="bd2">졸업이수학점 계산기</h3></div><span class="badge badge-done">완료</span></div>
+            <div class="board-head"><p class="board-no">제0-2호 (창립 전)</p><h3 id="bd2">졸업이수학점 계산기</h3></div>
+            <span class="badge badge-done">완료</span>
             <dl><div><dt>기존 절차</dt><dd>졸업요건표와 성적표를 나란히 놓고 직접 계산</dd></div><div><dt>개선 후</dt><dd>들은 과목을 체크하면 남은 졸업 요건을 한 화면에 표시 (항해정보시스템학부)</dd></div></dl>
             <div class="board-foot"><a class="board-go" href="https://eesuu.mymmu.my/" target="_blank" rel="noopener">우회로 바로가기<span class="sr-only"> (졸업이수학점 계산기, 새 창)</span> <span aria-hidden="true">→</span></a><svg class="done-seal" style="--r: 7deg" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
           </article>
@@ -829,7 +830,8 @@
         </div>
         <div class="board-unit">
           <article class="board" aria-labelledby="bd3">
-            <div class="board-head"><div class="board-title"><p class="board-no">제0-3호 (창립 전)</p><h3 id="bd3">학식 알리미 ‘꿀꿀이’</h3></div><span class="badge badge-done">완료</span></div>
+            <div class="board-head"><p class="board-no">제0-3호 (창립 전)</p><h3 id="bd3">학식 알리미 ‘꿀꿀이’</h3></div>
+            <span class="badge badge-done">완료</span>
             <dl><div><dt>기존 절차</dt><dd>오늘 학식이 뭔지 보려고 식단 게시판을 찾아 들어감</dd></div><div><dt>개선 후</dt><dd>카카오톡 채널 ‘목해대 꿀꿀이’에서 학식 식단을 바로 확인</dd></div></dl>
             <div class="board-foot"><a class="board-go" href="https://pf.kakao.com/_uuxfmX" target="_blank" rel="noopener">우회로 바로가기<span class="sr-only"> (목해대 꿀꿀이 카카오톡 채널, 새 창)</span> <span aria-hidden="true">→</span></a><svg class="done-seal" style="--r: -4deg" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
           </article>
@@ -837,7 +839,8 @@
         </div>
         <div class="board-unit">
           <article class="board board-rejected" aria-labelledby="bd4">
-            <div class="board-head"><div class="board-title"><p class="board-no">제0-4호</p><h3 id="bd4">강의동 이동 불편</h3></div><span class="badge badge-rejected">반려</span></div>
+            <div class="board-head"><p class="board-no">제0-4호</p><h3 id="bd4">강의동 이동 불편</h3></div>
+            <span class="badge badge-rejected">반려</span>
             <span class="specimen">견본</span>
             <dl><div><dt>접수 내용</dt><dd>비 오는 날 강의동까지 걸어가야 함</dd></div><div><dt>반려 사유</dt><dd>해당 불편은 절차가 아닌 날씨에 기인함.</dd></div></dl>
             <div class="board-foot"></div>
