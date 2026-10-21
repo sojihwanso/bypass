@@ -21,7 +21,8 @@
 1. Supabase 대시보드 → 왼쪽 **Edge Functions** → **Deploy a new function** → **Via Editor**
 2. 함수 이름: `publish-wiki` (정확히 이 이름)
 3. 편집기 내용을 지우고, 이 폴더의 `index.ts` 전체를 붙여 넣은 뒤 **Deploy**
-4. **Edge Functions → Secrets**(또는 Settings 안의 Secrets)에서 **Add new secret**
+4. 함수 화면의 **Details**(또는 Settings)에서 **Verify JWT / Enforce JWT verification** 을 끕니다. 로그인과 운영진 여부는 함수가 직접 확인합니다.
+5. **Edge Functions → Secrets**(또는 Settings 안의 Secrets)에서 **Add new secret**
    - Name: `GITHUB_TOKEN`
    - Value: 1번에서 복사한 `github_pat_…`
 

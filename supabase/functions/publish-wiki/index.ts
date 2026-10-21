@@ -7,7 +7,10 @@
 //   GITHUB_TOKEN  : 이 저장소의 Contents 읽기·쓰기 권한만 가진 GitHub 토큰 (fine-grained)
 //   GITHUB_REPO   : sojihwanso/bypass   (없으면 이 값을 씀)
 //   GITHUB_BRANCH : main                (없으면 이 값을 씀)
-// SUPABASE_URL, SUPABASE_ANON_KEY 는 Supabase 가 자동으로 넣어 줍니다.
+// SUPABASE_URL 은 Supabase 가 자동으로 넣어 줍니다. 로그인 확인에 쓰는 공개 키는 사이트가 함께 보내는 apikey 를 쓰고,
+// 없으면 SUPABASE_ANON_KEY 를 씁니다. (새 publishable 키를 쓰는 프로젝트에서도 동작하도록)
+//
+// 대시보드의 'Verify JWT'(JWT 검증)는 꺼도 됩니다. 이 함수가 /auth/v1/user 로 직접 로그인과 운영진 여부를 확인합니다.
 
 const ALLOWED_ORIGINS = [
   'https://teambypass.vercel.app',
@@ -51,7 +54,7 @@ export async function handle(req: Request, env: (k: string) => string | undefine
   const auth = req.headers.get('authorization') ?? '';
   if (!auth.startsWith('Bearer ')) return reply(req, 401, { error: '로그인이 필요합니다.' });
   const who = await http(`${env('SUPABASE_URL')}/auth/v1/user`, {
-    headers: { apikey: env('SUPABASE_ANON_KEY') ?? '', Authorization: auth },
+    headers: { apikey: req.headers.get('apikey') || env('SUPABASE_ANON_KEY') || '', Authorization: auth },
   });
   if (!who.ok) return reply(req, 401, { error: '로그인 정보가 만료되었습니다. 다시 로그인해 주세요.' });
   const user = await who.json();
