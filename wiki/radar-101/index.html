@@ -1,0 +1,2370 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>레이더 위키</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@600;700&display=swap">
+<style>
+/* Layout: chart-room reference wiki — sticky top bar, left index rail, single article column; radar scopes stay dark in both themes. */
+:root{
+  --bg:#F4F6F7; --surface:#FFFFFF; --ink:#15232E; --muted:#5B6B77; --line:#D6DDE2;
+  --accent:#0B6A86; --accent-soft:#E2EFF3; --echo:#B8650F; --echo-soft:#FBEEDC;
+  --warn-soft:#FFF5D6; --warn-line:#E4C566; --danger:#C0392B;
+  --scope-bg:#0A1A23; --scope-ring:#29495A; --scope-echo:#F3B23C; --scope-line:#7FD0E6; --scope-text:#9FC0CE;
+  --f-display:"Noto Serif KR","Nanum Myeongjo",Georgia,serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F171D; --surface:#16222B; --ink:#E2E9ED; --muted:#94A4AF; --line:#283742;
+  --accent:#5CB8D2; --accent-soft:#17323D; --echo:#E9A44A; --echo-soft:#3A2A14;
+  --warn-soft:#2E2914; --warn-line:#7A6A2A; --danger:#F07466; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F171D; --surface:#16222B; --ink:#E2E9ED; --muted:#94A4AF; --line:#283742;
+  --accent:#5CB8D2; --accent-soft:#17323D; --echo:#E9A44A; --echo-soft:#3A2A14;
+  --warn-soft:#2E2914; --warn-line:#7A6A2A; --danger:#F07466; color-scheme:dark}
+
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.75;word-break:keep-all;overflow-wrap:break-word}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,canvas:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:16px;padding-block:10px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:700;font-size:19px;color:var(--ink)}
+.brand:hover{text-decoration:none}
+.brand svg{flex:none}
+.draft{font-family:var(--f-body);font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--echo);background:var(--echo-soft);padding:2px 8px;border-radius:999px}
+.search{margin-left:auto;flex:1;max-width:340px}
+.search input{width:100%;box-sizing:border-box;font:inherit;font-size:14px;padding:7px 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.menu-btn{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer}
+
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:40px;padding-block:28px 64px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+nav.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 72px);align-self:start;max-height:calc(100vh - 100px);overflow:auto;font-size:14px}
+.rail h3{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:18px 0 6px}
+.rail h3:first-child{margin-top:0}
+.rail ul{list-style:none;margin:0;padding:0;display:grid;gap:1px}
+.rail a{display:block;padding:4px 10px;border-radius:5px;color:var(--ink)}
+.rail a:hover{background:var(--accent-soft);text-decoration:none}
+.rail a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.rail .sim-tag{font-size:10px;font-weight:600;color:var(--echo);margin-left:4px}
+
+main{min-width:0}
+article{max-width:48rem}
+.crumb{font-size:13px;color:var(--muted);margin-bottom:6px}
+article h1{font-family:var(--f-display);font-size:32px;line-height:1.3;margin:0 0 4px;text-wrap:balance}
+.en{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+article h2{font-family:var(--f-display);font-size:21px;margin:36px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line);text-wrap:balance}
+article h3{font-size:16px;margin:24px 0 6px}
+article p{margin:0 0 14px}
+article ul,article ol{margin:0 0 14px;padding-left:1.3em}
+article li{margin-bottom:4px}
+.lede{font-size:16px}
+
+.formula{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 16px;margin:0 0 16px;overflow-x:auto;font-size:16px}
+.formula mjx-container{margin:.4em 0!important}
+.formula small{display:block;font-size:13px;color:var(--muted);line-height:1.6;margin-top:2px}
+.note{background:var(--warn-soft);border:1px solid var(--warn-line);border-radius:6px;padding:10px 14px;font-size:14px;margin:0 0 16px}
+.note strong{font-weight:600}
+.key{border-left:3px solid var(--echo);padding:2px 0 2px 14px;margin:0 0 16px}
+
+.tbl{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-size:14px;background:var(--surface)}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--accent-soft);font-weight:600;white-space:nowrap}
+td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.infobox{float:right;width:250px;margin:4px 0 16px 24px;background:var(--surface);border:1px solid var(--line);border-radius:6px;font-size:13px;overflow:hidden}
+.infobox .ib-h{background:var(--accent);color:var(--surface);font-weight:600;padding:8px 12px;font-size:14px}
+.infobox .ib-fig{padding:12px;border-bottom:1px solid var(--line);display:flex;justify-content:center;background:var(--scope-bg)}
+.infobox dl{margin:0;display:grid;grid-template-columns:auto 1fr}
+.infobox dt,.infobox dd{margin:0;padding:6px 12px;border-bottom:1px solid var(--line)}
+.infobox dt{color:var(--muted);font-weight:500;padding-right:4px}
+.infobox dl > :nth-last-child(-n+2){border-bottom:0}
+.clear{clear:both}
+
+figure{margin:0 0 20px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px}
+figure .fig-scroll{overflow-x:auto}
+figure svg{display:block;max-width:100%;height:auto;margin:0 auto}
+figcaption{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.6}
+figcaption b{color:var(--ink);font-weight:600}
+svg text{font-family:var(--f-body)}
+.s-ink{stroke:var(--ink)} .s-muted{stroke:var(--muted)} .s-line{stroke:var(--line)} .s-acc{stroke:var(--accent)} .s-echo{stroke:var(--echo)} .s-danger{stroke:var(--danger)}
+.f-ink{fill:var(--ink)} .f-muted{fill:var(--muted)} .f-acc{fill:var(--accent)} .f-echo{fill:var(--echo)} .f-none{fill:none} .f-surf{fill:var(--surface)} .f-soft{fill:var(--accent-soft)} .f-esoft{fill:var(--echo-soft)} .f-bg{fill:var(--bg)}
+.sc-bg{fill:var(--scope-bg)} .sc-ring{stroke:var(--scope-ring)} .sc-echo{fill:var(--scope-echo)} .sc-echo-s{stroke:var(--scope-echo)} .sc-line{stroke:var(--scope-line)} .sc-linef{fill:var(--scope-line)} .sc-text{fill:var(--scope-text)}
+
+/* simulators */
+.sim{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;margin:0 0 20px}
+.sim-head{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.sim-head b{font-size:15px}
+.sim-badge{font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--echo);background:var(--echo-soft);padding:1px 8px;border-radius:999px}
+.sim-grid{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:18px;align-items:start}
+.sim-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.scope-wrap{min-width:0}
+.scope{display:block;width:100%;max-width:520px;aspect-ratio:1;margin:0 auto;border-radius:50%;background:var(--scope-bg);cursor:crosshair;touch-action:manipulation}
+.chart{display:block;width:100%;max-width:520px;aspect-ratio:1;margin:0 auto;border-radius:6px;border:1px solid var(--line)}
+.cap{font-size:12px;color:var(--muted);text-align:center;margin-top:6px}
+.ctrls{display:grid;gap:12px;font-size:13px;min-width:0}
+.ctrl{min-width:0}
+.ctrl label,.ctrl .lab{display:flex;justify-content:space-between;gap:8px;color:var(--muted);margin-bottom:3px;font-size:13px}
+.ctrl output,.ctrl .val{font-family:var(--f-mono);color:var(--ink);font-variant-numeric:tabular-nums}
+.ctrl input[type=range]{width:100%;accent-color:var(--accent)}
+.ctrl select{width:100%;box-sizing:border-box;font:inherit;font-size:14px;padding:5px 8px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--ink)}
+.seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{flex:1;font:inherit;font-size:13px;padding:5px 6px;border:0;background:var(--bg);color:var(--ink);cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface);font-weight:600}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+.btn{font:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);cursor:pointer;min-width:0}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--surface);border-color:var(--accent);font-weight:600}
+.readout{font-family:var(--f-mono);font-size:12.5px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;line-height:1.7;font-variant-numeric:tabular-nums}
+.readout .warn{color:var(--danger);font-weight:500}
+.readout .ok{color:var(--accent)}
+.verdict{font-weight:600;margin-top:8px}
+.try{font-size:14px;margin-top:4px}
+.try li{margin-bottom:2px}
+.lab-out{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}
+.stat{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 12px}
+.stat span{display:block;font-size:12px;color:var(--muted)}
+.stat b{font-family:var(--f-mono);font-size:18px;font-weight:500;font-variant-numeric:tabular-nums}
+.lab-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+.ctrl input[type=number]{width:100%;box-sizing:border-box;font:inherit;font-family:var(--f-mono);font-size:14px;padding:5px 8px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--ink)}
+.lab-sub{font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px}
+.plot-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start;margin-top:12px}
+.plot-wrap .lab-out{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:0}
+@media (max-width:700px){.plot-wrap{grid-template-columns:minmax(0,1fr)}}
+
+/* collapsible rail */
+.grp + .grp{margin-top:10px}
+.grp-btn{display:flex;align-items:center;justify-content:space-between;width:100%;font:inherit;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;background:none;border:0;padding:4px 10px;border-radius:5px;cursor:pointer;text-align:left}
+.grp-btn:hover{background:var(--accent-soft);color:var(--ink)}
+.grp-btn .chev{display:inline-block;width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .15s;font-size:0}
+.grp-btn[aria-expanded="false"] .chev{transform:rotate(-45deg)}
+.grp ul{margin-top:2px}
+.grp.closed ul{display:none}
+.rail-tools{display:flex;gap:6px;margin-bottom:12px}
+.rail-tools button{flex:1;font:inherit;font-size:12px;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:3px 6px;cursor:pointer}
+.rail-tools button:hover{color:var(--ink);border-color:var(--accent)}
+:root.rail-off .wrap{grid-template-columns:minmax(0,1fr)}
+:root.rail-off nav.rail{display:none}
+@media (prefers-reduced-motion:reduce){.grp-btn .chev{transition:none}}
+
+.related{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+.related a{margin-right:12px}
+.foot{margin-top:28px;font-size:12px;color:var(--muted)}
+.results{list-style:none;padding:0;margin:0 0 18px;display:grid;gap:8px}
+.results li{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.results small{display:block;color:var(--muted);font-size:13px}
+
+@media (max-width:900px){
+  .sim-grid,.sim-grid.two{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:820px){
+  .wrap{grid-template-columns:minmax(0,1fr);gap:16px;padding-block:16px 48px}
+  nav.rail{position:static;max-height:none;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px}
+  nav.rail:not(.open){display:none}
+  :root.rail-off .wrap{grid-template-columns:minmax(0,1fr)}
+  .search{max-width:none}
+  .brand .draft{display:none}
+  .infobox{float:none;width:auto;margin:0 0 18px}
+  article h1{font-size:26px}
+}
+</style>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+  svg: { fontCache: 'global', mtextInheritFont: true },
+  options: { enableMenu: false },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="#main">
+      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="11.5" class="f-none s-acc" stroke-width="1.5"/><circle cx="13" cy="13" r="6" class="f-none s-acc" stroke-width="1"/><line x1="13" y1="13" x2="21.5" y2="5" class="s-acc" stroke-width="1.6"/><circle cx="18" cy="16" r="1.8" class="f-echo"/></svg>
+      레이더 위키 <span class="draft">초안</span>
+    </a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="true" aria-controls="rail"><span aria-hidden="true">☰</span> <span id="menuLabel">목차 접기</span></button>
+    <div class="search"><input id="q" type="search" placeholder="문서 검색 (예: 레이콘, PRR)" aria-label="문서 검색"></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="rail" id="rail" aria-label="문서 목록">
+    <div class="rail-tools"><button type="button" id="grpOpenAll">모두 펼치기</button><button type="button" id="grpCloseAll">모두 접기</button></div>
+    <div class="grp" data-g="start"><button type="button" class="grp-btn" aria-expanded="true">시작 <span class="chev" aria-hidden="true">▼</span></button>
+    <ul><li><a href="#main">대문: 레이더 항법</a></li><li><a href="#glossary">용어집</a></li></ul></div>
+    <div class="grp" data-g="basics"><button type="button" class="grp-btn" aria-expanded="true">원리와 구성 <span class="chev" aria-hidden="true">▼</span></button>
+    <ul>
+      <li><a href="#principle">레이더의 원리</a></li>
+      <li><a href="#transmitter">송신기</a></li>
+      <li><a href="#receiver">수신기</a></li>
+      <li><a href="#antenna">안테나</a></li>
+      <li><a href="#ppi">PPI (디스플레이)</a></li>
+      <li><a href="#beam">레이더 빔</a></li>
+    </ul></div>
+    <div class="grp" data-g="prop"><button type="button" class="grp-btn" aria-expanded="true">전파와 판독 <span class="chev" aria-hidden="true">▼</span></button>
+    <ul>
+      <li><a href="#propagation">감쇠·회절·굴절</a></li>
+      <li><a href="#bands">X밴드와 S밴드</a></li>
+      <li><a href="#resolution">분해능</a></li>
+      <li><a href="#interpretation">영상 판독</a></li>
+      <li><a href="#distortion">해안선 왜곡과 음영</a></li>
+      <li><a href="#false-echoes">허상 (불필요한 에코)</a></li>
+    </ul></div>
+    <div class="grp" data-g="ops"><button type="button" class="grp-btn" aria-expanded="true">레이더 운용 <span class="chev" aria-hidden="true">▼</span></button>
+    <ul>
+      <li><a href="#controls">레이더 조작과 조정</a></li>
+      <li><a href="#errors">레이더 오차와 점검</a></li>
+    </ul></div>
+    <div class="grp" data-g="nav"><button type="button" class="grp-btn" aria-expanded="true">항법 실무 <span class="chev" aria-hidden="true">▼</span></button>
+    <ul>
+      <li><a href="#aids">레이더 항로표지</a></li>
+      <li><a href="#target-selection">레이더 물표 선정 요령</a></li>
+      <li><a href="#fixing">레이더 위치결정</a></li>
+      <li><a href="#parallel-indexing">평행 지표법</a></li>
+    </ul></div>
+    <div class="grp" data-g="colav"><button type="button" class="grp-btn" aria-expanded="true">충돌 회피 <span class="chev" aria-hidden="true">▼</span></button>
+    <ul>
+      <li><a href="#motion">진운동과 상대운동</a></li>
+      <li><a href="#arpa">레이더 플로팅과 ARPA</a></li>
+      <li><a href="#colregs">충돌예방규칙과 레이더</a></li>
+      <li><a href="#sart-ais">SART와 AIS</a></li>
+    </ul></div>
+    <div class="grp" data-g="sim"><button type="button" class="grp-btn" aria-expanded="true">시뮬레이터 <span class="chev" aria-hidden="true">▼</span></button>
+    <ul>
+      <li><a href="#ppi-sim">PPI 시뮬레이터<span class="sim-tag">SIM</span></a></li>
+      <li><a href="#pi-sim">평행 지표법 연습<span class="sim-tag">SIM</span></a></li>
+      <li><a href="#lab-plot">레이더 플로팅 연습</a></li>
+      <li><a href="#lab-horizon">레이더 수평선 계산기</a></li>
+      <li><a href="#lab-resolution">거리 분해능 실험</a></li>
+      <li><a href="#lab-second-trace">2차 소인 에코 실험</a></li>
+    </ul></div>
+  </nav>
+
+  <main id="content">
+
+<!-- ============ 대문 ============ -->
+<article data-slug="main" data-title="레이더 항법" data-cat="대문">
+  <div class="crumb">대문</div>
+  <h1>레이더 항법</h1>
+  <div class="en">Radar Navigation</div>
+
+  <aside class="infobox">
+    <div class="ib-h">선박용 레이더</div>
+    <div class="ib-fig">
+      <svg width="200" height="200" viewBox="0 0 200 200" role="img" aria-label="PPI 화면 모식도">
+        <circle cx="100" cy="100" r="94" class="sc-bg sc-ring" stroke-width="1"/>
+        <circle cx="100" cy="100" r="62" class="f-none sc-ring" stroke-width="1"/>
+        <circle cx="100" cy="100" r="31" class="f-none sc-ring" stroke-width="1"/>
+        <line x1="100" y1="100" x2="100" y2="7" class="sc-line" stroke-width="1" stroke-dasharray="3 3"/>
+        <line x1="100" y1="100" x2="166" y2="34" class="sc-line" stroke-width="2"/>
+        <path d="M28 72 Q44 40 72 30 Q60 56 40 82 Z" class="sc-echo" opacity=".85"/>
+        <circle cx="140" cy="130" r="3" class="sc-echo"/>
+        <circle cx="70" cy="146" r="2.5" class="sc-echo"/>
+        <circle cx="100" cy="100" r="2.5" class="sc-linef"/>
+      </svg>
+    </div>
+    <dl>
+      <dt>측정량</dt><dd>거리, 방위</dd>
+      <dt>방식</dt><dd>펄스 변조</dd>
+      <dt>주파수대</dt><dd>X밴드 (3cm)<br>S밴드 (10cm)</dd>
+      <dt>송신 소자</dt><dd>마그네트론, 솔리드 스테이트</dd>
+      <dt>표시기</dt><dd>PPI</dd>
+      <dt>정확도</dt><dd>거리 &gt; 방위<br>(방위 약 ±5°)</dd>
+    </dl>
+  </aside>
+
+  <p class="lede"><b>레이더 항법</b>은 선박용 레이더로 주변 물표까지의 거리와 방위를 측정해 자선의 위치를 구하고, 계획한 항로를 따라가는지 감시하는 항해 기법이다. 시정에 관계없이 쓸 수 있어서 안개, 강우, 야간에 특히 중요하다.</p>
+
+  <h2>개요</h2>
+  <p>레이더(RADAR, Radio Detection And Ranging)는 짧은 전파 펄스를 쏘고 물체에 반사되어 돌아오는 에코를 받아, 왕복에 걸린 시간으로 거리를 구한다. 안테나가 회전하면서 좁은 빔을 내보내므로, 에코가 돌아온 순간 안테나가 향한 방향이 곧 물표의 방위가 된다. 이렇게 얻은 거리와 방위는 PPI라는 원형 화면에 자선을 중심으로 한 지도처럼 표시된다.</p>
+  <p>항해사는 이 화면에서 등대, 곶, 섬 같은 물표를 해도와 대조해 식별하고, 거리와 방위를 재서 해도에 위치선을 긋는다. 둘 이상의 위치선이 만나는 점이 선위(픽스)다. 협수로처럼 계속 감시해야 하는 곳에서는 화면에 미리 기준선을 그어 두고 물표 에코가 그 선을 따라 움직이는지 보는 <a href="#parallel-indexing">평행 지표법</a>을 쓴다.</p>
+
+  <div class="key"><b>레이더 거리 측정은 레이더 방위 측정보다 훨씬 정확하다.</b> 거리는 시간 측정으로 정밀하게 얻지만, 방위는 빔폭 때문에 퍼져서 보통 ±5° 정도 오차가 있다. 위치를 구하는 방법, 영상을 해석하는 방법이 모두 이 성질에서 출발한다.</div>
+
+  <h2>장점과 한계</h2>
+  <div class="tbl"><table>
+    <tr><th>장점</th><th>한계</th></tr>
+    <tr><td>시정, 주야에 관계없이 사용</td><td>방위 정확도가 낮다 (빔폭 왜곡)</td></tr>
+    <tr><td>GPS와 독립된 위치 확인 수단</td><td>물표를 잘못 식별할 위험이 크다</td></tr>
+    <tr><td>물표 하나로도 거리와 방위를 동시에 얻어 픽스 가능</td><td>레이더 음영, 빔폭·펄스 길이 왜곡으로 해안선이 해도와 다르게 보인다</td></tr>
+    <tr><td>실시간 연속 감시 (평행 지표법)</td><td>해면·비 클러터, 각종 허상</td></tr>
+    <tr><td>ECDIS 위치의 교차 확인</td><td>레이더 수평선 아래 물표는 보이지 않는다</td></tr>
+  </table></div>
+
+  <h2>레이더 항법의 흐름</h2>
+  <ol>
+    <li><b>준비</b>: 해도에서 레이더로 잘 잡힐 물표(가파른 곶, 등대, 레이콘)를 고르고, 필요하면 평행 지표선을 계획한다.</li>
+    <li><b>영상 판독</b>: 화면의 에코를 해도의 지형과 대조해 식별한다. 음영, 왜곡, 허상을 고려한다.</li>
+    <li><b>위치결정</b>: 가능하면 여러 물표의 거리로 픽스를 구한다. 측심으로 결과를 확인한다.</li>
+    <li><b>감시</b>: 협수로와 변침점에서는 평행 지표법으로 항로 이탈을 실시간으로 확인한다.</li>
+  </ol>
+  <p>ECDIS를 탑재하지 않은 선박이 제한 시정에서 항해할 때 레이더는 안전 통항에 충분한 정확도로 선위를 구하는 주 수단이다. ECDIS를 탑재한 선박에서도 레이더는 GPS에 의존하지 않는 교차 확인 수단으로서 신중한 항해에 꼭 필요하다.</p>
+  <div class="clear"></div>
+</article>
+
+<!-- ============ 원리 ============ -->
+<article data-slug="principle" data-title="레이더의 원리" data-cat="원리와 구성" data-kw="PRR PRT 펄스 폭 펄스 반복률 거리 공식" hidden>
+  <div class="crumb">원리와 구성</div>
+  <h1>레이더의 원리</h1>
+  <div class="en">Principles of Radar Operation</div>
+
+  <h2>거리 측정</h2>
+  <p>레이더는 송신 안테나에서 나간 전파가 물체에 반사되어 수신 에코로 돌아오기까지의 시간을 측정해 거리를 구한다. 전파는 빛의 속도로 움직이고 왕복 거리를 측정하므로 2로 나눈다.</p>
+  <div class="formula">\[ R = \frac{c\,t}{2} \]
+    <small>\(R\): 거리(해리), \(c\): 광속 ≈ 162,000 해리/초, \(t\): 펄스 송신부터 에코 수신까지 걸린 시간(초)</small></div>
+  <p>\(c\)가 매우 크기 때문에 \(t\)는 아주 작다. 10해리 거리의 물표라면 다음과 같다.</p>
+  <div class="formula">\[ t = \frac{2R}{c} = \frac{2 \times 10}{162{,}000} \approx 1.2 \times 10^{-4}\ \mathrm{s} \;(\approx 123\ \mu\mathrm{s}) \]</div>
+  <p>측정한 거리는 물표를 중심으로 하는 원, 즉 <b>위치선(LOP)</b>으로 바꿔 해도에 기입할 수 있다.</p>
+
+  <h2>펄스 변조</h2>
+  <p>대부분의 선박용 레이더는 <b>펄스 변조</b> 방식이다. 타이밍 회로가 보통 1µs 미만의 아주 짧은 펄스를 만들어 안테나로 내보낸다. 송신하는 동안 안테나는 송신기에만 연결되고, 펄스가 나가자마자 전자 스위치가 안테나를 수신기 쪽으로 바꿔 연결한다.</p>
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 230" width="640" height="230" role="img" aria-label="펄스 변조 파형">
+      <rect x="72" y="62" width="258" height="98" class="f-soft"/>
+      <rect x="342" y="62" width="258" height="98" class="f-soft"/>
+      <text x="201" y="80" font-size="12" text-anchor="middle" class="f-acc">수신 시간 (에코를 기다림)</text>
+      <text x="471" y="80" font-size="12" text-anchor="middle" class="f-acc">수신 시간</text>
+      <line x1="30" y1="160" x2="620" y2="160" class="s-muted" stroke-width="1.2"/>
+      <text x="620" y="178" font-size="11" text-anchor="end" class="f-muted">시간 →</text>
+      <rect x="60" y="40" width="12" height="120" class="f-echo"/>
+      <rect x="330" y="40" width="12" height="120" class="f-echo"/>
+      <rect x="600" y="40" width="12" height="120" class="f-echo"/>
+      <rect x="150" y="126" width="6" height="34" class="f-acc"/>
+      <rect x="236" y="142" width="6" height="18" class="f-acc"/>
+      <rect x="420" y="126" width="6" height="34" class="f-acc"/>
+      <rect x="506" y="142" width="6" height="18" class="f-acc"/>
+      <text x="153" y="120" font-size="11" text-anchor="middle" class="f-ink">에코</text>
+      <text x="239" y="136" font-size="11" text-anchor="middle" class="f-ink">약한 에코</text>
+      <path d="M60 28 L72 28 M60 22 L60 34 M72 22 L72 34" class="s-ink" stroke-width="1.2"/>
+      <text x="80" y="32" font-size="12" class="f-ink">펄스 폭 τ (1µs 미만)</text>
+      <path d="M66 196 L336 196" class="s-ink" stroke-width="1.2"/>
+      <path d="M66 190 L66 202 M336 190 L336 202" class="s-ink" stroke-width="1.2"/>
+      <text x="201" y="218" font-size="12" text-anchor="middle" class="f-ink">펄스 반복 주기 PRT = 1 / PRR</text>
+      <text x="40" y="100" font-size="11" text-anchor="end" class="f-muted">출력</text>
+    </svg>
+    </div>
+    <figcaption><b>펄스 변조 파형.</b> 짧고 강한 송신 펄스(주황) 사이의 긴 시간 동안 수신기가 에코(파랑)를 기다린다. 실제로는 펄스 폭이 주기의 1/1000 정도로 훨씬 짧아, 평균 전력은 낮으면서도 순간 출력은 강하다.</figcaption>
+  </figure>
+  <p>다음 펄스는 직전 펄스가 탐지 범위 내 가장 먼 물표까지 갔다 돌아올 시간이 지난 뒤에 송신한다. 펄스 사이 간격이 펄스 길이에 비해 매우 길기 때문에, 평균 전력은 낮으면서도 강한 신호를 낼 수 있다.</p>
+
+  <div class="tbl"><table>
+    <tr><th>용어</th><th>뜻</th><th>대표값</th></tr>
+    <tr><td>펄스 폭 \(\tau\) (펄스 길이, 펄스 지속시간)</td><td>펄스 하나가 지속되는 시간</td><td class="num">&lt; 1 µs</td></tr>
+    <tr><td>펄스 반복률 (PRR)</td><td>1초에 송신하는 펄스 수</td><td class="num">약 1,000 회/초</td></tr>
+    <tr><td>펄스 반복 주기 (PRT)</td><td>펄스와 펄스 사이 시간</td><td class="num">약 1 ms</td></tr>
+  </table></div>
+  <p>PRR은 다음 펄스가 나가기 전에 에코가 돌아올 수 있는 최대 거리를 정한다.</p>
+  <div class="formula">\[ \mathrm{PRT} = \frac{1}{\mathrm{PRR}}, \qquad R_{\max} = \frac{c}{2\,\mathrm{PRR}} \]
+    <small>예: PRR 1,000회/초 → \(R_{\max} = 162{,}000 / 2{,}000 = 81\) 해리. 이보다 먼 물표의 에코는 <a href="#false-echoes">2차 소인 에코</a>가 될 수 있다.</small></div>
+  <p>펄스 폭은 <a href="#resolution">거리 분해능</a>을 결정한다.</p>
+
+  <div class="related">관련 문서: <a href="#transmitter">송신기</a><a href="#receiver">수신기</a><a href="#ppi">PPI</a></div>
+</article>
+
+<!-- ============ 송신기 ============ -->
+<article data-slug="transmitter" data-title="송신기" data-cat="원리와 구성" data-kw="마그네트론 솔리드 스테이트 고체 코히어런트 magnetron" hidden>
+  <div class="crumb">원리와 구성</div>
+  <h1>송신기</h1>
+  <div class="en">The Transmitter</div>
+  <p>레이더 송신기는 송신 펄스를 만드는 장치다. 현재 선박용으로는 두 가지 방식이 쓰인다.</p>
+
+  <h2>마그네트론 레이더</h2>
+  <p>1940년대 이후 생산된 전통적인 선박용 레이더는 <b>마그네트론</b>이라는 특수 전자 발진관을 쓴다. 마그네트론은 25kW 이상의 아주 높은 출력의 마이크로파를 매우 짧은 시간 동안 만들어 낸다.</p>
+
+  <h2>솔리드 스테이트 레이더</h2>
+  <p>최근 상선 분야에 도입된 <b>솔리드 스테이트(고체) 레이더</b>, 또는 <b>코히어런트 레이더</b>는 마그네트론을 쓰지 않는다. 송신기의 전용 회로가 만드는 펄스는 출력이 훨씬 낮고, 길이가 훨씬 길며, 주파수가 변한다. 파형 자체가 마그네트론 레이더와 완전히 다르다. 원문 기준으로 현재 솔리드 스테이트 레이더는 <a href="#bands">S밴드</a>에서만 상용화되어 있다.</p>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 200" width="640" height="200" role="img" aria-label="마그네트론 펄스와 솔리드 스테이트 처프 펄스 비교">
+      <text x="20" y="24" font-size="13" class="f-ink" font-weight="600">마그네트론: 짧고 강한 단일 주파수 펄스</text>
+      <line x1="20" y1="80" x2="620" y2="80" class="s-line"/>
+      <path id="mag" d="M20 80 L620 80" class="f-none s-echo" stroke-width="1.4"/>
+      <text x="20" y="124" font-size="13" class="f-ink" font-weight="600">솔리드 스테이트: 길고 약하며 주파수가 변하는 펄스 (처프)</text>
+      <line x1="20" y1="168" x2="620" y2="168" class="s-line"/>
+      <path id="chirp" d="M20 168 L620 168" class="f-none s-acc" stroke-width="1.4"/>
+    </svg>
+    </div>
+    <figcaption><b>송신 파형 비교 (개념도).</b> 마그네트론은 0.05–1.0µs의 짧은 펄스, 솔리드 스테이트는 5–18µs의 긴 처프 펄스를 낸다. 처프는 수신기에서 <a href="#receiver">펄스 압축</a>으로 짧게 줄인다.</figcaption>
+  </figure>
+
+  <div class="tbl"><table>
+    <tr><th></th><th>마그네트론</th><th>솔리드 스테이트</th></tr>
+    <tr><td>송신 출력</td><td>매우 높음 (25kW 이상)</td><td>낮음</td></tr>
+    <tr><td>펄스 길이</td><td class="num">0.05–1.0 µs</td><td class="num">5–18 µs (수신 시 압축)</td></tr>
+    <tr><td>주파수</td><td>고정 (3,000 또는 10,000 MHz)</td><td>변화 (처프)</td></tr>
+    <tr><td>클러터 억제</td><td>보통</td><td>우수</td></tr>
+    <tr><td>사용 대역</td><td>X밴드, S밴드</td><td>S밴드</td></tr>
+  </table></div>
+  <div class="related">관련 문서: <a href="#receiver">수신기</a><a href="#bands">X밴드와 S밴드</a></div>
+</article>
+
+<!-- ============ 수신기 ============ -->
+<article data-slug="receiver" data-title="수신기" data-cat="원리와 구성" data-kw="펄스 압축 처프 chirp pulse compression" hidden>
+  <div class="crumb">원리와 구성</div>
+  <h1>수신기</h1>
+  <div class="en">The Receiver</div>
+  <p>수신기는 매우 약하게 돌아온 에코를 증폭한다. 증폭된 신호는 영상 신호로 바뀌어 디스플레이에 물표로 표시된다.</p>
+  <h2>마그네트론 레이더의 수신기</h2>
+  <p>단일 주파수(레이더에 따라 3,000MHz 또는 10,000MHz)만 처리하면 된다.</p>
+  <h2>솔리드 스테이트 레이더의 수신기</h2>
+  <p>주파수가 계속 바뀌는 복잡한 신호를 처리해야 한다. 이렇게 주파수가 변하는 신호를 <b>처프(chirp)</b>라 하며, 수신기 안에서 <b>펄스 압축</b>이라는 신호 처리가 필요하다. 펄스 압축은 5–18µs의 비교적 긴 송신 펄스를 기존 레이더와 비슷한 0.05–1.0µs 길이로 줄이는 동시에 신호 진폭을 키운다. 그 결과 낮은 송신 출력으로도 기존 레이더와 같은 탐지·거리 측정 성능을 얻는다.</p>
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 170" width="640" height="170" role="img" aria-label="펄스 압축 개념도">
+      <line x1="20" y1="120" x2="250" y2="120" class="s-line"/>
+      <rect x="40" y="96" width="190" height="24" class="f-soft s-acc" stroke-width="1"/>
+      <text x="135" y="88" font-size="12" text-anchor="middle" class="f-ink">수신된 긴 처프 (5–18µs, 진폭 낮음)</text>
+      <rect x="270" y="80" width="110" height="56" rx="6" class="f-surf s-ink" stroke-width="1.2"/>
+      <text x="325" y="104" font-size="13" text-anchor="middle" class="f-ink" font-weight="600">펄스 압축</text>
+      <text x="325" y="122" font-size="11" text-anchor="middle" class="f-muted">수신기 신호 처리</text>
+      <path d="M236 108 L262 108" class="s-ink" stroke-width="1.4"/><path d="M256 103 L263 108 L256 113" class="f-none s-ink" stroke-width="1.4"/>
+      <path d="M386 108 L412 108" class="s-ink" stroke-width="1.4"/><path d="M406 103 L413 108 L406 113" class="f-none s-ink" stroke-width="1.4"/>
+      <line x1="420" y1="120" x2="620" y2="120" class="s-line"/>
+      <rect x="510" y="40" width="10" height="80" class="f-echo"/>
+      <text x="515" y="30" font-size="12" text-anchor="middle" class="f-ink">짧고 강한 펄스 (0.05–1.0µs)</text>
+      <text x="320" y="160" font-size="12" text-anchor="middle" class="f-muted">에너지는 그대로 두고 시간 폭을 줄여 진폭을 키운다</text>
+    </svg>
+    </div>
+    <figcaption><b>펄스 압축 개념도.</b> 길게 퍼져 있던 에너지를 짧은 시간에 모아, 기존 레이더와 같은 거리 분해능과 탐지 성능을 얻는다.</figcaption>
+  </figure>
+  <div class="key">솔리드 스테이트 레이더는 비 클러터와 해면 클러터를 걸러내는 능력이 마그네트론 레이더보다 훨씬 뛰어나다. 그래서 레이더 항법에 쓰는 육상 물표를 식별하기가 쉽다.</div>
+  <div class="related">관련 문서: <a href="#transmitter">송신기</a><a href="#interpretation">영상 판독</a></div>
+</article>
+
+<!-- ============ 안테나 ============ -->
+<article data-slug="antenna" data-title="안테나" data-cat="원리와 구성" data-kw="슬롯 도파관 slotted waveguide" hidden>
+  <div class="crumb">원리와 구성</div>
+  <h1>안테나</h1>
+  <div class="en">The Antenna</div>
+  <p>현대 상선용 레이더는 거의 모두 <b>슬롯 도파관 안테나(slotted waveguide)</b>를 쓴다. 마그네트론 레이더와 솔리드 스테이트 레이더 모두 이 구성을 채택한다. 구조가 단순하고 효율이 좋으며, 원치 않는 <a href="#beam">사이드 로브</a>를 최소화하는 빔을 만들기 때문이다.</p>
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 170" width="640" height="170" role="img" aria-label="슬롯 도파관 안테나와 빔 모양">
+      <rect x="60" y="60" width="520" height="34" rx="4" class="f-surf s-ink" stroke-width="1.4"/>
+      <g class="f-ink" id="slots"></g>
+      <rect x="306" y="94" width="28" height="40" class="f-muted"/>
+      <text x="320" y="152" font-size="12" text-anchor="middle" class="f-muted">회전 구동부</text>
+      <path d="M60 46 L580 46" class="s-acc" stroke-width="1.2"/>
+      <path d="M60 40 L60 52 M580 40 L580 52" class="s-acc" stroke-width="1.2"/>
+      <text x="320" y="34" font-size="12" text-anchor="middle" class="f-acc">수평으로 길다 → 수평 빔폭이 좁다 (방위 정확도)</text>
+      <text x="420" y="120" font-size="12" class="f-echo">수직으로 좁다 → 수직 빔폭이 넓다</text>
+    </svg>
+    </div>
+    <figcaption><b>슬롯 도파관 안테나 (개념도).</b> 도파관 앞면에 비스듬히 낸 슬롯들에서 전파가 방사된다. 안테나 길이가 길수록 수평 빔이 좁아진다.</figcaption>
+  </figure>
+  <p>선박용 안테나는 수평 방향으로 길고 수직 방향으로 좁다. 따라서 수평으로는 좁고 수직으로는 넓은 빔이 나간다. 자세한 내용은 <a href="#beam">레이더 빔</a> 문서 참고.</p>
+  <div class="related">관련 문서: <a href="#beam">레이더 빔</a><a href="#false-echoes">허상</a></div>
+</article>
+
+<!-- ============ PPI ============ -->
+<article data-slug="ppi" data-title="PPI (디스플레이)" data-cat="원리와 구성" data-kw="plan position indicator 헤딩업 노스업 north-up head-up 스윕 커서 안정화" hidden>
+  <div class="crumb">원리와 구성</div>
+  <h1>PPI (평면 위치 표시기)</h1>
+  <div class="en">Plan Position Indicator</div>
+  <p>레이더 디스플레이는 흔히 <b>PPI</b>라고 부른다. PPI에서 <b>스윕(sweep)</b>은 화면 중심에서 뻗어 나가는 반지름 선으로 나타나며, 안테나와 동기되어 회전한다. 에코가 돌아오면 그 물체의 방위와 거리에 해당하는 위치가 밝아지고, 스윕이 지나간 뒤에도 잔광이 남는다.</p>
+  <p>물표의 실제 거리는 화면 중심으로부터의 거리에 비례한다. 이동식 커서로 거리와 방위를 측정한다.</p>
+
+  <h2>헤딩 업과 노스 업</h2>
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 330" width="640" height="330" role="img" aria-label="노스 업과 헤딩 업 화면 비교">
+      <g>
+        <circle cx="160" cy="150" r="112" class="sc-bg sc-ring" stroke-width="1.2"/>
+        <circle cx="160" cy="150" r="75" class="f-none sc-ring"/>
+        <circle cx="160" cy="150" r="37" class="f-none sc-ring"/>
+        <line x1="160" y1="150" x2="160" y2="40" class="sc-ring" stroke-dasharray="3 3"/>
+        <text x="160" y="30" font-size="11" text-anchor="middle" class="f-ink">000° (북)</text>
+        <line x1="160" y1="150" x2="257" y2="94" class="sc-line" stroke-width="2"/>
+        <text x="262" y="86" font-size="11" class="f-acc">선수 060°</text>
+        <ellipse cx="184" cy="84" rx="12" ry="8" class="sc-echo"/>
+        <circle cx="212" cy="180" r="4" class="sc-echo"/>
+        <text x="194" y="72" font-size="10" class="sc-text">섬</text>
+        <text x="220" y="196" font-size="10" class="sc-text">선박</text>
+        <circle cx="160" cy="150" r="3" class="sc-linef"/>
+      </g>
+      <g>
+        <circle cx="480" cy="150" r="112" class="sc-bg sc-ring" stroke-width="1.2"/>
+        <circle cx="480" cy="150" r="75" class="f-none sc-ring"/>
+        <circle cx="480" cy="150" r="37" class="f-none sc-ring"/>
+        <line x1="480" y1="150" x2="480" y2="40" class="sc-line" stroke-width="2"/>
+        <text x="480" y="30" font-size="11" text-anchor="middle" class="f-acc">선수 (상대방위 000°)</text>
+        <line x1="480" y1="150" x2="384" y2="94" class="sc-ring" stroke-dasharray="3 3"/>
+        <text x="372" y="88" font-size="11" text-anchor="middle" class="f-ink">북</text>
+        <ellipse cx="435" cy="96" rx="12" ry="8" class="sc-echo" transform="rotate(-60 435 96)"/>
+        <circle cx="532" cy="120" r="4" class="sc-echo"/>
+        <text x="420" y="124" font-size="10" class="sc-text">섬</text>
+        <text x="540" y="112" font-size="10" class="sc-text">선박</text>
+        <circle cx="480" cy="150" r="3" class="sc-linef"/>
+      </g>
+      <text x="160" y="290" font-size="13" text-anchor="middle" class="f-ink" font-weight="600">노스 업 (North-up)</text>
+      <text x="160" y="310" font-size="12" text-anchor="middle" class="f-muted">위쪽 = 진북 · 진방위 · 안정화</text>
+      <text x="480" y="290" font-size="13" text-anchor="middle" class="f-ink" font-weight="600">헤딩 업 (Head-up)</text>
+      <text x="480" y="310" font-size="12" text-anchor="middle" class="f-muted">위쪽 = 선수 · 상대방위 · 비안정화</text>
+    </svg>
+    </div>
+    <figcaption><b>같은 상황, 다른 화면.</b> 자선이 060°로 항해 중이고 섬은 진방위 020°, 선박은 120°에 있다. 노스 업에서는 해도와 같은 방향으로 보이고 선수선이 060°를 가리킨다. 헤딩 업에서는 선수가 항상 위쪽이므로 섬은 상대방위 320°, 선박은 060°에 보인다. 자선이 변침하면 헤딩 업 화면은 통째로 회전한다.</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <tr><th>모드</th><th>화면 위쪽</th><th>나타내는 방위</th><th>특징</th></tr>
+    <tr><td>헤딩 업 (Head-up)</td><td>자선의 선수 방향</td><td>상대 방위</td><td>비안정화 표시. 변침하면 화면 방향이 바뀐다. 창밖 경치와 방향이 같아 직관적이다.</td></tr>
+    <tr><td>노스 업 (North-up)</td><td>자이로 북</td><td>진방위</td><td>안정화 표시. 변침해도 화면 방향이 그대로다. 해도와 대조하기 쉽다.</td></tr>
+  </table></div>
+  <p><a href="#ppi-sim">PPI 시뮬레이터</a>에서 두 모드를 직접 바꿔 보며 변침할 때 화면이 어떻게 달라지는지 확인할 수 있다.</p>
+  <div class="related">관련 문서: <a href="#principle">레이더의 원리</a><a href="#ppi-sim">PPI 시뮬레이터</a><a href="#parallel-indexing">평행 지표법</a></div>
+</article>
+
+<!-- ============ 빔 ============ -->
+<article data-slug="beam" data-title="레이더 빔" data-cat="원리와 구성" data-kw="빔폭 반전력점 사이드 로브 side lobe 수직 로브 직접파 간접파" hidden>
+  <div class="crumb">원리와 구성</div>
+  <h1>레이더 빔</h1>
+  <div class="en">The Radar Beam</div>
+  <p>자유 공간에서 방사된 레이더 펄스 에너지는 하나의 엽(lobe) 모양 방사 패턴을 이룬다. 실제 안테나는 이 주엽 외에 원치 않는 작은 엽, 즉 <b>사이드 로브(부엽)</b>도 만든다. 에너지는 빔 축을 따라 가장 많이 모이지만 경계가 뚜렷하지는 않다. 이 방사 패턴과 감쇠·회절·반사 효과는 마그네트론과 솔리드 스테이트 레이더에 똑같이 적용된다.</p>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 240" width="640" height="240" role="img" aria-label="레이더 빔 방사 패턴">
+      <path d="M60 120 C200 62, 500 78, 560 120 C500 162, 200 178, 60 120 Z" class="f-soft s-acc" stroke-width="1.5"/>
+      <path d="M60 120 C92 82, 132 70, 146 86 C130 102, 92 114, 60 120 Z" class="f-esoft s-echo" stroke-width="1.2"/>
+      <path d="M60 120 C92 158, 132 170, 146 154 C130 138, 92 126, 60 120 Z" class="f-esoft s-echo" stroke-width="1.2"/>
+      <line x1="60" y1="120" x2="610" y2="120" class="s-muted" stroke-dasharray="4 4"/>
+      <text x="612" y="112" font-size="11" text-anchor="end" class="f-muted">빔 축</text>
+      <line x1="60" y1="120" x2="470" y2="91" class="s-ink" stroke-width="1"/>
+      <line x1="60" y1="120" x2="470" y2="149" class="s-ink" stroke-width="1"/>
+      <circle cx="470" cy="91" r="3.5" class="f-ink"/><circle cx="470" cy="149" r="3.5" class="f-ink"/>
+      <text x="476" y="84" font-size="11" class="f-ink">반전력점</text>
+      <text x="476" y="164" font-size="11" class="f-ink">반전력점</text>
+      <path d="M260 106 A 200 200 0 0 1 260 134" class="f-none s-ink" stroke-width="1.2"/>
+      <text x="268" y="116" font-size="12" class="f-ink" font-weight="600">빔폭 θ</text>
+      <text x="340" y="60" font-size="12" class="f-acc">주엽 (main lobe)</text>
+      <text x="110" y="58" font-size="12" class="f-echo">사이드 로브</text>
+      <rect x="44" y="104" width="16" height="32" class="f-ink"/>
+      <text x="52" y="156" font-size="11" text-anchor="middle" class="f-muted">안테나</text>
+      <text x="320" y="222" font-size="12" text-anchor="middle" class="f-muted">빔폭 = 최대 전력의 절반이 되는 두 방향 사이의 각</text>
+    </svg>
+    </div>
+    <figcaption><b>방사 패턴과 빔폭 (수평면).</b> 에너지는 빔 축 방향에서 가장 크고 바깥으로 갈수록 급격히 줄어든다.</figcaption>
+  </figure>
+
+  <h2>빔폭</h2>
+  <p>최대 전력은 빔 축 방향에 있고, 축에서 벗어날수록 급격히 줄어든다. <b>빔폭</b>은 양쪽 <b>반전력점</b>(half-power point) 사이의 각도로 정의한다. 빔폭은 파장, 안테나 설계, 안테나 크기에 따라 달라진다.</p>
+  <div class="formula">\[ \theta \;\propto\; \frac{\lambda}{L} \]
+    <small>\(\theta\): 빔폭, \(\lambda\): 파장, \(L\): 안테나 개구(길이). 파장이 짧을수록, 안테나가 길수록 빔이 좁아진다.</small></div>
+  <p>선박용 안테나는 수평으로 길고 수직으로 좁아서, <b>수평 빔은 좁고 수직 빔은 넓다</b>. 좁은 수평 빔은 방위 정확도에 유리하다. 넓은 수직 빔은 선박이 피칭·롤링할 때도 빔이 수평선을 놓치지 않게 해 준다. 수직 빔이 수평 빔만큼 좁다면 황천 시 물표 응답이 끊겼다 이어졌다 할 것이다.</p>
+
+  <h2>수직 로브</h2>
+  <p>실제 해상에서 주엽은 수직 방향으로 여러 개의 엽으로 갈라진다. 물표로 곧장 가는 <b>직접파</b>와 해면에 반사된 뒤 물표에 닿는 <b>간접파</b>가 서로 간섭하기 때문이다. 두 경로의 길이 차이에 따라 위상이 맞으면 보강, 어긋나면 상쇄 간섭이 일어난다. 그래서 자선으로부터 특정 거리에 있는 물표는 응답이 약하게 나올 수 있다.</p>
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 210" width="640" height="210" role="img" aria-label="직접파와 간접파">
+      <rect x="0" y="170" width="640" height="40" class="f-soft"/>
+      <line x1="0" y1="170" x2="640" y2="170" class="s-acc" stroke-width="1.2"/>
+      <text x="620" y="196" font-size="11" text-anchor="end" class="f-acc">해면</text>
+      <path d="M40 170 L80 170 L74 182 L46 182 Z" class="f-ink"/>
+      <line x1="60" y1="170" x2="60" y2="90" class="s-ink" stroke-width="2"/>
+      <rect x="52" y="86" width="16" height="6" class="f-ink"/>
+      <text x="48" y="78" font-size="11" class="f-ink">안테나</text>
+      <line x1="580" y1="170" x2="580" y2="110" class="s-ink" stroke-width="3"/>
+      <text x="588" y="112" font-size="11" class="f-ink">물표</text>
+      <line x1="60" y1="90" x2="580" y2="110" class="s-echo" stroke-width="1.8"/>
+      <text x="300" y="88" font-size="12" class="f-echo">직접파</text>
+      <path d="M60 90 L357 170 L580 110" class="f-none s-acc" stroke-width="1.8" stroke-dasharray="6 4"/>
+      <text x="250" y="156" font-size="12" class="f-acc">간접파 (해면 반사)</text>
+      <circle cx="357" cy="170" r="3.5" class="f-acc"/>
+      <text x="320" y="40" font-size="12" text-anchor="middle" class="f-ink">두 경로의 길이 차이 → 위상이 맞으면 보강, 어긋나면 상쇄</text>
+    </svg>
+    </div>
+    <figcaption><b>직접파와 간접파의 간섭.</b> 경로 차이가 거리에 따라 바뀌므로, 어떤 거리에서는 에코가 강해지고 어떤 거리에서는 약해진다.</figcaption>
+  </figure>
+  <div class="related">관련 문서: <a href="#antenna">안테나</a><a href="#resolution">분해능</a><a href="#false-echoes">사이드 로브 효과</a></div>
+</article>
+
+<!-- ============ 전파 ============ -->
+<article data-slug="propagation" data-title="감쇠·회절·굴절" data-cat="전파와 판독" data-kw="레이더 수평선 radar horizon 반사 단면적 RCS attenuation diffraction refraction 계산기" hidden>
+  <div class="crumb">전파와 판독</div>
+  <h1>감쇠·회절·굴절</h1>
+  <div class="en">Distance, Attenuation, Diffraction, Refraction</div>
+
+  <h2>거리와 물표 응답</h2>
+  <p>거울에 비친 빛이 직접 보는 빛보다 어둡듯이, 레이더 에코는 송신 펄스보다 훨씬 약하다. 신호 에너지가 거리에 따라 퍼지기 때문이다. 에코 강도는 물표에 닿은 에너지의 양, 그리고 물표의 크기와 반사 특성에 따라 달라진다. 이 반사 특성을 <b>레이더 반사 단면적(RCS)</b>이라 한다.</p>
+
+  <h2>감쇠</h2>
+  <p><b>감쇠</b>는 빔 에너지가 대기를 지나며 산란·흡수되어 에코가 약해지는 현상이다. 감쇠는 10cm 레이더보다 3cm 레이더에서 크다. 짙은 안개, 비, 눈 같은 대기 중 수분은 3cm 레이더의 성능을 크게 떨어뜨린다.</p>
+  <div class="key">강한 강수 중에는 10cm(S밴드) 레이더가 있으면 그쪽으로 전환한다.</div>
+
+  <h2>회절</h2>
+  <p><b>회절</b>은 파가 장애물을 지나며 휘어지는 현상이다. 회절 덕분에 장애물 뒤쪽 영역도 어느 정도 빔이 닿는다. 파장이 긴(저주파) S밴드에서 회절 효과가 크므로, 10cm 레이더는 3cm X밴드 레이더보다 장애물 뒤 음영 영역을 더 많이 비춘다.</p>
+
+  <h2>굴절과 레이더 수평선</h2>
+  <p>전파가 직진한다면 레이더 수평선까지의 거리는 송신 출력과 안테나 높이만으로 정해지고 기하학적 수평선과 같을 것이다. 실제로는 대기의 밀도 경사가 레이더 전파를 휘게 하는데, 이를 <b>굴절</b>이라 한다.</p>
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 220" width="640" height="220" role="img" aria-label="레이더 수평선 모식도">
+      <path d="M0 152 Q320 70 640 152 L640 220 L0 220 Z" class="f-soft"/>
+      <path d="M0 152 Q320 70 640 152" class="f-none s-acc" stroke-width="1.5"/>
+      <line x1="60" y1="138" x2="60" y2="60" class="s-ink" stroke-width="2.5"/>
+      <rect x="52" y="54" width="16" height="6" class="f-ink"/>
+      <path d="M44 138 L76 138" class="s-ink" stroke-width="2"/>
+      <path d="M40 60 L40 138" class="s-muted" stroke-width="1"/><path d="M35 60 L45 60 M35 138 L45 138" class="s-muted"/>
+      <text x="32" y="104" font-size="12" text-anchor="end" class="f-muted">h</text>
+      <path d="M60 58 L560 128" class="f-none s-muted" stroke-width="1" stroke-dasharray="4 4"/>
+      <path d="M60 58 Q330 74 600 126" class="f-none s-echo" stroke-width="2"/>
+      <circle cx="356" cy="99" r="4" class="f-echo"/>
+      <text x="356" y="120" font-size="12" text-anchor="middle" class="f-echo">레이더 수평선</text>
+      <text x="200" y="52" font-size="11" class="f-echo">굴절로 아래로 휜 레이더 전파</text>
+      <text x="420" y="160" font-size="11" class="f-muted">직선 경로 (기하학적)</text>
+      <rect x="560" y="80" width="14" height="44" class="f-ink"/>
+      <rect x="560" y="124" width="14" height="22" class="f-muted" opacity=".45"/>
+      <text x="636" y="70" font-size="11" text-anchor="end" class="f-ink">물표 윗부분: 탐지</text>
+      <text x="636" y="188" font-size="11" text-anchor="end" class="f-muted">아랫부분: 가려짐</text>
+    </svg>
+    </div>
+    <figcaption><b>레이더 수평선.</b> 전파가 지표에 접하는 지점까지가 레이더 수평선이다. 그 너머의 물표라도 수평선 위로 솟은 부분은 탐지된다. 지구 곡률과 높이는 과장해서 그렸다.</figcaption>
+  </figure>
+  <p><b>레이더 수평선</b>은 레이더 전파가 지구 표면에 접하는 지점까지의 거리다. 이론적인 레이더 수평선 거리는 다음과 같다.</p>
+  <div class="formula">\[ D = 1.22\sqrt{h} \]
+    <small>\(D\): 레이더 수평선까지 거리(해리), \(h\): 안테나 높이(피트). 미터 단위로는 \(D \approx 2.21\sqrt{h_{\mathrm{m}}}\).</small></div>
+  <div class="tbl"><table>
+    <tr><th>안테나 높이 h</th><th>레이더 수평선 D</th></tr>
+    <tr><td class="num">25 ft (약 7.6 m)</td><td class="num">6.1 NM</td></tr>
+    <tr><td class="num">49 ft (약 14.9 m)</td><td class="num">8.5 NM</td></tr>
+    <tr><td class="num">100 ft (약 30.5 m)</td><td class="num">12.2 NM</td></tr>
+    <tr><td class="num">144 ft (약 43.9 m)</td><td class="num">14.6 NM</td></tr>
+  </table></div>
+  <p>레이더 수평선이 탐지 한계는 아니다. 송신 출력이 충분하면, 반사면이 수평선 위로 솟아 있는 물표는 수평선 너머에서도 에코가 잡힌다. 물표 높이 \(H\)까지 고려한 이론적 최대 탐지 거리는 양쪽 수평선 거리의 합으로 어림한다.</p>
+  <div class="formula">\[ D_{\max} \approx 1.22\left(\sqrt{h} + \sqrt{H}\right) \]
+    <small>실제 탐지 거리는 송신 출력, 물표의 반사 특성, 기상에 따라 이보다 짧을 수 있다.</small></div>
+
+  <div class="sim" id="lab-horizon">
+    <div class="sim-head"><b>레이더 수평선 계산기</b><span class="sim-badge">실험</span></div>
+    <div class="lab-row">
+      <div class="ctrl"><label for="hzA">안테나 높이 (m) <output id="hzAo">20</output></label><input id="hzA" type="range" min="2" max="60" step="1" value="20"></div>
+      <div class="ctrl"><label for="hzT">물표 높이 (m) <output id="hzTo">15</output></label><input id="hzT" type="range" min="0" max="300" step="1" value="15"></div>
+    </div>
+    <div class="lab-out">
+      <div class="stat"><span>자선 레이더 수평선</span><b id="hzD1">–</b></div>
+      <div class="stat"><span>물표 쪽 수평선</span><b id="hzD2">–</b></div>
+      <div class="stat"><span>이론적 최대 탐지 거리</span><b id="hzD3">–</b></div>
+    </div>
+    <p class="try" style="margin-top:10px">예: 낮은 모래 해변(높이 2m)과 해발 200m 산을 비교해 보자. 산은 수평선 훨씬 너머에서도 잡히지만, 해안선은 가까이 가야 보인다. 그래서 레이더 화면에서 해안선이 실제보다 내륙에 나타날 수 있다.</p>
+  </div>
+  <div class="related">관련 문서: <a href="#bands">X밴드와 S밴드</a><a href="#interpretation">영상 판독</a></div>
+</article>
+
+<!-- ============ 밴드 ============ -->
+<article data-slug="bands" data-title="X밴드와 S밴드" data-cat="전파와 판독" data-kw="3cm 10cm 주파수 frequency" hidden>
+  <div class="crumb">전파와 판독</div>
+  <h1>X밴드와 S밴드</h1>
+  <div class="en">3-cm and 10-cm radar</div>
+  <p>선박용 레이더는 주로 두 주파수 대역을 쓴다. 대역별 특성을 한 표로 모았다.</p>
+  <div class="tbl"><table>
+    <tr><th>특성</th><th>X밴드 (3cm, 약 10,000MHz)</th><th>S밴드 (10cm, 약 3,000MHz)</th></tr>
+    <tr><td>작은 물표 탐지</td><td>우수. 잔잔한 바다에서 새 한 마리나 음료 캔까지 잡는다.</td><td>소형 보트나 잠망경을 놓칠 수 있다.</td></tr>
+    <tr><td>강수·안개 감쇠</td><td>크다</td><td>작다. 강한 강수 시 권장</td></tr>
+    <tr><td>회절 (음영 뒤 조사)</td><td>작다</td><td>크다</td></tr>
+    <tr><td>빔폭 (같은 안테나 크기)</td><td>좁다</td><td>넓다</td></tr>
+    <tr><td>솔리드 스테이트 기종</td><td>원문 기준 없음</td><td>있음</td></tr>
+    <tr><td>레이콘 응답</td><td>대부분의 레이콘이 이 대역</td><td>일부</td></tr>
+  </table></div>
+  <p><a href="#ppi-sim">PPI 시뮬레이터</a>에서 대역을 바꿔 비 구름, 작은 물표, 레이콘이 어떻게 달라 보이는지 비교할 수 있다.</p>
+  <div class="related">관련 문서: <a href="#propagation">감쇠·회절·굴절</a><a href="#aids">레이더 항로표지</a></div>
+</article>
+
+<!-- ============ 분해능 ============ -->
+<article data-slug="resolution" data-title="분해능" data-cat="전파와 판독" data-kw="거리 분해능 방위 분해능 range bearing resolution 펄스 길이 실험" hidden>
+  <div class="crumb">전파와 판독</div>
+  <h1>분해능</h1>
+  <div class="en">Resolution in Range and Bearing</div>
+
+  <h2>거리 분해능</h2>
+  <p>같은 방위선 위에 가까이 붙어 있는 두 물표를 따로 구분해 내는 능력이다. 주로 <b>펄스 길이</b>에 따라 정해진다.</p>
+  <p>펄스가 첫 번째 물표를 지나 두 번째 물표에 닿는 동안, 첫 번째 물표의 에코는 반대 방향으로 같은 거리를 이동한다. 그래서 두 에코의 앞쪽 가장자리 간격은 물표 간격의 두 배가 된다. 디스플레이는 왕복 거리의 절반으로 보정되어 있으므로 물표 간격은 올바르게 표시된다. 그러나 물표가 더 가깝거나 펄스가 더 길면 두 에코가 겹쳐 하나의 큰 물표로 보인다. 펄스를 짧게 하면 다시 분리된다.</p>
+  <div class="formula">\[ \Delta R_{\min} = \frac{c\,\tau}{2} \approx 150\ \mathrm{m} \times \tau\,[\mu\mathrm{s}] \]
+    <small>\(\tau\): 펄스 폭. 이 값은 화면상 물표의 겉보기 두께일 뿐 실제 크기가 아니다.</small></div>
+
+  <div class="sim" id="lab-resolution">
+    <div class="sim-head"><b>거리 분해능 실험</b><span class="sim-badge">실험</span></div>
+    <div class="lab-row">
+      <div class="ctrl"><label for="rsTau">펄스 폭 τ <output id="rsTauo">0.50 µs</output></label><input id="rsTau" type="range" min="0.05" max="1.0" step="0.05" value="0.5"></div>
+      <div class="ctrl"><label for="rsSep">두 물표 간격 <output id="rsSepo">60 m</output></label><input id="rsSep" type="range" min="10" max="250" step="5" value="60"></div>
+    </div>
+    <div class="fig-scroll" style="margin-top:10px"><svg id="rsSvg" viewBox="0 0 600 170" width="600" height="170" role="img" aria-label="거리 분해능 실험 결과" style="display:block;max-width:100%;height:auto"></svg></div>
+    <div class="verdict" id="rsVerdict"></div>
+  </div>
+
+  <p>그래서 같은 방위에 붙어 있는 여러 척의 선박이 섬처럼 보일 수 있다. 해안 가까이 있는 소형 보트, 말뚝, 쇄파, 대형선의 에코가 해안 에코와 합쳐지면 해안선의 위치와 모양이 잘못 표시된다.</p>
+
+  <h2>방위 분해능</h2>
+  <p>같은 거리에서 나란히 있는 물표를 구분해 내는 능력이다. 수평 빔폭과 물표까지의 거리, 두 변수에 따라 정해진다. 수평 빔이 좁을수록, 거리가 가까울수록 방위 분해능이 좋다. 구분하지 못하면 여러 에코가 하나의 넓은 에코로 합쳐진다.</p>
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 220" width="640" height="220" role="img" aria-label="방위 분해능">
+      <path d="M40 190 L600 50 L600 150 Z" class="f-soft"/>
+      <circle cx="40" cy="190" r="5" class="f-ink"/>
+      <text x="40" y="212" font-size="11" text-anchor="middle" class="f-muted">자선</text>
+      <path d="M40 190 L600 100" class="s-muted" stroke-dasharray="4 4"/>
+      <circle cx="226" cy="148" r="5" class="f-ink"/><circle cx="234" cy="170" r="5" class="f-ink"/>
+      <text x="230" y="134" font-size="11" text-anchor="middle" class="f-ink">가까운 거리</text>
+      <text x="246" y="186" font-size="11" class="f-acc">빔 밖으로 벗어난 물표가 있어 따로 보인다 → 분리</text>
+      <circle cx="530" cy="92" r="5" class="f-ink"/><circle cx="538" cy="114" r="5" class="f-ink"/>
+      <text x="534" y="44" font-size="11" text-anchor="middle" class="f-ink">먼 거리</text>
+      <text x="380" y="80" font-size="11" class="f-echo">둘 다 빔 안 → 하나로 합쳐짐</text>
+    </svg>
+    </div>
+    <figcaption><b>방위 분해능.</b> 빔은 거리가 멀수록 넓게 퍼진다. 같은 간격의 두 물표도 가까이에서는 분리되고 멀리서는 하나로 보인다.</figcaption>
+  </figure>
+  <div class="related">관련 문서: <a href="#beam">레이더 빔</a><a href="#distortion">해안선 왜곡과 음영</a></div>
+</article>
+
+<!-- ============ 판독 ============ -->
+<article data-slug="interpretation" data-title="영상 판독" data-cat="전파와 판독" data-kw="클러터 clutter 해면 반사 이득 gain 해안 지형 모래톱 맹그로브 산호초 환초" hidden>
+  <div class="crumb">전파와 판독</div>
+  <h1>영상 판독</h1>
+  <div class="en">Factors Affecting Radar Interpretation</div>
+  <p>레이더가 항법 장비로서 갖는 가치는 항해사가 그 특성과 한계를 얼마나 이해하느냐에 달려 있다. 반사체 하나의 거리를 재든, 심한 클러터 속에서 해안선을 찾든, 자기가 쓰는 레이더의 특성을 알아야 한다.</p>
+
+  <h2>판독에 영향을 주는 요인</h2>
+  <ul>
+    <li><b><a href="#resolution">거리·방위 분해능</a></b>: 가까운 물표들이 하나로 합쳐 보일 수 있다.</li>
+    <li><b>안테나와 물표의 높이</b>: 레이더 수평선이 자선과 물표 사이에 있으면 물표 아랫부분이 보이지 않는다. 대형선이 소형선처럼 보이거나, 해안선이 실제보다 내륙 쪽에 나타날 수 있다.</li>
+    <li><b>반사 특성과 물표의 자세</b>: 금속은 목재보다 강하게 반사한다. 빔에 수직인 면이 비스듬한 면보다 강한 에코를 낸다. 선박은 정면이나 정후방을 향할 때보다 옆면을 보일 때 에코가 강하다. 레이더 에너지를 대부분 흡수하는 표면도 있다.</li>
+    <li><b>주파수</b>: <a href="#bands">X밴드와 S밴드</a> 참고.</li>
+  </ul>
+
+  <h2>클러터</h2>
+  <p>대기 잡음, 해면 반사, 강수는 <b>클러터</b>를 만들어 판독을 어렵게 한다. 클러터는 보통 자선 가까이에서 가장 강하다.</p>
+  <ul>
+    <li>수신기 <b>이득(gain)</b>을 낮춰 약한 신호를 지우면 강한 물표 에코를 가려낼 수 있다.</li>
+    <li>안테나가 여러 번 회전하는 동안 화면을 지켜보면, 신호 세기가 같더라도 구분할 수 있다. 실제 물표의 에코는 비교적 제자리에 머물고, 클러터는 스윕마다 무작위로 움직인다.</li>
+  </ul>
+  <p><a href="#ppi-sim">PPI 시뮬레이터</a>에서 이득, 해면 클러터 억제, 비 클러터 억제를 직접 조절해 볼 수 있다.</p>
+
+  <h2>육지 물표의 판독</h2>
+  <p>육지는 넓은 면적이 꾸준히 밝게 표시되므로 쉽게 알아본다. 어려운 것은 <b>특정 지형을 식별</b>하는 일이다. 음영, 빔폭과 펄스 길이에 의한 왜곡, 해도의 어느 지형이 실제로 에코를 내는지 모른다는 점 때문이다. 맑은 날 레이더 영상과 육안 경치를 비교해 보는 경험이 매우 소중하다.</p>
+  <div class="tbl"><table>
+    <tr><th>지형</th><th>레이더상 모습</th><th>주의점</th></tr>
+    <tr><td>모래톱, 매끈한 해변</td><td>1–2해리 밖에서는 거의 안 보인다</td><td>매끈한 수평면이 전파를 모두 다른 방향으로 반사한다. 모래톱의 쇄파가 보일 수 있으나 해안선보다 훨씬 바깥에서 부서질 수 있어 거리 측정에 쓰면 오차가 난다.</td></tr>
+    <tr><td>갯벌, 습지</td><td>모래톱보다 약간 나은 약한 에코</td><td>저조 때 보이던 약한 에코가 고조 때 사라진다.</td></tr>
+    <tr><td>맹그로브, 밀생 식물</td><td>강한 에코 가능</td><td>해도상 습지는 식생 밀도·종류·크기에 따라 강하게도 약하게도 나온다.</td></tr>
+    <tr><td>식생 덮인 사구</td><td>사구 선이 해안선처럼 보인다</td><td>실제보다 해변에서 멀리 있다고 착각하기 쉽다. 위험하다.</td></tr>
+    <tr><td>석호, 내륙 호수</td><td>빈 영역</td><td>둘러싼 사주나 초도 수면에 너무 가까우면 안 보일 수 있다.</td></tr>
+    <tr><td>산호 환초, 열도</td><td>빔이 열도에 수직이면 긴 선 하나로 보인다</td><td>빔폭에 의한 퍼짐이 방위 분해능을 넘기 때문이다. 길이 방향이나 비스듬히 보면 각 섬이 따로 보일 수 있다.</td></tr>
+    <tr><td>환초의 쇄파</td><td>들쭉날쭉하고 변하는 에코 선</td><td>수면 위 작은 바위도 모양과 거리에 따라 잡힌다.</td></tr>
+    <tr><td>완만하게 높아지는 땅</td><td>뿌연 에코 덩어리</td><td>특정 지점까지의 거리를 재기 어렵다.</td></tr>
+    <tr><td>구릉지</td><td>얼룩덜룩한 에코</td><td>능선마다 에코가 나고 뒤쪽은 음영이 된다. 이득을 높이면 깊은 골짜기 외에는 꽉 차 보인다.</td></tr>
+    <tr><td>낮은 섬</td><td>작은 에코</td><td>야자수 등 숲이 우거지면 수면과 나무가 코너 리플렉터처럼 작용해 강한 에코를 낸다. 숲이 있는 섬은 민둥섬보다 훨씬 멀리서 잡힌다.</td></tr>
+  </table></div>
+  <div class="related">관련 문서: <a href="#distortion">해안선 왜곡과 음영</a><a href="#false-echoes">허상</a></div>
+</article>
+
+<!-- ============ 왜곡 ============ -->
+<article data-slug="distortion" data-title="해안선 왜곡과 음영" data-cat="전파와 판독" data-kw="레이더 음영 shadow 빔폭 왜곡 펄스 길이 왜곡 초승달" hidden>
+  <div class="crumb">전파와 판독</div>
+  <h1>해안선 왜곡과 음영</h1>
+  <div class="en">Shadowing and Distortion</div>
+  <p>레이더 화면의 해안선은 해도의 해안선과 다르게 보이는 일이 많다. 주된 원인은 세 가지다.</p>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 280" width="640" height="280" role="img" aria-label="레이더 음영과 빔폭 왜곡">
+      <path d="M180 20 L620 20 L620 130 C560 120, 520 150, 470 140 C420 130, 400 160, 340 150 C300 145, 260 160, 230 120 C210 90, 190 60, 180 20 Z" class="f-esoft s-echo" stroke-width="1.2"/>
+      <path d="M330 60 L362 20 L404 20 L360 80 Z" class="f-muted" opacity=".3"/>
+      <path d="M300 80 L330 40 L360 80 Z" class="f-ink" opacity=".75"/>
+      <path d="M470 70 L505 30 L540 70 Z" class="f-ink" opacity=".75"/>
+      <text x="330" y="96" font-size="11" text-anchor="middle" class="f-ink">산</text>
+      <text x="505" y="86" font-size="11" text-anchor="middle" class="f-ink">산</text>
+      <text x="412" y="34" font-size="11" class="f-muted">레이더 음영</text>
+      <circle cx="376" cy="44" r="7" class="f-surf s-muted" stroke-dasharray="2 2"/>
+      <text x="412" y="52" font-size="10" class="f-muted">작은 섬 (안 보임)</text>
+      <circle cx="250" cy="250" r="6" class="f-ink"/>
+      <text x="262" y="262" font-size="11" class="f-ink">자선</text>
+      <path d="M250 250 L330 60" class="s-muted" stroke-width="1" stroke-dasharray="3 3"/>
+      <path d="M160 132 C200 150, 240 166, 280 168 C330 170, 400 166, 470 152 C520 142, 560 138, 620 142" class="f-none s-acc" stroke-width="3"/>
+      <text x="40" y="190" font-size="12" class="f-acc">레이더상 해안선</text>
+      <text x="40" y="206" font-size="11" class="f-muted">(빔폭만큼 퍼져 매끈해짐)</text>
+      <text x="40" y="120" font-size="12" class="f-echo">실제 해안선</text>
+    </svg>
+    </div>
+    <figcaption><b>음영과 빔폭 왜곡 (개념도).</b> 산 뒤쪽은 빔이 닿지 않아 그 안의 작은 섬이 보이지 않는다. 해안선은 빔폭만큼 방위 방향으로 퍼져, 실제(주황)보다 자선 쪽으로 튀어나온 매끈한 선(파랑)으로 보인다.</figcaption>
+  </figure>
+
+  <h2>레이더 음영</h2>
+  <p>해안의 일부 지형은 다른 지형이나 장애물에 가려 에코를 내지 못한다. 한 위치에서 연속으로 보이던 해안선이 근처 다른 위치에서는 끊겨 보이고, 만이나 작은 후미가 보였다 안 보였다 한다. <b>레이더 음영으로 인한 왜곡은 다른 어떤 원인보다 큰 혼란을 일으킨다.</b></p>
+
+  <h2>빔폭 왜곡 (방위 방향)</h2>
+  <p>PPI의 물표 영상은 유효 수평 빔폭만큼 방위 방향으로 늘어난다. 그래서 곧은 해안선이 초승달 모양으로 보이기 쉽다. 빔폭이 넓을수록, 빔 축과 해안선 사이 각이 작을수록 이 왜곡이 커진다.</p>
+
+  <h2>펄스 길이 왜곡 (거리 방향)</h2>
+  <p>물표 영상은 거리 방향으로도 최소 펄스 길이의 절반만큼 늘어난다. 펄스 폭 1µs당 약 150m다.</p>
+
+  <h2>사례</h2>
+  <p>낮은 모래 해변에 철탑이 서 있고, 해안 가까이 선박 두 척이 정박해 있는 경우 레이더 화면에는 다음과 같이 나타난다.</p>
+  <ol>
+    <li>낮은 모래 해변은 탐지되지 않는다.</li>
+    <li>철탑은 탐지되지만 후미 안에 있는 배처럼 보인다. 더 가까이 가면 육지가 잡히면서 후미 모양이 메워지고, 이득을 낮추지 않으면 철탑이 보이지 않게 된다.</li>
+    <li>두 산 뒤쪽은 레이더 음영이 된다. 작은 섬이 음영 안에 있어 나타나지 않는다.</li>
+    <li>빔폭 왜곡으로 육지가 방위 방향으로 퍼진다. 빔과 해안 사이 각이 작은 쪽일수록 더 심하다.</li>
+    <li>1번 선박은 빔폭 왜곡 때문에 육지와 합쳐져 작은 반도처럼 보인다.</li>
+    <li>2번 선박도 해안선과 합쳐져 혹처럼 튀어나와 보인다. 해안에 너무 붙어 있지 않다면 이득을 낮추거나 비 클러터 억제 기능으로 수신기 내 유효 펄스 길이를 줄여 분리해 볼 수 있다.</li>
+  </ol>
+  <div class="related">관련 문서: <a href="#resolution">분해능</a><a href="#interpretation">영상 판독</a></div>
+</article>
+
+<!-- ============ 허상 ============ -->
+<article data-slug="false-echoes" data-title="허상 (불필요한 에코)" data-cat="전파와 판독" data-kw="간접 에코 indirect echo 다중 에코 multiple echo 2차 소인 second-trace 사이드 로브 간섭 interference 맹목 구역 blind sector 음영 구역 송전선 메시나 실험" hidden>
+  <div class="crumb">전파와 판독</div>
+  <h1>허상 (불필요한 에코)</h1>
+  <div class="en">Recognition of Unwanted Echoes</div>
+  <p>실제 물표가 아닌데 화면에 나타나는 에코, 또는 실제와 다른 위치에 나타나는 에코의 종류와 식별법을 정리한다.</p>
+
+  <h2>간접 에코 (허위 에코)</h2>
+  <p>주엽이 자선의 마스트, 연돌, 킹포스트, 갑판 화물(특히 컨테이너)에 반사되어 생긴다. 실제 물표의 에코가 같은 간접 경로로 안테나에 돌아오므로, 화면에는 <b>반사면의 방위</b>에, <b>실제 에코와 같은 거리</b>에 나타난다.</p>
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 300" width="640" height="300" role="img" aria-label="간접 에코 발생 원리">
+      <circle cx="150" cy="140" r="150" class="f-none s-line" stroke-dasharray="4 4"/>
+      <path d="M150 90 C176 110, 180 170, 170 230 L130 230 C120 170, 124 110, 150 90 Z" class="f-surf s-ink" stroke-width="1.4"/>
+      <circle cx="150" cy="140" r="5" class="f-acc"/>
+      <text x="140" y="132" font-size="11" text-anchor="end" class="f-acc">안테나</text>
+      <rect x="160" y="172" width="12" height="12" class="f-ink"/>
+      <text x="110" y="182" font-size="11" text-anchor="end" class="f-ink">마스트</text>
+      <line x1="150" y1="140" x2="292" y2="94" class="s-echo" stroke-width="1.6"/>
+      <circle cx="292" cy="94" r="7" class="f-echo"/>
+      <text x="302" y="86" font-size="12" class="f-echo" font-weight="600">실제 물표</text>
+      <path d="M150 140 L166 178 L292 94" class="f-none s-acc" stroke-width="1.4" stroke-dasharray="5 3"/>
+      <line x1="166" y1="178" x2="208" y2="278" class="s-muted" stroke-width="1" stroke-dasharray="2 3"/>
+      <circle cx="208" cy="278" r="7" class="f-none s-danger" stroke-width="2"/>
+      <text x="222" y="284" font-size="12" class="f-ink" font-weight="600">허상</text>
+      <text x="340" y="160" font-size="12" class="f-ink">• 주황 실선: 직접 경로 → 정상 에코</text>
+      <text x="340" y="182" font-size="12" class="f-ink">• 파랑 점선: 마스트에 반사된 간접 경로</text>
+      <text x="340" y="204" font-size="12" class="f-ink">• 허상은 마스트 방향에,</text>
+      <text x="352" y="222" font-size="12" class="f-ink">실제 물표와 같은 거리(점선 원)에 나타난다</text>
+    </svg>
+    </div>
+    <figcaption><b>간접 에코.</b> 안테나가 마스트 쪽을 향할 때 빔이 마스트에 반사되어 실제 물표를 비추고, 에코도 같은 경로로 돌아온다. 레이더는 이를 안테나가 향한 방향(마스트 방향)의 물표로 표시한다.</figcaption>
+  </figure>
+  <h3>식별 요령</h3>
+  <ol>
+    <li>음영 구역 안에 자주 나타난다.</li>
+    <li>실제 물표의 진방위가 크게 변해도 상대 방위(장애물 방향)는 거의 일정하다.</li>
+    <li>대응하는 직접 에코와 같은 거리에 나타난다.</li>
+    <li>작도해 보면 움직임이 비정상적이다.</li>
+    <li>모양이 일그러지거나 흐릿하다.</li>
+  </ol>
+
+  <h2>사이드 로브 효과</h2>
+  <p>주엽 에코 양옆으로 같은 거리에 일련의 에코가 나타난다. 반원이나 완전한 원이 그려지기도 한다. 사이드 로브는 에너지가 낮아 주로 근거리에서만 생긴다. 이득과 클러터 억제로 줄일 수 있지만, 부이나 소형선 같은 약한 물표를 놓칠 위험이 따른다. 슬롯 도파관 안테나가 보급되면서 크게 줄었지만, 근거리에 강한 반사체가 있으면 여전히 나타난다.</p>
+
+  <h2>다중 에코</h2>
+  <p>근거리 선박에서 강한 에코가 돌아올 때 생긴다. 실제 거리의 2배, 3배 등 배수 거리에 두 번째, 세 번째 에코가 나타난다.</p>
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 240" width="640" height="240" role="img" aria-label="사이드 로브 효과와 다중 에코 화면">
+      <circle cx="160" cy="112" r="105" class="sc-bg sc-ring"/>
+      <circle cx="160" cy="112" r="3" class="sc-linef"/>
+      <path d="M116 61 A 66 66 0 0 1 214 74" class="f-none sc-echo-s" stroke-width="2.5" stroke-dasharray="3 5"/>
+      <circle cx="166" cy="46" r="6" class="sc-echo"/>
+      <text x="160" y="236" font-size="12" text-anchor="middle" class="f-ink">사이드 로브: 같은 거리의 호 모양 점열</text>
+      <circle cx="480" cy="112" r="105" class="sc-bg sc-ring"/>
+      <circle cx="480" cy="112" r="3" class="sc-linef"/>
+      <circle cx="510" cy="92" r="6" class="sc-echo"/>
+      <circle cx="540" cy="72" r="5" class="sc-echo" opacity=".7"/>
+      <circle cx="570" cy="52" r="4" class="sc-echo" opacity=".45"/>
+      <text x="514" y="112" font-size="10" class="sc-text">실제</text>
+      <text x="546" y="92" font-size="10" class="sc-text">2배</text>
+      <text x="566" y="70" font-size="10" class="sc-text">3배</text>
+      <text x="480" y="236" font-size="12" text-anchor="middle" class="f-ink">다중 에코: 같은 방위, 거리 배수</text>
+    </svg>
+    </div>
+    <figcaption><b>근거리 허상 두 가지.</b> 사이드 로브는 같은 거리에서 방위로 퍼지고, 다중 에코는 같은 방위에서 거리 배수로 늘어선다.</figcaption>
+  </figure>
+
+  <h2>2차 소인 에코</h2>
+  <p>현재 거리 설정보다 먼 곳에 있는 물표의 에코가 다음 펄스가 송신된 뒤에 돌아오면, 방위는 맞지만 거리는 틀리게 표시된다. 이를 <b>2차 소인 에코(second-trace echo, 다중 소인 에코)</b>라 한다. 평소에는 드물고, 과굴절(super-refraction)이나 덕팅이 있을 때 나타난다.</p>
+  <h3>식별 요령</h3>
+  <ul>
+    <li>PRR이 다른 거리 스케일로 바꾸면 화면상 위치가 바뀐다.</li>
+    <li>흐릿하거나 줄무늬처럼 일그러진 모양이다. 큰 육지 물표에서 특히 눈에 띈다.</li>
+    <li>작도해 보면 움직임이 불규칙하다.</li>
+  </ul>
+  <h3>계산 예</h3>
+  <p>12해리 스케일, PRR 2,000회/초에서 진방위 090°, 7.5해리에 에코가 보인다. PRR을 1,800회/초로 바꾸자 같은 물표가 090°, 3해리에 나타난다. 위치가 바뀌었으므로 2차 소인 에코다. 실제 거리는 표시 거리에 펄스 간격 동안 전파가 갈 수 있는 거리의 절반을 더한 값이다.</p>
+  <div class="formula">\[ R = R_{d} + \frac{c}{2\,\mathrm{PRR}} = 7.5 + \frac{162{,}000}{2 \times 2{,}000} = 7.5 + 40.5 = 48\ \mathrm{NM} \]
+    <small>\(R_d\): 화면에 표시된 거리. 12해리 스케일에서는 보일 수 없는 거리이므로 2차 소인 에코임이 확인된다.</small></div>
+
+  <div class="sim" id="lab-second-trace">
+    <div class="sim-head"><b>2차 소인 에코 실험</b><span class="sim-badge">실험</span></div>
+    <div class="lab-row">
+      <div class="ctrl"><label for="stPrr">PRR <output id="stPrro">2000 회/초</output></label><input id="stPrr" type="range" min="500" max="3000" step="100" value="2000"></div>
+      <div class="ctrl"><label for="stR">물표 실제 거리 <output id="stRo">48.0 NM</output></label><input id="stR" type="range" min="1" max="100" step="0.5" value="48"></div>
+      <div class="ctrl"><label for="stScale">거리 스케일 (NM)</label><select id="stScale"><option>3</option><option>6</option><option selected>12</option><option>24</option><option>48</option></select></div>
+    </div>
+    <div class="fig-scroll" style="margin-top:10px"><svg id="stSvg" viewBox="0 0 640 150" width="640" height="150" role="img" aria-label="2차 소인 에코 시간축" style="display:block;max-width:100%;height:auto"></svg></div>
+    <div class="lab-out">
+      <div class="stat"><span>최대 측정 거리 c/(2·PRR)</span><b id="stRu">–</b></div>
+      <div class="stat"><span>화면 표시 거리</span><b id="stRd">–</b></div>
+      <div class="stat"><span>화면에 보이나?</span><b id="stVis">–</b></div>
+    </div>
+    <div class="verdict" id="stVerdict"></div>
+    <p class="try">PRR을 2,000에서 1,800으로 바꿔 보자. 실제 거리는 그대로인데 화면 거리가 7.5해리에서 3해리로 뛴다. 이것이 2차 소인 에코를 가려내는 방법이다.</p>
+  </div>
+
+  <h2>전파 간섭</h2>
+  <p>같은 주파수 대역의 다른 레이더 근처에 있을 때 생긴다. 작은 밝은 점들이 무작위로 흩어지거나, 화면 중심에서 가장자리로 휘어진 점선 모양으로 나타난다. 거리 스케일이 길수록 심하다. 안테나가 돌 때마다 같은 자리에 나타나지 않으므로 실제 에코와 쉽게 구분된다. 대부분의 레이더에는 <b>간섭 제거(IR)</b> 기능이 있다.</p>
+
+  <h2>맹목 구역과 음영 구역</h2>
+  <p>연돌, 마스트, 컨테이너 등 구조물은 그 뒤쪽 빔 강도를 줄인다. 안테나 가까이 있을수록 영향이 크다. 안테나에서 본 장애물의 각이 몇 도 이상이면 <b>맹목 구역(blind sector)</b>이 생긴다. 강도 감소가 덜하면 <b>음영 구역(shadow sector)</b>이 되는데, 이 구역에서는 근거리의 작은 물표는 안 잡히고 원거리의 큰 물표만 보일 수 있다.</p>
+
+  <h2>가공 송전선</h2>
+  <p>해협을 가로지르는 가공 송전선의 에코는 방위 변화 없이 거리가 줄어드는 선박, 즉 충돌 위험선처럼 보일 수 있다. 피하려고 변침해도 계속 방위 불변·거리 감소로 나타난다. 이탈리아 메시나 해협의 송전선에서 특히 잘 알려진 현상이다.</p>
+  <div class="related">관련 문서: <a href="#beam">레이더 빔</a><a href="#principle">PRR</a><a href="#interpretation">클러터</a></div>
+</article>
+
+<!-- ============ 항로표지 ============ -->
+<article data-slug="aids" data-title="레이더 항로표지" data-cat="항법 실무" data-kw="코너 리플렉터 corner reflector 레이콘 racon 레마크 ramark 비컨 트랜스폰더 부이" hidden>
+  <div class="crumb">항법 실무</div>
+  <h1>레이더 항로표지</h1>
+  <div class="en">Aids to Radar Navigation</div>
+  <p>레이더 항로표지는 레이더 물표를 식별하기 쉽게 하고, 반사가 약한 물표의 에코를 강하게 만든다.</p>
+
+  <h2>코너 리플렉터 (레이더 반사기)</h2>
+  <p>부이는 특히 반사가 약한 물표다. 에코가 약하고 들쭉날쭉해서 해면 클러터에 묻히기 쉽다. 이를 보완하려고 부이 꼭대기에 달거나 구조물에 일체형으로 넣는 것이 <b>코너 리플렉터</b>다.</p>
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 220" width="640" height="220" role="img" aria-label="코너 리플렉터 반사 원리">
+      <path d="M200 130 L200 30 L100 180 Z" class="f-soft s-acc" stroke-width="1.4"/>
+      <path d="M200 130 L200 30 L300 180 Z" class="f-soft s-acc" stroke-width="1.4" opacity=".9"/>
+      <path d="M200 130 L100 180 L300 180 Z" class="f-soft s-acc" stroke-width="1.4"/>
+      <text x="200" y="206" font-size="12" text-anchor="middle" class="f-muted">서로 직각인 금속판 3장</text>
+      <path d="M560 60 L230 116" class="s-echo" stroke-width="2"/>
+      <path d="M244 109 L230 116 L245 120" class="f-none s-echo" stroke-width="2"/>
+      <path d="M226 136 L556 80" class="s-acc" stroke-width="2"/>
+      <path d="M542 77 L556 80 L544 88" class="f-none s-acc" stroke-width="2"/>
+      <text x="420" y="66" font-size="12" class="f-echo">입사파</text>
+      <text x="400" y="126" font-size="12" class="f-acc">반사파: 온 방향 그대로 되돌아감</text>
+      <text x="566" y="56" font-size="11" class="f-ink">레이더 쪽</text>
+    </svg>
+    </div>
+    <figcaption><b>코너 리플렉터.</b> 세 면에 차례로 반사되면 들어온 방향과 평행하게 되돌아간다. 그래서 작은 부이도 큰 물표처럼 강한 에코를 낸다.</figcaption>
+  </figure>
+  <p>서로 직각인 금속판 세 장으로 이루어져, 어느 판에 닿은 전파든 온 방향으로 되돌려 보낸다. 빔 축이 세 판과 같은 각을 이룰 때 가장 많은 에너지가 돌아온다. 반사 신호를 키우려고 여러 개를 묶어 달기도 한다.</p>
+
+  <h2>레이더 비컨</h2>
+  <p>반사기는 에코를 강하게 할 뿐 물표를 확실히 식별해 주지는 않는다. 확실한 식별을 위해 선박용 레이더 주파수 대역에서 신호를 내는 송신기, 곧 <b>레이더 비컨</b>을 쓴다.</p>
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 260" width="640" height="260" role="img" aria-label="레이콘과 레마크 화면 표시">
+      <circle cx="160" cy="120" r="100" class="sc-bg sc-ring"/>
+      <circle cx="160" cy="120" r="50" class="f-none sc-ring"/>
+      <circle cx="160" cy="120" r="3" class="sc-linef"/>
+      <circle cx="192" cy="82" r="4" class="sc-echo"/>
+      <g class="sc-echo-s" stroke-width="4">
+        <line x1="197" y1="76" x2="206" y2="65"/>
+        <line x1="210" y1="61" x2="213" y2="57"/>
+        <line x1="217" y1="52" x2="226" y2="41"/>
+      </g>
+      <text x="200" y="100" font-size="10" class="sc-text">비컨</text>
+      <text x="196" y="40" font-size="10" text-anchor="end" class="sc-text">— · —</text>
+      <text x="160" y="244" font-size="13" text-anchor="middle" class="f-ink" font-weight="600">레이콘 (Racon)</text>
+      <circle cx="480" cy="120" r="100" class="sc-bg sc-ring"/>
+      <circle cx="480" cy="120" r="50" class="f-none sc-ring"/>
+      <circle cx="480" cy="120" r="3" class="sc-linef"/>
+      <line x1="480" y1="120" x2="393" y2="70" class="sc-echo-s" stroke-width="2.5" stroke-dasharray="8 5"/>
+      <text x="480" y="244" font-size="13" text-anchor="middle" class="f-ink" font-weight="600">레마크 (Ramark)</text>
+    </svg>
+    </div>
+    <figcaption><b>화면 표시 비교.</b> 레이콘은 비컨 위치 바로 바깥에서 시작해 바깥으로 뻗는 모스 부호(예: K = — · —)로 나타나 방위와 거리를 모두 준다. 레마크는 화면 중심부터 뻗는 반지름 선으로 나타나 방위만 준다.</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <tr><th></th><th>레이콘 (Racon)</th><th>레마크 (Ramark)</th></tr>
+    <tr><td>작동</td><td>선박 레이더 펄스를 받으면 응답하는 트랜스폰더</td><td>연속 또는 일정 간격으로 스스로 송신</td></tr>
+    <tr><td>제공 정보</td><td>방위와 거리</td><td>방위만 (비컨이 에코로 잡히면 거리도 알 수 있음)</td></tr>
+    <tr><td>화면 표시</td><td>비컨 위치 바로 바깥에서 시작해 바깥쪽으로 뻗는 선 또는 모스 부호</td><td>화면 중심에서 뻗는 반지름 선 (실선, 끊긴 선, 점, 점과 선)</td></tr>
+    <tr><td>보급</td><td>널리 쓰임. 대부분 3cm 대역 인밴드 방식</td><td>드묾. 거리를 주지 않아 항법상 덜 유용</td></tr>
+  </table></div>
+  <p>레이콘의 모스 부호는 해도에 표시된 주요 항로표지를 식별하는 데 쓰인다. 레마크를 간격을 두고 송신하는 이유는 레마크 신호가 없는 상태에서 PPI를 클러터 없이 볼 수 있게 하기 위해서다.</p>
+  <div class="related">관련 문서: <a href="#bands">X밴드와 S밴드</a><a href="#fixing">레이더 위치결정</a><a href="#ppi-sim">PPI 시뮬레이터</a></div>
+</article>
+
+<!-- ============ 위치결정 ============ -->
+<article data-slug="fixing" data-title="레이더 위치결정" data-cat="항법 실무" data-kw="픽스 fix 위치선 LOP 거리 방위 접선 방위 tangent 측심 음향측심기 체서피크" hidden>
+  <div class="crumb">항법 실무</div>
+  <h1>레이더 위치결정</h1>
+  <div class="en">Radar Piloting</div>
+  <p>협수로에서는 보통 육안 항법으로 필요한 정확도를 얻지만, 육안 항법은 맑은 날씨가 전제다. 안개 등 제한 시정에서 ECDIS가 없는 선박은 레이더 항법으로 안전 통항에 충분한 정확도의 선위를 얻는다.</p>
+
+  <h2>방법 비교</h2>
+  <div class="tbl"><table>
+    <tr><th>방법</th><th>정확도</th><th>측정 순서</th><th>쓰임</th></tr>
+    <tr><td><a href="#fix-range">거리에 의한 픽스</a></td><td>가장 높음</td><td>선수·선미 방향 먼저, 정횡 쪽 나중</td><td>레이더 픽스의 기본</td></tr>
+    <tr><td><a href="#fix-bearing">방위에 의한 픽스</a></td><td>낮음</td><td>정횡 먼저, 선수·선미 방향 나중</td><td>협수로 접근 전 대략 위치 확인</td></tr>
+    <tr><td><a href="#fix-single">한 물표의 거리와 방위</a></td><td>중간</td><td>-</td><td>물표가 하나뿐일 때</td></tr>
+    <tr><td><a href="#fix-tangent">접선 방위와 거리</a></td><td>지형에 따라 다름</td><td>-</td><td>섬, 곶 등 큰 물표</td></tr>
+  </table></div>
+
+  <h2 id="fix-range">거리에 의한 픽스</h2>
+  <p>레이더는 방위보다 거리를 훨씬 정확히 재므로, 가장 정확한 레이더 픽스는 둘 이상의 물표까지 거리를 연달아 재서 작도하는 것이다.</p>
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 260" width="640" height="260" role="img" aria-label="거리에 의한 픽스">
+      <defs><clipPath id="fixclip"><rect x="150" y="100" width="340" height="160"/></clipPath></defs>
+      <g clip-path="url(#fixclip)">
+        <circle cx="200" cy="60" r="162.8" class="f-none s-acc" stroke-width="2"/>
+        <circle cx="440" cy="60" r="162.8" class="f-none s-echo" stroke-width="2"/>
+      </g>
+      <path d="M186 44 L200 22 L214 44 Z" class="f-acc"/><line x1="200" y1="44" x2="200" y2="60" class="s-acc" stroke-width="3"/>
+      <text x="200" y="80" font-size="12" text-anchor="middle" class="f-acc">A 등대</text>
+      <path d="M410 70 L440 40 L475 70 Z" class="f-echo"/>
+      <text x="440" y="88" font-size="12" text-anchor="middle" class="f-echo">B 곶</text>
+      <line x1="200" y1="60" x2="320" y2="170" class="s-acc" stroke-dasharray="3 3"/>
+      <line x1="440" y1="60" x2="320" y2="170" class="s-echo" stroke-dasharray="3 3"/>
+      <text x="200" y="126" font-size="11" class="f-acc">거리 2.4 NM</text>
+      <text x="380" y="126" font-size="11" class="f-echo">거리 2.4 NM</text>
+      <circle cx="320" cy="170" r="6" class="f-none s-ink" stroke-width="2"/>
+      <circle cx="320" cy="170" r="1.8" class="f-ink"/>
+      <text x="332" y="198" font-size="12" class="f-ink" font-weight="600">픽스</text>
+      <text x="510" y="180" font-size="11" class="f-muted">두 물표 방위 차이</text>
+      <text x="510" y="196" font-size="11" class="f-muted">약 90° → 정확도 좋음</text>
+    </svg>
+    </div>
+    <figcaption><b>거리 원호에 의한 픽스.</b> 각 물표를 중심으로 측정 거리를 반지름으로 하는 원호를 그리고, 원호들이 만나는 점을 선위로 한다. 물표 사이 방위 차이는 60°–90°가 좋다.</figcaption>
+  </figure>
+  <ul>
+    <li><b>선수·선미 방향 물표를 먼저</b>, 정횡에 가까운 물표를 나중에 잰다. 픽스 시각은 선수·선미 물표를 잰 시각이다. 자선 운동에 따른 거리 변화율이 가장 큰 물표를 기준 시각으로 삼아, 측정 시간차로 인한 오차를 줄인다.</li>
+    <li>측정한 거리로 해도에 거리 원호를 그린다. 원호들이 만나는 점이 픽스다.</li>
+    <li>가능하면 방위 차이가 <b>60°–90°</b>로 크게 벌어진 물표를 고른다.</li>
+  </ul>
+  <div class="note"><strong>측심으로 확인할 것.</strong> 레이더 항법에서 가장 흔하고 심각한 오류는 물표를 잘못 식별하는 것이다. 음향측심기 수심을 해도 수심과 대조하면 이런 오류를 찾을 수 있다.</div>
+
+  <h2 id="fix-bearing">방위에 의한 픽스</h2>
+  <p>레이더 방위(또는 육안 방위)로 픽스를 구할 때는 <b>정횡 물표를 먼저</b>, 선수·선미 방향 물표를 나중에 잰다. 방위 변화율은 정횡 물표에서 가장 크고 선수·선미 물표에서 가장 작기 때문이다. 픽스 시각은 정횡 물표를 잰 시각이다.</p>
+  <p>레이더 방위만으로 구한 픽스는 정확도가 떨어진다. 협수로 접근 시 대략적인 선위를 빨리 구해 거리 측정용 물표를 고르는 용도로 쓴다. 협수로 항해 중에는 적합하지 않으며, 육안 방위와 레이더 거리를 조합하는 등 더 정확한 방법이 없을 때만 쓴다.</p>
+
+  <h2 id="fix-single">한 물표의 거리와 방위</h2>
+  <p>육안 항법에는 적어도 두 물표의 방위가 필요하지만, 레이더는 한 물표에서 거리와 방위를 모두 얻으므로 항로표지가 하나뿐이어도 픽스를 구할 수 있다. 예를 들어 체서피크 만 입구의 체서피크 등대(Chesapeake Light)처럼 항구 입구에 눈에 띄는 물표 하나만 있는 경우, 육상 표지는 물론 등대 자체도 육안으로 보이지 않는 먼 거리에서 레이더로 방위와 거리를 잴 수 있다.</p>
+  <ul>
+    <li>근처에 정박한 다른 선박이 아니라 실제 항로표지를 재고 있는지 확인한다.</li>
+    <li>레이더 방위는 빔폭 왜곡 등으로 보통 진방위와 <b>약 5°</b> 정도 차이가 난다. 결과를 신중히 평가하고 측심으로 확인한다.</li>
+    <li>육안 방위를 잴 수 있으면 레이더 방위 대신 육안 방위를 쓴다.</li>
+    <li>자이로로 안정화된 레이더라도 1° 이상의 자이로 오차가 있을 수 있으며, 레이더 방위와 육안 방위 모두 그만큼 틀린다.</li>
+  </ul>
+  <div class="note"><strong>식별이 전부다.</strong> 두 위치선을 한 표지에서 얻으므로, 그 표지를 잘못 식별하면 그대로 사고로 이어진다.</div>
+
+  <h2 id="fix-tangent">접선 방위와 거리</h2>
+  <p>물표의 양 끝에 접하는 방위선 두 개와, 그 물표의 한 지점까지 거리를 조합하는 방법이다. 접선 방위 사이가 충분히 벌어질 만큼 큰 물표, 예컨대 섬이나 반도가 좋다.</p>
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 280" width="640" height="280" role="img" aria-label="접선 방위와 거리에 의한 픽스">
+      <circle cx="430" cy="110" r="70" class="f-esoft s-echo" stroke-width="1.5"/>
+      <text x="456" y="104" font-size="13" class="f-echo" font-weight="600">섬</text>
+      <line x1="382.1" y1="58.9" x2="154.5" y2="272.8" class="s-acc" stroke-width="1.8"/>
+      <line x1="444.4" y1="178.5" x2="138.9" y2="242.9" class="s-acc" stroke-width="1.8"/>
+      <circle cx="382.1" cy="58.9" r="3" class="f-acc"/><circle cx="444.4" cy="178.5" r="3" class="f-acc"/>
+      <text x="296" y="100" font-size="11" text-anchor="end" class="f-acc">접선 방위 1</text>
+      <text x="340" y="222" font-size="11" class="f-acc">접선 방위 2</text>
+      <circle cx="367.9" cy="142.4" r="4" class="f-ink"/>
+      <text x="376" y="156" font-size="11" class="f-ink">기준 지형</text>
+      <line x1="367.9" y1="142.4" x2="200" y2="230" class="s-ink" stroke-dasharray="3 3"/>
+      <text x="282" y="178" font-size="11" class="f-ink">거리</text>
+      <path d="M222.8 264.2 A 189.4 189.4 0 0 1 185 191.4" class="f-none s-echo" stroke-width="2.5"/>
+      <text x="176" y="184" font-size="11" text-anchor="end" class="f-echo">거리 위치선</text>
+      <circle cx="200" cy="230" r="6" class="f-none s-ink" stroke-width="2"/>
+      <text x="40" y="236" font-size="12" class="f-ink" font-weight="600">픽스</text>
+      <path d="M72 232 L190 230" class="s-ink" stroke-width="1"/>
+    </svg>
+    </div>
+    <figcaption><b>접선 방위와 거리.</b> 섬 양 끝의 접선 방위선 두 개와, 기준 지형까지의 거리 원호를 함께 그린다. 픽스는 거리 위치선 위에서 두 접선 방위선 사이의 중간점이다. 실제로는 빔폭 때문에 레이더 접선이 바깥으로 넓어져, 두 접선의 교점이 거리 위치선보다 섬 쪽에 생긴다.</figcaption>
+  </figure>
+  <ol>
+    <li>해도와 레이더 화면 모두에 나타나는 눈에 띄는 지형을 고른다.</li>
+    <li>그 지형까지의 거리를 재서 해도에 기입한다.</li>
+    <li>양쪽 접선 방위를 재서 해도에 기입한다.</li>
+    <li>거리 위치선은 접선 방위선의 교점이 아니라 그보다 조금 바깥을 지난다. <b>거리 위치선 위에서 두 접선 방위선 사이의 중간점</b>을 픽스로 한다.</li>
+  </ol>
+  <p>경사가 급한 지형일수록 좋다. 낮고 완만한 해안의 접선이나, 조차가 아주 큰 해역(겉보기 해안선이 수 미터 이상 움직임)에서는 정확도가 크게 떨어진다.</p>
+  <div class="related">관련 문서: <a href="#parallel-indexing">평행 지표법</a><a href="#aids">레이더 항로표지</a></div>
+</article>
+
+<!-- ============ 평행 지표법 ============ -->
+<article data-slug="parallel-indexing" data-title="평행 지표법" data-cat="항법 실무" data-kw="parallel indexing PI EBL VRM 지표선 협수로 ECDIS wheel over" hidden>
+  <div class="crumb">항법 실무</div>
+  <h1>평행 지표법</h1>
+  <div class="en">Parallel Indexing</div>
+  <p>협수로에서는 일반적인 위치결정 방법이 충분하지 않다. 방위나 거리를 재고, 해도에 작도하고, 픽스를 얻고, 변침을 결정하기까지 숙련된 항해사라도 5분 이상 걸릴 수 있다. 수역이 좁고 위험물이 있는 곳에서는 이 지연이 사고로 이어진다. 그래서 선위를 끊임없이 감시해야 한다.</p>
+  <p>ECDIS가 종이 해도보다 훨씬 낫지만 GPS에 전적으로 의존한다. 레이더의 <b>평행 지표법</b>은 GPS 없이도 실시간 항적 감시를 가능하게 한다. 제대로 준비한 지표선은 선박이 계획 항로에서 벗어나기 시작하는 순간을 바로 보여 준다. 제한 시정의 협수로 통항, 중요한 변침, 항로표지가 적거나 믿기 어려운 해역에서 특히 결정적이다.</p>
+
+  <h2>설정 예</h2>
+  <p>침로 045°의 계획 항로로 작은 섬(또는 암초)을 우현 정횡 2해리에 두고 지나가려 한다. 레이더 화면에 045°–225° 방향의 전자선을 우현 쪽 2해리 거리에 그어 둔다. 섬이 화면에 들어오면 섬 에코가 그 선 위를 따라 움직이도록 조선하기만 하면 된다. 그러면 선박이 계획 항로 위에 있게 된다.</p>
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 520 330" width="520" height="330" role="img" aria-label="평행 지표선 설정 모식도">
+      <defs><clipPath id="scope"><circle cx="160" cy="165" r="140"/></clipPath>
+        <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" class="sc-echo"/></marker></defs>
+      <circle cx="160" cy="165" r="140" class="sc-bg sc-ring" stroke-width="1"/>
+      <circle cx="160" cy="165" r="93.3" class="f-none sc-ring" stroke-width="1"/>
+      <circle cx="160" cy="165" r="46.7" class="f-none sc-ring" stroke-width="1"/>
+      <text x="164" y="116" font-size="10" class="sc-text">2 NM</text>
+      <text x="164" y="69" font-size="10" class="sc-text">4 NM</text>
+      <text x="160" y="18" font-size="10" text-anchor="middle" class="f-muted">N 000°</text>
+      <line x1="160" y1="165" x2="259" y2="66" class="sc-line" stroke-width="1.4" stroke-dasharray="5 4"/>
+      <text x="262" y="62" font-size="11" class="f-acc">선수 045°</text>
+      <g clip-path="url(#scope)">
+        <line x1="299" y1="92" x2="87" y2="304" class="sc-line" stroke-width="2.2"/>
+      </g>
+      <line x1="160" y1="165" x2="193" y2="198" class="sc-ring" stroke-width="1" stroke-dasharray="2 3"/>
+      <circle cx="160" cy="165" r="3" class="sc-linef"/>
+      <path d="M234 157 L210 181" class="sc-echo-s" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+      <circle cx="240" cy="151" r="6" class="sc-echo"/>
+      <text x="310" y="150" font-size="12" class="f-ink">PI선: 045°–225°</text>
+      <text x="310" y="167" font-size="12" class="f-ink">자선에서 우현 2 NM</text>
+      <text x="310" y="196" font-size="12" class="f-echo">섬 에코가 PI선을 따라</text>
+      <text x="310" y="213" font-size="12" class="f-echo">움직이면 계획 항로 위</text>
+      <text x="310" y="242" font-size="12" class="f-muted">선에서 벗어나면 즉시</text>
+      <text x="310" y="259" font-size="12" class="f-muted">항로 이탈을 알 수 있다</text>
+    </svg>
+    </div>
+    <figcaption><b>평행 지표선 설정.</b> 노스 업 화면 기준. 고정 물표의 에코는 자선 침로의 반대 방향(225°)으로 PI선을 따라 흘러간다. <a href="#pi-sim">평행 지표법 연습</a>에서 직접 조선해 볼 수 있다.</figcaption>
+  </figure>
+
+  <h2>레이더에서 설정하는 방법</h2>
+  <h3>EBL 이용</h3>
+  <p>대부분의 레이더는 <b>전자 방위선(EBL)</b>의 원점을 화면 중심에서 옮길 수 있다. EBL 방위를 항로 방향에 맞춘 뒤, 원점을 원하는 거리로 설정한 <b>가변 거리 환(VRM)</b>에 접하도록 띄워 단일 지표선으로 쓴다.</p>
+  <h3>전용 PI 기능</h3>
+  <p>현대 레이더에는 대개 전용 평행 지표(PI) 기능이 있고 EBL을 띄우는 것보다 쓰기 쉽다. 제조사마다 모양은 다르지만 공통점은 다음과 같다.</p>
+  <ul>
+    <li>화면 전체 또는 일부를 가로지르는 전자 PI선을 표시한다.</li>
+    <li>PI선의 방향(방위)과 자선으로부터의 거리를 조절할 수 있다.</li>
+    <li>한번 설정하면 PI선은 자선에 대해 고정된다.</li>
+  </ul>
+  <div class="note"><strong>설정 순서:</strong> PI선은 반드시 <b>방위를 먼저, 거리를 나중에</b> 설정한다. 순서를 바꾸면 자선과 PI선 사이 거리가 의도보다 짧아진다.</div>
+
+  <h2>복잡한 지표 설정</h2>
+  <p>위 예는 지표선 하나, 지표 물표 하나를 쓰는 가장 기본적인 방법이다. 상황에 따라 여러 거리 스케일에 걸친 여러 지표선, 여러 지표 물표, 여유선(margin line), 위험 구역, 변침 개시점(wheel over point)이 필요할 수 있다. 하지만 설정이 복잡할수록 항해사의 시간과 노력이 더 들고, 작성 오류 위험도 커지며, 화면이 어지러워진다. 어려운 수역을 자주 지나는 선박이라면 ECDIS에 더 의지하고, 레이더 PI는 단순하게 설정해 백업과 교차 확인용으로 쓰는 편이 낫다.</p>
+  <div class="related">관련 문서: <a href="#fixing">레이더 위치결정</a><a href="#ppi">PPI</a><a href="#pi-sim">평행 지표법 연습</a></div>
+</article>
+
+<!-- ============ PPI 시뮬레이터 ============ -->
+<article data-slug="ppi-sim" data-title="PPI 시뮬레이터" data-cat="시뮬레이터" data-kw="시뮬레이션 simulator 헤딩업 노스업 이득 gain STC FTC 클러터 레이콘 음영 커서 EBL VRM" hidden>
+  <div class="crumb">시뮬레이터</div>
+  <h1>PPI 시뮬레이터</h1>
+  <div class="en">Radar PPI Simulator</div>
+  <p>가상의 해역에서 레이더 화면을 직접 조작해 보는 시뮬레이터다. 서쪽에 구릉 해안, 북동쪽에 섬, 동쪽에 레이콘 등표와 낮은 섬, 남동쪽에 비 구름이 있고, 선박 두 척과 부이 하나가 있다. 화면을 누르면 그 지점까지의 거리와 방위를 잴 수 있다.</p>
+  <div class="sim">
+    <div class="sim-grid">
+      <div class="scope-wrap">
+        <canvas id="ppiCanvas" class="scope" aria-label="레이더 화면. 누르면 커서로 거리와 방위를 잰다"></canvas>
+        <div class="readout" id="ppiReadout" style="margin-top:10px">화면을 누르면 커서 위치의 거리와 방위가 표시된다.</div>
+      </div>
+      <div class="ctrls">
+        <div class="ctrl"><div class="lab">화면 방향</div>
+          <div class="seg" id="ppiMode"><button type="button" data-v="N" aria-pressed="true">노스 업</button><button type="button" data-v="H" aria-pressed="false">헤딩 업</button></div></div>
+        <div class="ctrl"><div class="lab">주파수 대역</div>
+          <div class="seg" id="ppiBand"><button type="button" data-v="X" aria-pressed="true">X 3cm</button><button type="button" data-v="S" aria-pressed="false">S 10cm</button></div></div>
+        <div class="ctrl"><div class="lab">거리 스케일</div>
+          <div class="seg" id="ppiRange"><button type="button" data-v="3" aria-pressed="false">3 NM</button><button type="button" data-v="6" aria-pressed="true">6 NM</button><button type="button" data-v="12" aria-pressed="false">12 NM</button></div></div>
+        <div class="ctrl"><label for="ppiGain">이득 (GAIN) <output id="ppiGaino">55</output></label><input id="ppiGain" type="range" min="0" max="100" value="55"></div>
+        <div class="ctrl"><label for="ppiStc">해면 클러터 억제 (SEA) <output id="ppiStco">30</output></label><input id="ppiStc" type="range" min="0" max="100" value="30"></div>
+        <div class="ctrl"><label for="ppiFtc">비 클러터 억제 (RAIN) <output id="ppiFtco">0</output></label><input id="ppiFtc" type="range" min="0" max="100" value="0"></div>
+        <div class="ctrl"><label for="ppiHdg">자선 침로 <output id="ppiHdgo">060°</output></label><input id="ppiHdg" type="range" min="0" max="359" value="60"></div>
+        <div class="ctrl"><label for="ppiSpd">자선 속력 <output id="ppiSpdo">0 kn</output></label><input id="ppiSpd" type="range" min="0" max="15" value="0"></div>
+        <div class="btns"><button type="button" class="btn" id="ppiReset">처음 상태로</button></div>
+      </div>
+    </div>
+  </div>
+  <h2>해 볼 것</h2>
+  <ol class="try">
+    <li><b>헤딩 업과 노스 업</b>: 헤딩 업으로 바꾼 뒤 침로를 움직여 보자. 화면 전체가 돌아간다. 노스 업에서는 선수선만 돈다.</li>
+    <li><b>해면 클러터</b>: SEA를 0으로 내리면 자선 주변이 클러터로 덮인다. 너무 올리면 근거리의 약한 부이 에코까지 사라진다.</li>
+    <li><b>비 클러터와 대역</b>: 남동쪽 비 구름은 X밴드에서 크게 보이고 그 뒤의 낮은 섬이 약해진다. S밴드로 바꾸거나 RAIN을 올려 보자.</li>
+    <li><b>레이콘</b>: X밴드에서 동쪽 등표 바깥으로 — · — (K) 부호가 보인다. 이 시뮬레이터에서는 S밴드에 응답하지 않는다고 가정했다.</li>
+    <li><b>음영과 왜곡</b>: 서쪽 해안은 해안선에서 일정 깊이까지만 보이고 그 뒤는 음영이다. 12NM로 바꾸면 해안 가까이 정박한 선박이 해안 에코와 합쳐진다.</li>
+    <li><b>이득</b>: GAIN을 낮추면 낮은 섬과 부이가 먼저 사라지고, 너무 높이면 잡음이 화면을 덮는다.</li>
+  </ol>
+  <div class="note"><strong>교육용 단순화 모델.</strong> 실제 레이더의 신호 처리, 전파 특성, 지형 높이를 단순화했다. 수치와 모양은 개념을 보여 주기 위한 것이다.</div>
+  <div class="related">관련 문서: <a href="#ppi">PPI</a><a href="#interpretation">영상 판독</a><a href="#bands">X밴드와 S밴드</a></div>
+</article>
+
+<!-- ============ 평행 지표법 연습 ============ -->
+<article data-slug="pi-sim" data-title="평행 지표법 연습" data-cat="시뮬레이터" data-kw="시뮬레이션 simulator parallel indexing 조류 압류 침로 이탈 XTE" hidden>
+  <div class="crumb">시뮬레이터</div>
+  <h1>평행 지표법 연습</h1>
+  <div class="en">Parallel Indexing Practice</div>
+  <p>계획 항로는 침로 045°, 섬을 우현 정횡 2해리에 두고 지나는 것이다. 레이더에는 우현 2해리에 045°–225° PI선이 그어져 있다. 조류가 선박을 섬 쪽으로 밀고 있으니, 섬 에코가 PI선 위를 따라 흐르도록 침로를 조정하자. 섬 주변 0.8해리는 얕은 여울이다.</p>
+  <div class="sim">
+    <div class="sim-grid two">
+      <div><canvas id="piRadar" class="scope" aria-label="평행 지표법 레이더 화면"></canvas><div class="cap">레이더 (노스 업, 6 NM)</div></div>
+      <div><canvas id="piChart" class="chart" aria-label="해도상 항적"></canvas><div class="cap">해도 (실제 항적)</div></div>
+    </div>
+    <div class="lab-row" style="margin-top:14px">
+      <div class="ctrl"><div class="lab">침로 조정 <span class="val" id="piHdg">045°</span></div>
+        <div class="btns"><button type="button" class="btn" data-d="-5">좌 5°</button><button type="button" class="btn" data-d="-1">좌 1°</button><button type="button" class="btn" data-d="1">우 1°</button><button type="button" class="btn" data-d="5">우 5°</button></div></div>
+      <div class="ctrl"><label for="piSet">조류 방향 (흘러가는 쪽) <output id="piSeto">135°</output></label><input id="piSet" type="range" min="0" max="355" step="5" value="135"></div>
+      <div class="ctrl"><label for="piDrift">조류 속도 <output id="piDrifto">2.0 kn</output></label><input id="piDrift" type="range" min="0" max="4" step="0.5" value="2"></div>
+    </div>
+    <div class="lab-row" style="margin-top:12px;align-items:start">
+      <div class="btns"><button type="button" class="btn primary" id="piRun">시작</button><button type="button" class="btn" id="piReset">처음부터</button></div>
+      <div class="readout" id="piReadout"></div>
+    </div>
+  </div>
+  <h2>요령</h2>
+  <ul class="try">
+    <li>섬 에코가 PI선보다 <b>화면 중심 쪽</b>으로 들어오면 자선이 섬 쪽(우현)으로 밀린 것이다. 좌현으로 변침한다.</li>
+    <li>에코가 PI선 위로 돌아오면, 조류를 상쇄할 만큼만 남기고 침로를 되돌린다. 조류를 받으며 항로를 유지하려면 침로가 045°와 달라야 한다.</li>
+    <li>해도 화면의 실제 항적과 레이더의 에코 궤적을 비교해 보자. 둘은 같은 정보를 다른 관점에서 보여 준다.</li>
+  </ul>
+  <div class="related">관련 문서: <a href="#parallel-indexing">평행 지표법</a><a href="#ppi-sim">PPI 시뮬레이터</a></div>
+</article>
+
+<!-- ============ 용어집 ============ -->
+<article data-slug="glossary" data-title="용어집" data-cat="시작" hidden>
+  <div class="crumb">시작</div>
+  <h1>용어집</h1>
+  <div class="en">Glossary</div>
+  <div class="tbl"><table>
+    <tr><th>용어</th><th>영문</th><th>뜻</th></tr>
+    <tr><td>PPI</td><td>Plan Position Indicator</td><td>레이더 화면. 중심에서 회전하는 스윕으로 물표의 방위·거리를 표시. <a href="#ppi">→</a></td></tr>
+    <tr><td>펄스 폭</td><td>Pulse length / width</td><td>펄스 하나의 지속 시간. 거리 분해능을 결정. <a href="#resolution">→</a></td></tr>
+    <tr><td>PRR</td><td>Pulse Repetition Rate</td><td>초당 펄스 송신 횟수. <a href="#principle">→</a></td></tr>
+    <tr><td>PRT</td><td>Pulse Repetition Time</td><td>펄스와 펄스 사이 시간. 1/PRR. <a href="#principle">→</a></td></tr>
+    <tr><td>마그네트론</td><td>Magnetron</td><td>전통적 레이더의 고출력 마이크로파 발진관. <a href="#transmitter">→</a></td></tr>
+    <tr><td>솔리드 스테이트 레이더</td><td>Solid state / coherent radar</td><td>저출력·장펄스·가변 주파수 방식. <a href="#transmitter">→</a></td></tr>
+    <tr><td>펄스 압축</td><td>Pulse compression</td><td>긴 처프 펄스를 수신기에서 짧게 줄이고 진폭을 키우는 처리. <a href="#receiver">→</a></td></tr>
+    <tr><td>슬롯 도파관 안테나</td><td>Slotted waveguide</td><td>현대 선박용 레이더의 표준 안테나. <a href="#antenna">→</a></td></tr>
+    <tr><td>빔폭</td><td>Beam width</td><td>반전력점 사이의 각. <a href="#beam">→</a></td></tr>
+    <tr><td>사이드 로브</td><td>Side lobe</td><td>주엽 밖의 작은 방사 엽. 근거리 허상의 원인. <a href="#false-echoes">→</a></td></tr>
+    <tr><td>레이더 반사 단면적</td><td>Radar cross section</td><td>물표의 크기와 반사 특성. <a href="#propagation">→</a></td></tr>
+    <tr><td>레이더 수평선</td><td>Radar horizon</td><td>전파가 지표에 접하는 지점까지의 거리. <a href="#propagation">→</a></td></tr>
+    <tr><td>클러터</td><td>Clutter</td><td>해면·강수·대기 잡음에 의한 불필요한 반사. <a href="#interpretation">→</a></td></tr>
+    <tr><td>SEA / RAIN</td><td>Sea clutter (STC) / Rain clutter (FTC) control</td><td>해면 클러터 억제, 비 클러터 억제 조절기. <a href="#ppi-sim">→</a></td></tr>
+    <tr><td>2차 소인 에코</td><td>Second-trace echo</td><td>거리 설정보다 먼 물표가 다음 펄스 뒤에 표시되는 허상. <a href="#false-echoes">→</a></td></tr>
+    <tr><td>맹목 구역 / 음영 구역</td><td>Blind / shadow sector</td><td>자선 구조물에 가려 탐지가 안 되거나 약해지는 구역. <a href="#false-echoes">→</a></td></tr>
+    <tr><td>코너 리플렉터</td><td>Corner reflector</td><td>직각 금속판 3장으로 된 레이더 반사기. <a href="#aids">→</a></td></tr>
+    <tr><td>레이콘</td><td>Racon</td><td>레이더 펄스에 응답하는 비컨. 방위·거리 제공. <a href="#aids">→</a></td></tr>
+    <tr><td>레마크</td><td>Ramark</td><td>스스로 송신하는 비컨. 방위만 제공. <a href="#aids">→</a></td></tr>
+    <tr><td>EBL</td><td>Electronic Bearing Line</td><td>전자 방위선. <a href="#parallel-indexing">→</a></td></tr>
+    <tr><td>VRM</td><td>Variable Range Marker</td><td>가변 거리 환. <a href="#parallel-indexing">→</a></td></tr>
+    <tr><td>평행 지표법</td><td>Parallel indexing (PI)</td><td>지표선을 이용한 실시간 항적 감시. <a href="#parallel-indexing">→</a></td></tr>
+    <tr><td>위치선</td><td>Line of position (LOP)</td><td>선박이 그 위 어딘가에 있다고 판단되는 선. 레이더 거리는 원호 형태. <a href="#fixing">→</a></td></tr>
+    <tr><td>선수선</td><td>Heading line / marker</td><td>화면에 자선의 선수 방향을 나타내는 선. <a href="#errors">→</a></td></tr>
+    <tr><td>상대운동 / 진운동</td><td>Relative / True motion</td><td>자선을 고정하고 보는 표시 방식 / 자선이 화면 위를 움직이는 표시 방식. <a href="#motion">→</a></td></tr>
+    <tr><td>지면 / 수면 안정화</td><td>Ground / Sea stabilization</td><td>자선 운동을 대지 기준 / 대수 기준으로 입력하는 방식. <a href="#motion">→</a></td></tr>
+    <tr><td>CPA / TCPA</td><td>Closest Point of Approach / Time to CPA</td><td>최근접점 거리 / 최근접점까지 남은 시간. <a href="#arpa">→</a></td></tr>
+    <tr><td>상대운동선</td><td>Relative Motion Line (RML)</td><td>자선에서 본 물표의 이동 경로. <a href="#arpa">→</a></td></tr>
+    <tr><td>ARPA</td><td>Automatic Radar Plotting Aid</td><td>물표를 자동 추적해 CPA·TCPA·진운동을 계산하는 장치. <a href="#arpa">→</a></td></tr>
+    <tr><td>시험 조선</td><td>Trial manoeuvre</td><td>변침·변속의 효과를 미리 계산해 보는 기능. <a href="#arpa">→</a></td></tr>
+    <tr><td>SART</td><td>Search and Rescue Transponder</td><td>X밴드 레이더에 12개 점열로 응답하는 조난용 트랜스폰더. <a href="#sart-ais">→</a></td></tr>
+    <tr><td>AIS</td><td>Automatic Identification System</td><td>선박이 식별 정보와 위치·침로·속력을 자동 송신하는 체계. <a href="#sart-ais">→</a></td></tr>
+    <tr><td>COLREGs</td><td>International Regulations for Preventing Collisions at Sea</td><td>1972년 국제해상충돌예방규칙. <a href="#colregs">→</a></td></tr>
+  </table></div>
+</article>
+
+<!-- ============ 레이더 조작과 조정 ============ -->
+<article data-slug="controls" data-title="레이더 조작과 조정" data-cat="레이더 운용" data-kw="튜닝 tuning 이득 gain STC SEA FTC RAIN 펄스 폭 성능 감시기 performance monitor 에코 확장 IR 예열 스탠바이" hidden>
+  <div class="crumb">레이더 운용</div>
+  <h1>레이더 조작과 조정</h1>
+  <div class="en">Radar Operation and Controls</div>
+  <p>레이더 영상의 품질은 조정에 크게 좌우된다. 같은 장비라도 조정이 나쁘면 약한 물표를 놓치거나 클러터 속에서 물표를 구분하지 못한다. 대부분의 기종에 자동 조정 기능이 있지만, 그 원리와 한계를 알고 필요할 때 손으로 다시 맞출 수 있어야 한다.</p>
+
+  <h2>켜기 전과 켠 직후</h2>
+  <ul>
+    <li>안테나 주변에 사람이나 장애물이 없는지 확인한다. 마이크로파는 인체에 해로울 수 있다.</li>
+    <li>마그네트론 레이더는 전원을 넣은 뒤 예열 시간이 필요하다. 예열이 끝나면 대기(STANDBY) 상태가 되고, 송신(TRANSMIT)으로 바꿔야 펄스가 나간다.</li>
+    <li>송신을 시작하면 선수선이 실제 선수 방향과 맞는지, 화면 방향 모드와 안정화 방식이 의도한 대로인지 확인한다.</li>
+  </ul>
+
+  <h2>조정 순서</h2>
+  <p>조정 기능은 서로 영향을 주므로 순서대로 맞추는 것이 좋다. 일반적인 순서는 다음과 같다.</p>
+  <ol>
+    <li><b>밝기와 화면</b>: 주변 조도에 맞게 화면 밝기, 거리환·선수선 밝기를 맞춘다.</li>
+    <li><b>거리 스케일</b>: 목적에 맞는 스케일을 고른다. 펄스 폭은 대개 스케일에 따라 자동으로 바뀐다.</li>
+    <li><b>튜닝</b>: 수신기를 송신 주파수에 맞춘다.</li>
+    <li><b>이득</b>: 수신 증폭도를 맞춘다.</li>
+    <li><b>해면 클러터 억제 (SEA)</b>와 <b>비 클러터 억제 (RAIN)</b>: 필요한 만큼만 쓴다.</li>
+    <li>필요하면 간섭 제거, 에코 확장 등 기타 기능을 켠다.</li>
+  </ol>
+
+  <h2>주요 조정 기능</h2>
+  <div class="tbl"><table>
+    <tr><th>기능</th><th>하는 일</th><th>맞추는 요령</th><th>과하면</th></tr>
+    <tr><td><b>튜닝</b> (TUNE)</td><td>수신기 국부 발진 주파수를 송신 주파수에 맞춘다</td><td>원거리의 약한 물표가 가장 선명할 때, 또는 튜닝 지시기가 최대일 때</td><td>어긋나면 모든 에코가 약해진다</td></tr>
+    <tr><td><b>이득</b> (GAIN)</td><td>수신 신호 전체의 증폭도</td><td>화면 전체에 잡음 반점이 아주 약하게 보이는 정도. 스케일을 바꿀 때마다 확인</td><td>높으면 잡음이 물표를 덮고, 낮으면 약한 물표가 사라진다</td></tr>
+    <tr><td><b>해면 클러터 억제</b> (SEA, STC)</td><td>가까운 거리일수록 수신 감도를 더 많이 낮춘다</td><td>클러터가 약간 남아 있는 정도로. 해상 상태에 따라 수시로</td><td>근거리의 소형선, 부이를 지워 버린다</td></tr>
+    <tr><td><b>비 클러터 억제</b> (RAIN, FTC)</td><td>에코의 앞 가장자리만 남기는 미분 처리</td><td>강수 구역 속 물표가 드러날 만큼만</td><td>큰 물표가 윤곽선만 남고 약한 물표가 사라진다</td></tr>
+    <tr><td><b>펄스 폭</b></td><td>짧은 펄스와 긴 펄스 선택</td><td>근거리·분해능은 짧게, 원거리 탐지는 길게</td><td>긴 펄스는 클러터와 물표 겹침이 늘어난다</td></tr>
+    <tr><td><b>간섭 제거</b> (IR)</td><td>다른 레이더의 간섭 무늬를 지운다</td><td>간섭이 보일 때 켠다</td><td>레이콘·SART 응답까지 지워질 수 있다</td></tr>
+    <tr><td><b>에코 확장</b></td><td>작은 에코를 크게 그려 보기 쉽게 한다</td><td>원거리 소형 물표 탐지 보조</td><td>분해능이 나빠지고 물표 크기 판단이 틀어진다</td></tr>
+  </table></div>
+  <div class="note"><strong>자동 조정의 한계.</strong> 자동 이득·자동 클러터 기능은 평균적인 상황에 맞춰져 있어, 약한 물표를 클러터로 보고 지울 수 있다. 소형선이나 부이가 있을 법한 해역에서는 손으로 조정해 가며 확인한다.</div>
+
+  <h2>펄스 폭 선택</h2>
+  <div class="tbl"><table>
+    <tr><th></th><th>짧은 펄스</th><th>긴 펄스</th></tr>
+    <tr><td>거리 분해능</td><td>좋다</td><td>나쁘다</td></tr>
+    <tr><td>최소 탐지 거리</td><td>짧다 (가까운 물표도 보임)</td><td>길다</td></tr>
+    <tr><td>원거리 탐지</td><td>불리</td><td>유리 (에너지가 많음)</td></tr>
+    <tr><td>클러터</td><td>적게 보인다</td><td>많이 보인다</td></tr>
+    <tr><td>쓰는 곳</td><td>협수로, 입출항, 근거리 위치결정</td><td>대양, 원거리 경계</td></tr>
+  </table></div>
+
+  <h2>성능 점검</h2>
+  <ul>
+    <li><b>성능 감시기</b>(performance monitor)가 있는 기종은 송신 출력과 수신 감도가 기준 이내인지 정기적으로 확인한다.</li>
+    <li>평소 자주 지나는 해역에서 특정 물표가 처음 탐지되는 거리를 기록해 두면, 성능 저하를 쉽게 알아챌 수 있다.</li>
+    <li>마그네트론은 소모품이다. 출력이 떨어지면 원거리 탐지 거리가 줄어든다.</li>
+  </ul>
+  <p><a href="#ppi-sim">PPI 시뮬레이터</a>에서 이득, SEA, RAIN을 직접 조절해 볼 수 있다.</p>
+  <div class="related">관련 문서: <a href="#interpretation">영상 판독</a><a href="#errors">레이더 오차와 점검</a><a href="#ppi-sim">PPI 시뮬레이터</a></div>
+</article>
+
+<!-- ============ 레이더 오차와 점검 ============ -->
+<article data-slug="errors" data-title="레이더 오차와 점검" data-cat="레이더 운용" data-kw="선수선 오차 heading marker 방위 오차 거리 오차 영점 자이로 오차 성능 기준 IMO 정확도 점검" hidden>
+  <div class="crumb">레이더 운용</div>
+  <h1>레이더 오차와 점검</h1>
+  <div class="en">Radar Errors and Checks</div>
+  <p>레이더로 잰 거리와 방위에는 장비와 설치에서 오는 오차가 섞인다. 어떤 오차가 있는지 알고 정기적으로 점검해야 레이더 픽스를 믿을 수 있다.</p>
+
+  <h2>방위 오차</h2>
+  <div class="tbl"><table>
+    <tr><th>원인</th><th>내용</th><th>점검·대책</th></tr>
+    <tr><td><b>선수선 오차</b></td><td>화면의 선수선이 실제 선수 방향과 어긋난다. 모든 상대방위가 같은 양만큼 틀린다.</td><td>정선수 방향의 물표를 육안으로 맞춘 뒤 레이더 방위와 비교. 약 1° 이내로 조정</td></tr>
+    <tr><td><b>자이로 오차</b></td><td>노스 업 등 안정화 표시에서는 자이로 오차가 레이더 진방위에 그대로 들어간다.</td><td>자이로 오차를 정기적으로 측정해 보정</td></tr>
+    <tr><td><b>빔폭 왜곡</b></td><td>물표가 빔폭만큼 방위로 퍼져 끝 방위가 부정확하다.</td><td>작은 점 물표는 에코 중앙을 잰다. 접선 방위는 반 빔폭만큼 안쪽으로 보정</td></tr>
+    <tr><td><b>화면 중심 어긋남</b></td><td>스윕 원점이 화면 중심과 다르면 방위 측정이 틀린다.</td><td>중심 조정 확인. 전자식 EBL을 사용</td></tr>
+    <tr><td><b>선체 동요</b></td><td>롤링·피칭으로 안테나가 기울어 방위가 흔들린다.</td><td>여러 번 재서 평균</td></tr>
+  </table></div>
+
+  <h2>거리 오차</h2>
+  <div class="tbl"><table>
+    <tr><th>원인</th><th>내용</th><th>점검·대책</th></tr>
+    <tr><td><b>거리 영점 오차</b></td><td>송신 시각과 거리 0의 기준이 어긋나 모든 거리가 일정량만큼 크거나 작게 나온다.</td><td>정박 중 거리를 아는 가까운 물표로 비교. 영점 보정</td></tr>
+    <tr><td><b>펄스 길이 왜곡</b></td><td>에코가 거리 방향으로 펄스 길이 절반만큼 늘어난다.</td><td>에코의 <b>안쪽(앞쪽) 가장자리</b>에 VRM을 맞춘다</td></tr>
+    <tr><td><b>VRM·거리환 오차</b></td><td>가변 거리 환과 고정 거리환이 서로 다른 값을 보인다.</td><td>VRM을 고정 거리환에 겹쳐 비교</td></tr>
+    <tr><td><b>스케일 선택</b></td><td>긴 스케일일수록 같은 화면 오차가 큰 거리 오차가 된다.</td><td>물표가 들어오는 가장 짧은 스케일 사용</td></tr>
+  </table></div>
+
+  <h2>성능 기준의 정확도</h2>
+  <p>IMO 레이더 성능 기준은 거리와 방위 측정 정확도의 최소 요건을 정하고 있다.</p>
+  <div class="formula">\[ \text{거리 오차} \le \max\left(30\ \mathrm{m},\ 0.01 \times \text{사용 중 거리 스케일}\right), \qquad \text{방위 오차} \le 1^\circ \]
+    <small>예: 12해리 스케일에서는 1% = 0.12해리(약 222m)이므로 허용 오차는 약 222m다.</small></div>
+
+  <h2>정기 점검 목록</h2>
+  <ol>
+    <li>선수선이 실제 선수 방향과 맞는가 (정선수 물표 육안 비교)</li>
+    <li>자이로 방위와 화면 방위가 일치하는가</li>
+    <li>VRM과 고정 거리환 값이 일치하는가</li>
+    <li>거리를 아는 물표로 거리 영점 확인</li>
+    <li>성능 감시기 값 또는 기준 물표의 최초 탐지 거리 비교</li>
+    <li>맹목 구역·음영 구역의 범위 기록</li>
+  </ol>
+  <div class="related">관련 문서: <a href="#controls">레이더 조작과 조정</a><a href="#fixing">레이더 위치결정</a></div>
+</article>
+
+<!-- ============ 물표 선정 요령 ============ -->
+<article data-slug="target-selection" data-title="레이더 물표 선정 요령" data-cat="항법 실무" data-kw="물표 선정 conspicuous 절벽 곶 등대 고립 암 부이 정박선 위치결정" hidden>
+  <div class="crumb">항법 실무</div>
+  <h1>레이더 물표 선정 요령</h1>
+  <div class="en">Selecting Radar Targets</div>
+  <p>레이더 위치결정의 정확도는 어떤 물표를 고르느냐에 달려 있다. 화면에서 잘 보이고, 해도에서 정확한 위치를 알 수 있으며, 잘못 식별할 가능성이 낮은 물표가 좋다. 물표는 항해 계획 단계에서 해도를 보며 미리 골라 둔다.</p>
+
+  <h2>좋은 물표와 나쁜 물표</h2>
+  <div class="tbl"><table>
+    <tr><th>좋은 물표</th><th>이유</th></tr>
+    <tr><td>해안에서 가파르게 솟은 절벽, 곶</td><td>반사가 강하고, 반사점이 해도의 해안선과 일치한다</td></tr>
+    <tr><td>고립된 작은 섬, 바위</td><td>점 물표라 방위·거리를 정확히 잴 수 있다</td></tr>
+    <tr><td>등대, 철탑 등 금속·콘크리트 구조물</td><td>반사가 강하고 위치가 정확하다</td></tr>
+    <tr><td>레이콘이 설치된 표지</td><td>모스 부호로 확실하게 식별된다</td></tr>
+    <tr><td>방파제 끝단</td><td>위치가 명확하다 (재질과 높이에 따라 다름)</td></tr>
+  </table></div>
+  <div class="tbl"><table>
+    <tr><th>피해야 할 물표</th><th>이유</th></tr>
+    <tr><td>낮은 모래 해변, 갯벌, 습지</td><td>에코가 약하거나 조석에 따라 위치가 바뀐다</td></tr>
+    <tr><td>완만하게 높아지는 해안</td><td>실제 해안선보다 내륙에서 에코가 시작된다</td></tr>
+    <tr><td>내륙의 높은 산</td><td>어느 지점이 반사하는지 알기 어렵다</td></tr>
+    <tr><td>부이</td><td>정위치에서 벗어날 수 있다. 위치결정용이 아니라 확인용으로만 쓴다</td></tr>
+    <tr><td>정박선, 정치망</td><td>해도에 없거나 움직인다</td></tr>
+    <tr><td>음영에 가려질 수 있는 지형</td><td>자선 위치에 따라 보였다 안 보였다 한다</td></tr>
+  </table></div>
+
+  <h2>고르는 요령</h2>
+  <ol>
+    <li><b>가까운 물표를 쓴다.</b> 짧은 거리 스케일로 잴 수 있어 거리 정확도가 높다.</li>
+    <li><b>방위 차이를 크게 한다.</b> 두 물표라면 60°–90°, 세 물표라면 약 120° 간격이 이상적이다.</li>
+    <li><b>세 개 이상을 쓴다.</b> 위치선 세 개가 만드는 삼각형(코크드 햇)의 크기로 오차와 오식별을 확인할 수 있다.</li>
+    <li><b>음영을 미리 따진다.</b> 자선 위치에서 그 물표가 앞의 지형에 가려지지 않는지 해도로 확인한다.</li>
+    <li><b>측심으로 확인한다.</b> 구한 선위의 해도 수심과 측심값을 비교한다.</li>
+    <li><b>식별에 확신이 없으면 쓰지 않는다.</b> 잘못 식별한 물표 하나가 전체 픽스를 틀리게 만든다.</li>
+  </ol>
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 230" width="640" height="230" role="img" aria-label="세 위치선이 만드는 삼각형">
+      <line x1="140" y1="40" x2="420" y2="200" class="s-acc" stroke-width="2"/>
+      <line x1="520" y1="40" x2="220" y2="200" class="s-echo" stroke-width="2"/>
+      <line x1="120" y1="148" x2="560" y2="140" class="s-ink" stroke-width="2"/>
+      <path d="M335 152 L300 146 L322 128 Z" class="f-soft s-danger" stroke-width="1"/>
+      <text x="350" y="120" font-size="12" class="f-ink" font-weight="600">작은 삼각형 → 신뢰할 만한 픽스</text>
+      <text x="350" y="138" font-size="11" class="f-muted">크면 오식별·측정 오차를 의심한다</text>
+      <text x="130" y="34" font-size="11" class="f-acc">위치선 1</text>
+      <text x="520" y="34" font-size="11" class="f-echo">위치선 2</text>
+      <text x="120" y="168" font-size="11" class="f-ink">위치선 3</text>
+    </svg>
+    </div>
+    <figcaption><b>세 위치선의 삼각형.</b> 세 위치선이 한 점에서 만나지 않고 작은 삼각형을 만드는 것이 보통이다. 삼각형이 크면 물표 식별이나 측정을 다시 확인한다.</figcaption>
+  </figure>
+  <div class="related">관련 문서: <a href="#fixing">레이더 위치결정</a><a href="#interpretation">영상 판독</a><a href="#aids">레이더 항로표지</a></div>
+</article>
+
+<!-- ============ 진운동과 상대운동 ============ -->
+<article data-slug="motion" data-title="진운동과 상대운동" data-cat="충돌 회피" data-kw="진운동 상대운동 true motion relative motion TM RM 지면 안정화 수면 안정화 ground stabilized sea stabilized 궤적 trail" hidden>
+  <div class="crumb">충돌 회피</div>
+  <h1>진운동과 상대운동</h1>
+  <div class="en">True Motion and Relative Motion</div>
+  <p>레이더 화면에서 물표가 어떻게 움직여 보이는지는 표시 방식에 따라 다르다. 같은 상황이라도 상대운동 표시와 진운동 표시는 전혀 다른 그림을 보여 주므로, 지금 어떤 방식인지 항상 알고 있어야 한다.</p>
+
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 310" width="640" height="310" role="img" aria-label="상대운동 표시와 진운동 표시 비교">
+      <circle cx="160" cy="140" r="115" class="sc-bg sc-ring"/>
+      <circle cx="160" cy="140" r="57" class="f-none sc-ring"/>
+      <line x1="160" y1="140" x2="160" y2="25" class="sc-line" stroke-width="1.6"/>
+      <circle cx="160" cy="140" r="4" class="sc-linef"/>
+      <g class="sc-echo"><circle cx="252" cy="70" r="2" opacity=".3"/><circle cx="238" cy="82" r="2" opacity=".45"/><circle cx="224" cy="94" r="2" opacity=".6"/><circle cx="210" cy="106" r="2" opacity=".8"/><circle cx="196" cy="118" r="5"/></g>
+      <line x1="196" y1="118" x2="160" y2="148" class="sc-echo-s" stroke-dasharray="3 4" stroke-width="1"/>
+      <g class="sc-echo"><circle cx="100" cy="50" r="2" opacity=".3"/><circle cx="100" cy="60" r="2" opacity=".5"/><ellipse cx="100" cy="76" rx="14" ry="9"/></g>
+      <text x="206" y="134" font-size="10" class="sc-text">선박</text>
+      <text x="74" y="98" font-size="10" class="sc-text">섬도 움직임</text>
+      <text x="160" y="282" font-size="13" text-anchor="middle" class="f-ink" font-weight="600">상대운동 (RM)</text>
+      <text x="160" y="301" font-size="12" text-anchor="middle" class="f-muted">자선 고정 · 궤적 연장선 = 상대운동선</text>
+      <circle cx="480" cy="140" r="115" class="sc-bg sc-ring"/>
+      <g class="sc-linef"><circle cx="480" cy="230" r="2" opacity=".3"/><circle cx="480" cy="215" r="2" opacity=".45"/><circle cx="480" cy="200" r="2" opacity=".6"/><circle cx="480" cy="185" r="2" opacity=".8"/><circle cx="480" cy="170" r="4"/></g>
+      <line x1="480" y1="170" x2="480" y2="70" class="sc-line" stroke-width="1.6"/>
+      <g class="sc-echo"><circle cx="572" cy="100" r="2" opacity=".3"/><circle cx="560" cy="100" r="2" opacity=".45"/><circle cx="548" cy="100" r="2" opacity=".6"/><circle cx="536" cy="100" r="2" opacity=".8"/><circle cx="524" cy="100" r="5"/></g>
+      <ellipse cx="420" cy="76" rx="14" ry="9" class="sc-echo"/>
+      <text x="530" y="90" font-size="10" class="sc-text">선박 (실제 침로)</text>
+      <text x="398" y="98" font-size="10" class="sc-text">섬 정지</text>
+      <text x="490" y="232" font-size="10" class="sc-text">자선 이동</text>
+      <text x="480" y="282" font-size="13" text-anchor="middle" class="f-ink" font-weight="600">진운동 (TM)</text>
+      <text x="480" y="301" font-size="12" text-anchor="middle" class="f-muted">자선이 화면 위를 이동 · 고정 물표 정지</text>
+    </svg>
+    </div>
+    <figcaption><b>같은 상황, 두 표시 방식.</b> 자선은 북쪽으로, 다른 선박은 서쪽으로 가고 있다. 상대운동 표시에서는 선박 궤적이 자선 쪽을 향해 충돌 위험이 바로 보이고, 섬도 남쪽으로 흘러간다. 진운동 표시에서는 각 선박의 실제 침로가 보이고 섬은 멈춰 있다.</figcaption>
+  </figure>
+
+  <h2>상대운동 표시 (RM)</h2>
+  <p>자선이 화면의 한 점(보통 중심)에 고정되고, 다른 모든 물표는 자선에 대한 <b>상대운동</b>으로 움직인다. 육지 같은 고정 물표도 자선 침로의 반대 방향, 자선 속력으로 흘러간다.</p>
+  <ul>
+    <li>물표 궤적의 연장선이 곧 <b>상대운동선</b>이므로, 자선 근처를 지나는지(CPA) 화면에서 바로 판단할 수 있다. 충돌 회피에 유리하다.</li>
+    <li>다른 선박의 실제 침로와 속력은 바로 보이지 않는다. <a href="#arpa">레이더 플로팅</a>으로 구해야 한다.</li>
+    <li><a href="#parallel-indexing">평행 지표법</a>은 상대운동 표시를 전제로 한다.</li>
+  </ul>
+
+  <h2>진운동 표시 (TM)</h2>
+  <p>자선이 실제 침로와 속력으로 화면 위를 움직이고, 고정 물표는 멈춰 있으며, 다른 선박은 실제 운동대로 움직인다.</p>
+  <ul>
+    <li>해도와 같은 그림이 되어 항법과 상황 파악이 쉽다. 다른 선박의 진침로와 마주침 관계(aspect)를 바로 볼 수 있다.</li>
+    <li>자선이 화면 가장자리에 가까워지면 자선 위치를 재설정(reset)해야 한다. 자선 앞쪽 시야가 좁아지지 않게 주의한다.</li>
+    <li>충돌 위험은 궤적만 보고 판단하기 어렵다. CPA는 ARPA나 플로팅으로 확인한다.</li>
+  </ul>
+
+  <h2>지면 안정화와 수면 안정화</h2>
+  <p>진운동 표시와 진벡터는 자선의 운동을 무엇에 대해 재느냐에 따라 두 가지로 나뉜다.</p>
+  <div class="tbl"><table>
+    <tr><th></th><th>지면 안정화 (Ground stabilized)</th><th>수면 안정화 (Sea stabilized)</th></tr>
+    <tr><td>자선 운동 입력</td><td>대지 침로·속력 (COG/SOG, GPS 또는 대지 속력 로그)</td><td>선수 방향·대수 속력 (자이로 + 대수 속력 로그)</td></tr>
+    <tr><td>고정 물표</td><td>정지해 보인다</td><td>조류가 있으면 조류 반대 방향으로 흘러간다</td></tr>
+    <tr><td>다른 선박의 벡터</td><td>대지 침로 (조류에 밀린 방향)</td><td>대수 침로 (선수가 향하는 방향과 비슷)</td></tr>
+    <tr><td>적합한 용도</td><td>항법, 위치 감시, 평행 지표</td><td>충돌 회피 (마주침 관계 판단)</td></tr>
+  </table></div>
+  <div class="note"><strong>조류가 강한 해역에서 주의.</strong> 지면 안정화 화면에서 다른 선박의 진벡터는 그 선박의 선수 방향과 크게 다를 수 있다. 이를 선수 방향으로 착각하면 마주침 관계(정면, 횡단, 추월)를 잘못 판단해 충돌예방규칙을 잘못 적용하게 된다. 충돌 회피에는 수면 안정화가 권장된다.</div>
+
+  <h2>궤적 (Trails)</h2>
+  <p>물표의 과거 위치를 잔상으로 남기는 기능이다. <b>상대 궤적</b>은 상대운동을, <b>진 궤적</b>은 실제 운동을 보여 준다. 화면 표시 방식과 궤적 방식을 따로 고를 수 있는 기종이 많으므로, 지금 보는 궤적이 어느 쪽인지 확인한다.</p>
+  <div class="related">관련 문서: <a href="#arpa">레이더 플로팅과 ARPA</a><a href="#ppi">PPI</a><a href="#colregs">충돌예방규칙과 레이더</a></div>
+</article>
+
+<!-- ============ ARPA ============ -->
+<article data-slug="arpa" data-title="레이더 플로팅과 ARPA" data-cat="충돌 회피" data-kw="플로팅 plotting ARPA CPA TCPA 상대운동 삼각형 OAW 시험 조선 trial manoeuvre 자동 추적 벡터 물표 바꿔치기 target swap" hidden>
+  <div class="crumb">충돌 회피</div>
+  <h1>레이더 플로팅과 ARPA</h1>
+  <div class="en">Radar Plotting and ARPA</div>
+  <p><b>레이더 플로팅</b>은 레이더로 관측한 물표의 위치를 시간 간격을 두고 기록해, 그 물표가 자선에 얼마나 가까이 오는지와 실제로 어떻게 움직이는지를 구하는 작도법이다. <b>ARPA</b>(자동 레이더 플로팅 장치)는 이 과정을 자동으로 해 준다. 국제해상충돌예방규칙은 레이더를 가진 선박에게 레이더 플로팅 또는 이와 동등한 체계적 관측을 요구한다.</p>
+
+  <h2>플로팅으로 구하는 것</h2>
+  <div class="tbl"><table>
+    <tr><th>항목</th><th>뜻</th></tr>
+    <tr><td><b>CPA</b> (최근접점 거리)</td><td>지금 운동을 유지할 때 물표가 자선에 가장 가까워지는 거리</td></tr>
+    <tr><td><b>TCPA</b> (최근접점 도달 시간)</td><td>CPA에 이를 때까지 남은 시간</td></tr>
+    <tr><td><b>상대 침로·상대 속력</b></td><td>자선에서 본 물표의 움직임 (상대운동선의 방향과 속력)</td></tr>
+    <tr><td><b>진침로·진속력</b></td><td>물표의 실제 운동. 마주침 관계 판단에 필요</td></tr>
+  </table></div>
+
+  <h2>상대운동 삼각형 작도</h2>
+  <p>여기서는 흔히 쓰는 <b>O·A·W</b> 표기를 쓴다.</p>
+  <ol>
+    <li><b>O</b>: 첫 관측 위치를 플로팅하고 시각을 적는다.</li>
+    <li><b>A</b>: 일정 시간(보통 6분) 뒤의 위치를 플로팅한다. <b>OA</b>는 상대운동이다.</li>
+    <li>OA를 연장한 <b>상대운동선(RML)</b>에 자선(중심)에서 수선을 내리면, 그 길이가 <b>CPA</b>다.</li>
+    <li>A에서 CPA점까지의 거리를 상대 속력으로 나누면 <b>TCPA</b>다.</li>
+    <li><b>W</b>: O에서 자선 침로의 반대 방향으로, 같은 시간 동안 자선이 간 거리만큼 이동한 점이다. <b>WO</b>는 자선의 운동이다.</li>
+    <li><b>WA</b>가 물표의 진침로와 진속력이다.</li>
+  </ol>
+  <div class="formula">\[ \vec{WA} = \vec{WO} + \vec{OA} \quad\Longleftrightarrow\quad \text{물표 진운동} = \text{자선 운동} + \text{상대운동} \]
+    <small>6분 간격으로 플로팅하면 거리(해리)에 10을 곱한 값이 곧 속력(노트)이다.</small></div>
+  <div class="formula">\[ V_r = \frac{\overline{OA}}{\Delta t}, \qquad \mathrm{TCPA} = \frac{\overline{A\,C}}{V_r} \]
+    <small>\(V_r\): 상대 속력, \(\Delta t\): 플로팅 간격, \(C\): 최근접점.</small></div>
+
+  <div class="sim" id="lab-plot">
+    <div class="sim-head"><b>레이더 플로팅 연습</b><span class="sim-badge">실험</span></div>
+    <div class="lab-sub">자선</div>
+    <div class="lab-row">
+      <div class="ctrl"><label for="plHdg">침로 (°)</label><input id="plHdg" type="number" min="0" max="359" value="0"></div>
+      <div class="ctrl"><label for="plSpd">속력 (kn)</label><input id="plSpd" type="number" min="0" max="40" step="0.5" value="12"></div>
+      <div class="ctrl"><label for="plDt">플로팅 간격 (분)</label><input id="plDt" type="number" min="1" max="30" value="6"></div>
+      <div class="ctrl"><label for="plLim">CPA 한계 (NM)</label><input id="plLim" type="number" min="0" max="5" step="0.1" value="2"></div>
+    </div>
+    <div class="lab-sub">물표 관측 (진방위·거리)</div>
+    <div class="lab-row">
+      <div class="ctrl"><label for="plB1">첫 관측 방위 (°)</label><input id="plB1" type="number" min="0" max="359" step="0.5" value="45"></div>
+      <div class="ctrl"><label for="plR1">첫 관측 거리 (NM)</label><input id="plR1" type="number" min="0.1" max="24" step="0.1" value="8"></div>
+      <div class="ctrl"><label for="plB2">두 번째 방위 (°)</label><input id="plB2" type="number" min="0" max="359" step="0.5" value="43"></div>
+      <div class="ctrl"><label for="plR2">두 번째 거리 (NM)</label><input id="plR2" type="number" min="0.1" max="24" step="0.1" value="6.5"></div>
+    </div>
+    <div class="plot-wrap">
+      <div><svg id="plSvg" viewBox="0 0 420 560" width="420" height="560" role="img" aria-label="상대운동 플로팅 결과" style="display:block;width:100%;max-width:420px;height:auto;margin:0 auto"></svg></div>
+      <div>
+        <div class="lab-out">
+          <div class="stat"><span>CPA</span><b id="plCpa">–</b></div>
+          <div class="stat"><span>TCPA</span><b id="plTcpa">–</b></div>
+          <div class="stat"><span>상대 침로·속력</span><b id="plRel">–</b></div>
+          <div class="stat"><span>물표 진침로·속력</span><b id="plTrue">–</b></div>
+        </div>
+        <div class="verdict" id="plVerdict"></div>
+        <div class="lab-sub">시험 조선 (지금 A 위치에서 바꾼다면)</div>
+        <div class="ctrl"><label for="plTHdg">시험 침로 <output id="plTHdgo">000°</output></label><input id="plTHdg" type="range" min="0" max="359" value="0"></div>
+        <div class="ctrl" style="margin-top:8px"><label for="plTSpd">시험 속력 <output id="plTSpdo">12.0 kn</output></label><input id="plTSpd" type="range" min="0" max="25" step="0.5" value="12"></div>
+        <div class="readout" id="plTrial" style="margin-top:10px">–</div>
+      </div>
+    </div>
+    <p class="try" style="margin-top:12px">처음 값은 우현 앞쪽에서 서쪽으로 가로질러 오는 선박이다. 시험 침로를 우현 쪽(예: 040°)으로 돌려 CPA가 한계 밖으로 커지는지 보자. 그림에서 파랑은 상대운동(OA), 검정은 자선 운동(WO), 주황은 물표 진운동(WA)이다.</p>
+  </div>
+
+  <h2>시험 조선</h2>
+  <p>피항 동작을 실제로 하기 전에, 자선 침로나 속력을 바꾸면 CPA가 어떻게 달라지는지 미리 확인하는 것이 <b>시험 조선</b>(trial manoeuvre)이다. 작도에서는 W를 중심으로 새 자선 운동 벡터를 그리고, 그 끝점에서 A까지가 새 상대운동이 된다. ARPA는 이를 화면에서 바로 보여 준다. 변침이 늦어질수록 같은 각도의 변침으로 얻는 CPA 증가가 작아진다.</p>
+
+  <h2>ARPA</h2>
+  <p>ARPA는 레이더 물표를 자동으로 추적해 CPA, TCPA, 진침로·진속력을 계산하고 벡터로 표시한다.</p>
+  <ul>
+    <li><b>포착과 추적</b>: 수동 또는 자동으로 물표를 포착하면 위치를 연속으로 추적한다. 추적 초기에는 데이터가 쌓일 때까지 결과가 불안정하다. 보통 약 1분 뒤 운동 경향, 약 3분 뒤 신뢰할 만한 예측값을 낸다.</li>
+    <li><b>벡터</b>: 상대 벡터와 진 벡터를 고를 수 있다. 벡터 길이는 설정한 시간(예: 6분) 동안의 이동을 나타낸다.</li>
+    <li><b>과거 위치</b>: 일정 간격의 과거 위치 점을 표시해, 물표가 변침·변속했는지 확인할 수 있다.</li>
+    <li><b>경보</b>: CPA·TCPA 한계를 넘는 물표, 새로 경계 구역에 들어온 물표, 추적을 잃은 물표를 알린다.</li>
+    <li><b>시험 조선</b>: 계획한 변침·변속의 효과를 미리 보여 준다.</li>
+  </ul>
+  <h3>ARPA의 한계</h3>
+  <ul>
+    <li><b>물표 바꿔치기</b>(target swap): 가까이 지나가는 두 물표의 추적이 서로 바뀔 수 있다.</li>
+    <li><b>추적 소실</b>: 클러터, 음영, 약한 에코 때문에 추적을 잃을 수 있다.</li>
+    <li><b>입력 오차</b>: 자선의 선수 방향·속력 입력이 틀리면 모든 물표의 진벡터가 틀린다. 상대 벡터와 CPA는 비교적 영향을 덜 받는다.</li>
+    <li><b>지연</b>: 물표가 변침하면 ARPA가 이를 반영하기까지 시간이 걸린다.</li>
+    <li><b>안정화 방식</b>: 지면 안정화에서는 진벡터가 대지 침로를 보여 마주침 관계를 오판할 수 있다. <a href="#motion">진운동과 상대운동</a> 참고.</li>
+  </ul>
+  <div class="note"><strong>ARPA는 보조 수단이다.</strong> 숫자를 그대로 믿기보다 화면의 궤적, 방위 변화, 육안 관측과 함께 판단한다. 방위가 뚜렷이 변하지 않고 거리가 줄면 충돌 위험이 있다고 본다.</div>
+  <div class="related">관련 문서: <a href="#motion">진운동과 상대운동</a><a href="#colregs">충돌예방규칙과 레이더</a><a href="#sart-ais">SART와 AIS</a></div>
+</article>
+
+<!-- ============ 충돌예방규칙 ============ -->
+<article data-slug="colregs" data-title="충돌예방규칙과 레이더" data-cat="충돌 회피" data-kw="COLREG 국제해상충돌예방규칙 해상교통안전법 경계 안전한 속력 충돌 위험 피항 동작 제한된 시계 제19조 제6조 제7조 제5조 제8조" hidden>
+  <div class="crumb">충돌 회피</div>
+  <h1>충돌예방규칙과 레이더</h1>
+  <div class="en">COLREGs and the Use of Radar</div>
+  <p><b>1972년 국제해상충돌예방규칙</b>(COLREGs)은 레이더 사용에 관한 의무를 여러 조항에 걸쳐 정하고 있다. 국내에서는 해상교통안전법이 같은 내용을 담고 있다. 아래는 레이더와 관련된 핵심 내용을 정리한 것으로, 정확한 문구는 규칙 원문을 확인해야 한다.</p>
+
+  <h2>제5조 경계</h2>
+  <p>모든 선박은 시각과 청각은 물론, 당시 상황에 맞는 <b>모든 가능한 수단</b>으로 항상 적절한 경계를 해야 한다. 레이더가 있다면 레이더도 그 수단에 포함된다.</p>
+
+  <h2>제6조 안전한 속력</h2>
+  <p>안전한 속력을 정할 때 모든 선박이 고려할 요소에 더해, 레이더를 사용하는 선박은 다음을 추가로 고려해야 한다.</p>
+  <ol>
+    <li>레이더의 특성, 효율 및 한계</li>
+    <li>사용 중인 거리 스케일에 따른 제약</li>
+    <li>해상 상태, 기상, 그 밖의 간섭원이 레이더 탐지에 주는 영향</li>
+    <li>소형선, 얼음, 그 밖의 부유물이 적절한 거리에서 탐지되지 않을 가능성</li>
+    <li>레이더로 탐지한 선박의 수, 위치, 동향</li>
+    <li>레이더로 주변 선박이나 물체까지의 거리를 재서 시정을 더 정확히 판단할 수 있다는 점</li>
+  </ol>
+
+  <h2>제7조 충돌 위험</h2>
+  <ul>
+    <li>레이더가 있고 작동 중이면 이를 적절히 사용해야 한다. 충돌 위험을 일찍 알기 위한 <b>장거리 탐색</b>과, 탐지한 물체에 대한 <b>레이더 플로팅 또는 이와 동등한 체계적 관측</b>이 포함된다.</li>
+    <li>불충분한 정보, 특히 <b>불충분한 레이더 정보</b>에 근거해 추측해서는 안 된다.</li>
+    <li>다가오는 선박의 나침 방위가 뚜렷이 변하지 않으면 충돌 위험이 있다고 보아야 한다. 방위가 뚜렷이 변하더라도 대형선, 예인 중인 선박, 아주 가까이 접근하는 선박에는 충돌 위험이 있을 수 있다.</li>
+  </ul>
+
+  <h2>제8조 충돌을 피하기 위한 동작</h2>
+  <ul>
+    <li>피항 동작은 충분한 시간 여유를 두고, 적극적으로, 선박 운용술에 맞게 한다.</li>
+    <li>변침이나 변속은 <b>육안이나 레이더로 관측하는 다른 선박이 쉽게 알아챌 수 있을 만큼 크게</b> 한다. 작은 변침을 여러 번 하는 것은 피한다.</li>
+    <li>동작의 효과는 다른 선박이 완전히 지나가 멀어질 때까지 주의 깊게 확인한다.</li>
+  </ul>
+
+  <h2>제19조 제한된 시계에서의 항법</h2>
+  <p>서로 보이지 않는 상태(안개, 강우 등)에서 적용된다. 레이더와 직접 관련된 내용은 다음과 같다.</p>
+  <ul>
+    <li>레이더만으로 다른 선박을 탐지한 선박은 <b>근접 상황이 생기고 있는지, 충돌 위험이 있는지</b> 판단해야 한다. 그렇다면 충분한 시간 여유를 두고 피항 동작을 한다.</li>
+    <li>그 동작이 변침이라면 가능한 한 다음을 피한다.
+      <ul>
+        <li>정횡보다 앞쪽에 있는 선박에 대해 <b>좌현으로 변침</b>하는 것 (자선이 추월하는 선박은 제외)</li>
+        <li>정횡 또는 정횡보다 뒤쪽에 있는 선박 <b>쪽으로 변침</b>하는 것</li>
+      </ul>
+    </li>
+    <li>충돌 위험이 없다고 판단한 경우를 제외하고, 정횡보다 앞쪽에서 다른 선박의 무중신호를 듣거나 정횡보다 앞쪽 선박과의 근접 상황을 피할 수 없을 때는 <b>침로를 유지할 수 있는 최소 속력으로 감속</b>하고, 필요하면 정지해야 한다.</li>
+  </ul>
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 300" width="640" height="300" role="img" aria-label="제한된 시계에서 피해야 할 변침">
+      <path d="M100 170 L540 170 L540 20 L100 20 Z" class="f-soft"/>
+      <line x1="80" y1="170" x2="560" y2="170" class="s-muted" stroke-dasharray="5 4"/>
+      <text x="556" y="188" font-size="11" text-anchor="end" class="f-muted">정횡선</text>
+      <text x="110" y="38" font-size="12" class="f-acc" font-weight="600">정횡보다 앞쪽</text>
+      <text x="110" y="262" font-size="12" class="f-muted" font-weight="600">정횡 및 정횡보다 뒤쪽</text>
+      <path d="M320 140 L332 176 L332 214 L308 214 L308 176 Z" class="f-ink"/>
+      <circle cx="450" cy="70" r="7" class="f-echo"/>
+      <text x="462" y="66" font-size="11" class="f-echo">앞쪽 선박</text>
+      <path d="M314 132 Q 290 96 250 92" class="f-none s-danger" stroke-width="2.2"/>
+      <path d="M262 84 L250 92 L262 101" class="f-none s-danger" stroke-width="2.2"/>
+      <path d="M270 82 L292 106 M292 82 L270 106" class="s-danger" stroke-width="2.5"/>
+      <text x="160" y="120" font-size="12" class="f-ink">앞쪽 선박에 대해</text>
+      <text x="160" y="137" font-size="12" class="f-ink">좌현 변침은 피한다</text>
+      <circle cx="480" cy="230" r="7" class="f-echo"/>
+      <text x="492" y="226" font-size="11" class="f-echo">정횡 후방 선박</text>
+      <path d="M332 200 Q 380 214 430 226" class="f-none s-danger" stroke-width="2.2"/>
+      <path d="M418 220 L430 226 L420 234" class="f-none s-danger" stroke-width="2.2"/>
+      <path d="M374 202 L392 224 M392 202 L374 224" class="s-danger" stroke-width="2.5"/>
+      <text x="360" y="262" font-size="12" class="f-ink">그 선박 쪽으로 변침은 피한다</text>
+    </svg>
+    </div>
+    <figcaption><b>제한된 시계에서 피해야 할 변침 (제19조).</b> 정횡보다 앞쪽 선박에 대해서는 좌현 변침을, 정횡이나 그 뒤쪽 선박에 대해서는 그 선박 쪽으로의 변침을 가능한 한 피한다.</figcaption>
+  </figure>
+  <div class="note"><strong>레이더로 본 선박에는 진로 우선 규칙이 적용되지 않는다.</strong> 서로 보이는 상태의 항법(제11조–제18조, 유지선·피항선 관계)은 제한된 시계에서 레이더로만 탐지한 선박에는 적용되지 않는다. 이때는 두 선박 모두 제19조에 따라 행동해야 한다.</div>
+  <div class="related">관련 문서: <a href="#arpa">레이더 플로팅과 ARPA</a><a href="#motion">진운동과 상대운동</a></div>
+</article>
+
+<!-- ============ SART와 AIS ============ -->
+<article data-slug="sart-ais" data-title="SART와 AIS" data-cat="충돌 회피" data-kw="SART 수색구조 트랜스폰더 AIS-SART AIS 중첩 overlay MMSI 연관 association 조난 12점" hidden>
+  <div class="crumb">충돌 회피</div>
+  <h1>SART와 AIS</h1>
+  <div class="en">SART, AIS and Radar Overlay</div>
+  <p>레이더 화면에는 레이더 에코 말고도 조난 위치를 알리는 SART 신호와, 다른 선박이 송신하는 AIS 정보가 함께 표시될 수 있다. 각각의 표시 모양과 한계를 알아야 올바르게 해석할 수 있다.</p>
+
+  <h2>레이더 SART</h2>
+  <p><b>SART</b>(수색구조용 레이더 트랜스폰더)는 구명정이나 조난자가 작동시키는 장비다. 9GHz 대역, 곧 <b>X밴드 레이더</b>의 펄스를 받으면 응답 신호를 보내 레이더 화면에 특유의 무늬를 만든다. S밴드 레이더에는 나타나지 않는다.</p>
+  <figure>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 270" width="640" height="270" role="img" aria-label="SART 화면 표시 변화">
+      <circle cx="160" cy="125" r="110" class="sc-bg sc-ring"/>
+      <circle cx="160" cy="125" r="55" class="f-none sc-ring"/>
+      <circle cx="160" cy="125" r="3" class="sc-linef"/>
+      <g class="sc-echo" id="sartDots"></g>
+      <text x="160" y="258" font-size="12" text-anchor="middle" class="f-ink">멀 때: 바깥으로 뻗는 12개 점열</text>
+      <circle cx="480" cy="125" r="110" class="sc-bg sc-ring"/>
+      <circle cx="480" cy="125" r="3" class="sc-linef"/>
+      <g class="f-none sc-echo-s" stroke-width="3" id="sartArcs"></g>
+      <text x="480" y="258" font-size="12" text-anchor="middle" class="f-ink">약 1해리 이내: 점이 호로, 더 가까우면 동심원으로</text>
+    </svg>
+    </div>
+    <figcaption><b>SART 표시.</b> 멀리 있을 때는 SART 위치에서 바깥쪽으로 같은 방위에 12개의 점이 늘어선다. 가장 안쪽 점이 SART 위치에 해당한다. 가까워지면 사이드 로브까지 응답을 받아 점이 호로 늘어나고, 아주 가까우면 동심원이 된다. 이때가 생존자 바로 근처다.</figcaption>
+  </figure>
+  <ul>
+    <li>12개 점의 길이는 약 8해리다. SART가 수면 가까이 있어 일반적인 탐지 거리는 수 해리 정도다.</li>
+    <li>SART를 찾을 때는 X밴드 레이더를 6해리나 12해리 스케일에 두고, 클러터 억제를 지나치게 쓰지 않는다. 간섭 제거 기능은 SART 응답을 지울 수 있으므로 끈다. 튜닝을 약간 틀면 클러터 속에서 점열이 더 잘 보이기도 한다.</li>
+  </ul>
+
+  <h2>AIS-SART</h2>
+  <p>AIS-SART는 레이더 응답 대신 <b>AIS 신호</b>로 GPS 위치를 송신한다. 레이더 화면이나 ECDIS의 AIS 표시에 원 안에 X가 그려진 전용 기호와 경보로 나타난다. 레이더 수평선과 무관하게 AIS 수신 거리 안이면 보인다.</p>
+
+  <h2>AIS 정보 중첩</h2>
+  <p>많은 레이더는 AIS로 받은 선박 정보를 레이더 영상 위에 삼각형 기호로 겹쳐 표시한다.</p>
+  <div class="tbl"><table>
+    <tr><th>장점</th><th>한계</th></tr>
+    <tr><td>선명, 호출부호, MMSI로 선박을 바로 식별</td><td>모든 선박이 AIS를 갖추지는 않는다 (소형선, 어선 등)</td></tr>
+    <tr><td>상대 선박의 침로·속력·선수 방향·선회율을 바로 알 수 있다</td><td>송신 정보가 틀릴 수 있다 (GPS 오차, 잘못 입력된 정보)</td></tr>
+    <tr><td>섬이나 곶 뒤 레이더 음영에 있는 선박도 보인다</td><td>꺼져 있거나 송신 간격이 길어 위치가 늦게 갱신될 수 있다</td></tr>
+    <tr><td>상대의 변침을 빨리 알 수 있다</td><td>AIS 위치는 상대 선박의 GPS 안테나 위치다</td></tr>
+  </table></div>
+  <ul>
+    <li><b>연관(association)</b>: 같은 선박의 레이더 물표와 AIS 물표를 하나로 묶어 표시하는 기능이다. 두 기호가 계속 어긋나 보이면 자선의 자이로 오차, GPS 오차, 상대 선박의 AIS 정보 오류를 의심한다.</li>
+    <li>AIS는 충돌 회피의 <b>보조 정보</b>다. 레이더에 잡히는데 AIS가 없는 물표가 있을 수 있으므로, 레이더 관측과 플로팅을 기본으로 한다.</li>
+  </ul>
+  <div class="related">관련 문서: <a href="#arpa">레이더 플로팅과 ARPA</a><a href="#aids">레이더 항로표지</a><a href="#bands">X밴드와 S밴드</a></div>
+</article>
+
+<!-- ============ 검색 결과 ============ -->
+<article data-slug="search" data-title="검색" hidden>
+  <div class="crumb">검색</div>
+  <h1 id="searchTitle">검색 결과</h1>
+  <ul class="results" id="results"></ul>
+</article>
+
+    <div class="foot">출처: American Practical Navigator (Bowditch), NGA Pub. No. 9, 2024 ed., Vol. I, Ch. 24 Radar Navigation. 이 위키는 초안이다.</div>
+  </main>
+</div>
+
+<script>
+(function(){
+  const D2R = Math.PI / 180;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const tok = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const pad3 = n => String(((Math.round(n) % 360) + 360) % 360).padStart(3, '0');
+  const sims = [];
+
+  /* ---------- generated figure parts ---------- */
+  (function(){
+    let m = 'M20 80 L120 80 ';
+    for(let i = 0; i <= 80; i++){ const x = 120 + i * 40 / 80; m += 'L' + x.toFixed(1) + ' ' + (80 - 30 * Math.sin(i * 0.9)).toFixed(1) + ' '; }
+    m += 'L620 80';
+    document.getElementById('mag').setAttribute('d', m);
+    let c = 'M20 168 L60 168 ', ph = 0;
+    for(let i = 0; i <= 600; i++){ ph += 0.08 + 0.5 * i / 600; const x = 60 + i * 500 / 600; c += 'L' + x.toFixed(1) + ' ' + (168 - 12 * Math.sin(ph)).toFixed(1) + ' '; }
+    c += 'L620 168';
+    document.getElementById('chirp').setAttribute('d', c);
+    let s = '';
+    for(let x = 76, k = 0; x < 572; x += 18, k++){ const tilt = k % 2 ? 6 : -6; s += '<rect x="' + x + '" y="70" width="4" height="14" transform="rotate(' + tilt + ' ' + (x + 2) + ' 77)"/>'; }
+    document.getElementById('slots').innerHTML = s;
+  })();
+
+  /* ---------- lab: radar horizon ---------- */
+  (function(){
+    const a = document.getElementById('hzA'), t = document.getElementById('hzT');
+    function upd(){
+      const h = +a.value, H = +t.value;
+      document.getElementById('hzAo').textContent = h;
+      document.getElementById('hzTo').textContent = H;
+      const d1 = 2.21 * Math.sqrt(h), d2 = 2.21 * Math.sqrt(H);
+      document.getElementById('hzD1').textContent = d1.toFixed(1) + ' NM';
+      document.getElementById('hzD2').textContent = d2.toFixed(1) + ' NM';
+      document.getElementById('hzD3').textContent = (d1 + d2).toFixed(1) + ' NM';
+    }
+    a.addEventListener('input', upd); t.addEventListener('input', upd); upd();
+  })();
+
+  /* ---------- lab: range resolution ---------- */
+  (function(){
+    const tauI = document.getElementById('rsTau'), sepI = document.getElementById('rsSep'), svg = document.getElementById('rsSvg'), out = document.getElementById('rsVerdict');
+    const X = m => 90 + m * (490 / 520);
+    function upd(){
+      const tau = +tauI.value, sep = +sepI.value, len = 150 * tau, t1 = 60, t2 = t1 + sep;
+      document.getElementById('rsTauo').textContent = tau.toFixed(2) + ' µs';
+      document.getElementById('rsSepo').textContent = sep + ' m';
+      const merged = sep < len;
+      let h = '';
+      h += '<text x="10" y="58" font-size="12" class="f-muted">실제 물표</text>';
+      h += '<line x1="90" y1="54" x2="580" y2="54" class="s-line"/>';
+      h += '<circle cx="' + X(t1) + '" cy="54" r="6" class="f-ink"/><circle cx="' + X(t2) + '" cy="54" r="6" class="f-ink"/>';
+      h += '<text x="' + ((X(t1) + X(t2)) / 2) + '" y="38" font-size="11" text-anchor="middle" class="f-ink">' + sep + ' m</text>';
+      h += '<text x="10" y="123" font-size="12" class="f-muted">화면 에코</text>';
+      h += '<rect x="90" y="104" width="490" height="30" class="sc-bg"/>';
+      if(merged){
+        h += '<rect x="' + X(t1) + '" y="108" width="' + (X(t2 + len) - X(t1)) + '" height="22" class="sc-echo"/>';
+      } else {
+        h += '<rect x="' + X(t1) + '" y="108" width="' + (X(t1 + len) - X(t1)) + '" height="22" class="sc-echo"/>';
+        h += '<rect x="' + X(t2) + '" y="108" width="' + (X(t2 + len) - X(t2)) + '" height="22" class="sc-echo"/>';
+      }
+      h += '<path d="M' + X(t1) + ' 146 L' + X(t1 + len) + ' 146 M' + X(t1) + ' 141 L' + X(t1) + ' 151 M' + X(t1 + len) + ' 141 L' + X(t1 + len) + ' 151" class="s-echo" stroke-width="1.2"/>';
+      h += '<text x="' + X(t1) + '" y="164" font-size="11" class="f-echo">에코 길이 cτ/2 = ' + len.toFixed(0) + ' m</text>';
+      h += '<text x="580" y="164" font-size="11" text-anchor="end" class="f-muted">거리 방향 →</text>';
+      svg.innerHTML = h;
+      out.innerHTML = merged
+        ? '<span style="color:var(--danger)">하나로 합쳐 보인다.</span> 간격 ' + sep + ' m가 분해능 ' + len.toFixed(0) + ' m보다 작다. 펄스를 짧게 하면 분리된다.'
+        : '<span style="color:var(--accent)">두 물표로 분리된다.</span> 간격 ' + sep + ' m가 분해능 ' + len.toFixed(0) + ' m보다 크다.';
+    }
+    tauI.addEventListener('input', upd); sepI.addEventListener('input', upd); upd();
+  })();
+
+  /* ---------- lab: second-trace ---------- */
+  (function(){
+    const prrI = document.getElementById('stPrr'), rI = document.getElementById('stR'), scI = document.getElementById('stScale'), svg = document.getElementById('stSvg');
+    function upd(){
+      const prr = +prrI.value, R = +rI.value, sc = +scI.value, Ru = 81000 / prr;
+      const n = Math.floor(R / Ru), Rd = R - n * Ru, vis = Rd <= sc;
+      document.getElementById('stPrro').textContent = prr + ' 회/초';
+      document.getElementById('stRo').textContent = R.toFixed(1) + ' NM';
+      document.getElementById('stRu').textContent = Ru.toFixed(1) + ' NM';
+      document.getElementById('stRd').textContent = Rd.toFixed(1) + ' NM';
+      document.getElementById('stVis').textContent = vis ? '보임' : '안 보임';
+      const maxX = Math.max(R * 1.12, Ru * 1.15, 10);
+      const X = v => 30 + v * (580 / maxX);
+      let h = '<line x1="30" y1="80" x2="620" y2="80" class="s-muted" stroke-width="1.2"/>';
+      const kmax = Math.floor(maxX / Ru);
+      for(let k = 0; k <= kmax && k < 40; k++){
+        const x = X(k * Ru);
+        h += '<rect x="' + (x - 3) + '" y="44" width="6" height="36" class="f-acc"/>';
+        if(kmax < 8) h += '<text x="' + (x + 6) + '" y="40" font-size="11" class="f-acc">펄스 ' + (k + 1) + '</text>';
+      }
+      const xe = X(R), xs = X(n * Ru);
+      h += '<rect x="' + (xe - 3) + '" y="58" width="6" height="22" class="f-echo"/>';
+      h += '<text x="' + Math.min(xe, 590) + '" y="100" font-size="11" text-anchor="middle" class="f-echo">에코 ' + R.toFixed(1) + '</text>';
+      h += '<path d="M' + xs + ' 118 L' + xe + ' 118 M' + xs + ' 113 L' + xs + ' 123 M' + xe + ' 113 L' + xe + ' 123" class="s-echo" stroke-width="1.5"/>';
+      h += '<text x="' + clamp((xs + xe) / 2, 70, 570) + '" y="140" font-size="11" text-anchor="middle" class="f-echo">화면 거리 ' + Rd.toFixed(1) + ' NM</text>';
+      h += '<text x="30" y="100" font-size="10" class="f-muted">0</text>';
+      svg.innerHTML = h;
+      const v = document.getElementById('stVerdict');
+      if(n === 0) v.innerHTML = '<span style="color:var(--accent)">정상 에코.</span> 실제 거리 그대로 표시된다.' + (vis ? '' : ' 다만 거리 스케일 밖이라 화면에는 보이지 않는다.');
+      else v.innerHTML = '<span style="color:var(--danger)">' + (n + 1) + '차 소인 에코.</span> 실제 ' + R.toFixed(1) + ' NM 물표가 ' + Rd.toFixed(1) + ' NM에 잘못 표시된다' + (vis ? '.' : '. 지금 스케일에서는 보이지 않는다.');
+    }
+    [prrI, rI, scI].forEach(e => e.addEventListener('input', upd)); upd();
+  })();
+
+  /* ---------- PPI simulator ---------- */
+  (function(){
+    const art = document.querySelector('[data-slug="ppi-sim"]');
+    const cv = document.getElementById('ppiCanvas'), ctx = cv.getContext('2d');
+    const buf = document.createElement('canvas'), bctx = buf.getContext('2d');
+    const readout = document.getElementById('ppiReadout');
+    const TF = 20;
+    let S = 0, dpr = 1, SC = {};
+    const coast = [[-14,-14],[-6,-14],[-5.4,-9],[-4.4,-6],[-4.8,-3.5],[-6.6,-2.2],[-6.0,-0.6],[-4.6,0.8],[-3.8,3.2],[-4.6,6],[-5.2,9],[-6,14],[-14,14]];
+    const islandA = [[3.0,5.4],[3.7,5.1],[4.2,4.5],[4.1,3.8],[3.6,3.2],[3.0,3.0],[2.4,3.3],[2.0,3.9],[2.1,4.7],[2.5,5.2]];
+    const lowIsl = [[6.3,-2.8],[6.8,-2.7],[6.9,-3.2],[6.4,-3.4]];
+    const rain = {x:3.4, y:-2.3, r:1.5};
+    let st;
+    function init(){
+      st = { mode:'N', band:'X', range:6, gain:55, stc:30, ftc:0, heading:60, speed:0, rho:0,
+        own:{x:0,y:0}, cursor:null,
+        tg:[ {x:1.0,y:-5.5,cog:340,sog:12,rcs:3.0}, {x:-5.25,y:-1.25,cog:0,sog:0,rcs:2.4}, {x:-1.3,y:2.4,cog:0,sog:0,rcs:0.95,fl:true}, {x:4.4,y:1.0,cog:0,sog:0,rcs:1.7,racon:true} ] };
+    }
+    init();
+    function inPoly(x, y, p){ let c = false; for(let i = 0, j = p.length - 1; i < p.length; j = i++){ const xi = p[i][0], yi = p[i][1], xj = p[j][0], yj = p[j][1]; if(((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) c = !c; } return c; }
+    function hash(x, y){ const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return s - Math.floor(s); }
+    function landAt(x, y){ if(x < -3.5 && inPoly(x, y, coast)) return 2.6; if(x > 1.8 && x < 4.5 && y > 2.8 && inPoly(x, y, islandA)) return 2.4; if(x > 6 && inPoly(x, y, lowIsl)) return 0.75; return 0; }
+    function readColors(){ SC = { bg: tok('--scope-bg'), ring: tok('--scope-ring'), echo: tok('--scope-echo'), line: tok('--scope-line'), text: tok('--scope-text') }; }
+    function resize(){
+      const w = cv.clientWidth; if(!w) return;
+      readColors();
+      dpr = window.devicePixelRatio || 1; S = w;
+      cv.width = buf.width = Math.round(w * dpr); cv.height = buf.height = Math.round(w * dpr);
+      clearBuf();
+    }
+    function clearBuf(){ if(!buf.width) return; bctx.setTransform(1,0,0,1,0,0); bctx.globalAlpha = 1; bctx.globalCompositeOperation = 'source-over'; bctx.clearRect(0,0,buf.width,buf.height); }
+    let fadeAcc = 0;
+    function fade(dt){
+      fadeAcc += dt; if(fadeAcc < 0.1) return;
+      bctx.setTransform(1,0,0,1,0,0);
+      bctx.globalCompositeOperation = 'destination-out';
+      bctx.globalAlpha = 1 - Math.pow(0.12, fadeAcc / 2.5);
+      bctx.fillStyle = '#000'; bctx.fillRect(0,0,buf.width,buf.height);
+      bctx.globalCompositeOperation = 'source-over'; bctx.globalAlpha = 1; fadeAcc = 0;
+    }
+    function rotateBuf(deg){
+      if(!buf.width) return;
+      const tmp = document.createElement('canvas'); tmp.width = buf.width; tmp.height = buf.height; tmp.getContext('2d').drawImage(buf, 0, 0);
+      clearBuf(); bctx.save(); bctx.translate(buf.width / 2, buf.height / 2); bctx.rotate(-deg * D2R); bctx.drawImage(tmp, -buf.width / 2, -buf.height / 2); bctx.restore();
+    }
+    const R0 = () => S / 2 - 3;
+    function screenAng(trueBrg){ return st.mode === 'H' ? trueBrg - st.heading : trueBrg; }
+    function pulseDepth(){ const tau = st.range <= 3 ? 0.1 : st.range <= 6 ? 0.3 : 0.7; return tau * 150 / 1852; }
+    function castRay(rho, info){
+      const theta = rho + st.heading, sx = Math.sin(theta * D2R), sy = Math.cos(theta * D2R);
+      const N = 220, dr = st.range / N, A = Math.pow(10, (st.gain - 50) / 45), bw = st.band === 'X' ? 1.2 : 1.9;
+      const phi = screenAng(theta) * D2R, ps = Math.sin(phi), pc = Math.cos(phi);
+      const Rpx = R0(), cx = S / 2, size = Math.max(1.6, Rpx / N * 1.6) * dpr;
+      let landTravel = 0, blocked = false, deep = false, atten = 1;
+      const pd = Math.max(pulseDepth(), dr * 1.2);
+      const tgs = [];
+      for(const t of info){ const d = Math.abs(((t.brg - theta + 540) % 360) - 180); if(d < bw / 2 + 0.7) tgs.push({ t, d }); }
+      bctx.fillStyle = SC.echo;
+      for(let i = 1; i <= N; i++){
+        const r = i * dr, x = st.own.x + r * sx, y = st.own.y + r * sy;
+        let s = 0;
+        const L = landAt(x, y);
+        if(L){ if(!deep) s += L * (blocked ? 0.55 : 1) * (0.5 + 0.5 * hash(Math.round(x * 6), Math.round(y * 6))); landTravel += dr; if(landTravel > 1.3) deep = true; }
+        else { if(landTravel > 0.25) blocked = true; landTravel = 0; }
+        const dxr = x - rain.x, dyr = y - rain.y;
+        if(dxr * dxr + dyr * dyr < rain.r * rain.r){
+          s += (st.band === 'X' ? 1.6 : 0.3) * Math.random() * (1 - 0.85 * st.ftc / 100);
+          atten = st.band === 'X' ? 0.45 : 0.9;
+        }
+        if(!deep && !blocked){
+          for(const o of tgs){
+            const t = o.t;
+            if(o.d < bw / 2 && Math.abs(r - t.rng) < pd / 2 + dr / 2){ s += t.rcs * atten * (t.fl ? 0.4 + Math.random() * 0.9 : 1) * (1 - 0.3 * o.d / bw); }
+            if(t.racon && st.band === 'X' && o.d < bw / 2 + 0.6){
+              const q = r - t.rng - 0.15;
+              if((q > 0 && q < 0.45) || (q > 0.6 && q < 0.75) || (q > 0.9 && q < 1.35)) s += 2.4;
+            }
+          }
+        }
+        s += 2.4 * Math.exp(-r / 1.2) * Math.pow(Math.random(), 2);
+        s += 0.55 * Math.random();
+        const f = 1 - 0.95 * (st.stc / 100) * Math.exp(-r / 2.0);
+        const I = clamp(s * f * A - 1.0, 0, 1);
+        if(I > 0.02){
+          const pr = r / st.range * Rpx;
+          bctx.globalAlpha = Math.min(1, 0.35 + I);
+          bctx.fillRect((cx + pr * ps) * dpr - size / 2, (cx - pr * pc) * dpr - size / 2, size, size);
+        }
+      }
+      bctx.globalAlpha = 1;
+    }
+    function draw(){
+      const cx = S / 2, Rr = R0();
+      ctx.setTransform(1,0,0,1,0,0);
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      ctx.save(); ctx.beginPath(); ctx.arc(cx * dpr, cx * dpr, Rr * dpr, 0, Math.PI * 2); ctx.clip();
+      ctx.fillStyle = SC.bg; ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.drawImage(buf, 0, 0); ctx.restore();
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      ctx.strokeStyle = SC.ring; ctx.lineWidth = 1;
+      for(let k = 1; k <= 6; k++){ ctx.beginPath(); ctx.arc(cx, cx, Rr * k / 6, 0, Math.PI * 2); ctx.stroke(); }
+      ctx.fillStyle = SC.text; ctx.font = '10px "IBM Plex Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      for(let a = 0; a < 360; a += 10){
+        const s = Math.sin(a * D2R), c = Math.cos(a * D2R), l = a % 30 ? 5 : 9;
+        ctx.beginPath(); ctx.moveTo(cx + (Rr - l) * s, cx - (Rr - l) * c); ctx.lineTo(cx + Rr * s, cx - Rr * c); ctx.stroke();
+        if(a % 30 === 0 && S > 300) ctx.fillText(pad3(a), cx + (Rr - 18) * s, cx - (Rr - 18) * c);
+      }
+      const hs = screenAng(st.heading) * D2R;
+      ctx.strokeStyle = SC.line; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(cx, cx); ctx.lineTo(cx + Rr * Math.sin(hs), cx - Rr * Math.cos(hs)); ctx.stroke();
+      if(st.mode === 'H'){
+        const ns = -st.heading * D2R;
+        ctx.fillStyle = SC.line; ctx.beginPath();
+        ctx.arc(cx + (Rr - 4) * Math.sin(ns), cx - (Rr - 4) * Math.cos(ns), 4, 0, Math.PI * 2); ctx.fill();
+        ctx.font = 'bold 11px "IBM Plex Mono", monospace';
+        ctx.fillText('N', cx + (Rr - 34) * Math.sin(ns), cx - (Rr - 34) * Math.cos(ns));
+      }
+      const sw = screenAng(st.rho + st.heading) * D2R;
+      ctx.strokeStyle = SC.line; ctx.globalAlpha = 0.55; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(cx, cx); ctx.lineTo(cx + Rr * Math.sin(sw), cx - Rr * Math.cos(sw)); ctx.stroke(); ctx.globalAlpha = 1;
+      if(st.cursor){
+        const cs = screenAng(st.cursor.brg) * D2R, cr = st.cursor.rng / st.range * Rr;
+        ctx.strokeStyle = SC.line; ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(cx, cx); ctx.lineTo(cx + Rr * Math.sin(cs), cx - Rr * Math.cos(cs)); ctx.stroke();
+        if(cr <= Rr){ ctx.beginPath(); ctx.arc(cx, cx, cr, 0, Math.PI * 2); ctx.stroke(); }
+        ctx.setLineDash([]);
+        if(cr <= Rr){ ctx.beginPath(); ctx.arc(cx + cr * Math.sin(cs), cx - cr * Math.cos(cs), 4, 0, Math.PI * 2); ctx.stroke(); }
+      }
+      ctx.fillStyle = SC.line; ctx.beginPath(); ctx.arc(cx, cx, 2.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = SC.text; ctx.font = '11px "IBM Plex Mono", monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(st.mode === 'H' ? 'H UP' : 'N UP', cx - Rr * 0.66, cx - Rr * 0.6);
+      ctx.fillText('HDG ' + pad3(st.heading), cx - Rr * 0.66, cx + Rr * 0.6);
+      ctx.textAlign = 'right';
+      ctx.fillText(st.range + ' NM', cx + Rr * 0.66, cx - Rr * 0.6);
+      ctx.fillText(st.band + '-BAND', cx + Rr * 0.66, cx + Rr * 0.6);
+    }
+    function updReadout(){
+      if(!st.cursor){ readout.textContent = '화면을 누르면 커서 위치의 거리와 방위가 표시된다.'; return; }
+      const rel = ((st.cursor.brg - st.heading) % 360 + 360) % 360;
+      readout.innerHTML = '커서 거리 <b>' + st.cursor.rng.toFixed(2) + ' NM</b><br>진방위 <b>' + st.cursor.brg.toFixed(1).padStart(5, '0') + '°</b> · 상대방위 ' + rel.toFixed(1).padStart(5, '0') + '°';
+    }
+    let last = 0;
+    function step(now){
+      if(art.hidden){ last = 0; return; }
+      if(!S || cv.clientWidth !== S) resize();
+      if(!S) return;
+      const dt = last ? Math.min(0.1, (now - last) / 1000) : 0.016; last = now;
+      const sdt = dt * TF / 3600;
+      st.own.x += Math.sin(st.heading * D2R) * st.speed * sdt; st.own.y += Math.cos(st.heading * D2R) * st.speed * sdt;
+      st.tg.forEach(t => { t.x += Math.sin(t.cog * D2R) * t.sog * sdt; t.y += Math.cos(t.cog * D2R) * t.sog * sdt; });
+      const info = st.tg.map(t => { const dx = t.x - st.own.x, dy = t.y - st.own.y; return Object.assign({}, t, { rng: Math.hypot(dx, dy), brg: (Math.atan2(dx, dy) / D2R + 360) % 360 }); });
+      fade(dt);
+      const from = st.rho, to = st.rho + dt * 360 / 2.5;
+      for(let a = from; a < to; a += 0.4) castRay(a % 360, info);
+      st.rho = to % 360;
+      draw();
+    }
+    sims.push(step);
+    function seg(id, key, cb){
+      const el = document.getElementById(id);
+      el.addEventListener('click', e => {
+        const b = e.target.closest('button'); if(!b) return;
+        el.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+        const v = b.dataset.v; st[key] = key === 'range' ? +v : v; if(cb) cb();
+      });
+    }
+    seg('ppiMode', 'mode', () => { clearBuf(); updReadout(); });
+    seg('ppiBand', 'band');
+    seg('ppiRange', 'range', clearBuf);
+    function slider(id, key, fmt, cb){
+      const el = document.getElementById(id), o = document.getElementById(id + 'o');
+      el.addEventListener('input', () => { const old = st[key]; st[key] = +el.value; o.textContent = fmt(st[key]); if(cb) cb(old, st[key]); });
+    }
+    slider('ppiGain', 'gain', v => v);
+    slider('ppiStc', 'stc', v => v);
+    slider('ppiFtc', 'ftc', v => v);
+    slider('ppiSpd', 'speed', v => v + ' kn');
+    slider('ppiHdg', 'heading', v => pad3(v) + '°', (o, n) => { if(st.mode === 'H') rotateBuf(n - o); updReadout(); });
+    document.getElementById('ppiReset').addEventListener('click', () => {
+      init(); clearBuf(); updReadout();
+      const set = (id, v, txt) => { document.getElementById(id).value = v; document.getElementById(id + 'o').textContent = txt; };
+      set('ppiGain', 55, 55); set('ppiStc', 30, 30); set('ppiFtc', 0, 0); set('ppiHdg', 60, '060°'); set('ppiSpd', 0, '0 kn');
+      [['ppiMode','N'],['ppiBand','X'],['ppiRange','6']].forEach(([id, v]) => document.querySelectorAll('#' + id + ' button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v))));
+    });
+    cv.addEventListener('pointerdown', e => {
+      const r = cv.getBoundingClientRect(), half = r.width / 2;
+      const dx = e.clientX - r.left - half, dy = e.clientY - r.top - half, d = Math.hypot(dx, dy);
+      if(d > R0()) return;
+      const sa = (Math.atan2(dx, -dy) / D2R + 360) % 360;
+      st.cursor = { brg: ((st.mode === 'H' ? sa + st.heading : sa) + 360) % 360, rng: d / R0() * st.range };
+      updReadout();
+    });
+    window.addEventListener('resize', () => { S = 0; });
+  })();
+
+  /* ---------- parallel indexing practice ---------- */
+  (function(){
+    const art = document.querySelector('[data-slug="pi-sim"]');
+    const rc = document.getElementById('piRadar'), rx = rc.getContext('2d');
+    const cc = document.getElementById('piChart'), cx2 = cc.getContext('2d');
+    const out = document.getElementById('piReadout'), runBtn = document.getElementById('piRun');
+    const TF = 60, SHOAL = 0.8, H = Math.SQRT1_2;
+    const Q = {x:-2 * H, y:2 * H}, U = {x:H, y:H}, NV = {x:H, y:-H}, P0 = {x:2 * H, y:-2 * H};
+    let st, acc = 0;
+    function init(){
+      st = { own:{x:Q.x - 6 * U.x, y:Q.y - 6 * U.y}, hdg:45, spd:10, set:+document.getElementById('piSet').value, drift:+document.getElementById('piDrift').value,
+        run:false, trail:[], echo:[], minD:99, status:'ready' };
+      st.trail.push({x:st.own.x, y:st.own.y});
+      runBtn.textContent = '시작';
+      document.getElementById('piHdg').textContent = pad3(st.hdg) + '°';
+    }
+    init();
+    function size(c){ const w = c.clientWidth; if(!w) return 0; const d = window.devicePixelRatio || 1; if(c.width !== Math.round(w * d)){ c.width = c.height = Math.round(w * d); } return w; }
+    function drawRadar(){
+      const W = size(rc); if(!W) return; const d = window.devicePixelRatio || 1;
+      const c = rx; c.setTransform(d,0,0,d,0,0);
+      const cx = W / 2, R = W / 2 - 3, k = R / 6;
+      c.clearRect(0,0,W,W);
+      c.fillStyle = tok('--scope-bg'); c.beginPath(); c.arc(cx, cx, R, 0, Math.PI * 2); c.fill();
+      c.save(); c.beginPath(); c.arc(cx, cx, R, 0, Math.PI * 2); c.clip();
+      c.strokeStyle = tok('--scope-ring'); c.lineWidth = 1;
+      for(let i = 1; i <= 6; i++){ c.beginPath(); c.arc(cx, cx, k * i, 0, Math.PI * 2); c.stroke(); }
+      const P = (ex, ey) => [cx + ex * k, cx - ey * k];
+      c.strokeStyle = tok('--scope-line'); c.lineWidth = 2;
+      const a = P(P0.x - 10 * U.x, P0.y - 10 * U.y), b = P(P0.x + 10 * U.x, P0.y + 10 * U.y);
+      c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke();
+      c.lineWidth = 1.2; c.setLineDash([5, 4]);
+      const hs = st.hdg * D2R; c.beginPath(); c.moveTo(cx, cx); c.lineTo(cx + R * Math.sin(hs), cx - R * Math.cos(hs)); c.stroke(); c.setLineDash([]);
+      c.fillStyle = tok('--scope-echo');
+      st.echo.forEach((e, i) => { const q = P(e.x, e.y); c.globalAlpha = 0.15 + 0.5 * i / st.echo.length; c.beginPath(); c.arc(q[0], q[1], 2, 0, Math.PI * 2); c.fill(); });
+      c.globalAlpha = 1;
+      const rel = {x:-st.own.x, y:-st.own.y};
+      if(Math.hypot(rel.x, rel.y) < 6.3){ const q = P(rel.x, rel.y); c.beginPath(); c.ellipse(q[0], q[1], k * 0.38, k * 0.3, 0.4, 0, Math.PI * 2); c.fill(); }
+      c.restore();
+      c.fillStyle = tok('--scope-line'); c.beginPath(); c.arc(cx, cx, 2.5, 0, Math.PI * 2); c.fill();
+      c.fillStyle = tok('--scope-text'); c.font = '10px "IBM Plex Mono", monospace'; c.textAlign = 'left'; c.textBaseline = 'middle';
+      c.fillText('N UP  6 NM', cx - R * 0.6, cx - R * 0.76);
+      c.fillText('PI 045° / 2.0 NM R', cx - R * 0.6, cx + R * 0.78);
+    }
+    function drawChart(){
+      const W = size(cc); if(!W) return; const d = window.devicePixelRatio || 1;
+      const c = cx2; c.setTransform(d,0,0,d,0,0);
+      const x0 = -7.5, y1 = 8.5, k = W / 13;
+      const P = (x, y) => [(x - x0) * k, (y1 - y) * k];
+      c.fillStyle = tok('--surface'); c.fillRect(0,0,W,W);
+      c.strokeStyle = tok('--line'); c.lineWidth = 1;
+      for(let g = -7; g <= 5; g++){ const a = P(g, 0)[0]; c.beginPath(); c.moveTo(a, 0); c.lineTo(a, W); c.stroke(); }
+      for(let g = -4; g <= 8; g++){ const a = P(0, g)[1]; c.beginPath(); c.moveTo(0, a); c.lineTo(W, a); c.stroke(); }
+      const s = P(0, 0);
+      c.fillStyle = tok('--accent-soft'); c.strokeStyle = tok('--danger'); c.setLineDash([3, 3]);
+      c.beginPath(); c.arc(s[0], s[1], SHOAL * k, 0, Math.PI * 2); c.fill(); c.stroke(); c.setLineDash([]);
+      c.fillStyle = tok('--echo'); c.beginPath(); c.ellipse(s[0], s[1], k * 0.38, k * 0.3, 0.4, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = tok('--accent'); c.lineWidth = 1.6; c.setLineDash([7, 5]);
+      const a = P(Q.x - 9 * U.x, Q.y - 9 * U.y), b = P(Q.x + 9 * U.x, Q.y + 9 * U.y);
+      c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke(); c.setLineDash([]);
+      c.strokeStyle = tok('--ink'); c.lineWidth = 2; c.beginPath();
+      st.trail.forEach((p, i) => { const q = P(p.x, p.y); if(i) c.lineTo(q[0], q[1]); else c.moveTo(q[0], q[1]); });
+      const qo = P(st.own.x, st.own.y); c.lineTo(qo[0], qo[1]); c.stroke();
+      c.save(); c.translate(qo[0], qo[1]); c.rotate(st.hdg * D2R); c.fillStyle = tok('--ink');
+      c.beginPath(); c.moveTo(0, -9); c.lineTo(5, 6); c.lineTo(-5, 6); c.closePath(); c.fill(); c.restore();
+      if(st.drift > 0){
+        const ax = W - 40, ay = 44, L = 10 + st.drift * 5, sa = st.set * D2R;
+        c.strokeStyle = tok('--accent'); c.fillStyle = tok('--accent'); c.lineWidth = 2;
+        const ex = ax + L * Math.sin(sa), ey = ay - L * Math.cos(sa);
+        c.beginPath(); c.moveTo(ax - L * Math.sin(sa), ay + L * Math.cos(sa)); c.lineTo(ex, ey); c.stroke();
+        c.beginPath(); c.moveTo(ex, ey); c.lineTo(ex - 7 * Math.sin(sa - 0.45), ey + 7 * Math.cos(sa - 0.45)); c.lineTo(ex - 7 * Math.sin(sa + 0.45), ey + 7 * Math.cos(sa + 0.45)); c.closePath(); c.fill();
+        c.font = '11px "IBM Plex Sans KR", sans-serif'; c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.fillText('조류', ax, ay + 36);
+      }
+      c.fillStyle = tok('--muted'); c.font = '11px "IBM Plex Sans KR", sans-serif'; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+      c.textAlign = 'right'; c.fillText('계획 항로 045°', W - 8, W - 10); c.textAlign = 'left';
+      c.fillText('N ↑  격자 1 NM', 8, 16);
+    }
+    function metrics(){
+      const r = {x:st.own.x - Q.x, y:st.own.y - Q.y};
+      return { xte: r.x * NV.x + r.y * NV.y, along: r.x * U.x + r.y * U.y, dist: Math.hypot(st.own.x, st.own.y) };
+    }
+    function updOut(){
+      const m = metrics();
+      const side = Math.abs(m.xte) < 0.05 ? '항로 위' : (m.xte > 0 ? '우현 쪽 (섬 쪽)' : '좌현 쪽');
+      const cls = Math.abs(m.xte) < 0.2 ? 'ok' : Math.abs(m.xte) > 0.6 ? 'warn' : '';
+      let msg = '';
+      if(st.status === 'aground') msg = '<span class="warn">여울에 들어갔다. 좌초 위험! 처음부터 다시 해 보자.</span>';
+      else if(st.status === 'done') msg = '<span class="ok">통과 완료.</span> 최근접 거리 ' + st.minD.toFixed(2) + ' NM (계획 2.00 NM)';
+      else if(st.status === 'ready') msg = '시작을 누르면 시간이 60배속으로 흐른다.';
+      out.innerHTML = '침로 ' + pad3(st.hdg) + '° · 속력 10 kn<br>항로 이탈 <span class="' + cls + '">' + Math.abs(m.xte).toFixed(2) + ' NM ' + side + '</span><br>섬까지 ' + m.dist.toFixed(2) + ' NM' + (msg ? '<br>' + msg : '');
+    }
+    let last = 0;
+    function step(now){
+      if(art.hidden){ last = 0; return; }
+      const dt = last ? Math.min(0.1, (now - last) / 1000) : 0.016; last = now;
+      if(st.run){
+        const h = dt * TF / 3600;
+        st.own.x += (st.spd * Math.sin(st.hdg * D2R) + st.drift * Math.sin(st.set * D2R)) * h;
+        st.own.y += (st.spd * Math.cos(st.hdg * D2R) + st.drift * Math.cos(st.set * D2R)) * h;
+        acc += dt;
+        if(acc > 0.35){ acc = 0; st.trail.push({x:st.own.x, y:st.own.y}); st.echo.push({x:-st.own.x, y:-st.own.y}); if(st.echo.length > 60) st.echo.shift(); }
+        const m = metrics(); st.minD = Math.min(st.minD, m.dist);
+        if(m.dist < SHOAL){ st.run = false; st.status = 'aground'; runBtn.textContent = '다시 시작'; }
+        else if(m.along > 6.5){ st.run = false; st.status = 'done'; runBtn.textContent = '다시 시작'; }
+      }
+      drawRadar(); drawChart(); updOut();
+    }
+    sims.push(step);
+    runBtn.addEventListener('click', () => {
+      if(st.status === 'aground' || st.status === 'done') init();
+      st.run = !st.run; st.status = st.run ? 'run' : 'pause'; runBtn.textContent = st.run ? '일시정지' : '계속';
+    });
+    document.getElementById('piReset').addEventListener('click', () => { init(); acc = 0; });
+    art.querySelectorAll('[data-d]').forEach(b => b.addEventListener('click', () => {
+      st.hdg = (st.hdg + +b.dataset.d + 360) % 360; document.getElementById('piHdg').textContent = pad3(st.hdg) + '°';
+    }));
+    const setI = document.getElementById('piSet'), drI = document.getElementById('piDrift');
+    setI.addEventListener('input', () => { st.set = +setI.value; document.getElementById('piSeto').textContent = pad3(st.set) + '°'; });
+    drI.addEventListener('input', () => { st.drift = +drI.value; document.getElementById('piDrifto').textContent = st.drift.toFixed(1) + ' kn'; });
+  })();
+
+  /* ---------- SART figure ---------- */
+  (function(){
+    const a = 60 * D2R; let s = '';
+    for(let i = 0; i < 12; i++){ const r = 34 + i * 6.2; s += '<circle cx="' + (160 + r * Math.sin(a)).toFixed(1) + '" cy="' + (125 - r * Math.cos(a)).toFixed(1) + '" r="2.6"/>'; }
+    document.getElementById('sartDots').innerHTML = s;
+    let arcs = '';
+    for(let i = 0; i < 12; i++){
+      const r = 14 + i * 7.6, span = (18 + i * 4) * D2R, a0 = a - span, a1 = a + span;
+      const p = t => (480 + r * Math.sin(t)).toFixed(1) + ' ' + (125 - r * Math.cos(t)).toFixed(1);
+      arcs += '<path d="M' + p(a0) + ' A ' + r + ' ' + r + ' 0 0 1 ' + p(a1) + '"/>';
+    }
+    document.getElementById('sartArcs').innerHTML = arcs;
+  })();
+
+  /* ---------- lab: radar plotting ---------- */
+  (function(){
+    const ids = ['plHdg','plSpd','plDt','plLim','plB1','plR1','plB2','plR2','plTHdg','plTSpd'];
+    const el = Object.fromEntries(ids.map(i => [i, document.getElementById(i)]));
+    const svg = document.getElementById('plSvg');
+    const vec = (b, r) => ({ x: r * Math.sin(b * D2R), y: r * Math.cos(b * D2R) });
+    const brg = v => (Math.atan2(v.x, v.y) / D2R + 360) % 360;
+    const len = v => Math.hypot(v.x, v.y);
+    const f1 = n => n.toFixed(1), f2 = n => n.toFixed(2);
+    function cpaFrom(P, rel){
+      const Vr = len(rel); if(Vr < 1e-6) return null;
+      const d = { x: rel.x / Vr, y: rel.y / Vr };
+      const s = -(P.x * d.x + P.y * d.y);
+      const C = { x: P.x + d.x * s, y: P.y + d.y * s };
+      return { Vr, d, s, C, cpa: len(C), tcpa: s / Vr * 60 };
+    }
+    let trialTouched = false;
+    function upd(){
+      const num = i => { const v = parseFloat(el[i].value); return isFinite(v) ? v : 0; };
+      const hdg = num('plHdg'), spd = num('plSpd'), dtm = Math.max(0.1, num('plDt')), lim = num('plLim');
+      if(!trialTouched){ el.plTHdg.value = Math.round(((hdg % 360) + 360) % 360); el.plTSpd.value = spd; }
+      const tH = +el.plTHdg.value, tS = +el.plTSpd.value;
+      document.getElementById('plTHdgo').textContent = pad3(tH) + '°';
+      document.getElementById('plTSpdo').textContent = f1(tS) + ' kn';
+      const dt = dtm / 60;
+      const O = vec(num('plB1'), num('plR1')), A = vec(num('plB2'), num('plR2'));
+      const rel = { x: (A.x - O.x) / dt, y: (A.y - O.y) / dt };
+      const Vo = vec(hdg, spd), Vt = { x: rel.x + Vo.x, y: rel.y + Vo.y };
+      const W = { x: O.x - Vo.x * dt, y: O.y - Vo.y * dt };
+      const r = cpaFrom(A, rel);
+      const out = (id, t) => document.getElementById(id).textContent = t;
+      const v = document.getElementById('plVerdict');
+      out('plRel', pad3(brg(rel)) + '° / ' + f1(len(rel)) + ' kn');
+      out('plTrue', len(Vt) < 0.1 ? '정지' : pad3(brg(Vt)) + '° / ' + f1(len(Vt)) + ' kn');
+      if(!r){ out('plCpa', '–'); out('plTcpa', '–'); v.textContent = '상대운동이 없다. 거리와 방위가 그대로 유지된다.'; }
+      else {
+        out('plCpa', f2(r.cpa) + ' NM');
+        out('plTcpa', r.s < 0 ? '지남' : Math.round(r.tcpa) + ' 분');
+        if(r.s < 0) v.innerHTML = '<span style="color:var(--accent)">이미 최근접점을 지나 멀어지고 있다.</span>';
+        else if(r.cpa < lim) v.innerHTML = '<span style="color:var(--danger)">충돌 위험.</span> CPA ' + f2(r.cpa) + ' NM가 한계 ' + f1(lim) + ' NM보다 작다. 약 ' + Math.round(r.tcpa) + '분 뒤 최근접. CPA 방위 ' + pad3(brg(r.C)) + '°.';
+        else v.innerHTML = '<span style="color:var(--accent)">한계 밖으로 지나간다.</span> CPA 방위 ' + pad3(brg(r.C)) + '°.';
+      }
+      const Vn = vec(tH, tS), reln = { x: Vt.x - Vn.x, y: Vt.y - Vn.y }, rn = cpaFrom(A, reln);
+      const tr = document.getElementById('plTrial');
+      if(!rn) tr.textContent = '시험 조선 후 상대운동 없음';
+      else tr.innerHTML = '시험 조선 ' + pad3(tH) + '° / ' + f1(tS) + ' kn<br>새 CPA <b' + (rn.s >= 0 && rn.cpa < lim ? ' class="warn"' : ' class="ok"') + '>' + f2(rn.cpa) + ' NM</b> · TCPA ' + (rn.s < 0 ? '지남' : Math.round(rn.tcpa) + ' 분');
+      // drawing
+      const maxR = Math.max(len(O), len(A), len(W), 1) * 1.15;
+      const S = [3, 4, 6, 8, 10, 12, 16, 20, 24, 32].find(s => s >= maxR) || 32, k = 190 / S, c = 210;
+      const P = p => [(c + p.x * k).toFixed(1), (c - p.y * k).toFixed(1)];
+      let h = '<defs><clipPath id="plClip"><circle cx="210" cy="210" r="196"/></clipPath>';
+      [['plA','f-acc'],['plE','f-echo'],['plK','f-ink']].forEach(([id, cl]) => { h += '<marker id="' + id + '" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" class="' + cl + '"/></marker>'; });
+      h += '</defs><circle cx="210" cy="210" r="196" class="f-surf s-line"/>';
+      for(let i = 1; i <= 4; i++){ const rr = 190 * i / 4; h += '<circle cx="210" cy="210" r="' + rr + '" class="f-none s-line"/><text x="214" y="' + (206 - rr) + '" font-size="10" class="f-muted">' + (S * i / 4) + '</text>'; }
+      h += '<line x1="210" y1="14" x2="210" y2="406" class="s-line"/><line x1="14" y1="210" x2="406" y2="210" class="s-line"/>';
+      h += '<g clip-path="url(#plClip)">';
+      if(lim > 0) h += '<circle cx="210" cy="210" r="' + (lim * k) + '" class="f-none s-danger" stroke-dasharray="3 3" opacity=".7"/>';
+      if(r){
+        const e1 = { x: O.x - r.d.x * 40, y: O.y - r.d.y * 40 }, e2 = { x: A.x + r.d.x * 60, y: A.y + r.d.y * 60 };
+        h += '<line x1="' + P(e1)[0] + '" y1="' + P(e1)[1] + '" x2="' + P(e2)[0] + '" y2="' + P(e2)[1] + '" class="s-acc" stroke-dasharray="6 4" opacity=".6"/>';
+        if(r.s >= 0){ h += '<line x1="210" y1="210" x2="' + P(r.C)[0] + '" y2="' + P(r.C)[1] + '" class="' + (r.cpa < lim ? 's-danger' : 's-acc') + '" stroke-width="1.5"/><circle cx="' + P(r.C)[0] + '" cy="' + P(r.C)[1] + '" r="4" class="' + (r.cpa < lim ? 'f-none s-danger' : 'f-none s-acc') + '" stroke-width="2"/>'; }
+      }
+      if(rn && (Math.abs(tH - hdg) > 0.4 || Math.abs(tS - spd) > 0.1)){
+        const e3 = { x: A.x + rn.d.x * 60, y: A.y + rn.d.y * 60 };
+        h += '<line x1="' + P(A)[0] + '" y1="' + P(A)[1] + '" x2="' + P(e3)[0] + '" y2="' + P(e3)[1] + '" class="s-ink" stroke-dasharray="2 4" stroke-width="1.5"/>';
+        const Wn = { x: W.x + Vn.x * dt, y: W.y + Vn.y * dt };
+        h += '<line x1="' + P(W)[0] + '" y1="' + P(W)[1] + '" x2="' + P(Wn)[0] + '" y2="' + P(Wn)[1] + '" class="s-muted" stroke-width="1.5" stroke-dasharray="4 3"/>';
+      }
+      h += '</g>';
+      const arrow = (p, q, cl, m) => '<line x1="' + P(p)[0] + '" y1="' + P(p)[1] + '" x2="' + P(q)[0] + '" y2="' + P(q)[1] + '" class="' + cl + '" stroke-width="2.2" marker-end="url(#' + m + ')"/>';
+      h += arrow(W, O, 's-ink', 'plK') + arrow(O, A, 's-acc', 'plA') + arrow(W, A, 's-echo', 'plE');
+      const lab = (p, t, cl, dx, dy) => '<text x="' + (+P(p)[0] + dx) + '" y="' + (+P(p)[1] + dy) + '" font-size="13" font-weight="600" class="' + cl + '">' + t + '</text>';
+      h += lab(O, 'O', 'f-ink', 6, -6) + lab(A, 'A', 'f-acc', 6, 14) + lab(W, 'W', 'f-echo', -16, -6);
+      h += '<circle cx="210" cy="210" r="4" class="f-ink"/><text x="216" y="226" font-size="11" class="f-muted">자선</text>';
+      h += '<text x="16" y="414" font-size="10" class="f-muted">거리환 ' + (S / 4) + ' NM</text>';
+      // zoomed inset of the O-A-W triangle
+      const trialOn = rn && (Math.abs(tH - hdg) > 0.4 || Math.abs(tS - spd) > 0.1);
+      const Wn = { x: W.x + Vn.x * dt, y: W.y + Vn.y * dt };
+      const pts = trialOn ? [W, O, A, Wn] : [W, O, A];
+      const mnx = Math.min(...pts.map(p => p.x)), mxx = Math.max(...pts.map(p => p.x)), mny = Math.min(...pts.map(p => p.y)), mxy = Math.max(...pts.map(p => p.y));
+      const bw = 340, bh = 92, ks = Math.min(bw / Math.max(mxx - mnx, 0.01), bh / Math.max(mxy - mny, 0.01));
+      const ox = 210 - (mnx + mxx) / 2 * ks, oy = 496 + (mny + mxy) / 2 * ks;
+      const Z = p => [(ox + p.x * ks).toFixed(1), (oy - p.y * ks).toFixed(1)];
+      const zar = (p, q, cl, m, dash) => '<line x1="' + Z(p)[0] + '" y1="' + Z(p)[1] + '" x2="' + Z(q)[0] + '" y2="' + Z(q)[1] + '" class="' + cl + '" stroke-width="2.2"' + (dash ? ' stroke-dasharray="5 3"' : '') + (m ? ' marker-end="url(#' + m + ')"' : '') + '/>';
+      h += '<rect x="10" y="432" width="400" height="124" rx="6" class="f-bg s-line"/>';
+      h += '<text x="20" y="450" font-size="11" class="f-muted">삼각형 확대 (' + dtm + '분)</text>';
+      h += zar(W, O, 's-ink', 'plK') + zar(O, A, 's-acc', 'plA') + zar(W, A, 's-echo', 'plE');
+      if(trialOn) h += zar(W, Wn, 's-muted', '', true) + zar(Wn, A, 's-ink', '', true);
+      const zl = (p, t, cl, dx, dy) => '<text x="' + (+Z(p)[0] + dx) + '" y="' + (+Z(p)[1] + dy) + '" font-size="12" font-weight="600" class="' + cl + '">' + t + '</text>';
+      h += zl(O, 'O', 'f-ink', 6, -4) + zl(A, 'A', 'f-acc', 6, 14) + zl(W, 'W', 'f-echo', -16, -4);
+      svg.innerHTML = h;
+    }
+    ['plHdg','plSpd','plDt','plLim','plB1','plR1','plB2','plR2'].forEach(i => el[i].addEventListener('input', upd));
+    ['plTHdg','plTSpd'].forEach(i => el[i].addEventListener('input', () => { trialTouched = true; upd(); }));
+    upd();
+  })();
+
+  function loop(now){ sims.forEach(f => { try { f(now); } catch(e) { console.error(e); } }); requestAnimationFrame(loop); }
+  requestAnimationFrame(loop);
+
+  /* ---------- router, math, search ---------- */
+  const arts = Array.from(document.querySelectorAll('article[data-slug]'));
+  const bySlug = Object.fromEntries(arts.map(a => [a.dataset.slug, a]));
+  const navLinks = Array.from(document.querySelectorAll('nav.rail a'));
+  const rail = document.getElementById('rail');
+  const menuBtn = document.getElementById('menuBtn');
+  const q = document.getElementById('q');
+  const results = document.getElementById('results');
+  const searchTitle = document.getElementById('searchTitle');
+  const anchorParent = {};
+  arts.forEach(a => a.querySelectorAll('[id]').forEach(el => { anchorParent[el.id] = a.dataset.slug; }));
+
+  function typeset(a){
+    if(!a || a.dataset.tex === 'done') return;
+    if(!window.MathJax || !MathJax.startup || !MathJax.startup.promise) return;
+    a.dataset.tex = 'done';
+    MathJax.startup.promise.then(() => MathJax.typesetPromise([a])).catch(() => { a.dataset.tex = ''; });
+  }
+  function show(slug, anchor){
+    if(!bySlug[slug]) slug = 'main';
+    arts.forEach(a => { a.hidden = a.dataset.slug !== slug; });
+    const cur = '#' + (anchor || slug);
+    const hit = navLinks.some(l => l.getAttribute('href') === cur);
+    const target = hit ? cur : '#' + slug;
+    navLinks.forEach(l => { if(l.getAttribute('href') === target) l.setAttribute('aria-current', 'page'); else l.removeAttribute('aria-current'); });
+    rail.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false');
+    if(slug !== 'search') document.title = (slug === 'main' ? '레이더 위키' : bySlug[slug].dataset.title + ' · 레이더 위키');
+    typeset(bySlug[slug]);
+    if(anchor){ const el = document.getElementById(anchor); if(el){ el.scrollIntoView(); return; } }
+    window.scrollTo(0, 0);
+  }
+  function route(){
+    const h = decodeURIComponent((location.hash || '#main').slice(1));
+    if(bySlug[h]) show(h);
+    else if(anchorParent[h]) show(anchorParent[h], h);
+    else show('main');
+  }
+  window.addEventListener('hashchange', route);
+  route();
+
+  /* sidebar: whole-rail toggle + collapsible groups */
+  const mqSmall = window.matchMedia('(max-width:820px)');
+  const menuLabel = document.getElementById('menuLabel');
+  const store = { get(k){ try { return localStorage.getItem(k); } catch(e) { return null; } }, set(k, v){ try { localStorage.setItem(k, v); } catch(e) {} } };
+  function syncMenu(){
+    if(mqSmall.matches){
+      const open = rail.classList.contains('open');
+      menuBtn.setAttribute('aria-expanded', String(open)); menuLabel.textContent = open ? '목차 닫기' : '목차';
+    } else {
+      const off = document.documentElement.classList.contains('rail-off');
+      menuBtn.setAttribute('aria-expanded', String(!off)); menuLabel.textContent = off ? '목차 펴기' : '목차 접기';
+    }
+  }
+  if(store.get('railOff') === '1') document.documentElement.classList.add('rail-off');
+  menuBtn.addEventListener('click', () => {
+    if(mqSmall.matches) rail.classList.toggle('open');
+    else { const off = document.documentElement.classList.toggle('rail-off'); store.set('railOff', off ? '1' : '0'); }
+    syncMenu();
+    window.dispatchEvent(new Event('resize'));
+  });
+  if(mqSmall.addEventListener) mqSmall.addEventListener('change', syncMenu);
+  syncMenu();
+  const grps = Array.from(document.querySelectorAll('.grp'));
+  let closedG = []; try { closedG = JSON.parse(store.get('closedGroups') || '[]'); } catch(e) {}
+  function setGrp(g, open){ g.classList.toggle('closed', !open); g.querySelector('.grp-btn').setAttribute('aria-expanded', String(open)); }
+  function saveGrps(){ store.set('closedGroups', JSON.stringify(grps.filter(g => g.classList.contains('closed')).map(g => g.dataset.g))); }
+  grps.forEach(g => {
+    setGrp(g, !closedG.includes(g.dataset.g));
+    g.querySelector('.grp-btn').addEventListener('click', () => { setGrp(g, g.classList.contains('closed')); saveGrps(); });
+  });
+  document.getElementById('grpOpenAll').addEventListener('click', () => { grps.forEach(g => setGrp(g, true)); saveGrps(); });
+  document.getElementById('grpCloseAll').addEventListener('click', () => { grps.forEach(g => setGrp(g, false)); saveGrps(); });
+  function revealCurrent(){
+    const cur = rail.querySelector('a[aria-current="page"]'); if(!cur) return;
+    const g = cur.closest('.grp'); if(g && g.classList.contains('closed')) setGrp(g, true);
+  }
+  window.addEventListener('hashchange', () => { revealCurrent(); syncMenu(); }); revealCurrent();
+
+  function runSearch(term){
+    term = term.trim().toLowerCase();
+    if(!term){ route(); return; }
+    const hits = [];
+    arts.forEach(a => {
+      const slug = a.dataset.slug; if(slug === 'search') return;
+      const title = (a.dataset.title || '').toLowerCase(), kw = (a.dataset.kw || '').toLowerCase();
+      const raw = a.textContent.replace(/\s+/g, ' ');
+      let score = 0;
+      if(title.includes(term)) score += 10;
+      if(kw.includes(term)) score += 5;
+      const j = raw.toLowerCase().indexOf(term);
+      if(j >= 0) score += 1;
+      if(score){
+        const snip = j >= 0 ? (j > 40 ? '…' : '') + raw.slice(Math.max(0, j - 40), j + 60) + '…' : '';
+        hits.push({slug, title: a.dataset.title, score, snip});
+      }
+    });
+    hits.sort((x, y) => y.score - x.score);
+    results.innerHTML = '';
+    searchTitle.textContent = '“' + term + '” 검색 결과 ' + hits.length + '건';
+    if(!hits.length){ const li = document.createElement('li'); li.textContent = '일치하는 문서가 없습니다. 다른 낱말로 검색해 보세요.'; results.appendChild(li); }
+    hits.forEach(h => {
+      const li = document.createElement('li');
+      const a = document.createElement('a'); a.href = '#' + h.slug; a.textContent = h.title;
+      a.addEventListener('click', () => { q.value = ''; });
+      const s = document.createElement('small'); s.textContent = h.snip;
+      li.append(a, s); results.appendChild(li);
+    });
+    arts.forEach(a => { a.hidden = a.dataset.slug !== 'search'; });
+    navLinks.forEach(l => l.removeAttribute('aria-current'));
+  }
+  let t; q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => runSearch(q.value), 150); });
+})();
+</script>
+
+</body></html>
