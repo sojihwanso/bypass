@@ -125,7 +125,7 @@
         <article class="card" aria-labelledby="c-report">
           <div class="card-head card-head-row"><div><p class="card-no">B구역</p><h2 id="c-report">내 제보</h2></div><span class="card-count" data-count="mine" hidden></span></div>
           <div class="card-body">
-            <ul class="inbox" data-list="mine" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
+            <ul class="inbox slips" data-list="mine" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
             <div class="empty" data-empty="mine" hidden>
               <p class="empty-title">아직 공사할 곳이 없습니다.</p>
               <p class="empty-text">로그인한 채로 불편을 제보하시면<br>처리 상황이 이곳에 표시됩니다.</p>
@@ -189,7 +189,8 @@
             </div>
             <div data-open hidden>
               <p class="card-lead" data-lead></p>
-              <ul class="inbox inbox-cols" data-list="reports" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
+              <div class="slip-filter" role="group" aria-label="처리 상태로 거르기" data-filter hidden></div>
+              <ul class="inbox slips" data-list="reports" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
             </div>
           </div>
         </article>
@@ -205,7 +206,7 @@
             </div>
             <div data-open hidden>
               <p class="card-lead">이름·연락처는 합류 안내에만 쓰고, 안내가 끝나면 지워 주세요.</p>
-              <ul class="inbox" data-list="apps" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
+              <ul class="inbox slips" data-list="apps" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
             </div>
           </div>
         </article>
@@ -223,7 +224,7 @@
               <p class="card-lead">구분을 바꾸면 바로 저장됩니다. 바뀐 구분은 그 회원이 다시 로그인하면(늦어도 1시간 안에) 적용됩니다. 자기 자신의 구분은 바꿀 수 없습니다.</p>
               <label class="sr-only" for="member-search">회원 찾기</label>
               <input class="input member-search" id="member-search" type="search" placeholder="이름이나 아이디로 찾기" autocomplete="off" data-member-search>
-              <ul class="inbox member-list" data-list="members" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
+              <ul class="inbox member-list member-grid" data-list="members" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
             </div>
           </div>
         </article>
@@ -331,12 +332,20 @@
     const { data, error } = await B.sb.from(table).delete().eq('id', id).select('id');
     if (error || !data || !data.length) { alertLine(li, '삭제하지 못했습니다. 권한을 확인해 주세요.'); return false; }
     li.remove(); bumpCount(countKey, -1);
+    if (listKey === 'reports') refreshFilter();
     if (!listOf(listKey).children.length) setState(listKey, emptyText);
     return true;
   }
 
+  function paintStatus(li, status) {
+    Object.values(STATUS).forEach(k => li.classList.remove(`slip-${k}`));
+    li.classList.add(`slip-${STATUS[status] || 'received'}`);
+    li.dataset.status = status;
+  }
+
   function reportItem(row, opts) {
     const li = el('li');
+    paintStatus(li, row.status);
     const meta = el('div', 'inbox-meta');
     meta.append(el('span', 'inbox-no', receiptNo('BYP', row)), el('span', null, B.dateText(row.created_at)));
     if (opts.canEdit) {
@@ -347,7 +356,7 @@
         const prev = row.status; sel.disabled = true;
         const { error } = await B.sb.from('reports').update({ status: sel.value }).eq('id', row.id);
         sel.disabled = false;
-        if (error) { sel.value = prev; alertLine(li, '상태를 바꾸지 못했습니다.'); } else { row.status = sel.value; }
+        if (error) { sel.value = prev; alertLine(li, '상태를 바꾸지 못했습니다.'); } else { row.status = sel.value; paintStatus(li, row.status); refreshFilter(); }
       });
       meta.append(sel);
     } else {
@@ -454,6 +463,25 @@
     return li;
   }
 
+  /* E구역 상태 거르기: 전체 / 접수 / 심의 / 개통 / 반려 */
+  let filterNow = '전체';
+  function refreshFilter() {
+    const box = document.querySelector('[data-filter]');
+    const items = [...listOf('reports').querySelectorAll(':scope > li[data-status]')];
+    if (!items.length) { box.hidden = true; return; }
+    const count = k => k === '전체' ? items.length : items.filter(li => li.dataset.status === k).length;
+    box.replaceChildren(...['전체', ...Object.keys(STATUS)].map(k => {
+      const b = el('button', `filter-chip${k === filterNow ? ' is-on' : ''}`);
+      b.type = 'button';
+      b.setAttribute('aria-pressed', String(k === filterNow));
+      b.append(document.createTextNode(k), el('span', 'filter-n', String(count(k))));
+      b.addEventListener('click', () => { filterNow = k; refreshFilter(); });
+      return b;
+    }));
+    box.hidden = false;
+    items.forEach(li => { li.hidden = filterNow !== '전체' && li.dataset.status !== filterNow; });
+  }
+
   function openZone(key) {
     const card = document.querySelector(`[data-zone="${key}"]`);
     card.classList.remove('card-locked');
@@ -488,6 +516,7 @@
       if (!data.length) { setState('reports', '아직 접수된 제보가 없습니다.'); return; }
       const contactOf = new Map((contacts.data || []).map(c => [c.report_id, c.contact]));
       listOf('reports').replaceChildren(...data.map(r => reportItem(r, { canEdit: isStaff, contact: contactOf.get(r.id) })));
+      refreshFilter();
     })();
   }
 

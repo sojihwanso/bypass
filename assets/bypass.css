@@ -259,14 +259,9 @@ a { color: var(--green); text-underline-offset: 3px; }
 .st-select { font: inherit; font-size: 13.5px; font-weight: 700; color: var(--ink); background: #fff; border: 1.5px solid var(--post-dark); border-radius: 4px; padding: 1px 4px; }
 .st-select[disabled] { opacity: .6; }
 
-@media (min-width: 821px) {
-  .inbox-cols > li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2px 28px; }
-  .inbox-cols .inbox-meta, .inbox-cols .inbox-private { grid-column: 1 / -1; justify-self: start; }
-}
 
 /* ===== 운영진 관리: 삭제·부원 등록·회원 구분 ===== */
 .inbox-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 10px; }
-.inbox-cols .inbox-actions { grid-column: 1 / -1; }
 .inbox-account { font-size: 13.5px; color: var(--muted); margin-right: auto; }
 .inbox-alert { color: var(--orange-ink); font-weight: 700; }
 .mini-btn { font: inherit; font-size: 13.5px; font-weight: 700; line-height: 1.4; padding: 4px 11px; border-radius: 6px; cursor: pointer; background: #fff; color: var(--green); border: 2px solid var(--green); }
@@ -286,3 +281,50 @@ a { color: var(--green); text-underline-offset: 3px; }
 .member-row .inbox-alert { grid-column: 1 / -1; margin: 0; }
 .member-row[hidden] { display: none; }
 .inbox-alert.is-good { color: var(--green); }
+
+/* ===== 접수증 상자: 제보·합류 신청을 한 장씩 ===== */
+.slips { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 14px; margin-top: 14px; align-items: stretch; }
+.slips > li.inbox-state { grid-column: 1 / -1; }
+.slips > li:not(.inbox-state) {
+  display: flex; flex-direction: column; padding: 0 0 12px; border: 2px solid var(--post); border-radius: 8px;
+  background: #fff; overflow: hidden; box-shadow: 0 2px 0 var(--pave);
+}
+.slips > li:not(.inbox-state):last-child { padding-bottom: 12px; }
+.slips > li > * { margin-left: 14px; margin-right: 14px; }
+.slips > li > .inbox-meta {
+  margin: 0 0 2px; padding: 7px 10px 7px 14px; background: var(--pave); border-bottom: 2px solid var(--post);
+  justify-content: flex-start;
+}
+.slips > li > .inbox-meta .inbox-no { margin-right: auto; }
+.slips > li > .inbox-meta .st-select, .slips > li > .inbox-meta .st { order: 3; }
+.slips .inbox-title { margin-top: 10px; }
+.slips .inbox-private { align-self: flex-start; }
+.slips .inbox-actions { margin-top: auto; padding-top: 10px; border-top: 1px dashed var(--rule); }
+.slips > li > :nth-last-child(2) { margin-bottom: 12px; }
+.slips .inbox-alert { margin-top: 8px; }
+/* 상태별 윗줄 색 */
+.slips > li.slip-review { border-color: #C98A1E; }
+.slips > li.slip-review > .inbox-meta { background: #FFE2A8; border-bottom-color: #C98A1E; }
+.slips > li.slip-open { border-color: var(--orange-ink); }
+.slips > li.slip-open > .inbox-meta { background: #FBC9A6; border-bottom-color: var(--orange-ink); }
+.slips > li.slip-rejected { border-style: dashed; border-color: var(--post); background: #FAFAF8; }
+.slips > li.slip-rejected > .inbox-meta { background: #F1F2EF; }
+.slips > li.slip-rejected .inbox-title { color: var(--muted); }
+/* 합류 신청은 녹색 윗줄 */
+[data-list="apps"] > li:not(.inbox-state) { border-color: var(--green); }
+[data-list="apps"] > li > .inbox-meta { background: var(--green-tint); border-bottom-color: var(--green); }
+
+/* 상태 거르기 버튼 */
+.slip-filter { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.filter-chip { font: inherit; font-size: 14px; font-weight: 700; line-height: 1.4; padding: 5px 10px 5px 12px; border-radius: 999px; cursor: pointer; background: #fff; color: var(--ink); border: 1.5px solid var(--post); display: inline-flex; align-items: center; gap: 6px; }
+.filter-chip:hover { border-color: var(--green); }
+.filter-chip.is-on { background: var(--green); color: #fff; border-color: var(--green); }
+.filter-n { font-size: 12.5px; font-weight: 900; border-radius: 999px; padding: 0 6px; background: var(--pave); color: var(--ink); line-height: 1.6; }
+.filter-chip.is-on .filter-n { background: #fff; color: var(--green); }
+
+/* 회원 관리: 넓은 화면에서 두 줄 */
+@media (min-width: 821px) {
+  .member-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; }
+  .member-grid > li.inbox-state { grid-column: 1 / -1; }
+  .member-grid > li:last-child { border-bottom: 1px solid var(--rule); padding-bottom: 14px; }
+}
