@@ -177,9 +177,28 @@
     if (saved && saved.refresh_token) { const a = document.getElementById('nav-account'); a.textContent = '공사장'; a.href = '/site/'; }
   } catch (e) { /* 저장소를 못 쓰면 그대로 */ }
 
+  /* 목록은 Supabase(routes, route_lines)에서 읽는다. 운영진이 공사장 H구역에서 고치면 바로 반영된다.
+     데이터베이스 설정 전이거나 연결이 안 되면 assets/routes.json 을 대신 쓴다. */
+  const SB_URL = 'https://itzdjdgjqcpmxdfssfel.supabase.co';
+  const SB_KEY = 'sb_publishable_L2FP31VpA_dZfwqH4u6H0Q_UWJlCS6G';
+  async function fromDb() {
+    const get = q => fetch(`${SB_URL}/rest/v1/${q}`, { headers: { apikey: SB_KEY } }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+    const [lines, routes] = await Promise.all([
+      get('route_lines?select=id,name,no,color,description,sort&order=sort.asc'),
+      get('routes?select=id,title,type,line,status,url,description,subject,featured,sample,sort,created_at&order=sort.asc,created_at.asc')
+    ]);
+    if (!lines.length) throw new Error('empty');
+    return {
+      lines: lines.map(l => ({ ...l, desc: l.description })),
+      routes: routes.map(r => ({ ...r, desc: r.description }))
+    };
+  }
   let data;
-  try { data = await (await fetch('/assets/routes.json', { cache: 'no-cache' })).json(); }
-  catch (e) { document.querySelector('[data-lines]').textContent = '노선도를 불러오지 못했습니다. 새로고침해 주십시오.'; return; }
+  try { data = await fromDb(); }
+  catch (e) {
+    try { data = await (await fetch('/assets/routes.json', { cache: 'no-cache' })).json(); }
+    catch (e2) { document.querySelector('[data-lines]').textContent = '노선도를 불러오지 못했습니다. 새로고침해 주십시오.'; return; }
+  }
 
   const lineOf = Object.fromEntries(data.lines.map(l => [l.id, l]));
 
@@ -197,7 +216,8 @@
 
   function card(r) {
     const line = lineOf[r.line] || {};
-    const li = el('li', `route${r.line === 'life' ? ' is-life' : ''}${r.status === 'building' ? ' is-building' : ''}`);
+    const warm = /^#e|^#f/i.test(line.color || '');  // 주황 계열 노선은 우회 표지(주황) 모양
+    const li = el('li', `route${warm ? ' is-life' : ''}${r.status === 'building' ? ' is-building' : ''}`);
     li.dataset.type = r.type;
     li.dataset.search = [r.title, r.subject, r.desc, TYPE[r.type], line.name].join(' ').toLowerCase();
     li.append(el('span', 'route-tab', `${line.no ? line.no + '호선 · ' : ''}${TYPE[r.type] || r.type}`));

@@ -284,6 +284,62 @@
           </div>
         </article>
 
+        <!-- H구역: 노선도 관리 (운영진) -->
+        <article class="card card-wide card-locked" aria-labelledby="c-routes" data-zone="routes">
+          <div class="card-head card-head-row"><div><p class="card-no">H구역</p><h2 id="c-routes">노선도 관리</h2></div><span class="card-count" data-count="routes" hidden></span></div>
+          <div class="card-body">
+            <div data-locked>
+              <div class="lock-band" aria-hidden="true"></div>
+              <p class="lock-title">운영진 전용 구역</p>
+              <p class="lock-text">개통 노선도에 우회로를 올리고, 과목 위키 파일을 올리는 곳입니다.</p>
+            </div>
+            <div data-open hidden>
+              <p class="card-lead">여기서 고친 목록은 <a href="/routes/" target="_blank" rel="noopener">개통 노선도</a>에 바로 반영됩니다. 위키 파일은 올린 뒤 사이트에 열리기까지 1~몇 분 걸립니다.</p>
+              <div class="board-tools routes-tools">
+                <button type="button" class="mini-btn mini-go" data-route-open>+ 우회로 추가</button>
+                <button type="button" class="mini-btn mini-go" data-wiki-open>위키 올리기</button>
+              </div>
+
+              <form class="board-form" data-route-form novalidate hidden>
+                <p class="form-title" data-route-form-title>우회로 추가</p>
+                <div class="form-cols">
+                  <div><label class="field-label" for="rt-title">이름</label><input class="input" id="rt-title" maxlength="100" required placeholder="예: 수강플래너"></div>
+                  <div><label class="field-label" for="rt-line">노선</label><select class="input" id="rt-line"></select></div>
+                  <div><label class="field-label" for="rt-type">종류</label>
+                    <select class="input" id="rt-type"><option value="app">앱</option><option value="wiki">위키</option><option value="channel">카톡 채널</option></select></div>
+                  <div><label class="field-label" for="rt-status">상태</label>
+                    <select class="input" id="rt-status"><option value="open">개통</option><option value="building">공사 중</option></select></div>
+                </div>
+                <label class="field-label" for="rt-url">주소 <span class="opt">(공사 중이면 비워도 됨)</span></label>
+                <input class="input" id="rt-url" maxlength="1000" placeholder="https://… 또는 /wiki/과목이름/">
+                <label class="field-label" for="rt-desc">한 줄 설명</label>
+                <input class="input" id="rt-desc" maxlength="300" placeholder="무엇을 어떻게 우회하는지 한 줄로">
+                <p class="form-error" role="alert" hidden></p>
+                <div class="form-actions"><button type="submit" class="btn btn-primary btn-small">올리기</button><button type="button" class="btn btn-secondary btn-small" data-form-close>취소</button></div>
+              </form>
+
+              <form class="board-form" data-wiki-form novalidate hidden>
+                <p class="form-title">위키 올리기</p>
+                <p class="hint">위키 HTML 파일을 고르면 사이트의 <b>/wiki/주소이름/</b> 에 올라가고, 노선도에도 개통으로 추가됩니다. 같은 주소이름으로 다시 올리면 고쳐집니다.</p>
+                <div class="form-cols">
+                  <div><label class="field-label" for="wk-subject">과목 이름</label><input class="input" id="wk-subject" maxlength="60" required placeholder="예: 항해학개론"></div>
+                  <div><label class="field-label" for="wk-slug">주소 이름 <span class="opt">(영문)</span></label><input class="input" id="wk-slug" maxlength="49" required placeholder="예: navigation-101" autocapitalize="none" spellcheck="false"></div>
+                  <div><label class="field-label" for="wk-line">노선</label><select class="input" id="wk-line"></select></div>
+                </div>
+                <label class="field-label" for="wk-file">위키 파일 (.html)</label>
+                <input class="input file-input" id="wk-file" type="file" accept=".html,.htm,text/html" required>
+                <label class="field-label" for="wk-desc">한 줄 설명 <span class="opt">(선택)</span></label>
+                <input class="input" id="wk-desc" maxlength="300" placeholder="예: 강의 요점과 시험 범위 정리">
+                <p class="form-error" role="alert" hidden></p>
+                <div class="form-actions"><button type="submit" class="btn btn-primary btn-small">위키 올리기</button><button type="button" class="btn btn-secondary btn-small" data-form-close>취소</button></div>
+              </form>
+              <div class="wiki-done" role="status" data-wiki-done hidden></div>
+
+              <div data-list="routes" aria-live="polite"><p class="inbox-state">불러오는 중…</p></div>
+            </div>
+          </div>
+        </article>
+
       </div>
     </div>
   </section>
@@ -926,6 +982,180 @@
     })();
   }
 
+
+  /* ===== H구역 노선도 관리 (운영진) =====
+     목록: routes · route_lines 표 (supabase/005_routes.sql)
+     위키 파일: Edge Function publish-wiki 가 GitHub 저장소 wiki/<주소이름>/index.html 로 저장 */
+  if (role.key === 'staff') {
+    openZone('routes');
+    const RT_TYPE = { app: '앱', wiki: '위키', channel: '카톡 채널' };
+    const RT_STATE = { open: '개통', building: '공사 중' };
+    const routeForm = document.querySelector('[data-route-form]');
+    const wikiForm = document.querySelector('[data-wiki-form]');
+    const wikiDone = document.querySelector('[data-wiki-done]');
+    const v = id => document.getElementById(id).value.trim();
+    let rtLines = [], rtRoutes = [], editingId = null;
+
+    const showForm = (form, open) => {
+      [routeForm, wikiForm].forEach(f => { f.hidden = f !== form || !open; });
+      if (open) { form.querySelector('.form-error').hidden = true; form.querySelector('input').focus(); }
+    };
+    [routeForm, wikiForm].forEach(f => f.querySelector('[data-form-close]').addEventListener('click', () => { f.hidden = true; editingId = null; }));
+    const fail = (form, text, field) => { const b = form.querySelector('.form-error'); b.textContent = text; b.hidden = false; if (field) document.getElementById(field).focus(); };
+
+    document.querySelector('[data-route-open]').addEventListener('click', () => {
+      editingId = null; routeForm.reset();
+      routeForm.querySelector('[data-route-form-title]').textContent = '우회로 추가';
+      routeForm.querySelector('[type="submit"]').textContent = '올리기';
+      showForm(routeForm, routeForm.hidden);
+    });
+    document.querySelector('[data-wiki-open]').addEventListener('click', () => { wikiForm.reset(); wikiDone.hidden = true; showForm(wikiForm, wikiForm.hidden); });
+
+    function fillLineSelects() {
+      ['rt-line', 'wk-line'].forEach(id => {
+        const sel = document.getElementById(id);
+        sel.replaceChildren(...rtLines.map(l => { const o = el('option', null, `${l.no}호선 · ${l.name}`); o.value = l.id; return o; }));
+      });
+    }
+
+    function routeRow(r) {
+      const li = el('li');
+      const info = el('div');
+      info.append(el('p', 'rt-title', r.title));
+      const meta = el('p', 'rt-meta');
+      meta.append(el('span', `st ${r.status === 'open' ? 'st-open' : 'st-received'}`, RT_STATE[r.status]), el('span', null, RT_TYPE[r.type] || r.type));
+      if (r.url) { const a = el('a', null, r.url); a.href = r.url; a.target = '_blank'; a.rel = 'noopener'; meta.append(a); }
+      if (r.sample) meta.append(el('span', 'bl-tag', '견본'));
+      info.append(meta);
+      if (r.description) info.append(el('p', 'bl-note', r.description));
+      const act = el('div', 'rt-actions');
+      const edit = el('button', 'mini-btn', '고치기'); edit.type = 'button';
+      edit.addEventListener('click', () => {
+        editingId = r.id;
+        document.getElementById('rt-title').value = r.title;
+        document.getElementById('rt-line').value = r.line;
+        document.getElementById('rt-type').value = r.type;
+        document.getElementById('rt-status').value = r.status;
+        document.getElementById('rt-url').value = r.url || '';
+        document.getElementById('rt-desc').value = r.description || '';
+        routeForm.querySelector('[data-route-form-title]').textContent = `고치기: ${r.title}`;
+        routeForm.querySelector('[type="submit"]').textContent = '고친 내용 저장';
+        showForm(routeForm, true);
+        routeForm.scrollIntoView({ block: 'center' });
+      });
+      const toggle = el('button', 'mini-btn', r.status === 'open' ? '공사 중으로' : '개통하기'); toggle.type = 'button';
+      toggle.addEventListener('click', async () => {
+        const next = r.status === 'open' ? 'building' : 'open';
+        if (next === 'open' && !r.url) { alertLine(li, '개통하려면 먼저 ‘고치기’로 주소를 넣어 주세요.'); return; }
+        toggle.disabled = true;
+        const { error } = await B.sb.from('routes').update({ status: next, sample: false }).eq('id', r.id);
+        toggle.disabled = false;
+        if (error) { alertLine(li, '바꾸지 못했습니다.'); return; }
+        r.status = next; r.sample = false; renderRoutes();
+      });
+      act.append(edit, toggle, deleteButton(`우회로 ${r.title}`, async () => {
+        const { error } = await B.sb.from('routes').delete().eq('id', r.id);
+        if (error) { alertLine(li, '삭제하지 못했습니다.'); return false; }
+        rtRoutes = rtRoutes.filter(x => x.id !== r.id); renderRoutes(); return true;
+      }));
+      li.append(info, act);
+      return li;
+    }
+
+    function renderRoutes() {
+      const box = listOf('routes');
+      setCount('routes', rtRoutes.length);
+      if (!rtLines.length) { box.replaceChildren(el('p', 'inbox-state', '노선이 없습니다.')); return; }
+      box.replaceChildren(...rtLines.map(l => {
+        const sec = el('section', 'rt-line');
+        const h = el('h3'); const b = el('b', null, l.no); b.style.background = l.color; h.append(b, document.createTextNode(l.name));
+        const items = rtRoutes.filter(r => r.line === l.id);
+        const ul = el('ul', 'rt-list');
+        if (items.length) ul.append(...items.map(routeRow)); else ul.append(el('li', 'inbox-state', '아직 우회로가 없습니다.'));
+        sec.append(h, ul);
+        return sec;
+      }));
+    }
+
+    (async () => {
+      const [ls, rs] = await Promise.all([
+        B.sb.from('route_lines').select('id, name, no, color, sort').order('sort'),
+        B.sb.from('routes').select('id, title, type, line, status, url, description, subject, sample, sort, created_at').order('sort').order('created_at')
+      ]);
+      if (ls.error || rs.error) {
+        const e = ls.error || rs.error;
+        listOf('routes').replaceChildren(el('p', 'inbox-state', e.code === 'PGRST205' ? '노선도 설정이 아직 끝나지 않았습니다. supabase/005_routes.sql 을 실행해 주세요.' : '노선도 목록을 불러오지 못했습니다.'));
+        return;
+      }
+      rtLines = ls.data; rtRoutes = rs.data;
+      fillLineSelects(); renderRoutes();
+    })();
+
+    // 우회로 추가·고치기
+    routeForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      routeForm.querySelector('.form-error').hidden = true;
+      const row = { title: v('rt-title'), line: v('rt-line'), type: v('rt-type'), status: v('rt-status'), url: v('rt-url') || null, description: v('rt-desc') || null };
+      if (!row.title) return fail(routeForm, '이름을 넣어 주세요.', 'rt-title');
+      if (row.url && !/^https?:\/\//i.test(row.url) && !/^\/[a-z0-9/_-]*$/.test(row.url)) return fail(routeForm, '주소는 https:// 로 시작하거나 /wiki/주소이름/ 형태여야 합니다.', 'rt-url');
+      if (row.status === 'open' && !row.url) return fail(routeForm, '개통하려면 주소가 있어야 합니다. 아직이면 상태를 ‘공사 중’으로 두세요.', 'rt-url');
+      const btn = routeForm.querySelector('[type="submit"]');
+      B.setBusy(btn, true, '저장 중…');
+      const q = editingId ? B.sb.from('routes').update({ ...row, sample: false }).eq('id', editingId).select().single()
+                          : B.sb.from('routes').insert({ ...row, sort: rtRoutes.filter(r => r.line === row.line).length + 1 }).select().single();
+      const { data, error } = await q;
+      B.setBusy(btn, false);
+      if (error) return fail(routeForm, '저장하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+      if (editingId) rtRoutes = rtRoutes.map(r => r.id === editingId ? data : r); else rtRoutes.push(data);
+      editingId = null; routeForm.hidden = true; renderRoutes();
+    });
+
+    // 위키 올리기
+    wikiForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      wikiForm.querySelector('.form-error').hidden = true;
+      const subject = v('wk-subject'), slug = v('wk-slug').toLowerCase(), line = v('wk-line'), desc = v('wk-desc');
+      const file = document.getElementById('wk-file').files[0];
+      if (!subject) return fail(wikiForm, '과목 이름을 넣어 주세요.', 'wk-subject');
+      if (!/^[a-z0-9][a-z0-9-]{1,48}$/.test(slug)) return fail(wikiForm, '주소 이름은 영문 소문자·숫자·하이픈(-)으로 2~49자로 정해 주세요. 예: navigation-101', 'wk-slug');
+      if (!file) return fail(wikiForm, '위키 HTML 파일을 골라 주세요.', 'wk-file');
+      if (file.size > 1_500_000) return fail(wikiForm, '파일이 너무 큽니다. 1.5MB 이하로 올려 주세요.', 'wk-file');
+      const html = await file.text();
+      if (!/<html[\s>]/i.test(html)) return fail(wikiForm, 'HTML 파일이 아닌 것 같습니다. 위키 .html 파일을 골라 주세요.', 'wk-file');
+
+      const btn = wikiForm.querySelector('[type="submit"]');
+      B.setBusy(btn, true, '올리는 중…');
+      const { data, error } = await B.sb.functions.invoke('publish-wiki', { body: { slug, title: subject, html } });
+      if (error) {
+        B.setBusy(btn, false);
+        let text = '위키를 올리지 못했습니다.';
+        try { const j = await error.context.json(); if (j && j.error) text = j.error; } catch (x) {
+          if (error.context && error.context.status === 404) text = '위키 올리기 설정이 아직 끝나지 않았습니다. (publish-wiki 함수 배포 필요)';
+        }
+        return fail(wikiForm, text);
+      }
+
+      // 노선도에도 개통으로 올림 (같은 주소가 있으면 고침)
+      const url = `/wiki/${slug}/`;
+      const same = rtRoutes.find(r => r.url === url);
+      const row = { title: `${subject} 위키`, subject, type: 'wiki', line, status: 'open', url, description: desc || same?.description || `${subject} 과목 정리 위키입니다.`, sample: false };
+      const q = same ? B.sb.from('routes').update(row).eq('id', same.id).select().single()
+                     : B.sb.from('routes').insert({ ...row, sort: rtRoutes.filter(r => r.line === line).length + 1 }).select().single();
+      const saved = await q;
+      B.setBusy(btn, false);
+      if (!saved.error) { if (same) rtRoutes = rtRoutes.map(r => r.id === same.id ? saved.data : r); else rtRoutes.push(saved.data); renderRoutes(); }
+
+      wikiForm.hidden = true;
+      wikiDone.classList.toggle('is-bad', Boolean(saved.error));
+      const link = el('a', null, url); link.href = url; link.target = '_blank'; link.rel = 'noopener';
+      wikiDone.replaceChildren(
+        el('b', null, data && data.updated ? `‘${subject}’ 위키를 고쳤습니다. ` : `‘${subject}’ 위키를 올렸습니다. `),
+        document.createTextNode('1~몇 분 뒤 '), link, document.createTextNode(' 에서 열립니다.'),
+        document.createTextNode(saved.error ? ' (노선도 목록에는 넣지 못했으니 ‘+ 우회로 추가’로 넣어 주세요.)' : ' 노선도에도 개통으로 올렸습니다.')
+      );
+      wikiDone.hidden = false;
+    });
+  }
 
   // 로그아웃
   let leaving = false;
