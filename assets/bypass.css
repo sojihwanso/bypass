@@ -229,3 +229,37 @@ a { color: var(--green); text-underline-offset: 3px; }
 .foot-name { font-size: 15px; }
 .foot-name strong { font-weight: 900; letter-spacing: 0.03em; margin-right: 8px; color: #fff; }
 .foot-note { color: #B7BEB9; }
+
+/* ===== 접수함: 내 제보·접수된 제보·합류 신청 ===== */
+.card-wide { grid-column: 1 / -1; }
+.card-head-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+.card-count { flex-shrink: 0; margin-bottom: 3px; border-radius: 4px; background: #fff; color: var(--green); font-weight: 900; font-size: 13.5px; line-height: 1.7; padding: 0 9px; }
+.card-locked .card-count { display: none; }
+.card-lead { margin: 12px 0 0; font-size: 14.5px; color: var(--muted); line-height: 1.6; }
+
+.inbox { list-style: none; margin: 6px 0 0; padding: 0; }
+.inbox > li { padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.inbox > li:last-child { border-bottom: 0; padding-bottom: 2px; }
+.inbox-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+.inbox-no { font-weight: 900; color: var(--ink); letter-spacing: 0.03em; }
+.inbox-title { margin: 4px 0 0; font-size: 16.5px; font-weight: 700; line-height: 1.55; overflow-wrap: anywhere; white-space: pre-line; }
+.inbox-text { margin: 2px 0 0; font-size: 15px; color: var(--muted); line-height: 1.6; overflow-wrap: anywhere; white-space: pre-line; }
+.inbox-text b { color: var(--ink); font-weight: 700; margin-right: 6px; }
+.inbox-private { margin: 8px 0 0; display: inline-flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; padding: 3px 10px; border-radius: 4px; background: #FFF3EA; border: 1px dashed var(--orange-ink); font-size: 14px; overflow-wrap: anywhere; }
+.inbox-private b { color: var(--orange-ink); font-weight: 900; font-size: 12.5px; letter-spacing: 0.05em; }
+.inbox-state { color: var(--muted); font-size: 15px; padding: 14px 0 4px; }
+.inbox-more { margin-top: 10px; }
+
+/* 처리 상태 표: 접수 → 심의 → 개통 / 반려 */
+.st { display: inline-block; border-radius: 4px; font-weight: 900; font-size: 12.5px; letter-spacing: 0.06em; line-height: 1.7; padding: 0 8px; }
+.st-received { background: var(--pave); color: var(--ink); }
+.st-review { background: var(--amber); color: var(--ink); }
+.st-open { background: var(--orange); color: var(--ink); }
+.st-rejected { background: #fff; color: var(--orange-ink); box-shadow: inset 0 0 0 1.5px var(--orange-ink); }
+.st-select { font: inherit; font-size: 13.5px; font-weight: 700; color: var(--ink); background: #fff; border: 1.5px solid var(--post-dark); border-radius: 4px; padding: 1px 4px; }
+.st-select[disabled] { opacity: .6; }
+
+@media (min-width: 821px) {
+  .inbox-cols > li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2px 28px; }
+  .inbox-cols .inbox-meta, .inbox-cols .inbox-private { grid-column: 1 / -1; justify-self: start; }
+}

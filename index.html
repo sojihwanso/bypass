@@ -994,11 +994,11 @@
     <form novalidate>
       <p class="dlg-notice">본 양식은 세 개 항목만 요구합니다. 그 이상은 설치 규정 제1조에 위배되기 때문입니다.</p>
       <label class="field-label" for="r-what">무엇이 불편합니까?</label>
-      <textarea id="r-what" name="what" rows="3" required placeholder="예: 신청서마다 학번과 계좌번호를 다시 씁니다."></textarea>
+      <textarea id="r-what" maxlength="2000" name="what" rows="3" required placeholder="예: 신청서마다 학번과 계좌번호를 다시 씁니다."></textarea>
       <label class="field-label" for="r-how">지금은 어떻게 하고 있습니까?</label>
-      <textarea id="r-how" name="how" rows="3" required></textarea>
+      <textarea id="r-how" maxlength="2000" name="how" rows="3" required></textarea>
       <label class="field-label" for="r-contact">연락처 <span class="opt">(선택)</span></label>
-      <input id="r-contact" name="contact" type="text" autocomplete="email" placeholder="이메일 또는 전화번호" aria-describedby="r-contact-hint">
+      <input id="r-contact" maxlength="100" name="contact" type="text" autocomplete="email" placeholder="이메일 또는 전화번호" aria-describedby="r-contact-hint">
       <p class="hint" id="r-contact-hint">연락처는 처리 결과 회신에만 쓰며, 처리가 끝나면 파기합니다.</p>
       <p class="form-error" role="alert" hidden>필수 항목이 누락되었습니다. 본 국도 이 문구를 쓰게 되어 유감입니다.</p>
       <div class="dlg-actions"><button type="submit" class="btn btn-primary">제보 제출하기</button></div>
@@ -1032,14 +1032,14 @@
     <form novalidate>
       <p class="dlg-notice">본 신청서는 네 개 항목만 요구합니다. 그중 하나는 선택입니다.</p>
       <label class="field-label" for="j-name">이름</label>
-      <input id="j-name" name="name" type="text" autocomplete="name" required>
+      <input id="j-name" maxlength="40" name="name" type="text" autocomplete="name" required>
       <label class="field-label" for="j-contact">연락처</label>
-      <input id="j-contact" name="contact" type="text" autocomplete="email" required placeholder="이메일 또는 전화번호" aria-describedby="j-contact-hint">
+      <input id="j-contact" maxlength="100" name="contact" type="text" autocomplete="email" required placeholder="이메일 또는 전화번호" aria-describedby="j-contact-hint">
       <p class="hint" id="j-contact-hint">연락처는 합류 안내에만 씁니다.</p>
       <label class="field-label" for="j-major">학과 <span class="opt">(선택)</span></label>
-      <input id="j-major" name="major" type="text">
+      <input id="j-major" maxlength="60" name="major" type="text">
       <label class="field-label" for="j-want">하고 싶은 것 한 줄</label>
-      <input id="j-want" name="want" type="text" required placeholder="예: 공지 알림을 한곳으로 모으고 싶습니다.">
+      <input id="j-want" maxlength="300" name="want" type="text" required placeholder="예: 공지 알림을 한곳으로 모으고 싶습니다.">
       <p class="form-error" role="alert" hidden>필수 항목이 누락되었습니다. 본 국도 이 문구를 쓰게 되어 유감입니다.</p>
       <div class="dlg-actions"><button type="submit" class="btn btn-primary">합류 신청하기</button></div>
     </form>
@@ -1083,10 +1083,43 @@
     report.parentNode.insertBefore(join, report);
   }
 
-  /* ===== 제보·합류 대화상자 ===== */
+  /* ===== 제보·합류 대화상자 =====
+     제출 내용은 Supabase 제출 함수(submit_report, submit_application)로 저장된다.
+     이 페이지는 가벼움을 위해 Supabase 라이브러리를 불러오지 않고 주소로 바로 부른다.
+     표 구조와 열람 권한: supabase/001_reports_applications.sql */
+  const SB_URL = 'https://itzdjdgjqcpmxdfssfel.supabase.co';
+  const SB_KEY = 'sb_publishable_L2FP31VpA_dZfwqH4u6H0Q_UWJlCS6G';
+  const SB_SESSION = 'sb-itzdjdgjqcpmxdfssfel-auth-token';
+
   const now = new Date();
   const dateText = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}.`;
-  let receiptSeq = 0;
+
+  /* 로그인한 채로 내면 '공사장 > 내 제보'에 모이도록 로그인 정보를 함께 보낸다 */
+  function sessionToken() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(SB_SESSION) || 'null');
+      if (saved && saved.access_token && saved.expires_at * 1000 > Date.now() + 30000) return saved.access_token;
+    } catch (e) { /* 저장소를 못 쓰면 비로그인으로 낸다 */ }
+    return null;
+  }
+
+  async function submitTo(fn, body) {
+    const headers = { apikey: SB_KEY, 'Content-Type': 'application/json' };
+    const token = sessionToken();
+    if (token) headers.Authorization = 'Bearer ' + token;
+    const res = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, { method: 'POST', headers, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(`${fn} ${res.status}`);
+    return res.json();  // 접수번호 문자열
+  }
+
+  // form.name 은 양식 자체의 이름이라, 칸은 elements 로 꺼낸다
+  const val = (form, name) => form.elements.namedItem(name).value.trim();
+  const SUBMIT = {
+    'report-dialog': f => submitTo('submit_report', { p_what: val(f, 'what'), p_how: val(f, 'how'), p_contact: val(f, 'contact') || null }),
+    'join-dialog': f => submitTo('submit_application', { p_name: val(f, 'name'), p_contact: val(f, 'contact'), p_want: val(f, 'want'), p_major: val(f, 'major') || null })
+  };
+  const MISSING_TEXT = '필수 항목이 누락되었습니다. 본 국도 이 문구를 쓰게 되어 유감입니다.';
+  const FAIL_TEXT = '전송 중 정체가 발생하여 접수하지 못했습니다. 잠시 후 다시 시도해 주십시오. 본 국도 이 정체가 유감입니다.';
 
   function resetDialog(dlg) {
     const form = dlg.querySelector('form');
@@ -1110,26 +1143,42 @@
     dlg.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => dlg.close()));
 
     const form = dlg.querySelector('form');
-    form.addEventListener('submit', e => {
+    const submitBtn = form.querySelector('[type="submit"]');
+    let sending = false;
+    form.addEventListener('submit', async e => {
       e.preventDefault();
+      if (sending) return;
       const required = [...form.querySelectorAll('[required]')];
       const missing = required.filter(f => !f.value.trim());
       required.forEach(f => f.setAttribute('aria-invalid', missing.includes(f) ? 'true' : 'false'));
       const error = form.querySelector('.form-error');
       if (missing.length) {
+        error.textContent = MISSING_TEXT;
         error.hidden = false;
         missing[0].focus();
         return;
       }
       error.hidden = true;
 
-      // TODO: 실제 전송 연결 (구글 폼, Formspree, 자체 서버 등).
-      // 지금은 화면에서만 접수 처리되며, 입력 내용은 어디에도 저장되지 않는다.
+      sending = true;
+      const label = submitBtn.textContent;
+      submitBtn.textContent = '접수 중…';
+      submitBtn.disabled = true;
+      let receiptNo;
+      try {
+        receiptNo = await SUBMIT[dlg.id](form);
+      } catch (err) {
+        error.textContent = FAIL_TEXT;
+        error.hidden = false;
+        return;
+      } finally {
+        sending = false;
+        submitBtn.textContent = label;
+        submitBtn.disabled = false;
+      }
 
-      receiptSeq += 1;
-      const seq = String(receiptSeq).padStart(3, '0');
       const receipt = dlg.querySelector('.receipt');
-      receipt.querySelectorAll('[data-no]').forEach(el => { el.textContent = `BYP-${now.getFullYear()}-${seq}`; });
+      receipt.querySelectorAll('[data-no]').forEach(el => { el.textContent = receiptNo; });
       receipt.querySelector('[data-date]').textContent = dateText;
 
       form.hidden = true;
