@@ -209,6 +209,25 @@
             </div>
           </div>
         </article>
+
+        <!-- G구역: 회원 관리 (운영진) -->
+        <article class="card card-wide card-locked" aria-labelledby="c-members" data-zone="members">
+          <div class="card-head card-head-row"><div><p class="card-no">G구역</p><h2 id="c-members">회원 관리</h2></div><span class="card-count" data-count="members" hidden></span></div>
+          <div class="card-body">
+            <div data-locked>
+              <div class="lock-band" aria-hidden="true"></div>
+              <p class="lock-title">운영진 전용 구역</p>
+              <p class="lock-text">회원을 부원·운영진으로 등록하거나 해제하는 곳입니다.</p>
+            </div>
+            <div data-open hidden>
+              <p class="card-lead">구분을 바꾸면 바로 저장됩니다. 바뀐 구분은 그 회원이 다시 로그인하면(늦어도 1시간 안에) 적용됩니다. 자기 자신의 구분은 바꿀 수 없습니다.</p>
+              <label class="sr-only" for="member-search">회원 찾기</label>
+              <input class="input member-search" id="member-search" type="search" placeholder="이름이나 아이디로 찾기" autocomplete="off" data-member-search>
+              <ul class="inbox member-list" data-list="members" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
+            </div>
+          </div>
+        </article>
+
       </div>
     </div>
   </section>
@@ -279,10 +298,42 @@
   function failText(error) {
     // 표가 아직 없으면(설정 전) 안내, 그 밖에는 일반 오류
     if (error && (error.code === 'PGRST205' || error.code === '42P01')) return '접수함 설정이 아직 끝나지 않았습니다. 운영진이 데이터베이스 설정을 마치면 열립니다.';
+    if (error && error.code === 'PGRST202') return '회원 관리 설정이 아직 끝나지 않았습니다. supabase/002_member_admin.sql 을 실행해 주세요.';
     return '접수함을 불러오지 못했습니다. 잠시 후 새로고침해 주세요.';
   }
 
   function statusChip(status) { return el('span', `st st-${STATUS[status] || 'received'}`, status); }
+
+  const ROLE_LABEL = { general: '일반 회원', member: '부원', staff: '운영진' };
+  const bumpCount = (key, d) => { const c = document.querySelector(`[data-count="${key}"]`); const n = (parseInt(c.textContent, 10) || 0) + d; c.textContent = `${n}건`; };
+
+  /* 두 번 눌러야 지워지는 삭제 버튼: '삭제' → '정말 삭제?' */
+  function deleteButton(label, onConfirm) {
+    const btn = el('button', 'mini-btn mini-danger', '삭제');
+    btn.type = 'button';
+    btn.setAttribute('aria-label', `${label} 삭제`);
+    let armed = null;
+    btn.addEventListener('click', async () => {
+      if (!armed) {
+        btn.textContent = '정말 삭제?'; btn.classList.add('is-armed');
+        armed = setTimeout(() => { armed = null; btn.textContent = '삭제'; btn.classList.remove('is-armed'); }, 4000);
+        return;
+      }
+      clearTimeout(armed); armed = null;
+      btn.disabled = true; btn.textContent = '삭제 중…';
+      const ok = await onConfirm();
+      if (!ok) { btn.disabled = false; btn.textContent = '삭제'; btn.classList.remove('is-armed'); }
+    });
+    return btn;
+  }
+
+  async function removeRow(table, id, li, countKey, listKey, emptyText) {
+    const { data, error } = await B.sb.from(table).delete().eq('id', id).select('id');
+    if (error || !data || !data.length) { alertLine(li, '삭제하지 못했습니다. 권한을 확인해 주세요.'); return false; }
+    li.remove(); bumpCount(countKey, -1);
+    if (!listOf(listKey).children.length) setState(listKey, emptyText);
+    return true;
+  }
 
   function reportItem(row, opts) {
     const li = el('li');
@@ -307,21 +358,99 @@
     if (opts.contact) {
       const pv = el('p', 'inbox-private'); pv.append(el('b', null, '운영진만'), document.createTextNode(`연락처 ${opts.contact}`)); li.append(pv);
     }
+    if (opts.canEdit) {
+      const act = el('div', 'inbox-actions');
+      act.append(deleteButton(receiptNo('BYP', row), () => removeRow('reports', row.id, li, 'reports', 'reports', '아직 접수된 제보가 없습니다.')));
+      li.append(act);
+    }
     return li;
   }
 
-  function alertLine(li, text) {
-    const p = el('p', 'inbox-text', text); p.setAttribute('role', 'alert'); li.append(p);
-    setTimeout(() => p.remove(), 4000);
+  function alertLine(li, text, good) {
+    li.querySelectorAll(':scope > .inbox-alert').forEach(x => x.remove());
+    const p = el('p', `inbox-text inbox-alert${good ? ' is-good' : ''}`, text); p.setAttribute('role', good ? 'status' : 'alert'); li.append(p);
+    setTimeout(() => p.remove(), good ? 3000 : 6000);
   }
 
-  function appItem(row) {
+  /* 회원 구분 바꾸기 (운영진). 성공하면 화면의 같은 회원 표시도 함께 고친다. */
+  async function changeRole(member, newRole) {
+    const { error } = await B.sb.rpc('set_member_role', { p_user: member.id, p_role: newRole });
+    if (error) return error.message && /[가-힣]/.test(error.message) ? error.message : '구분을 바꾸지 못했습니다.';
+    member.role = newRole;
+    document.querySelectorAll(`[data-member-role="${member.id}"]`).forEach(x => { x.value = newRole; });
+    document.querySelectorAll(`[data-applicant="${member.id}"]`).forEach(x => x.dispatchEvent(new Event('rolechange')));
+    return null;
+  }
+
+  function appItem(row, members) {
     const li = el('li');
     const meta = el('div', 'inbox-meta');
     meta.append(el('span', 'inbox-no', receiptNo('JOIN', row)), el('span', null, B.dateText(row.created_at)));
     li.append(meta, el('p', 'inbox-title', row.major ? `${row.name} · ${row.major}` : row.name));
     const want = el('p', 'inbox-text'); want.append(el('b', null, '하고 싶은 것'), document.createTextNode(row.want)); li.append(want);
     const pv = el('p', 'inbox-private'); pv.append(el('b', null, '운영진만'), document.createTextNode(`연락처 ${row.contact}`)); li.append(pv);
+
+    const act = el('div', 'inbox-actions');
+    const member = row.applicant && members.get(row.applicant);
+    if (member) {
+      // 로그인한 채로 신청한 경우: 회원 계정과 바로 연결
+      const who = el('span', 'inbox-account');
+      const promote = el('button', 'mini-btn mini-go', '부원으로 등록');
+      promote.type = 'button';
+      promote.dataset.applicant = member.id;
+      const paint = () => {
+        who.textContent = `회원 계정 ${member.username} · ${ROLE_LABEL[member.role] || member.role}`;
+        promote.hidden = member.role !== 'general';
+      };
+      promote.addEventListener('rolechange', paint);
+      promote.addEventListener('click', async () => {
+        promote.disabled = true; promote.textContent = '등록 중…';
+        const err = await changeRole(member, 'member');
+        promote.disabled = false; promote.textContent = '부원으로 등록';
+        if (err) alertLine(li, err); else paint();
+      });
+      paint();
+      act.append(who, promote);
+    } else {
+      act.append(el('span', 'inbox-account', '로그인하지 않고 신청함 · 연락처로 안내'));
+    }
+    act.append(deleteButton(receiptNo('JOIN', row), () => removeRow('applications', row.id, li, 'apps', 'apps', '아직 들어온 합류 신청이 없습니다.')));
+    li.append(act);
+    return li;
+  }
+
+  function memberItem(m) {
+    const li = el('li', 'member-row');
+    li.dataset.search = `${m.display_name} ${m.username}`.toLowerCase();
+    const info = el('div', 'member-info');
+    info.append(el('p', 'inbox-title', m.display_name));
+    info.append(el('p', 'inbox-meta', `${m.username} · 가입 ${B.dateText(m.created_at)}${m.last_sign_in_at ? ` · 최근 로그인 ${B.dateText(m.last_sign_in_at)}` : ''}`));
+    li.append(info);
+    if (m.id === user.id) {
+      li.append(el('span', `role${m.role !== 'general' ? ` role-${m.role}` : ''}`, `${ROLE_LABEL[m.role] || m.role} (나)`));
+      return li;
+    }
+    const sel = el('select', 'st-select member-role');
+    sel.dataset.memberRole = m.id;
+    sel.setAttribute('aria-label', `${m.display_name} 회원 구분`);
+    Object.entries(ROLE_LABEL).forEach(([k, v]) => { const o = el('option', null, v); o.value = k; if (k === m.role) o.selected = true; sel.append(o); });
+    let staffConfirm = null;
+    sel.addEventListener('change', async () => {
+      const prev = m.role, next = sel.value;
+      if (next === 'staff' && !staffConfirm) {
+        // 운영진은 연락처·합류 신청까지 보므로 한 번 더 확인
+        sel.value = prev;
+        staffConfirm = setTimeout(() => { staffConfirm = null; }, 6000);
+        alertLine(li, '운영진은 연락처와 합류 신청까지 볼 수 있습니다. 맞으면 6초 안에 한 번 더 ‘운영진’을 고르세요.');
+        return;
+      }
+      clearTimeout(staffConfirm); staffConfirm = null;
+      sel.disabled = true;
+      const err = await changeRole(m, next);
+      sel.disabled = false;
+      if (err) { sel.value = prev; alertLine(li, err); } else { alertLine(li, `${ROLE_LABEL[next]}(으)로 바꿨습니다.`, true); }
+    });
+    li.append(sel);
     return li;
   }
 
@@ -347,7 +476,7 @@
     openZone('reports');
     const isStaff = role.key === 'staff';
     document.querySelector('[data-zone="reports"] [data-lead]').textContent = isStaff
-      ? '운영진은 처리 상태를 바꿀 수 있습니다. 바꾼 상태는 제보자의 ‘내 제보’에도 바로 보입니다.'
+      ? '운영진은 처리 상태를 바꾸거나 제보를 지울 수 있습니다. 바꾼 상태는 제보자의 ‘내 제보’에도 바로 보입니다.'
       : '최근 접수 순입니다. 제보자 연락처는 운영진만 봅니다.';
     (async () => {
       const [{ data, error }, contacts] = await Promise.all([
@@ -362,18 +491,37 @@
     })();
   }
 
-  // F구역: 합류 신청 (운영진)
+  // F구역 합류 신청 · G구역 회원 관리 (운영진)
   if (role.key === 'staff') {
     openZone('apps');
+    openZone('members');
     (async () => {
-      const { data, error } = await B.sb.from('applications').select('id, created_at, name, contact, major, want')
-        .order('created_at', { ascending: false }).limit(LIMIT);
-      if (error) { setState('apps', failText(error)); return; }
-      setCount('apps', data.length);
-      if (!data.length) { setState('apps', '아직 들어온 합류 신청이 없습니다.'); return; }
-      listOf('apps').replaceChildren(...data.map(appItem));
+      const [apps, mem] = await Promise.all([
+        B.sb.from('applications').select('id, created_at, name, contact, major, want, applicant')
+          .order('created_at', { ascending: false }).limit(LIMIT),
+        B.sb.rpc('list_members')
+      ]);
+      const members = new Map((mem.data || []).map(m => [m.id, m]));
+
+      if (mem.error) setState('members', failText(mem.error));
+      else {
+        setCount('members', mem.data.length);
+        document.querySelector('[data-count="members"]').textContent = `${mem.data.length}명`;
+        listOf('members').replaceChildren(...mem.data.map(memberItem));
+        const search = document.querySelector('[data-member-search]');
+        search.addEventListener('input', () => {
+          const q = search.value.trim().toLowerCase();
+          listOf('members').querySelectorAll('.member-row').forEach(li => { li.hidden = Boolean(q) && !li.dataset.search.includes(q); });
+        });
+      }
+
+      if (apps.error) { setState('apps', failText(apps.error)); return; }
+      setCount('apps', apps.data.length);
+      if (!apps.data.length) { setState('apps', '아직 들어온 합류 신청이 없습니다.'); return; }
+      listOf('apps').replaceChildren(...apps.data.map(r => appItem(r, members)));
     })();
   }
+
 
   // 로그아웃
   let leaving = false;

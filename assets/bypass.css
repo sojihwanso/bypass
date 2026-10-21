@@ -263,3 +263,26 @@ a { color: var(--green); text-underline-offset: 3px; }
   .inbox-cols > li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2px 28px; }
   .inbox-cols .inbox-meta, .inbox-cols .inbox-private { grid-column: 1 / -1; justify-self: start; }
 }
+
+/* ===== 운영진 관리: 삭제·부원 등록·회원 구분 ===== */
+.inbox-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 10px; }
+.inbox-cols .inbox-actions { grid-column: 1 / -1; }
+.inbox-account { font-size: 13.5px; color: var(--muted); margin-right: auto; }
+.inbox-alert { color: var(--orange-ink); font-weight: 700; }
+.mini-btn { font: inherit; font-size: 13.5px; font-weight: 700; line-height: 1.4; padding: 4px 11px; border-radius: 6px; cursor: pointer; background: #fff; color: var(--green); border: 2px solid var(--green); }
+.mini-btn:hover { background: var(--green-tint); }
+.mini-btn[disabled] { opacity: .6; cursor: progress; }
+.mini-go { background: var(--green); color: #fff; }
+.mini-go:hover { background: var(--green-deep); }
+.mini-danger { color: var(--orange-ink); border-color: var(--orange-ink); }
+.mini-danger:hover { background: #FFF3EA; }
+.mini-danger.is-armed { background: var(--orange); color: var(--ink); border-color: var(--ink); }
+.member-search { margin-top: 12px; }
+.member-list > li.member-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 14px; }
+.member-row .member-info { min-width: 0; }
+.member-row .inbox-title { margin: 0; }
+.member-row .inbox-meta { margin: 0; display: block; }
+.member-row .member-role { font-size: 14.5px; padding: 4px 6px; }
+.member-row .inbox-alert { grid-column: 1 / -1; margin: 0; }
+.member-row[hidden] { display: none; }
+.inbox-alert.is-good { color: var(--green); }
