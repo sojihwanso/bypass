@@ -121,13 +121,14 @@
           </div>
         </article>
 
-        <!-- B구역: 내 제보 (6단계에서 실제 제보와 연결) -->
+        <!-- B구역: 내 제보 (로그인한 채로 낸 제보) -->
         <article class="card" aria-labelledby="c-report">
-          <div class="card-head"><p class="card-no">B구역</p><h2 id="c-report">내 제보</h2></div>
+          <div class="card-head card-head-row"><div><p class="card-no">B구역</p><h2 id="c-report">내 제보</h2></div><span class="card-count" data-count="mine" hidden></span></div>
           <div class="card-body">
-            <div class="empty">
+            <ul class="inbox" data-list="mine" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
+            <div class="empty" data-empty="mine" hidden>
               <p class="empty-title">아직 공사할 곳이 없습니다.</p>
-              <p class="empty-text">불편한 점을 제보해 주시면<br>처리 상황이 이곳에 표시됩니다.</p>
+              <p class="empty-text">로그인한 채로 불편을 제보하시면<br>처리 상황이 이곳에 표시됩니다.</p>
               <a class="btn btn-primary btn-small" href="/?report=1">불편 제보하기</a>
             </div>
           </div>
@@ -176,6 +177,38 @@
           </div>
         </article>
 
+
+        <!-- E구역: 접수된 제보 (부원·운영진) -->
+        <article class="card card-wide card-locked" aria-labelledby="c-reports" data-zone="reports">
+          <div class="card-head card-head-row"><div><p class="card-no">E구역</p><h2 id="c-reports">접수된 불편 제보</h2></div><span class="card-count" data-count="reports" hidden></span></div>
+          <div class="card-body">
+            <div data-locked>
+              <div class="lock-band" aria-hidden="true"></div>
+              <p class="lock-title">부원 열람 구역</p>
+              <p class="lock-text">메인 페이지로 들어온 불편 제보는 부원으로 등록되면 이곳에서 볼 수 있습니다. 제보자 연락처는 운영진만 봅니다.</p>
+            </div>
+            <div data-open hidden>
+              <p class="card-lead" data-lead></p>
+              <ul class="inbox inbox-cols" data-list="reports" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
+            </div>
+          </div>
+        </article>
+
+        <!-- F구역: 합류 신청 (운영진) -->
+        <article class="card card-wide card-locked" aria-labelledby="c-apps" data-zone="apps">
+          <div class="card-head card-head-row"><div><p class="card-no">F구역</p><h2 id="c-apps">합류 신청</h2></div><span class="card-count" data-count="apps" hidden></span></div>
+          <div class="card-body">
+            <div data-locked>
+              <div class="lock-band" aria-hidden="true"></div>
+              <p class="lock-title">운영진 전용 구역</p>
+              <p class="lock-text">합류 신청서에는 이름과 연락처가 있어 운영진만 열람합니다.</p>
+            </div>
+            <div data-open hidden>
+              <p class="card-lead">이름·연락처는 합류 안내에만 쓰고, 안내가 끝나면 지워 주세요.</p>
+              <ul class="inbox" data-list="apps" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
+            </div>
+          </div>
+        </article>
       </div>
     </div>
   </section>
@@ -230,6 +263,117 @@
 
   checking.remove();
   document.body.classList.remove('is-checking');
+
+  /* ===== 접수함 =====
+     열람 권한은 데이터베이스가 정한다 (supabase/001_reports_applications.sql).
+     화면은 회원 구분에 맞춰 칸을 열어 줄 뿐이다. */
+  const STATUS = { '접수': 'received', '심의': 'review', '개통': 'open', '반려': 'rejected' };
+  const pad = n => String(n).padStart(3, '0');
+  const receiptNo = (prefix, row) => `${prefix}-${new Date(row.created_at).getUTCFullYear()}-${pad(row.id)}`;
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const listOf = key => document.querySelector(`[data-list="${key}"]`);
+  const setState = (key, text) => listOf(key).replaceChildren(el('li', 'inbox-state', text));
+  const setCount = (key, n) => { const c = document.querySelector(`[data-count="${key}"]`); c.textContent = `${n}건`; c.hidden = false; };
+  const LIMIT = 100;
+
+  function failText(error) {
+    // 표가 아직 없으면(설정 전) 안내, 그 밖에는 일반 오류
+    if (error && (error.code === 'PGRST205' || error.code === '42P01')) return '접수함 설정이 아직 끝나지 않았습니다. 운영진이 데이터베이스 설정을 마치면 열립니다.';
+    return '접수함을 불러오지 못했습니다. 잠시 후 새로고침해 주세요.';
+  }
+
+  function statusChip(status) { return el('span', `st st-${STATUS[status] || 'received'}`, status); }
+
+  function reportItem(row, opts) {
+    const li = el('li');
+    const meta = el('div', 'inbox-meta');
+    meta.append(el('span', 'inbox-no', receiptNo('BYP', row)), el('span', null, B.dateText(row.created_at)));
+    if (opts.canEdit) {
+      const sel = el('select', 'st-select');
+      sel.setAttribute('aria-label', `${receiptNo('BYP', row)} 처리 상태`);
+      Object.keys(STATUS).forEach(k => { const o = el('option', null, k); o.value = k; if (k === row.status) o.selected = true; sel.append(o); });
+      sel.addEventListener('change', async () => {
+        const prev = row.status; sel.disabled = true;
+        const { error } = await B.sb.from('reports').update({ status: sel.value }).eq('id', row.id);
+        sel.disabled = false;
+        if (error) { sel.value = prev; alertLine(li, '상태를 바꾸지 못했습니다.'); } else { row.status = sel.value; }
+      });
+      meta.append(sel);
+    } else {
+      meta.append(statusChip(row.status));
+    }
+    li.append(meta, el('p', 'inbox-title', row.what));
+    const how = el('p', 'inbox-text'); how.append(el('b', null, '지금은'), document.createTextNode(row.how)); li.append(how);
+    if (opts.contact) {
+      const pv = el('p', 'inbox-private'); pv.append(el('b', null, '운영진만'), document.createTextNode(`연락처 ${opts.contact}`)); li.append(pv);
+    }
+    return li;
+  }
+
+  function alertLine(li, text) {
+    const p = el('p', 'inbox-text', text); p.setAttribute('role', 'alert'); li.append(p);
+    setTimeout(() => p.remove(), 4000);
+  }
+
+  function appItem(row) {
+    const li = el('li');
+    const meta = el('div', 'inbox-meta');
+    meta.append(el('span', 'inbox-no', receiptNo('JOIN', row)), el('span', null, B.dateText(row.created_at)));
+    li.append(meta, el('p', 'inbox-title', row.major ? `${row.name} · ${row.major}` : row.name));
+    const want = el('p', 'inbox-text'); want.append(el('b', null, '하고 싶은 것'), document.createTextNode(row.want)); li.append(want);
+    const pv = el('p', 'inbox-private'); pv.append(el('b', null, '운영진만'), document.createTextNode(`연락처 ${row.contact}`)); li.append(pv);
+    return li;
+  }
+
+  function openZone(key) {
+    const card = document.querySelector(`[data-zone="${key}"]`);
+    card.classList.remove('card-locked');
+    card.querySelector('[data-locked]').hidden = true;
+    card.querySelector('[data-open]').hidden = false;
+  }
+
+  // B구역: 내 제보
+  (async () => {
+    const { data, error } = await B.sb.from('reports').select('id, created_at, what, how, status')
+      .eq('reporter', user.id).order('created_at', { ascending: false }).limit(LIMIT);
+    if (error) { setState('mine', failText(error)); return; }
+    if (!data.length) { listOf('mine').hidden = true; document.querySelector('[data-empty="mine"]').hidden = false; return; }
+    setCount('mine', data.length);
+    listOf('mine').replaceChildren(...data.map(r => reportItem(r, {})));
+  })();
+
+  // E구역: 접수된 제보 (부원·운영진)
+  if (role.key !== 'general') {
+    openZone('reports');
+    const isStaff = role.key === 'staff';
+    document.querySelector('[data-zone="reports"] [data-lead]').textContent = isStaff
+      ? '운영진은 처리 상태를 바꿀 수 있습니다. 바꾼 상태는 제보자의 ‘내 제보’에도 바로 보입니다.'
+      : '최근 접수 순입니다. 제보자 연락처는 운영진만 봅니다.';
+    (async () => {
+      const [{ data, error }, contacts] = await Promise.all([
+        B.sb.from('reports').select('id, created_at, what, how, status').order('created_at', { ascending: false }).limit(LIMIT),
+        isStaff ? B.sb.from('report_contacts').select('report_id, contact') : Promise.resolve({ data: [] })
+      ]);
+      if (error) { setState('reports', failText(error)); return; }
+      setCount('reports', data.length);
+      if (!data.length) { setState('reports', '아직 접수된 제보가 없습니다.'); return; }
+      const contactOf = new Map((contacts.data || []).map(c => [c.report_id, c.contact]));
+      listOf('reports').replaceChildren(...data.map(r => reportItem(r, { canEdit: isStaff, contact: contactOf.get(r.id) })));
+    })();
+  }
+
+  // F구역: 합류 신청 (운영진)
+  if (role.key === 'staff') {
+    openZone('apps');
+    (async () => {
+      const { data, error } = await B.sb.from('applications').select('id, created_at, name, contact, major, want')
+        .order('created_at', { ascending: false }).limit(LIMIT);
+      if (error) { setState('apps', failText(error)); return; }
+      setCount('apps', data.length);
+      if (!data.length) { setState('apps', '아직 들어온 합류 신청이 없습니다.'); return; }
+      listOf('apps').replaceChildren(...data.map(appItem));
+    })();
+  }
 
   // 로그아웃
   let leaving = false;
