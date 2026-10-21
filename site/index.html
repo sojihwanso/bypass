@@ -607,8 +607,7 @@
       copy.addEventListener('click', async () => {
         try { await navigator.clipboard.writeText(data); copy.textContent = '복사됨'; } catch (e) { copy.textContent = '직접 복사해 주세요'; }
       });
-      box.append(el('b', null, `${m.display_name} 님 임시 비밀번호 `), code, copy,
-        el('span', null, ' 아이디 ' + m.username + ' 와 함께 1:1 문의 창구로 본인에게만 전달하세요. 로그인하면 바로 바꾸라는 안내가 뜹니다. 새로고침하면 다시 볼 수 없습니다.'));
+      box.append(el('b', null, `${m.display_name} 님 임시 비밀번호 `), code, copy);
       li.append(box);
     });
 
