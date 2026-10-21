@@ -298,9 +298,10 @@
   .board > .badge-rejected { background: #fff; color: var(--orange-ink); border: 2px dashed var(--orange-ink); box-shadow: 2px 3px 0 rgba(0,0,0,.35); transform: rotate(4deg); }
   .board:hover > .badge { transform: rotate(0deg) translateY(-2px); }
   @media (prefers-reduced-motion: reduce) { .board > .badge { transition: none; } }
-  .board-rejected .board-head { border-top: 10px solid transparent; background: var(--green) padding-box; position: relative; }
+  /* 반려 안내판은 줄무늬 위로 녹색 테두리가 보이도록 머리판이 테두리를 덮지 않는다 */
+  .board-rejected .board-head { margin: 0; border-radius: 7px 7px 0 0; padding: 10px 14px 11px; border-top: 10px solid transparent; background: var(--green) padding-box; position: relative; }
   .board-rejected .board-head::before {
-    content: ""; position: absolute; left: 0; right: 0; top: -10px; height: 10px; border-radius: 10px 10px 0 0;
+    content: ""; position: absolute; left: 0; right: 0; top: -10px; height: 10px; border-radius: 7px 7px 0 0;
     background: repeating-linear-gradient(-45deg, var(--orange) 0 10px, #fff 10px 20px);
   }
   .specimen {
