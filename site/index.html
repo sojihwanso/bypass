@@ -152,14 +152,14 @@
           </div>
         </article>
 
-        <!-- D구역: 부원 전용 (회원 구분이 부원·운영진이면 열림) -->
+        <!-- D구역: 국원 전용 (회원 구분이 국원·운영진이면 열림) -->
         <article class="card card-locked" aria-labelledby="c-crew" data-crew-card>
-          <div class="card-head"><p class="card-no">D구역</p><h2 id="c-crew">부원 전용</h2></div>
+          <div class="card-head"><p class="card-no">D구역</p><h2 id="c-crew">국원 전용</h2></div>
           <div class="card-body">
             <div data-crew-locked>
               <div class="lock-band" aria-hidden="true"></div>
               <p class="lock-title">공사 예정 구역</p>
-              <p class="lock-text">부원으로 등록되면 이번 주 회의 안건과 자료실이 열립니다. 부원 등록은 운영진이 처리합니다.</p>
+              <p class="lock-text">국원으로 등록되면 이번 주 회의 안건과 자료실이 열립니다. 국원 등록은 운영진이 처리합니다.</p>
               <ul class="zone-list">
                 <li>이번 주 회의 안건 <span class="zone-state">잠김</span></li>
                 <li>자료실 <span class="zone-state">잠김</span></li>
@@ -203,14 +203,14 @@
         </article>
 
 
-        <!-- E구역: 접수된 제보 (부원·운영진) -->
+        <!-- E구역: 접수된 제보 (국원·운영진) -->
         <article class="card card-wide card-locked" aria-labelledby="c-reports" data-zone="reports">
           <div class="card-head card-head-row"><div><p class="card-no">E구역</p><h2 id="c-reports">접수된 불편 제보</h2></div><span class="card-count" data-count="reports" hidden></span></div>
           <div class="card-body">
             <div data-locked>
               <div class="lock-band" aria-hidden="true"></div>
-              <p class="lock-title">부원 열람 구역</p>
-              <p class="lock-text">메인 페이지로 들어온 불편 제보는 부원으로 등록되면 이곳에서 볼 수 있습니다. 제보자 연락처는 운영진만 봅니다.</p>
+              <p class="lock-title">국원 열람 구역</p>
+              <p class="lock-text">메인 페이지로 들어온 불편 제보는 국원으로 등록되면 이곳에서 볼 수 있습니다. 제보자 연락처는 운영진만 봅니다.</p>
             </div>
             <div data-open hidden>
               <p class="card-lead" data-lead></p>
@@ -243,7 +243,7 @@
             <div data-locked>
               <div class="lock-band" aria-hidden="true"></div>
               <p class="lock-title">운영진 전용 구역</p>
-              <p class="lock-text">회원을 부원·운영진으로 등록하거나 해제하는 곳입니다.</p>
+              <p class="lock-text">회원을 국원·운영진으로 등록하거나 해제하는 곳입니다.</p>
             </div>
             <div data-open hidden>
               <p class="card-lead">구분을 바꾸면 바로 저장됩니다. 바뀐 구분은 그 회원이 다시 로그인하면(늦어도 1시간 안에) 적용됩니다. 자기 자신의 구분은 바꿀 수 없습니다.</p>
@@ -263,7 +263,7 @@
 <footer class="site-foot">
   <div class="wrap">
     <p class="foot-name"><strong>BYPASS</strong>느린 시스템의 실용적 대안 마련국</p>
-    <p class="foot-note">본 사이트는 국립목포해양대학교 학생 자율 동아리 BYPASS가 운영하며, 대학 행정 부서 및 정부 기관과 무관합니다.</p>
+    <p class="foot-note">본 사이트는 국립목포해양대학교 학생 자율 크루 BYPASS가 운영하며, 대학 행정 부서 및 정부 기관과 무관합니다.</p>
   </div>
 </footer>
 
@@ -330,7 +330,7 @@
 
   function statusChip(status) { return el('span', `st st-${STATUS[status] || 'received'}`, status); }
 
-  const ROLE_LABEL = { general: '일반 회원', member: '부원', staff: '운영진' };
+  const ROLE_LABEL = { general: '일반 회원', member: '국원', staff: '운영진' };
   const bumpCount = (key, d) => { const c = document.querySelector(`[data-count="${key}"]`); const n = (parseInt(c.textContent, 10) || 0) + d; c.textContent = `${n}건`; };
 
   /* 두 번 눌러야 지워지는 삭제 버튼: '삭제' → '정말 삭제?' */
@@ -436,7 +436,7 @@
     if (member) {
       // 로그인한 채로 신청한 경우: 회원 계정과 바로 연결
       const who = el('span', 'inbox-account');
-      const promote = el('button', 'mini-btn mini-go', '부원으로 등록');
+      const promote = el('button', 'mini-btn mini-go', '국원으로 등록');
       promote.type = 'button';
       promote.dataset.applicant = member.id;
       const paint = () => {
@@ -447,7 +447,7 @@
       promote.addEventListener('click', async () => {
         promote.disabled = true; promote.textContent = '등록 중…';
         const err = await changeRole(member, 'member');
-        promote.disabled = false; promote.textContent = '부원으로 등록';
+        promote.disabled = false; promote.textContent = '국원으로 등록';
         if (err) alertLine(li, err); else paint();
       });
       paint();
@@ -532,7 +532,7 @@
   })();
 
   /* ===== C구역 공지 · D구역 회의 안건·자료실 =====
-     읽기: 공지는 회원 모두, 안건·자료는 부원·운영진. 쓰기·고치기·지우기는 운영진만 (supabase/003_board.sql). */
+     읽기: 공지는 회원 모두, 안건·자료는 국원·운영진. 쓰기·고치기·지우기는 운영진만 (supabase/003_board.sql). */
   const isStaffUser = role.key === 'staff';
   if (isStaffUser) document.querySelectorAll('[data-staff-only]').forEach(x => { x.hidden = false; });
 
@@ -631,7 +631,7 @@
     prepend: n => { notices.push(n); renderNotices(); }
   });
 
-  // ----- 회의 안건 · 자료실 (부원·운영진) -----
+  // ----- 회의 안건 · 자료실 (국원·운영진) -----
   const agendaReports = new Set();   // 안건에 올라간 제보 번호 (E구역 버튼 표시용)
   function paintAgendaButtons() {
     document.querySelectorAll('[data-agenda-btn]').forEach(b => {
@@ -751,7 +751,7 @@
     return true;
   }
 
-  // E구역: 접수된 제보 (부원·운영진)
+  // E구역: 접수된 제보 (국원·운영진)
   if (role.key !== 'general') {
     openZone('reports');
     const isStaff = role.key === 'staff';
