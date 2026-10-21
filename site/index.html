@@ -134,24 +134,21 @@
           </div>
         </article>
 
-        <!-- C구역: 공지 (지금은 여기서 직접 고칩니다) -->
+        <!-- C구역: 공지 (운영진이 여기서 쓰고 지움) -->
         <article class="card" aria-labelledby="c-notice">
-          <div class="card-head"><p class="card-no">C구역</p><h2 id="c-notice">공지</h2></div>
+          <div class="card-head card-head-row"><div><p class="card-no">C구역</p><h2 id="c-notice">공지</h2></div><span class="card-count" data-count="notices" hidden></span></div>
           <div class="card-body">
-            <ul class="notices">
-              <li>
-                <span class="n-date">2026. 10. 20. · 운영진</span>
-                <span class="n-title"><span class="badge badge-new">신설</span>회원 전용 페이지 ‘공사장’이 문을 열었습니다.</span>
-              </li>
-              <li>
-                <span class="n-date">2026. 10. 20. · 운영진</span>
-                <span class="n-title">동아리가 만든 앱을 모아 보는 ‘발명한 지름길 모음’을 준비하고 있습니다.</span>
-              </li>
-              <li>
-                <span class="n-date">상시 · 운영진</span>
-                <span class="n-title">비밀번호를 잊으셨다면 운영진에게 문의해 주세요.</span>
-              </li>
-            </ul>
+            <div class="board-tools" data-staff-only hidden><button type="button" class="mini-btn mini-go" data-form-open="notice">+ 공지 쓰기</button></div>
+            <form class="board-form" data-form="notice" novalidate hidden>
+              <label class="field-label" for="nt-title">제목</label>
+              <input class="input" id="nt-title" maxlength="200" required>
+              <label class="field-label" for="nt-body">내용 <span class="opt">(선택)</span></label>
+              <textarea class="input" id="nt-body" maxlength="2000" rows="3"></textarea>
+              <label class="check"><input type="checkbox" id="nt-pin"> 맨 위에 고정</label>
+              <p class="form-error" role="alert" hidden></p>
+              <div class="form-actions"><button type="submit" class="btn btn-primary btn-small">올리기</button><button type="button" class="btn btn-secondary btn-small" data-form-close>취소</button></div>
+            </form>
+            <ul class="notices" data-list="notices" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
           </div>
         </article>
 
@@ -169,10 +166,38 @@
               </ul>
             </div>
             <div data-crew-open hidden>
-              <ul class="zone-list">
-                <li>이번 주 회의 안건 <span class="zone-state">아직 올라온 안건이 없습니다</span></li>
-                <li>자료실 <span class="zone-state">준비 중</span></li>
-              </ul>
+              <section class="crew-part" aria-labelledby="c-agenda">
+                <div class="crew-head"><h3 id="c-agenda">회의 안건</h3><span class="crew-count" data-count="agenda" hidden></span>
+                  <button type="button" class="mini-btn mini-go" data-staff-only data-form-open="agenda" hidden>+ 안건</button></div>
+                <form class="board-form" data-form="agenda" novalidate hidden>
+                  <label class="field-label" for="ag-title">안건</label>
+                  <input class="input" id="ag-title" maxlength="200" required placeholder="예: 셔틀버스 시간표 앱 만들지 정하기">
+                  <label class="field-label" for="ag-note">메모 <span class="opt">(선택)</span></label>
+                  <input class="input" id="ag-note" maxlength="1000">
+                  <p class="form-error" role="alert" hidden></p>
+                  <div class="form-actions"><button type="submit" class="btn btn-primary btn-small">올리기</button><button type="button" class="btn btn-secondary btn-small" data-form-close>취소</button></div>
+                </form>
+                <ul class="board-list" data-list="agenda" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
+                <details class="done-list" data-done-wrap hidden>
+                  <summary>처리한 안건 <span data-done-count></span></summary>
+                  <ul class="board-list" data-list="agenda-done"></ul>
+                </details>
+              </section>
+              <section class="crew-part" aria-labelledby="c-res">
+                <div class="crew-head"><h3 id="c-res">자료실</h3><span class="crew-count" data-count="resources" hidden></span>
+                  <button type="button" class="mini-btn mini-go" data-staff-only data-form-open="resource" hidden>+ 자료</button></div>
+                <form class="board-form" data-form="resource" novalidate hidden>
+                  <label class="field-label" for="rs-title">이름</label>
+                  <input class="input" id="rs-title" maxlength="200" required placeholder="예: 회의록 (노션)">
+                  <label class="field-label" for="rs-url">주소</label>
+                  <input class="input" id="rs-url" type="url" maxlength="1000" required placeholder="https://">
+                  <label class="field-label" for="rs-note">설명 <span class="opt">(선택)</span></label>
+                  <input class="input" id="rs-note" maxlength="500">
+                  <p class="form-error" role="alert" hidden></p>
+                  <div class="form-actions"><button type="submit" class="btn btn-primary btn-small">올리기</button><button type="button" class="btn btn-secondary btn-small" data-form-close>취소</button></div>
+                </form>
+                <ul class="board-list" data-list="resources" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
+              </section>
             </div>
           </div>
         </article>
@@ -369,6 +394,13 @@
     }
     if (opts.canEdit) {
       const act = el('div', 'inbox-actions');
+      const toAgenda = el('button', 'mini-btn', '회의 안건으로');
+      toAgenda.type = 'button';
+      toAgenda.dataset.agendaBtn = row.id;
+      toAgenda.addEventListener('click', async () => {
+        if (!(await reportToAgenda(row, toAgenda))) alertLine(li, '안건에 올리지 못했습니다.');
+      });
+      act.append(toAgenda);
       act.append(deleteButton(receiptNo('BYP', row), () => removeRow('reports', row.id, li, 'reports', 'reports', '아직 접수된 제보가 없습니다.')));
       li.append(act);
     }
@@ -499,6 +531,226 @@
     listOf('mine').replaceChildren(...data.map(r => reportItem(r, {})));
   })();
 
+  /* ===== C구역 공지 · D구역 회의 안건·자료실 =====
+     읽기: 공지는 회원 모두, 안건·자료는 부원·운영진. 쓰기·고치기·지우기는 운영진만 (supabase/003_board.sql). */
+  const isStaffUser = role.key === 'staff';
+  if (isStaffUser) document.querySelectorAll('[data-staff-only]').forEach(x => { x.hidden = false; });
+
+  // 쓰기 양식 열고 닫기
+  const formOf = key => document.querySelector(`[data-form="${key}"]`);
+  document.querySelectorAll('[data-form-open]').forEach(btn => btn.addEventListener('click', () => {
+    const f = formOf(btn.dataset.formOpen);
+    f.hidden = !f.hidden;
+    if (!f.hidden) { f.reset(); f.querySelector('.form-error').hidden = true; f.querySelector('input, textarea').focus(); }
+  }));
+  document.querySelectorAll('.board-form [data-form-close]').forEach(btn => btn.addEventListener('click', () => { btn.closest('form').hidden = true; }));
+
+  function formFail(form, text, field) {
+    const box = form.querySelector('.form-error'); box.textContent = text; box.hidden = false;
+    if (field) field.focus();
+  }
+
+  /* 운영진 양식 공통: 필수 칸 확인 → 저장 → 목록 맨 앞에 붙이기 */
+  function bindBoardForm(key, { table, read, required, toRow, render, prepend }) {
+    const form = formOf(key);
+    if (!form) return;
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const values = read();
+      const missing = required.find(id => !values[id]);
+      if (missing) return formFail(form, '필수 칸을 채워 주세요.', document.getElementById(missing));
+      const row = toRow(values);
+      if (row.error) return formFail(form, row.error, document.getElementById(row.field));
+      const btn = form.querySelector('[type="submit"]');
+      B.setBusy(btn, true, '올리는 중…');
+      const { data, error } = await B.sb.from(table).insert(row).select().single();
+      B.setBusy(btn, false);
+      if (error) return formFail(form, error.code === 'PGRST205' ? '게시판 설정이 아직 끝나지 않았습니다. supabase/003_board.sql 을 실행해 주세요.' : '올리지 못했습니다. 잠시 후 다시 시도해 주세요.');
+      form.hidden = true;
+      prepend(render(data));
+    });
+  }
+
+  function addToList(key, li, { top = true } = {}) {
+    const list = listOf(key);
+    list.querySelectorAll(':scope > .inbox-state').forEach(x => x.remove());
+    if (top) list.prepend(li); else list.append(li);
+    const c = document.querySelector(`[data-count="${key}"]`);
+    if (c) { c.hidden = false; c.textContent = `${list.children.length}건`; }
+  }
+
+  // ----- 공지 -----
+  function noticeItem(n) {
+    const li = el('li', n.pinned ? 'is-pinned' : null);
+    li.append(el('span', 'n-date', `${B.dateText(n.created_at)} · ${n.author_name || '운영진'}`));
+    const t = el('span', 'n-title');
+    if (n.pinned) t.append(el('span', 'badge badge-pin', '고정'));
+    t.append(document.createTextNode(n.title));
+    li.append(t);
+    if (n.body) li.append(el('p', 'n-body', n.body));
+    if (isStaffUser) {
+      const act = el('div', 'inbox-actions');
+      const pin = el('button', 'mini-btn', n.pinned ? '고정 해제' : '맨 위에 고정');
+      pin.type = 'button';
+      pin.addEventListener('click', async () => {
+        pin.disabled = true;
+        const { error } = await B.sb.from('notices').update({ pinned: !n.pinned }).eq('id', n.id);
+        pin.disabled = false;
+        if (error) { alertLine(li, '바꾸지 못했습니다.'); return; }
+        n.pinned = !n.pinned; renderNotices();
+      });
+      act.append(pin, deleteButton(`공지 ${n.title}`, async () => {
+        const ok = await removeRow('notices', n.id, li, 'notices', 'notices', '아직 올라온 공지가 없습니다.');
+        if (ok) notices = notices.filter(x => x.id !== n.id);
+        return ok;
+      }));
+      li.append(act);
+    }
+    return li;
+  }
+  let notices = [];
+  function renderNotices() {
+    // 고정한 공지가 먼저, 그다음 최신 순
+    notices.sort((a, b) => (b.pinned - a.pinned) || (new Date(b.created_at) - new Date(a.created_at)));
+    setCount('notices', notices.length);
+    if (!notices.length) { setState('notices', '아직 올라온 공지가 없습니다.'); return; }
+    listOf('notices').replaceChildren(...notices.map(noticeItem));
+  }
+  (async () => {
+    const { data, error } = await B.sb.from('notices').select('id, created_at, title, body, pinned, author_name')
+      .order('created_at', { ascending: false }).limit(50);
+    if (error) { setState('notices', failText(error).replace('접수함', '공지')); return; }
+    notices = data; renderNotices();
+  })();
+  bindBoardForm('notice', {
+    table: 'notices',
+    read: () => ({ 'nt-title': document.getElementById('nt-title').value.trim(), 'nt-body': document.getElementById('nt-body').value.trim(), pin: document.getElementById('nt-pin').checked }),
+    required: ['nt-title'],
+    toRow: v => ({ title: v['nt-title'], body: v['nt-body'] || null, pinned: v.pin }),
+    render: n => n,
+    prepend: n => { notices.push(n); renderNotices(); }
+  });
+
+  // ----- 회의 안건 · 자료실 (부원·운영진) -----
+  const agendaReports = new Set();   // 안건에 올라간 제보 번호 (E구역 버튼 표시용)
+  function paintAgendaButtons() {
+    document.querySelectorAll('[data-agenda-btn]').forEach(b => {
+      const on = agendaReports.has(Number(b.dataset.agendaBtn));
+      b.disabled = on; b.textContent = on ? '안건에 올림 ✓' : '회의 안건으로';
+    });
+  }
+
+  function agendaItem(a) {
+    const li = el('li', a.done ? 'is-done' : null);
+    const head = el('p', 'bl-title', a.title);
+    li.append(head);
+    const meta = el('p', 'bl-meta');
+    meta.append(document.createTextNode(`${B.dateText(a.created_at)} · ${a.author_name || '운영진'}`));
+    if (a.report_id) meta.append(el('span', 'bl-tag', `제보 ${receiptNo('BYP', { id: a.report_id, created_at: a.created_at })}`));
+    li.append(meta);
+    if (a.note) li.append(el('p', 'bl-note', a.note));
+    if (isStaffUser) {
+      const act = el('div', 'inbox-actions');
+      const done = el('button', 'mini-btn', a.done ? '다시 안건으로' : '처리 완료');
+      done.type = 'button';
+      done.addEventListener('click', async () => {
+        done.disabled = true;
+        const { error } = await B.sb.from('agenda_items').update({ done: !a.done }).eq('id', a.id);
+        done.disabled = false;
+        if (error) { alertLine(li, '바꾸지 못했습니다.'); return; }
+        a.done = !a.done; renderAgenda();
+      });
+      act.append(done, deleteButton(`안건 ${a.title}`, async () => {
+        const { error } = await B.sb.from('agenda_items').delete().eq('id', a.id);
+        if (error) { alertLine(li, '삭제하지 못했습니다.'); return false; }
+        agenda = agenda.filter(x => x.id !== a.id);
+        if (a.report_id) agendaReports.delete(a.report_id);
+        renderAgenda(); paintAgendaButtons();
+        return true;
+      }));
+      li.append(act);
+    }
+    return li;
+  }
+  let agenda = [];
+  function renderAgenda() {
+    const open = agenda.filter(a => !a.done), done = agenda.filter(a => a.done);
+    setCount('agenda', open.length);
+    if (open.length) listOf('agenda').replaceChildren(...open.map(agendaItem));
+    else setState('agenda', '아직 올라온 안건이 없습니다.');
+    const wrap = document.querySelector('[data-done-wrap]');
+    wrap.hidden = !done.length;
+    wrap.querySelector('[data-done-count]').textContent = `${done.length}건`;
+    listOf('agenda-done').replaceChildren(...done.slice(0, 20).map(agendaItem));
+  }
+
+  function resourceItem(r) {
+    const li = el('li');
+    const a = el('a', 'bl-title bl-link', r.title);
+    a.href = r.url; a.target = '_blank'; a.rel = 'noopener';
+    li.append(a);
+    let host = '';
+    try { host = new URL(r.url).hostname.replace(/^www\./, ''); } catch (e) { /* 주소 형식은 DB에서 이미 확인 */ }
+    li.append(el('p', 'bl-meta', `${host} · ${B.dateText(r.created_at)} · ${r.author_name || '운영진'}`));
+    if (r.note) li.append(el('p', 'bl-note', r.note));
+    if (isStaffUser) {
+      const act = el('div', 'inbox-actions');
+      act.append(deleteButton(`자료 ${r.title}`, () => removeRow('resources', r.id, li, 'resources', 'resources', '아직 올라온 자료가 없습니다.')));
+      li.append(act);
+    }
+    return li;
+  }
+
+  if (role.key !== 'general') {
+    (async () => {
+      const [ag, rs] = await Promise.all([
+        B.sb.from('agenda_items').select('id, created_at, title, note, done, report_id, author_name').order('created_at', { ascending: false }).limit(LIMIT),
+        B.sb.from('resources').select('id, created_at, title, url, note, author_name').order('created_at', { ascending: false }).limit(LIMIT)
+      ]);
+      if (ag.error) setState('agenda', failText(ag.error).replace('접수함', '회의 안건'));
+      else {
+        agenda = ag.data;
+        agenda.forEach(a => { if (a.report_id) agendaReports.add(a.report_id); });
+        renderAgenda(); paintAgendaButtons();
+      }
+      if (rs.error) setState('resources', failText(rs.error).replace('접수함', '자료실'));
+      else {
+        setCount('resources', rs.data.length);
+        if (!rs.data.length) setState('resources', '아직 올라온 자료가 없습니다.');
+        else listOf('resources').replaceChildren(...rs.data.map(resourceItem));
+      }
+    })();
+
+    bindBoardForm('agenda', {
+      table: 'agenda_items',
+      read: () => ({ 'ag-title': document.getElementById('ag-title').value.trim(), 'ag-note': document.getElementById('ag-note').value.trim() }),
+      required: ['ag-title'],
+      toRow: v => ({ title: v['ag-title'], note: v['ag-note'] || null }),
+      render: a => a,
+      prepend: a => { agenda.unshift(a); renderAgenda(); }
+    });
+    bindBoardForm('resource', {
+      table: 'resources',
+      read: () => ({ 'rs-title': document.getElementById('rs-title').value.trim(), 'rs-url': document.getElementById('rs-url').value.trim(), 'rs-note': document.getElementById('rs-note').value.trim() }),
+      required: ['rs-title', 'rs-url'],
+      toRow: v => /^https?:\/\//i.test(v['rs-url'])
+        ? { title: v['rs-title'], url: v['rs-url'], note: v['rs-note'] || null }
+        : { error: '주소는 https:// 로 시작해야 합니다.', field: 'rs-url' },
+      render: r => resourceItem(r),
+      prepend: li => addToList('resources', li)
+    });
+  }
+
+  /* E구역 제보 → 회의 안건으로 (운영진) */
+  async function reportToAgenda(row, btn) {
+    btn.disabled = true; btn.textContent = '올리는 중…';
+    const { data, error } = await B.sb.from('agenda_items').insert({ title: row.what.slice(0, 200), report_id: row.id }).select().single();
+    if (error) { btn.disabled = false; btn.textContent = '회의 안건으로'; return false; }
+    agenda.unshift(data); agendaReports.add(row.id);
+    renderAgenda(); paintAgendaButtons();
+    return true;
+  }
+
   // E구역: 접수된 제보 (부원·운영진)
   if (role.key !== 'general') {
     openZone('reports');
@@ -517,6 +769,7 @@
       const contactOf = new Map((contacts.data || []).map(c => [c.report_id, c.contact]));
       listOf('reports').replaceChildren(...data.map(r => reportItem(r, { canEdit: isStaff, contact: contactOf.get(r.id) })));
       refreshFilter();
+      paintAgendaButtons();
     })();
   }
 

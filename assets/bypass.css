@@ -332,3 +332,38 @@ a { color: var(--green); text-underline-offset: 3px; }
 /* ===== 회원가입: 비밀번호 확인란 일치 표시 ===== */
 .hint.is-ok { color: var(--green); font-weight: 700; }
 .hint.is-bad { color: var(--orange-ink); font-weight: 700; }
+
+/* ===== C구역 공지 · D구역 회의 안건·자료실 ===== */
+.board-tools { display: flex; justify-content: flex-end; margin-top: 12px; }
+.board-form { margin-top: 12px; padding: 2px 14px 14px; border: 2px dashed var(--post); border-radius: 8px; background: #F7F8F5; }
+.board-form .field-label { margin-top: 12px; font-size: 15px; }
+.board-form .form-actions { display: flex; gap: 8px; margin-top: 14px; }
+.board-form .form-actions .btn { width: auto; }
+.board-form textarea.input { resize: vertical; min-height: 72px; font: inherit; font-size: 16px; }
+.check { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--green); }
+.notices li.is-pinned { background: #FFF6EC; margin: 0 -18px; padding-left: 18px; padding-right: 18px; }
+.badge-pin { background: var(--orange); color: var(--ink); }
+.n-body { margin: 4px 0 0; font-size: 15px; color: var(--muted); line-height: 1.6; white-space: pre-line; overflow-wrap: anywhere; }
+.notices .inbox-actions { margin-top: 8px; }
+
+.crew-part + .crew-part { margin-top: 18px; padding-top: 16px; border-top: 3px solid var(--ink); }
+.crew-part:first-child { margin-top: 12px; }
+.crew-head { display: flex; align-items: center; gap: 8px; }
+.crew-head h3 { margin: 0; font-size: 17px; font-weight: 900; }
+.crew-head .mini-btn { margin-left: auto; }
+.crew-count { border-radius: 4px; background: var(--green-tint); color: var(--green); font-weight: 900; font-size: 12.5px; line-height: 1.7; padding: 0 7px; }
+.board-list { list-style: none; margin: 6px 0 0; padding: 0; }
+.board-list > li { padding: 11px 0; border-bottom: 1px solid var(--rule); }
+.board-list > li:last-child { border-bottom: 0; }
+.board-list > li.inbox-state { padding: 10px 0 2px; }
+.bl-title { margin: 0; font-size: 16px; font-weight: 700; line-height: 1.5; overflow-wrap: anywhere; }
+.bl-link { display: inline-block; color: var(--green); text-decoration: underline; text-underline-offset: 3px; }
+.bl-link::after { content: " ↗"; font-weight: 500; }
+.bl-meta { margin: 2px 0 0; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.bl-tag { border-radius: 4px; background: var(--pave); color: var(--ink); font-weight: 700; font-size: 12px; padding: 0 6px; line-height: 1.7; }
+.bl-note { margin: 3px 0 0; font-size: 14.5px; color: var(--muted); line-height: 1.6; overflow-wrap: anywhere; }
+.board-list .inbox-actions { margin-top: 8px; }
+.board-list > li.is-done .bl-title { text-decoration: line-through; color: var(--muted); }
+.done-list { margin-top: 6px; }
+.done-list summary { cursor: pointer; font-size: 14px; font-weight: 700; color: var(--muted); padding: 6px 0; }
