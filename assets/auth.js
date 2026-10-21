@@ -32,7 +32,7 @@
   function roleOf(user) {
     const r = user && user.app_metadata && user.app_metadata.bypass_role;
     if (r === 'staff') return { key: 'staff', label: '운영진' };
-    if (r === 'member') return { key: 'member', label: '부원' };
+    if (r === 'member') return { key: 'member', label: '국원' };
     return { key: 'general', label: '일반 회원' };
   }
 
