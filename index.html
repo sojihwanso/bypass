@@ -345,6 +345,9 @@
   .legs::before, .legs::after { content: ""; position: absolute; top: 0; bottom: 0; width: 9px; background: var(--post); }
   .legs::before { left: 22%; }
   .legs::after { right: 22%; }
+  .map-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 28px; }
+  .map-cta-note { font-size: 15px; color: var(--muted); }
+  .map-cta-arrow { margin-left: 10px; }
   .swipe-hint { display: none; margin: 12px 0 0; font-size: 14px; font-weight: 700; color: var(--muted); }
   @media (max-width: 1060px) {
     .boards { gap: 0 14px; }
@@ -673,6 +676,7 @@
         <li><a href="#statute">설치 규정</a></li>
         <li><a href="#process">처리 절차</a></li>
         <li><a href="#dockets">처리 현황</a></li>
+        <li><a href="/routes/">노선도</a></li>
         <li><a href="#recruit">국원 모집</a></li>
         <li><a href="#scope">업무 범위</a></li>
         <li><a href="#faq">자주 묻는 질문</a></li>
@@ -883,6 +887,10 @@
         </div>
       </div>
       <p class="swipe-hint">옆으로 넘겨 다른 안건을 보십시오.</p>
+      <div class="map-cta">
+        <a class="btn btn-primary" href="/routes/">개통 노선도 전체 보기<span class="map-cta-arrow" aria-hidden="true">→</span></a>
+        <span class="map-cta-note">과목별 위키를 비롯한 모든 우회로를 한곳에 모았습니다.</span>
+      </div>
       <p class="note">※ 기존 업무를 우회한 안건에는 도도새 직인을, 새로 만든 안건에는 신설 개통 인장을 찍습니다.<br>※ 제0-4호는 견본입니다. 처리 내역은 처리 즉시 이곳에 공고됩니다.</p>
     </div>
   </section>
