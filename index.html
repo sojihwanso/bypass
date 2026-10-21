@@ -286,6 +286,16 @@
   .board-head { background: var(--green); color: #fff; border-radius: 6px 6px 0 0; padding: 10px 14px 11px; }
   .board-no { margin: 0; padding-right: 62px; font-size: 12.5px; font-weight: 700; line-height: 1.5; color: #D5E4DB; }
   .board-head h3 { margin: 2px 0 0; font-weight: 900; font-size: 18px; line-height: 1.35; }
+  /* 상태 스티커: 안내판 위 모서리에 걸쳐 붙임 */
+  .board > .badge {
+    position: absolute; top: -12px; right: 10px; z-index: 2; transform: rotate(-5deg);
+    border: 2px solid var(--ink); border-radius: 5px; box-shadow: 2px 3px 0 var(--ink);
+    font-size: 14.5px; line-height: 1.6; padding: 1px 10px 1px 11px; transition: transform .2s ease;
+  }
+  .board > .badge-done { background: var(--orange); color: var(--ink); }
+  .board > .badge-rejected { background: #fff; color: var(--orange-ink); border: 2px dashed var(--orange-ink); box-shadow: 2px 3px 0 rgba(0,0,0,.35); transform: rotate(4deg); }
+  .board:hover > .badge { transform: rotate(0deg) translateY(-2px); }
+  @media (prefers-reduced-motion: reduce) { .board > .badge { transition: none; } }
   .board-rejected .board-head { border-top: 10px solid transparent; background: var(--green) padding-box; position: relative; }
   .board-rejected .board-head::before {
     content: ""; position: absolute; left: 0; right: 0; top: -10px; height: 10px; border-radius: 6px 6px 0 0;
@@ -296,12 +306,26 @@
     background: var(--orange); color: var(--ink); border: 2px solid var(--ink); border-radius: 4px;
     font-weight: 900; font-size: 13px; line-height: 1.5; padding: 1px 9px; letter-spacing: 0.08em;
   }
+  .board-rejected .specimen { top: auto; bottom: 22px; right: 16px; transform: rotate(-8deg); font-size: 15px; padding: 2px 12px; box-shadow: 2px 3px 0 var(--ink); }
   .board dl { margin: 0; padding: 2px 14px 0; }
   .board dl div { padding: 9px 0; border-bottom: 1px solid var(--rule); }
   .board dt { font-weight: 700; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
   .board dd { margin: 1px 0 0; font-size: 14.5px; line-height: 1.55; }
-  .board-foot { position: relative; margin-top: auto; min-height: 98px; padding: 12px 14px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .board-foot { position: relative; margin-top: auto; min-height: 98px; padding: 12px 14px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; isolation: isolate; }
+  .board-foot .done-seal, .board-foot .open-seal { z-index: 1; }
   .board-link { font-weight: 700; font-size: 14px; }
+  /* 우회로 바로가기: 결과물로 가는 출구 표지 */
+  .board-go {
+    position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 6px;
+    background: var(--green); color: #fff; text-decoration: none; border-radius: 6px;
+    padding: 6px 11px 7px 13px; font-weight: 700; font-size: 14px; line-height: 1.3;
+    box-shadow: inset 0 0 0 2px var(--green), inset 0 0 0 3.5px #fff;
+  }
+  .board-go:hover { background: var(--green-deep); box-shadow: inset 0 0 0 2px var(--green-deep), inset 0 0 0 3.5px #fff; }
+  .go-text { display: flex; flex-direction: column; }
+  .go-text span:first-child { font-size: 12px; font-weight: 500; opacity: .85; }
+  .board-go span[aria-hidden] { font-size: 18px; transition: transform .15s; }
+  .board-go:hover span[aria-hidden] { transform: translateX(3px); }
   .badge { display: inline-block; border-radius: 4px; font-weight: 900; font-size: 13.5px; letter-spacing: 0.1em; padding: 0 9px 0 10px; line-height: 1.75; }
   .badge-done { background: var(--orange); color: var(--ink); }
   .badge-rejected { background: var(--white); color: var(--orange-ink); border: 2px dashed var(--orange-ink); line-height: 1.6; }
@@ -324,6 +348,7 @@
     .board-head h3 { font-size: 17px; }
     .board-link { font-size: 13px; }
     .done-seal { width: 98px; height: 98px; }
+    .board-go { padding-right: 9px; }
     .open-seal { width: 110px; height: 92px; }
   }
   @media (max-width: 900px) {
@@ -343,6 +368,13 @@
     .board-unit { border-bottom: 0; padding-top: 0; scroll-snap-align: start; }
     .legs { height: 24px; }
     .swipe-hint { display: block; }
+  }
+  /* 안내판이 좁은 구간: 직인을 줄여 바로가기 버튼과 겹치지 않게 */
+  @media (min-width: 901px) and (max-width: 1060px) {
+    .done-seal { width: 78px; height: 78px; right: 2px; bottom: 6px; }
+  }
+  @media (max-width: 370px) {
+    .done-seal { width: 84px; height: 84px; right: 2px; }
   }
 
   /* 도도새 직인 안내: 규정 안내판과 같은 볼트 고정 안내판 */
@@ -786,48 +818,48 @@
   <section class="sec" id="dockets" aria-labelledby="dockets-title">
     <div class="wrap">
       <h2 class="sec-title" id="dockets-title">안건 처리 현황</h2>
-      <!-- 견본 안내판: 실제 안건 내용으로 교체. 안건이 하나도 없으면 아래 문구를 쓴다.
-           <p><strong>제1호 안건을 접수 중입니다.</strong> 처리 내역은 처리 즉시 이곳에 공고됩니다. 먼저 우회하고 싶은 업무가 있다면 제보해 주십시오.</p> -->
+      <!-- 안건 안내판. 새 안건은 board-unit 하나를 복사해 추가하고, 결과물이 있으면 board-go 링크를 단다. -->
       <div class="boards">
         <div class="board-unit">
           <article class="board" aria-labelledby="bd1">
-            <div class="board-head"><p class="board-no">제0-1호 (창립 전)</p><h3 id="bd1">졸업이수학점 계산기</h3></div>
-            <span class="specimen">견본</span>
-            <dl><div><dt>기존 절차</dt><dd>졸업요건표와 성적표를 나란히 놓고 직접 계산</dd></div><div><dt>개선 후</dt><dd>과목 유형별 이수 학점과 남은 학점을 한 화면에 표시</dd></div></dl>
-            <div class="board-foot"><span class="badge badge-done">완료</span><a class="board-link" href="#">통지서 전문 보기</a><svg class="done-seal" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
+            <div class="board-head"><p class="board-no">제0-1호 (창립 전)</p><h3 id="bd1">수강플래너</h3></div>
+            <span class="badge badge-done">개통</span>
+            <dl><div><dt>기존 절차</dt><dd>강의 목록을 하나씩 열어 시간이 겹치는지 맞춰 봄</dd></div><div><dt>개선 후</dt><dd>과목을 검색해 담으면 시간표로 바로 보이고, 계획을 여러 개 비교·공유</dd></div></dl>
+            <div class="board-foot"><a class="board-go" href="https://mymmu.my/" target="_blank" rel="noopener"><span class="go-text"><span>우회로</span><span>바로가기</span></span><span class="sr-only"> (수강플래너, 새 창)</span> <span aria-hidden="true">→</span></a><svg class="done-seal" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
           </article>
           <div class="legs" aria-hidden="true"></div>
         </div>
         <div class="board-unit">
           <article class="board" aria-labelledby="bd2">
-            <div class="board-head"><p class="board-no">제0-2호 (창립 전)</p><h3 id="bd2">시간표 조회 앱</h3></div>
-            <span class="specimen">견본</span>
-            <dl><div><dt>기존 절차</dt><dd>강의 목록을 하나씩 열어 시간을 맞춰 봄</dd></div><div><dt>개선 후</dt><dd>개설 강의를 시간표 형태로 바로 조회</dd></div></dl>
-            <div class="board-foot"><span class="badge badge-done">완료</span><a class="board-link" href="#">통지서 전문 보기</a><svg class="done-seal" style="--r: 7deg" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
+            <div class="board-head"><p class="board-no">제0-2호 (창립 전)</p><h3 id="bd2">졸업이수학점 계산기</h3></div>
+            <span class="badge badge-done">개통</span>
+            <dl><div><dt>기존 절차</dt><dd>졸업요건표와 성적표를 나란히 놓고 직접 계산</dd></div><div><dt>개선 후</dt><dd>들은 과목을 체크하면 남은 졸업 요건을 한 화면에 표시 (항해정보시스템학부)</dd></div></dl>
+            <div class="board-foot"><a class="board-go" href="https://eesuu.mymmu.my/" target="_blank" rel="noopener"><span class="go-text"><span>우회로</span><span>바로가기</span></span><span class="sr-only"> (졸업이수학점 계산기, 새 창)</span> <span aria-hidden="true">→</span></a><svg class="done-seal" style="--r: 7deg" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
           </article>
           <div class="legs" aria-hidden="true"></div>
         </div>
         <div class="board-unit">
           <article class="board" aria-labelledby="bd3">
-            <div class="board-head"><p class="board-no">제0-3호 (신설)</p><h3 id="bd3">빈 강의실 지도</h3></div>
-            <span class="specimen">견본</span>
-            <dl><div><dt>기존 절차</dt><dd>해당 없음 (전례 없음)</dd></div><div><dt>신설 내용</dt><dd>시간대별로 비어 있는 강의실을 지도에 표시</dd></div></dl>
-            <div class="board-foot"><span class="badge badge-new">신설 개통</span><a class="board-link" href="#">통지서 전문 보기</a><svg class="open-seal" role="img" aria-label="신설 개통 인장. 개통 리본이 잘려 있고, '이 길은 원래 지도에 없었습니다'라고 새겨져 있습니다."><use href="#open-seal"/></svg></div>
+            <div class="board-head"><p class="board-no">제0-3호 (창립 전)</p><h3 id="bd3">학식 알리미 ‘꿀꿀이’</h3></div>
+            <span class="badge badge-done">개통</span>
+            <dl><div><dt>기존 절차</dt><dd>오늘 학식이 뭔지 보려고 식단 게시판을 찾아 들어감</dd></div><div><dt>개선 후</dt><dd>카카오톡 채널 ‘목해대 꿀꿀이’에서 학식 식단을 바로 확인</dd></div></dl>
+            <div class="board-foot"><a class="board-go" href="https://pf.kakao.com/_uuxfmX" target="_blank" rel="noopener"><span class="go-text"><span>우회로</span><span>바로가기</span></span><span class="sr-only"> (목해대 꿀꿀이 카카오톡 채널, 새 창)</span> <span aria-hidden="true">→</span></a><svg class="done-seal" style="--r: -4deg" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
           </article>
           <div class="legs" aria-hidden="true"></div>
         </div>
         <div class="board-unit">
           <article class="board board-rejected" aria-labelledby="bd4">
             <div class="board-head"><p class="board-no">제0-4호</p><h3 id="bd4">강의동 이동 불편</h3></div>
+            <span class="badge badge-rejected">반려</span>
             <span class="specimen">견본</span>
             <dl><div><dt>접수 내용</dt><dd>비 오는 날 강의동까지 걸어가야 함</dd></div><div><dt>반려 사유</dt><dd>해당 불편은 절차가 아닌 날씨에 기인함.</dd></div></dl>
-            <div class="board-foot"><span class="badge badge-rejected">반려</span></div>
+            <div class="board-foot"></div>
           </article>
           <div class="legs" aria-hidden="true"></div>
         </div>
       </div>
       <p class="swipe-hint">옆으로 넘겨 다른 안건을 보십시오.</p>
-      <p class="note">※ 기존 업무를 우회한 안건에는 도도새 직인을, 새로 만든 안건에는 신설 개통 인장을 찍습니다.<br>※ 위 통지서는 견본입니다. 처리 내역은 처리 즉시 이곳에 공고됩니다.</p>
+      <p class="note">※ 기존 업무를 우회한 안건에는 도도새 직인을, 새로 만든 안건에는 신설 개통 인장을 찍습니다.<br>※ 제0-4호는 견본입니다. 처리 내역은 처리 즉시 이곳에 공고됩니다.</p>
     </div>
   </section>
 
