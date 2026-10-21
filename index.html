@@ -300,8 +300,19 @@
   .board dl div { padding: 9px 0; border-bottom: 1px solid var(--rule); }
   .board dt { font-weight: 700; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
   .board dd { margin: 1px 0 0; font-size: 14.5px; line-height: 1.55; }
-  .board-foot { position: relative; margin-top: auto; min-height: 98px; padding: 12px 14px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .board-foot { position: relative; margin-top: auto; min-height: 98px; padding: 12px 14px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; isolation: isolate; }
+  .board-foot .done-seal, .board-foot .open-seal { z-index: 1; }
   .board-link { font-weight: 700; font-size: 14px; }
+  /* 우회로 바로가기: 결과물로 가는 출구 표지 */
+  .board-go {
+    position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 6px;
+    background: var(--green); color: #fff; text-decoration: none; border-radius: 6px;
+    padding: 6px 12px 6px 13px; font-weight: 700; font-size: 14px; line-height: 1.4;
+    box-shadow: inset 0 0 0 2px var(--green), inset 0 0 0 3.5px #fff;
+  }
+  .board-go:hover { background: var(--green-deep); box-shadow: inset 0 0 0 2px var(--green-deep), inset 0 0 0 3.5px #fff; }
+  .board-go span[aria-hidden] { font-size: 15px; transition: transform .15s; }
+  .board-go:hover span[aria-hidden] { transform: translateX(3px); }
   .badge { display: inline-block; border-radius: 4px; font-weight: 900; font-size: 13.5px; letter-spacing: 0.1em; padding: 0 9px 0 10px; line-height: 1.75; }
   .badge-done { background: var(--orange); color: var(--ink); }
   .badge-rejected { background: var(--white); color: var(--orange-ink); border: 2px dashed var(--orange-ink); line-height: 1.6; }
@@ -786,33 +797,29 @@
   <section class="sec" id="dockets" aria-labelledby="dockets-title">
     <div class="wrap">
       <h2 class="sec-title" id="dockets-title">안건 처리 현황</h2>
-      <!-- 견본 안내판: 실제 안건 내용으로 교체. 안건이 하나도 없으면 아래 문구를 쓴다.
-           <p><strong>제1호 안건을 접수 중입니다.</strong> 처리 내역은 처리 즉시 이곳에 공고됩니다. 먼저 우회하고 싶은 업무가 있다면 제보해 주십시오.</p> -->
+      <!-- 안건 안내판. 새 안건은 board-unit 하나를 복사해 추가하고, 결과물이 있으면 board-go 링크를 단다. -->
       <div class="boards">
         <div class="board-unit">
           <article class="board" aria-labelledby="bd1">
-            <div class="board-head"><p class="board-no">제0-1호 (창립 전)</p><h3 id="bd1">졸업이수학점 계산기</h3></div>
-            <span class="specimen">견본</span>
-            <dl><div><dt>기존 절차</dt><dd>졸업요건표와 성적표를 나란히 놓고 직접 계산</dd></div><div><dt>개선 후</dt><dd>과목 유형별 이수 학점과 남은 학점을 한 화면에 표시</dd></div></dl>
-            <div class="board-foot"><span class="badge badge-done">완료</span><a class="board-link" href="#">통지서 전문 보기</a><svg class="done-seal" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
+            <div class="board-head"><p class="board-no">제0-1호 (창립 전)</p><h3 id="bd1">학식 알리미 ‘꿀꿀이’</h3></div>
+            <dl><div><dt>기존 절차</dt><dd>오늘 학식이 뭔지 보려고 식단 게시판을 찾아 들어감</dd></div><div><dt>개선 후</dt><dd>카카오톡 채널 ‘목해대 꿀꿀이’에서 학식 식단을 바로 확인</dd></div></dl>
+            <div class="board-foot"><span class="badge badge-done">완료</span><a class="board-go" href="https://pf.kakao.com/_uuxfmX" target="_blank" rel="noopener">우회로 바로가기<span class="sr-only"> (목해대 꿀꿀이 카카오톡 채널, 새 창)</span> <span aria-hidden="true">→</span></a><svg class="done-seal" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
           </article>
           <div class="legs" aria-hidden="true"></div>
         </div>
         <div class="board-unit">
           <article class="board" aria-labelledby="bd2">
-            <div class="board-head"><p class="board-no">제0-2호 (창립 전)</p><h3 id="bd2">시간표 조회 앱</h3></div>
-            <span class="specimen">견본</span>
-            <dl><div><dt>기존 절차</dt><dd>강의 목록을 하나씩 열어 시간을 맞춰 봄</dd></div><div><dt>개선 후</dt><dd>개설 강의를 시간표 형태로 바로 조회</dd></div></dl>
-            <div class="board-foot"><span class="badge badge-done">완료</span><a class="board-link" href="#">통지서 전문 보기</a><svg class="done-seal" style="--r: 7deg" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
+            <div class="board-head"><p class="board-no">제0-2호 (창립 전)</p><h3 id="bd2">수강플래너</h3></div>
+            <dl><div><dt>기존 절차</dt><dd>강의 목록을 하나씩 열어 시간이 겹치는지 맞춰 봄</dd></div><div><dt>개선 후</dt><dd>과목을 검색해 담으면 시간표로 바로 보이고, 계획을 여러 개 비교·공유</dd></div></dl>
+            <div class="board-foot"><span class="badge badge-done">완료</span><a class="board-go" href="https://mymmu.my/" target="_blank" rel="noopener">우회로 바로가기<span class="sr-only"> (수강플래너, 새 창)</span> <span aria-hidden="true">→</span></a><svg class="done-seal" style="--r: 7deg" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
           </article>
           <div class="legs" aria-hidden="true"></div>
         </div>
         <div class="board-unit">
           <article class="board" aria-labelledby="bd3">
-            <div class="board-head"><p class="board-no">제0-3호 (신설)</p><h3 id="bd3">빈 강의실 지도</h3></div>
-            <span class="specimen">견본</span>
-            <dl><div><dt>기존 절차</dt><dd>해당 없음 (전례 없음)</dd></div><div><dt>신설 내용</dt><dd>시간대별로 비어 있는 강의실을 지도에 표시</dd></div></dl>
-            <div class="board-foot"><span class="badge badge-new">신설 개통</span><a class="board-link" href="#">통지서 전문 보기</a><svg class="open-seal" role="img" aria-label="신설 개통 인장. 개통 리본이 잘려 있고, '이 길은 원래 지도에 없었습니다'라고 새겨져 있습니다."><use href="#open-seal"/></svg></div>
+            <div class="board-head"><p class="board-no">제0-3호 (창립 전)</p><h3 id="bd3">학점계산기</h3></div>
+            <dl><div><dt>기존 절차</dt><dd>졸업요건표와 성적표를 나란히 놓고 직접 계산</dd></div><div><dt>개선 후</dt><dd>이수 학점과 졸업까지 남은 학점을 한 화면에 표시</dd></div></dl>
+            <div class="board-foot"><span class="badge badge-done">완료</span><!-- 주소가 정해지면: <a class="board-go" href="주소" target="_blank" rel="noopener">우회로 바로가기<span class="sr-only"> (학점계산기, 새 창)</span> <span aria-hidden="true">→</span></a> --><svg class="done-seal" style="--r: -4deg" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
           </article>
           <div class="legs" aria-hidden="true"></div>
         </div>
@@ -827,7 +834,7 @@
         </div>
       </div>
       <p class="swipe-hint">옆으로 넘겨 다른 안건을 보십시오.</p>
-      <p class="note">※ 기존 업무를 우회한 안건에는 도도새 직인을, 새로 만든 안건에는 신설 개통 인장을 찍습니다.<br>※ 위 통지서는 견본입니다. 처리 내역은 처리 즉시 이곳에 공고됩니다.</p>
+      <p class="note">※ 기존 업무를 우회한 안건에는 도도새 직인을, 새로 만든 안건에는 신설 개통 인장을 찍습니다.<br>※ 제0-4호는 견본입니다. 처리 내역은 처리 즉시 이곳에 공고됩니다.</p>
     </div>
   </section>
 
