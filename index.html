@@ -261,6 +261,7 @@
   }
   .exit-sign h3 { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; font-weight: 900; font-size: 32px; line-height: 1.2; letter-spacing: -0.02em; }
   .exit-sign h3 svg { width: 34px; height: 34px; }
+  .exit-sign h3 svg.exit-dodo { width: 52px; height: 52px; margin: -10px 0 -10px -6px; filter: drop-shadow(1.5px 2px 0 rgba(28, 33, 30, 0.35)); }
   .exit-sign p { margin: 0; font-size: 16px; line-height: 1.65; }
   .exit-sign .exit-due { margin-top: auto; padding-top: 16px; }
   .exit-due span { display: inline-block; background: #fff; color: var(--green); border-radius: 4px; padding: 2px 9px; font-size: 14px; font-weight: 700; line-height: 1.6; }
@@ -553,6 +554,12 @@
       <circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/>
       <path d="M32 55 C40 50 51 54 54 64" fill="none" stroke="#EE6A1F" stroke-width="2.6" stroke-linecap="round"/>
     </symbol>
+    <!-- 도도새 마름모 표지판 (머리글 로고·파비콘과 같은 모양) -->
+    <symbol id="dodo-sign" viewBox="1 1 130 130">
+      <path d="M66 4 L128 66 L66 128 L4 66 Z" fill="#EE6A1F" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M66 15 L117 66 L66 117 L15 66 Z" fill="none" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/>
+      <use href="#dodo" x="34" y="32" width="64" height="64" style="color:#1C211E"/>
+    </symbol>
     <symbol id="bypass" viewBox="0 0 32 32">
       <rect x="12" y="17" width="8" height="9" fill="currentColor"/>
       <path d="M3 22h6c0-12 14-12 14 0h6M26 19l3 3-3 3" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -799,7 +806,7 @@
         <li class="exit exit-detour">
           <span class="exit-tab">출구 3</span>
           <div class="exit-sign">
-            <h3><svg aria-hidden="true"><use href="#bypass"/></svg>우회</h3>
+            <h3><svg class="exit-dodo" aria-hidden="true"><use href="#dodo-sign"/></svg>우회</h3>
             <p>AI와 코드로 더 쉬운 방법을 만듭니다.</p>
           </div>
         </li>
