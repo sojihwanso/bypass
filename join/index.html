@@ -55,7 +55,7 @@
       </div>
       <div class="panel-body">
         <form id="join-form" novalidate>
-          <p class="notice">본 양식은 세 개 항목만 요구합니다. 비밀번호 확인란은 우회했으니, ‘보기’를 눌러 직접 확인해 주세요.</p>
+          <p class="notice">본 양식은 네 개 항목을 요구합니다. 비밀번호 확인란은 우회하지 않았습니다. 잘못 적은 비밀번호를 고치는 절차가 더 불필요하기 때문입니다.</p>
 
           <label class="field-label" for="f-id">아이디</label>
           <input class="input" id="f-id" name="username" type="text" required maxlength="20"
@@ -69,7 +69,15 @@
                    autocomplete="new-password" aria-describedby="f-pw-hint">
             <button type="button" class="pw-toggle" data-pw-toggle aria-controls="f-pw" aria-pressed="false">보기</button>
           </div>
-          <p class="hint" id="f-pw-hint">8자 이상. 잊어버리면 운영진이 직접 초기화해야 하니 꼭 기억해 주세요.</p>
+          <p class="hint" id="f-pw-hint">8자 이상. 잊어버리면 1:1 문의 창구로 알려 주세요. 운영진이 임시 비밀번호를 발급합니다.</p>
+
+          <label class="field-label" for="f-pw2">비밀번호 확인</label>
+          <div class="pw">
+            <input class="input" id="f-pw2" name="password_confirm" type="password" required minlength="8"
+                   autocomplete="new-password" aria-describedby="f-pw2-hint">
+            <button type="button" class="pw-toggle" data-pw-toggle aria-controls="f-pw2" aria-pressed="false">보기</button>
+          </div>
+          <p class="hint" id="f-pw2-hint" data-pw-match aria-live="polite">같은 비밀번호를 한 번 더 입력해 주세요.</p>
 
           <label class="field-label" for="f-name">이름 또는 별명</label>
           <input class="input" id="f-name" name="display_name" type="text" required maxlength="20"
@@ -101,11 +109,24 @@
   const form = document.getElementById('join-form');
   const idInput = document.getElementById('f-id');
   const pwInput = document.getElementById('f-pw');
+  const pw2Input = document.getElementById('f-pw2');
+  const matchHint = form.querySelector('[data-pw-match]');
   const nameInput = document.getElementById('f-name');
   const errorBox = form.querySelector('.form-error');
   const submit = form.querySelector('[type="submit"]');
 
   B.bindPasswordToggles(form);
+
+  // 비밀번호 확인: 입력하는 동안 일치 여부를 바로 알려 준다
+  function paintMatch() {
+    const a = pwInput.value, b = pw2Input.value;
+    matchHint.classList.remove('is-ok', 'is-bad');
+    if (!b) { matchHint.textContent = '같은 비밀번호를 한 번 더 입력해 주세요.'; return; }
+    if (a === b) { matchHint.textContent = '두 비밀번호가 같습니다.'; matchHint.classList.add('is-ok'); }
+    else { matchHint.textContent = '아직 두 비밀번호가 다릅니다.'; matchHint.classList.add('is-bad'); }
+  }
+  pwInput.addEventListener('input', paintMatch);
+  pw2Input.addEventListener('input', paintMatch);
 
   function showError(text, field) {
     errorBox.textContent = text;
@@ -132,7 +153,7 @@
   form.addEventListener('submit', async e => {
     e.preventDefault();
     errorBox.hidden = true;
-    [idInput, pwInput, nameInput].forEach(f => f.removeAttribute('aria-invalid'));
+    [idInput, pwInput, pw2Input, nameInput].forEach(f => f.removeAttribute('aria-invalid'));
 
     const id = B.normalizeId(idInput.value);
     const pw = pwInput.value;
@@ -143,6 +164,8 @@
     else if (!B.ID_RULE.test(id)) problems.push({ field: idInput, text: '아이디는 영문 소문자, 숫자, 밑줄(_)로 4~20자여야 합니다.' });
     if (!pw) problems.push({ field: pwInput, empty: true, text: '비밀번호를 입력해 주세요.' });
     else if (pw.length < B.PW_MIN) problems.push({ field: pwInput, text: `비밀번호는 ${B.PW_MIN}자 이상이어야 합니다.` });
+    if (!pw2Input.value) problems.push({ field: pw2Input, empty: true, text: '비밀번호 확인란을 입력해 주세요.' });
+    else if (pw && pw2Input.value !== pw) problems.push({ field: pw2Input, text: '두 비밀번호가 서로 다릅니다. 같은 비밀번호를 두 번 입력해 주세요.' });
     if (!name) problems.push({ field: nameInput, empty: true, text: '이름 또는 별명을 입력해 주세요.' });
 
     if (problems.length) {
