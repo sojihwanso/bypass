@@ -311,7 +311,7 @@
                 <p class="form-title" data-route-form-title>지름길 추가</p>
                 <div class="form-cols">
                   <div><label class="field-label" for="rt-title">이름</label><input class="input" id="rt-title" maxlength="100" required placeholder="예: 수강플래너"></div>
-                  <div><label class="field-label" for="rt-line">노선</label><select class="input" id="rt-line"></select></div>
+                  <div><label class="field-label" for="rt-line">분류</label><select class="input" id="rt-line"></select></div>
                   <div><label class="field-label" for="rt-type">종류</label>
                     <select class="input" id="rt-type"><option value="app">앱</option><option value="wiki">위키</option><option value="channel">카톡 채널</option></select></div>
                   <div><label class="field-label" for="rt-status">상태</label>
@@ -331,7 +331,7 @@
                 <div class="form-cols">
                   <div><label class="field-label" for="wk-subject">과목 이름</label><input class="input" id="wk-subject" maxlength="60" required placeholder="예: 항해학개론"></div>
                   <div><label class="field-label" for="wk-slug">주소 이름 <span class="opt">(영문)</span></label><input class="input" id="wk-slug" maxlength="49" required placeholder="예: navigation-101" autocapitalize="none" spellcheck="false"></div>
-                  <div><label class="field-label" for="wk-line">노선</label><select class="input" id="wk-line"></select></div>
+                  <div><label class="field-label" for="wk-line">분류</label><select class="input" id="wk-line"></select></div>
                 </div>
                 <label class="field-label" for="wk-file">위키 파일 (.html)</label>
                 <input class="input file-input" id="wk-file" type="file" accept=".html,.htm,text/html" required>
@@ -1026,7 +1026,7 @@
     function fillLineSelects() {
       ['rt-line', 'wk-line'].forEach(id => {
         const sel = document.getElementById(id);
-        sel.replaceChildren(...rtLines.map(l => { const o = el('option', null, `${l.no}호선 · ${l.name}`); o.value = l.id; return o; }));
+        sel.replaceChildren(...rtLines.map(l => { const o = el('option', null, l.name); o.value = l.id; return o; }));
       });
     }
 

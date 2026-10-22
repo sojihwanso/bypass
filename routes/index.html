@@ -30,15 +30,16 @@
   .map-hero h1 { margin: 0 0 12px; font-weight: 900; font-size: clamp(2.3rem, 5vw, 3.4rem); line-height: 1.15; letter-spacing: -0.035em; }
   .map-hero .lead { margin: 0; font-size: 18px; line-height: 1.7; max-width: 30em; }
   .map-hero .sign-code { margin-bottom: 18px; }
-  /* 노선 그림: 줄마다 역(점)이 찍힌 지하철 노선도처럼 */
+  /* 노선 그림: 줄마다 역(점)이 찍힌 지하철 노선도처럼. 역을 누르면 안내가 열린다 */
   .linemap { background: #fff; border: 4px solid var(--ink); border-radius: 14px; padding: 18px 20px 14px; }
-  .linemap-row { display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: center; gap: 12px; padding: 8px 0; }
-  .linemap-badge { display: inline-flex; align-items: center; gap: 6px; font-weight: 900; font-size: 14px; }
-  .linemap-badge b { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; color: #fff; font-size: 13px; }
+  .linemap-row { display: grid; grid-template-columns: 96px minmax(0, 1fr); align-items: center; gap: 12px; padding: 8px 0; }
+  .linemap-badge { display: inline-flex; align-items: center; gap: 6px; font-weight: 900; font-size: 14px; white-space: nowrap; }
+  .linemap-badge b { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; color: #fff; font-size: 13px; flex: none; }
   .linemap-track { position: relative; height: 26px; }
   .linemap-track::before { content: ""; position: absolute; left: 6px; right: 6px; top: 50%; height: 8px; margin-top: -4px; border-radius: 4px; background: var(--line); }
   .linemap-stops { position: relative; display: flex; justify-content: space-between; height: 100%; align-items: center; }
-  .linemap-stop { width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 4px solid var(--line); }
+  .linemap-stop { width: 18px; height: 18px; padding: 0; border-radius: 50%; background: #fff; border: 4px solid var(--line); cursor: pointer; }
+  .linemap-stop:hover { transform: scale(1.25); }
   .linemap-stop.is-building { border-style: dashed; background: #F1F2EF; }
   .linemap-note { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
   @media (max-width: 860px) { .map-hero .wrap { grid-template-columns: 1fr; gap: 22px; } }
@@ -52,44 +53,126 @@
   .chip:hover { border-color: var(--green); }
   .chip[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
 
-  /* 노선별 구역 */
+  /* 분류 구역: 큰 표지판 하나가 서 있고, 그 땅에 지름길 아이콘이 놓인다 */
   .lines { padding: 34px 0 80px; }
-  .line-sec + .line-sec { margin-top: 46px; }
-  .line-head { display: flex; align-items: center; gap: 12px; margin: 0 0 6px; }
-  .line-head h2 { margin: 0; font-size: clamp(1.4rem, 2.6vw, 1.9rem); font-weight: 900; letter-spacing: -0.02em; }
-  .line-no { display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; color: #fff; font-weight: 900; font-size: 19px; flex: none; }
-  .line-desc { margin: 0 0 16px; color: var(--muted); font-size: 15.5px; }
-  .line-bar { height: 8px; border-radius: 4px; margin: 0 0 18px; }
-  .route-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 18px; }
+  .zone {
+    --c: var(--green);
+    display: grid; grid-template-columns: minmax(0, 290px) minmax(0, 1fr); gap: 34px;
+    padding: 28px 28px 0; background: #F2F3F0;
+    border: 2px solid var(--rule); border-bottom: 8px solid var(--post); border-radius: 18px 18px 4px 4px;
+  }
+  .zone + .zone { margin-top: 34px; }
+  .zone-post { display: flex; flex-direction: column; }
+  .zsign {
+    position: relative; background: var(--c); color: #fff; border-radius: 16px; padding: 20px 22px 18px;
+    box-shadow: inset 0 0 0 6px var(--c), inset 0 0 0 9px #fff;
+  }
+  .zsign-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .zsign-no { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #fff; color: var(--c); font-weight: 900; font-size: 20px; flex: none; }
+  .zsign-arrow { width: 40px; height: 40px; flex: none; }
+  .zsign h2 { margin: 12px 0 0; font-size: clamp(1.7rem, 2.6vw, 2.1rem); font-weight: 900; line-height: 1.2; letter-spacing: -0.02em; }
+  .zsign-desc { margin: 8px 0 0; font-size: 15px; line-height: 1.6; color: rgba(255, 255, 255, 0.88); }
+  .zsign-count { margin: 14px 0 0; padding-top: 11px; border-top: 2px solid rgba(255, 255, 255, 0.55); font-size: 14px; font-weight: 700; }
+  .zone-legs { flex: 1; min-height: 34px; position: relative; }
+  .zone-legs::before, .zone-legs::after { content: ""; position: absolute; top: 0; bottom: 0; width: 10px; background: var(--post); }
+  .zone-legs::before { left: 24%; } .zone-legs::after { right: 24%; }
+  /* 주황 계열 분류는 주황 표지 */
+  .zone.is-warm .zsign { color: var(--ink); box-shadow: inset 0 0 0 6px var(--c), inset 0 0 0 9px var(--ink); }
+  .zone.is-warm .zsign-no { background: var(--ink); color: var(--c); }
+  .zone.is-warm .zsign-desc { color: #3A2412; }
+  .zone.is-warm .zsign-count { border-top-color: rgba(28, 33, 30, 0.45); }
 
-  /* 노선 안내판(카드) */
-  .route { position: relative; display: flex; flex-direction: column; }
-  .route-tab { align-self: flex-start; margin-left: 14px; padding: 2px 12px 1px; background: var(--green); color: #fff; border: 2.5px solid #fff; border-bottom: 0; border-radius: 9px 9px 0 0; font-weight: 700; font-size: 13.5px; line-height: 1.5; position: relative; top: 2px; }
-  .route-sign { flex: 1; display: flex; flex-direction: column; background: var(--green); color: #fff; border-radius: 14px; padding: 18px 18px 16px; box-shadow: inset 0 0 0 5px var(--green), inset 0 0 0 7.5px #fff; }
-  .route-sign h3 { margin: 0; font-weight: 900; font-size: 22px; line-height: 1.3; letter-spacing: -0.01em; }
-  .route-sign p { margin: 8px 0 0; font-size: 15px; line-height: 1.6; color: #E5EEE8; }
-  .route-foot { margin-top: auto; padding-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .route-go { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--green); text-decoration: none; font-weight: 900; font-size: 15px; padding: 6px 12px; border-radius: 6px; }
-  .route-go:hover { background: var(--green-tint); }
-  .route-state { font-weight: 900; font-size: 13.5px; letter-spacing: .08em; padding: 1px 9px; border-radius: 4px; border: 2px solid var(--ink); }
-  .route-state.is-open { background: var(--orange); color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
-  .route-sample { position: absolute; top: -8px; right: 10px; transform: rotate(-5deg); background: var(--orange); color: var(--ink); border: 2px solid var(--ink); border-radius: 4px; font-weight: 900; font-size: 12.5px; padding: 0 8px; letter-spacing: .08em; }
-  .route-legs { height: 22px; position: relative; }
-  .route-legs::before, .route-legs::after { content: ""; position: absolute; top: 0; bottom: 0; width: 8px; background: var(--post); }
-  .route-legs::before { left: 24%; } .route-legs::after { right: 24%; }
-  /* 생활 노선은 주황 우회 표지 */
-  .route.is-life .route-tab { background: var(--orange); color: var(--ink); border-color: var(--ink); }
-  .route.is-life .route-sign { background: var(--orange); color: var(--ink); box-shadow: inset 0 0 0 5px var(--orange), inset 0 0 0 7.5px var(--ink); }
-  .route.is-life .route-sign p { color: #3A2412; }
-  .route.is-life .route-go { background: var(--ink); color: #fff; }
-  .route.is-life .route-state.is-open { background: #fff; }
-  /* 공사 중 */
-  .route.is-building .route-sign { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 3px var(--post-dark); }
-  .route.is-building .route-sign p { color: var(--muted); }
-  .route.is-building .route-tab { background: var(--post-dark); border-color: #fff; }
-  .route-works { margin-top: auto; padding-top: 14px; }
-  .route-works span { display: block; height: 12px; border-radius: 3px; background: repeating-linear-gradient(-45deg, var(--orange) 0 10px, var(--ink) 10px 20px); }
-  .route-works em { display: block; margin-top: 8px; font-style: normal; font-weight: 900; font-size: 14px; }
+  .spots { list-style: none; margin: 0; padding: 4px 0 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(106px, 1fr)); gap: 22px 10px; align-content: start; }
+  .spot-btn {
+    width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px;
+    padding: 6px 2px 4px; background: none; border: 0; border-radius: 12px; cursor: pointer; font: inherit; color: var(--ink);
+  }
+  .tile-wrap { position: relative; display: block; transition: transform 0.15s; }
+  .spot-btn:hover .tile-wrap { transform: translateY(-3px); }
+  .spot-btn:hover .tile { box-shadow: 0 6px 0 rgba(28, 33, 30, 0.14); }
+  .spot-name {
+    font-size: 14.5px; font-weight: 700; line-height: 1.35; text-align: center; word-break: keep-all;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .spot-state { margin-top: -4px; font-size: 12px; font-weight: 700; color: var(--muted); }
+  .spots-empty { grid-column: 1 / -1; margin: 0; padding: 18px 0; color: var(--muted); font-weight: 700; }
+
+  /* 아이콘 판: 종류마다 다른 판 */
+  .tile {
+    position: relative; display: grid; place-items: center; width: 76px; height: 76px; border-radius: 20px;
+    background: var(--c); color: #fff; box-shadow: 0 3px 0 rgba(28, 33, 30, 0.14);
+    transition: box-shadow 0.15s;
+  }
+  .tile svg { width: 38px; height: 38px; }
+  .zone.is-warm .tile, .route-dlg.is-warm .tile { color: var(--ink); }
+  .tile.t-wiki { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 3px var(--ink), 0 3px 0 rgba(28, 33, 30, 0.14); }
+  .tile.t-channel { background: var(--amber); color: var(--ink); }
+  .tile.is-building { background: #F7F8F5; color: var(--post-dark); box-shadow: inset 0 0 0 2.5px var(--post-dark); overflow: hidden; }
+  .tile.is-building::before { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 2.5px dashed #F7F8F5; }
+  .tile.is-building::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 11px; background: repeating-linear-gradient(-45deg, var(--orange) 0 7px, var(--ink) 7px 14px); }
+  .tile.is-building svg { margin-bottom: 8px; opacity: 0.75; }
+  .sticker { position: absolute; top: -8px; right: -14px; transform: rotate(8deg); background: var(--orange); color: var(--ink); border: 2px solid var(--ink); border-radius: 4px; font-weight: 900; font-size: 11.5px; line-height: 1.5; padding: 0 6px; letter-spacing: 0.06em; }
+
+  @media (max-width: 760px) {
+    .zone { grid-template-columns: 1fr; gap: 20px; padding: 18px 16px 0; }
+    .zone-legs { display: none; }
+    .zsign { padding: 16px 18px 15px; border-radius: 14px; box-shadow: inset 0 0 0 5px var(--c), inset 0 0 0 7.5px #fff; }
+    .zone.is-warm .zsign { box-shadow: inset 0 0 0 5px var(--c), inset 0 0 0 7.5px var(--ink); }
+    .zsign-arrow { transform: rotate(90deg); width: 34px; height: 34px; }
+    .zsign-no { width: 34px; height: 34px; font-size: 17px; }
+    .zsign h2 { margin-top: 8px; }
+    .spots { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 18px 6px; padding-bottom: 22px; }
+    .tile { width: 64px; height: 64px; border-radius: 17px; }
+    .tile svg { width: 32px; height: 32px; }
+    .spot-name { font-size: 13.5px; }
+  }
+
+  /* 상세 안내판 (아이콘을 누르면) */
+  .route-dlg {
+    --c: var(--green);
+    width: min(460px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 0; border: 0; border-radius: 18px;
+    background: transparent; color: var(--ink); overflow: visible;
+  }
+  .route-dlg::backdrop { background: rgba(28, 33, 30, 0.55); }
+  .dlg-sign {
+    position: relative; background: var(--c); color: #fff; border-radius: 18px; padding: 24px 24px 22px;
+    box-shadow: inset 0 0 0 6px var(--c), inset 0 0 0 9px #fff;
+  }
+  .route-dlg.is-warm .dlg-sign { color: var(--ink); box-shadow: inset 0 0 0 6px var(--c), inset 0 0 0 9px var(--ink); }
+  .route-dlg.is-building .dlg-sign { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 4px var(--post-dark); }
+  .dlg-top { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center; padding-right: 54px; }
+  .route-dlg .tile { box-shadow: none; }
+  .route-dlg:not(.is-building) .tile:not(.t-wiki):not(.t-channel) { box-shadow: inset 0 0 0 3px #fff; }
+  .route-dlg.is-warm:not(.is-building) .tile:not(.t-wiki):not(.t-channel) { box-shadow: inset 0 0 0 3px var(--ink); }
+  .dlg-tags { margin: 0 0 4px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .dlg-tag { font-size: 12.5px; font-weight: 700; line-height: 1.6; padding: 0 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.18); }
+  .route-dlg.is-warm .dlg-tag, .route-dlg.is-building .dlg-tag { background: rgba(28, 33, 30, 0.1); }
+  .dlg-tag.is-sample { background: var(--orange); color: var(--ink); }
+  .route-dlg h2 { margin: 0; font-size: 24px; font-weight: 900; line-height: 1.3; letter-spacing: -0.01em; }
+  .dlg-desc { margin: 16px 0 0; font-size: 16px; line-height: 1.65; }
+  .route-dlg:not(.is-warm):not(.is-building) .dlg-desc { color: #E8F0EB; }
+  .dlg-x {
+    position: absolute; top: 18px; right: 18px; font: inherit; font-size: 14px; font-weight: 700; line-height: 1.5;
+    padding: 3px 11px; border-radius: 6px; cursor: pointer; background: transparent; color: inherit; border: 2px solid currentColor;
+  }
+  .dlg-x:hover { background: rgba(255, 255, 255, 0.15); }
+  .dlg-actions { margin-top: 20px; }
+  .dlg-go {
+    display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+    padding: 14px 18px; border-radius: 10px; text-decoration: none; font-weight: 900; font-size: 17px;
+    background: #fff; color: var(--c);
+  }
+  .dlg-go:hover { background: var(--green-tint); }
+  .route-dlg.is-warm .dlg-go { background: var(--ink); color: #fff; }
+  .route-dlg.is-warm .dlg-go:hover { background: #343B37; }
+  .dlg-works span { display: block; height: 14px; border-radius: 3px; background: repeating-linear-gradient(-45deg, var(--orange) 0 10px, var(--ink) 10px 20px); }
+  .dlg-works p { margin: 10px 0 0; font-weight: 900; font-size: 15px; }
+  @media (max-width: 600px) {
+    .route-dlg { width: 100%; max-width: 100%; margin: auto 0 0; border-radius: 18px 18px 0 0; }
+    .dlg-sign { border-radius: 18px 18px 0 0; padding: 22px 18px calc(22px + env(safe-area-inset-bottom)); }
+    .route-dlg h2 { font-size: 22px; }
+  }
+
   .empty-find { padding: 30px 0; color: var(--muted); font-weight: 700; }
   .map-note { margin: 34px 0 0; font-size: 14.5px; color: var(--muted); }
 </style>
@@ -154,10 +237,26 @@
     <div class="wrap">
       <div data-lines aria-live="polite"></div>
       <p class="empty-find" data-empty hidden>찾는 지름길이 아직 개통되지 않았습니다. <a href="/?report=1">불편 제보</a>로 알려 주시면 심의하겠습니다.</p>
-      <p class="map-note">※ 공사 중인 노선은 개통되는 대로 이곳에 공고됩니다. 새로 건너뛰고 싶은 절차가 있다면 <a href="/?report=1">제보</a>해 주십시오.</p>
+      <p class="map-note">※ 아이콘을 누르면 설명과 이용 버튼이 나옵니다. 공사 중인 지름길은 개통되는 대로 이곳에 공고됩니다. 새로 건너뛰고 싶은 절차가 있다면 <a href="/?report=1">제보</a>해 주십시오.</p>
     </div>
   </div>
 </main>
+
+<!-- 지름길 상세 안내판 -->
+<dialog class="route-dlg" aria-labelledby="dlg-title" data-dlg>
+  <div class="dlg-sign">
+    <div class="dlg-top">
+      <span data-dlg-icon></span>
+      <div>
+        <p class="dlg-tags" data-dlg-tags></p>
+        <h2 id="dlg-title" data-dlg-title></h2>
+      </div>
+    </div>
+    <button type="button" class="dlg-x" data-dlg-close>닫기</button>
+    <p class="dlg-desc" data-dlg-desc></p>
+    <div class="dlg-actions" data-dlg-actions></div>
+  </div>
+</dialog>
 
 <footer class="site-foot">
   <div class="wrap">
@@ -176,6 +275,49 @@
     const saved = JSON.parse(localStorage.getItem('sb-itzdjdgjqcpmxdfssfel-auth-token') || 'null');
     if (saved && saved.refresh_token) { const a = document.getElementById('nav-account'); a.textContent = '공사장'; a.href = '/site/'; }
   } catch (e) { /* 저장소를 못 쓰면 그대로 */ }
+
+  /* ===== 아이콘 =====
+     지름길마다 그림 하나. icon 값이 있으면 그 그림, 없으면 이름(과목)에 든 낱말로 고르고, 그래도 없으면 종류별 기본 그림. */
+  const ICONS = {
+    calendar: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M7.5 14h2.5M13.5 14h3M7.5 17.2h2.5"/>',
+    cap: '<path d="M2 9.5 12 5l10 4.5L12 14z"/><path d="M6.5 11.8V16c0 1.6 2.5 3 5.5 3s5.5-1.4 5.5-3v-4.2M22 9.5v5"/>',
+    bowl: '<path d="M3 11.5h18c0 5-4 8.5-9 8.5s-9-3.5-9-8.5z"/><path d="M8.5 3.5c-1 1.3 1 2.4 0 4M12 3.5c-1 1.3 1 2.4 0 4M15.5 3.5c-1 1.3 1 2.4 0 4"/>',
+    radar: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l6.4-6.4"/><circle cx="15.3" cy="9.2" r="1.3" fill="currentColor" stroke="none"/>',
+    ship: '<path d="M3 14.5h18l-2.8 5.5H5.8z"/><path d="M6.5 14.5V10h11v4.5M12 10V3.5l5 3h-5"/>',
+    compass: '<circle cx="12" cy="12" r="9"/><path d="M15.8 8.2l-2.3 5.3-5.3 2.3 2.3-5.3z"/>',
+    tool: '<path d="M14.6 6.4a4 4 0 0 0-5.1 5.1L4 17l3 3 5.5-5.5a4 4 0 0 0 5.1-5.1l-2.4 2.4-2.3-.4-.4-2.3z"/>',
+    bell: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
+    bus: '<rect x="5" y="3.5" width="14" height="14" rx="2.5"/><path d="M5 10h14M8 17.5V20.5M16 17.5V20.5"/><circle cx="8.6" cy="13.8" r="1" fill="currentColor" stroke="none"/><circle cx="15.4" cy="13.8" r="1" fill="currentColor" stroke="none"/>',
+    pin: '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+    doc: '<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h5"/>',
+    book: '<path d="M4 5.5c2.6-1.5 5.4-1.5 8 0v14c-2.6-1.5-5.4-1.5-8 0z"/><path d="M20 5.5c-2.6-1.5-5.4-1.5-8 0v14c2.6-1.5 5.4-1.5 8 0z"/>',
+    chat: '<path d="M4 5h16v11H10l-4 4v-4H4z"/><circle cx="9" cy="10.5" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="10.5" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="10.5" r="1" fill="currentColor" stroke="none"/>',
+    app: '<rect x="4" y="4" width="7" height="7" rx="1.8"/><rect x="13" y="4" width="7" height="7" rx="1.8"/><rect x="4" y="13" width="7" height="7" rx="1.8"/><rect x="13" y="13" width="7" height="7" rx="1.8"/>'
+  };
+  const GUESS = [
+    [/시간표|수강|플래너/, 'calendar'],
+    [/학점|졸업|이수/, 'cap'],
+    [/학식|식단|급식|밥|꿀꿀/, 'bowl'],
+    [/레이더|radar|arpa/i, 'radar'],
+    [/충돌|colreg|선박|해운|항만|선원/i, 'ship'],
+    [/항해|천문|나침|해도|gps|지문/i, 'compass'],
+    [/기관|엔진|기계|정비/, 'tool'],
+    [/공지|알림|알리미/, 'bell'],
+    [/버스|셔틀|통학/, 'bus'],
+    [/강의실|지도|위치|캠퍼스/, 'pin'],
+    [/시험|족보|기출|문제/, 'doc']
+  ];
+  function iconOf(r) {
+    if (r.icon && ICONS[r.icon]) return r.icon;
+    const words = `${r.title} ${r.subject || ''}`;
+    for (const [re, key] of GUESS) if (re.test(words)) return key;
+    return { wiki: 'book', channel: 'chat' }[r.type] || 'app';
+  }
+  function tile(r) {
+    const t = el('span', `tile t-${r.type}${r.status === 'building' ? ' is-building' : ''}`);
+    t.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[iconOf(r)]}</svg>`;
+    return t;
+  }
 
   /* 목록은 Supabase(routes, route_lines)에서 읽는다. 운영진이 공사장 H구역에서 고치면 바로 반영된다.
      데이터베이스 설정 전이거나 연결이 안 되면 assets/routes.json 을 대신 쓴다. */
@@ -201,59 +343,100 @@
   }
 
   const lineOf = Object.fromEntries(data.lines.map(l => [l.id, l]));
+  const isWarm = color => /^#e|^#f/i.test(color || '');  // 주황 계열 분류는 주황 표지
+  const byOrder = (a, b) => (a.status === 'building') - (b.status === 'building');  // 개통 먼저
 
-  // 첫 화면 노선 그림
+  /* ===== 상세 안내판 ===== */
+  const dlg = document.querySelector('[data-dlg]');
+  dlg.querySelector('[data-dlg-close]').addEventListener('click', () => dlg.close());
+  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+  function openRoute(r) {
+    const line = lineOf[r.line] || {};
+    const building = r.status === 'building';
+    dlg.className = `route-dlg${isWarm(line.color) ? ' is-warm' : ''}${building ? ' is-building' : ''}`;
+    dlg.style.setProperty('--c', line.color || '#0F5A3A');
+    dlg.querySelector('[data-dlg-icon]').replaceChildren(tile(r));
+    const tags = [line.name, TYPE[r.type] || r.type, building ? '공사 중' : '개통'].filter(Boolean).map(t => el('span', 'dlg-tag', t));
+    if (r.sample) tags.push(el('span', 'dlg-tag is-sample', '견본'));
+    dlg.querySelector('[data-dlg-tags]').replaceChildren(...tags);
+    dlg.querySelector('[data-dlg-title]').textContent = r.title;
+    dlg.querySelector('[data-dlg-desc]').textContent = r.desc || '';
+    const actions = dlg.querySelector('[data-dlg-actions]');
+    if (!building && r.url) {
+      const a = el('a', 'dlg-go'); a.href = r.url;
+      if (/^https?:/.test(r.url)) { a.target = '_blank'; a.rel = 'noopener'; }
+      a.append(document.createTextNode('이용하기'), el('span', null, '→'));
+      if (a.target) a.append(el('span', 'sr-only', ' (새 창)'));
+      actions.replaceChildren(a);
+    } else {
+      const w = el('div', 'dlg-works'); w.append(el('span'), el('p', null, '공사 중 · 개통되면 이곳에서 바로 이용할 수 있습니다.'));
+      actions.replaceChildren(w);
+    }
+    dlg.showModal();
+  }
+
+  /* ===== 첫 화면 노선 그림 (역을 누르면 안내판) ===== */
   const map = document.querySelector('[data-linemap]');
   map.replaceChildren(...data.lines.map(l => {
-    const stops = data.routes.filter(r => r.line === l.id);
+    const stops = data.routes.filter(r => r.line === l.id).sort(byOrder);
     const row = el('div', 'linemap-row'); row.style.setProperty('--line', l.color);
     const badge = el('span', 'linemap-badge'); const b = el('b', null, l.no); b.style.background = l.color; badge.append(b, document.createTextNode(l.name.replace(' 노선', '')));
     const track = el('div', 'linemap-track'); const st = el('div', 'linemap-stops');
-    stops.forEach(r => { const s = el('span', `linemap-stop${r.status === 'building' ? ' is-building' : ''}`); s.title = r.title; st.append(s); });
+    stops.forEach(r => {
+      const s = el('button', `linemap-stop${r.status === 'building' ? ' is-building' : ''}`); s.type = 'button';
+      s.title = r.title; s.setAttribute('aria-label', `${r.title} 안내 보기`);
+      s.addEventListener('click', () => openRoute(r));
+      st.append(s);
+    });
     track.append(st); row.append(badge, track);
     return row;
   }), el('p', 'linemap-note', `개통 ${data.routes.filter(r => r.status === 'open').length}곳 · 공사 중 ${data.routes.filter(r => r.status === 'building').length}곳`));
 
-  function card(r) {
+  /* ===== 분류 구역 ===== */
+  const ARROW = '<svg class="zsign-arrow" viewBox="0 0 40 40" aria-hidden="true"><path d="M6 20h24M21 10l10 10-10 10" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function spot(r) {
     const line = lineOf[r.line] || {};
-    const warm = /^#e|^#f/i.test(line.color || '');  // 주황 계열 노선은 우회 표지(주황) 모양
-    const li = el('li', `route${warm ? ' is-life' : ''}${r.status === 'building' ? ' is-building' : ''}`);
+    const li = el('li', 'spot');
     li.dataset.type = r.type;
     li.dataset.search = [r.title, r.subject, r.desc, TYPE[r.type], line.name].join(' ').toLowerCase();
-    li.append(el('span', 'route-tab', `${line.no ? line.no + '호선 · ' : ''}${TYPE[r.type] || r.type}`));
-    const sign = el('div', 'route-sign');
-    sign.append(el('h3', null, r.title), el('p', null, r.desc));
-    if (r.status === 'open') {
-      const foot = el('div', 'route-foot');
-      const a = el('a', 'route-go'); a.href = r.url;
-      if (/^https?:/.test(r.url)) { a.target = '_blank'; a.rel = 'noopener'; }
-      a.append(document.createTextNode('지름길 바로가기'), el('span', null, '→'));
-      foot.append(el('span', 'route-state is-open', '개통'), a);
-      sign.append(foot);
-    } else {
-      const w = el('div', 'route-works'); w.append(el('span'), el('em', null, '공사 중 · 개통 예정'));
-      sign.append(w);
-    }
-    li.append(sign);
-    if (r.sample) li.append(el('span', 'route-sample', '견본'));
-    li.append(el('div', 'route-legs'));
+    const btn = el('button', 'spot-btn'); btn.type = 'button'; btn.setAttribute('aria-haspopup', 'dialog');
+    const wrap = el('span', 'tile-wrap'); wrap.append(tile(r));
+    if (r.sample) wrap.append(el('span', 'sticker', '견본'));
+    btn.append(wrap, el('span', 'spot-name', r.title));
+    if (r.status === 'building') btn.append(el('span', 'spot-state', '공사 중'));
+    btn.addEventListener('click', () => openRoute(r));
+    li.append(btn);
     return li;
   }
 
   const box = document.querySelector('[data-lines]');
   box.replaceChildren(...data.lines.map(l => {
-    const sec = el('section', 'line-sec'); sec.dataset.line = l.id;
-    const head = el('div', 'line-head'); const no = el('span', 'line-no', l.no); no.style.background = l.color;
-    head.append(no, el('h2', null, l.name));
-    const bar = el('div', 'line-bar'); bar.style.background = l.color;
-    const grid = el('ul', 'route-grid');
-    // 개통 먼저, 공사 중은 뒤로
-    data.routes.filter(r => r.line === l.id).sort((a, b) => (a.status === 'building') - (b.status === 'building')).forEach(r => grid.append(card(r)));
-    sec.append(head, el('p', 'line-desc', l.desc), bar, grid);
-    return sec;
+    const routes = data.routes.filter(r => r.line === l.id).sort(byOrder);
+    const zone = el('section', `zone${isWarm(l.color) ? ' is-warm' : ''}`);
+    zone.style.setProperty('--c', l.color);
+    zone.setAttribute('aria-labelledby', `zone-${l.id}`);
+
+    const post = el('div', 'zone-post');
+    const sign = el('div', 'zsign');
+    const top = el('div', 'zsign-top');
+    top.append(el('span', 'zsign-no', l.no));
+    top.insertAdjacentHTML('beforeend', ARROW);
+    const h = el('h2', null, l.name); h.id = `zone-${l.id}`;
+    const open = routes.filter(r => r.status === 'open').length;
+    const building = routes.length - open;
+    sign.append(top, h);
+    if (l.desc) sign.append(el('p', 'zsign-desc', l.desc));
+    sign.append(el('p', 'zsign-count', `개통 ${open}곳${building ? ` · 공사 중 ${building}곳` : ''}`));
+    post.append(sign, el('div', 'zone-legs'));
+
+    const list = el('ul', 'spots');
+    if (routes.length) routes.forEach(r => list.append(spot(r)));
+    else list.append(el('li', 'spots-empty', '아직 개통된 지름길이 없습니다.'));
+    zone.append(post, list);
+    return zone;
   }));
 
-  // 찾기: 검색어 + 종류
+  /* ===== 찾기: 검색어 + 종류 ===== */
   const chips = document.querySelector('[data-chips]');
   let type = 'all';
   const kinds = [['all', '전체'], ...Object.entries(TYPE).filter(([k]) => data.routes.some(r => r.type === k))];
@@ -267,13 +450,13 @@
   function apply() {
     const q = find.value.trim().toLowerCase();
     let shown = 0;
-    box.querySelectorAll('.line-sec').forEach(sec => {
+    box.querySelectorAll('.zone').forEach(zone => {
       let n = 0;
-      sec.querySelectorAll('.route').forEach(li => {
+      zone.querySelectorAll('.spot').forEach(li => {
         const ok = (type === 'all' || li.dataset.type === type) && (!q || li.dataset.search.includes(q));
         li.hidden = !ok; if (ok) n++;
       });
-      sec.hidden = !n; shown += n;
+      zone.hidden = !n; shown += n;
     });
     document.querySelector('[data-empty]').hidden = shown > 0;
   }
