@@ -294,109 +294,19 @@
     .exit-tab { margin-left: 14px; }
   }
 
-  /* 처리 현황: 노변 안내판 (네 장을 한 줄에) */
+  /* 처리 현황: 안내판 모양은 /assets/dockets.css, 그리는 코드는 /assets/dockets.js */
   #dockets { padding: 76px 0 72px; }
   #dockets .sec-title { margin-bottom: 34px; }
-  .boards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 20px; border-bottom: 6px solid var(--post); }
-  .board-unit { display: flex; flex-direction: column; }
-  .board { position: relative; flex: 1; display: flex; flex-direction: column; background: var(--white); border: 3px solid var(--green); border-radius: 10px; }
-  /* 머리판이 안내판 윗 테두리까지 덮는다: 화면 배율(125% 등)에서 테두리와 머리판 사이에 흰 실선이 비치지 않도록 */
-  .board-head { position: relative; margin: -3px -3px 0; background: var(--green); color: #fff; border-radius: 10px 10px 0 0; padding: 13px 17px 11px; }
-  .board-no { margin: 0; padding-right: 62px; font-size: 12.5px; font-weight: 700; line-height: 1.5; color: #D5E4DB; }
-  .board-head h3 { margin: 2px 0 0; font-weight: 900; font-size: 18px; line-height: 1.35; }
-  /* 상태 스티커: 안내판 위 모서리에 걸쳐 붙임 */
-  .board > .badge {
-    position: absolute; top: -12px; right: 10px; z-index: 2; transform: rotate(-5deg);
-    border: 2px solid var(--ink); border-radius: 5px; box-shadow: 2px 3px 0 var(--ink);
-    font-size: 14.5px; line-height: 1.6; padding: 1px 10px 1px 11px; transition: transform .2s ease;
-  }
-  .board > .badge-done { background: var(--orange); color: var(--ink); }
-  .board > .badge-rejected { background: #fff; color: var(--orange-ink); border: 2px dashed var(--orange-ink); box-shadow: 2px 3px 0 rgba(0,0,0,.35); transform: rotate(4deg); }
-  .board:hover > .badge { transform: rotate(0deg) translateY(-2px); }
-  @media (prefers-reduced-motion: reduce) { .board > .badge { transition: none; } }
-  /* 반려 안내판은 줄무늬 위로 녹색 테두리가 보이도록 머리판이 테두리를 덮지 않는다 */
-  .board-rejected .board-head { margin: 0; border-radius: 7px 7px 0 0; padding: 10px 14px 11px; border-top: 10px solid transparent; background: var(--green) padding-box; position: relative; }
-  .board-rejected .board-head::before {
-    content: ""; position: absolute; left: 0; right: 0; top: -10px; height: 10px; border-radius: 7px 7px 0 0;
-    background: repeating-linear-gradient(-45deg, var(--orange) 0 10px, #fff 10px 20px);
-  }
-  .specimen {
-    position: absolute; top: -11px; right: 10px; transform: rotate(-5deg);
-    background: var(--orange); color: var(--ink); border: 2px solid var(--ink); border-radius: 4px;
-    font-weight: 900; font-size: 13px; line-height: 1.5; padding: 1px 9px; letter-spacing: 0.08em;
-  }
-  .board-rejected .specimen { top: auto; bottom: 22px; right: 16px; transform: rotate(-8deg); font-size: 15px; padding: 2px 12px; box-shadow: 2px 3px 0 var(--ink); }
-  .board dl { margin: 0; padding: 2px 14px 0; }
-  .board dl div { padding: 9px 0; border-bottom: 1px solid var(--rule); }
-  .board dt { font-weight: 700; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
-  .board dd { margin: 1px 0 0; font-size: 14.5px; line-height: 1.55; }
-  .board-foot { position: relative; margin-top: auto; min-height: 98px; padding: 12px 14px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; isolation: isolate; }
-  .board-foot .done-seal, .board-foot .open-seal { z-index: 1; }
-  .board-link { font-weight: 700; font-size: 14px; }
-  /* 지름길 바로가기: 결과물로 가는 출구 표지 */
-  .board-go {
-    position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 6px;
-    background: var(--green); color: #fff; text-decoration: none; border-radius: 6px;
-    padding: 6px 11px 7px 13px; font-weight: 700; font-size: 14px; line-height: 1.3;
-    box-shadow: inset 0 0 0 2px var(--green), inset 0 0 0 3.5px #fff;
-  }
-  .board-go:hover { background: var(--green-deep); box-shadow: inset 0 0 0 2px var(--green-deep), inset 0 0 0 3.5px #fff; }
-  .go-text { display: flex; flex-direction: column; }
-  .go-text span:first-child { font-size: 12px; font-weight: 500; opacity: .85; }
-  .board-go span[aria-hidden] { font-size: 18px; transition: transform .15s; }
-  .board-go:hover span[aria-hidden] { transform: translateX(3px); }
-  .badge { display: inline-block; border-radius: 4px; font-weight: 900; font-size: 13.5px; letter-spacing: 0.1em; padding: 0 9px 0 10px; line-height: 1.75; }
-  .badge-done { background: var(--orange); color: var(--ink); }
-  .badge-rejected { background: var(--white); color: var(--orange-ink); border: 2px dashed var(--orange-ink); line-height: 1.6; }
-  .badge-new { background: var(--green); color: #fff; }
-  .done-seal {
-    position: absolute; right: 6px; bottom: 4px; width: 110px; height: 110px;
-    color: var(--orange); transform: rotate(var(--r, -11deg)); mix-blend-mode: multiply; pointer-events: none;
-  }
-  .open-seal {
-    position: absolute; right: 4px; bottom: 6px; width: 128px; height: 106px;
-    transform: rotate(-6deg); mix-blend-mode: multiply; pointer-events: none;
-  }
-  .legs { flex: none; height: 34px; position: relative; }
-  .legs::before, .legs::after { content: ""; position: absolute; top: 0; bottom: 0; width: 9px; background: var(--post); }
-  .legs::before { left: 22%; }
-  .legs::after { right: 22%; }
   .map-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 28px; }
   .map-cta-note { font-size: 15px; color: var(--muted); }
   .map-cta-arrow { margin-left: 10px; }
   .swipe-hint { display: none; margin: 12px 0 0; font-size: 14px; font-weight: 700; color: var(--muted); }
-  @media (max-width: 1060px) {
-    .boards { gap: 0 14px; }
-    .board-head h3 { font-size: 17px; }
-    .board-link { font-size: 13px; }
-    .done-seal { width: 98px; height: 98px; }
-    .board-go { padding-right: 9px; }
-    .open-seal { width: 110px; height: 92px; }
-  }
-  @media (max-width: 900px) {
-    .boards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; border-bottom: 0; }
-    .board-unit { border-bottom: 6px solid var(--post); padding-top: 16px; }
-  }
-  /* 휴대폰: 안내판을 옆으로 넘겨 보는 한 줄 */
+  .dockets-more { margin: 14px 0 0; text-align: right; font-weight: 700; font-size: 15px; }
+  .dockets-more a { color: var(--green); }
   @media (max-width: 640px) {
     #dockets { padding: 60px 0; }
-    .boards {
-      grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 78%; gap: 0 14px;
-      overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 16px; overscroll-behavior-x: contain;
-      margin: 0 -16px; padding: 14px 16px 0; border-bottom: 6px solid var(--post);
-    }
-    .boards { scrollbar-width: none; }
-    .boards::-webkit-scrollbar { display: none; }
-    .board-unit { border-bottom: 0; padding-top: 0; scroll-snap-align: start; }
-    .legs { height: 24px; }
     .swipe-hint { display: block; }
-  }
-  /* 안내판이 좁은 구간: 직인을 줄여 바로가기 버튼과 겹치지 않게 */
-  @media (min-width: 901px) and (max-width: 1060px) {
-    .done-seal { width: 78px; height: 78px; right: 2px; bottom: 6px; }
-  }
-  @media (max-width: 370px) {
-    .done-seal { width: 84px; height: 84px; right: 2px; }
+    .dockets-more { text-align: left; }
   }
 
   /* 도도새 직인 안내: 규정 안내판과 같은 볼트 고정 안내판 */
@@ -571,6 +481,7 @@
   .receipt-no strong { font-weight: 900; font-size: 18px; letter-spacing: 0.03em; }
   .receipt .btn { margin-top: 22px; min-width: 160px; }
 </style>
+<link rel="stylesheet" href="/assets/dockets.css">
 </head>
 <body>
 
@@ -864,8 +775,8 @@
   <section class="sec" id="dockets" aria-labelledby="dockets-title">
     <div class="wrap">
       <h2 class="sec-title" id="dockets-title">안건 처리 현황</h2>
-      <!-- 안건 안내판. 새 안건은 board-unit 하나를 복사해 추가하고, 결과물이 있으면 board-go 링크를 단다. -->
-      <div class="boards">
+      <!-- 안건 안내판: HQ › 처리 현황에서 고친다(앞에서 4건). 아래는 데이터베이스를 못 읽을 때 보이는 기본 안내판. -->
+      <div class="boards" data-boards>
         <div class="board-unit">
           <article class="board" aria-labelledby="bd1">
             <div class="board-head"><p class="board-no">제0-1호 (창립 전)</p><h3 id="bd1">수강플래너</h3></div>
@@ -905,11 +816,12 @@
         </div>
       </div>
       <p class="swipe-hint">옆으로 넘겨 다른 안건을 보십시오.</p>
+      <p class="dockets-more" data-dockets-more hidden><a href="/dockets/">처리 현황 전체 보기<span data-dockets-count></span> →</a></p>
       <div class="map-cta">
         <a class="btn btn-primary" href="/routes/">개통 노선도 전체 보기<span class="map-cta-arrow" aria-hidden="true">→</span></a>
         <span class="map-cta-note">과목별 위키를 비롯한 모든 지름길을 한곳에 모았습니다.</span>
       </div>
-      <p class="note">※ 기존 업무 방식을 대체한 안건에는 도도새 직인을, 새로 만든 안건에는 신설 개통 인장을 찍습니다.<br>※ 제0-4호는 견본입니다. 처리 내역은 처리 즉시 이곳에 공고됩니다.</p>
+      <p class="note">※ 기존 업무 방식을 대체한 안건에는 도도새 직인을, 새로 만든 안건에는 신설 개통 인장을 찍습니다.<br>※ <span data-sample-note>제0-4호는 견본입니다. </span>처리 내역은 처리 즉시 이곳에 공고됩니다.</p>
     </div>
   </section>
 
@@ -956,7 +868,7 @@
               <tr><th scope="row">지원 자격</th><td>국립목포해양대학교 재학생. 전공, 학년, 코딩 경험 무관</td></tr>
               <tr><th scope="row">우대 사항</th><td>같은 일을 세 번 반복하면 참을 수 없는 분<br>이미 엑셀 매크로를 몰래 만들어 본 분</td></tr>
               <tr><th scope="row">주요 업무</th><td>정기 심의 회의 참석, 안건별 소규모 제작</td></tr>
-              <tr><th scope="row">모집 기간</th><td class="tbd">언제나</td></tr>
+              <tr><th scope="row">모집 기간</th><td class="tbd" id="recruit-period">언제나</td></tr>
               <tr><th scope="row">활동 일시·장소</th><td class="tbd">추후 공고</td></tr>
               <tr><th scope="row">제출 서류</th><td>없음. 본 국은 불필요한 서류를 요구하지 않습니다.</td></tr>
               <tr><th scope="row">문의</th><td><a class="ask-btn" href="https://open.kakao.com/o/snJ3HuTi" target="_blank" rel="noopener"><svg class="ask-icon" viewBox="0 0 40 36" aria-hidden="true"><path d="M20 3C10 3 3 9.2 3 16.6c0 4.6 2.8 8.6 7 11l-1.6 6.1 7-4.3c1.5.3 3 .4 4.6.4 10 0 17-6.2 17-13.6S30 3 20 3Z" fill="#FFE14A" stroke="#1C211E" stroke-width="2.6" stroke-linejoin="round"/><text x="20" y="21.5" text-anchor="middle" font-size="12.5" font-weight="900" fill="#1C211E" font-family="Noto Sans KR, sans-serif">1:1</text></svg><span class="ask-text"><span class="ask-small">카카오톡 오픈채팅</span><span class="ask-big">1:1 문의 창구</span></span><span class="sr-only"> (새 창)</span></a><span class="ask-note">합류·제보·궁금한 점 무엇이든. 운영진이 답합니다.</span></td></tr>
@@ -1112,35 +1024,77 @@
   </div>
 </dialog>
 
+<script src="/assets/site-status.js"></script>
+<script src="/assets/dockets.js"></script>
 <script>
-  /* ===== 운영 설정 =====
-     OPERATING_STATE: 'normal'(평시) | 'recruiting'(모집 기간) | 'exam'(시험 기간)
-     모집 기간에는 첫 화면의 메인 버튼이 '합류'로 바뀐다. */
-  const OPERATING_STATE = 'normal';
-  const STATUS_TEXT = {
-    normal: '본 국은 현재 정상 운영 중입니다. 제보는 상시 접수합니다.',
-    recruiting: '2026학년도 BYPASS 국원 공개 모집 중 (~ MM. DD.)',
-    exam: '시험 기간 중 본 국의 심의 업무가 일시 정지됩니다. 접수는 계속됩니다.'
-  };
+  const SB_URL = 'https://itzdjdgjqcpmxdfssfel.supabase.co';
+  const SB_KEY = 'sb_publishable_L2FP31VpA_dZfwqH4u6H0Q_UWJlCS6G';
+  const SB_SESSION = 'sb-itzdjdgjqcpmxdfssfel-auth-token';
 
-  document.getElementById('status-text').textContent = STATUS_TEXT[OPERATING_STATE];
-
-  if (OPERATING_STATE === 'recruiting') {
+  /* ===== 운영 상태 전광판 =====
+     HQ › 사이트 상태에서 고친 값(Supabase site_settings)을 읽는다. 읽기 전·실패하면 HTML에 적힌 평시 문구 그대로.
+     모집 기간에는 첫 화면의 메인 버튼이 '합류'로 바뀐다. 마감일이 지나면 저절로 평시. */
+  function applyStatus(value) {
+    if (!window.BYPASS_STATUS) return;
+    const v = window.BYPASS_STATUS.view(value);
+    document.getElementById('status-text').textContent = v.text;
+    const period = document.getElementById('recruit-period');
+    period.textContent = v.period;
+    period.classList.toggle('tbd', v.period === '언제나');
     const report = document.getElementById('cta-report');
     const join = document.getElementById('cta-join');
-    report.classList.replace('btn-primary', 'btn-secondary');
-    join.classList.replace('btn-secondary', 'btn-primary');
-    report.parentNode.insertBefore(join, report);
+    const recruiting = v.mode === 'recruiting';
+    report.classList.toggle('btn-primary', !recruiting); report.classList.toggle('btn-secondary', recruiting);
+    join.classList.toggle('btn-primary', recruiting); join.classList.toggle('btn-secondary', !recruiting);
+    const first = recruiting ? join : report, second = recruiting ? report : join;
+    if (first.nextElementSibling !== second) first.parentNode.insertBefore(first, second);
   }
+
+  /* ===== 처리 현황 안내판 =====
+     HQ › 처리 현황에서 고친 안건(Supabase dockets)을 앞에서 4건 보여 준다. 읽기 전·실패하면 HTML에 적힌 안내판 그대로. */
+  function applyDockets(list, total) {
+    const D = window.BYPASS_DOCKETS;
+    if (!D) return;
+    const boards = document.querySelector('[data-boards]');
+    if (!list.length) {
+      const empty = document.createElement('p');
+      empty.className = 'note';
+      empty.textContent = '공고할 안건이 아직 없습니다.';
+      boards.replaceChildren(empty);
+    } else {
+      boards.replaceChildren(...list.map((d, i) => D.board(d, { index: i })));
+    }
+    boards.scrollLeft = 0;
+    const note = D.sampleNote(list);
+    document.querySelector('[data-sample-note]').textContent = note ? note + ' ' : '';
+    const more = document.querySelector('[data-dockets-more]');
+    document.querySelector('[data-dockets-count]').textContent = total > list.length ? ` (${total}건)` : '';
+    more.hidden = !(total > 0);
+  }
+
+  (async function loadFromDb() {
+    const get = (q, extra) => fetch(`${SB_URL}/rest/v1/${q}`, { headers: { apikey: SB_KEY, ...extra } });
+    const [st, dk] = await Promise.allSettled([
+      get('site_settings?key=eq.status&select=value').then(r => r.ok ? r.json() : Promise.reject(r.status)),
+      window.BYPASS_DOCKETS
+        ? get(`dockets?select=${window.BYPASS_DOCKETS.SELECT}&hidden=is.false&order=sort.asc,id.asc&limit=4`, { Prefer: 'count=exact' })
+            .then(async r => {
+              if (!r.ok) throw r.status;
+              const range = r.headers.get('content-range') || '';
+              const total = Number(range.split('/')[1]);
+              const list = await r.json();
+              return { list, total: Number.isFinite(total) ? total : list.length };
+            })
+        : Promise.reject('no module')
+    ]);
+    if (st.status === 'fulfilled' && st.value[0]) applyStatus(st.value[0].value);
+    if (dk.status === 'fulfilled' && Array.isArray(dk.value.list)) applyDockets(dk.value.list, dk.value.total);
+  })();
 
   /* ===== 제보·합류 대화상자 =====
      제출 내용은 Supabase 제출 함수(submit_report, submit_application)로 저장된다.
      이 페이지는 가벼움을 위해 Supabase 라이브러리를 불러오지 않고 주소로 바로 부른다.
      표 구조와 열람 권한: supabase/001_reports_applications.sql */
-  const SB_URL = 'https://itzdjdgjqcpmxdfssfel.supabase.co';
-  const SB_KEY = 'sb_publishable_L2FP31VpA_dZfwqH4u6H0Q_UWJlCS6G';
-  const SB_SESSION = 'sb-itzdjdgjqcpmxdfssfel-auth-token';
-
   const now = new Date();
   const dateText = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}.`;
 

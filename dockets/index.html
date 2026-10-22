@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>안건 처리 현황 | BYPASS</title>
+<meta name="description" content="BYPASS가 심의한 모든 안건과 처리 결과. 불편 제보가 지름길로 개통되기까지의 기록을 공고합니다.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="BYPASS">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:url" content="https://teambypass.vercel.app/dockets/">
+<meta property="og:title" content="안건 처리 현황 | BYPASS">
+<meta property="og:description" content="불편 제보가 지름길로 개통되기까지. BYPASS가 심의한 모든 안건과 처리 결과를 공고합니다.">
+<meta property="og:image" content="https://teambypass.vercel.app/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/bypass.css">
+<link rel="stylesheet" href="/assets/dockets.css">
+<style>
+  .head-link { color: var(--ink); font-weight: 700; font-size: 15px; text-decoration: none; }
+  .head-link:hover { text-decoration: underline; text-decoration-color: var(--green); text-decoration-thickness: 2px; }
+  @media (max-width: 420px) { .head-link { display: none; } }
+
+  .dk-hero { border-bottom: 6px solid var(--post); }
+  .dk-hero .wrap { padding-top: 34px; padding-bottom: 30px; }
+  .dk-hero h1 { margin: 0 0 12px; font-weight: 900; font-size: clamp(2.3rem, 5vw, 3.4rem); line-height: 1.15; letter-spacing: -0.035em; }
+  .dk-hero .lead { margin: 0; font-size: 18px; line-height: 1.7; max-width: 34em; }
+
+  .finder { position: sticky; top: 0; z-index: 5; background: var(--ground); border-bottom: 1px solid var(--rule); }
+  .finder .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding-top: 12px; padding-bottom: 12px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font: inherit; font-size: 14px; font-weight: 700; line-height: 1.4; padding: 6px 12px; border-radius: 999px; cursor: pointer; background: #fff; color: var(--ink); border: 1.5px solid var(--post); }
+  .chip:hover { border-color: var(--green); }
+  .chip[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .chip span { font-variant-numeric: tabular-nums; opacity: 0.75; margin-left: 4px; }
+
+  .dk-list { padding: 30px 0 60px; }
+  .dk-state { padding: 30px 0; color: var(--muted); font-weight: 700; }
+  .dk-note { margin: 34px 0 0; font-size: 14.5px; line-height: 1.75; color: var(--muted); }
+  .dk-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">본문 바로가기</a>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="BYPASS 처음으로">
+      <svg class="brand-mark" viewBox="1 1 130 130" aria-hidden="true">
+        <path d="M66 4 L128 66 L66 128 L4 66 Z" fill="#EE6A1F" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M66 15 L117 66 L66 117 L15 66 Z" fill="none" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/>
+        <g transform="translate(34 32) scale(0.64)" fill="#1C211E">
+        <ellipse cx="44" cy="60" rx="27" ry="23"/>
+        <path d="M51 45 C55 37 58 31 61 25 L72 30 C68 36 66 44 64 53 Z"/>
+        <circle cx="66" cy="26" r="10"/>
+        <path d="M72 20 C83 19 93 24 95 32 C96 38 91 41 88 37 C86 34 82 33 74 33 Z"/>
+        <path d="M19 52 C10 47 7 40 11 34 C14 43 20 46 23 46 Z"/>
+        <path d="M37 80 L35 92 L27 95 L41 95 L42 81 Z"/>
+        <path d="M51 80 L51 92 L44 95 L58 95 L56 81 Z"/>
+        <circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/>
+        <path d="M32 55 C40 50 51 54 54 64" fill="none" stroke="#EE6A1F" stroke-width="2.6" stroke-linecap="round"/>
+        </g>
+      </svg>
+      <span>
+        <span class="brand-name">BYPASS</span>
+        <span class="brand-sub">느린 시스템의 실용적 대안 마련국</span>
+      </span>
+    </a>
+    <div class="head-actions">
+      <a class="head-link" href="/routes/">개통 노선도</a>
+      <a class="head-pill" href="/login/" id="nav-account">로그인</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="dk-hero" aria-labelledby="page-title">
+    <div class="wrap">
+      <p class="sign-code">BYPASS 처리 현황 공고</p>
+      <h1 id="page-title">안건 처리 현황</h1>
+      <p class="lead">본 국이 심의한 안건과 처리 결과를 모두 공고합니다. 처리 내역은 처리 즉시 이곳에 올라갑니다.</p>
+    </div>
+  </section>
+
+  <div class="finder" data-finder hidden>
+    <div class="wrap">
+      <div class="chips" role="group" aria-label="상태로 거르기" data-chips></div>
+    </div>
+  </div>
+
+  <div class="dk-list">
+    <div class="wrap">
+      <div data-list aria-live="polite"><p class="dk-state">불러오는 중…</p></div>
+      <p class="dk-note">※ 기존 업무 방식을 대체한 안건에는 도도새 직인을, 새로 만든 안건에는 신설 개통 인장을 찍습니다.<br><span data-sample-note></span>※ 반려 안건에는 날인하지 않으며, 반려 사유를 함께 공고합니다.</p>
+      <div class="dk-cta">
+        <a class="btn btn-primary btn-small" href="/routes/">개통 노선도 보기</a>
+        <a class="btn btn-secondary btn-small" href="/?report=1">불편 제보하기</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <p class="foot-name"><strong>BYPASS</strong>느린 시스템의 실용적 대안 마련국</p>
+    <p class="foot-note">본 사이트는 BYPASS 크루가 운영하며, 국립목포해양대학교 행정 부서 및 정부 기관과 무관합니다.</p>
+  </div>
+</footer>
+
+<script src="/assets/dockets.js"></script>
+<script src="/assets/track.js" defer></script>
+<script>
+(async function () {
+  const D = window.BYPASS_DOCKETS;
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const listBox = document.querySelector('[data-list]');
+
+  // 로그인 기록이 있으면 '로그인' 대신 '공사장'
+  try {
+    const saved = JSON.parse(localStorage.getItem('sb-itzdjdgjqcpmxdfssfel-auth-token') || 'null');
+    if (saved && saved.refresh_token) { const a = document.getElementById('nav-account'); a.textContent = '공사장'; a.href = '/site/'; }
+  } catch (e) { /* 저장소를 못 쓰면 그대로 */ }
+
+  /* 안건은 Supabase(dockets)에서 읽는다. 운영진이 HQ › 처리 현황에서 고치면 바로 반영된다. */
+  const SB_URL = 'https://itzdjdgjqcpmxdfssfel.supabase.co';
+  const SB_KEY = 'sb_publishable_L2FP31VpA_dZfwqH4u6H0Q_UWJlCS6G';
+  let all;
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/dockets?select=${D.SELECT}&hidden=is.false&order=sort.asc,id.asc`, { headers: { apikey: SB_KEY } });
+    if (!r.ok) throw new Error(r.status);
+    all = await r.json();
+  } catch (e) {
+    listBox.replaceChildren(el('p', 'dk-state', '처리 현황을 불러오지 못했습니다. 잠시 후 새로고침해 주십시오.'));
+    return;
+  }
+  if (!all.length) { listBox.replaceChildren(el('p', 'dk-state', '공고할 안건이 아직 없습니다.')); return; }
+
+  const sampleNote = D.sampleNote(all);
+  if (sampleNote) document.querySelector('[data-sample-note]').append(`※ ${sampleNote}`, el('br'));
+
+  /* 상태로 거르기: 개통 = 완료 + 신설 개통 */
+  const GROUPS = [
+    ['all', '전체', () => true],
+    ['open', '개통', d => d.status === 'done' || d.status === 'new'],
+    ['building', '공사 중', d => d.status === 'building'],
+    ['rejected', '반려', d => d.status === 'rejected']
+  ];
+
+  let current = 'all';
+  const chips = document.querySelector('[data-chips]');
+  GROUPS.forEach(([key, name, f]) => {
+    const n = all.filter(f).length;
+    if (key !== 'all' && !n) return;
+    const b = el('button', 'chip', name); b.type = 'button'; b.dataset.key = key;
+    b.append(el('span', null, String(n)));
+    b.setAttribute('aria-pressed', String(key === current));
+    b.addEventListener('click', () => { current = key; render(); });
+    chips.append(b);
+  });
+  document.querySelector('[data-finder]').hidden = chips.children.length < 3;
+
+  function render() {
+    const f = GROUPS.find(g => g[0] === current)[2];
+    const shown = all.filter(f);
+    const grid = el('div', 'boards boards-all');
+    shown.forEach((d, i) => grid.append(D.board(d, { index: i })));
+    listBox.replaceChildren(grid);
+    [...chips.children].forEach(c => c.setAttribute('aria-pressed', String(c.dataset.key === current)));
+  }
+  render();
+})();
+</script>
+</body>
+</html>

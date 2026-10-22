@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/bypass.css">
+<link rel="stylesheet" href="/assets/dockets.css">
 <style>
   :root { --head-h: 66px; }
   body { background: var(--ground); }
@@ -216,6 +217,41 @@
     .crop-foot { padding: 12px 16px calc(14px + env(safe-area-inset-bottom)); }
   }
 
+  /* 처리 현황 */
+  .dk-no { flex: none; min-width: 64px; font-size: 13px; font-weight: 900; color: var(--green); font-variant-numeric: tabular-nums; }
+  .dk-st { flex: none; font-size: 12px; font-weight: 900; line-height: 1.7; padding: 0 7px; border-radius: 4px; border: 1.5px solid var(--ink); }
+  .dk-st-building { background: var(--amber); }
+  .dk-st-done { background: var(--orange); }
+  .dk-st-new { background: var(--green); color: #fff; }
+  .dk-st-rejected { background: #fff; color: var(--orange-ink); border-style: dashed; border-color: var(--orange-ink); }
+  .pv-board { max-width: 300px; padding: 22px 16px 0; margin: 0 auto; }
+  .pv-board .board-unit { border-bottom: 6px solid var(--post); }
+  .pv-board .legs { height: 22px; }
+  .field-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+  .warn-note { margin: 8px 0 0; font-size: 13.5px; font-weight: 700; color: var(--orange-ink); }
+  .seg-wrap { display: flex; flex-wrap: wrap; }
+  .seg-wrap .seg { flex-wrap: wrap; }
+
+  /* 사이트 상태 */
+  .card { max-width: 760px; background: #fff; border: 1px solid var(--rule); border-radius: 12px; padding: 4px 22px 22px; }
+  .card + .card { margin-top: 16px; }
+  .card h2 { margin: 18px 0 2px; font-size: 18px; font-weight: 900; }
+  .card .field-label { margin: 16px 0 6px; font-size: 15px; }
+  .card .input { padding: 9px 11px; font-size: 15.5px; }
+  .card textarea.input { resize: vertical; min-height: 54px; }
+  .pv-vms { display: flex; align-items: baseline; gap: 10px; padding: 10px 14px; border-radius: 8px; background: var(--vms); color: var(--amber); font-weight: 700; font-size: 15px; line-height: 1.5; border-bottom: 4px solid var(--post-dark); }
+  .pv-vms-label { flex: none; border: 1.5px solid var(--amber); border-radius: 3px; padding: 0 8px; font-size: 12.5px; line-height: 1.7; }
+  .pv-hero { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; font-size: 13.5px; color: var(--muted); }
+  .pv-btn { display: inline-block; padding: 6px 12px; border-radius: 8px; font-weight: 900; font-size: 13.5px; }
+  .pv-btn-1 { background: var(--green); color: #fff; box-shadow: inset 0 0 0 2px var(--green), inset 0 0 0 3.5px #fff; }
+  .pv-btn-2 { background: #fff; color: var(--green); box-shadow: inset 0 0 0 2px var(--green); }
+  .pv-mode { margin: 12px 0 0; font-size: 14px; font-weight: 700; }
+  .pv-mode.is-off { color: var(--orange-ink); }
+  .date-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 200px)); gap: 0 12px; }
+  .card-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
+  .card-foot .form-error { flex-basis: 100%; margin: 0 0 4px; }
+  .saved-at { margin-left: auto; font-size: 13px; color: var(--muted); }
+
   .toast { position: fixed; left: 50%; bottom: 24px; z-index: 60; transform: translateX(-50%); max-width: calc(100% - 32px); padding: 10px 16px; border-radius: 8px; background: var(--ink); color: #fff; font-weight: 700; font-size: 14.5px; line-height: 1.5; box-shadow: 0 6px 20px rgba(28, 33, 30, 0.3); }
   .toast.is-bad { background: var(--orange); color: var(--ink); }
 
@@ -238,6 +274,8 @@
     .drawer-head, .drawer-foot { padding-left: 16px; padding-right: 16px; }
     .form-cols3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .rrow-flags { display: none; }
+    .card { padding: 2px 16px 18px; }
+    .date-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .toast { bottom: calc(84px + env(safe-area-inset-bottom)); }
     .hq-tabs { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding-bottom: env(safe-area-inset-bottom); background: #fff; border-top: 1px solid var(--rule); }
     .hq-tab { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 0 7px; color: var(--muted); text-decoration: none; font-size: 12px; font-weight: 700; }
@@ -300,6 +338,9 @@
   <div class="hq-body">
     <main class="hq-main" id="main">
 
+      <div class="banner banner-warn" role="alert" data-sql-warn2 hidden>
+        <p><b>데이터베이스 설정이 한 단계 남았습니다.</b> Supabase SQL Editor에서 <code>supabase/010_hq_phase2.sql</code>을 실행해 주세요. 그 전에는 사이트 상태와 처리 현황을 저장할 수 없습니다.</p>
+      </div>
       <div class="banner banner-warn" role="alert" data-sql-warn hidden>
         <p><b>데이터베이스 설정이 한 단계 남았습니다.</b> Supabase SQL Editor에서 <code>supabase/009_hq_phase1.sql</code>을 실행해 주세요. 그 전에는 아이콘·판 색·숨김을 저장할 수 없고, 이름·주소 같은 기존 칸만 저장됩니다.</p>
       </div>
@@ -336,6 +377,79 @@
           <div data-line-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
           <p class="list-hint">분류는 노선도의 큰 표지판입니다. 손잡이로 표지판 순서를 바꿉니다.</p>
         </div>
+      </section>
+
+      <!-- 처리 현황 -->
+      <section data-view="dockets" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-content">‹ 콘텐츠</a>
+            <p class="view-kicker">콘텐츠</p>
+            <h1 tabindex="-1">처리 현황</h1>
+          </div>
+          <div class="field-row" style="margin:0">
+            <a class="mini-btn" href="/#dockets" target="_blank" rel="noopener">메인에서 보기 ↗</a>
+            <a class="mini-btn" href="/dockets/" target="_blank" rel="noopener">전체 보기 ↗</a>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button type="button" class="btn btn-primary btn-small" data-new-docket>+ 안건 추가</button>
+          <label class="sr-only" for="docket-find">안건 찾기</label>
+          <input class="input" id="docket-find" type="search" placeholder="번호·제목·내용으로 찾기" autocomplete="off">
+        </div>
+        <div data-docket-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
+        <p class="list-hint">위에서부터 숨기지 않은 4건이 메인 ‘안건 처리 현황’에 보이고, 전체 보기에는 모두 보입니다. 새 안건은 맨 위에 붙습니다. 손잡이로 순서를 바꿉니다.</p>
+      </section>
+
+      <!-- 사이트 상태 -->
+      <section data-view="status" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-ops">‹ 운영</a>
+            <p class="view-kicker">운영</p>
+            <h1 tabindex="-1">사이트 상태</h1>
+          </div>
+          <a class="mini-btn" href="/" target="_blank" rel="noopener">메인 열기 ↗</a>
+        </div>
+        <form class="card" data-status-form novalidate>
+          <h2>미리보기</h2>
+          <p class="hint" style="margin:2px 0 12px">메인 맨 위 전광판과 첫 화면 버튼이 이렇게 보입니다.</p>
+          <div class="pv-vms" aria-label="전광판 미리보기"><span class="pv-vms-label">운영 상태</span><span data-pv-vms></span></div>
+          <div class="pv-hero" aria-label="첫 화면 버튼 순서"><span>첫 화면 버튼</span><span data-pv-btns></span></div>
+          <p class="pv-mode" data-pv-mode></p>
+
+          <fieldset style="margin:18px 0 0;padding:0;border:0;min-width:0">
+            <legend class="field-label" style="margin:0 0 8px">지금 운영 상태</legend>
+            <div class="seg" role="radiogroup" aria-label="운영 상태" data-status-mode>
+              <button type="button" role="radio" data-mode-val="normal">평시</button>
+              <button type="button" role="radio" data-mode-val="recruiting">모집 기간</button>
+              <button type="button" role="radio" data-mode-val="exam">시험 기간</button>
+            </div>
+          </fieldset>
+
+          <h2>모집 기간</h2>
+          <div class="date-cols">
+            <div><label class="field-label" for="s-start">시작일 <span class="opt">(선택)</span></label><input class="input" id="s-start" type="date"></div>
+            <div><label class="field-label" for="s-end">마감일</label><input class="input" id="s-end" type="date"></div>
+          </div>
+          <p class="hint">‘모집 기간’이어도 시작일 전과 마감일 다음 날부터는 메인이 저절로 평시로 보입니다. 모집 기간에는 첫 화면의 큰 버튼이 ‘합류하기’로 바뀌고, 모집 요강의 모집 기간 칸에 날짜가 들어갑니다.</p>
+
+          <h2>전광판 문구</h2>
+          <p class="hint" style="margin-top:2px">문구 속 <b>{마감}</b>·<b>{시작}</b>은 날짜(예: 11. 20.)로 바뀝니다. 비워 두면 기본 문구를 씁니다.</p>
+          <label class="field-label" for="s-t-normal">평시</label>
+          <textarea class="input" id="s-t-normal" maxlength="120" rows="2" data-text="normal"></textarea>
+          <label class="field-label" for="s-t-recruiting">모집 기간</label>
+          <textarea class="input" id="s-t-recruiting" maxlength="120" rows="2" data-text="recruiting"></textarea>
+          <label class="field-label" for="s-t-exam">시험 기간</label>
+          <textarea class="input" id="s-t-exam" maxlength="120" rows="2" data-text="exam"></textarea>
+
+          <div class="card-foot">
+            <p class="form-error" role="alert" data-status-error hidden></p>
+            <button type="submit" class="btn btn-primary btn-small" data-status-save>저장</button>
+            <button type="button" class="btn btn-secondary btn-small" data-status-reset>되돌리기</button>
+            <span class="saved-at" data-status-saved></span>
+          </div>
+        </form>
       </section>
 
       <!-- 아직 열리지 않은 메뉴 -->
@@ -435,6 +549,57 @@
           </fieldset>
         </form>
 
+        <!-- 처리 현황 안건 -->
+        <form data-form="docket" novalidate hidden>
+          <div class="pv" aria-label="미리보기"><p class="pv-title" data-docket-pv-title>미리보기 · 메인 안내판</p><div class="pv-board" data-docket-pv></div></div>
+
+          <div class="form-cols3">
+            <div><label class="field-label" for="d-no">번호</label><input class="input" id="d-no" maxlength="20" required placeholder="예: 0-5" aria-describedby="d-no-hint"></div>
+            <div style="grid-column: span 2"><label class="field-label" for="d-note">번호 옆 메모 <span class="opt">(선택)</span></label><input class="input" id="d-note" maxlength="20" placeholder="예: 창립 전"></div>
+          </div>
+          <p class="hint" id="d-no-hint">‘0-5’라고 쓰면 ‘제0-5호’로 보입니다.</p>
+
+          <label class="field-label" for="d-title">제목</label>
+          <input class="input" id="d-title" maxlength="60" required placeholder="예: 수강플래너">
+
+          <fieldset>
+            <legend>상태</legend>
+            <div class="seg" role="radiogroup" aria-label="안건 상태" data-docket-status>
+              <button type="button" role="radio" data-st="building">공사 중</button>
+              <button type="button" role="radio" data-st="done">완료</button>
+              <button type="button" role="radio" data-st="new">신설 개통</button>
+              <button type="button" role="radio" data-st="rejected">반려</button>
+            </div>
+            <p class="hint" data-st-hint></p>
+          </fieldset>
+
+          <label class="field-label" for="d-old" data-old-label>기존 절차</label>
+          <textarea class="input" id="d-old" maxlength="300" rows="2" placeholder="예: 강의 목록을 하나씩 열어 시간이 겹치는지 맞춰 봄"></textarea>
+          <div data-new-wrap>
+            <label class="field-label" for="d-new" data-new-label>개선 후</label>
+            <textarea class="input" id="d-new" maxlength="300" rows="2" placeholder="예: 과목을 담으면 시간표로 바로 보임"></textarea>
+          </div>
+          <div data-reason-wrap hidden>
+            <label class="field-label" for="d-reason">반려 사유</label>
+            <textarea class="input" id="d-reason" maxlength="300" rows="2" placeholder="예: 해당 불편은 절차가 아닌 날씨에 기인함."></textarea>
+          </div>
+
+          <label class="field-label" for="d-route">연결한 지름길</label>
+          <select class="input" id="d-route"></select>
+          <p class="hint">완료·신설 개통 안건에 개통된 지름길을 이으면 ‘지름길 바로가기’ 버튼이 저절로 달립니다.</p>
+          <p class="warn-note" data-route-warn hidden></p>
+
+          <label class="field-label" for="d-report">시작된 제보 <span class="opt">(선택)</span></label>
+          <select class="input" id="d-report"></select>
+          <div class="field-row"><button type="button" class="mini-btn" data-take-report disabled>제보 내용 가져오기</button><span class="hint" style="margin:0" data-report-hint></span></div>
+
+          <fieldset>
+            <legend>보이기</legend>
+            <label class="check"><input type="checkbox" id="d-hidden"> <span>숨기기 <small>(지우지 않고 잠시 내릴 때)</small></span></label>
+            <label class="check"><input type="checkbox" id="d-sample"> <span>‘견본’ 딱지 붙이기</span></label>
+          </fieldset>
+        </form>
+
         <!-- 분류 -->
         <form data-form="line" novalidate hidden>
           <div data-line-pv></div>
@@ -515,9 +680,11 @@
 <script src="/assets/vendor/supabase-js-2.117.2.js"></script>
 <script src="/assets/auth.js"></script>
 <script src="/assets/route-icons.js"></script>
+<script src="/assets/site-status.js"></script>
+<script src="/assets/dockets.js"></script>
 <script>
 (async function () {
-  const B = window.BYPASS, I = window.BYPASS_ICONS;
+  const B = window.BYPASS, I = window.BYPASS_ICONS, DK = window.BYPASS_DOCKETS, ST = window.BYPASS_STATUS;
   const $ = (s, root) => (root || document).querySelector(s);
   const $$ = (s, root) => [...(root || document).querySelectorAll(s)];
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
@@ -553,14 +720,14 @@
     { id: 'stats', group: 'home', name: '통계', when: '3단계', note: '방문·이용 기록은 지금부터 쌓이고 있습니다.' },
     { id: 'reports', group: 'inbox', name: '불편 제보', when: '3단계', legacy: 'inbox' },
     { id: 'applications', group: 'inbox', name: '합류 신청', when: '3단계', legacy: 'inbox' },
-    { id: 'dockets', group: 'content', name: '처리 현황', when: '2단계', note: '그전까지 메인 처리 현황은 index.html에서 고칩니다.' },
+    { id: 'dockets', group: 'content', name: '처리 현황', ready: true },
     { id: 'routes', group: 'content', name: '개통 노선도', ready: true },
     { id: 'wiki', group: 'content', name: '위키', legacy: 'admin' },
     { id: 'notices', group: 'content', name: '공지', when: '4단계', legacy: 'home' },
     { id: 'faq', group: 'content', name: '자주 묻는 질문', when: '4단계' },
     { id: 'texts', group: 'content', name: '페이지 문구', when: '4단계' },
-    { id: 'status', group: 'ops', name: '사이트 상태', when: '2단계' },
-    { id: 'share', group: 'ops', name: '링크 미리보기', when: '2단계' },
+    { id: 'status', group: 'ops', name: '사이트 상태', ready: true },
+    { id: 'share', group: 'ops', name: '링크 미리보기', when: '2단계 두 번째 묶음' },
     { id: 'members', group: 'ops', name: '회원', when: '3단계', legacy: 'admin' },
     { id: 'log', group: 'ops', name: '변경 기록', when: '4단계' }
   ];
@@ -581,7 +748,8 @@
   });
 
   let firstRoute = true;
-  function show(view) { $$('[data-view]').forEach(v => { v.hidden = v.dataset.view !== view; }); }
+  const viewHooks = [];       // 화면이 바뀔 때 부를 것 (서랍 닫기 등)
+  function show(view) { $$('[data-view]').forEach(v => { v.hidden = v.dataset.view !== view; }); viewHooks.forEach(f => f(view)); }
   function markNav(menuId, group) {
     $$('.nav-item').forEach(a => { if (a.dataset.menu === menuId) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     $$('.hq-tab').forEach(a => { if (a.dataset.tab === group) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
@@ -647,10 +815,13 @@
     $$('[data-needs-sql]').forEach(f => { f.disabled = !ok; });
     $$('[data-needs-sql-input]').forEach(i => { i.disabled = !ok; });
   }
-  function errText(e, what) {
+  function errText(e, what, ctx) {
     if (!e) return '';
     if (e.code === '42501' || /row-level security|permission/i.test(e.message || '')) return '운영진 권한이 확인되지 않습니다. 로그아웃했다가 다시 로그인해 주세요.';
-    if (e.code === 'PGRST205' || e.code === '42P01') return '노선도 표가 아직 없습니다. supabase/005_routes.sql을 먼저 실행해 주세요.';
+    if (e.code === 'PGRST205' || e.code === '42P01') return ctx === 'docket' || ctx === 'status' ? '표가 아직 없습니다. supabase/010_hq_phase2.sql을 먼저 실행해 주세요.' : '노선도 표가 아직 없습니다. supabase/005_routes.sql을 먼저 실행해 주세요.';
+    if (ctx === 'docket' && e.code === '23505') return '같은 번호의 안건이 이미 있습니다. 다른 번호를 써 주세요.';
+    if (ctx === 'docket' && e.code === '23514') return '입력한 값의 형식이 맞지 않습니다. 번호에는 < > 를 쓸 수 없고, 글자 수를 확인해 주세요.';
+    if (ctx === 'status' && e.code === '23514') return '입력한 값의 형식이 맞지 않습니다. 날짜와 문구 길이(120자)를 확인해 주세요.';
     if (e.code === '23514' && /open_needs_url/.test(e.message || '')) return '개통하려면 주소가 있어야 합니다.';
     if (e.code === '23514') return '입력한 값의 형식이 맞지 않습니다. 주소·색·이름을 확인해 주세요.';
     if (e.code === '23505') return '같은 주소용 이름이 이미 있습니다. 다른 이름을 정해 주세요.';
@@ -828,7 +999,8 @@
 
   /* ===== 고치기 서랍 ===== */
   const hq = $('[data-hq]'), drawer = $('[data-drawer]'), scrim = $('[data-scrim]');
-  const formRoute = $('[data-form="route"]'), formLine = $('[data-form="line"]');
+  const formRoute = $('[data-form="route"]'), formLine = $('[data-form="line"]'), formDocket = $('[data-form="docket"]');
+  const FORMS = { route: formRoute, line: formLine, docket: formDocket };
   const errBox = $('.drawer-foot .form-error');
   const saveBtn = $('[data-save]'), delBtn = $('[data-delete]');
   let mode = null;            // 'route' | 'line'
@@ -844,8 +1016,7 @@
     mode = kind;
     formSeq++;
     lastFocus = document.activeElement;
-    formRoute.hidden = kind !== 'route';
-    formLine.hidden = kind !== 'line';
+    Object.entries(FORMS).forEach(([k, f]) => { f.hidden = k !== kind; });
     $('[data-drawer-title]').textContent = title;
     $('[data-drawer-kicker]').textContent = kicker;
     errBox.hidden = true;
@@ -855,7 +1026,7 @@
     scrim.hidden = !overlay();
     if (overlay()) document.body.style.overflow = 'hidden';
     $('.drawer-body').scrollTop = 0;
-    const first = (kind === 'route' ? formRoute : formLine).querySelector('input:not([readonly])');
+    const first = FORMS[kind].querySelector('input:not([readonly])');
     if (first) first.focus({ preventScroll: true });
   }
   function closeDrawer() {
@@ -885,11 +1056,14 @@
   delBtn.addEventListener('click', () => {
     if (!armed) { armed = true; delBtn.classList.add('is-armed'); delBtn.textContent = '한 번 더 누르면 지웁니다'; return; }
     disarm();
-    if (mode === 'route') deleteRoute(); else if (mode === 'line') deleteLine();
+    if (mode === 'route') deleteRoute(); else if (mode === 'line') deleteLine(); else if (mode === 'docket') deleteDocket();
   });
-  saveBtn.addEventListener('click', () => { if (mode === 'route') saveRoute(); else if (mode === 'line') saveLine(); });
-  [formRoute, formLine].forEach(f => f.addEventListener('submit', e => { e.preventDefault(); saveBtn.click(); }));
-  [formRoute, formLine].forEach(f => f.addEventListener('input', e => { if (e.target.removeAttribute) e.target.removeAttribute('aria-invalid'); errBox.hidden = true; }));
+  saveBtn.addEventListener('click', () => { if (mode === 'route') saveRoute(); else if (mode === 'line') saveLine(); else if (mode === 'docket') saveDocket(); });
+  Object.values(FORMS).forEach(f => f.addEventListener('submit', e => { e.preventDefault(); saveBtn.click(); }));
+  Object.values(FORMS).forEach(f => f.addEventListener('input', e => { if (e.target.removeAttribute) e.target.removeAttribute('aria-invalid'); errBox.hidden = true; }));
+  // 다른 메뉴로 가면 서랍을 닫는다 (저장 중이면 그대로)
+  const VIEW_OF = { route: 'routes', line: 'routes', docket: 'dockets' };
+  viewHooks.push(view => { if (mode && VIEW_OF[mode] !== view && !busy) closeDrawer(); });
 
   /* ===== 지름길 편집 ===== */
   const F = id => document.getElementById(id);
@@ -1287,7 +1461,7 @@
     if (i >= 0) routes[i] = saved; else routes.push(saved);
     routes.sort((a, b) => (a.sort - b.sort) || String(a.created_at).localeCompare(String(b.created_at)));
     closeDrawer();
-    renderRoutes(); renderLines();
+    renderRoutes(); renderLines(); renderDockets();
     toast(`${target ? '저장' : '추가'}했습니다. 노선도에 바로 반영됩니다.${saved.hidden ? ' (숨김 상태)' : ''}`);
   }
 
@@ -1300,7 +1474,8 @@
     if (error) return fail(errText(error, '지우기'));
     if (target.icon_url) removeFile(target.icon_url);
     routes = routes.filter(r => String(r.id) !== String(target.id));
-    closeDrawer(); renderRoutes(); renderLines();
+    dockets.forEach(d => { if (String(d.route_id) === String(target.id)) d.route_id = null; });  // 데이터베이스도 연결을 끊는다(on delete set null)
+    closeDrawer(); renderRoutes(); renderLines(); renderDockets();
     toast(`‘${target.title}’을(를) 지웠습니다.`);
   }
 
@@ -1396,7 +1571,343 @@
     toast(`분류 ‘${target.name}’을(를) 지웠습니다.`);
   }
 
-  await loadAll();
+  /* ===== 처리 현황 안건 ===== */
+  let dockets = [], reports = [], hasPhase2 = true, docketsLoaded = false;
+  const docketList = $('[data-docket-list]');
+  const DST = DK.STATUS;
+  const ST_HINT = {
+    building: '심의를 통과해 만드는 중인 안건. 공사 띠가 붙고 직인은 없습니다.',
+    done: '기존 업무 방식을 대체한 안건. 도도새 직인을 찍습니다.',
+    new: '원래 없던 길을 새로 만든 안건. 신설 개통 인장을 찍습니다.',
+    rejected: '심의에서 반려한 안건. 직인 없이 반려 사유를 함께 공고합니다.'
+  };
+  const receiptOf = r => `BYP-${new Date(r.created_at).getFullYear()}-${String(r.id).padStart(3, '0')}`;
+  function setPhase2(ok) { hasPhase2 = ok; $('[data-sql-warn2]').hidden = ok; }
+  const missingTable = e => e && (e.code === 'PGRST205' || e.code === '42P01');
+
+  async function loadDockets() {
+    const [d, r] = await Promise.all([
+      B.sb.from('dockets').select('*').order('sort').order('id'),
+      B.sb.from('reports').select('id,created_at,what,how,status').order('id', { ascending: false }).limit(300)
+    ]);
+    if (d.error) {
+      if (missingTable(d.error)) setPhase2(false);
+      docketList.replaceChildren(el('p', 'list-state', errText(d.error, '불러오기', 'docket')));
+      return false;
+    }
+    dockets = d.data; docketsLoaded = true;
+    reports = r.error ? [] : r.data;
+    renderDockets();
+    return true;
+  }
+  // 공개 화면과 같은 모양으로 그리려면 연결한 지름길 정보를 붙인다 (숨긴 지름길은 공개 화면에서 안 보이므로 뺀다)
+  function withRoute(d) {
+    const r = routes.find(x => String(x.id) === String(d.route_id));
+    return { ...d, route: r && !r.hidden ? { title: r.title, url: r.url, status: r.status } : null };
+  }
+  function docketRow(d, onMain) {
+    const li = el('li', `rrow${editing && mode === 'docket' && String(editing.id) === String(d.id) ? ' is-current' : ''}`);
+    li.dataset.id = d.id;
+    li.dataset.search = [DK.label(d), d.title, d.old_way, d.new_way, d.reason].join(' ').toLowerCase();
+    const grip = el('button', 'grip'); grip.type = 'button'; grip.innerHTML = GRIP;
+    grip.setAttribute('aria-label', `${DK.label(d)} ${d.title} 순서 바꾸기 (위아래 화살표 키)`);
+    const main = el('button', 'rrow-main'); main.type = 'button';
+    main.style.paddingLeft = '6px';
+    const text = el('span', 'rrow-text');
+    text.append(el('span', 'rrow-title', d.title));
+    const meta = el('span', 'rrow-meta');
+    meta.append(el('span', `dk-st dk-st-${d.status}`, DST[d.status] ? DST[d.status].name : d.status), el('span', null, DK.label(d)));
+    const r = routes.find(x => String(x.id) === String(d.route_id));
+    if (r) meta.append(el('span', null, `· 지름길: ${r.title}`));
+    text.append(meta);
+    const flags = el('span', 'rrow-flags');
+    if (d.hidden) flags.append(el('span', 'flag flag-hidden', '숨김'));
+    if (d.sample) flags.append(el('span', 'flag', '견본'));
+    if (onMain) flags.append(el('span', 'flag flag-feat', '메인에 보임'));
+    main.append(text, flags);
+    main.addEventListener('click', () => openDocketForm(d));
+    li.append(grip, main);
+    bindSort(grip, li, () => saveDocketOrder(li.parentElement));
+    return li;
+  }
+  function renderDockets() {
+    if (!hasPhase2 || !docketsLoaded) return;
+    const sec = el('section', 'lgroup');
+    const ul = el('ul', 'rlist');
+    let shown = 0;
+    if (dockets.length) dockets.forEach(d => { const onMain = !d.hidden && shown < 4; if (onMain) shown++; ul.append(docketRow(d, onMain)); });
+    else ul.append(el('li', 'rempty', '아직 안건이 없습니다. ‘+ 안건 추가’로 첫 안건을 올려 주세요.'));
+    const head = el('h2', 'lgroup-head');
+    head.append(el('span', null, '안건'), el('span', 'lcount', `${dockets.length}건 · 공개 ${dockets.filter(d => !d.hidden).length}건`));
+    sec.append(head, ul);
+    docketList.replaceChildren(sec);
+    applyDocketFind();
+  }
+  const dfind = $('#docket-find');
+  function applyDocketFind() {
+    const q = dfind.value.trim().toLowerCase();
+    $$('.rrow', docketList).forEach(li => { li.hidden = !!q && !li.dataset.search.includes(q); });
+    $$('.grip', docketList).forEach(g => { g.disabled = !!q; });
+  }
+  dfind.addEventListener('input', applyDocketFind);
+  // 순서 저장은 한 번에 하나씩 (빠르게 여러 번 옮겨도 마지막 순서가 남게)
+  let orderChain = Promise.resolve();
+  function saveDocketOrder(list) {
+    const ids = $$(':scope > li[data-id]', list).map(li => li.dataset.id);
+    orderChain = orderChain.then(() => writeDocketOrder(ids)).catch(() => {});
+  }
+  async function writeDocketOrder(ids) {
+    const jobs = [];
+    ids.forEach((id, i) => {
+      const item = dockets.find(x => String(x.id) === id);
+      const sort = (i + 1) * 10;
+      if (item && item.sort !== sort) { item.sort = sort; jobs.push(B.sb.from('dockets').update({ sort }).eq('id', item.id)); }
+    });
+    if (!jobs.length) return;
+    const res = await Promise.all(jobs);
+    const bad = res.find(x => x.error);
+    if (bad) { toast('순서를 저장하지 못했습니다. ' + errText(bad.error, '저장', 'docket'), true); await loadDockets(); return; }
+    dockets.sort((a, b) => a.sort - b.sort || a.id - b.id);
+    // 다시 그려도 손잡이에 둔 키보드 위치는 그대로
+    const focusedId = document.activeElement && document.activeElement.classList.contains('grip') && docketList.contains(document.activeElement)
+      ? document.activeElement.closest('li').dataset.id : null;
+    renderDockets();
+    if (focusedId) { const g = $(`li[data-id="${focusedId}"] .grip`, docketList); if (g) g.focus({ preventScroll: true }); }
+    toast('순서를 저장했습니다. 메인에 바로 반영됩니다.');
+  }
+
+  // 다음 번호: 가장 최근에 만든 안건 번호의 끝 숫자 + 1 (예: 0-4 → 0-5)
+  function nextNo() {
+    const latest = [...dockets].sort((a, b) => b.id - a.id).find(d => /\d+$/.test(d.no));
+    if (!latest) return String(dockets.length + 1);
+    const m = latest.no.match(/^(.*?)(\d+)$/);
+    let n = Number(m[2]) + 1, cand;
+    do { cand = m[1] + n++; } while (dockets.some(d => d.no === cand));
+    return cand;
+  }
+
+  let docketStatus = 'building';
+  $$('[data-st]').forEach(b => b.addEventListener('click', () => { docketStatus = b.dataset.st; syncDocketUI(); }));
+  function fillDocketSelects(d) {
+    const rsel = F('d-route');
+    const none = el('option', null, '연결 안 함'); none.value = '';
+    const groups = lines.map(l => {
+      const g = document.createElement('optgroup'); g.label = l.name;
+      routes.filter(r => r.line === l.id).forEach(r => {
+        const o = el('option', null, `${r.title}${r.status === 'building' ? ' (공사 중)' : ''}${r.hidden ? ' (숨김)' : ''}`); o.value = r.id; g.append(o);
+      });
+      return g;
+    }).filter(g => g.children.length);
+    // 지름길 목록을 못 불러왔거나 목록 밖이면, 저장하다 연결이 끊기지 않게 그대로 남겨 둔다
+    if (d && d.route_id != null && !routes.some(r => String(r.id) === String(d.route_id))) { const o = el('option', null, `지름길 ${d.route_id}번 (목록에 없음)`); o.value = d.route_id; groups.unshift(o); }
+    rsel.replaceChildren(none, ...groups);
+    rsel.value = d && d.route_id != null ? String(d.route_id) : '';
+    const psel = F('d-report');
+    const pnone = el('option', null, '연결 안 함'); pnone.value = '';
+    const opts = reports.map(r => { const o = el('option', null, `${receiptOf(r)} · ${r.what.length > 34 ? r.what.slice(0, 34) + '…' : r.what}`); o.value = r.id; return o; });
+    // 목록 밖(오래된) 제보에 이어져 있으면 번호만이라도 보여 준다
+    if (d && d.report_id != null && !reports.some(r => String(r.id) === String(d.report_id))) { const o = el('option', null, `제보 ${d.report_id}번`); o.value = d.report_id; opts.unshift(o); }
+    psel.replaceChildren(pnone, ...opts);
+    psel.value = d && d.report_id != null ? String(d.report_id) : '';
+  }
+  function docketDraft() {
+    return {
+      id: editing && mode === 'docket' ? editing.id : null,
+      no: F('d-no').value.trim(), no_note: F('d-note').value.trim() || null,
+      title: F('d-title').value.trim(), status: docketStatus,
+      old_way: F('d-old').value.trim() || null,
+      new_way: docketStatus === 'rejected' ? null : (F('d-new').value.trim() || null),
+      reason: docketStatus === 'rejected' ? (F('d-reason').value.trim() || null) : null,
+      route_id: F('d-route').value ? Number(F('d-route').value) : null,
+      report_id: F('d-report').value ? Number(F('d-report').value) : null,
+      hidden: F('d-hidden').checked, sample: F('d-sample').checked
+    };
+  }
+  function syncDocketUI() {
+    $$('[data-st]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.st === docketStatus)));
+    $('[data-st-hint]').textContent = ST_HINT[docketStatus];
+    const rows = DST[docketStatus].rows;
+    $('[data-old-label]').textContent = rows[0];
+    $('[data-new-label]').textContent = rows[1];
+    $('[data-new-wrap]').hidden = docketStatus === 'rejected';
+    $('[data-reason-wrap]').hidden = docketStatus !== 'rejected';
+    const d = docketDraft();
+    const r = routes.find(x => String(x.id) === String(d.route_id));
+    const warn = $('[data-route-warn]');
+    let w = '';
+    if (r && (d.status === 'done' || d.status === 'new')) {
+      if (r.hidden) w = '연결한 지름길이 노선도에서 숨김 상태라 바로가기 버튼이 보이지 않습니다.';
+      else if (r.status !== 'open' || !r.url) w = '연결한 지름길이 아직 공사 중이라 바로가기 버튼이 보이지 않습니다. 개통하면 저절로 생깁니다.';
+    }
+    if (!r && (d.status === 'done' || d.status === 'new')) w = '';
+    warn.textContent = w; warn.hidden = !w;
+    const rep = reports.find(x => String(x.id) === String(d.report_id));
+    $('[data-take-report]').disabled = !rep;
+    $('[data-report-hint]').textContent = rep ? `제보 상태: ${rep.status}` : '';
+    renderDocketPreview();
+  }
+  function renderDocketPreview() {
+    const d = docketDraft();
+    const shown = { ...withRoute(d), no: d.no || '?', title: d.title || '안건 제목' };
+    const box = $('[data-docket-pv]');
+    box.replaceChildren(DK.board(shown, { index: 0, idPrefix: 'pv' }));
+    $('[data-docket-pv-title]').textContent = d.hidden ? '미리보기 · 지금은 숨김 (공개 화면에 안 보임)' : '미리보기 · 메인 안내판';
+  }
+  formDocket.addEventListener('input', syncDocketUI);
+  formDocket.addEventListener('change', syncDocketUI);
+  $('[data-take-report]').addEventListener('click', () => {
+    const rep = reports.find(x => String(x.id) === F('d-report').value);
+    if (!rep) return;
+    if (!F('d-title').value.trim()) F('d-title').value = rep.what.slice(0, 60);
+    F('d-old').value = rep.how.slice(0, 300);
+    syncDocketUI();
+    toast('제보 내용을 가져왔습니다. 공고에 맞게 다듬어 주세요.');
+  });
+
+  function openDocketForm(d) {
+    if (waitBusy()) return;
+    if (!hasPhase2 || !docketsLoaded) { toast(hasPhase2 ? '안건을 아직 불러오지 못했습니다. 새로고침해 주세요.' : 'supabase/010_hq_phase2.sql을 먼저 실행해 주세요.', true); return; }
+    editing = d || null;
+    currentId = null;
+    const v = d || {};
+    F('d-no').value = v.no || nextNo();
+    F('d-note').value = v.no_note || '';
+    F('d-title').value = v.title || '';
+    F('d-old').value = v.old_way || '';
+    F('d-new').value = v.new_way || '';
+    F('d-reason').value = v.reason || '';
+    F('d-hidden').checked = !!v.hidden; F('d-sample').checked = !!v.sample;
+    docketStatus = v.status || 'building';
+    fillDocketSelects(d);
+    $$('[aria-invalid]', formDocket).forEach(x => x.removeAttribute('aria-invalid'));
+    delBtn.hidden = !d;
+    openDrawer('docket', d ? `고치기: ${DK.label(d)}` : '안건 추가', '처리 현황 · 안건');
+    syncDocketUI();
+    $$('.rrow', docketList).forEach(li => li.classList.toggle('is-current', !!d && li.dataset.id === String(d.id)));
+    if (!d) F('d-title').focus({ preventScroll: true });
+  }
+  $('[data-new-docket]').addEventListener('click', () => openDocketForm(null));
+
+  async function saveDocket() {
+    if (busy) return;
+    const target = editing;
+    const d = docketDraft();
+    $$('[aria-invalid]', formDocket).forEach(x => x.removeAttribute('aria-invalid'));
+    if (!d.no) return fail('번호를 입력해 주세요.', 'd-no');
+    if (/[<>]/.test(d.no)) return fail('번호에는 < > 를 쓸 수 없습니다.', 'd-no');
+    if (dockets.some(x => x.no === d.no && (!target || x.id !== target.id))) return fail(`제${d.no}호가 이미 있습니다. 다른 번호를 써 주세요.`, 'd-no');
+    if (!d.title) return fail('제목을 입력해 주세요.', 'd-title');
+    if (d.status === 'rejected' && !d.reason) return fail('반려 사유를 입력해 주세요. 반려 안건은 사유와 함께 공고합니다.', 'd-reason');
+    const row = { no: d.no, no_note: d.no_note, title: d.title, status: d.status, old_way: d.old_way, new_way: d.new_way, reason: d.reason, route_id: d.route_id, report_id: d.report_id, hidden: d.hidden, sample: d.sample };
+    if (!target) row.sort = Math.min(10, ...dockets.map(x => x.sort || 0)) - 10;  // 새 안건은 맨 위
+    setBusy(true); B.setBusy(saveBtn, true, '저장 중…');
+    const res = target
+      ? await B.sb.from('dockets').update(row).eq('id', target.id).select().single()
+      : await B.sb.from('dockets').insert(row).select().single();
+    setBusy(false); B.setBusy(saveBtn, false);
+    if (res.error) { fail(errText(res.error, '저장', 'docket')); if (res.error.code === 'PGRST116') loadDockets(); return; }
+    const saved = res.data;
+    const i = dockets.findIndex(x => x.id === saved.id);
+    if (i >= 0) dockets[i] = saved; else dockets.push(saved);
+    dockets.sort((a, b) => a.sort - b.sort || a.id - b.id);
+    closeDrawer(); renderDockets();
+    const onMain = dockets.filter(x => !x.hidden).slice(0, 4).some(x => x.id === saved.id);
+    toast(`${target ? '저장' : '추가'}했습니다. ${saved.hidden ? '(숨김 상태라 공개 화면에는 안 보입니다)' : onMain ? '메인과 전체 보기에 바로 반영됩니다.' : '전체 보기에 바로 반영됩니다.'}`);
+  }
+  async function deleteDocket() {
+    const target = editing;
+    if (!target || busy) return;
+    setBusy(true); B.setBusy(delBtn, true, '지우는 중…');
+    const { error } = await B.sb.from('dockets').delete().eq('id', target.id);
+    setBusy(false); B.setBusy(delBtn, false);
+    if (error) return fail(errText(error, '지우기', 'docket'));
+    dockets = dockets.filter(x => x.id !== target.id);
+    closeDrawer(); renderDockets();
+    toast(`${DK.label(target)} ‘${target.title}’을(를) 지웠습니다.`);
+  }
+
+  /* ===== 사이트 상태 ===== */
+  const sForm = $('[data-status-form]');
+  const sErr = $('[data-status-error]'), sSave = $('[data-status-save]');
+  let statusRow = null;       // 저장된 값 (없으면 null)
+  let statusMode = 'normal';
+  let statusBusy = false;
+  const TEXT_IDS = { normal: 's-t-normal', recruiting: 's-t-recruiting', exam: 's-t-exam' };
+  Object.entries(TEXT_IDS).forEach(([k, id]) => { F(id).placeholder = ST.DEFAULT.texts[k]; });
+  $$('[data-mode-val]').forEach(b => b.addEventListener('click', () => { statusMode = b.dataset.modeVal; syncStatusUI(); }));
+  function statusDraft() {
+    const texts = {};
+    Object.entries(TEXT_IDS).forEach(([k, id]) => { const v = F(id).value.trim(); texts[k] = v || ST.DEFAULT.texts[k]; });
+    return { mode: statusMode, texts, recruit_start: F('s-start').value || null, recruit_end: F('s-end').value || null };
+  }
+  function fillStatusForm(value) {
+    const c = ST.clean(value);
+    statusMode = c.mode;
+    Object.entries(TEXT_IDS).forEach(([k, id]) => { F(id).value = c.texts[k] === ST.DEFAULT.texts[k] ? '' : c.texts[k]; });
+    F('s-start').value = c.recruit_start || '';
+    F('s-end').value = c.recruit_end || '';
+    sErr.hidden = true;
+    syncStatusUI();
+  }
+  function syncStatusUI() {
+    $$('[data-mode-val]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.modeVal === statusMode)));
+    const v = ST.view(statusDraft());
+    $('[data-pv-vms]').textContent = v.text;
+    const btns = v.mode === 'recruiting' ? ['BYPASS 합류하기', '불편 제보하기'] : ['불편 제보하기', 'BYPASS 합류하기'];
+    $('[data-pv-btns]').replaceChildren(el('span', 'pv-btn pv-btn-1', btns[0]), document.createTextNode(' '), el('span', 'pv-btn pv-btn-2', btns[1]));
+    const pm = $('[data-pv-mode]');
+    let note = `메인에 보이는 상태: ${ST.MODES[v.mode]}`;
+    if (statusMode === 'recruiting' && v.mode !== 'recruiting') {
+      const t = ST.todayIso();
+      const d = statusDraft();
+      note += d.recruit_start && t < d.recruit_start ? ` · 시작일(${ST.md(d.recruit_start)}) 전이라 평시로 보입니다.` : ` · 마감일(${ST.md(d.recruit_end)})이 지나 평시로 보입니다.`;
+    } else if (v.mode === 'recruiting') note += ` · 모집 요강 모집 기간: ${v.period}`;
+    pm.textContent = note;
+    pm.classList.toggle('is-off', statusMode !== v.mode);
+  }
+  sForm.addEventListener('input', () => { sErr.hidden = true; $$('[aria-invalid]', sForm).forEach(x => x.removeAttribute('aria-invalid')); syncStatusUI(); });
+  function statusFail(text, id) {
+    sErr.textContent = text; sErr.hidden = false;
+    if (id) { F(id).setAttribute('aria-invalid', 'true'); F(id).focus(); }
+  }
+  function showSavedAt(row) {
+    $('[data-status-saved]').textContent = row && row.updated_at ? `마지막 저장 ${new Date(row.updated_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}` : '';
+  }
+  async function loadStatus() {
+    const { data, error } = await B.sb.from('site_settings').select('*').eq('key', 'status').maybeSingle();
+    if (error) {
+      if (missingTable(error)) setPhase2(false);
+      fillStatusForm(null);
+      statusFail(errText(error, '불러오기', 'status'));
+      return;
+    }
+    statusRow = data;
+    fillStatusForm(data && data.value);
+    showSavedAt(data);
+  }
+  $('[data-status-reset]').addEventListener('click', () => { fillStatusForm(statusRow && statusRow.value); toast('저장된 값으로 되돌렸습니다.'); });
+  sForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (statusBusy) return;
+    const d = statusDraft();
+    if (d.recruit_start && d.recruit_end && d.recruit_end < d.recruit_start) return statusFail('마감일이 시작일보다 빠릅니다.', 's-end');
+    if (d.mode === 'recruiting' && !d.recruit_end && /\{마감\}/.test(d.texts.recruiting)) return statusFail('모집 기간 문구에 {마감}이 있습니다. 마감일을 정해 주세요.', 's-end');
+    const over = Object.entries(d.texts).find(([, t]) => t.length > 120);
+    if (over) return statusFail('전광판 문구는 120자까지 쓸 수 있습니다.', TEXT_IDS[over[0]]);
+    statusBusy = true; B.setBusy(sSave, true, '저장 중…');
+    const res = statusRow
+      ? await B.sb.from('site_settings').update({ value: d }).eq('key', 'status').select().single()
+      : await B.sb.from('site_settings').insert({ key: 'status', value: d }).select().single();
+    statusBusy = false; B.setBusy(sSave, false);
+    if (res.error) { if (missingTable(res.error)) setPhase2(false); return statusFail(errText(res.error, '저장', 'status')); }
+    statusRow = res.data;
+    showSavedAt(statusRow);
+    const v = ST.view(d);
+    toast(`저장했습니다. 메인 전광판: ${ST.MODES[v.mode]}`);
+  });
+
+  await Promise.all([loadAll(), loadStatus()]);
+  await loadDockets();
 })();
 </script>
 </body>
