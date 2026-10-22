@@ -100,7 +100,10 @@
     if (luminance(bg) > 0.85) t.style.setProperty('--tile-ring-w', '3px');
     if (key === 'upload') {
       const img = document.createElement('img');
-      img.src = r.icon_url; img.alt = ''; img.decoding = 'async'; img.loading = 'lazy';
+      img.alt = ''; img.decoding = 'async'; img.loading = 'lazy';
+      // 파일이 사라졌으면 깨진 그림 대신 자동 그림
+      img.onerror = () => { t.classList.remove('is-full'); t.innerHTML = svgOf(guess(r)); };
+      img.src = r.icon_url;
       t.append(img);
     } else {
       t.innerHTML = svgOf(key);

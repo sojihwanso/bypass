@@ -107,6 +107,7 @@
   .drawer-body { flex: 1; overflow-y: auto; padding: 0 20px 24px; }
   .drawer-foot { padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid var(--rule); background: #fff; }
   .drawer-foot .form-error { margin: 0 0 10px; }
+  .drawer.is-busy .drawer-body { pointer-events: none; opacity: 0.6; }
   .foot-btns { display: flex; align-items: center; gap: 8px; }
   .foot-btns [data-delete] { margin-left: auto; }
   .drawer .field-label { margin: 14px 0 6px; font-size: 15px; }
@@ -591,6 +592,7 @@
     if (e.code === '23514') return '입력한 값의 형식이 맞지 않습니다. 주소·색·이름을 확인해 주세요.';
     if (e.code === '23505') return '같은 주소용 이름이 이미 있습니다. 다른 이름을 정해 주세요.';
     if (e.code === '23503') return '이 분류를 쓰는 지름길이 있어 지울 수 없습니다.';
+    if (e.code === 'PGRST116') return '이미 지워졌거나 고칠 권한이 없는 항목입니다. 목록을 새로 불러옵니다.';
     const verb = { 저장: '저장하지', 지우기: '지우지', 불러오기: '불러오지' }[what || '저장'] || '처리하지';
     return `${verb} 못했습니다. 잠시 후 다시 해 주세요.${e.code ? ` (${e.code})` : ''}`;
   }
@@ -769,10 +771,15 @@
   let mode = null;            // 'route' | 'line'
   let editing = null;         // 고치는 항목 (새로 만들 때 null)
   let lastFocus = null;
+  let busy = false;           // 저장·지우기 중에는 다른 항목을 열거나 닫지 않는다
+  let formSeq = 0;            // 서랍을 새로 열 때마다 바뀌는 번호 (늦게 끝난 작업이 다른 항목에 섞이지 않게)
+  const waitBusy = () => { if (busy) { toast('저장하는 중입니다. 잠시만 기다려 주세요.'); return true; } return false; };
+  function setBusy(on) { busy = on; drawer.classList.toggle('is-busy', on); }
   const overlay = () => matchMedia('(max-width: 1179px)').matches;
 
   function openDrawer(kind, title, kicker) {
     mode = kind;
+    formSeq++;
     lastFocus = document.activeElement;
     formRoute.hidden = kind !== 'route';
     formLine.hidden = kind !== 'line';
@@ -789,6 +796,8 @@
     if (first) first.focus({ preventScroll: true });
   }
   function closeDrawer() {
+    if (waitBusy()) return;
+    formSeq++;
     drawer.hidden = true; scrim.hidden = true;
     hq.classList.remove('has-drawer');
     document.body.style.overflow = '';
@@ -928,6 +937,7 @@
     F('f-line').replaceChildren(...lines.map(l => { const o = el('option', null, l.name); o.value = l.id; return o; }));
   }
   function openRouteForm(r) {
+    if (waitBusy()) return;
     editing = r || null;
     currentId = r ? r.id : null;
     fillLineSelect();
@@ -969,10 +979,12 @@
     if (!file) return;
     if (!TYPES.includes(file.type)) { fileNote('PNG·SVG·JPG·WebP 파일만 올릴 수 있습니다.'); return; }
     if (file.size > MAX) { fileNote(`파일이 ${Math.ceil(file.size / 1024)}KB입니다. 500KB 이하로 줄여 주세요.`); return; }
+    const seq = formSeq;
     const url = URL.createObjectURL(file);
     let note = '';
     if (file.type !== 'image/svg+xml') {
       const size = await new Promise(res => { const im = new Image(); im.onload = () => res([im.naturalWidth, im.naturalHeight]); im.onerror = () => res(null); im.src = url; });
+      if (seq !== formSeq) { URL.revokeObjectURL(url); return; }
       if (!size) { URL.revokeObjectURL(url); fileNote('그림 파일을 읽지 못했습니다. 다른 파일로 해 주세요.'); return; }
       if (Math.min(...size) < 192) { URL.revokeObjectURL(url); fileNote(`그림이 ${size[0]}×${size[1]}px입니다. 가로·세로 모두 192px 이상이어야 합니다.`); return; }
       if (size[0] !== size[1]) note = `정사각형이 아니라서(${size[0]}×${size[1]}px) 가운데 부분만 보입니다.`;
@@ -993,9 +1005,9 @@
   // 저장소 파일
   const BUCKET = 'route-icons';
   const pathOf = url => { const i = (url || '').indexOf(`/${BUCKET}/`); return i < 0 ? null : decodeURIComponent(url.slice(i + BUCKET.length + 2).split('?')[0]); };
-  async function upload(file) {
+  async function upload(file, targetId) {
     const ext = { 'image/png': 'png', 'image/svg+xml': 'svg', 'image/jpeg': 'jpg', 'image/webp': 'webp' }[file.type];
-    const path = `${editing ? editing.id : 'new'}-${Date.now()}.${ext}`;
+    const path = `${targetId || 'new'}-${Date.now()}.${ext}`;
     const { error } = await B.sb.storage.from(BUCKET).upload(path, file, { contentType: file.type, cacheControl: '31536000', upsert: false });
     if (error) return { error };
     return { url: B.sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl };
@@ -1005,64 +1017,77 @@
   const PATH_RULE = /^\/[a-z0-9\/_-]*$/;
 
   async function saveRoute() {
+    if (busy) return;
+    // 기다리는 동안 화면이 바뀌어도 섞이지 않도록, 지금 값을 먼저 모두 붙잡아 둔다
+    const target = editing;
     const d = draft();
+    const mode0 = iconMode, pick0 = pickKey, tile0 = tileVal, kept0 = uploadedUrl, file0 = pendingFile;
     $$('[aria-invalid]', formRoute).forEach(x => x.removeAttribute('aria-invalid'));
     if (!d.title) return fail('이름을 입력해 주세요.', 'f-title');
     if (!d.line) return fail('분류를 먼저 만들어 주세요.');
     if (d.url && (!URL_RULE.test(d.url) || (d.url.startsWith('/') && !PATH_RULE.test(d.url)))) return fail('주소는 https:// 로 시작하거나, /wiki/radar-101/ 처럼 영문 소문자로 써 주세요.', 'f-url');
     if (d.status === 'open' && !d.url) return fail('개통하려면 주소가 있어야 합니다. 아직 주소가 없으면 상태를 ‘공사 중’으로 두세요.', 'f-url');
-    if (iconMode === 'upload' && !pendingFile && !uploadedUrl) return fail('올릴 그림 파일을 골라 주세요.');
-    B.setBusy(saveBtn, true, '저장 중…');
-    let newUrl = null;
-    if (hasIconCols && iconMode === 'upload' && pendingFile) {
-      const up = await upload(pendingFile);
-      if (up.error) {
-        B.setBusy(saveBtn, false);
-        return fail(/bucket/i.test(up.error.message || '') ? '아이콘 저장소가 아직 없습니다. supabase/009_hq_phase1.sql을 실행해 주세요.' : `그림을 올리지 못했습니다. (${up.error.message || up.error.statusCode || '오류'})`);
-      }
-      newUrl = up.url;
-    }
+    if (mode0 === 'upload' && !file0 && !kept0) return fail('올릴 그림 파일을 골라 주세요.');
     const row = {
       title: d.title, line: d.line, type: d.type, status: d.status,
       url: d.url || null, description: d.description || null, subject: d.subject || null,
       featured: d.featured, sample: d.sample,
-      icon: iconMode === 'pick' ? pickKey : iconMode === 'upload' ? 'upload' : 'auto',
-      icon_url: iconMode === 'upload' ? (newUrl || uploadedUrl) : null,
-      tile: tileVal, icon_full: iconMode === 'upload' && d.icon_full, hidden: d.hidden
+      icon: mode0 === 'pick' ? pick0 : mode0 === 'upload' ? 'upload' : 'auto',
+      icon_url: mode0 === 'upload' ? kept0 : null,
+      tile: tile0, icon_full: mode0 === 'upload' && d.icon_full, hidden: d.hidden
     };
-    if (!editing) row.sort = Math.max(0, ...routes.filter(r => r.line === d.line).map(r => r.sort || 0)) + 10;
+    // 새 지름길이거나 분류를 옮기면 그 분류의 맨 뒤로
+    if (!target || target.line !== row.line) {
+      row.sort = Math.max(0, ...routes.filter(r => r.line === row.line && (!target || r.id !== target.id)).map(r => r.sort || 0)) + 10;
+    }
+    setBusy(true); B.setBusy(saveBtn, true, '저장 중…');
+    const done = () => { setBusy(false); B.setBusy(saveBtn, false); };
+    let newUrl = null;
+    if (hasIconCols && mode0 === 'upload' && file0) {
+      const up = await upload(file0, target && target.id);
+      if (up.error) {
+        done();
+        return fail(/bucket/i.test(up.error.message || '') ? '아이콘 저장소가 아직 없습니다. supabase/009_hq_phase1.sql을 실행해 주세요.' : `그림을 올리지 못했습니다. (${up.error.message || up.error.statusCode || '오류'})`);
+      }
+      newUrl = up.url;
+      row.icon_url = newUrl;
+    }
     const strip = o => { const c = { ...o }; NEW_COLS.forEach(k => delete c[k]); return c; };
-    const send = body => editing
-      ? B.sb.from('routes').update(body).eq('id', editing.id).select().single()
+    const send = body => target
+      ? B.sb.from('routes').update(body).eq('id', target.id).select().single()
       : B.sb.from('routes').insert(body).select().single();
     let res = await send(hasIconCols ? row : strip(row));
     if (res.error && hasIconCols && missingCol(res.error)) { setIconCols(false); res = await send(strip(row)); }
-    B.setBusy(saveBtn, false);
-    if (res.error) { if (newUrl) removeFile(newUrl); return fail(errText(res.error, '저장')); }
+    done();
+    if (res.error) {
+      if (newUrl) removeFile(newUrl);
+      fail(errText(res.error, '저장'));
+      if (res.error.code === 'PGRST116') loadAll();
+      return;
+    }
     // 바꾼 그림 파일 정리
-    const oldUrl = editing && editing.icon_url;
+    const oldUrl = target && target.icon_url;
     if (hasIconCols && oldUrl && oldUrl !== row.icon_url) removeFile(oldUrl);
     const saved = res.data;
     const i = routes.findIndex(r => String(r.id) === String(saved.id));
     if (i >= 0) routes[i] = saved; else routes.push(saved);
     routes.sort((a, b) => (a.sort - b.sort) || String(a.created_at).localeCompare(String(b.created_at)));
-    const wasNew = !editing;
     closeDrawer();
     renderRoutes(); renderLines();
-    toast(`${wasNew ? '추가' : '저장'}했습니다. 노선도에 바로 반영됩니다.${saved.hidden ? ' (숨김 상태)' : ''}`);
+    toast(`${target ? '저장' : '추가'}했습니다. 노선도에 바로 반영됩니다.${saved.hidden ? ' (숨김 상태)' : ''}`);
   }
 
   async function deleteRoute() {
-    if (!editing) return;
-    B.setBusy(delBtn, true, '지우는 중…');
-    const { error } = await B.sb.from('routes').delete().eq('id', editing.id);
-    B.setBusy(delBtn, false);
+    const target = editing;
+    if (!target || busy) return;
+    setBusy(true); B.setBusy(delBtn, true, '지우는 중…');
+    const { error } = await B.sb.from('routes').delete().eq('id', target.id);
+    setBusy(false); B.setBusy(delBtn, false);
     if (error) return fail(errText(error, '지우기'));
-    if (editing.icon_url) removeFile(editing.icon_url);
-    routes = routes.filter(r => String(r.id) !== String(editing.id));
-    const name = editing.title;
+    if (target.icon_url) removeFile(target.icon_url);
+    routes = routes.filter(r => String(r.id) !== String(target.id));
     closeDrawer(); renderRoutes(); renderLines();
-    toast(`‘${name}’을(를) 지웠습니다.`);
+    toast(`‘${target.title}’을(를) 지웠습니다.`);
   }
 
   /* ===== 분류 편집 ===== */
@@ -1099,6 +1124,7 @@
   }
   formLine.addEventListener('input', syncLineUI);
   function openLineForm(l) {
+    if (waitBusy()) return;
     editing = l || null;
     currentId = l ? 'line:' + l.id : null;
     const v = l || {};
@@ -1118,41 +1144,42 @@
   $('[data-new-line]').addEventListener('click', () => openLineForm(null));
 
   async function saveLine() {
+    if (busy) return;
+    const target = editing;
     $$('[aria-invalid]', formLine).forEach(x => x.removeAttribute('aria-invalid'));
     const name = F('l-name').value.trim(), no = F('l-no').value.trim(), id = F('l-id').value.trim().toLowerCase(), description = F('l-desc').value.trim();
     if (!name) return fail('이름을 입력해 주세요.', 'l-name');
     if (!no) return fail('번호를 입력해 주세요.', 'l-no');
-    if (!editing) {
+    if (!target) {
       if (!/^[a-z0-9-]{1,30}$/.test(id)) return fail('주소용 이름은 영문 소문자·숫자·하이픈(-)으로 써 주세요.', 'l-id');
       if (lines.some(l => l.id === id)) return fail('같은 주소용 이름이 이미 있습니다.', 'l-id');
     }
     const row = { name, no, color: lineColor, description: description || null };
-    B.setBusy(saveBtn, true, '저장 중…');
-    const res = editing
-      ? await B.sb.from('route_lines').update(row).eq('id', editing.id).select().single()
+    setBusy(true); B.setBusy(saveBtn, true, '저장 중…');
+    const res = target
+      ? await B.sb.from('route_lines').update(row).eq('id', target.id).select().single()
       : await B.sb.from('route_lines').insert({ ...row, id, sort: Math.max(0, ...lines.map(l => l.sort || 0)) + 10 }).select().single();
-    B.setBusy(saveBtn, false);
-    if (res.error) return fail(errText(res.error, '저장'));
+    setBusy(false); B.setBusy(saveBtn, false);
+    if (res.error) { fail(errText(res.error, '저장')); if (res.error.code === 'PGRST116') loadAll(); return; }
     const saved = res.data;
     const i = lines.findIndex(l => l.id === saved.id);
     if (i >= 0) lines[i] = saved; else lines.push(saved);
     lines.sort((a, b) => a.sort - b.sort);
-    const wasNew = !editing;
     closeDrawer(); renderLines(); renderRoutes();
-    toast(`분류를 ${wasNew ? '추가' : '저장'}했습니다. 노선도에 바로 반영됩니다.`);
+    toast(`분류를 ${target ? '저장' : '추가'}했습니다. 노선도에 바로 반영됩니다.`);
   }
   async function deleteLine() {
-    if (!editing) return;
-    const n = routes.filter(r => r.line === editing.id).length;
+    const target = editing;
+    if (!target || busy) return;
+    const n = routes.filter(r => r.line === target.id).length;
     if (n) return fail(`이 분류에 지름길이 ${n}곳 있어 지울 수 없습니다. 지름길을 다른 분류로 옮긴 뒤 지워 주세요.`);
-    B.setBusy(delBtn, true, '지우는 중…');
-    const { error } = await B.sb.from('route_lines').delete().eq('id', editing.id);
-    B.setBusy(delBtn, false);
+    setBusy(true); B.setBusy(delBtn, true, '지우는 중…');
+    const { error } = await B.sb.from('route_lines').delete().eq('id', target.id);
+    setBusy(false); B.setBusy(delBtn, false);
     if (error) return fail(errText(error, '지우기'));
-    lines = lines.filter(l => l.id !== editing.id);
-    const name = editing.name;
+    lines = lines.filter(l => l.id !== target.id);
     closeDrawer(); renderLines(); renderRoutes();
-    toast(`분류 ‘${name}’을(를) 지웠습니다.`);
+    toast(`분류 ‘${target.name}’을(를) 지웠습니다.`);
   }
 
   await loadAll();

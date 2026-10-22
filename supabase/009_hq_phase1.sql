@@ -2,7 +2,7 @@
 -- 008 다음에 이 파일 전체를 SQL Editor 에 붙여 넣고 Run 하세요. 여러 번 실행해도 안전합니다.
 --
 -- 바뀌는 것
---   1) 지름길(routes)에 아이콘·판 색·숨김 칸 추가
+--   1) 지름길(routes)에 아이콘·판 색·숨김 칸 추가. 숨긴 지름길은 운영진에게만 보임
 --   2) 방문·클릭 기록(stats_events) 표: 누구나 한 줄 추가만, 보기는 운영진만. 개인 정보는 남기지 않음
 --   3) 아이콘 파일 저장소(route-icons): 누구나 보기, 올리기·지우기는 운영진만
 
@@ -25,6 +25,11 @@ alter table public.routes add  constraint routes_icon_url_check check (icon_url 
 alter table public.routes drop constraint if exists routes_tile_check;
 alter table public.routes add  constraint routes_tile_check check (tile ~ '^(auto|line|white|yellow|#[0-9a-fA-F]{6})$');
 
+-- 숨긴 지름길은 운영진에게만 보이게 (005 의 '누구나 읽기'를 바꾼다)
+drop policy if exists "우회로: 누구나 읽기" on public.routes;
+create policy "우회로: 누구나 읽기" on public.routes for select to anon, authenticated
+  using (not hidden or (select public.bypass_role()) = 'staff');
+
 -- 운영진이 새 칸도 쓸 수 있게 (005 에서 칸마다 권한을 주었으므로 새 칸도 따로 준다)
 grant insert (icon, icon_url, tile, icon_full, hidden),
       update (icon, icon_url, tile, icon_full, hidden) on public.routes to authenticated;
@@ -38,6 +43,12 @@ create table if not exists public.stats_events (
   route_id  bigint references public.routes (id) on delete set null
 );
 create index if not exists stats_events_at_idx on public.stats_events (at);
+create index if not exists stats_events_route_idx on public.stats_events (route_id);
+-- 페이지 경로 모양만 받기, 지름길 번호는 '이용하기' 기록에만
+alter table public.stats_events drop constraint if exists stats_events_page_path;
+alter table public.stats_events add  constraint stats_events_page_path check (page ~ '^/[^[:space:]<>"]*$');
+alter table public.stats_events drop constraint if exists stats_events_go_route;
+alter table public.stats_events add  constraint stats_events_go_route check (kind = 'go' or route_id is null);
 
 alter table public.stats_events enable row level security;
 revoke all on public.stats_events from anon, authenticated;

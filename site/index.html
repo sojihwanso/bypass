@@ -1116,7 +1116,7 @@
       const btn = routeForm.querySelector('[type="submit"]');
       B.setBusy(btn, true, '저장 중…');
       const q = editingId ? B.sb.from('routes').update({ ...row, sample: false }).eq('id', editingId).select().single()
-                          : B.sb.from('routes').insert({ ...row, sort: rtRoutes.filter(r => r.line === row.line).length + 1 }).select().single();
+                          : B.sb.from('routes').insert({ ...row, sort: Math.max(0, ...rtRoutes.filter(r => r.line === row.line).map(r => r.sort || 0)) + 10 }).select().single();
       const { data, error } = await q;
       B.setBusy(btn, false);
       if (error) return fail(routeForm, '저장하지 못했습니다. 잠시 후 다시 시도해 주세요.');
@@ -1154,7 +1154,7 @@
       const same = rtRoutes.find(r => r.url === url);
       const row = { title: `${subject} 위키`, subject, type: 'wiki', line, status: 'open', url, description: desc || same?.description || `${subject} 과목 정리 위키입니다.`, sample: false };
       const q = same ? B.sb.from('routes').update(row).eq('id', same.id).select().single()
-                     : B.sb.from('routes').insert({ ...row, sort: rtRoutes.filter(r => r.line === line).length + 1 }).select().single();
+                     : B.sb.from('routes').insert({ ...row, sort: Math.max(0, ...rtRoutes.filter(r => r.line === line).map(r => r.sort || 0)) + 10 }).select().single();
       const saved = await q;
       B.setBusy(btn, false);
       if (!saved.error) { if (same) rtRoutes = rtRoutes.map(r => r.id === same.id ? saved.data : r); else rtRoutes.push(saved.data); renderRoutes(); }
