@@ -1,0 +1,1162 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HQ | BYPASS</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/bypass.css">
+<style>
+  :root { --head-h: 66px; }
+  body { background: var(--ground); }
+  .is-checking .hq, .is-checking .hq-tabs, .is-checking .hq-head .head-actions { visibility: hidden; }
+
+  /* 머리글: 운영진 구역임을 알 수 있게 어두운 띠 */
+  .hq-head { position: sticky; top: 0; z-index: 20; background: var(--vms); color: #fff; border-bottom: 4px solid var(--post-dark); }
+  .hq-head .bar { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; height: calc(var(--head-h) - 4px); padding: 0 24px; }
+  .hq-head .brand { color: #fff; }
+  .hq-head .brand-name { color: #fff; display: inline; }
+  .hq-badge { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 4px; background: var(--amber); color: var(--ink); font-weight: 900; font-size: 14px; letter-spacing: 0.06em; vertical-align: 3px; }
+  .hq-head .head-actions { gap: 16px; }
+  .hq-head .head-link { color: #fff; font-weight: 700; font-size: 15px; text-decoration: none; white-space: nowrap; }
+  .hq-head .head-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .hq-head .head-user { color: #C9CFCB; }
+  .hq-head .head-user strong { color: #fff; }
+  .hq-head .head-pill { background: transparent; color: #fff; box-shadow: inset 0 0 0 2px #fff; }
+  .hq-head .head-pill:hover { background: rgba(255, 255, 255, 0.12); }
+  .hq-head :focus-visible { outline-color: #fff; }
+
+  /* 뼈대: 왼쪽 메뉴 + 본문 (+ 편집 서랍) */
+  .hq { display: grid; grid-template-columns: 228px minmax(0, 1fr); min-height: calc(100vh - var(--head-h)); }
+  .hq-nav { position: sticky; top: var(--head-h); height: calc(100vh - var(--head-h)); overflow-y: auto; padding: 20px 12px 40px; background: #fff; border-right: 1px solid var(--rule); }
+  .nav-group + .nav-group { margin-top: 18px; }
+  .nav-group-title { margin: 0 0 4px; padding: 0 10px; font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; color: var(--muted); }
+  .nav-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 10px; border-radius: 8px; color: var(--ink); text-decoration: none; font-weight: 700; font-size: 15px; line-height: 1.45; }
+  .nav-item:hover { background: var(--green-tint); }
+  .nav-item.is-soon { color: var(--muted); font-weight: 500; }
+  .nav-item[aria-current="page"] { background: var(--green); color: #fff; }
+  .soon-tag { flex: none; font-size: 11.5px; font-weight: 700; line-height: 1.6; color: var(--muted); border: 1px dashed var(--post); border-radius: 4px; padding: 0 5px; }
+  .nav-item[aria-current="page"] .soon-tag { color: #fff; border-color: rgba(255, 255, 255, 0.6); }
+
+  .hq-body { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; min-width: 0; }
+  .hq-main { min-width: 0; padding: 28px 32px 80px; }
+  @media (min-width: 1180px) { .hq.has-drawer .hq-body { grid-template-columns: minmax(0, 1fr) 460px; } }
+
+  .view-head { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 10px 20px; margin-bottom: 18px; }
+  .view-kicker { margin: 0; font-size: 13px; font-weight: 700; color: var(--muted); }
+  .view-head h1 { margin: 2px 0 0; font-size: 28px; font-weight: 900; line-height: 1.25; letter-spacing: -0.02em; }
+  .view-head h1:focus { outline: none; }
+  .view-back { display: none; align-items: center; gap: 4px; margin-bottom: 4px; font-size: 14px; font-weight: 700; color: var(--green); text-decoration: none; }
+
+  .banner-warn { background: #FFF3EA; color: var(--ink); box-shadow: inset 0 0 0 2px var(--orange-ink); font-weight: 500; }
+  .banner-warn b { font-weight: 900; }
+  .banner-warn code { font-size: 14px; background: #fff; padding: 0 4px; border-radius: 3px; }
+
+  /* 지름길 · 분류 탭 */
+  .subtabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 2px solid var(--rule); }
+  .subtab { margin-bottom: -2px; padding: 8px 14px; border: 0; border-bottom: 3px solid transparent; background: none; font: inherit; font-size: 15px; font-weight: 700; color: var(--muted); cursor: pointer; }
+  .subtab[aria-selected="true"] { color: var(--green); border-bottom-color: var(--green); }
+  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; margin-bottom: 16px; }
+  .toolbar .input { flex: 1 1 220px; max-width: 360px; padding: 9px 12px; font-size: 15px; }
+
+  /* 목록 */
+  .lgroup { background: #fff; border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; }
+  .lgroup + .lgroup { margin-top: 16px; }
+  .lgroup-head { display: flex; align-items: center; gap: 10px; margin: 0; padding: 12px 16px 10px; font-size: 17px; font-weight: 900; }
+  .lno { display: inline-grid; place-items: center; flex: none; width: 26px; height: 26px; border-radius: 50%; font-size: 13.5px; font-weight: 900; }
+  .lcount { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--muted); }
+  .rlist { list-style: none; margin: 0; padding: 0; }
+  .rrow { display: flex; align-items: stretch; background: #fff; border-top: 1px solid var(--rule); }
+  .rrow.is-dragging { position: relative; z-index: 2; box-shadow: 0 8px 22px rgba(28, 33, 30, 0.2); }
+  .rrow.is-current .rrow-main { background: var(--green-tint); }
+  .grip { flex: none; width: 40px; display: grid; place-items: center; padding: 0; border: 0; background: none; color: var(--post); cursor: grab; touch-action: none; }
+  .grip:hover { color: var(--ink); }
+  .grip:active { cursor: grabbing; }
+  .grip:disabled { opacity: 0.3; cursor: default; }
+  .grip svg { width: 18px; height: 18px; }
+  .rrow-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 10px 14px 10px 2px; border: 0; background: none; text-align: left; font: inherit; color: var(--ink); cursor: pointer; }
+  .rrow-main:hover { background: #F6F7F4; }
+  .rrow-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .rrow-title { font-size: 16px; font-weight: 700; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rrow-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; font-size: 13px; line-height: 1.6; color: var(--muted); }
+  .rrow-meta .st { font-size: 11.5px; }
+  .rrow-flags { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
+  .flag { white-space: nowrap; font-size: 12px; font-weight: 700; line-height: 1.7; padding: 0 7px; border-radius: 4px; background: var(--pave); }
+  .flag-hidden { background: var(--ink); color: #fff; }
+  .flag-feat { background: var(--green-tint); color: var(--green); }
+  .rempty { padding: 14px 16px; border-top: 1px solid var(--rule); font-size: 14.5px; color: var(--muted); }
+  .list-hint { margin: 12px 2px 0; font-size: 13.5px; color: var(--muted); }
+  .list-state { padding: 20px 4px; color: var(--muted); font-weight: 700; }
+
+  /* 편집 서랍 */
+  .drawer { position: sticky; top: var(--head-h); height: calc(100vh - var(--head-h)); display: flex; flex-direction: column; background: #fff; border-left: 1px solid var(--rule); }
+  .drawer-scrim { position: fixed; inset: 0; z-index: 39; background: rgba(28, 33, 30, 0.45); }
+  @media (max-width: 1179px) {
+    .drawer { position: fixed; top: 0; right: 0; bottom: 0; z-index: 40; width: min(480px, 100%); height: auto; box-shadow: -10px 0 30px rgba(28, 33, 30, 0.25); }
+  }
+  @media (min-width: 1180px) { .drawer-scrim { display: none !important; } }
+  .drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 16px 20px 12px; border-bottom: 1px solid var(--rule); }
+  .drawer-kicker { margin: 0; font-size: 12.5px; font-weight: 700; color: var(--muted); }
+  .drawer-head h2 { margin: 2px 0 0; font-size: 20px; font-weight: 900; line-height: 1.3; overflow-wrap: anywhere; }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 0 20px 24px; }
+  .drawer-foot { padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid var(--rule); background: #fff; }
+  .drawer-foot .form-error { margin: 0 0 10px; }
+  .foot-btns { display: flex; align-items: center; gap: 8px; }
+  .foot-btns [data-delete] { margin-left: auto; }
+  .drawer .field-label { margin: 14px 0 6px; font-size: 15px; }
+  .drawer .input { padding: 9px 11px; font-size: 15.5px; }
+  .drawer textarea.input { resize: vertical; min-height: 64px; }
+  .drawer .hint { margin-top: 5px; }
+  .form-cols3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 10px; }
+  .drawer fieldset { margin: 20px 0 0; padding: 0; border: 0; min-width: 0; }
+  .drawer fieldset[disabled] { opacity: 0.45; }
+  .drawer legend { padding: 0; margin-bottom: 8px; font-weight: 700; font-size: 15px; }
+  .readonly { background: #F1F2EF; color: var(--muted); }
+
+  .seg { display: inline-flex; overflow: hidden; border: 1.5px solid var(--post-dark); border-radius: 8px; }
+  .seg button { padding: 7px 14px; border: 0; background: #fff; font: inherit; font-size: 14px; font-weight: 700; color: var(--ink); cursor: pointer; }
+  .seg button + button { border-left: 1.5px solid var(--post-dark); }
+  .seg button[aria-checked="true"] { background: var(--green); color: #fff; }
+  .pick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 8px; margin-top: 12px; }
+  .pick { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px 6px; border: 1.5px solid var(--rule); border-radius: 10px; background: #fff; font: inherit; font-size: 12px; color: var(--muted); cursor: pointer; }
+  .pick:hover { border-color: var(--green); }
+  .pick svg { width: 26px; height: 26px; color: var(--ink); }
+  .pick[aria-checked="true"] { padding: 7.5px 3.5px 5.5px; border: 2px solid var(--green); background: var(--green-tint); color: var(--ink); font-weight: 700; }
+  .drop { display: flex; align-items: center; gap: 14px; margin-top: 12px; padding: 14px; border: 2px dashed var(--post); border-radius: 10px; background: #FAFBF9; cursor: pointer; }
+  .drop:hover, .drop.is-over { border-color: var(--green); background: var(--green-tint); }
+  .drop-img { flex: none; width: 56px; height: 56px; border-radius: 12px; object-fit: cover; background: var(--pave); }
+  .drop-text b { display: block; font-size: 14.5px; line-height: 1.45; }
+  .drop-text small { display: block; margin-top: 2px; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+  .file-note { margin: 8px 0 0; font-size: 13.5px; font-weight: 700; color: var(--orange-ink); }
+  .check { display: flex; align-items: flex-start; gap: 8px; margin-top: 10px; font-size: 15px; line-height: 1.5; cursor: pointer; }
+  .check input { flex: none; width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--green); }
+  .check small { color: var(--muted); font-size: 13px; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sw { position: relative; display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px 5px 6px; border: 1.5px solid var(--rule); border-radius: 999px; background: #fff; font: inherit; font-size: 13.5px; font-weight: 700; color: var(--ink); cursor: pointer; }
+  .sw:hover { border-color: var(--green); }
+  .sw[aria-checked="true"] { padding: 4.5px 10.5px 4.5px 5.5px; border: 2px solid var(--green); background: var(--green-tint); }
+  .sw-dot { flex: none; width: 20px; height: 20px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(28, 33, 30, 0.35); }
+  .sw-dot.is-auto { background: conic-gradient(var(--green) 0 33%, #fff 0 66%, var(--amber) 0); }
+  .sw input[type="color"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: 0; padding: 0; }
+
+  /* 미리보기 */
+  .pv { margin: 16px 0 4px; padding: 14px; border-radius: 12px; background: var(--ground); }
+  .pv-title { margin: 0 0 10px; font-size: 13px; font-weight: 700; color: var(--muted); }
+  .pv-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 18px; }
+  .pv-item { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+  .pv-item b { max-width: 104px; font-size: 13.5px; line-height: 1.35; overflow-wrap: anywhere; }
+  .pv-item small { font-size: 11.5px; color: var(--muted); }
+  .pv-dlg { --c: var(--green); margin-top: 14px; padding: 14px; border-radius: 14px; background: var(--c); color: #fff; box-shadow: inset 0 0 0 4px var(--c), inset 0 0 0 6px #fff; }
+  .pv-dlg.is-light { color: var(--ink); box-shadow: inset 0 0 0 4px var(--c), inset 0 0 0 6px var(--ink); }
+  .pv-dlg.is-building { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 3px var(--post-dark); }
+  .pv-dlg .tile:not(.is-building):not(.is-full) { box-shadow: inset 0 0 0 2.5px var(--tile-fg); }
+  .pv-dlg-top { display: flex; align-items: center; gap: 12px; }
+  .pv-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .pv-tag { font-size: 11px; font-weight: 700; line-height: 1.6; padding: 0 6px; border-radius: 4px; background: rgba(255, 255, 255, 0.2); }
+  .pv-dlg.is-light .pv-tag, .pv-dlg.is-building .pv-tag { background: rgba(28, 33, 30, 0.1); }
+  .pv-dlg h3 { margin: 3px 0 0; font-size: 18px; font-weight: 900; line-height: 1.3; overflow-wrap: anywhere; }
+  .pv-desc { margin: 10px 0 0; font-size: 13.5px; line-height: 1.55; overflow-wrap: anywhere; }
+  .pv-go { margin-top: 10px; padding: 8px; border-radius: 8px; background: #fff; color: var(--c); text-align: center; font-weight: 900; font-size: 14px; }
+  .pv-dlg.is-light .pv-go { background: var(--ink); color: #fff; }
+  .pv-dlg.is-building .pv-go { background: repeating-linear-gradient(-45deg, var(--orange) 0 9px, var(--ink) 9px 18px); color: transparent; height: 12px; padding: 0; }
+  /* 분류 미리보기: 노선도의 큰 표지판 */
+  .mini-zsign { --c: var(--green); margin: 16px 0 4px; padding: 16px 18px; border-radius: 14px; background: var(--c); color: #fff; box-shadow: inset 0 0 0 5px var(--c), inset 0 0 0 7.5px #fff; }
+  .mini-zsign.is-light { color: var(--ink); box-shadow: inset 0 0 0 5px var(--c), inset 0 0 0 7.5px var(--ink); }
+  .mini-zsign .lno { width: 32px; height: 32px; font-size: 16px; background: #fff; color: var(--c); }
+  .mini-zsign.is-light .lno { background: var(--ink); color: var(--c); }
+  .mini-zsign h3 { margin: 8px 0 0; font-size: 22px; font-weight: 900; line-height: 1.25; overflow-wrap: anywhere; }
+  .mini-zsign p { margin: 6px 0 0; font-size: 14px; line-height: 1.55; opacity: 0.9; overflow-wrap: anywhere; }
+
+  /* 출입금지 · 공사 중 */
+  .gate-box, .soon-box { max-width: 560px; overflow: hidden; background: #fff; border: 2px solid var(--post-dark); border-radius: 14px; }
+  .gate-box { margin: 64px auto; }
+  .soon-band { height: 14px; background: repeating-linear-gradient(-45deg, var(--orange) 0 12px, var(--ink) 12px 24px); }
+  .soon-in { padding: 20px 22px 22px; }
+  .soon-in h2 { margin: 0; font-size: 22px; font-weight: 900; line-height: 1.35; }
+  .soon-in p { margin: 8px 0 0; color: var(--muted); line-height: 1.65; }
+  .soon-in .btn { margin-top: 16px; }
+
+  /* 휴대폰: 묶음 목록 */
+  .group-list { list-style: none; margin: 0; padding: 0; background: #fff; border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; }
+  .group-list li + li { border-top: 1px solid var(--rule); }
+  .group-list a { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 15px 16px; color: var(--ink); text-decoration: none; font-weight: 700; font-size: 16px; }
+  .group-list a::after { content: "›"; font-size: 22px; line-height: 1; color: var(--post); }
+  .group-list .soon-tag { margin-left: auto; }
+
+  .toast { position: fixed; left: 50%; bottom: 24px; z-index: 60; transform: translateX(-50%); max-width: calc(100% - 32px); padding: 10px 16px; border-radius: 8px; background: var(--ink); color: #fff; font-weight: 700; font-size: 14.5px; line-height: 1.5; box-shadow: 0 6px 20px rgba(28, 33, 30, 0.3); }
+  .toast.is-bad { background: var(--orange); color: var(--ink); }
+
+  .hq-tabs { display: none; }
+  @media (max-width: 760px) {
+    :root { --head-h: 58px; }
+    .hq-head .bar { padding: 0 16px; }
+    .hq-head .brand-mark { width: 34px; height: 34px; }
+    .hq-head .brand-name { font-size: 19px; }
+    .hq-head .head-user { display: none; }
+    .hq-head .head-actions { gap: 12px; }
+    .hq { grid-template-columns: 1fr; }
+    .hq-nav { display: none; }
+    .hq-main { padding: 18px 16px 104px; }
+    .view-head h1 { font-size: 24px; }
+    .view-back { display: inline-flex; }
+    .view-back + .view-kicker { display: none; }
+    .drawer { width: 100%; }
+    .drawer-body { padding: 0 16px 24px; }
+    .drawer-head, .drawer-foot { padding-left: 16px; padding-right: 16px; }
+    .form-cols3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .rrow-flags { display: none; }
+    .toast { bottom: calc(84px + env(safe-area-inset-bottom)); }
+    .hq-tabs { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding-bottom: env(safe-area-inset-bottom); background: #fff; border-top: 1px solid var(--rule); }
+    .hq-tab { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 0 7px; color: var(--muted); text-decoration: none; font-size: 12px; font-weight: 700; }
+    .hq-tab svg { width: 22px; height: 22px; }
+    .hq-tab[aria-current="true"] { color: var(--green); }
+  }
+  @media (max-width: 380px) { .hq-head .head-link { display: none; } }
+</style>
+</head>
+<body class="is-checking">
+
+<a class="skip" href="#main">본문 바로가기</a>
+
+<header class="hq-head">
+  <div class="bar">
+    <a class="brand" href="/" aria-label="BYPASS 처음으로">
+      <svg class="brand-mark" viewBox="1 1 130 130" aria-hidden="true">
+        <path d="M66 4 L128 66 L66 128 L4 66 Z" fill="#EE6A1F" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M66 15 L117 66 L66 117 L15 66 Z" fill="none" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/>
+        <g transform="translate(34 32) scale(0.64)" fill="#1C211E">
+        <ellipse cx="44" cy="60" rx="27" ry="23"/>
+        <path d="M51 45 C55 37 58 31 61 25 L72 30 C68 36 66 44 64 53 Z"/>
+        <circle cx="66" cy="26" r="10"/>
+        <path d="M72 20 C83 19 93 24 95 32 C96 38 91 41 88 37 C86 34 82 33 74 33 Z"/>
+        <path d="M19 52 C10 47 7 40 11 34 C14 43 20 46 23 46 Z"/>
+        <path d="M37 80 L35 92 L27 95 L41 95 L42 81 Z"/>
+        <path d="M51 80 L51 92 L44 95 L58 95 L56 81 Z"/>
+        <circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/>
+        <path d="M32 55 C40 50 51 54 54 64" fill="none" stroke="#EE6A1F" stroke-width="2.6" stroke-linecap="round"/>
+        </g>
+      </svg>
+      <span><span class="brand-name">BYPASS</span><span class="hq-badge">HQ</span></span>
+    </a>
+    <div class="head-actions">
+      <a class="head-link" href="/site/">공사장</a>
+      <span class="head-user"><strong data-name></strong> 님</span>
+      <button type="button" class="head-pill" data-logout>로그아웃</button>
+    </div>
+  </div>
+</header>
+
+<p class="checking" role="status" data-checking>출입 확인 중…</p>
+
+<!-- 운영진이 아닐 때 -->
+<div class="wrap" data-denied hidden>
+  <div class="gate-box" role="alert">
+    <div class="soon-band" aria-hidden="true"></div>
+    <div class="soon-in">
+      <h2>관계자 외 출입금지</h2>
+      <p>HQ는 운영진만 들어올 수 있습니다. 운영진 등록은 기존 운영진이 공사장 관리실에서 합니다.</p>
+      <p data-denied-count>잠시 뒤 공사장으로 이동합니다.</p>
+      <a class="btn btn-primary btn-small" href="/site/">공사장으로 가기</a>
+    </div>
+  </div>
+</div>
+
+<div class="hq" data-hq>
+  <nav class="hq-nav" aria-label="HQ 메뉴" data-nav></nav>
+
+  <div class="hq-body">
+    <main class="hq-main" id="main">
+
+      <div class="banner banner-warn" role="alert" data-sql-warn hidden>
+        <p><b>데이터베이스 설정이 한 단계 남았습니다.</b> Supabase SQL Editor에서 <code>supabase/009_hq_phase1.sql</code>을 실행해 주세요. 그 전에는 아이콘·판 색·숨김을 저장할 수 없고, 이름·주소 같은 기존 칸만 저장됩니다.</p>
+      </div>
+
+      <!-- 개통 노선도 -->
+      <section data-view="routes" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-content">‹ 콘텐츠</a>
+            <p class="view-kicker">콘텐츠</p>
+            <h1 tabindex="-1">개통 노선도</h1>
+          </div>
+          <a class="mini-btn" href="/routes/" target="_blank" rel="noopener">노선도 열기 ↗</a>
+        </div>
+        <div class="subtabs" role="tablist" aria-label="개통 노선도">
+          <button type="button" class="subtab" role="tab" id="tab-routes" aria-controls="pane-routes" aria-selected="true" data-subtab="routes">지름길</button>
+          <button type="button" class="subtab" role="tab" id="tab-lines" aria-controls="pane-lines" aria-selected="false" data-subtab="lines">분류</button>
+        </div>
+
+        <div id="pane-routes" role="tabpanel" aria-labelledby="tab-routes" data-pane="routes">
+          <div class="toolbar">
+            <button type="button" class="btn btn-primary btn-small" data-new-route>+ 지름길 추가</button>
+            <label class="sr-only" for="route-find">지름길 찾기</label>
+            <input class="input" id="route-find" type="search" placeholder="이름·과목·주소로 찾기" autocomplete="off">
+          </div>
+          <div data-route-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
+          <p class="list-hint">왼쪽 손잡이를 끌거나, 손잡이를 고른 뒤 ↑↓ 키로 순서를 바꿉니다. 순서는 바로 저장되고 노선도에도 그대로 보입니다.</p>
+        </div>
+
+        <div id="pane-lines" role="tabpanel" aria-labelledby="tab-lines" data-pane="lines" hidden>
+          <div class="toolbar">
+            <button type="button" class="btn btn-primary btn-small" data-new-line>+ 분류 추가</button>
+          </div>
+          <div data-line-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
+          <p class="list-hint">분류는 노선도의 큰 표지판입니다. 손잡이로 표지판 순서를 바꿉니다.</p>
+        </div>
+      </section>
+
+      <!-- 아직 열리지 않은 메뉴 -->
+      <section data-view="soon" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#" data-soon-back>‹ 메뉴</a>
+            <p class="view-kicker" data-soon-group></p>
+            <h1 tabindex="-1" data-soon-title></h1>
+          </div>
+        </div>
+        <div class="soon-box">
+          <div class="soon-band" aria-hidden="true"></div>
+          <div class="soon-in">
+            <h2>공사 중인 메뉴입니다</h2>
+            <p data-soon-when></p>
+            <p data-soon-legacy hidden></p>
+            <a class="btn btn-secondary btn-small" data-soon-link hidden>공사장에서 열기</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 휴대폰: 묶음별 메뉴 목록 -->
+      <section data-view="group" hidden>
+        <div class="view-head"><div><p class="view-kicker">HQ</p><h1 tabindex="-1" data-group-title></h1></div></div>
+        <ul class="group-list" data-group-list></ul>
+      </section>
+    </main>
+
+    <!-- 고치기 서랍 -->
+    <aside class="drawer" data-drawer hidden aria-labelledby="drawer-title">
+      <div class="drawer-head">
+        <div>
+          <p class="drawer-kicker" data-drawer-kicker></p>
+          <h2 id="drawer-title" data-drawer-title></h2>
+        </div>
+        <button type="button" class="mini-btn" data-drawer-close>닫기</button>
+      </div>
+      <div class="drawer-body">
+
+        <!-- 지름길 -->
+        <form data-form="route" novalidate hidden>
+          <div class="pv" data-route-pv aria-label="미리보기"></div>
+
+          <label class="field-label" for="f-title">이름</label>
+          <input class="input" id="f-title" maxlength="100" required placeholder="예: 수강플래너">
+
+          <div class="form-cols3">
+            <div><label class="field-label" for="f-line">분류</label><select class="input" id="f-line"></select></div>
+            <div><label class="field-label" for="f-type">종류</label>
+              <select class="input" id="f-type"><option value="app">앱</option><option value="wiki">위키</option><option value="channel">카톡 채널</option></select></div>
+            <div><label class="field-label" for="f-status">상태</label>
+              <select class="input" id="f-status"><option value="open">개통</option><option value="building">공사 중</option></select></div>
+          </div>
+
+          <label class="field-label" for="f-url">주소 <span class="opt">(공사 중이면 비워도 됨)</span></label>
+          <input class="input" id="f-url" maxlength="1000" inputmode="url" autocapitalize="none" spellcheck="false" placeholder="https://… 또는 /wiki/과목이름/">
+
+          <label class="field-label" for="f-desc">한 줄 설명</label>
+          <textarea class="input" id="f-desc" maxlength="300" rows="2" placeholder="무엇을 어떻게 건너뛰는지 한 줄로"></textarea>
+
+          <label class="field-label" for="f-subject">과목 <span class="opt">(위키일 때)</span></label>
+          <input class="input" id="f-subject" maxlength="60" placeholder="예: 레이더">
+
+          <fieldset data-needs-sql>
+            <legend>아이콘</legend>
+            <div class="seg" role="radiogroup" aria-label="아이콘 정하는 방법">
+              <button type="button" role="radio" aria-checked="true" data-mode="auto">자동</button>
+              <button type="button" role="radio" aria-checked="false" data-mode="pick">기본 그림</button>
+              <button type="button" role="radio" aria-checked="false" data-mode="upload">직접 올리기</button>
+            </div>
+            <p class="hint" data-auto-hint></p>
+            <div class="pick-grid" role="radiogroup" aria-label="기본 그림" data-pick-grid hidden></div>
+            <div data-upload hidden>
+              <label class="drop" for="f-file" data-drop>
+                <img class="drop-img" alt="" data-drop-img hidden>
+                <span class="drop-text"><b data-drop-title>그림 파일을 끌어다 놓거나 눌러서 고르기</b><small>PNG·SVG·JPG·WebP · 정사각형 192px 이상 · 500KB 이하</small></span>
+              </label>
+              <input class="sr-only" id="f-file" type="file" accept="image/png,image/svg+xml,image/jpeg,image/webp">
+              <p class="file-note" data-file-note hidden></p>
+              <label class="check"><input type="checkbox" id="f-full"> <span>그림을 판 대신 쓰기 <small>(이미 완성된 앱 아이콘일 때)</small></span></label>
+            </div>
+          </fieldset>
+
+          <fieldset data-needs-sql data-tile-set>
+            <legend>판 색</legend>
+            <div class="swatches" role="radiogroup" aria-label="판 색" data-swatches></div>
+            <p class="hint" data-tile-hint></p>
+          </fieldset>
+
+          <fieldset>
+            <legend>보이기</legend>
+            <label class="check"><input type="checkbox" id="f-hidden" data-needs-sql-input> <span>노선도에서 숨기기 <small>(지우지 않고 잠시 내릴 때)</small></span></label>
+            <label class="check"><input type="checkbox" id="f-sample"> <span>‘견본’ 딱지 붙이기</span></label>
+            <label class="check"><input type="checkbox" id="f-featured"> <span>메인 페이지 소개 대상</span></label>
+          </fieldset>
+        </form>
+
+        <!-- 분류 -->
+        <form data-form="line" novalidate hidden>
+          <div data-line-pv></div>
+          <label class="field-label" for="l-name">이름</label>
+          <input class="input" id="l-name" maxlength="30" required placeholder="예: 학업 지름길">
+          <div class="form-cols3">
+            <div><label class="field-label" for="l-no">번호</label><input class="input" id="l-no" maxlength="4" required placeholder="예: 3"></div>
+            <div style="grid-column: span 2"><label class="field-label" for="l-id">주소용 이름 <span class="opt">(영문)</span></label>
+              <input class="input" id="l-id" maxlength="30" autocapitalize="none" spellcheck="false" placeholder="예: club" aria-describedby="l-id-hint"></div>
+          </div>
+          <p class="hint" id="l-id-hint">영문 소문자·숫자·하이픈(-). 만든 뒤에는 바꿀 수 없습니다.</p>
+          <fieldset>
+            <legend>표지판 색</legend>
+            <div class="swatches" role="radiogroup" aria-label="표지판 색" data-line-swatches></div>
+          </fieldset>
+          <label class="field-label" for="l-desc">설명</label>
+          <input class="input" id="l-desc" maxlength="200" placeholder="예: 수강·학점·공부에 걸리는 절차를 건너뜁니다.">
+        </form>
+      </div>
+      <div class="drawer-foot">
+        <p class="form-error" role="alert" hidden></p>
+        <div class="foot-btns">
+          <button type="button" class="btn btn-primary btn-small" data-save>저장</button>
+          <button type="button" class="btn btn-secondary btn-small" data-drawer-close>취소</button>
+          <button type="button" class="mini-btn mini-danger" data-delete hidden>지우기</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+<div class="drawer-scrim" data-scrim hidden></div>
+
+<nav class="hq-tabs" aria-label="HQ 묶음" data-tabs>
+  <a class="hq-tab" href="#g-home" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/></svg>홈</a>
+  <a class="hq-tab" href="#g-inbox" data-tab="inbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M4 13h4l1.5 2.5h5L16 13h4"/></svg>접수</a>
+  <a class="hq-tab" href="#g-content" data-tab="content"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>콘텐츠</a>
+  <a class="hq-tab" href="#g-ops" data-tab="ops"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>운영</a>
+</nav>
+
+<div class="toast" role="status" data-toast hidden></div>
+
+<script src="/assets/vendor/supabase-js-2.117.2.js"></script>
+<script src="/assets/auth.js"></script>
+<script src="/assets/route-icons.js"></script>
+<script>
+(async function () {
+  const B = window.BYPASS, I = window.BYPASS_ICONS;
+  const $ = (s, root) => (root || document).querySelector(s);
+  const $$ = (s, root) => [...(root || document).querySelectorAll(s)];
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const TYPE = { app: '앱', wiki: '위키', channel: '카톡 채널' };
+  const checking = $('[data-checking]');
+
+  /* ===== 출입 확인: 운영진만 ===== */
+  if (!B.sb) { checking.textContent = B.unavailableText; return; }
+  const { data: { session } } = await B.sb.auth.getSession();
+  if (!session) { location.replace('/login/?next=' + encodeURIComponent('/hq/' + location.hash)); return; }
+  const user = session.user;
+  const role = B.roleOf(user);
+  $$('[data-name]').forEach(x => { x.textContent = B.profileOf(user).name; });
+  $$('[data-logout]').forEach(btn => btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    try { await B.sb.auth.signOut({ scope: 'local' }); } finally { location.replace('/'); }
+  }));
+  checking.remove();
+  document.body.classList.remove('is-checking');
+  if (role.key !== 'staff') {
+    $('[data-hq]').hidden = true;
+    $('[data-tabs]').hidden = true;
+    $('[data-denied]').hidden = false;
+    setTimeout(() => location.replace('/site/'), 4000);
+    return;
+  }
+
+  /* ===== 메뉴 ===== */
+  const GROUPS = [['home', '홈'], ['inbox', '접수'], ['content', '콘텐츠'], ['ops', '운영']];
+  const LEGACY = { inbox: ['/site/#inbox', '공사장 접수함'], admin: ['/site/#admin', '공사장 관리실'], home: ['/site/#home', '공사장 내 공사장 탭'] };
+  const MENUS = [
+    { id: 'dashboard', group: 'home', name: '대시보드', when: '3단계' },
+    { id: 'stats', group: 'home', name: '통계', when: '3단계', note: '방문·이용 기록은 지금부터 쌓이고 있습니다.' },
+    { id: 'reports', group: 'inbox', name: '불편 제보', when: '3단계', legacy: 'inbox' },
+    { id: 'applications', group: 'inbox', name: '합류 신청', when: '3단계', legacy: 'inbox' },
+    { id: 'dockets', group: 'content', name: '처리 현황', when: '2단계', note: '그전까지 메인 처리 현황은 index.html에서 고칩니다.' },
+    { id: 'routes', group: 'content', name: '개통 노선도', ready: true },
+    { id: 'wiki', group: 'content', name: '위키', legacy: 'admin' },
+    { id: 'notices', group: 'content', name: '공지', when: '4단계', legacy: 'home' },
+    { id: 'faq', group: 'content', name: '자주 묻는 질문', when: '4단계' },
+    { id: 'texts', group: 'content', name: '페이지 문구', when: '4단계' },
+    { id: 'status', group: 'ops', name: '사이트 상태', when: '2단계' },
+    { id: 'share', group: 'ops', name: '링크 미리보기', when: '2단계' },
+    { id: 'members', group: 'ops', name: '회원', when: '3단계', legacy: 'admin' },
+    { id: 'log', group: 'ops', name: '변경 기록', when: '4단계' }
+  ];
+  const menuById = Object.fromEntries(MENUS.map(m => [m.id, m]));
+  const groupName = Object.fromEntries(GROUPS);
+
+  const nav = $('[data-nav]');
+  GROUPS.forEach(([g, gname]) => {
+    const box = el('div', 'nav-group');
+    box.append(el('p', 'nav-group-title', gname));
+    MENUS.filter(m => m.group === g).forEach(m => {
+      const a = el('a', `nav-item${m.ready ? '' : ' is-soon'}`); a.href = `#${m.id}`; a.dataset.menu = m.id;
+      a.append(el('span', null, m.name));
+      if (!m.ready) a.append(el('span', 'soon-tag', '준비 중'));
+      box.append(a);
+    });
+    nav.append(box);
+  });
+
+  let firstRoute = true;
+  function show(view) { $$('[data-view]').forEach(v => { v.hidden = v.dataset.view !== view; }); }
+  function markNav(menuId, group) {
+    $$('.nav-item').forEach(a => { if (a.dataset.menu === menuId) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    $$('.hq-tab').forEach(a => { if (a.dataset.tab === group) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+  }
+  function focusTitle(view) { if (!firstRoute) { const h = $(`[data-view="${view}"] h1`); if (h) h.focus({ preventScroll: true }); } }
+
+  function route() {
+    const h = decodeURIComponent(location.hash.slice(1));
+    if (h.startsWith('g-') && groupName[h.slice(2)]) {
+      const g = h.slice(2);
+      $('[data-group-title]').textContent = groupName[g];
+      const list = $('[data-group-list]');
+      list.replaceChildren(...MENUS.filter(m => m.group === g).map(m => {
+        const li = el('li'); const a = el('a'); a.href = `#${m.id}`;
+        a.append(el('span', null, m.name));
+        if (!m.ready) a.append(el('span', 'soon-tag', '준비 중'));
+        li.append(a); return li;
+      }));
+      markNav(null, g); show('group'); focusTitle('group');
+    } else {
+      const m = menuById[h] || menuById.routes;
+      markNav(m.id, m.group);
+      if (m.ready) { show(m.id); }
+      else {
+        $('[data-soon-group]').textContent = groupName[m.group];
+        $('[data-soon-title]').textContent = m.name;
+        $('[data-soon-back]').href = `#g-${m.group}`;
+        $('[data-soon-back]').textContent = `‹ ${groupName[m.group]}`;
+        $('[data-soon-when]').textContent = (m.when ? `이 메뉴는 ${m.when}에서 엽니다.` : '이 메뉴는 다음 단계에서 엽니다.') + (m.note ? ` ${m.note}` : '');
+        const legacy = m.legacy && LEGACY[m.legacy];
+        $('[data-soon-legacy]').hidden = !legacy;
+        $('[data-soon-link]').hidden = !legacy;
+        if (legacy) {
+          $('[data-soon-legacy]').textContent = `그동안은 ${legacy[1]}에서 처리해 주세요.`;
+          $('[data-soon-link]').href = legacy[0];
+        }
+        show('soon');
+      }
+      focusTitle(m.ready ? m.id : 'soon');
+    }
+    firstRoute = false;
+  }
+  window.addEventListener('hashchange', route);
+  route();
+
+  /* ===== 알림 ===== */
+  const toastBox = $('[data-toast]');
+  let toastTimer;
+  function toast(text, bad) {
+    toastBox.textContent = text; toastBox.classList.toggle('is-bad', !!bad); toastBox.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { toastBox.hidden = true; }, bad ? 6000 : 3000);
+  }
+
+  /* ===== 개통 노선도: 데이터 ===== */
+  let lines = [], routes = [];
+  let hasIconCols = true;  // 009 SQL 실행 여부
+  const lineById = () => Object.fromEntries(lines.map(l => [l.id, l]));
+  const NEW_COLS = ['icon', 'icon_url', 'tile', 'icon_full', 'hidden'];
+  const missingCol = e => e && (e.code === 'PGRST204' || /column/i.test(e.message || '') && NEW_COLS.some(c => (e.message || '').includes(c)));
+  function setIconCols(ok) {
+    hasIconCols = ok;
+    $('[data-sql-warn]').hidden = ok;
+    $$('[data-needs-sql]').forEach(f => { f.disabled = !ok; });
+    $$('[data-needs-sql-input]').forEach(i => { i.disabled = !ok; });
+  }
+  function errText(e, what) {
+    if (!e) return '';
+    if (e.code === '42501' || /row-level security|permission/i.test(e.message || '')) return '운영진 권한이 확인되지 않습니다. 로그아웃했다가 다시 로그인해 주세요.';
+    if (e.code === 'PGRST205' || e.code === '42P01') return '노선도 표가 아직 없습니다. supabase/005_routes.sql을 먼저 실행해 주세요.';
+    if (e.code === '23514' && /open_needs_url/.test(e.message || '')) return '개통하려면 주소가 있어야 합니다.';
+    if (e.code === '23514') return '입력한 값의 형식이 맞지 않습니다. 주소·색·이름을 확인해 주세요.';
+    if (e.code === '23505') return '같은 주소용 이름이 이미 있습니다. 다른 이름을 정해 주세요.';
+    if (e.code === '23503') return '이 분류를 쓰는 지름길이 있어 지울 수 없습니다.';
+    const verb = { 저장: '저장하지', 지우기: '지우지', 불러오기: '불러오지' }[what || '저장'] || '처리하지';
+    return `${verb} 못했습니다. 잠시 후 다시 해 주세요.${e.code ? ` (${e.code})` : ''}`;
+  }
+
+  async function loadAll() {
+    const [l, r] = await Promise.all([
+      B.sb.from('route_lines').select('*').order('sort').order('id'),
+      B.sb.from('routes').select('*').order('sort').order('created_at')
+    ]);
+    if (l.error || r.error) {
+      const text = errText(l.error || r.error, '불러오기');
+      $('[data-route-list]').replaceChildren(el('p', 'list-state', text));
+      $('[data-line-list]').replaceChildren(el('p', 'list-state', text));
+      return false;
+    }
+    lines = l.data; routes = r.data;
+    if (routes.length) setIconCols('icon' in routes[0]);
+    renderRoutes(); renderLines();
+    return true;
+  }
+
+  /* ===== 지름길·분류 탭 ===== */
+  $$('[data-subtab]').forEach(btn => btn.addEventListener('click', () => {
+    $$('[data-subtab]').forEach(b => b.setAttribute('aria-selected', String(b === btn)));
+    $$('[data-pane]').forEach(p => { p.hidden = p.dataset.pane !== btn.dataset.subtab; });
+  }));
+
+  /* ===== 순서 바꾸기: 손잡이 끌기 · 화살표 키 ===== */
+  const GRIP = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
+  function bindSort(grip, li, onDone) {
+    let timer;
+    const later = () => { clearTimeout(timer); timer = setTimeout(onDone, 500); };
+    grip.addEventListener('pointerdown', e => {
+      if (grip.disabled || e.button > 0) return;
+      e.preventDefault();
+      li.classList.add('is-dragging');
+      let moved = false;
+      const mid = x => { const b = x.getBoundingClientRect(); return b.top + b.height / 2; };
+      // 줄을 옮기면 손잡이가 문서에서 잠깐 빠지므로, 움직임은 창 전체에서 듣는다
+      const move = ev => {
+        if (ev.pointerId !== e.pointerId) return;
+        ev.preventDefault();
+        const list = li.parentElement;
+        const prev = li.previousElementSibling, next = li.nextElementSibling;
+        if (prev && prev.dataset.id && ev.clientY < mid(prev)) { list.insertBefore(li, prev); moved = true; }
+        else if (next && next.dataset.id && ev.clientY > mid(next)) { list.insertBefore(li, next.nextElementSibling); moved = true; }
+      };
+      const end = ev => {
+        if (ev.pointerId !== e.pointerId) return;
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', end);
+        window.removeEventListener('pointercancel', end);
+        li.classList.remove('is-dragging');
+        if (moved) { grip.focus({ preventScroll: true }); onDone(); }
+      };
+      window.addEventListener('pointermove', move, { passive: false });
+      window.addEventListener('pointerup', end);
+      window.addEventListener('pointercancel', end);
+    });
+    grip.addEventListener('keydown', e => {
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+      e.preventDefault();
+      const list = li.parentElement;
+      const prev = li.previousElementSibling, next = li.nextElementSibling;
+      if (e.key === 'ArrowUp' && prev && prev.dataset.id) list.insertBefore(li, prev);
+      else if (e.key === 'ArrowDown' && next && next.dataset.id) list.insertBefore(li, next.nextElementSibling);
+      else return;
+      grip.focus();
+      later();
+    });
+  }
+  async function saveOrder(list, table) {
+    const arr = table === 'routes' ? routes : lines;
+    const ids = $$(':scope > li[data-id]', list).map(li => li.dataset.id);
+    const jobs = [];
+    ids.forEach((id, i) => {
+      const item = arr.find(x => String(x.id) === id);
+      const sort = (i + 1) * 10;
+      if (item && item.sort !== sort) { item.sort = sort; jobs.push(B.sb.from(table).update({ sort }).eq('id', item.id)); }
+    });
+    if (!jobs.length) return;
+    const res = await Promise.all(jobs);
+    const bad = res.find(x => x.error);
+    if (bad) { toast('순서를 저장하지 못했습니다. ' + errText(bad.error, '저장'), true); await loadAll(); return; }
+    arr.sort((a, b) => a.sort - b.sort);
+    if (table === 'route_lines') renderRoutes();
+    toast('순서를 저장했습니다. 노선도에 바로 반영됩니다.');
+  }
+
+  /* ===== 지름길 목록 ===== */
+  const shortUrl = u => (u || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
+  let currentId = null;
+  function routeRow(r) {
+    const line = lineById()[r.line] || {};
+    const li = el('li', `rrow${String(r.id) === String(currentId) ? ' is-current' : ''}`);
+    li.dataset.id = r.id;
+    li.dataset.search = [r.title, r.subject, r.url, r.description].join(' ').toLowerCase();
+    const grip = el('button', 'grip'); grip.type = 'button'; grip.innerHTML = GRIP;
+    grip.setAttribute('aria-label', `${r.title} 순서 바꾸기 (위아래 화살표 키)`);
+    const main = el('button', 'rrow-main'); main.type = 'button';
+    main.append(I.tile(r, line.color, { size: 44 }));
+    const text = el('span', 'rrow-text');
+    text.append(el('span', 'rrow-title', r.title));
+    const meta = el('span', 'rrow-meta');
+    meta.append(el('span', `st ${r.status === 'open' ? 'st-open' : 'st-review'}`, r.status === 'open' ? '개통' : '공사 중'), el('span', null, TYPE[r.type] || r.type));
+    if (r.url) meta.append(el('span', null, `· ${shortUrl(r.url)}`));
+    text.append(meta);
+    const flags = el('span', 'rrow-flags');
+    if (r.hidden) flags.append(el('span', 'flag flag-hidden', '숨김'));
+    if (r.sample) flags.append(el('span', 'flag', '견본'));
+    if (r.featured) flags.append(el('span', 'flag flag-feat', '메인 소개'));
+    main.append(text, flags);
+    main.addEventListener('click', () => openRouteForm(r));
+    li.append(grip, main);
+    bindSort(grip, li, () => saveOrder(li.parentElement, 'routes'));
+    return li;
+  }
+  function renderRoutes() {
+    const box = $('[data-route-list]');
+    if (!lines.length) { box.replaceChildren(el('p', 'list-state', '분류가 없습니다. ‘분류’ 탭에서 먼저 분류를 만들어 주세요.')); return; }
+    box.replaceChildren(...lines.map(l => {
+      const sec = el('section', 'lgroup');
+      const items = routes.filter(r => r.line === l.id);
+      const head = el('h2', 'lgroup-head');
+      const no = el('span', 'lno', l.no); no.style.background = l.color; no.style.color = I.fgOf(l.color);
+      head.append(no, el('span', null, l.name), el('span', 'lcount', `${items.length}곳`));
+      const ul = el('ul', 'rlist'); ul.dataset.line = l.id;
+      if (items.length) items.forEach(r => ul.append(routeRow(r)));
+      else ul.append(el('li', 'rempty', '아직 지름길이 없습니다.'));
+      sec.append(head, ul);
+      return sec;
+    }));
+    applyFind();
+  }
+  const find = $('#route-find');
+  function applyFind() {
+    const q = find.value.trim().toLowerCase();
+    $$('.rrow', $('[data-route-list]')).forEach(li => { li.hidden = !!q && !li.dataset.search.includes(q); });
+    $$('.grip', $('[data-route-list]')).forEach(g => { g.disabled = !!q; });
+  }
+  find.addEventListener('input', applyFind);
+
+  /* ===== 분류 목록 ===== */
+  function lineRow(l) {
+    const li = el('li', `rrow${'line:' + l.id === currentId ? ' is-current' : ''}`);
+    li.dataset.id = l.id;
+    const grip = el('button', 'grip'); grip.type = 'button'; grip.innerHTML = GRIP;
+    grip.setAttribute('aria-label', `${l.name} 순서 바꾸기 (위아래 화살표 키)`);
+    const main = el('button', 'rrow-main'); main.type = 'button';
+    const no = el('span', 'lno', l.no); no.style.background = l.color; no.style.color = I.fgOf(l.color);
+    no.style.width = no.style.height = '36px'; no.style.fontSize = '17px'; no.style.marginLeft = '4px';
+    const text = el('span', 'rrow-text');
+    text.append(el('span', 'rrow-title', l.name), el('span', 'rrow-meta', l.description || '설명 없음'));
+    const n = routes.filter(r => r.line === l.id).length;
+    main.append(no, text, el('span', 'lcount', `지름길 ${n}곳`));
+    main.addEventListener('click', () => openLineForm(l));
+    li.append(grip, main);
+    bindSort(grip, li, () => saveOrder(li.parentElement, 'route_lines'));
+    return li;
+  }
+  function renderLines() {
+    const box = $('[data-line-list]');
+    const sec = el('section', 'lgroup');
+    const ul = el('ul', 'rlist');
+    if (lines.length) lines.forEach(l => ul.append(lineRow(l)));
+    else ul.append(el('li', 'rempty', '아직 분류가 없습니다.'));
+    sec.append(ul);
+    box.replaceChildren(sec);
+  }
+
+  /* ===== 고치기 서랍 ===== */
+  const hq = $('[data-hq]'), drawer = $('[data-drawer]'), scrim = $('[data-scrim]');
+  const formRoute = $('[data-form="route"]'), formLine = $('[data-form="line"]');
+  const errBox = $('.drawer-foot .form-error');
+  const saveBtn = $('[data-save]'), delBtn = $('[data-delete]');
+  let mode = null;            // 'route' | 'line'
+  let editing = null;         // 고치는 항목 (새로 만들 때 null)
+  let lastFocus = null;
+  const overlay = () => matchMedia('(max-width: 1179px)').matches;
+
+  function openDrawer(kind, title, kicker) {
+    mode = kind;
+    lastFocus = document.activeElement;
+    formRoute.hidden = kind !== 'route';
+    formLine.hidden = kind !== 'line';
+    $('[data-drawer-title]').textContent = title;
+    $('[data-drawer-kicker]').textContent = kicker;
+    errBox.hidden = true;
+    disarm();
+    drawer.hidden = false;
+    hq.classList.add('has-drawer');
+    scrim.hidden = !overlay();
+    if (overlay()) document.body.style.overflow = 'hidden';
+    $('.drawer-body').scrollTop = 0;
+    const first = (kind === 'route' ? formRoute : formLine).querySelector('input:not([readonly])');
+    if (first) first.focus({ preventScroll: true });
+  }
+  function closeDrawer() {
+    drawer.hidden = true; scrim.hidden = true;
+    hq.classList.remove('has-drawer');
+    document.body.style.overflow = '';
+    mode = null; editing = null; currentId = null;
+    clearPending();
+    $$('.rrow.is-current').forEach(x => x.classList.remove('is-current'));
+    if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
+  }
+  $$('[data-drawer-close]').forEach(b => b.addEventListener('click', closeDrawer));
+  scrim.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !drawer.hidden) closeDrawer(); });
+  function fail(text, fieldId) {
+    errBox.textContent = text; errBox.hidden = false;
+    if (fieldId) { const f = document.getElementById(fieldId); if (f) { f.setAttribute('aria-invalid', 'true'); f.focus(); } }
+  }
+  function markCurrent() {
+    $$('.rrow').forEach(li => li.classList.toggle('is-current', String(li.dataset.id) === String(mode === 'line' ? (editing && editing.id) : (editing && editing.id))));
+  }
+  // 지우기: 한 번 더 눌러야 지운다
+  let armed = false;
+  function disarm() { armed = false; delBtn.classList.remove('is-armed'); delBtn.textContent = '지우기'; }
+  delBtn.addEventListener('click', () => {
+    if (!armed) { armed = true; delBtn.classList.add('is-armed'); delBtn.textContent = '한 번 더 누르면 지웁니다'; return; }
+    disarm();
+    if (mode === 'route') deleteRoute(); else if (mode === 'line') deleteLine();
+  });
+  saveBtn.addEventListener('click', () => { if (mode === 'route') saveRoute(); else if (mode === 'line') saveLine(); });
+  [formRoute, formLine].forEach(f => f.addEventListener('submit', e => { e.preventDefault(); saveBtn.click(); }));
+  [formRoute, formLine].forEach(f => f.addEventListener('input', e => { if (e.target.removeAttribute) e.target.removeAttribute('aria-invalid'); errBox.hidden = true; }));
+
+  /* ===== 지름길 편집 ===== */
+  const F = id => document.getElementById(id);
+  const ICON_KEYS = Object.keys(I.ICONS);
+  let iconMode = 'auto', pickKey = 'calendar', tileVal = 'auto', customColor = '#3A6EA5';
+  let uploadedUrl = null;      // 이미 저장된 그림 주소
+  let pendingFile = null, pendingPreview = null;
+
+  // 기본 그림 고르기 칸
+  const pickGrid = $('[data-pick-grid]');
+  ICON_KEYS.forEach(key => {
+    const b = el('button', 'pick'); b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.key = key;
+    b.innerHTML = I.svgOf(key); b.append(el('span', null, I.ICONS[key].name));
+    b.addEventListener('click', () => { pickKey = key; syncIconUI(); renderRoutePreview(); });
+    pickGrid.append(b);
+  });
+  $$('[data-mode]').forEach(b => b.addEventListener('click', () => { iconMode = b.dataset.mode; syncIconUI(); renderRoutePreview(); }));
+
+  // 판 색
+  const TILE_OPTS = [['auto', '자동'], ['line', '분류 색'], ['white', '흰 판'], ['yellow', '노란 판'], ['custom', '색 고르기']];
+  const swBox = $('[data-swatches]');
+  TILE_OPTS.forEach(([val, name]) => {
+    const b = el(val === 'custom' ? 'label' : 'button', 'sw'); if (val !== 'custom') b.type = 'button';
+    b.setAttribute('role', 'radio'); b.dataset.tile = val;
+    const dot = el('span', `sw-dot${val === 'auto' ? ' is-auto' : ''}`); b.append(dot, el('span', 'sw-name', name));
+    if (val === 'custom') {
+      const input = el('input'); input.type = 'color'; input.value = customColor; input.setAttribute('aria-label', '판 색 고르기');
+      input.addEventListener('input', () => { customColor = input.value; tileVal = customColor; syncTileUI(); renderRoutePreview(); });
+      input.addEventListener('click', () => { tileVal = input.value; syncTileUI(); renderRoutePreview(); });
+      b.append(input);
+    } else {
+      b.addEventListener('click', () => { tileVal = val; syncTileUI(); renderRoutePreview(); });
+    }
+    swBox.append(b);
+  });
+  function syncTileUI() {
+    const isCustom = /^#/.test(tileVal);
+    const lc = (lineById()[F('f-line').value] || {}).color || '#0F5A3A';
+    $$('.sw', swBox).forEach(b => {
+      const v = b.dataset.tile;
+      b.setAttribute('aria-checked', String(v === 'custom' ? isCustom : v === tileVal));
+      const dot = b.querySelector('.sw-dot');
+      if (v === 'line') dot.style.background = lc;
+      if (v === 'white') dot.style.background = I.PRESET.white;
+      if (v === 'yellow') dot.style.background = I.PRESET.yellow;
+      if (v === 'custom') { dot.style.background = isCustom ? tileVal : customColor; b.querySelector('.sw-name').textContent = isCustom ? tileVal.toUpperCase() : '색 고르기'; }
+    });
+    const full = iconMode === 'upload' && F('f-full').checked;
+    $$('.sw', swBox).forEach(b => { b.style.pointerEvents = full ? 'none' : ''; });
+    $('[data-tile-set]').style.opacity = full ? '0.45' : '';
+    $('[data-tile-hint]').textContent = full ? '그림을 판 대신 쓰면 판 색은 쓰지 않습니다.' : '판이 어두우면 그림은 흰색, 밝으면 검은색으로 저절로 바뀝니다.';
+  }
+  function syncIconUI() {
+    $$('[data-mode]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.mode === iconMode)));
+    pickGrid.hidden = iconMode !== 'pick';
+    $('[data-upload]').hidden = iconMode !== 'upload';
+    $$('.pick', pickGrid).forEach(b => b.setAttribute('aria-checked', String(b.dataset.key === pickKey)));
+    const auto = I.ICONS[I.guess(draft())];
+    $('[data-auto-hint]').textContent = iconMode === 'auto' ? `이름·과목으로 고른 그림: ${auto.name}. 맞지 않으면 ‘기본 그림’에서 직접 고르세요.` : '';
+    $('[data-auto-hint]').hidden = iconMode !== 'auto';
+    const src = pendingPreview || uploadedUrl;
+    const img = $('[data-drop-img]');
+    img.hidden = !src; if (src) img.src = src;
+    $('[data-drop-title]').textContent = src ? '다른 그림으로 바꾸려면 끌어다 놓거나 누르기' : '그림 파일을 끌어다 놓거나 눌러서 고르기';
+    syncTileUI();
+  }
+
+  // 지금 입력한 내용으로 만든 지름길 (미리보기·저장용)
+  function draft() {
+    const icon = iconMode === 'pick' ? pickKey : iconMode === 'upload' && (pendingPreview || uploadedUrl) ? 'upload' : 'auto';
+    return {
+      id: editing ? editing.id : null,
+      title: F('f-title').value.trim(), line: F('f-line').value, type: F('f-type').value, status: F('f-status').value,
+      url: F('f-url').value.trim(), description: F('f-desc').value.trim(), subject: F('f-subject').value.trim(),
+      icon, icon_url: icon === 'upload' ? (pendingPreview || uploadedUrl) : null,
+      tile: tileVal, icon_full: iconMode === 'upload' && F('f-full').checked,
+      hidden: F('f-hidden').checked, sample: F('f-sample').checked, featured: F('f-featured').checked
+    };
+  }
+  function renderRoutePreview() {
+    const d = draft();
+    const name = d.title || '이름';
+    const line = lineById()[d.line] || {};
+    const pv = $('[data-route-pv]');
+    const row = el('div', 'pv-row');
+    const item = (size, label, extra, r) => { const it = el('div', 'pv-item'); it.append(I.tile(r || d, line.color, { size })); if (extra) it.append(el('b', null, extra)); it.append(el('small', null, label)); return it; };
+    const other = { ...d, status: d.status === 'open' ? 'building' : 'open' };
+    row.append(item(76, '노선도', name), item(64, '휴대폰'), item(48, d.status === 'open' ? '공사 중일 때' : '개통하면', null, other));
+    const building = d.status === 'building';
+    const dlg = el('div', `pv-dlg${I.fgOf(line.color || '#0F5A3A') === '#FFFFFF' ? '' : ' is-light'}${building ? ' is-building' : ''}`);
+    dlg.style.setProperty('--c', line.color || '#0F5A3A');
+    const top = el('div', 'pv-dlg-top');
+    const tags = el('div', 'pv-tags');
+    [line.name, TYPE[d.type], building ? '공사 중' : '개통'].concat(d.sample ? ['견본'] : []).filter(Boolean).forEach(t => tags.append(el('span', 'pv-tag', t)));
+    const txt = el('div'); txt.append(tags, el('h3', null, name));
+    top.append(I.tile(d, line.color, { size: 48 }), txt);
+    dlg.append(top);
+    if (d.description) dlg.append(el('p', 'pv-desc', d.description));
+    dlg.append(el('div', 'pv-go', building ? '' : '이용하기 →'));
+    const title = el('p', 'pv-title', d.hidden ? '미리보기 · 지금은 노선도에서 숨김' : '미리보기');
+    pv.replaceChildren(title, row, el('p', 'pv-title', '아이콘을 눌렀을 때'), dlg);
+    pv.children[2].style.margin = '14px 0 0';
+  }
+  formRoute.addEventListener('input', () => { if (iconMode === 'auto') syncIconUI(); syncTileUI(); renderRoutePreview(); });
+  formRoute.addEventListener('change', () => { syncTileUI(); renderRoutePreview(); });
+
+  function fillLineSelect() {
+    F('f-line').replaceChildren(...lines.map(l => { const o = el('option', null, l.name); o.value = l.id; return o; }));
+  }
+  function openRouteForm(r) {
+    editing = r || null;
+    currentId = r ? r.id : null;
+    fillLineSelect();
+    const v = r || {};
+    F('f-title').value = v.title || '';
+    F('f-line').value = v.line || (lines[0] && lines[0].id) || '';
+    F('f-type').value = v.type || 'app';
+    F('f-status').value = v.status || 'open';
+    F('f-url').value = v.url || '';
+    F('f-desc').value = v.description || '';
+    F('f-subject').value = v.subject || '';
+    F('f-hidden').checked = !!v.hidden; F('f-sample').checked = !!v.sample; F('f-featured').checked = !!v.featured;
+    F('f-full').checked = !!v.icon_full;
+    const icon = v.icon || 'auto';
+    uploadedUrl = icon === 'upload' && v.icon_url ? v.icon_url : null;
+    iconMode = icon === 'upload' ? 'upload' : I.ICONS[icon] ? 'pick' : 'auto';
+    pickKey = I.ICONS[icon] ? icon : I.guess(v);
+    tileVal = v.tile || 'auto';
+    if (/^#/.test(tileVal)) { customColor = tileVal; swBox.querySelector('input[type="color"]').value = tileVal; }
+    clearPending();
+    $$('[aria-invalid]', formRoute).forEach(x => x.removeAttribute('aria-invalid'));
+    delBtn.hidden = !r;
+    syncIconUI(); renderRoutePreview();
+    openDrawer('route', r ? `고치기: ${r.title}` : '지름길 추가', '개통 노선도 · 지름길');
+    markCurrent();
+  }
+  $('[data-new-route]').addEventListener('click', () => openRouteForm(null));
+
+  // 그림 파일 고르기 · 끌어다 놓기
+  const MAX = 500 * 1024, TYPES = ['image/png', 'image/svg+xml', 'image/jpeg', 'image/webp'];
+  function clearPending() {
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    pendingFile = null; pendingPreview = null;
+    F('f-file').value = '';
+    const note = $('[data-file-note]'); note.hidden = true; note.textContent = '';
+  }
+  function fileNote(text) { const n = $('[data-file-note]'); n.textContent = text; n.hidden = !text; }
+  async function takeFile(file) {
+    if (!file) return;
+    if (!TYPES.includes(file.type)) { fileNote('PNG·SVG·JPG·WebP 파일만 올릴 수 있습니다.'); return; }
+    if (file.size > MAX) { fileNote(`파일이 ${Math.ceil(file.size / 1024)}KB입니다. 500KB 이하로 줄여 주세요.`); return; }
+    const url = URL.createObjectURL(file);
+    let note = '';
+    if (file.type !== 'image/svg+xml') {
+      const size = await new Promise(res => { const im = new Image(); im.onload = () => res([im.naturalWidth, im.naturalHeight]); im.onerror = () => res(null); im.src = url; });
+      if (!size) { URL.revokeObjectURL(url); fileNote('그림 파일을 읽지 못했습니다. 다른 파일로 해 주세요.'); return; }
+      if (Math.min(...size) < 192) { URL.revokeObjectURL(url); fileNote(`그림이 ${size[0]}×${size[1]}px입니다. 가로·세로 모두 192px 이상이어야 합니다.`); return; }
+      if (size[0] !== size[1]) note = `정사각형이 아니라서(${size[0]}×${size[1]}px) 가운데 부분만 보입니다.`;
+    }
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    pendingFile = file; pendingPreview = url;
+    fileNote(note);
+    iconMode = 'upload';
+    syncIconUI(); renderRoutePreview();
+  }
+  F('f-file').addEventListener('change', () => takeFile(F('f-file').files[0]));
+  const drop = $('[data-drop]');
+  ['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('is-over'); }));
+  ['dragleave', 'drop'].forEach(t => drop.addEventListener(t, () => drop.classList.remove('is-over')));
+  drop.addEventListener('drop', e => { e.preventDefault(); takeFile(e.dataTransfer.files[0]); });
+  F('f-full').addEventListener('change', () => { syncTileUI(); renderRoutePreview(); });
+
+  // 저장소 파일
+  const BUCKET = 'route-icons';
+  const pathOf = url => { const i = (url || '').indexOf(`/${BUCKET}/`); return i < 0 ? null : decodeURIComponent(url.slice(i + BUCKET.length + 2).split('?')[0]); };
+  async function upload(file) {
+    const ext = { 'image/png': 'png', 'image/svg+xml': 'svg', 'image/jpeg': 'jpg', 'image/webp': 'webp' }[file.type];
+    const path = `${editing ? editing.id : 'new'}-${Date.now()}.${ext}`;
+    const { error } = await B.sb.storage.from(BUCKET).upload(path, file, { contentType: file.type, cacheControl: '31536000', upsert: false });
+    if (error) return { error };
+    return { url: B.sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl };
+  }
+  function removeFile(url) { const p = pathOf(url); if (p) B.sb.storage.from(BUCKET).remove([p]).catch(() => {}); }
+  const URL_RULE = /^(https?:\/\/\S+|\/[a-z0-9\/_-]*)$/i;
+  const PATH_RULE = /^\/[a-z0-9\/_-]*$/;
+
+  async function saveRoute() {
+    const d = draft();
+    $$('[aria-invalid]', formRoute).forEach(x => x.removeAttribute('aria-invalid'));
+    if (!d.title) return fail('이름을 입력해 주세요.', 'f-title');
+    if (!d.line) return fail('분류를 먼저 만들어 주세요.');
+    if (d.url && (!URL_RULE.test(d.url) || (d.url.startsWith('/') && !PATH_RULE.test(d.url)))) return fail('주소는 https:// 로 시작하거나, /wiki/radar-101/ 처럼 영문 소문자로 써 주세요.', 'f-url');
+    if (d.status === 'open' && !d.url) return fail('개통하려면 주소가 있어야 합니다. 아직 주소가 없으면 상태를 ‘공사 중’으로 두세요.', 'f-url');
+    if (iconMode === 'upload' && !pendingFile && !uploadedUrl) return fail('올릴 그림 파일을 골라 주세요.');
+    B.setBusy(saveBtn, true, '저장 중…');
+    let newUrl = null;
+    if (hasIconCols && iconMode === 'upload' && pendingFile) {
+      const up = await upload(pendingFile);
+      if (up.error) {
+        B.setBusy(saveBtn, false);
+        return fail(/bucket/i.test(up.error.message || '') ? '아이콘 저장소가 아직 없습니다. supabase/009_hq_phase1.sql을 실행해 주세요.' : `그림을 올리지 못했습니다. (${up.error.message || up.error.statusCode || '오류'})`);
+      }
+      newUrl = up.url;
+    }
+    const row = {
+      title: d.title, line: d.line, type: d.type, status: d.status,
+      url: d.url || null, description: d.description || null, subject: d.subject || null,
+      featured: d.featured, sample: d.sample,
+      icon: iconMode === 'pick' ? pickKey : iconMode === 'upload' ? 'upload' : 'auto',
+      icon_url: iconMode === 'upload' ? (newUrl || uploadedUrl) : null,
+      tile: tileVal, icon_full: iconMode === 'upload' && d.icon_full, hidden: d.hidden
+    };
+    if (!editing) row.sort = Math.max(0, ...routes.filter(r => r.line === d.line).map(r => r.sort || 0)) + 10;
+    const strip = o => { const c = { ...o }; NEW_COLS.forEach(k => delete c[k]); return c; };
+    const send = body => editing
+      ? B.sb.from('routes').update(body).eq('id', editing.id).select().single()
+      : B.sb.from('routes').insert(body).select().single();
+    let res = await send(hasIconCols ? row : strip(row));
+    if (res.error && hasIconCols && missingCol(res.error)) { setIconCols(false); res = await send(strip(row)); }
+    B.setBusy(saveBtn, false);
+    if (res.error) { if (newUrl) removeFile(newUrl); return fail(errText(res.error, '저장')); }
+    // 바꾼 그림 파일 정리
+    const oldUrl = editing && editing.icon_url;
+    if (hasIconCols && oldUrl && oldUrl !== row.icon_url) removeFile(oldUrl);
+    const saved = res.data;
+    const i = routes.findIndex(r => String(r.id) === String(saved.id));
+    if (i >= 0) routes[i] = saved; else routes.push(saved);
+    routes.sort((a, b) => (a.sort - b.sort) || String(a.created_at).localeCompare(String(b.created_at)));
+    const wasNew = !editing;
+    closeDrawer();
+    renderRoutes(); renderLines();
+    toast(`${wasNew ? '추가' : '저장'}했습니다. 노선도에 바로 반영됩니다.${saved.hidden ? ' (숨김 상태)' : ''}`);
+  }
+
+  async function deleteRoute() {
+    if (!editing) return;
+    B.setBusy(delBtn, true, '지우는 중…');
+    const { error } = await B.sb.from('routes').delete().eq('id', editing.id);
+    B.setBusy(delBtn, false);
+    if (error) return fail(errText(error, '지우기'));
+    if (editing.icon_url) removeFile(editing.icon_url);
+    routes = routes.filter(r => String(r.id) !== String(editing.id));
+    const name = editing.title;
+    closeDrawer(); renderRoutes(); renderLines();
+    toast(`‘${name}’을(를) 지웠습니다.`);
+  }
+
+  /* ===== 분류 편집 ===== */
+  const LINE_COLORS = [['#0F5A3A', '녹색'], ['#EE6A1F', '주황'], ['#3A403C', '먹색'], ['#1F5C99', '파랑'], ['custom', '색 고르기']];
+  let lineColor = '#0F5A3A', lineCustom = '#7A4FA0';
+  const lsw = $('[data-line-swatches]');
+  LINE_COLORS.forEach(([val, name]) => {
+    const b = el(val === 'custom' ? 'label' : 'button', 'sw'); if (val !== 'custom') b.type = 'button';
+    b.setAttribute('role', 'radio'); b.dataset.color = val;
+    const dot = el('span', 'sw-dot'); dot.style.background = val === 'custom' ? lineCustom : val;
+    b.append(dot, el('span', 'sw-name', name));
+    if (val === 'custom') {
+      const input = el('input'); input.type = 'color'; input.value = lineCustom; input.setAttribute('aria-label', '표지판 색 고르기');
+      const pickIt = () => { lineCustom = input.value; lineColor = input.value; syncLineUI(); };
+      input.addEventListener('input', pickIt); input.addEventListener('click', pickIt);
+      b.append(input);
+    } else b.addEventListener('click', () => { lineColor = val; syncLineUI(); });
+    lsw.append(b);
+  });
+  function syncLineUI() {
+    const preset = LINE_COLORS.some(([v]) => v.toLowerCase() === lineColor.toLowerCase());
+    $$('.sw', lsw).forEach(b => {
+      const v = b.dataset.color;
+      b.setAttribute('aria-checked', String(v === 'custom' ? !preset : v.toLowerCase() === lineColor.toLowerCase()));
+      if (v === 'custom') { b.querySelector('.sw-dot').style.background = preset ? lineCustom : lineColor; b.querySelector('.sw-name').textContent = preset ? '색 고르기' : lineColor.toUpperCase(); }
+    });
+    const pv = $('[data-line-pv]');
+    const sign = el('div', `mini-zsign${I.fgOf(lineColor) === '#FFFFFF' ? '' : ' is-light'}`);
+    sign.style.setProperty('--c', lineColor);
+    sign.append(el('span', 'lno', F('l-no').value.trim() || '?'), el('h3', null, F('l-name').value.trim() || '분류 이름'));
+    const desc = F('l-desc').value.trim(); if (desc) sign.append(el('p', null, desc));
+    pv.replaceChildren(el('p', 'pv-title', '미리보기 · 노선도의 큰 표지판'), sign);
+    pv.firstChild.style.margin = '16px 0 0';
+  }
+  formLine.addEventListener('input', syncLineUI);
+  function openLineForm(l) {
+    editing = l || null;
+    currentId = l ? 'line:' + l.id : null;
+    const v = l || {};
+    F('l-name').value = v.name || '';
+    F('l-no').value = v.no || String(lines.length + 1);
+    F('l-id').value = v.id || '';
+    F('l-id').readOnly = !!l; F('l-id').classList.toggle('readonly', !!l);
+    F('l-desc').value = v.description || '';
+    lineColor = v.color || '#0F5A3A';
+    if (!LINE_COLORS.some(([c]) => c.toLowerCase() === lineColor.toLowerCase())) { lineCustom = lineColor; lsw.querySelector('input[type="color"]').value = lineColor; }
+    delBtn.hidden = !l;
+    $$('[aria-invalid]', formLine).forEach(x => x.removeAttribute('aria-invalid'));
+    syncLineUI();
+    openDrawer('line', l ? `고치기: ${l.name}` : '분류 추가', '개통 노선도 · 분류');
+    $$('.rrow', $('[data-line-list]')).forEach(li => li.classList.toggle('is-current', l && li.dataset.id === l.id));
+  }
+  $('[data-new-line]').addEventListener('click', () => openLineForm(null));
+
+  async function saveLine() {
+    $$('[aria-invalid]', formLine).forEach(x => x.removeAttribute('aria-invalid'));
+    const name = F('l-name').value.trim(), no = F('l-no').value.trim(), id = F('l-id').value.trim().toLowerCase(), description = F('l-desc').value.trim();
+    if (!name) return fail('이름을 입력해 주세요.', 'l-name');
+    if (!no) return fail('번호를 입력해 주세요.', 'l-no');
+    if (!editing) {
+      if (!/^[a-z0-9-]{1,30}$/.test(id)) return fail('주소용 이름은 영문 소문자·숫자·하이픈(-)으로 써 주세요.', 'l-id');
+      if (lines.some(l => l.id === id)) return fail('같은 주소용 이름이 이미 있습니다.', 'l-id');
+    }
+    const row = { name, no, color: lineColor, description: description || null };
+    B.setBusy(saveBtn, true, '저장 중…');
+    const res = editing
+      ? await B.sb.from('route_lines').update(row).eq('id', editing.id).select().single()
+      : await B.sb.from('route_lines').insert({ ...row, id, sort: Math.max(0, ...lines.map(l => l.sort || 0)) + 10 }).select().single();
+    B.setBusy(saveBtn, false);
+    if (res.error) return fail(errText(res.error, '저장'));
+    const saved = res.data;
+    const i = lines.findIndex(l => l.id === saved.id);
+    if (i >= 0) lines[i] = saved; else lines.push(saved);
+    lines.sort((a, b) => a.sort - b.sort);
+    const wasNew = !editing;
+    closeDrawer(); renderLines(); renderRoutes();
+    toast(`분류를 ${wasNew ? '추가' : '저장'}했습니다. 노선도에 바로 반영됩니다.`);
+  }
+  async function deleteLine() {
+    if (!editing) return;
+    const n = routes.filter(r => r.line === editing.id).length;
+    if (n) return fail(`이 분류에 지름길이 ${n}곳 있어 지울 수 없습니다. 지름길을 다른 분류로 옮긴 뒤 지워 주세요.`);
+    B.setBusy(delBtn, true, '지우는 중…');
+    const { error } = await B.sb.from('route_lines').delete().eq('id', editing.id);
+    B.setBusy(delBtn, false);
+    if (error) return fail(errText(error, '지우기'));
+    lines = lines.filter(l => l.id !== editing.id);
+    const name = editing.name;
+    closeDrawer(); renderLines(); renderRoutes();
+    toast(`분류 ‘${name}’을(를) 지웠습니다.`);
+  }
+
+  await loadAll();
+})();
+</script>
+</body>
+</html>
