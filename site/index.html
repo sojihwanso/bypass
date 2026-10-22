@@ -57,7 +57,7 @@
       <div class="site-hero-copy">
         <p class="sign-code">BYPASS 회원 전용 구역</p>
         <h1 id="page-title">공사장</h1>
-        <p class="lead"><strong data-name></strong> 님, 어서 오세요. 새 길과 우회로를 만드는 현장입니다.</p>
+        <p class="lead"><strong data-name></strong> 님, 어서 오세요. 새 길과 지름길을 만드는 현장입니다.</p>
       </div>
       <!-- 관계자 외 출입금지 바리케이드. 확인 도장이 이미 찍혀 있다. -->
       <svg class="gate" viewBox="0 0 300 222" role="img" aria-label="‘관계자 외 출입금지’ 표지판에 ‘관계자 확인’ 도장이 찍혀 있습니다.">
@@ -298,17 +298,17 @@
             <div data-locked>
               <div class="lock-band" aria-hidden="true"></div>
               <p class="lock-title">운영진 전용 구역</p>
-              <p class="lock-text">개통 노선도에 우회로를 올리고, 과목 위키 파일을 올리는 곳입니다.</p>
+              <p class="lock-text">개통 노선도에 지름길을 올리고, 과목 위키 파일을 올리는 곳입니다.</p>
             </div>
             <div data-open hidden>
               <p class="card-lead">여기서 고친 목록은 <a href="/routes/" target="_blank" rel="noopener">개통 노선도</a>에 바로 반영됩니다. 위키 파일은 올린 뒤 사이트에 열리기까지 1~몇 분 걸립니다.</p>
               <div class="board-tools routes-tools">
-                <button type="button" class="mini-btn mini-go" data-route-open>+ 우회로 추가</button>
+                <button type="button" class="mini-btn mini-go" data-route-open>+ 지름길 추가</button>
                 <button type="button" class="mini-btn mini-go" data-wiki-open>위키 올리기</button>
               </div>
 
               <form class="board-form" data-route-form novalidate hidden>
-                <p class="form-title" data-route-form-title>우회로 추가</p>
+                <p class="form-title" data-route-form-title>지름길 추가</p>
                 <div class="form-cols">
                   <div><label class="field-label" for="rt-title">이름</label><input class="input" id="rt-title" maxlength="100" required placeholder="예: 수강플래너"></div>
                   <div><label class="field-label" for="rt-line">노선</label><select class="input" id="rt-line"></select></div>
@@ -320,7 +320,7 @@
                 <label class="field-label" for="rt-url">주소 <span class="opt">(공사 중이면 비워도 됨)</span></label>
                 <input class="input" id="rt-url" maxlength="1000" placeholder="https://… 또는 /wiki/과목이름/">
                 <label class="field-label" for="rt-desc">한 줄 설명</label>
-                <input class="input" id="rt-desc" maxlength="300" placeholder="무엇을 어떻게 우회하는지 한 줄로">
+                <input class="input" id="rt-desc" maxlength="300" placeholder="무엇을 어떻게 건너뛰는지 한 줄로">
                 <p class="form-error" role="alert" hidden></p>
                 <div class="form-actions"><button type="submit" class="btn btn-primary btn-small">올리기</button><button type="button" class="btn btn-secondary btn-small" data-form-close>취소</button></div>
               </form>
@@ -1017,7 +1017,7 @@
 
     document.querySelector('[data-route-open]').addEventListener('click', () => {
       editingId = null; routeForm.reset();
-      routeForm.querySelector('[data-route-form-title]').textContent = '우회로 추가';
+      routeForm.querySelector('[data-route-form-title]').textContent = '지름길 추가';
       routeForm.querySelector('[type="submit"]').textContent = '올리기';
       showForm(routeForm, routeForm.hidden);
     });
@@ -1065,7 +1065,7 @@
         if (error) { alertLine(li, '바꾸지 못했습니다.'); return; }
         r.status = next; r.sample = false; renderRoutes();
       });
-      act.append(edit, toggle, deleteButton(`우회로 ${r.title}`, async () => {
+      act.append(edit, toggle, deleteButton(`지름길 ${r.title}`, async () => {
         const { error } = await B.sb.from('routes').delete().eq('id', r.id);
         if (error) { alertLine(li, '삭제하지 못했습니다.'); return false; }
         rtRoutes = rtRoutes.filter(x => x.id !== r.id); renderRoutes(); return true;
@@ -1083,7 +1083,7 @@
         const h = el('h3'); const b = el('b', null, l.no); b.style.background = l.color; h.append(b, document.createTextNode(l.name));
         const items = rtRoutes.filter(r => r.line === l.id);
         const ul = el('ul', 'rt-list');
-        if (items.length) ul.append(...items.map(routeRow)); else ul.append(el('li', 'inbox-state', '아직 우회로가 없습니다.'));
+        if (items.length) ul.append(...items.map(routeRow)); else ul.append(el('li', 'inbox-state', '아직 지름길이 없습니다.'));
         sec.append(h, ul);
         return sec;
       }));
@@ -1103,7 +1103,7 @@
       fillLineSelects(); renderRoutes();
     })();
 
-    // 우회로 추가·고치기
+    // 지름길 추가·고치기
     routeForm.addEventListener('submit', async e => {
       e.preventDefault();
       routeForm.querySelector('.form-error').hidden = true;
@@ -1163,7 +1163,7 @@
       wikiDone.replaceChildren(
         el('b', null, data && data.updated ? `‘${subject}’ 위키를 고쳤습니다. ` : `‘${subject}’ 위키를 올렸습니다. `),
         document.createTextNode('1~몇 분 뒤 '), link, document.createTextNode(' 에서 열립니다.'),
-        document.createTextNode(saved.error ? ' (노선도 목록에는 넣지 못했으니 ‘+ 우회로 추가’로 넣어 주세요.)' : ' 노선도에도 개통으로 올렸습니다.')
+        document.createTextNode(saved.error ? ' (노선도 목록에는 넣지 못했으니 ‘+ 지름길 추가’로 넣어 주세요.)' : ' 노선도에도 개통으로 올렸습니다.')
       );
       wikiDone.hidden = false;
     });
