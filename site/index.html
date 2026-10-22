@@ -42,6 +42,7 @@
     </a>
     <div class="head-actions">
       <span class="head-user"><strong data-name></strong> 님</span>
+      <a class="head-pill head-hq" href="/hq/" data-hq-link hidden>HQ</a>
       <button type="button" class="head-pill" data-logout>로그아웃</button>
     </div>
   </div>
@@ -301,6 +302,7 @@
               <p class="lock-text">개통 노선도에 지름길을 올리고, 과목 위키 파일을 올리는 곳입니다.</p>
             </div>
             <div data-open hidden>
+              <p class="card-lead hq-moved">지름길 목록·아이콘·분류는 이제 <a href="/hq/#routes">HQ의 개통 노선도</a>에서 관리합니다. 이곳은 위키 올리기가 HQ로 옮겨 갈 때까지 함께 둡니다.</p>
               <p class="card-lead">여기서 고친 목록은 <a href="/routes/" target="_blank" rel="noopener">개통 노선도</a>에 바로 반영됩니다. 위키 파일은 올린 뒤 사이트에 열리기까지 1~몇 분 걸립니다.</p>
               <div class="board-tools routes-tools">
                 <button type="button" class="mini-btn mini-go" data-route-open>+ 지름길 추가</button>
@@ -721,7 +723,7 @@
      읽기: 공지는 회원 모두, 안건·자료는 국원·운영진.
      쓰기: 공지는 운영진만, 안건·자료는 국원도 (국원은 자기가 올린 것만 지움). 안건 처리 완료는 운영진만. */
   const isStaffUser = role.key === 'staff';
-  if (isStaffUser) document.querySelectorAll('[data-staff-only]').forEach(x => { x.hidden = false; });
+  if (isStaffUser) document.querySelectorAll('[data-staff-only], [data-hq-link]').forEach(x => { x.hidden = false; });
   // 회의 안건·자료 올리기는 국원도 (supabase/006_crew_posting.sql)
   if (role.key !== 'general') document.querySelectorAll('[data-crew-only]').forEach(x => { x.hidden = false; });
 
@@ -1114,7 +1116,7 @@
       const btn = routeForm.querySelector('[type="submit"]');
       B.setBusy(btn, true, '저장 중…');
       const q = editingId ? B.sb.from('routes').update({ ...row, sample: false }).eq('id', editingId).select().single()
-                          : B.sb.from('routes').insert({ ...row, sort: rtRoutes.filter(r => r.line === row.line).length + 1 }).select().single();
+                          : B.sb.from('routes').insert({ ...row, sort: Math.max(0, ...rtRoutes.filter(r => r.line === row.line).map(r => r.sort || 0)) + 10 }).select().single();
       const { data, error } = await q;
       B.setBusy(btn, false);
       if (error) return fail(routeForm, '저장하지 못했습니다. 잠시 후 다시 시도해 주세요.');
@@ -1152,7 +1154,7 @@
       const same = rtRoutes.find(r => r.url === url);
       const row = { title: `${subject} 위키`, subject, type: 'wiki', line, status: 'open', url, description: desc || same?.description || `${subject} 과목 정리 위키입니다.`, sample: false };
       const q = same ? B.sb.from('routes').update(row).eq('id', same.id).select().single()
-                     : B.sb.from('routes').insert({ ...row, sort: rtRoutes.filter(r => r.line === line).length + 1 }).select().single();
+                     : B.sb.from('routes').insert({ ...row, sort: Math.max(0, ...rtRoutes.filter(r => r.line === line).map(r => r.sort || 0)) + 10 }).select().single();
       const saved = await q;
       B.setBusy(btn, false);
       if (!saved.error) { if (same) rtRoutes = rtRoutes.map(r => r.id === same.id ? saved.data : r); else rtRoutes.push(saved.data); renderRoutes(); }

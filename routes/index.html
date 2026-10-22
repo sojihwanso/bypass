@@ -89,7 +89,7 @@
   }
   .tile-wrap { position: relative; display: block; transition: transform 0.15s; }
   .spot-btn:hover .tile-wrap { transform: translateY(-3px); }
-  .spot-btn:hover .tile { box-shadow: 0 6px 0 rgba(28, 33, 30, 0.14); }
+  .spot-btn:hover .tile:not(.is-building) { box-shadow: inset 0 0 0 var(--tile-ring-w, 0px) var(--ink), 0 6px 0 rgba(28, 33, 30, 0.14); }
   .spot-name {
     font-size: 14.5px; font-weight: 700; line-height: 1.35; text-align: center; word-break: keep-all;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
@@ -97,20 +97,7 @@
   .spot-state { margin-top: -4px; font-size: 12px; font-weight: 700; color: var(--muted); }
   .spots-empty { grid-column: 1 / -1; margin: 0; padding: 18px 0; color: var(--muted); font-weight: 700; }
 
-  /* 아이콘 판: 종류마다 다른 판 */
-  .tile {
-    position: relative; display: grid; place-items: center; width: 76px; height: 76px; border-radius: 20px;
-    background: var(--c); color: #fff; box-shadow: 0 3px 0 rgba(28, 33, 30, 0.14);
-    transition: box-shadow 0.15s;
-  }
-  .tile svg { width: 38px; height: 38px; }
-  .zone.is-warm .tile, .route-dlg.is-warm .tile { color: var(--ink); }
-  .tile.t-wiki { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 3px var(--ink), 0 3px 0 rgba(28, 33, 30, 0.14); }
-  .tile.t-channel { background: var(--amber); color: var(--ink); }
-  .tile.is-building { background: #F7F8F5; color: var(--post-dark); box-shadow: inset 0 0 0 2.5px var(--post-dark); overflow: hidden; }
-  .tile.is-building::before { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 2.5px dashed #F7F8F5; }
-  .tile.is-building::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 11px; background: repeating-linear-gradient(-45deg, var(--orange) 0 7px, var(--ink) 7px 14px); }
-  .tile.is-building svg { margin-bottom: 8px; opacity: 0.75; }
+  /* 아이콘 판 모양은 assets/bypass.css 의 .tile */
   .sticker { position: absolute; top: -8px; right: -14px; transform: rotate(8deg); background: var(--orange); color: var(--ink); border: 2px solid var(--ink); border-radius: 4px; font-weight: 900; font-size: 11.5px; line-height: 1.5; padding: 0 6px; letter-spacing: 0.06em; }
 
   @media (max-width: 760px) {
@@ -122,8 +109,7 @@
     .zsign-no { width: 34px; height: 34px; font-size: 17px; }
     .zsign h2 { margin-top: 8px; }
     .spots { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 18px 6px; padding-bottom: 22px; }
-    .tile { width: 64px; height: 64px; border-radius: 17px; }
-    .tile svg { width: 32px; height: 32px; }
+    .tile { --tile-size: 64px; }
     .spot-name { font-size: 13.5px; }
   }
 
@@ -141,9 +127,7 @@
   .route-dlg.is-warm .dlg-sign { color: var(--ink); box-shadow: inset 0 0 0 6px var(--c), inset 0 0 0 9px var(--ink); }
   .route-dlg.is-building .dlg-sign { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 4px var(--post-dark); }
   .dlg-top { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center; padding-right: 54px; }
-  .route-dlg .tile { box-shadow: none; }
-  .route-dlg:not(.is-building) .tile:not(.t-wiki):not(.t-channel) { box-shadow: inset 0 0 0 3px #fff; }
-  .route-dlg.is-warm:not(.is-building) .tile:not(.t-wiki):not(.t-channel) { box-shadow: inset 0 0 0 3px var(--ink); }
+  .route-dlg .tile:not(.is-building):not(.is-full) { box-shadow: inset 0 0 0 3px var(--tile-fg); }
   .dlg-tags { margin: 0 0 4px; display: flex; flex-wrap: wrap; gap: 6px; }
   .dlg-tag { font-size: 12.5px; font-weight: 700; line-height: 1.6; padding: 0 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.18); }
   .route-dlg.is-warm .dlg-tag, .route-dlg.is-building .dlg-tag { background: rgba(28, 33, 30, 0.1); }
@@ -265,6 +249,8 @@
   </div>
 </footer>
 
+<script src="/assets/route-icons.js"></script>
+<script src="/assets/track.js" defer></script>
 <script>
 (async function () {
   const TYPE = { app: '앱', wiki: '위키', channel: '카톡 채널' };
@@ -276,50 +262,11 @@
     if (saved && saved.refresh_token) { const a = document.getElementById('nav-account'); a.textContent = '공사장'; a.href = '/site/'; }
   } catch (e) { /* 저장소를 못 쓰면 그대로 */ }
 
-  /* ===== 아이콘 =====
-     지름길마다 그림 하나. icon 값이 있으면 그 그림, 없으면 이름(과목)에 든 낱말로 고르고, 그래도 없으면 종류별 기본 그림. */
-  const ICONS = {
-    calendar: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M7.5 14h2.5M13.5 14h3M7.5 17.2h2.5"/>',
-    cap: '<path d="M2 9.5 12 5l10 4.5L12 14z"/><path d="M6.5 11.8V16c0 1.6 2.5 3 5.5 3s5.5-1.4 5.5-3v-4.2M22 9.5v5"/>',
-    bowl: '<path d="M3 11.5h18c0 5-4 8.5-9 8.5s-9-3.5-9-8.5z"/><path d="M8.5 3.5c-1 1.3 1 2.4 0 4M12 3.5c-1 1.3 1 2.4 0 4M15.5 3.5c-1 1.3 1 2.4 0 4"/>',
-    radar: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l6.4-6.4"/><circle cx="15.3" cy="9.2" r="1.3" fill="currentColor" stroke="none"/>',
-    ship: '<path d="M3 14.5h18l-2.8 5.5H5.8z"/><path d="M6.5 14.5V10h11v4.5M12 10V3.5l5 3h-5"/>',
-    compass: '<circle cx="12" cy="12" r="9"/><path d="M15.8 8.2l-2.3 5.3-5.3 2.3 2.3-5.3z"/>',
-    tool: '<path d="M14.6 6.4a4 4 0 0 0-5.1 5.1L4 17l3 3 5.5-5.5a4 4 0 0 0 5.1-5.1l-2.4 2.4-2.3-.4-.4-2.3z"/>',
-    bell: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
-    bus: '<rect x="5" y="3.5" width="14" height="14" rx="2.5"/><path d="M5 10h14M8 17.5V20.5M16 17.5V20.5"/><circle cx="8.6" cy="13.8" r="1" fill="currentColor" stroke="none"/><circle cx="15.4" cy="13.8" r="1" fill="currentColor" stroke="none"/>',
-    pin: '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
-    doc: '<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h5"/>',
-    book: '<path d="M4 5.5c2.6-1.5 5.4-1.5 8 0v14c-2.6-1.5-5.4-1.5-8 0z"/><path d="M20 5.5c-2.6-1.5-5.4-1.5-8 0v14c2.6-1.5 5.4-1.5 8 0z"/>',
-    chat: '<path d="M4 5h16v11H10l-4 4v-4H4z"/><circle cx="9" cy="10.5" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="10.5" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="10.5" r="1" fill="currentColor" stroke="none"/>',
-    app: '<rect x="4" y="4" width="7" height="7" rx="1.8"/><rect x="13" y="4" width="7" height="7" rx="1.8"/><rect x="4" y="13" width="7" height="7" rx="1.8"/><rect x="13" y="13" width="7" height="7" rx="1.8"/>'
-  };
-  const GUESS = [
-    [/시간표|수강|플래너/, 'calendar'],
-    [/학점|졸업|이수/, 'cap'],
-    [/학식|식단|급식|밥|꿀꿀/, 'bowl'],
-    [/레이더|radar|arpa/i, 'radar'],
-    [/충돌|colreg|선박|해운|항만|선원/i, 'ship'],
-    [/항해|천문|나침|해도|gps|지문/i, 'compass'],
-    [/기관|엔진|기계|정비/, 'tool'],
-    [/공지|알림|알리미/, 'bell'],
-    [/버스|셔틀|통학/, 'bus'],
-    [/강의실|지도|위치|캠퍼스/, 'pin'],
-    [/시험|족보|기출|문제/, 'doc']
-  ];
-  function iconOf(r) {
-    if (r.icon && ICONS[r.icon]) return r.icon;
-    const words = `${r.title} ${r.subject || ''}`;
-    for (const [re, key] of GUESS) if (re.test(words)) return key;
-    return { wiki: 'book', channel: 'chat' }[r.type] || 'app';
-  }
-  function tile(r) {
-    const t = el('span', `tile t-${r.type}${r.status === 'building' ? ' is-building' : ''}`);
-    t.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[iconOf(r)]}</svg>`;
-    return t;
-  }
+  /* ===== 아이콘: assets/route-icons.js (HQ와 같은 모듈) ===== */
+  const I = window.BYPASS_ICONS;
+  const tile = r => I.tile(r, (lineOf[r.line] || {}).color);
 
-  /* 목록은 Supabase(routes, route_lines)에서 읽는다. 운영진이 공사장 H구역에서 고치면 바로 반영된다.
+  /* 목록은 Supabase(routes, route_lines)에서 읽는다. 운영진이 HQ에서 고치면 바로 반영된다.
      데이터베이스 설정 전이거나 연결이 안 되면 assets/routes.json 을 대신 쓴다. */
   const SB_URL = 'https://itzdjdgjqcpmxdfssfel.supabase.co';
   const SB_KEY = 'sb_publishable_L2FP31VpA_dZfwqH4u6H0Q_UWJlCS6G';
@@ -327,12 +274,12 @@
     const get = q => fetch(`${SB_URL}/rest/v1/${q}`, { headers: { apikey: SB_KEY } }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
     const [lines, routes] = await Promise.all([
       get('route_lines?select=id,name,no,color,description,sort&order=sort.asc'),
-      get('routes?select=id,title,type,line,status,url,description,subject,featured,sample,sort,created_at&order=sort.asc,created_at.asc')
+      get('routes?select=*&order=sort.asc,created_at.asc')
     ]);
     if (!lines.length) throw new Error('empty');
     return {
       lines: lines.map(l => ({ ...l, desc: l.description })),
-      routes: routes.map(r => ({ ...r, desc: r.description }))
+      routes: routes.filter(r => !r.hidden).map(r => ({ ...r, desc: r.description }))
     };
   }
   let data;
@@ -343,8 +290,9 @@
   }
 
   const lineOf = Object.fromEntries(data.lines.map(l => [l.id, l]));
-  const isWarm = color => /^#e|^#f/i.test(color || '');  // 주황 계열 분류는 주황 표지
-  const byOrder = (a, b) => (a.status === 'building') - (b.status === 'building');  // 개통 먼저
+  // 밝은 분류 색(주황 등)이면 먹색 글자 표지
+  const isWarm = color => I.fgOf(color || '#0F5A3A') !== '#FFFFFF';
+  data.routes = data.routes.filter(r => !r.hidden);
 
   /* ===== 상세 안내판 ===== */
   const dlg = document.querySelector('[data-dlg]');
@@ -364,6 +312,7 @@
     const actions = dlg.querySelector('[data-dlg-actions]');
     if (!building && r.url) {
       const a = el('a', 'dlg-go'); a.href = r.url;
+      a.addEventListener('click', () => { if (window.BYPASS_TRACK) window.BYPASS_TRACK.go(r.id); });
       if (/^https?:/.test(r.url)) { a.target = '_blank'; a.rel = 'noopener'; }
       a.append(document.createTextNode('이용하기'), el('span', null, '→'));
       if (a.target) a.append(el('span', 'sr-only', ' (새 창)'));
@@ -378,7 +327,7 @@
   /* ===== 첫 화면 노선 그림 (역을 누르면 안내판) ===== */
   const map = document.querySelector('[data-linemap]');
   map.replaceChildren(...data.lines.map(l => {
-    const stops = data.routes.filter(r => r.line === l.id).sort(byOrder);
+    const stops = data.routes.filter(r => r.line === l.id);
     const row = el('div', 'linemap-row'); row.style.setProperty('--line', l.color);
     const badge = el('span', 'linemap-badge'); const b = el('b', null, l.no); b.style.background = l.color; badge.append(b, document.createTextNode(l.name.replace(/ (노선|지름길)$/, '')));
     const track = el('div', 'linemap-track'); const st = el('div', 'linemap-stops');
@@ -411,7 +360,7 @@
 
   const box = document.querySelector('[data-lines]');
   box.replaceChildren(...data.lines.map(l => {
-    const routes = data.routes.filter(r => r.line === l.id).sort(byOrder);
+    const routes = data.routes.filter(r => r.line === l.id);
     const zone = el('section', `zone${isWarm(l.color) ? ' is-warm' : ''}`);
     zone.style.setProperty('--c', l.color);
     zone.setAttribute('aria-labelledby', `zone-${l.id}`);
