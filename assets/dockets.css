@@ -75,7 +75,7 @@
 .legs::before { left: 22%; }
 .legs::after { right: 22%; }
 /* 전체 보기: 여러 줄로 쌓이므로 안내판마다 땅을 그린다 */
-.boards-all { row-gap: 30px; border-bottom: 0; }
+.boards.boards-all { row-gap: 30px; border-bottom: 0; }
 .boards-all .board-unit { border-bottom: 6px solid var(--post); padding-top: 16px; }
 @media (max-width: 1060px) {
   .boards { gap: 0 14px; }

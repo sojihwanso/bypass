@@ -1650,8 +1650,13 @@
     $$('.grip', docketList).forEach(g => { g.disabled = !!q; });
   }
   dfind.addEventListener('input', applyDocketFind);
-  async function saveDocketOrder(list) {
+  // 순서 저장은 한 번에 하나씩 (빠르게 여러 번 옮겨도 마지막 순서가 남게)
+  let orderChain = Promise.resolve();
+  function saveDocketOrder(list) {
     const ids = $$(':scope > li[data-id]', list).map(li => li.dataset.id);
+    orderChain = orderChain.then(() => writeDocketOrder(ids)).catch(() => {});
+  }
+  async function writeDocketOrder(ids) {
     const jobs = [];
     ids.forEach((id, i) => {
       const item = dockets.find(x => String(x.id) === id);
@@ -1663,7 +1668,11 @@
     const bad = res.find(x => x.error);
     if (bad) { toast('순서를 저장하지 못했습니다. ' + errText(bad.error, '저장', 'docket'), true); await loadDockets(); return; }
     dockets.sort((a, b) => a.sort - b.sort || a.id - b.id);
+    // 다시 그려도 손잡이에 둔 키보드 위치는 그대로
+    const focusedId = document.activeElement && document.activeElement.classList.contains('grip') && docketList.contains(document.activeElement)
+      ? document.activeElement.closest('li').dataset.id : null;
     renderDockets();
+    if (focusedId) { const g = $(`li[data-id="${focusedId}"] .grip`, docketList); if (g) g.focus({ preventScroll: true }); }
     toast('순서를 저장했습니다. 메인에 바로 반영됩니다.');
   }
 
@@ -1689,6 +1698,8 @@
       });
       return g;
     }).filter(g => g.children.length);
+    // 지름길 목록을 못 불러왔거나 목록 밖이면, 저장하다 연결이 끊기지 않게 그대로 남겨 둔다
+    if (d && d.route_id != null && !routes.some(r => String(r.id) === String(d.route_id))) { const o = el('option', null, `지름길 ${d.route_id}번 (목록에 없음)`); o.value = d.route_id; groups.unshift(o); }
     rsel.replaceChildren(none, ...groups);
     rsel.value = d && d.route_id != null ? String(d.route_id) : '';
     const psel = F('d-report');

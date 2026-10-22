@@ -18,16 +18,17 @@ create table if not exists public.site_settings (
 );
 
 alter table public.site_settings drop constraint if exists site_settings_status_shape;
+-- coalesce: 칸이 빠져 NULL 이 되어도 통과하지 않게
 alter table public.site_settings add constraint site_settings_status_shape check (
-  key <> 'status' or (
+  key <> 'status' or coalesce(
         value ->> 'mode' in ('normal', 'recruiting', 'exam')
     and jsonb_typeof(value -> 'texts') = 'object'
     and char_length(coalesce(value -> 'texts' ->> 'normal', '')) <= 120
     and char_length(coalesce(value -> 'texts' ->> 'recruiting', '')) <= 120
     and char_length(coalesce(value -> 'texts' ->> 'exam', '')) <= 120
-    and (value ->> 'recruit_start' is null or value ->> 'recruit_start' ~ '^\d{4}-\d{2}-\d{2}$')
-    and (value ->> 'recruit_end' is null or value ->> 'recruit_end' ~ '^\d{4}-\d{2}-\d{2}$')
-  )
+    and (value ->> 'recruit_start' is null or value ->> 'recruit_start' ~ '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$')
+    and (value ->> 'recruit_end' is null or value ->> 'recruit_end' ~ '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$'),
+    false)
 );
 
 drop trigger if exists site_settings_touch on public.site_settings;
@@ -64,6 +65,10 @@ on conflict (key) do nothing;
 -- old_way: 기존 절차 (반려 안건은 '접수 내용')   new_way: 개선 후   reason: 반려 사유
 -- no     : '0-5' 처럼 적으면 '제0-5호'로 보임.   no_note: '창립 전' 처럼 번호 옆 괄호
 -- sort   : 작을수록 앞. 메인에는 앞에서 4건, /dockets/ 에는 전부
+-- 표를 처음 만들 때만 기존 안내판을 옮겨 넣도록 표시해 둔다 (나중에 모두 지우고 다시 실행해도 되살아나지 않게)
+do $$ begin
+  if to_regclass('public.dockets') is null then create temp table bypass_seed_dockets (x int); end if;
+end $$;
 create table if not exists public.dockets (
   id          bigint generated always as identity primary key,
   created_at  timestamptz not null default now(),
@@ -92,7 +97,10 @@ create trigger dockets_touch before update on public.dockets
 
 alter table public.dockets enable row level security;
 revoke all on public.dockets from anon, authenticated;
-grant select on public.dockets to anon, authenticated;
+-- 익명에게는 공개 화면이 쓰는 칸만 (어느 제보에서 시작됐는지는 로그인한 사람만)
+grant select (id, created_at, updated_at, no, no_note, title, status, old_way, new_way, reason, route_id, sample, hidden, sort)
+  on public.dockets to anon;
+grant select on public.dockets to authenticated;
 grant insert (no, no_note, title, status, old_way, new_way, reason, route_id, report_id, sample, hidden, sort),
       update (no, no_note, title, status, old_way, new_way, reason, route_id, report_id, sample, hidden, sort),
       delete on public.dockets to authenticated;
@@ -110,7 +118,7 @@ drop policy if exists "안건: 운영진 지우기" on public.dockets;
 create policy "안건: 운영진 지우기" on public.dockets for delete to authenticated
   using ((select public.bypass_role()) = 'staff');
 
--- 지금 메인에 있는 안내판 4건을 옮긴다 (표가 비어 있을 때 한 번만). 지름길은 주소로 찾아 잇는다
+-- 지금 메인에 있는 안내판 4건을 옮긴다 (표를 처음 만들 때 한 번만). 지름길은 주소로 찾아 잇는다
 insert into public.dockets (no, no_note, title, status, old_way, new_way, reason, route_id, sample, sort)
 select v.no, v.no_note, v.title, v.status, v.old_way, v.new_way, v.reason,
        (select r.id from public.routes r where r.url = v.url order by r.id limit 1),
@@ -129,4 +137,10 @@ from (values
    '비 오는 날 강의동까지 걸어가야 함', null, '해당 불편은 절차가 아닌 날씨에 기인함.',
    null, true, 40)
 ) as v(no, no_note, title, status, old_way, new_way, reason, url, sample, sort)
-where not exists (select 1 from public.dockets);
+where to_regclass('pg_temp.bypass_seed_dockets') is not null
+  and not exists (select 1 from public.dockets);
+drop table if exists pg_temp.bypass_seed_dockets;
+
+-- 확인: 실행 결과에 안건 목록이 보입니다. 개통 안건(0-1~0-3)의 route_id 가 비어 있으면
+-- 노선도의 주소와 맞지 않은 것이니 HQ › 처리 현황에서 '연결한 지름길'을 골라 주세요.
+select no as "번호", title as "제목", status as "상태", route_id as "연결 지름길" from public.dockets order by sort, id;
