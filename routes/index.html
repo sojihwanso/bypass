@@ -380,7 +380,7 @@
   map.replaceChildren(...data.lines.map(l => {
     const stops = data.routes.filter(r => r.line === l.id).sort(byOrder);
     const row = el('div', 'linemap-row'); row.style.setProperty('--line', l.color);
-    const badge = el('span', 'linemap-badge'); const b = el('b', null, l.no); b.style.background = l.color; badge.append(b, document.createTextNode(l.name.replace(' 노선', '')));
+    const badge = el('span', 'linemap-badge'); const b = el('b', null, l.no); b.style.background = l.color; badge.append(b, document.createTextNode(l.name.replace(/ (노선|지름길)$/, '')));
     const track = el('div', 'linemap-track'); const st = el('div', 'linemap-stops');
     stops.forEach(r => {
       const s = el('button', `linemap-stop${r.status === 'building' ? ' is-building' : ''}`); s.type = 'button';
