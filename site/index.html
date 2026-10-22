@@ -198,7 +198,7 @@
             <div data-crew-open hidden>
               <section class="crew-part" aria-labelledby="c-agenda">
                 <div class="crew-head"><h3 id="c-agenda">회의 안건</h3><span class="crew-count" data-count="agenda" hidden></span>
-                  <button type="button" class="mini-btn mini-go" data-staff-only data-form-open="agenda" hidden>+ 안건</button></div>
+                  <button type="button" class="mini-btn mini-go" data-crew-only data-form-open="agenda" hidden>+ 안건</button></div>
                 <form class="board-form" data-form="agenda" novalidate hidden>
                   <label class="field-label" for="ag-title">안건</label>
                   <input class="input" id="ag-title" maxlength="200" required placeholder="예: 셔틀버스 시간표 앱 만들지 정하기">
@@ -215,7 +215,7 @@
               </section>
               <section class="crew-part" aria-labelledby="c-res">
                 <div class="crew-head"><h3 id="c-res">자료실</h3><span class="crew-count" data-count="resources" hidden></span>
-                  <button type="button" class="mini-btn mini-go" data-staff-only data-form-open="resource" hidden>+ 자료</button></div>
+                  <button type="button" class="mini-btn mini-go" data-crew-only data-form-open="resource" hidden>+ 자료</button></div>
                 <form class="board-form" data-form="resource" novalidate hidden>
                   <label class="field-label" for="rs-title">이름</label>
                   <input class="input" id="rs-title" maxlength="200" required placeholder="예: 회의록 (노션)">
@@ -710,9 +710,12 @@
   })();
 
   /* ===== C구역 공지 · D구역 회의 안건·자료실 =====
-     읽기: 공지는 회원 모두, 안건·자료는 국원·운영진. 쓰기·고치기·지우기는 운영진만 (supabase/003_board.sql). */
+     읽기: 공지는 회원 모두, 안건·자료는 국원·운영진.
+     쓰기: 공지는 운영진만, 안건·자료는 국원도 (국원은 자기가 올린 것만 지움). 안건 처리 완료는 운영진만. */
   const isStaffUser = role.key === 'staff';
   if (isStaffUser) document.querySelectorAll('[data-staff-only]').forEach(x => { x.hidden = false; });
+  // 회의 안건·자료 올리기는 국원도 (supabase/006_crew_posting.sql)
+  if (role.key !== 'general') document.querySelectorAll('[data-crew-only]').forEach(x => { x.hidden = false; });
 
   // 쓰기 양식 열고 닫기
   const formOf = key => document.querySelector(`[data-form="${key}"]`);
@@ -827,9 +830,10 @@
     if (a.report_id) meta.append(el('span', 'bl-tag', `제보 ${receiptNo('BYP', { id: a.report_id, created_at: a.created_at })}`));
     li.append(meta);
     if (a.note) li.append(el('p', 'bl-note', a.note));
-    if (isStaffUser) {
+    if (isStaffUser || a.author === user.id) {
       const act = el('div', 'inbox-actions');
       const done = el('button', 'mini-btn', a.done ? '다시 안건으로' : '처리 완료');
+      done.hidden = !isStaffUser;   // 처리 완료 표시는 운영진만
       done.type = 'button';
       done.addEventListener('click', async () => {
         done.disabled = true;
@@ -871,7 +875,7 @@
     try { host = new URL(r.url).hostname.replace(/^www\./, ''); } catch (e) { /* 주소 형식은 DB에서 이미 확인 */ }
     li.append(el('p', 'bl-meta', `${host} · ${B.dateText(r.created_at)} · ${r.author_name || '운영진'}`));
     if (r.note) li.append(el('p', 'bl-note', r.note));
-    if (isStaffUser) {
+    if (isStaffUser || r.author === user.id) {   // 국원은 자기가 올린 자료만 지움
       const act = el('div', 'inbox-actions');
       act.append(deleteButton(`자료 ${r.title}`, () => removeRow('resources', r.id, li, 'resources', 'resources', '아직 올라온 자료가 없습니다.')));
       li.append(act);
@@ -882,8 +886,8 @@
   if (role.key !== 'general') {
     (async () => {
       const [ag, rs] = await Promise.all([
-        B.sb.from('agenda_items').select('id, created_at, title, note, done, report_id, author_name').order('created_at', { ascending: false }).limit(LIMIT),
-        B.sb.from('resources').select('id, created_at, title, url, note, author_name').order('created_at', { ascending: false }).limit(LIMIT)
+        B.sb.from('agenda_items').select('id, created_at, title, note, done, report_id, author, author_name').order('created_at', { ascending: false }).limit(LIMIT),
+        B.sb.from('resources').select('id, created_at, title, url, note, author, author_name').order('created_at', { ascending: false }).limit(LIMIT)
       ]);
       if (ag.error) setState('agenda', failText(ag.error).replace('접수함', '회의 안건'));
       else {
