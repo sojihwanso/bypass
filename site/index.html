@@ -1133,7 +1133,7 @@
       if (!subject) return fail(wikiForm, '과목 이름을 넣어 주세요.', 'wk-subject');
       if (!/^[a-z0-9][a-z0-9-]{1,48}$/.test(slug)) return fail(wikiForm, '주소 이름은 영문 소문자·숫자·하이픈(-)으로 2~49자로 정해 주세요. 예: navigation-101', 'wk-slug');
       if (!file) return fail(wikiForm, '위키 HTML 파일을 골라 주세요.', 'wk-file');
-      if (file.size > 1_500_000) return fail(wikiForm, '파일이 너무 큽니다. 1.5MB 이하로 올려 주세요.', 'wk-file');
+      if (file.size > 5_000_000) return fail(wikiForm, '파일이 너무 큽니다. 5MB 이하로 올려 주세요.', 'wk-file');
       const html = await file.text();
       if (!/<html[\s>]/i.test(html)) return fail(wikiForm, 'HTML 파일이 아닌 것 같습니다. 위키 .html 파일을 골라 주세요.', 'wk-file');
 
