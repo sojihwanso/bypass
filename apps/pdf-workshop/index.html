@@ -763,7 +763,7 @@ async function blobBytes(b) { return new Uint8Array(await b.arrayBuffer()); }
 
 /* ---------- download ---------- */
 function makeBlob(bytes, name) {
-  const t = /\.zip$/i.test(name) ? 'application/zip' : /\.png$/i.test(name) ? 'image/png' : /\.jpe?g$/i.test(name) ? 'image/jpeg' : 'application/pdf';
+  const t = /\.txt$/i.test(name) ? 'text/plain;charset=utf-8' : /\.zip$/i.test(name) ? 'application/zip' : /\.png$/i.test(name) ? 'image/png' : /\.jpe?g$/i.test(name) ? 'image/jpeg' : 'application/pdf';
   return bytes instanceof Blob ? bytes : new Blob([bytes], { type: t });
 }
 let lastURL;
@@ -1006,6 +1006,71 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', ['HWP', 'v
       r.canvas.width = r.canvas.height = 0;
     }
     await deliverMany(outs, baseName(it.name) + '_images.zip');
+  },
+},
+/* ---------- PDF → 텍스트 ---------- */
+{
+  id: 'pdf2txt', group: '변환', name: 'PDF → 텍스트', desc: 'PDF 속 글자를 .txt 파일로 뽑아내기', badge: ['TXT', 'var(--c6)'],
+  accept: '.pdf,application/pdf', multiple: true, test: isPdf, fileWord: 'PDF',
+  defaults: { range: '', marks: true },
+  prepare: preparePdf,
+  async extract(it, range) {
+    const idx = range && range.trim() ? Core.parseRanges(range, it.pages).flatMap(Core.rangeIdx) : Array.from({ length: it.pages }, (_, i) => i);
+    const pages = [];
+    for (const i of idx) {
+      const page = await it.doc.getPage(i + 1);
+      const tc = await page.getTextContent();
+      const lines = []; let line = '', lastY = null;
+      for (const t of tc.items) {
+        if (!('str' in t)) continue;
+        const y = t.transform[5], hgt = Math.abs(t.height || t.transform[3] || 10);
+        if (lastY !== null && line && Math.abs(y - lastY) > Math.max(2, hgt * 0.6)) { lines.push(line); line = ''; }
+        line += t.str; lastY = y;
+        if (t.hasEOL) { if (line.trim()) lines.push(line); line = ''; lastY = null; }
+      }
+      if (line) lines.push(line);
+      pages.push({ n: i + 1, text: lines.map((l) => l.replace(/\s+$/, '')).join('\n').replace(/\n{3,}/g, '\n\n').trim() });
+      page.cleanup();
+    }
+    return pages;
+  },
+  join(pages) {
+    return pages.map((p) => (S.opts.marks ? `===== ${p.n}페이지 =====\n` : '') + p.text).join(S.opts.marks ? '\n\n' : '\n\n');
+  },
+  async renderMain() {
+    const m = $('#main');
+    const it = S.files[0];
+    m.innerHTML = (S.files.length > 1
+      ? `<div class="mainbar"><span class="count">PDF ${S.files.length}개 · 각각 .txt로 만들어 ZIP으로 드려요 (미리보기는 첫 파일)</span><button class="btn" id="addMore">+ PDF 추가</button></div>`
+      : singleCard(it) + `<div class="mainbar"><span class="count">미리보기 · 첫 3페이지</span><button class="btn" id="addMore">+ PDF 추가</button><button class="btn" id="copyAll">전체 복사</button></div>`) +
+      `<textarea id="txtPv" readonly style="width:100%;height:60vh;padding:16px;border-radius:12px;border:1px solid var(--line);background:var(--panel);font:14px/1.7 ui-monospace,Menlo,Consolas,'Malgun Gothic',monospace;resize:vertical"></textarea><div id="txtWarn"></div>`;
+    wireSwap();
+    $('#addMore').onclick = () => { const i = $('#fileIn'); i.multiple = true; i.click(); };
+    const pv = await this.extract(it, it.pages > 3 ? '1-3' : '');
+    const txt = this.join(pv);
+    $('#txtPv').value = txt || '';
+    if (!pv.some((p) => p.text.trim())) $('#txtWarn').innerHTML = '<div class="note warn" style="margin-top:12px">글자가 나오지 않았어요. <b>스캔본(사진으로 된 PDF)</b>이라 글자 정보가 없는 것 같아요. 이런 파일은 OCR(글자 인식) 프로그램이 필요해요.</div>';
+    const c = $('#copyAll');
+    if (c) c.onclick = async () => { try { busy('글자 뽑는 중…'); const all = this.join(await this.extract(it, S.opts.range)); idle(); await navigator.clipboard.writeText(all); toast('전체 텍스트를 복사했어요.'); } catch (e) { idle(); toast('복사하지 못했어요: ' + e.message); } };
+  },
+  renderOpts() {
+    optsForm($('#opts'), [
+      { key: 'range', type: 'text', label: '페이지 (비우면 전체)', placeholder: '예: 1-5, 9' , show: () => S.files.length === 1 },
+      { key: 'marks', type: 'check', label: '페이지 구분선 넣기', hint: '"===== 3페이지 =====" 같은 줄을 페이지마다 넣어요', onchange: () => this.renderMain() },
+      { type: 'note', html: () => '글자 정보가 들어 있는 PDF만 뽑을 수 있어요. 표는 칸 구분 없이 줄글로 나와요. 저장 파일은 메모장에서 한글이 깨지지 않게 UTF-8로 만들어요.' },
+    ]);
+  },
+  runLabel: '텍스트 파일로 저장',
+  async run() {
+    const outs = [];
+    for (let f = 0; f < S.files.length; f++) {
+      const it = S.files[f];
+      busy(`글자 뽑는 중… (${f + 1}/${S.files.length})`, f / S.files.length);
+      const pages = await this.extract(it, S.files.length === 1 ? S.opts.range : '');
+      const body = '﻿' + this.join(pages).replace(/\n/g, '\r\n');
+      outs.push({ name: baseName(it.name) + '.txt', bytes: new TextEncoder().encode(body) });
+    }
+    await deliverMany(outs, 'pdf_text.zip');
   },
 },
 /* ---------- 병합 ---------- */
