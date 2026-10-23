@@ -17,7 +17,7 @@ const ALLOWED_ORIGINS = [
   'https://bypass-three.vercel.app',
 ];
 const SLUG_RULE = /^[a-z0-9][a-z0-9-]{1,48}$/;   // 주소에 쓰일 영문 이름: navigation-101
-const MAX_BYTES = 1_500_000;                      // 한 장 최대 약 1.5MB
+const MAX_BYTES = 5_000_000;                      // 한 장 최대 약 5MB
 const FOLDERS = ['wiki', 'apps'];                 // 올릴 수 있는 폴더 (vercel.json 에서 둘 다 sandbox 로 열림)
 
 function cors(req: Request) {
@@ -71,7 +71,7 @@ export async function handle(req: Request, env: (k: string) => string | undefine
   if (!FOLDERS.includes(folder)) return reply(req, 400, { error: '올릴 수 없는 폴더입니다.' });
   if (!SLUG_RULE.test(slug)) return reply(req, 400, { error: '주소 이름은 영문 소문자·숫자·하이픈(-)으로 2~49자여야 합니다. 예: navigation-101' });
   if (!/<html[\s>]/i.test(html)) return reply(req, 400, { error: 'HTML 파일이 아닌 것 같습니다. <html> 로 된 파일을 올려 주세요.' });
-  if (new TextEncoder().encode(html).length > MAX_BYTES) return reply(req, 413, { error: '파일이 너무 큽니다. 1.5MB 이하로 올려 주세요.' });
+  if (new TextEncoder().encode(html).length > MAX_BYTES) return reply(req, 413, { error: '파일이 너무 큽니다. 5MB 이하로 올려 주세요.' });
 
   // 3) GitHub 에 저장 (있으면 고쳐 쓰기)
   const token = env('GITHUB_TOKEN');
