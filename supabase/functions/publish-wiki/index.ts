@@ -1,7 +1,7 @@
 // BYPASS 위키 올리기 (Supabase Edge Function: publish-wiki)
 //
-// 공사장 H구역에서 운영진이 위키 HTML 파일을 올리면, 이 함수가 GitHub 저장소의
-// wiki/<주소이름>/index.html 로 대신 저장(커밋)합니다. 저장되면 Vercel 이 자동으로 배포합니다.
+// 운영진이 HQ(지름길 추가) 또는 공사장에서 HTML 파일을 올리면, 이 함수가 GitHub 저장소의
+// wiki/<주소이름>/index.html (위키) 또는 apps/<주소이름>/index.html (앱 등) 로 대신 저장(커밋)합니다. 저장되면 Vercel 이 자동으로 배포합니다.
 //
 // 필요한 비밀 값 (Supabase 대시보드 → Edge Functions → Secrets)
 //   GITHUB_TOKEN  : 이 저장소의 Contents 읽기·쓰기 권한만 가진 GitHub 토큰 (fine-grained)
@@ -17,7 +17,8 @@ const ALLOWED_ORIGINS = [
   'https://bypass-three.vercel.app',
 ];
 const SLUG_RULE = /^[a-z0-9][a-z0-9-]{1,48}$/;   // 주소에 쓰일 영문 이름: navigation-101
-const MAX_BYTES = 1_500_000;                      // 위키 한 장 최대 약 1.5MB
+const MAX_BYTES = 1_500_000;                      // 한 장 최대 약 1.5MB
+const FOLDERS = ['wiki', 'apps'];                 // 올릴 수 있는 폴더 (vercel.json 에서 둘 다 sandbox 로 열림)
 
 function cors(req: Request) {
   const origin = req.headers.get('origin') ?? '';
@@ -58,16 +59,18 @@ export async function handle(req: Request, env: (k: string) => string | undefine
   });
   if (!who.ok) return reply(req, 401, { error: '로그인 정보가 만료되었습니다. 다시 로그인해 주세요.' });
   const user = await who.json();
-  if (user?.app_metadata?.bypass_role !== 'staff') return reply(req, 403, { error: '운영진만 위키를 올릴 수 있습니다.' });
+  if (user?.app_metadata?.bypass_role !== 'staff') return reply(req, 403, { error: '운영진만 파일을 올릴 수 있습니다.' });
 
   // 2) 올린 내용 확인
-  let body: { slug?: string; title?: string; html?: string };
+  let body: { slug?: string; title?: string; html?: string; folder?: string };
   try { body = await req.json(); } catch { return reply(req, 400, { error: '올린 내용을 읽지 못했습니다.' }); }
   const slug = (body.slug ?? '').trim().toLowerCase();
   const title = (body.title ?? '').trim().slice(0, 100) || slug;
   const html = body.html ?? '';
+  const folder = body.folder ?? 'wiki';
+  if (!FOLDERS.includes(folder)) return reply(req, 400, { error: '올릴 수 없는 폴더입니다.' });
   if (!SLUG_RULE.test(slug)) return reply(req, 400, { error: '주소 이름은 영문 소문자·숫자·하이픈(-)으로 2~49자여야 합니다. 예: navigation-101' });
-  if (!/<html[\s>]/i.test(html)) return reply(req, 400, { error: 'HTML 파일이 아닌 것 같습니다. <html> 로 된 위키 파일을 올려 주세요.' });
+  if (!/<html[\s>]/i.test(html)) return reply(req, 400, { error: 'HTML 파일이 아닌 것 같습니다. <html> 로 된 파일을 올려 주세요.' });
   if (new TextEncoder().encode(html).length > MAX_BYTES) return reply(req, 413, { error: '파일이 너무 큽니다. 1.5MB 이하로 올려 주세요.' });
 
   // 3) GitHub 에 저장 (있으면 고쳐 쓰기)
@@ -75,7 +78,7 @@ export async function handle(req: Request, env: (k: string) => string | undefine
   if (!token) return reply(req, 500, { error: '위키 올리기 설정이 아직 끝나지 않았습니다. (GITHUB_TOKEN 없음)' });
   const repo = env('GITHUB_REPO') || 'sojihwanso/bypass';
   const branch = env('GITHUB_BRANCH') || 'main';
-  const path = `wiki/${slug}/index.html`;
+  const path = `${folder}/${slug}/index.html`;
   const gh = (url: string, init: RequestInit = {}) => http(`https://api.github.com/repos/${repo}/contents/${path}${url}`, {
     ...init,
     headers: {
@@ -97,7 +100,7 @@ export async function handle(req: Request, env: (k: string) => string | undefine
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      message: `위키 ${sha ? '고침' : '올림'}: ${title} (/wiki/${slug}/, ${name})`,
+      message: `${folder === 'wiki' ? '위키' : '페이지'} ${sha ? '고침' : '올림'}: ${title} (/${folder}/${slug}/, ${name})`,
       content: toBase64(html),
       branch,
       ...(sha ? { sha } : {}),
@@ -111,7 +114,7 @@ export async function handle(req: Request, env: (k: string) => string | undefine
   return reply(req, 200, {
     ok: true,
     updated: Boolean(sha),
-    url: `/wiki/${slug}/`,
+    url: `/${folder}/${slug}/`,
     commit: saved?.commit?.html_url ?? null,
   });
 }
