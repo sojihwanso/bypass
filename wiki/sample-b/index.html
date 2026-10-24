@@ -1,0 +1,1033 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>해운실무 위키</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;800&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: 해도(chart) 느낌의 차분한 위키 — 상단 바 + 좌측 색인 + 본문 문서 */
+:root{
+  --bg:#f5f7f8; --paper:#ffffff; --ink:#18242b; --muted:#5d6d76; --line:#d9e1e5;
+  --accent:#0d5f73; --accent-soft:#e3f0f3; --red:#b4412e; --mark:#f6e7b4;
+  --display:"Noto Serif KR","Nanum Myeongjo",Georgia,serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f171b; --paper:#152128; --ink:#e3ebee; --muted:#93a6af; --line:#2a3a42;
+  --accent:#6cc3d6; --accent-soft:#1b3440; --red:#e7836f; --mark:#4a4020; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f171b; --paper:#152128; --ink:#e3ebee; --muted:#93a6af; --line:#2a3a42;
+  --accent:#6cc3d6; --accent-soft:#1b3440; --red:#e7836f; --mark:#4a4020; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15.5px;line-height:1.75;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+a{color:var(--accent)}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:2px solid var(--accent);
+  margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px));
+  display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:800;font-size:1.25rem;text-decoration:none;color:var(--ink);display:flex;gap:8px;align-items:baseline}
+.brand small{font-family:var(--mono);font-size:.7rem;color:var(--muted);letter-spacing:.08em}
+.search{flex:1;min-width:180px;position:relative;max-width:420px;margin-left:auto}
+.search input{width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit;font-size:.95rem}
+.search input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.results{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--paper);border:1px solid var(--line);border-radius:6px;
+  box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:60vh;overflow:auto}
+.results a{display:block;padding:7px 12px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--line)}
+.results a:hover,.results a.sel{background:var(--accent-soft)}
+.results span{color:var(--muted);font-size:.85rem;margin-left:6px}
+#tocBtn{display:none;font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.wrap{display:grid;grid-template-columns:240px minmax(0,1fr);gap:28px;max-width:1180px;margin:0 auto;padding-block:24px 64px}
+nav.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px);align-self:start;max-height:calc(100vh - 90px);overflow:auto;font-size:.9rem}
+/* 스크롤바: 목록 왼쪽 끝, 얇게, 평소엔 숨김 */
+nav.side{direction:rtl;padding-left:10px;scrollbar-width:thin;scrollbar-color:transparent transparent;scrollbar-gutter:stable}
+nav.side>*{direction:ltr}
+nav.side:hover,nav.side:focus-within{scrollbar-color:var(--line) transparent}
+nav.side::-webkit-scrollbar{width:5px}
+nav.side::-webkit-scrollbar-track{background:transparent}
+nav.side::-webkit-scrollbar-thumb{background:transparent;border-radius:3px}
+nav.side:hover::-webkit-scrollbar-thumb,nav.side:focus-within::-webkit-scrollbar-thumb{background:var(--line)}
+nav.side::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+nav.side h4{font-size:.72rem;letter-spacing:.12em;color:var(--muted);margin:18px 0 4px;font-weight:500}
+nav.side h4:first-child{margin-top:0}
+nav.side a{display:flex;justify-content:space-between;align-items:baseline;gap:8px;text-decoration:none;color:var(--ink);padding:2px 8px;border-left:2px solid transparent}
+nav.side a .nm{min-width:0}
+nav.side a.unseen{color:var(--muted)}
+.cnt{font-family:var(--mono);font-size:.68rem;color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+.cnt.hot{color:var(--accent)}
+.sortbar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.sortbar label{font-size:.72rem;letter-spacing:.12em;color:var(--muted)}
+.sortbar select{flex:1;min-width:0;font:inherit;font-size:.85rem;padding:4px 6px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink)}
+.progress{font-size:.75rem;color:var(--muted);margin-bottom:6px}
+.progress i{display:block;height:3px;background:var(--line);border-radius:2px;margin-top:3px;overflow:hidden}
+.progress i b{display:block;height:100%;background:var(--accent)}
+.reset{margin-top:18px;font:inherit;font-size:.75rem;color:var(--muted);background:none;border:1px solid var(--line);border-radius:4px;padding:4px 8px;cursor:pointer}
+.reset.warn{color:var(--red);border-color:var(--red)}
+nav.side a:hover{color:var(--accent)}
+nav.side a.cur{border-left-color:var(--accent);color:var(--accent);font-weight:500;background:var(--accent-soft)}
+article{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:28px clamp(18px,4vw,44px) 36px;min-width:0}
+.crumb{font-size:.8rem;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{font-family:var(--mono);font-size:.72rem;border:1px solid var(--line);padding:1px 7px;border-radius:3px;color:var(--muted)}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,4vw,2.2rem);line-height:1.3;margin:10px 0 2px;text-wrap:balance}
+.en{font-style:italic;color:var(--muted);margin-bottom:14px}
+.alias{font-size:.85rem;color:var(--muted);margin-bottom:16px}
+.summary{background:var(--accent-soft);border-left:3px solid var(--accent);padding:12px 16px;margin:0 0 22px;border-radius:0 4px 4px 0}
+.summary b{color:var(--accent);font-size:.75rem;letter-spacing:.1em;display:block;margin-bottom:2px}
+article h2{font-family:var(--display);font-weight:600;font-size:1.25rem;margin:30px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--line);text-wrap:balance}
+article h2 .n{color:var(--accent);margin-right:8px;font-family:var(--mono);font-size:1rem}
+article p,article li{max-width:72ch}
+article ul,article ol{padding-left:1.3em}
+a.wl{text-decoration:none;border-bottom:1px dotted var(--accent)}
+a.wl:hover{background:var(--accent-soft)}
+a.wl.miss{color:var(--red);border-bottom-color:var(--red)}
+.abbr{font-family:var(--mono);font-size:.9em;background:var(--accent-soft);padding:0 4px;border-radius:3px}
+mark{background:var(--mark);color:inherit;padding:0 2px}
+.tbl{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;font-size:.9rem;min-width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+th{background:var(--accent-soft);font-weight:500;white-space:nowrap}
+td.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+sup.fn a{text-decoration:none;font-family:var(--mono);font-size:.72rem;padding:0 2px}
+.notes{margin-top:34px;border-top:1px solid var(--line);padding-top:10px;font-size:.88rem}
+.notes h3,.back h3{font-size:.78rem;letter-spacing:.12em;color:var(--muted);font-weight:500;margin:0 0 6px}
+.notes ol{padding-left:1.6em;margin:0}
+.notes li{margin:4px 0}
+.notes li:target{background:var(--mark)}
+.back{margin-top:22px;font-size:.88rem}
+.back div{display:flex;flex-wrap:wrap;gap:6px}
+.back a{padding:2px 8px;border:1px solid var(--line);border-radius:3px;text-decoration:none}
+.tl{display:flex;gap:3px;margin:18px 0 22px;font-size:.74rem;line-height:1.35}
+.tl .c{min-width:0;display:flex;flex-direction:column;gap:4px}
+.tl i{font-style:normal;color:var(--muted);display:flex;justify-content:space-between;gap:4px;min-height:2.7em;align-items:flex-end}
+.tl i:last-child{align-items:flex-start}
+.tl i span:last-child{text-align:right}
+.tl b{display:block;padding:9px 4px;text-align:center;background:var(--accent-soft);color:var(--accent);border-radius:3px;font-weight:500;border-left:2px solid var(--red);overflow-wrap:anywhere}
+.tl .c:last-child b{border-right:2px solid var(--red)}
+.tl .sail b{background:var(--mark);color:var(--ink)}
+.tl .off b{background:transparent;border:1px dashed var(--red);border-left-width:2px;color:var(--red)}
+.tl .plain b{border-left-color:transparent}
+.q{border:1px dashed var(--red);padding:10px 14px;border-radius:4px;margin:14px 0}
+.q b{color:var(--red)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:12px 0}
+.cards a{display:block;border:1px solid var(--line);border-radius:4px;padding:10px 12px;text-decoration:none;color:var(--ink)}
+.cards a:hover{border-color:var(--accent)}
+.cards a b{display:block;font-family:var(--display);color:var(--accent)}
+.cards a span{font-size:.82rem;color:var(--muted)}
+.dict td:first-child{font-family:var(--mono);white-space:nowrap}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:820px){
+  .wrap{grid-template-columns:minmax(0,1fr)}
+  nav.side{position:static;max-height:none;display:none;background:var(--paper);border:1px solid var(--line);padding:12px;border-radius:4px}
+  nav.side.open{display:block}
+  #tocBtn{display:inline-block}
+}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+
+<header class="top">
+  <a class="brand" href="#main">해운실무 위키 <small>SHIPPING PRACTICE</small></a>
+  <button id="tocBtn" type="button" aria-expanded="false">목차</button>
+  <div class="search">
+    <input id="q" type="search" placeholder="키워드·약어 검색 (예: NOR, 체선료, P&amp;I)" autocomplete="off" aria-label="문서 검색">
+    <div class="results" id="res" hidden></div>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="side" id="side" aria-label="문서 색인">
+    <div class="sortbar">
+      <label for="sortSel">정렬</label>
+      <select id="sortSel">
+        <option value="topic">주제별</option>
+        <option value="week">주차별</option>
+        <option value="visits">많이 본 순</option>
+        <option value="recent">최근 본 순</option>
+        <option value="unread">안 본 문서 먼저</option>
+        <option value="alpha">가나다순</option>
+      </select>
+    </div>
+    <div class="progress" id="prog"></div>
+    <div id="sideList"></div>
+    <button type="button" id="resetBtn" class="reset">방문 기록 지우기</button>
+  </nav>
+  <article id="doc"></article>
+</div>
+
+<script>
+/* 문법: [[id]] / [[id|표시]] 문서 링크,  [^각주^] 각주 */
+const CATS={
+ hist:"대항해시대·해운사",cls:"선급",ins:"해상보험",case:"사고·보험 사례",
+ chr:"용선·운송계약",nype:"NYPE 2015 조항",ops:"선종별 운항",doc:"운송서류·정박",law:"규칙·약관"
+};
+const W={2:"2주차 · 해운의 역사와 보험",3:"3주차 · 용선과 운항방식",4:"4주차 · 운송서류와 약관",6:"6주차 · 용선 실무와 NYPE 2015"};
+/* 타임라인: [위 라벨, 막대 라벨, 아래 라벨, 비율, 종류(sail|off), 오른쪽 위, 오른쪽 아래] */
+function TL(cols,label){return `<div class="tl" role="img" aria-label="${label||"타임라인"}">${cols.map(c=>`<div class="c ${c[4]||""}" style="flex:${c[3]}"><i><span>${c[0]}</span><span>${c[5]||""}</span></i><b>${c[1]}</b><i><span>${c[2]}</span><span>${c[6]||""}</span></i></div>`).join("")}</div>`}
+const A={};
+function add(id,o){A[id]=o}
+
+/* ───────── 2주차: 역사 ───────── */
+add("pepper",{t:"후추",en:"Black Pepper",cat:"hist",wk:2,
+s:"대항해시대를 연 대표 향신료. 유럽이 인도 항로를 찾아 나선 경제적 동기였다.",
+b:`<h2>개요</h2><ul>
+<li>학명 <i>Piper nigrum</i>, 덩굴식물.</li>
+<li>원산지: 인도 남서부 말라바르 해안.</li>
+<li>기후: 평균 24–30℃의 고온다습한 계절풍(몬순) 기후.</li>
+<li>현재 주요 생산지: 인도, 인도네시아, 베트남, 말레이시아, 캄보디아.</li></ul>
+<h2>색깔별 구분</h2><p>같은 열매를 수확 시기와 가공법에 따라 달리 부른다. 덜 익은 열매가 그린 페퍼, 익은 붉은 열매가 레드 페퍼콘, 덜 익은 열매를 말려 검게 만든 것이 블랙 페퍼다.[^흰 후추(white pepper)는 익은 열매의 껍질을 벗겨 말린 것이다.^]</p>
+<h2>해운사적 의미</h2><p>육상 교역로가 막히고 값이 치솟자 포르투갈·스페인이 바닷길을 찾아 나섰다. 이것이 [[columbus]], [[gama]], [[magellan]]으로 이어지고, 향신료 무역을 장악한 [[voc]]의 탄생으로 연결된다.</p>`});
+
+add("columbus",{t:"콜럼버스의 항해",en:"The Columbus voyages",cat:"hist",wk:2,
+s:"1492–1504년 스페인 후원으로 4차례 대서양을 횡단해 카리브해에 도달한 항해.",
+b:`<h2>항차별 정리</h2><div class="tbl"><table><tr><th>차수</th><th>기간</th></tr>
+<tr><td>1차</td><td class="num">1492–1493</td></tr><tr><td>2차</td><td class="num">1493–1496</td></tr>
+<tr><td>3차</td><td class="num">1498–1500</td></tr><tr><td>4차</td><td class="num">1502–1504</td></tr></table></div>
+<p>목표는 서쪽으로 돌아 인도(향신료 산지)에 닿는 것이었으나 실제 도착지는 카리브해와 중남미 연안이었다. 같은 목표를 동쪽으로 이룬 것이 [[gama]]다.</p>`});
+
+add("gama",{t:"바스코 다 가마의 항해",en:"The Vasco da Gama voyage",cat:"hist",wk:2,
+s:"포르투갈에서 아프리카 남단(희망봉)을 돌아 인도 캘리컷에 도착, 유럽–인도 직항로를 연 항해.",
+b:`<h2>개요</h2><p>리스본을 출발해 대서양을 남하, 희망봉을 돌아 동아프리카 연안을 거쳐 인도 서해안에 도착했다. [[pepper|후추]] 등 향신료를 바닷길로 직접 가져올 수 있게 되면서 포르투갈의 아시아 무역이 시작됐다.</p>
+<h2>연도</h2><p>강의자료에는 <b>1494–1499년</b>으로 표기되어 있다.[^일반적으로는 1497년 7월 리스본 출항, 1499년 귀환으로 정리한다. 1494년은 스페인·포르투갈이 세계를 나눈 토르데시야스 조약 연도다. 시험 대비 시 교수님 표기를 우선 확인할 것.^]</p>`});
+
+add("magellan",{t:"마젤란-엘카노 항해",en:"The Magellan-Elcano voyage",cat:"hist",wk:2,
+s:"1519–1522년, 인류 최초의 세계일주 항해. 마젤란 사후 엘카노가 완수했다.",
+b:`<h2>경로</h2><p>스페인 출발 → 남미 남단 해협(마젤란 해협) 통과 → 태평양 횡단 → 필리핀. 마젤란은 필리핀에서 전사했고, 엘카노가 남은 선원을 이끌고 인도양과 희망봉을 거쳐 귀환했다. 지도에서 실선은 마젤란 구간, 점선은 엘카노 구간이다.</p>
+<p>지구가 둥글고 바다가 하나로 이어져 있음을 실증해, 이후 [[voc]] 같은 장거리 해상무역의 바탕이 되었다.</p>`});
+
+add("voc",{t:"네덜란드 동인도회사",en:"VOC, Vereenigde Oost-Indische Compagnie",abbr:"VOC",cat:"hist",wk:2,
+s:"1602–1799년. 여러 상인조합을 합쳐 만든 세계 최초의 주식회사로, 아시아 향신료 무역을 주도했다.",
+b:`<h2>특징</h2><ul>
+<li>1602년 네덜란드 정부가 여러 상인조합을 하나로 통합 → <b>세계 최초의 주식회사</b>.</li>
+<li>인도네시아를 거점으로 아시아 전역의 [[pepper|향신료]] 무역.</li>
+<li>주식 발행 → 대규모 선단 구성 → 이익으로 주주배당 + 상선·호위선 확충 → 세계 최대 선단.</li>
+<li>정부로부터 무역독점권, 조약체결권, 군대·함대 운용권, 화폐 발행권까지 부여.</li></ul>
+<h2>의의</h2><p>배 한 척의 위험을 여러 투자자가 나누는 구조였다. 위험을 나눈다는 발상은 이후 [[lr|로이드]] 커피하우스의 해상보험, 상호보험인 [[pandi-club]], 손실을 이해관계자가 나눠 지는 [[ga]]와 같은 맥락에 있다.</p>`});
+
+/* ───────── 선급 ───────── */
+add("class",{t:"선급",en:"Classification Society",cat:"cls",wk:2,
+s:"선박의 구조·설비가 기술기준에 맞는지 검사하고 등급(Class)을 부여하는 제3자 기관.",
+b:`<h2>탄생 배경</h2><p>최초의 선급은 1760년 영국의 [[lr]]이다. 처음에는 <b>보험 목적</b>으로 선박의 종류, 항해구역, 적재화물 조건 등에 따라 선박 상태에 등급을 매겼다.</p>
+<p>→ 선주에게는 배의 신뢰성을 보장하고, 화주와 보험업자에게는 안심하고 거래할 수 있는 선박임을 제3자가 평가해 준다.</p>
+<h2>4가지 역할</h2><div class="tbl"><table>
+<tr><th>역할</th><th>내용</th></tr>
+<tr><td>기술기준 제정</td><td>선체 구조, 기계, 안전, 환경 규칙 제정 (예: 이중선체 유조선, LNG 연료선, 탈황장치(스크러버) 설치 규정)</td></tr>
+<tr><td>검사와 인증</td><td>신조선: 설계승인 → 건조 중 검사 → 완공검사<br>현존선: 정기·중간·특별검사 → 합격 시 선급증서 발급</td></tr>
+<tr><td>정부대행 업무</td><td>IMO 협약이 요구하는 법정검사를 정부(기국) 대신 수행 — SOLAS, [[marpol|MARPOL]], ISM, ISPS 등</td></tr>
+<tr><td>기자재 검사</td><td>엔진 등 선박·해양구조물에 쓰이는 재료, 기기, 의장품의 검사·승인</td></tr></table></div>
+<p>주요 선급들의 연합체는 [[iacs]]이다.</p>`});
+
+add("lr",{t:"로이드 선급",en:"Lloyd's Register",abbr:"LR",cat:"cls",wk:2,
+s:"1760년 런던에서 설립된 세계 최초의 선급. 로이드 커피하우스가 기원이다.",
+b:`<h2>개요</h2><p>17–18세기 런던의 로이드 커피하우스에는 선주, 상인, 보험업자가 모여 선박 정보를 주고받고 해상보험을 거래했다. 여기서 보험 인수에 쓸 선박 등급부(Register)를 만들면서 [[class|선급]]이 시작됐다.</p>
+<h2>헷갈리기 쉬운 이름</h2><ul>
+<li><b>Lloyd's Register (LR)</b> — 선급. [[iacs]] 회원.</li>
+<li><b>Lloyd's of London</b> — 보험시장. [[titanic]]의 [[hm|선체보험]]을 인수했다.</li></ul>
+<p>둘은 같은 커피하우스에서 유래했지만 별개의 조직이다.[^Lloyd's List(해운 신문)도 같은 뿌리에서 나온 별개 매체다.^]</p>`});
+
+add("iacs",{t:"국제선급연합회",en:"International Association of Classification Societies",abbr:"IACS",cat:"cls",wk:2,
+s:"주요 선급들의 국제 연합체. 공통 규칙(UR)을 만들고 IMO에 자문한다.",
+b:`<h2>강의자료의 회원 목록</h2><div class="tbl"><table><tr><th>약칭</th><th>선급</th><th>국가</th></tr>
+<tr><td>ABS</td><td>American Bureau of Shipping</td><td>미국</td></tr>
+<tr><td>BV</td><td>Bureau Veritas</td><td>프랑스</td></tr>
+<tr><td>CCS</td><td>China Classification Society</td><td>중국</td></tr>
+<tr><td>CRS</td><td>Croatian Register of Shipping</td><td>크로아티아</td></tr>
+<tr><td>DNV</td><td>Det Norske Veritas (2013년 독일 GL과 통합)</td><td>노르웨이</td></tr>
+<tr><td>IRS</td><td>Indian Register of Shipping</td><td>인도</td></tr>
+<tr><td>KR</td><td>[[kr|한국선급]]</td><td>대한민국</td></tr>
+<tr><td>LR</td><td>[[lr|Lloyd's Register]]</td><td>영국</td></tr>
+<tr><td>PRS</td><td>Polski Rejestr Statków</td><td>폴란드</td></tr>
+<tr><td>RINA</td><td>Registro Italiano Navale</td><td>이탈리아</td></tr>
+<tr><td>RS</td><td>Russian Maritime Register of Shipping</td><td>러시아</td></tr>
+<tr><td>TL</td><td>Türk Loydu</td><td>튀르키예</td></tr></table></div>
+<p>목록 보충: 일본의 <b>NK(ClassNK, 일본해사협회)</b>도 IACS의 주요 회원이다.[^강의자료 목록에는 NK가 빠져 있다. 또 러시아 선급(RS)은 2022년 3월 IACS 회원 자격이 철회되었으므로, 현재 회원은 RS 대신 NK가 들어간 12개로 보는 것이 맞다.^]</p>`});
+
+add("kr",{t:"한국선급",en:"Korean Register",abbr:"KR",cat:"cls",wk:2,
+s:"대한민국의 선급. 부산에 본부를 두고 있으며 IACS 정회원이다.",
+b:`<div class="q"><b>강의 질문 · 조선선급협회(Korean Ship Classification Society)는?</b><br>
+한국선급의 전신이다. 1960년 ‘사단법인 조선선급협회’로 설립되었고, 이후 한국선급으로 이름을 바꿨다. 1975년 [[iacs]] 준회원, 1988년 정회원이 되었다.[^연도는 한국선급의 공개 연혁 기준. 영문명 Korean Register of Shipping을 쓰다가 Korean Register로 정리되었다.^]</div>`});
+
+/* ───────── 보험 ───────── */
+add("marine-ins",{t:"선박의 보험",en:"Shipping Insurance",cat:"ins",wk:2,
+s:"선박 운항에 따르는 위험을 나눠 담보하는 보험 체계. 핵심은 H&M과 P&I 두 축이다.",
+b:`<h2>두 축</h2><div class="tbl"><table><tr><th></th><th>[[hm|H&M (선체보험)]]</th><th>[[pandi|P&I 보험]]</th></tr>
+<tr><td>무엇을</td><td>내 배 자체의 손해</td><td>내 배 때문에 생긴 남(제3자)에 대한 배상책임</td></tr>
+<tr><td>담보 예</td><td>선체·기관 손상, [[salvage|구난비용]], [[ga|공동해손]] 분담, 충돌책임(¾)</td><td>인명손해, 화물손해, 오염손해, 부두·교량 등 시설물 파손, 난파선 제거, 법률비용</td></tr>
+<tr><td>인수 주체</td><td>상업 보험사</td><td>선주 상호보험조합 [[pandi-club|P&I Club]]</td></tr></table></div>
+<div class="q"><b>강의 질문 · 영업손실은?</b> H&M과 P&I 어디에도 들어가지 않는다. 사고로 배를 못 쓰는 동안 놓친 용선료·운임 수입은 별도의 [[loh]]으로 담보한다.</div>
+<h2>그 밖의 해운 보험</h2><div class="cards">
+<a href="#tcl"><b>TCL</b><span>용선자 책임보험</span></a>
+<a href="#fdd"><b>FD&amp;D</b><span>운임·체선료 분쟁 법률비용</span></a>
+<a href="#sol"><b>SOL</b><span>운송계약 위반 책임</span></a>
+<a href="#cargo-ins"><b>적하보험</b><span>화물 자체</span></a>
+<a href="#war"><b>전쟁보험</b><span>전쟁·테러 위험</span></a>
+<a href="#kr-ins"><b>K&amp;R</b><span>해적·납치 몸값</span></a>
+<a href="#loh"><b>LOH</b><span>불가동 손실</span></a></div>`});
+
+add("hm",{t:"선체보험",en:"Hull & Machinery Insurance",abbr:"H&M",cat:"ins",wk:2,
+s:"선박 자체(선체·기관)의 물적 손해를 담보하는 보험. 선주가 상업 보험사에 가입한다.",
+b:`<h2>역사</h2><p>14세기 이탈리아 제노바·피렌체에서 선체보험과 해상보험이 나타났다. 대항해시대(15–17세기)의 선체보험은 <b>자기 선박의 손해만</b> 보장했다.</p>
+<ul><li>상대 선박과의 충돌 책임 → 선주가 개인 자산으로 부담</li>
+<li>제3자 손해 → 보장 안 함</li>
+<li>화물 → 화주가 따로 [[cargo-ins|적하보험]]에 가입</li></ul>
+<p>19세기 중반 [[rdc]]가 생겨 충돌 책임 일부가 들어오지만, 나머지는 [[pandi]]의 몫이 된다.</p>
+<h2>담보 범위</h2><ul><li>선체·기관 손상, 수리비</li><li>[[salvage|구난비용(Salvage)]]·예인비용</li><li>[[ga|공동해손(General Average)]] 중 선박 분담분</li><li>충돌배상책임 ¾ ([[rdc]])</li></ul>
+<h2>사례</h2><p>[[titanic]]: 선박가액 약 150만 파운드 중 100만 파운드 가입, 전손(Total Loss) 처리로 전액 지급. [[stolt]]: 선체 수리비, 구난·예인비용.</p>`});
+
+add("rdc",{t:"충돌약관",en:"Running Down Clause",abbr:"RDC",cat:"ins",wk:2,
+s:"선체보험에 덧붙여, 충돌 시 상대 선박에 준 손해의 ¾을 보상하는 약관.",
+b:`<h2>¾ 규칙</h2><p>19세기 중반 등장. 상대방 손해 중 <b>¾은 [[hm|선체보험]]</b>이 보상하고, <b>¼은 선주</b>가 직접 부담했다.[^¼을 남긴 이유는 선주가 항해를 조심하도록 하려는 것(도덕적 해이 방지)으로 흔히 설명한다.^]</p>
+<p>선주들은 이 ¼을 혼자 지지 않으려고 모여서 상호보험을 만들었다 → <b>Protection & Indemnity의 탄생</b> ([[pandi-club]]).</p>
+<p>오늘날에도 남은 ¼ 충돌책임(¼ RDC)은 P&I가 담보하는 것이 일반적이다.</p>`});
+
+add("pandi",{t:"P&I 보험",en:"Protection & Indemnity",abbr:"P&I",cat:"ins",wk:2,
+s:"선박 운항으로 생긴 제3자 배상책임을 담보하는 보험. 선주들의 상호조합(P&I Club)이 인수한다.",
+b:`<h2>이름의 뜻</h2><p><b>Protection</b>은 선원·승객 인명손해 등 선주를 ‘보호’하는 담보, <b>Indemnity</b>는 화물손해처럼 운송계약상 책임을 ‘보상’하는 담보에서 나왔다.</p>
+<h2>담보 범위</h2><ul><li>인명손해(선원·승객·제3자 사상)</li><li>화물손해</li><li>오염손해(유류 유출 등)</li><li>부두·교량 등 시설물 파손</li><li>난파선 제거(Wreck Removal)</li><li>¼ 충돌책임 ([[rdc]] 잔여분)</li><li>기타 법률비용</li></ul>
+<h2>H&M과의 구분</h2><p>[[stolt]] 사례가 좋은 예다. 부두 시설물, 부상자, 화물, 오염 = P&I / 선체 수리비, 구난·예인 = [[hm|H&M]].</p>
+<p>조합 구조는 [[pandi-club]], 국제 공동체는 [[igpi]], 협약상 보험증명은 [[bluecard]] 참고.</p>`});
+
+add("pandi-club",{t:"P&I Club",en:"Protection & Indemnity Club",cat:"ins",wk:2,
+s:"선주들이 분담금(Call)을 내고 사고 시 공동으로 보상하는 비영리 상호보험조합.",
+b:`<h2>탄생 과정</h2><ol>
+<li>19세기 영국 선주들은 [[hm|선체보험]]·해상보험에 가입했지만 보장 범위가 좁았다.</li>
+<li>영국 의회가 1854년 상선법(Merchant Shipping Act) 등으로 선주 책임을 계속 넓혔다 → 선주의 법적·재정적 부담 증가.</li>
+<li>선주들이 <b>상호보험(Mutual Insurance)</b> 방식을 고안 — 회원이 분담금을 내고, 사고가 나면 공동으로 보상.</li>
+<li><b>1855년</b> “The Shipowners' Mutual Protection Society” 설립 → 이후 지역별 Mutual Club들이 생겨남.</li>
+<li>H&M(내 배)과 P&I(남에 대한 책임)의 역할이 점점 명확하게 분리.</li></ol>
+<p>강의자료는 설립 장소를 뉴캐슬로 적고 있다.[^이 조합은 런던에서 설립되었다는 기록이 많고, 오늘날 Britannia P&I Club의 기원으로 알려져 있다. 장소는 자료마다 차이가 있으니 강의 표기를 우선한다.^]</p>
+<h2>국내 유사 제도</h2><p>내항선은 [[ksa|한국해운조합]], 어선은 수협 어선공제가 비슷한 공제 역할을 한다.</p>`});
+
+add("igpi",{t:"International Group of P&I Clubs",en:"IG P&I",abbr:"IG",cat:"ins",wk:2,
+s:"세계 원양선박 톤수 대부분을 담보하는 12개 P&I Club의 연합. 풀링협정으로 대형 사고를 나눠 진다.",
+b:`<h2>회원 클럽</h2><div class="tbl"><table><tr><th>클럽</th><th>기반</th></tr>
+<tr><td>American Club</td><td>미국</td></tr><tr><td>Britannia</td><td>영국</td></tr><tr><td>Gard</td><td>노르웨이 (세계 최대 규모 중 하나)</td></tr>
+<tr><td>Japan P&I Club</td><td>일본</td></tr><tr><td>London P&I Club</td><td>영국</td></tr><tr><td>NorthStandard</td><td>영국[^2023년 North of England와 Standard Club이 합병해 생겼다.^]</td></tr>
+<tr><td>Skuld</td><td>노르웨이</td></tr><tr><td>Shipowners' Club</td><td>영국</td></tr><tr><td>Steamship Mutual</td><td>영국</td></tr>
+<tr><td>Swedish Club</td><td>스웨덴</td></tr><tr><td>UK Club</td><td>영국</td></tr><tr><td>West of England</td><td>영국</td></tr></table></div>
+<h2>3단계 책임 분담 구조</h2><div class="tbl"><table><tr><th>구간</th><th>부담 주체</th></tr>
+<tr><td class="num">~ USD 1,000만</td><td>각 클럽 자기부담(Retention)</td></tr>
+<tr><td class="num">1,000만 ~ 1억</td><td>12개 클럽 공동분담 (Pooling Agreement, IG Pool)</td></tr>
+<tr><td class="num">1억 초과</td><td>IG가 공동 구매한 재보험(Reinsurance) 프로그램</td></tr></table></div>
+<p>개별 클럽 혼자 감당하기 어려운 초대형 오염·난파 사고를 업계 전체가 나눠 지는 구조다. [[voc]]·[[ga]]와 같은 위험 분산 원리.</p>`});
+
+add("bluecard",{t:"블루카드",en:"P&I Club Blue Card",cat:"ins",wk:2,
+s:"P&I Club이 협약상 의무보험에 가입되어 있음을 확인해 주는 증서. 기국이 이를 근거로 보험증명서를 발행한다.",
+b:`<h2>흐름</h2><p>[[pandi-club|P&I Club]] → 블루카드 발행 → <b>기국(Flag State)</b>이 이를 근거로 협약별 증서 발행 → 선박에 비치.</p>
+<h2>블루카드가 뒷받침하는 협약</h2><div class="tbl"><table><tr><th>협약</th><th>담보 책임</th></tr>
+<tr><td>Bunker Convention 2001</td><td>GT 1,000 초과 선박의 연료유 오염</td></tr>
+<tr><td>[[clc|CLC 1969/1992]]</td><td>유조선 화물유 오염</td></tr>
+<tr><td>WRC 2007 (Nairobi)</td><td>난파물 제거</td></tr>
+<tr><td>PLR 2002 (Athens 협약)</td><td>여객 사망·부상, 수하물</td></tr>
+<tr><td>MLC 2006</td><td>선원 임금 체불, 송환, 재해보상</td></tr></table></div>`});
+
+add("loh",{t:"불가동손실보험",en:"Loss of Hire Insurance",abbr:"LOH",cat:"ins",wk:2,
+s:"사고로 선박을 운항하지 못하는 기간의 수입 손실(용선료 등)을 보상하는 보험.",
+b:`<p>강의의 질문 “영업손실은 ???”의 답에 해당한다. [[hm|H&M]]은 배의 물적 손해를, [[pandi|P&I]]는 남에 대한 책임을 담보할 뿐 <b>벌지 못한 돈</b>은 보상하지 않는다.</p>
+<p>[[tc|정기용선]] 중 수리로 [[offhire|오프하이어]]가 되면 선주는 용선료를 받지 못하는데, 이 손실을 LOH로 메운다. 보통 일정 공제일수(deductible days)를 넘긴 기간부터, 최대 보상일수 한도 안에서 하루 금액을 정해 지급한다.[^LOH는 보통 H&M 담보 사고로 생긴 불가동에만 적용된다.^]</p>`});
+
+add("tcl",{t:"용선자 책임보험",en:"Time Charterers' Liability",abbr:"TCL",cat:"ins",wk:2,
+s:"용선자가 선주나 제3자에게 지는 배상책임을 담보하는 보험.",
+b:`<p>[[tc|정기용선자]]는 선박을 직접 소유하지 않지만 운항 지시를 내리므로 책임이 생길 수 있다. 예: 용선자가 지정한 항구가 안전하지 않아 선박이 손상된 경우(Unsafe Port), 용선자가 실은 화물로 인한 손해.</p>
+<p>[[evergiven]] 사례에서 용선자 Evergreen과 관련된 담보로 등장한다.</p>`});
+
+add("fdd",{t:"FD&D",en:"Freight, Demurrage & Defence",abbr:"FD&D",cat:"ins",wk:2,
+s:"운임, 체선료 등 계약 분쟁에서 생기는 법률비용을 담보하는 보험.",
+b:`<p>배상금 자체가 아니라 <b>다투는 데 드는 비용</b>(변호사·중재비용)을 담보한다. 예: 미지급 운임 청구, [[demurrage|체선료]] 정산 분쟁, [[cp|용선계약]] 해석 다툼. 주로 [[pandi-club|P&I Club]]이 별도 클래스로 운영한다.</p>`});
+
+add("sol",{t:"선주 책임보험",en:"Shipowners' Liability",abbr:"SOL",cat:"ins",wk:2,
+s:"운송인이 운송계약을 위반해 생기는 법적 책임을 담보하는 보험.",b:`<p>강의자료 분류 기준. 운송인으로서의 계약상 책임(화물 인도 지연, 계약 위반 등)을 담보한다. 넓게 보면 [[pandi]]와 겹치는 영역이다.</p>`});
+
+add("cargo-ins",{t:"적하보험",en:"Cargo Insurance",cat:"ins",wk:2,
+s:"국제무역에서 운송되는 화물 자체를 담보하는 보험. 화주(수출자·수입자)가 가입한다.",
+b:`<p>선주가 아닌 <b>화주</b>의 보험이다. 화물이 손상되면 화주는 적하보험사에서 먼저 보상받고, 보험사가 운송인에게 구상한다. 운송인 책임은 [[hvr]]의 [[sdr|책임한도]] 안으로 제한되므로 적하보험이 필요하다.</p>
+<p>[[ga|공동해손]]이 선포되면 화주가 내야 할 GA 분담금과 보증장도 적하보험사가 처리한다.</p>`});
+
+add("war",{t:"전쟁보험",en:"War Risk Insurance",cat:"ins",wk:2,
+s:"전쟁, 내란, 폭동, 테러 등으로 인한 선박·화물 손해와 선주 책임을 보장하는 보험.",
+b:`<p>일반 [[hm|선체보험]]은 전쟁위험을 면책하므로 따로 가입한다. 분쟁 지역(Listed Area)에 들어갈 때 추가 보험료(Additional Premium)를 내는 경우가 많다.</p>`});
+
+add("kr-ins",{t:"랜섬보험",en:"Kidnap & Ransom Insurance",abbr:"K&R",cat:"ins",wk:2,
+s:"해적행위나 납치 발생 시 몸값과 협상·관련 비용을 보장하는 보험.",b:`<p>소말리아 해역, 기니만 등 해적 위험 해역 통항 선박이 주로 가입한다. [[war|전쟁보험]]과 함께 특수위험 보험으로 분류된다.</p>`});
+
+add("ksa",{t:"한국해운조합 공제",en:"Korea Shipping Association",abbr:"KSA",cat:"ins",wk:2,
+s:"연안여객선, 소형화물선, 예선, 도선선 등 내항선박을 대상으로 H&M과 P&I를 공제 형태로 제공하는 조합.",
+b:`<h2>국내 해운·운송 공제</h2><ul>
+<li><b>한국해운조합</b>: 내항선박 공제 — 선박공제(HULL) + 선주배상책임공제(P&I)</li>
+<li><b>수협 어선공제</b>: 어선의 선체, 승무원, 배상책임을 종합 보장</li>
+<li>기타 비슷한 구조: 전국버스공제조합, 전국화물자동차공제조합, 전세버스공제조합, 개인택시공제조합, 대한건설기계공제조합</li></ul>
+<p>‘공제’는 조합원끼리 돈을 모아 서로 보상하는 상호보험이라는 점에서 [[pandi-club|P&I Club]]과 같은 원리다.</p>`});
+
+add("clc",{t:"CLC",en:"International Convention on Civil Liability for Oil Pollution Damage",abbr:"CLC",cat:"law",wk:2,
+s:"유조선 화물유 유출 오염손해에 대한 선주의 엄격책임과 강제보험을 정한 협약(1969, 1992 의정서).",
+b:`<p>[[torrey]] 사고 이후 오염 피해자를 보호하기 위해 만들어졌다. 선주는 과실이 없어도 책임을 지되(엄격책임), 톤수에 따른 한도까지 책임을 제한할 수 있다. 일정 규모 이상 유조선은 보험 가입이 의무이며 [[bluecard]]로 증명한다.[^CLC 한도를 넘는 피해는 화주 업계가 출연한 국제유류오염보상기금(IOPC Fund, 1971/1992)이 보충한다.^]</p>`});
+
+add("marpol",{t:"MARPOL",en:"International Convention for the Prevention of Pollution from Ships",abbr:"MARPOL",cat:"law",wk:2,
+s:"선박에 의한 해양오염 방지를 위한 국제협약(1973년 채택, 1978년 의정서로 보완, MARPOL 73/78).",
+b:`<h2>채택 배경</h2><p>1967년 [[torrey]] 사고로 해양오염 방지 체계의 허점이 드러났다. 이를 계기로 오염을 <b>예방</b>하는 MARPOL과 오염 <b>배상</b>을 정한 [[clc]]가 만들어졌다.</p>
+<h2>부속서(Annex)</h2><div class="tbl"><table><tr><th>Annex</th><th>대상</th></tr>
+<tr><td>I</td><td>기름</td></tr><tr><td>II</td><td>산적 유해액체물질</td></tr><tr><td>III</td><td>포장 유해물질</td></tr>
+<tr><td>IV</td><td>오수</td></tr><tr><td>V</td><td>폐기물</td></tr><tr><td>VI</td><td>대기오염(SOx, NOx 등)</td></tr></table></div>
+<p>이중선체 유조선 의무화, 탈황장치 규정 등은 [[class|선급]] 규칙과 법정검사로 이행된다.</p>`});
+
+/* ───────── 사례 ───────── */
+add("titanic",{t:"타이타닉호 보험사례",en:"Titanic Insurance case",cat:"case",wk:2,
+s:"1912년 침몰. 선체보험은 전액 지급되었지만, 책임제한법 때문에 유족·화물 배상은 매우 적었다.",
+b:`<h2>1. 선체보험 (H&M)</h2><ul><li>선박가액 약 150만 파운드, 보험가입액 약 100만 파운드</li>
+<li>보험자: Lloyd's of London과 영국·미국 상업보험사 컨소시엄</li>
+<li>전손(Total Loss) 처리 → 100만 파운드 전액 지급</li></ul>
+<h2>2. 제3자 배상 (P&I 영역)</h2><p>선주책임제한 제도 덕분에 책임액이 선박 톤수 기준으로 크게 줄어, 화물손실과 유족 배상을 합쳐 약 92,000달러만 지급하도록 판결되었다.[^강의자료는 영국 1894년 법을 근거로 들지만, 실제 유족 소송은 미국 법원에서 1851년 미국 선주책임제한법에 따라 진행되었다고 설명하는 문헌이 많다. 책임한도는 침몰 후 남은 가치(구명정 등)와 운임 수입을 합친 약 9.2만 달러였다. 이후 1916년 약 66만 달러에 합의되었다는 기록도 있다.^]</p>
+<div class="tbl"><table><tr><th></th><th>1912년</th><th>현재가치(강의자료)</th></tr>
+<tr><td>선체보험</td><td class="num">£1,000,000</td><td class="num">USD 160,000,000</td></tr>
+<tr><td>유족+화물보상</td><td class="num">USD 92,000</td><td class="num">USD 3,000,000</td></tr></table></div>
+<p>교훈: 내 배는 [[hm|선체보험]]으로 충분히 보장받았지만 피해자 보호는 미흡했다 → 이후 책임제한 강화·[[pandi]] 발전의 배경.</p>`});
+
+add("torrey",{t:"토리 캐니언호 사고",en:"M/T Torrey Canyon disaster",cat:"case",wk:2,
+s:"1967년 3월 영국 남서쪽 암초에 좌초해 대량의 원유를 유출한 사고. MARPOL·CLC 채택의 계기.",
+b:`<ul><li>1967년 3월, 영국 콘월 앞(실리 제도 부근) 암초에 좌초</li>
+<li>약 8만 톤의 원유 유출[^적재량은 약 12만 톤이었고, 유출량은 자료에 따라 8만~12만 톤으로 다르다.^] → 영국 콘월, 프랑스 브르타뉴 해안까지 오염</li>
+<li>유출량·오염범위로 볼 때 해양환경재난 → 해양오염 방지 체계의 문제점 노출</li></ul>
+<div class="q"><b>강의 질문 · 해양오염 처리 비용은?</b><br>당시에는 누가 얼마를 내야 하는지 국제 규칙이 없었다. 이 공백을 메우려고 예방 협약 [[marpol]], 배상 협약 [[clc]](와 IOPC Fund)가 만들어졌고, 오늘날 오염손해는 [[pandi]]가 담보한다.</div>`});
+
+add("stolt",{t:"스톨트 그로엔란드호 사고",en:"MV Stolt Groenland",cat:"case",wk:2,
+s:"2019년 9월 28일 울산항에서 폭발·화재가 난 케미컬 탱커. H&M과 P&I의 담보 구분 사례.",
+b:`<div class="tbl"><table><tr><th>[[pandi|P&I Club]] 보장</th><th>[[hm|H&M]] 보장</th></tr>
+<tr><td>부두 시설물 손상<br>부상자(인명) 손해<br>화물 손상<br>오염사고</td><td>선체 수리비<br>필요시 [[salvage|구난]]·예인비용</td></tr></table></div>
+<div class="q"><b>강의 질문 · MV BOW DALIAN은?</b><br>바로 옆에 계류 중이던 다른 케미컬 탱커로, 불이 옮겨붙어 함께 피해를 입었다. 스톨트 그로엔란드 쪽에서 보면 <b>제3자 선박 손해</b>이므로 P&I 영역의 배상 문제가 된다.</div>
+<p>운항 방식은 [[ops]]의 케미컬 탱커 항목 참고 (Stolt-Nielsen).</p>`});
+
+add("evergiven",{t:"에버기븐호 좌초",en:"MV Ever Given",cat:"case",wk:4,
+s:"2021년 수에즈 운하에서 좌초해 운하를 6일간 막은 초대형 컨테이너선. 여러 보험과 공동해손이 얽힌 사례.",
+b:`<h2>관계자</h2><div class="tbl"><table><tr><th>역할</th><th>회사</th></tr>
+<tr><td>선주(Owner)</td><td>Shoei Kisen (일본)</td></tr>
+<tr><td>운항사(Operator)</td><td>Evergreen (대만)</td></tr>
+<tr><td>선박관리(Managing)</td><td>BSM (Bernhard Schulte Shipmanagement)</td></tr>
+<tr><td>계약 형태</td><td>[[tc|정기용선(T/C)]]</td></tr></table></div>
+<h2>얽힌 보험</h2><ul><li>[[pandi|P&I]] — 운하 당국 배상, 제3자 손해</li><li>[[hm|H&M]] — 선체 손상, [[salvage|구난비용]]</li>
+<li>[[tcl|TCL]] — 용선자(Evergreen) 책임</li><li>[[cargo-ins|적하보험]] — 화주의 화물 및 GA 분담</li></ul>
+<p>선주는 [[ga|공동해손]]을 선포해 구난비용 등을 화주들과 나눠 지게 했다.</p>`});
+
+add("salvage",{t:"구난",en:"Salvage",cat:"law",wk:2,
+s:"해난에 처한 선박·화물을 구조하는 행위와 그 대가(구난료).",b:`<p>구난비용은 [[hm|H&M]]이 담보하며, 선박과 화물 모두를 살리기 위한 비용이면 [[ga|공동해손]]으로 처리되기도 한다. [[bl-terms|B/L 이면약관]]에는 구난선(같은 선사 소속)이 투입되어도 정상 구난료를 청구할 수 있다는 조항이 들어간다.</p>`});
+
+/* ───────── 3주차: 용선 ───────── */
+add("charter",{t:"용선",en:"Chartering",cat:"chr",wk:3,
+s:"선박 소유자(Owner)가 배를 일정 조건에 따라 용선자(Charterer)에게 빌려주고 대가를 받는 계약.",
+b:`<h2>3가지 유형 비교</h2><div class="tbl"><table><tr><th></th><th>[[vc|항해용선 V/C]]</th><th>[[tc|정기용선 T/C]]</th><th>[[bbc|나용선 BBC]]</th></tr>
+<tr><td>비유</td><td>택시</td><td>렌터카(기사 포함)</td><td>리스</td></tr>
+<tr><td>기간</td><td>1항차 (A항 → B항)</td><td>일정 기간 (6개월, 1년, 5년…)</td><td>장기 (5–15년 이상)</td></tr>
+<tr><td>대가</td><td>운임 (USD/MT, USD/CBM)</td><td>용선료 (USD/DAY)</td><td>용선료 (USD/DAY)</td></tr>
+<tr><td>선주 제공</td><td>선박 + 선원 + 운항 일체</td><td>선박 + 선원</td><td>선박만</td></tr>
+<tr><td>연료비·항비</td><td>선주</td><td>용선자</td><td>용선자</td></tr>
+<tr><td>운항 책임</td><td>선주</td><td>선주는 선원관리, 용선자는 항로 지시</td><td>사실상 용선자가 선주 역할</td></tr></table></div>
+<p>정해진 기간 동안 일정 물량을 나눠 실어 나르는 [[coa]]는 엄밀히는 용선이 아닌 운송계약이지만 함께 다룬다. 계약서 양식은 [[cp]] 참고.</p>`});
+
+add("vc",{t:"항해용선",en:"Voyage Charter",abbr:"V/C",cat:"chr",wk:3,
+s:"선주가 특정 화물을 특정 항로(한 항차)로 운송해 주고, 용선자는 운임만 지급하는 계약. ‘택시’에 비유된다.",
+b:`<ul><li>선주가 선박, 선원, 연료, 항비 등 운항에 필요한 모든 것을 제공</li>
+<li>운임: 보통 <span class="abbr">USD XX/MT</span>(톤당) 또는 <span class="abbr">USD XX/CBM</span>(입방미터당)</li>
+<li>계약에 따라 하역료를 운임에 포함시킬 수 있다.[^하역비를 누가 내는지는 FIO(Free In and Out, 화주 부담), Liner Terms(선주 부담) 등 조건으로 정한다.^]</li></ul>
+<p>항차 단위라 항구에서 지체되면 선주가 손해를 본다 → [[laytime]], [[demurrage|체선료]], [[despatch|조출료]] 개념이 핵심. 표준양식은 [[gencon]].</p>
+<h2>한 항차의 시간 구조 (6주차)</h2>
+${TL([["NOR","LOADING PORT","Laytime",1.3],["","SAILING","",4,"sail plain"],["NOR","DISCH. PORT","Laytime",1.3,"","Completion of Disch."]],"항해용선 한 항차 타임라인")}
+<p>선적항과 양하항에서 각각 [[nor|NOR]]을 내면 그 항구의 [[laytime]]이 시작된다. 항해 구간(Sailing)은 선주의 시간이고, 항구에서 정박시간을 넘긴 만큼만 용선자 부담([[demurrage|체선료]])이 된다. 정박시간을 셀 때는 [[wwd]], [[shinc|SHINC/SHEX]] 조건을 적용한다.</p>`});
+
+add("tc",{t:"정기용선",en:"Time Charter",abbr:"T/C",cat:"chr",wk:3,
+s:"선주가 선박과 선원을 일정 기간 제공하고, 용선자가 운항을 지시하며 연료비·항비를 부담하는 계약. ‘렌터카’에 비유된다.",
+b:`<ul><li>용선료: 보통 <span class="abbr">USD XXXXX/DAY</span> (일당)</li>
+<li>기간: 짧으면 1개월, 길게는 10–20년 ([[ops|LNG선]]은 20–25년)</li>
+<li>선주는 선원 관리, 용선자는 어디로 갈지 지시</li>
+<li>선주 잘못으로 수리하거나 정상 운항이 안 되면 용선료 지급 중지 → [[offhire]]</li></ul>
+<p>표준양식은 [[nype]], SHELLTIME, BPTIME. 용선자의 책임은 [[tcl]]로 담보한다. 사례: [[evergiven]].</p>
+<h2>정기용선의 시간 구조 (6주차)</h2>
+${TL([["Delivery","TIME CHARTER","On-Hire Survey",2.5],["Off-Hire","중단","",1,"off"],["","TIME CHARTER","",5,"","Redelivery","Off-Hire Survey"]],"정기용선 타임라인")}
+<p>[[delivery|인도]]부터 [[redelivery|반선]]까지 [[hire|용선료]]가 흐르고, 중간에 배 탓으로 쓰지 못한 구간만 [[offhire|용선중단]]으로 빠진다. 시작과 끝에 [[survey|검사]]로 상태를 기록한다.</p>
+<h2>두 가지 형태</h2><ul><li><b>Period T/C</b>: 정한 기간(수개월~20년) 동안 빌림.</li><li><b>1 TCT</b>: 한 항차만 정기용선 방식으로 빌림 → [[tct]].</li></ul>
+<p>표준 조항은 [[nype|NYPE 2015]]에서 조항별로 정리했다.</p>`});
+
+add("bbc",{t:"나용선",en:"Bareboat Charter",abbr:"BBC",cat:"chr",wk:3,
+s:"선주는 선박(빈 배)만 빌려주고, 용선자가 선원·보험·정비·연료·항비·드라이도크 등 모든 것을 책임지는 계약. ‘리스’에 비유된다.",
+b:`<ul><li>용선료: 정기용선과 같이 <span class="abbr">USD XXXX/DAY</span></li>
+<li>용선자가 사실상 선주 역할 (선원 고용, [[hm|H&M]]·[[pandi|P&I]] 가입, 선박 관리)</li>
+<li>기간: 장기(5–15년 이상)</li></ul>
+<h2>BBCHP</h2><p><b>Bareboat Charter Hire Purchase</b>(국적취득조건부 나용선). 용선 기간이 끝나면 용선자가 선박을 매입(소유권 취득)할 수 있다. 선박금융 수단으로 많이 쓰인다.</p>
+<p>표준양식: BARECON (BIMCO).</p>`});
+
+add("offhire",{t:"용선중단",en:"Off-Hire (NYPE 2015 Clause 17)",cat:"nype",wk:6,
+s:"정기용선 중 선박 쪽 사유로 시간을 잃으면, 잃은 기간만큼 용선료 지급이 멈추는 것.",
+b:`<h2>원리</h2><p>[[tc|정기용선]]에서 용선자는 ‘쓸 수 있는 배’에 대해 일당 [[hire|용선료]]를 낸다. 배를 못 쓰게 되면 그 시간만큼 용선료가 빠진다. 렌터카가 고장 나서 정비소에 있는 날은 대여료를 안 내는 것과 같다.</p>
+${TL([["Delivery","용선 중","On-Hire Survey",3],["Off-Hire","용선중단","용선료 정지",1.4,"off"],["","용선 중","",5,"","Redelivery","Off-Hire Survey"]])}
+<h2>용선중단 사유 (17조 1문)</h2><ul>
+<li>사관·부원의 부족(결함), 태만, 동맹파업</li><li>선용품 부족, 화재</li><li>선체·기관·기기의 고장 또는 손상, 좌초</li>
+<li>선박 압류로 인한 억류 — 단, 용선자·재용선자·그 고용인·대리점·하도급자 귀책이면 제외</li>
+<li>선박 결함으로 인한 항만국통제(PSC) 등 당국의 억류</li>
+<li>화물 고유의 하자에 기인하지 않은 해난사고로 인한 지체</li><li>검사, 선저 청소·페인트, 수리를 위한 입거(드라이도크)</li>
+<li>기타 선박의 온전한 운항을 막는 유사한 사유</li></ul>
+<p>→ 잃은 기간 동안 용선료와 시간외 수당 지급 중단.</p>
+<h2>이로·회항 (17조 2문)</h2><p>화물 사고나 제22조(자유항해권, Liberty)가 허용하는 경우가 아닌데 선박이 용선자 지시에 반해 이로(Deviation)하거나 되돌아가면, 그 시점부터 같은 지점이나 같은 거리 지점에서 항해를 다시 시작할 때까지 용선료가 중단된다. 그동안 쓴 연료는 선주 부담.</p>
+<h2>용선자 부담인 경우 (17조 3문)</h2><ul><li>악천후로 항구·정박지에 피항</li><li>수심이 얕은 항구·강에 취항해 생긴 지체와 비용</li></ul>
+<p>이것들은 배 탓이 아니므로 용선료가 계속 나간다.</p>
+<h2>속력 저하</h2><p>항해 중 선체·기관 결함으로 속력이 떨어지면, 잃은 시간과 추가 연료비 등 입증된 비용을 용선료에서 공제할 수 있다.</p>
+<p>선주는 용선중단으로 못 받는 수입을 [[loh]]으로 대비한다.</p>`});
+
+add("cp",{t:"용선계약서",en:"C/P, Charter Party",abbr:"C/P",cat:"chr",wk:3,
+s:"용선 조건을 정한 계약서. 대부분 BIMCO 등이 만든 표준양식에 추가 조항을 붙여 쓴다.",
+b:`<h2>표준양식</h2><div class="tbl"><table><tr><th>유형</th><th>양식</th></tr>
+<tr><td>[[vc|항해용선]]</td><td>[[gencon]] (1922/1976/1994/2022) — 일반화물<br>ASBATANKVOY (1977/1984) — 유조선<br>OREVOY(광석), SHELLVOY·BPVOY(석유 메이저)</td></tr>
+<tr><td>[[tc|정기용선]]</td><td>[[nype]] (1913/1921/1946/1993/2015)<br>SHELLTIME, BPTIME</td></tr>
+<tr><td>[[bbc|나용선]]</td><td>BARECON</td></tr>
+<tr><td>예인</td><td>TOWCON</td></tr></table></div>
+<p>[[nor]], [[laytime]], [[demurrage]] 같은 조건이 C/P에 들어간다.</p>`});
+
+add("gencon",{t:"GENCON",en:"Uniform General Charter",cat:"chr",wk:3,
+s:"BIMCO의 대표적인 항해용선계약 표준양식. 1994년판이 가장 널리 쓰인다.",
+b:`<h2>Clause 6(c) 정박시간 개시</h2><p>강의자료에 인용된 GENCON 1994 조항 요지:</p><ul>
+<li>[[nor|NOR]]을 <b>12:00까지(포함)</b> 제출 → [[laytime]]은 같은 날 <b>13:00</b>부터 개시</li>
+<li>NOR을 <b>12:00 이후 업무시간 중</b> 제출 → <b>다음 근무일 06:00</b>부터 개시</li>
+<li>선적항 NOR 수신인: Box 17의 Shipper, 없으면 Box 18의 용선자·대리점</li>
+<li>양하항 NOR 수신인: 수하인(Receiver), 모르면 Box 19의 용선자·대리점</li></ul>
+<p>즉 NOR을 냈다고 바로 시계가 도는 것이 아니라, 준비를 위한 유예시간(free time)이 붙는다.</p>`});
+
+add("nype",{t:"NYPE 2015",en:"New York Produce Exchange Form 2015",abbr:"NYPE",cat:"nype",wk:6,
+s:"뉴욕 상품거래소 양식에서 출발한 정기용선계약 표준양식. 2015년판은 BIMCO·ASBA·SMF가 공동 개정했다.",
+b:`<p>[[tc|정기용선]]의 대표 양식이다(1913/1921/1946/1993/2015). 유조선은 SHELLTIME, BPTIME을 주로 쓴다. 양식 안의 빈칸 ( )은 계약마다 당사자가 채워 넣는 값(기간, 장소, 금액, 일수)이다.[^강의자료 조항 번역의 빈칸도 이런 기입란이다. 시험에서 빈칸 자체를 묻기보다는 “무엇을 정하는 칸인지”를 묻는 경우가 많으니, 각 빈칸이 기간·장소·금액 중 무엇인지 함께 익혀 두자.^]</p>
+<h2>강의에서 다룬 조항</h2><div class="tbl"><table><tr><th>조항</th><th>제목</th><th>핵심 한 줄</th></tr>
+<tr><td class="num">1</td><td>[[nype-1|Duration / Trip Description]]<br>용선기간·항차명세</td><td>기간, 운항구역, [[safeport|안전항]], 좌주 허용, 재용선</td></tr>
+<tr><td class="num">2</td><td>[[delivery|Delivery]] 선박의 인도</td><td>감항성, STCW 정원, 선창 청결, 인도 통지</td></tr>
+<tr><td class="num">3</td><td>[[laycan|Laydays / Cancelling]] 인도일·해약일</td><td>지정일까지 인도 못 하면 용선자 해약권</td></tr>
+<tr><td class="num">4</td><td>[[redelivery|Redelivery]] 반선</td><td>통상 손모 외에는 양호한 상태로 반환</td></tr>
+<tr><td class="num">5</td><td>[[survey|On/Off-Hire Survey]]</td><td>개시 검사는 선주, 종료 검사는 용선자 시간</td></tr>
+<tr><td class="num">6</td><td>[[owners-provide|Owners to provide]] 선주 공급</td><td>선원·임금·보험·선용품·선급 유지·증서</td></tr>
+<tr><td class="num">7</td><td>[[charterers-provide|Charterers to provide]] 용선자 공급</td><td>연료·항비·도선료·운하료·대리점비</td></tr>
+<tr><td class="num">8</td><td>[[performance|Performance of Voyage]] 항해의 실행</td><td>선장은 용선자 지시에 따름, 화물작업은 용선자 비용</td></tr>
+<tr><td class="num">9</td><td>Bunkers 선박 연료</td><td>(강의자료에 제목만 수록)[^인도·반선 시 연료 잔량(ROB)과 단가 정산, 연료 품질 기준 등을 정하는 조항이다.^]</td></tr>
+<tr><td class="num">10</td><td>[[hire|Rate of Hire 등]] 용선료·선창청소비·통신비·식사비</td><td>일당 용선료, [[hold-cleaning|선창청소]], CVE, UTC 기준</td></tr>
+<tr><td class="num">11</td><td>Hire Payment 용선료 지급</td><td>(강의자료에 제목만 수록) → [[hire]]</td></tr>
+<tr><td class="num">14</td><td>[[supercargo|Supercargo]] 하역감독</td><td>용선자 위험으로 감독관 승선 가능</td></tr>
+<tr><td class="num">15</td><td>[[sailing-orders|Sailing Orders and Logs]]</td><td>지시는 영어 서면, 일지는 정확히 기록·제출</td></tr>
+<tr><td class="num">17</td><td>[[offhire|Off-Hire]] 용선중단</td><td>배 탓으로 잃은 시간은 용선료 정지</td></tr></table></div>
+<h2>정기용선의 생애</h2>
+${TL([["Delivery","용선 중","On-Hire Survey",3],["Off-Hire","용선중단","",1.2,"off"],["","용선 중","",5,"","Redelivery","Off-Hire Survey"]])}
+<p>[[laycan]] 안에 [[delivery|인도]] → [[survey|개시 검사]] → [[hire|용선료]] 발생 → (필요시 [[offhire|용선중단]]) → [[redelivery|반선]] → [[survey|종료 검사]]. 기간 대신 한 항차만 정기용선으로 하는 형태는 [[tct]].</p>
+<h2>누가 무엇을 내나</h2><div class="tbl"><table><tr><th>[[owners-provide|선주 (6조)]]</th><th>[[charterers-provide|용선자 (7조)]]</th></tr>
+<tr><td>선원 임금, 식료품, 선원 교대 관련 영사비·비자·항만서비스비<br>선박 보험<br>선실·갑판·기관실 선용품, 보일러수, 윤활유<br>선급 유지, 선체·기관 정비<br>국제톤수증서, 수에즈·파나마 톤수증서, 선적증서<br>유류오염 재정책임증서</td>
+<td>모든 연료<br>항비(폐기물 처리 포함), 도선료, 운하통과료, 예선료<br>현문·화물 경비원<br>대리점비, 수수료, 영사비(선원·국적 관련 제외)<br>화물 원인 훈증소독비<br>던니지·화물고박자재·특수부속품</td></tr></table></div>`});
+
+add("nype-1",{t:"용선기간·항차명세",en:"Duration / Trip Description (Clause 1)",cat:"nype",wk:6,
+s:"NYPE 2015 1조. 용선 기간, 운항구역, 안전한 선석, 좌주 허용 여부, 재용선 권리를 정한다.",
+b:`<div class="tbl"><table><tr><th>항</th><th>내용</th></tr>
+<tr><td>(a) 기간</td><td>선주는 인도 시부터 정한 기간( ) 동안 운항구역 범위 안에서 선박을 빌려주고, 용선자는 이를 용선한다.</td></tr>
+<tr><td>(b) 운항구역</td><td>Trading Limits. 선박은 용선자 지시에 따라 운항구역 안의 [[safeport|안전항과 안전한 장소]] 사이 <b>적법한 운송</b>에만 쓰여야 한다.</td></tr>
+<tr><td>(c) 선석</td><td>선박이 <b>항상 부상(浮上) 상태</b>로 안전하게 입항·정박·출항할 수 있는, 용선자가 지정한 안전한 묘박지·선석·장소에서 선적·양하한다.</td></tr>
+<tr><td>(d) 좌주 허용</td><td>지정 해역·항만( )에서는, 비슷한 규모의 배가 관습적으로 그렇게 정박한다면 손상 없이 할 수 있는 한 안전하게 바닥에 닿아(좌주) 있을 수 있다. 빈칸이면 적용 안 됨. 좌주로 생긴 손실·비용·시간(선급이 요구한 수면하 검사 포함)은 용선자가 선주에게 보상.</td></tr>
+<tr><td>(e) 재용선</td><td>Sublet. 용선자는 기간 전부나 일부를 다른 사람에게 다시 빌려줄 수 있다. 그래도 원 계약의 책임은 용선자가 계속 진다.</td></tr></table></div>
+<p>[^(c)의 “always afloat”와 (d)의 예외는 흔히 NAABSA(Not Always Afloat But Safely Aground) 조건으로 부른다. 조수 간만 차가 큰 항구에서 썰물 때 배가 진흙 바닥에 앉는 경우를 허용하는 것이다.^]</p>
+<p>(e)의 재용선 구조에서는 원 용선자가 다시 선주 입장이 되므로 “Head Owner – Disponent Owner – Sub-charterer” 사슬이 생긴다. [[evergiven]]처럼 사고가 나면 이 사슬을 따라 책임과 보험([[tcl|TCL]])이 얽힌다.</p>`});
+
+add("safeport",{t:"안전항",en:"Safe Port / Safe Berth",cat:"nype",wk:6,
+s:"선박이 정상적인 운항과 조선술로 위험 없이 들어가고, 머물고, 나올 수 있는 항구. 용선자는 안전한 항구만 지정해야 한다.",
+b:`<p>[[nype-1|NYPE 1조 (b)(c)]]에 근거한다. 수심, 기상 피난 여건, 정치적 위험 등이 모두 고려된다. 용선자가 안전하지 않은 항구를 지정해 선박이 손상되면 용선자가 책임지며, 이 위험은 [[tcl]]이 담보한다.</p>
+<p>[^영국 판례 The Eastern City(1958)의 정의가 흔히 인용된다: 그 시기에, 비정상적 사건이 없는 한, 좋은 항해술과 조선술로 피할 수 없는 위험에 노출되지 않고 도달·이용·출항할 수 있는 항구.^]</p>`});
+
+add("delivery",{t:"선박의 인도",en:"Delivery (Clause 2)",cat:"nype",wk:6,
+s:"선주가 정한 장소에서 계약 조건에 맞는 상태로 선박을 용선자에게 넘기는 것. 용선료가 이때부터 발생한다.",
+b:`<h2>인도 시 선박 상태 (2조)</h2><ul>
+<li>(a) 정한 장소( )에서 인도.</li>
+<li>(b) 물 밸러스트 유지, 하역기기를 동시에 돌릴 동력 확보. 톤수 기준으로 [[stcw|STCW]]를 충족하는 선장·사관·부원 정원 승선 → <b>감항성</b> 유지, 의도한 서비스에 모든 면에서 적합.</li>
+<li>(c) 화물창은 깨끗하고, 의도한 화물을 실을 수 있게 준비. 의도한 화물이 없으면 (i) 인도 시 또는 (ii) 인도장소가 다를 경우 첫 선적항 도착 즉시 아무 적합한 화물이나 실을 수 있게. 선창검사를 통과 못 하면 그때부터 통과할 때까지 [[offhire|용선중단]].[^(c)(i)과 (ii)는 선택사항이라 계약에서 하나를 지울 수 있다. 둘 다 지우지 않으면 (c)(i)이 적용된다.^]</li></ul>
+<h2>인도 통지 (2조 d·e)</h2><ul><li>선주는 운항일정을 계속 알리고, 인도 대략( )일 전과 확정( )일 전에 사전 통지.</li>
+<li>예정일 이전 인도가 합리적으로 예상되면 그 항차를 수행하게 할 수 있음.</li>
+<li>선박이 용선 개시 위치에 도착하면 용선자·지방 대리점에 인도 통지.</li>
+<li>인도 전 선박의 동정( )도 적는다.</li>
+<li>(e) 용선자가 인도를 수락해도 선주에 대한 권리는 그대로 유지(수락했다고 하자 청구를 포기한 것이 아님).</li></ul>
+<p>인도 기한은 [[laycan]], 인도 시점의 상태 확인은 [[survey|On-Hire Survey]], 반대 절차는 [[redelivery]].</p>`});
+
+add("laycan",{t:"인도일·해약일",en:"Laydays / Cancelling (Clause 3)",abbr:"Laycan",cat:"nype",wk:6,
+s:"인도를 받을 수 있는 가장 이른 날(Laydays)과, 그때까지 인도 안 되면 용선자가 계약을 해제할 수 있는 마지막 날(Cancelling).",
+b:`<ul><li>용선자가 요청하면 용선은 정한 시각( ) 이전에는 시작되지 않는다. → 배가 너무 일찍 와도 용선료는 그때부터.</li>
+<li>[[delivery|2(a)조]]의 장소에 정한 시각( )까지 인도되지 않으면, 용선자는 인도통지일 이전 언제든 계약을 <b>해제할 선택권</b>을 가진다.</li></ul>
+<p>두 날짜 사이의 창(Window)을 줄여서 <b>Laycan</b>(Laydays + Cancelling)이라 부른다. [[vc|항해용선]]에서도 선적항 도착 기한을 같은 방식으로 정한다.</p>`});
+
+add("redelivery",{t:"반선",en:"Redelivery (Clause 4)",cat:"nype",wk:6,
+s:"용선 기간이 끝나 용선자가 선박을 선주에게 돌려주는 것. 통상적인 손모를 빼면 양호한 상태여야 한다.",
+b:`<ul><li>(a) 정한 장소( )에서 <b>통상적인 손모(ordinary wear and tear)</b>를 제외하고 양호한 상태로 반환.</li>
+<li>(b) 용선자는 운항일정을 계속 알리고 반선 항·장소에 사전 도착 통지. 예정일 이전 반선이 합리적으로 예상되면 그 항차를 수행하게 할 수 있음.</li>
+<li>(c) 선주가 반선을 수락해도 용선자에 대한 권리는 유지.</li></ul>
+<p>[[delivery|인도(2조)]]와 거울처럼 대칭이다. 반선 시 상태는 [[survey|Off-Hire Survey]]로 확인하고, 용선자가 설치한 던니지·고박자재는 반선 전 제거해야 한다([[charterers-provide|7(c)조]]). 선창 청소 대신 일괄금을 내는 방법은 [[hold-cleaning]].</p>`});
+
+add("survey",{t:"용선개시·종료 검사",en:"On-Hire / Off-Hire Survey (Clause 5)",cat:"nype",wk:6,
+s:"인도 시점과 반선 시점에 선박 상태와 연료 잔량을 확인하는 검사. 둘을 비교해 손상·연료 정산을 한다.",
+b:`<div class="tbl"><table><tr><th></th><th>On-Hire Survey</th><th>Off-Hire Survey</th></tr>
+<tr><td>시점</td><td>[[delivery|인도]] 시</td><td>[[redelivery|반선]] 시</td></tr>
+<tr><td>검사 시간 부담</td><td>선주</td><td>용선자</td></tr></table></div>
+<p>보통 화물창 상태, 선체 손상 여부, 연료 잔량(ROB, Remaining on Board)을 기록한다. 두 기록의 차이가 용선자 사용 중 생긴 손상과 연료 정산의 근거가 된다. 렌터카를 빌릴 때와 돌려줄 때 차 상태와 기름 눈금을 사진으로 남기는 것과 같다.</p>
+<p>[^강의자료 표현은 “검사시간”의 부담이다. 검사 비용 자체의 분담은 계약 문구에 따라 달라질 수 있다.^] 용선 도중 생기는 [[offhire|Off-Hire(용선중단)]]와 이름이 비슷하니 구분할 것.</p>`});
+
+add("owners-provide",{t:"선주의 공급사항",en:"Owners to Provide (Clause 6)",cat:"nype",wk:6,
+s:"정기용선에서 선주가 대고 비용을 내야 하는 것: 선원, 선박 유지, 보험, 각종 증서.",
+b:`<h2>(a) 선박과 선원</h2><ul><li>선박 보험([[hm|H&M]], [[pandi|P&I]])</li><li>식료품, 선실·갑판·기관실 등 선용품, 보일러 물, 윤활유</li>
+<li>선원 임금, 선원 승하선 공인 영사비, 선원 비자 관련 항만서비스비</li>
+<li>선급 유지([[class]]), 선체·기관·기기를 효율적 작동 상태로 유지</li><li>사관·부원 정원 확보</li></ul>
+<h2>(b) 서류</h2><ul><li>국제톤수증서, 수에즈·파나마 운하 톤수증서, 선적증서, 선체강력·안전·하역장비 관련 서류 등 운항구역에서 자유롭게 운항하는 데 필요한 모든 서류 → 용선기간 내내 유효하게 비치</li>
+<li><b>유류오염 재정책임증서</b> ([[bluecard]], [[clc]]): 용선 개시 시 제공·비치. 갱신 시점에 증서를 구할 수 없거나 요율이 과도하게 오르면 협의하고, 합의 못 하면 그 증서를 요구하는 항만은 운항배제구역으로 간주.</li></ul>
+<h2>(c) 해치커버</h2><p>용선자가 요청하면 현지 노동규정이 허용하는 범위에서 선원이 주·야로 해치커버 개폐. 아니면 용선자 부담.</p>
+<p>반대편은 [[charterers-provide]].</p>`});
+
+add("charterers-provide",{t:"용선자의 공급사항",en:"Charterers to Provide (Clause 7)",cat:"nype",wk:6,
+s:"정기용선에서 용선자가 대고 비용을 내야 하는 것: 연료와 항해·항만에 드는 비용.",
+b:`<h2>(a) 연료와 항비</h2><ul><li>용선 기간 중 모든 연료</li>
+<li>항비(강제 폐기물 처리 포함), 강제 현문경비원·화물경비원, 강제·관습적 도선료, 운하통과료, 예선료</li>
+<li>대리점비, 수수료, 영사비 (선원 개인용도나 선박 국적 관련 비용은 제외)</li>
+<li>6조에 정한 것 외의 기타 통상 비용</li></ul>
+<p><b>예외</b>: 선박에 책임 있는 사유로(기상 이유 제외) 어떤 항구에 기항하면 그 비용은 모두 선주 부담.</p>
+<h2>(b) 훈증소독</h2><p>인도 전 선원 발병·전염병 때문 → 선주 / 용선 중 화물이나 기항 항구 때문 → 용선자.</p>
+<h2>(c) 던니지·고박자재</h2><p>필요한 던니지, 화물고박자재, 특수화물용 부속품은 용선자가 공급. 선주는 이미 선박에 있는 던니지를 쓰게 해야 한다. 용선자가 설치한 것은 [[redelivery|반선]] 전 용선자 비용·시간으로 제거.</p>
+<p>반대편은 [[owners-provide]]. 이 구분이 [[charter|용선 3유형 비교표]]의 “연료비·항비는 용선자” 부분이다.</p>`});
+
+add("performance",{t:"항해의 실행",en:"Performance of Voyage (Clause 8)",cat:"nype",wk:6,
+s:"선장은 신속히 항해하고, 선박의 사용과 대리관계에 대해서는 용선자 지시를 따라야 한다는 조항(Employment Clause).",
+b:`<h2>(a) 선장의 의무</h2><ul><li>제38조([[slow-steaming|감속운항]])를 준수하면서 신속하게 항해, 선원과 함께 관습상 필요한 지원 제공.</li>
+<li><mark>선장은 영어에 능통해야 한다.</mark></li>
+<li>선장은 선주가 선임했더라도 선박의 <b>사용(Employment)과 대리관계(Agency)</b>에 관해서는 용선자의 지시를 따른다.</li>
+<li>용선자는 자기 위험과 비용으로, 선장 감독 하에 화물의 선적, 적부, trimming, lashing, securing, dunnaging, unlashing, 양하, 검수 등 모든 화물취급을 수행.</li></ul>
+<h2>(b) 선장 교체</h2><p>용선자가 <mark>선장 또는 사관의 행위에 불만스러운 합당한 이유</mark>를 가지면, 선주는 접수 즉시 조사하고 필요하면 <mark>교대시켜야 한다</mark>.</p>
+<p>선박 안전과 항해 판단(Navigation)은 여전히 선장 몫이다. 용선자가 지시할 수 있는 것은 “어디로, 무엇을”이다. [[charter|정기용선 설명]]의 “선주는 선원관리, 용선자는 항로 지시”가 이 조항이다.[^화물작업을 용선자 비용·위험으로 하되 선장 감독 하에 둔다는 문구 때문에, 화물 손상 책임 배분은 별도 협정(Inter-Club Agreement, ICA)으로 나누는 경우가 많다.^]</p>
+<p>지시 전달 방식은 [[sailing-orders]].</p>`});
+
+add("slow-steaming",{t:"감속운항",en:"Slow Steaming (Clause 38)",cat:"nype",wk:6,
+s:"연료 절감 등을 위해 용선자가 선박에 계약 속력보다 느리게 운항하도록 지시할 수 있게 한 조항.",
+b:`<p>[[performance|8조 (a)]]가 선장의 “신속한 항해” 의무를 정하면서 38조를 준수하도록 해, 감속 지시를 따라도 신속항해 의무 위반이 아니게 만든다. 연료비는 용선자 부담([[charterers-provide|7조]])이므로 연료비가 비쌀 때 용선자에게 이득이다.[^NYPE 2015에서 새로 들어간 조항으로, 저유가·저운임 시기 업계 관행을 반영했다. 강의자료에는 8조 안에서 언급만 된다.^]</p>`});
+
+add("hire",{t:"용선료",en:"Rate of Hire (Clauses 10–11)",abbr:"Hire",cat:"nype",wk:6,
+s:"정기용선에서 용선자가 선박 사용 대가로 내는 일당 요금. 인도 시점부터 반선 때까지 발생한다.",
+b:`<h2>10조 (a) 용선료와 부대비용</h2><ul><li>[[delivery|인도]] 시점부터 일당( ) 요율, 1일 미만은 시간 비례(pro rata). 선원 초과근무수당 포함.</li>
+<li>선박이 멸실되지 않는 한 [[redelivery|반선]]될 때까지 계속.</li>
+<li><b>선창 청소 일괄비</b>: 따로 합의 없으면 용선자는 일괄 금액( )을 내고 청소 안 된 상태로 반선할 수 있다 → [[hold-cleaning]].</li>
+<li>선주는 도선사와 용선자(대리점)가 허락한 사람에게 식사 제공.</li>
+<li><b>CVE</b>: 통신비, 식사비, 용선자의 선박 사용 중 생긴 비용 보상으로 30일마다 ( ) 또는 30일 미만은 비례 지급.</li>
+<li>용선료 계산 시 인도·반선·종료 시간은 <b>UTC(협정세계시)</b>로 맞춘다 → 시간대가 다른 항구 사이의 계산 혼선 방지.</li></ul>
+<h2>11조 Hire Payment</h2><p>강의자료에는 제목만 있다.[^일반적으로 용선료는 15일 또는 30일 단위로 선급(先給)하며, 기한 내 미지급 시 통지 후 선주가 선박을 회수(Withdrawal)하거나 운항을 중지할 수 있게 정한다.^]</p>
+<p>용선료가 멈추는 경우는 [[offhire]], 선주가 그 손실을 메우는 보험은 [[loh]].</p>
+<p>비교: [[vc|항해용선]]의 대가는 화물 톤당 운임(Freight), 정기용선의 대가는 시간당 용선료(Hire).</p>`});
+
+add("hold-cleaning",{t:"선창청소",en:"Hold Cleaning / Residues (Clause 10(b))",abbr:"ILOHC",cat:"nype",wk:6,
+s:"화물창 청소와 잔유물 처분에 관한 규정. 용선자가 청소 비용·시간·폐기물 책임을 진다.",
+b:`<h2>(i) 중간 청소</h2><p>안전하고 현지 규정이 허용하면, 용선자는 선창당 ( ) 요율을 내고 선원에게 이전 항차와 다음 항차 사이(또는 이전 화물과 다음 화물 사이)에 선창 소제·물 세척을 시키도록 요청할 수 있다. 결과가 검사에 불합격해도 선주는 책임 없다. 청소에 걸린 시간은 용선자 부담.</p>
+<h2>(ii) 청결제</h2><p>단일 항차 계약이 아니면, 용선자가 화학제품·합성세제 등 모든 청결제와 첨가제를 공급·지불. 용선자는 그것이 [[marpol|MARPOL]] 부속서 V의 IMO 지침(결의 219(63))상 해양환경에 유해하지 않고, 발암성·돌연변이·생식독성 성분이 없다는 날짜·서명 있는 진술서를 선주에게 줘야 한다.</p>
+<h2>(iii) 잔유물·폐기물</h2><p>용선 기간 내내와 반선 시, 화물 잔유물·세척수·세제·폐기물의 제거·처분 비용과 시간은 용선자 책임. 처분은 MARPOL 부속서 V 등 적용 규칙을 따른다.</p>
+<p>[^반선 시 청소 대신 내는 일괄금을 실무에서는 ILOHC(In Lieu Of Hold Cleaning)라고 부른다. [[hire|10조 (a)]]의 “선창 청소의 대가로 일괄 지불”이 이것이다.^]</p>`});
+
+add("supercargo",{t:"하역감독",en:"Supercargo (Clause 14)",cat:"nype",wk:6,
+s:"용선자가 자기 위험으로 선박에 승선시켜 항해와 화물작업을 감독하게 하는 사람.",
+b:`<ul><li>용선자는 자기 위험부담으로 하역감독을 임명할 권리를 가진다.</li><li>거주 설비는 무상, 식사는 선장과 같은 대우.</li>
+<li>승선 전 용선자와 하역감독은 선주의 [[pandi|P&I]] 보험이 권고한 <b>권리포기 및 보상 표준서한</b>(Letter of Indemnity/Waiver)에 서명해야 한다.</li></ul>
+<p>배 위에서 다쳐도 선주에게 청구하지 않겠다는 약속이다. 선원이 아닌 사람이 타면 P&I 담보 밖의 위험이 생기기 때문이다.</p>`});
+
+add("sailing-orders",{t:"항해지시와 항해일지",en:"Sailing Orders and Logs (Clause 15)",cat:"nype",wk:6,
+s:"용선자의 지시는 영어 서면으로, 선장의 일지는 정확히 작성해 용선자에게 제공하도록 한 조항.",
+b:`<ul><li>용선자는 수시로 선장에게 <b>영어로 된 서면</b>으로 필요한 지시와 항해지시를 준다.</li>
+<li>선장은 매 항차의 갑판일지와 기관일지를 완전·정확하게 작성·유지하고 용선자(대리인)에게 제공. 용선자와 대리인에게 명확해야 한다.</li>
+<li>용선자·대리인·[[supercargo|하역감독]]이 요구하면 침로, 항주거리, 연료 소비량이 적힌 갑판·기관일지 <b>정본</b> 제출.</li>
+<li>용선자가 요구하는 일지 요약은 모두 영어.</li></ul>
+<p>일지는 속력·연료 성능 클레임(속력 저하로 인한 [[offhire|용선료 공제]])의 증거가 된다. [[sof]]가 항구 안의 시간을 기록한다면, 항해일지는 바다 위의 기록이다.</p>`});
+
+add("tct",{t:"1항차 정기용선",en:"Time Charter Trip",abbr:"TCT",cat:"chr",wk:6,
+s:"한 항차만을 위해 정기용선 방식(일당 용선료)으로 빌리는 계약. 기간 단위로 빌리는 Period T/C와 대비된다.",
+b:`<div class="tbl"><table><tr><th></th><th>[[vc|V/C]]</th><th>TCT</th><th>Period T/C</th></tr>
+<tr><td>범위</td><td>1항차</td><td>1항차</td><td>정한 기간</td></tr>
+<tr><td>대가</td><td>톤당 운임</td><td>일당 용선료</td><td>일당 용선료</td></tr>
+<tr><td>연료·항비</td><td>선주</td><td>용선자</td><td>용선자</td></tr>
+<tr><td>지체 위험</td><td>선주 ([[demurrage|체선료]]로 보전)</td><td>용선자</td><td>용선자</td></tr></table></div>
+<p>모양은 항해용선처럼 한 번 다녀오는 것이지만, 계약 구조는 [[tc|정기용선]]이다. 그래서 항구에서 오래 기다리면 그 시간의 용선료를 용선자가 낸다. 양식은 [[nype]]를 그대로 쓰고 항차 내용만 적는다.</p>`});
+
+add("stcw",{t:"STCW 협약",en:"International Convention on Standards of Training, Certification and Watchkeeping for Seafarers",abbr:"STCW",cat:"law",wk:6,
+s:"선원의 훈련, 자격증명, 당직근무 기준에 관한 국제협약(1978년 채택, 1995·2010년 대폭 개정).",
+b:`<p>[[delivery|NYPE 2조 (b)]]는 인도 시 선박의 톤수에 맞춰 STCW를 충족하는 선장·사관·부원 정원을 승선시키라고 정한다. 자격 없는 선원은 감항성 결여로 이어진다.</p>`});
+
+add("wwd",{t:"Weather Working Day",en:"WWD",abbr:"WWD",cat:"doc",wk:6,
+s:"날씨가 하역을 허락하는 날만 정박시간(Laytime)으로 센다는 조건. 비·악천후로 작업 못 한 시간은 빠진다.",
+b:`<p>예: 비가 오면 곡물이나 철강재 하역은 멈춘다. WWD 조건이면 그 시간은 [[laytime]]에서 공제되어 용선자가 [[demurrage|체선료]]를 덜 낸다. 그래서 [[sof]]의 “NO WORK DUE TO RAIN” 같은 기록이 중요하다.</p>
+<p>휴일 처리는 [[shinc]]로 따로 정한다. 둘을 합쳐 “WWD SHEX”처럼 쓴다.</p>`});
+
+add("shinc",{t:"SHINC / SHEX",en:"Sundays and Holidays Included / Excepted",abbr:"SHINC",cat:"doc",wk:6,
+s:"일요일·공휴일을 정박시간에 넣을지(SHINC) 뺄지(SHEX) 정하는 조건.",
+b:`<div class="tbl"><table><tr><th>조건</th><th>뜻</th><th>유리한 쪽</th></tr>
+<tr><td class="abbr">SHINC</td><td>일요일·공휴일 포함 → 휴일도 Laytime이 흐른다</td><td>선주</td></tr>
+<tr><td class="abbr">SHEX</td><td>일요일·공휴일 제외 → 휴일은 Laytime에서 빠진다</td><td>용선자</td></tr></table></div>
+<p>[^변형으로 SHEX UU(Unless Used: 휴일에 실제로 작업하면 그 시간은 포함), SSHEX(토·일·공휴일 제외), FHEX(금요일·공휴일 제외, 이슬람권) 등이 있다.^]</p>
+<p>[[sof]] 예시의 “SUNDAY WORK SURCHARGE”처럼 휴일 작업은 할증이 붙는다. 날씨 조건은 [[wwd]].</p>`});
+
+add("coa",{t:"장기운송계약",en:"Contract of Affreightment",abbr:"COA",cat:"chr",wk:3,
+s:"정해진 기간 동안 일정 물량을 여러 항차에 나눠 운송하기로 약정하는 계약. 특정 선박이 아닌 ‘물량’을 약속한다.",
+b:`<h2>장점</h2><p>화주는 장기적으로 안정적인 물량 운송을, 선주는 안정적인 운임 수익을 확보한다.</p>
+<div class="q"><b>강의 질문 · 단점은?</b><ul style="margin:4px 0 0">
+<li>운임이 고정되어 시황이 오르면 선주가, 내리면 화주가 기회손실을 본다.</li>
+<li>긴 계약기간 동안 연료비·환율·규제(환경규제 등) 변화 위험을 떠안는다.</li>
+<li>물량이 줄거나 선박을 제때 배정하지 못하면 계약 위반 분쟁이 생긴다.</li>
+<li>상대방 신용 위험(파산 등)에 오래 노출된다.</li></ul></div>
+<h2>사례</h2><p>폴라리스쉬핑–발레(Vale) COA (2025년 6월 보도): 2026–2031년 5년간 21만 톤급 뉴캐슬맥스 벌크선 4척을 브라질–중국 철광석 항로에 투입, 약 3억 달러(약 4,080억 원) 규모. 2019년 첫 계약을 갱신한 것이다.</p>
+<p>광탄선, PCTC 등 [[ops|선종별 운항]]에서 주력 계약 형태다.</p>`});
+
+add("liner",{t:"정기선",en:"Liner Service",cat:"ops",wk:3,
+s:"정해진 노선과 스케줄에 따라 반복 운항하는 해운 서비스. 대표 선종은 컨테이너선.",
+b:`<p>버스 노선처럼 기항지와 요일이 정해져 있고, 여러 화주의 화물을 함께 싣는다. 운송계약은 주로 [[bl|선하증권]]으로 증명된다. 대형 선사들은 [[alliance|해운동맹]]으로 선복을 나눠 쓴다. 반대 개념은 [[tramp]].</p>`});
+
+add("tramp",{t:"부정기선",en:"Tramp Service",cat:"ops",wk:3,
+s:"고정 노선 없이 화물이 있는 곳을 찾아 매 항차 계약하며 운항하는 해운. 대표 선종은 벌크선.",
+b:`<p>택시처럼 수요에 따라 움직이며, 매 항차 [[vc|항해용선]]으로 새 계약을 맺는다. 상세는 [[ops]]의 부정기 벌크선 항목. 반대 개념은 [[liner]].</p>`});
+
+add("alliance",{t:"해운동맹",en:"Shipping Alliance",cat:"ops",wk:3,
+s:"컨테이너 정기선사들이 선복·항로·운항일정을 공유하는 협력 네트워크.",
+b:`<h2>현재 구도</h2><div class="tbl"><table><tr><th>동맹</th><th>회원사</th></tr>
+<tr><td>Ocean Alliance</td><td>CMA CGM, COSCO, OOCL, Evergreen</td></tr>
+<tr><td>Gemini</td><td>Maersk, Hapag-Lloyd</td></tr>
+<tr><td>Premier Alliance</td><td>HMM, ONE, Yang Ming</td></tr>
+<tr><td>독자 운항(Independents)</td><td>MSC, ZIM, Wan Hai, PIL, SITC 등</td></tr></table></div>
+<p>[^2025년 2월 재편 기준. 기존 2M(Maersk·MSC)이 해체되며 Gemini가 출범했고, THE Alliance는 Hapag-Lloyd가 빠지며 Premier Alliance로 바뀌었다.^]</p>
+<h2>장단점</h2><ul><li><b>장점</b>: 비용절감, 위험분산, 서비스 빈도 증가, 전 세계 커버리지</li>
+<li><b>단점</b>: 사실상 카르텔처럼 작동해 담합 우려, Over-booking(초과예약)과 Roll-over(화물이 다음 배로 밀림) 빈도 증가</li></ul>
+<p>동맹 안팎에서 선복을 사고파는 계약이 [[sca]]다.</p>`});
+
+add("sca",{t:"선복용선계약",en:"Space Charter Agreement",abbr:"SCA",cat:"chr",wk:3,
+s:"다른 선사 선박의 일부 공간(선복, 슬롯)만 빌려 쓰는 계약.",
+b:`<div class="q"><b>강의 질문 · SCA란?</b><br>배 전체가 아니라 배 안의 <b>공간 일부</b>(컨테이너 슬롯, 자동차 적재 공간)를 빌리는 용선이다. 자기 배가 없는 노선에서도 서비스를 제공할 수 있다.</div>
+<ul><li>[[alliance|해운동맹]] 회원사끼리 서로 선복을 교환·매입</li><li>[[ops|PCTC]] 선사들끼리 선복 교환</li></ul>
+<p>[^서로 같은 양을 맞바꾸면 Slot Exchange(선복교환), 돈을 주고 사면 Slot Purchase로 구분하기도 한다.^]</p>`});
+
+add("ops",{t:"선종별 운항방식",en:"Operating by Ship Type",cat:"ops",wk:3,
+s:"선종마다 화물의 성격이 달라 주로 쓰는 계약 형태(V/C, T/C, COA)와 운항 패턴이 다르다.",
+b:`<h2><span class="n">A</span>요약표</h2><div class="tbl"><table><tr><th>선종</th><th>운항 형태</th><th>주력 계약</th><th>예시 선박</th></tr>
+<tr><td>컨테이너선</td><td>[[liner|정기선]]</td><td>B/L, [[alliance|동맹]], [[sca|SCA]]</td><td>HMM ALGECIRAS · 2020 · LOA 399m · 24,000 TEU</td></tr>
+<tr><td>부정기 벌크선</td><td>[[tramp|부정기선]]</td><td>[[vc|V/C]] (+[[tc|T/C]])</td><td>PAN GLORY · 2009 · LOA 190m · 57,000 DWT</td></tr>
+<tr><td>광탄선</td><td>전용 항로</td><td>[[coa|COA]] (+V/C)</td><td>SM PUMA · 2016 · LOA 300m · 200,000 DWT</td></tr>
+<tr><td>LNG선</td><td>프로젝트 전용</td><td>장기 T/C (20–25년)</td><td>HL RAS LAFFAN · 2000 · LOA 280m · 135,450 CBM</td></tr>
+<tr><td>VLCC</td><td>왕복(공선 귀항)</td><td>COA·T/C·V/C 혼합</td><td>UNIVERSAL VICTOR · 2019 · LOA 336m · 300,000 DWT</td></tr>
+<tr><td>케미컬·제품운반선</td><td>다품종 소량</td><td>V/C, COA</td><td>ARGENT IRIS · 2011 · LOA 174m · 34,862 DWT</td></tr>
+<tr><td>PCTC</td><td>준정기선</td><td>COA, SCA</td><td>GLOVIS CHALLENGE · 2012 · LOA 200m · 6,500 CEU</td></tr></table></div>
+<p>단위(TEU, CEU, DWT, CBM, LOA)는 [[units]] 참고.</p>
+<h2><span class="n">B</span>컨테이너선</h2><ul><li>[[liner|정기선]]의 대표 선종. 정해진 노선과 정확한 스케줄 준수.</li>
+<li>[[alliance|해운동맹]]으로 선복·서비스 항로 공유.</li>
+<li>허브 앤 스포크: 대형선은 부산·싱가포르·로테르담 같은 허브항에서 환적, 중형선은 대형 항구 위주 기항, 소형선은 Feeder로 소량을 많은 소형 항구에 분배.</li></ul>
+<h2><span class="n">C</span>부정기 벌크선</h2><ul><li>매 항차 [[vc|V/C]]로 새 계약 → 상황에 따라 V/C와 T/C 혼재.</li>
+<li>다양한 화물을 전 세계 곳곳으로 → 항해사로서 해운 경험을 가장 많이 쌓을 수 있어 강의에서 가장 추천하는 선종.</li>
+<li>다만 수익률이 낮아 한국 선사의 운항 비중이 줄고 있다.</li></ul>
+<h2><span class="n">D</span>광탄선 (석탄·철광석)</h2><ul><li>제철소·발전소와 장기 [[coa|COA]]가 대부분.</li>
+<li>철광석: 브라질·호주 → 제철소 / 석탄: 호주·인도네시아 → 발전소.</li><li>COA와 일부 V/C로 계약을 분산하기도 함.</li></ul>
+<h2><span class="n">E</span>LNG선</h2><ul><li>구조: 수출자–수입자 장기 매매계약 (예: 한국가스공사–카타르) → 선사 입찰로 장기 [[tc|T/C]] 체결 → 그 T/C 계약서를 담보로 조선소에 선박 발주.</li>
+<li>20–25년 장기 T/C로 안정적 수익.</li><li>2024년 기준 전 세계 약 700척 운항.</li></ul>
+<h2><span class="n">F</span>VLCC (초대형 원유운반선)</h2><ul><li>COA, 중장기 T/C, V/C 혼재.</li>
+<li>선적지(중동 등)가 몇 곳으로 정해져 있어 양하 후 대부분 공선(Ballast)으로 선적항에 복귀.</li>
+<li>원유 수급에 따라 운임 변동폭이 커 여러 척을 COA·T/C·V/C로 나눠 위험 분산.</li></ul>
+<h2><span class="n">G</span>케미컬·제품운반선</h2><ul><li>Chemical Tanker: 다품종 소량 → 대부분 V/C.</li>
+<li>Product Tanker: 크기에 따라 MR, LR1, LR2[^대략 MR 25,000–55,000 DWT, LR1 55,000–80,000 DWT, LR2 80,000–160,000 DWT. 업계마다 경계가 조금씩 다르다.^] → 대부분 COA, V/C.</li>
+<li>Stolt-Nielsen 같은 대형사는 미국 걸프–유럽–중동–아시아를 정기선처럼 운항 ([[stolt]] 참고).</li></ul>
+<h2><span class="n">H</span>PCTC (자동차운반선)</h2><ul><li>자동차 메이커 물량이 기반 → 진입장벽이 매우 높음.</li>
+<li>메이저 8개 선사가 세계 자동차 해상운송량의 80% 이상.</li>
+<li>정기선 개념이 있으나 물량에 따라 스케줄 변동이 큼.</li>
+<li>선사 간 [[sca|SCA]]로 선복 교환, 메이커와는 [[coa|COA]].</li></ul>`});
+
+add("units",{t:"선박 크기 단위",en:"Ship size units",cat:"ops",wk:3,
+s:"선종별로 크기를 재는 기준이 다르다: 컨테이너는 TEU, 자동차선은 CEU, 벌크·탱커는 DWT, 가스선은 CBM.",
+b:`<div class="tbl"><table class="dict"><tr><th>단위</th><th>뜻</th><th>쓰는 곳</th></tr>
+<tr><td>TEU</td><td>Twenty-foot Equivalent Unit. 20피트 컨테이너 1개 기준</td><td>컨테이너선</td></tr>
+<tr><td>CEU</td><td>Car Equivalent Unit. 표준 승용차 1대 기준</td><td>PCTC</td></tr>
+<tr><td>DWT</td><td>Deadweight Tonnage. 실을 수 있는 화물·연료·청수 등의 총 무게(톤)</td><td>벌크선, 탱커</td></tr>
+<tr><td>GT / GRT</td><td>Gross Tonnage. 선박 내부 용적으로 정한 크기 지표(무게 아님)</td><td>협약 적용 기준, 항비</td></tr>
+<tr><td>CBM</td><td>Cubic Meter. 화물창 용적</td><td>LNG선, 운임 단위</td></tr>
+<tr><td>MT</td><td>Metric Ton (1,000kg)</td><td>운임 단위</td></tr>
+<tr><td>LOA</td><td>Length Overall. 선박 전장</td><td>모든 선종</td></tr></table></div>`});
+
+/* ───────── 4주차: 서류 ───────── */
+add("nor",{t:"하역준비완료통지",en:"Notice of Readiness",abbr:"NOR",cat:"doc",wk:4,
+s:"선박이 용선계약상 적·양하항에서 하역 준비가 끝났음을 선장이 용선자 측에 공식 통지하는 문서. Laytime 계산의 시작점.",
+b:`<h2>의미</h2><p>[[laytime|정박시간]]의 시작점이며, [[demurrage|체선료]]·[[despatch|조출료]] 정산의 기준이 된다. 그래서 NOR의 제출 시각과 유효성은 분쟁이 잦은 지점이다.</p>
+<h2>서식 요소</h2><p>선명, 항구, 항차번호, 수신인 / “I herewith tender you this vessel … as being ready in all respects to LOAD her cargo of xxx MT of xxxxx” / 제출 일시(현지시각) / 선장 서명 / 수령 일시·서명란.</p>
+<h2>개시 시점</h2><p>NOR 제출 시각과 Laytime 개시 시각은 다르다. [[gencon]] 1994 Clause 6(c): 12:00까지 제출 → 13:00 개시, 12:00 이후 업무시간 중 제출 → 다음 근무일 06:00 개시.</p>
+<p>NOR 제출·수락 시각은 [[sof]]에 기록된다.</p>`});
+
+add("laytime",{t:"정박시간",en:"Laytime",cat:"doc",wk:4,
+s:"용선계약에서 선주가 용선자에게 허락한 하역(선적·양하) 시간. 이 시간 안에 끝내야 한다.",
+b:`<p>[[vc|항해용선]]에서 배가 항구에 오래 묶이면 선주는 다음 항차를 못 한다. 그래서 하역 가능 시간을 미리 정해 둔다.</p>
+<ul><li>시작: [[nor|NOR]] 제출 후 C/P에 정한 시각 ([[gencon]] 6(c))</li>
+<li>기록: [[sof]]에 하역 작업·중단 시간을 적어 계산</li>
+<li>초과 → 용선자가 [[demurrage|체선료]] 지급 / 단축 → 선주가 [[despatch|조출료]] 지급</li></ul>
+<h2>선적항 안의 시간 (6주차)</h2>
+${TL([["NOR tender","","",.7,"plain"],["NOR accept","Total Laytime","Laytime Commence",6,"","Completion of Loading"]],"선적항 정박시간 타임라인")}
+<ol><li><b>NOR tender</b>: 선장이 [[nor|하역준비완료통지]]를 제출.</li><li><b>NOR accept</b>: 용선자 측이 수락. 계약에 정한 유예시간 뒤 <b>Laytime Commence</b> ([[gencon]] 6(c)).</li>
+<li>하역 완료(Completion of Loading)까지가 사용한 정박시간(Total Laytime).</li></ol>
+<h2>무엇을 빼고 세나</h2><ul><li>날씨: [[wwd|WWD (Weather Working Day)]] — 악천후로 일 못 한 시간 제외</li>
+<li>휴일: [[shinc|SHINC / SHEX]] — 일요일·공휴일 포함 여부</li><li>결과: 약정 시간 초과 → [[demurrage]] / 단축 → [[despatch]]</li></ul>
+<p>[^하역회사(Stevedore) 사정, 화물 미준비 등 그 밖의 중단 사유도 C/P 문구에 따라 공제 여부가 갈린다.^]</p>`});
+
+add("sof",{t:"사실기록서",en:"Statement of Facts",abbr:"SOF",cat:"doc",wk:4,
+s:"선박의 입항부터 출항까지 사건과 하역 작업 시간을 날짜·시각별로 기록한 문서. Laytime 계산의 근거.",
+b:`<h2>주요 기록 항목</h2><ul><li>도선사 승선, 투묘(Anchor), 검역허가(Free Pratique)</li>
+<li>[[nor|NOR]] 제출(Tendered)·재제출·수락(Accepted)</li>
+<li>접안(All Fast), 하역 개시·중단·재개·완료</li><li>서류 선적, 출항(SOSP)</li></ul>
+<h2>Working Records 예시 (강의자료 마산항 사례)</h2><p>날짜별 날씨, 작업시간(From–To), 중단시간과 사유를 적는다. 예: 비로 작업 중단(NO WORK DUE TO RAIN), 일요일 할증, 화물 미준비로 작업 없음(NO WORK DUE TO NOT CARGO READY), 식사시간 12:00–13:00.</p>
+<p>중단 사유가 누구 책임이냐에 따라 [[laytime]]에서 빼느냐가 달라져 [[demurrage|체선료]] 금액이 바뀐다. 선장과 대리점·화주가 서명한다.</p>`});
+
+add("demurrage",{t:"체선료",en:"Demurrage",cat:"doc",wk:4,
+s:"약정된 Laytime을 초과했을 때 용선자가 선주에게 지불하는 금액. 선박 지체로 인한 선주의 기회비용을 보전한다.",
+b:`<p>예: <span class="abbr">Demurrage at USD 20,000 per day pro rata</span> — 하루 2만 달러, 하루 미만은 시간 비례(pro rata)로 계산.</p>
+<p>반대 개념은 [[despatch|조출료]]. 체선료 분쟁의 법률비용은 [[fdd|FD&D]]로 담보하고, 미지급 시 운송인은 화물에 [[lien|유치권]]을 행사할 수 있다.</p>
+<p>[^“Once on demurrage, always on demurrage”: 체선 상태에 들어가면 이후 비나 휴일이 있어도 원칙적으로 계속 체선료가 붙는다.^]</p>`});
+
+add("despatch",{t:"조출료",en:"Despatch",cat:"doc",wk:4,
+s:"약정된 Laytime보다 하역이 빨리 끝났을 때 선주가 용선자에게 지불하는 보상금. 체선료의 반대 개념.",
+b:`<ul><li>C/P에 명시된 경우에만 적용</li><li>보통 [[demurrage|체선료]]의 절반</li></ul>
+<h2>DHD</h2><p><b>Despatch Half Demurrage</b>. 조출료를 체선료의 절반으로 정한다는 C/P 약어. 예: Demurrage USD 20,000/day → Despatch USD 10,000/day.</p>`});
+
+add("mr",{t:"본선수취증",en:"Mate's Receipt",abbr:"M/R",cat:"doc",wk:4,
+s:"화물 적재를 책임지는 일등항해사가 화물을 받았음을 확인해 발행하는 영수증. 선하증권(B/L) 발행의 기초 자료.",
+b:`<p>기재 항목: 일자, B/L 번호, 선명·항차, 선적항·양하항, 화물 표시·수량·용적, Shipper, Consignee, Notify Party, Remarks, 선장·일항사 서명.</p>
+<h2>Remark의 중요성</h2><p>화물 상태에 따라 damage, shortage, condition 등을 Remark란에 적으면 그 내용이 [[bl|B/L]]의 Remark란에도 그대로 표시된다 → [[clean-bl|Foul B/L]]이 된다.</p>
+<p>강의자료 예시: 원목 화물에 “Shipper's load, count and measurement, ship is not responsible for quantity, quality, split ends, chaffing, crack…” 같은 문구를 넣어 선박 책임을 제한.</p>`});
+
+add("bl",{t:"선하증권",en:"Bill of Lading",abbr:"B/L",cat:"doc",wk:4,
+s:"운송인이 화물을 받아 선적했음을 증명하고, 목적지에서 정당한 권리자에게 화물을 인도할 것을 약정하는 유가증권.",
+b:`<h2>세 가지 기능</h2><ol><li><b>화물 수령증</b> — 운송인이 화물을 받아 실었다.</li>
+<li><b>운송계약의 증거</b> — 뒷면 [[bl-terms|이면약관]]이 계약 조건.</li>
+<li><b>권리증권(유가증권)</b> — B/L을 가진 사람이 화물을 찾아갈 권리.</li></ol>
+<h2>분류</h2><div class="tbl"><table><tr><th>기준</th><th>종류</th></tr>
+<tr><td>화물 상태 기재</td><td>[[clean-bl|Clean B/L / Foul B/L]]</td></tr>
+<tr><td>수하인(Consignee) 기재</td><td>[[straight-bl|기명식(Straight)]] / [[order-bl|지시식(Order)]]</td></tr></table></div>
+<h2>주요 기재사항</h2><p>① Shipper ② Consignee ③ Notify Party ④ Vessel ⑤ Voyage No. ⑥ Port of Loading ⑦ Port of Discharge ⑧ B/L No. ⑨ Marks & Numbers ⑩ No. & Kind of Pkgs ⑪ Description of Goods ⑫ Gross Weight ⑬ Measurement. 그 밖에 운임 지급 조건(Freight Prepaid/Collect), 원본 발행 부수(보통 THREE(3)), 발행지·일자, On Board Date.</p>
+<h2>Surrender B/L</h2><p>강의 예시(SITC B/L)에 찍힌 SURRENDER 도장. 원본 B/L을 선적지에서 미리 반납해, 수하인이 원본 없이 화물을 찾을 수 있게 한 것이다.[^가까운 항로(한중일·동남아)에서는 배가 원본 서류보다 먼저 도착하는 경우가 많아 자주 쓴다.^]</p>
+<p>발행 근거는 [[mr|Mate's Receipt]], 적용 규칙은 [[hvr]].</p>`});
+
+add("clean-bl",{t:"무고장·고장 선하증권",en:"Clean B/L / Foul B/L",cat:"doc",wk:4,
+s:"화물 상태에 문제 기재가 없으면 Clean B/L, 손상·부족 등이 기재되면 Foul(Dirty, Claused) B/L.",
+b:`<div class="tbl"><table><tr><th>Clean B/L</th><th>Foul B/L</th></tr>
+<tr><td>“CLEAN ON BOARD” 표기. 외관상 양호한 상태로 선적.<br>예: 3 COILS, ANTI FINGER PRINTED EGI, 18.393 MT</td>
+<td>Remarks에 화물 이상 기재.<br>예: 37 COILS HOT ROLLED — 야적장 보관, 먼지·긁힘, 대부분 젖음·녹 발생, 결속 밴드 녹</td></tr></table></div>
+<p>Foul B/L은 은행이 신용장 대금 결제를 거절할 수 있어 화주가 꺼린다. 그래서 화주가 파울 기재를 빼달라며 파손화물보상장(L/I, Letter of Indemnity)을 내고 Clean B/L을 요구하기도 한다.[^L/I를 받고 Clean B/L을 내주면 선의의 B/L 소지인을 속이는 것이 되어, 선주 책임이 [[pandi|P&I]] 담보에서 빠질 위험이 있다.^]</p>
+<p>기재 내용은 [[mr|M/R]]의 Remark에서 넘어온다.</p>`});
+
+add("straight-bl",{t:"기명식 선하증권",en:"Straight B/L",cat:"doc",wk:4,
+s:"Consignee(수하인)란에 특정인의 이름이 적힌 B/L. 배서로 양도할 수 없다.",
+b:`<p>예(강의자료): Consignee — KLUANG TIN & CAN FACTORY SDN BHD (말레이시아). 그 회사만 화물을 찾을 수 있다.</p><p>유통이 필요 없는 거래(본·지사 간, 대금 선결제)에서 쓴다. 반대는 [[order-bl|지시식]].</p>`});
+
+add("order-bl",{t:"지시식 선하증권",en:"Order B/L",cat:"doc",wk:4,
+s:"Consignee란에 “To Order” 또는 “To the order of ○○”로 적힌 B/L. 배서(Endorsement)로 계속 양도할 수 있다.",
+b:`<h2>두 형태</h2><ul><li><b>To the Order of [은행]</b> — 강의 예: TO THE ORDER OF UNITED OVERSEAS BANK (MALAYSIA) BHD. 은행이 뒷면에 “Deliver to the order of Japmas Steel Sdn Bhd”라고 [[endorsement|배서]]해 넘겨준다.</li>
+<li><b>To Order</b> — 강의 예: SK NETWORKS → Consignee “TO ORDER”. 송하인 배서 후 은행(HSBC) 배서를 거쳐 KISWIRE CORD에 넘어간다.</li></ul>
+<p>신용장 거래에서 은행이 화물을 담보로 잡기 위해 주로 쓴다. 반대는 [[straight-bl|기명식]].</p>`});
+
+add("endorsement",{t:"배서",en:"Endorsement",cat:"doc",wk:4,s:"B/L 뒷면에 양도 의사를 적고 서명해 권리를 넘기는 것. 지시식 B/L이 유통될 수 있는 근거.",
+b:`<p>“Deliver to the order of ○○” + 서명. 배서가 이어질수록 B/L이 사람에서 사람으로 넘어간다(전전유통). 화물이 바다 위에 있는 동안에도 B/L만 팔면 화물을 판 것이 된다. ([[order-bl]])</p>`});
+
+add("bl-terms",{t:"B/L 이면약관",en:"B/L terms and conditions",cat:"law",wk:4,
+s:"선하증권 뒷면에 인쇄된 운송계약 조건. 운송인의 책임, 면책, 한도, 분쟁 해결 방법을 정한다.",
+b:`<h2>HMM 선하증권 이면약관 요약 (강의자료)</h2><div class="tbl"><table><tr><th>구분</th><th>주요 내용</th></tr>
+<tr><td>적용 규칙</td><td>[[hvr|Hague-Visby Rules]] (미국 입출항 화물은 [[cogsa|U.S. COGSA]])</td></tr>
+<tr><td>운송인 책임</td><td>선적 전·양하 후 책임 없음 / 운송 중 손해는 Hague-Visby·COGSA 적용 / 지연·전쟁·파업·불가항력 면책</td></tr>
+<tr><td>운송 자유</td><td>항로·기항지 변경, 대체선 투입 가능 / 위험 시 중도 양하·보관·반송 가능</td></tr>
+<tr><td>화물 규정</td><td>위험화물 사전 신고·승인 필수(위반 시 화주 책임) / 화주 자가적입(SLC) 컨테이너 내용물 책임 없음 / 냉동·냉장 등 특수화물은 합의 없으면 일반화물 취급 / 갑판적재는 화주 위험(단, H-V 적용)</td></tr>
+<tr><td>운임</td><td>선적 시 확정, 화물 손상·멸실 시에도 환불 불가 / 화물 불출 시에도 전액 지급</td></tr>
+<tr><td>[[ga|공동해손]]</td><td>[[yar|York-Antwerp Rules]] 1994 적용 / 화주는 GA 보증장 제출 의무 / 구난선 투입 시 정상 [[salvage|구난료]] 청구 가능</td></tr>
+<tr><td>[[jason|New Jason Clause]]</td><td>운송인 과실(항해과실 등)로 사고가 나도 GA가 선포되면 화주는 GA 비용 분담</td></tr>
+<tr><td>[[btb|Both-to-Blame]]</td><td>쌍방과실 충돌 시 화주는 운송인을 면책하고, 제3선박에 지급되는 화물손해 부분은 화주 부담</td></tr>
+<tr><td>[[lien|유치권]]</td><td>미지급 운임·[[demurrage|체선료]]·GA 분담금 등에 대해 화물 유치 가능</td></tr>
+<tr><td>책임 제한</td><td>미국: US$500/package 또는 customary freight unit<br>기타: 2 [[sdr|SDR]]/kg 또는 666.67 SDR/package 중 큰 금액<br>고가 화물은 사전 신고 + 추가 운임 필요</td></tr>
+<tr><td>클레임·소송</td><td>손상 통지: 인도 시(잠재 손상은 3일 이내) / 소송 제기: 1년 이내 / 준거법: 한국법 / 관할: 서울중앙지법</td></tr></table></div>`});
+
+add("hvr",{t:"헤이그-비스비 규칙",en:"Hague-Visby Rules",abbr:"H-V",cat:"law",wk:4,
+s:"1924년 헤이그 규칙을 1968년 개정한 국제해상운송 규칙. B/L 운송에서 운송인의 의무·책임·면책·배상한도·소멸시효를 정한다.",
+b:`<h2>성립</h2><p>1924년 헤이그 규칙(Hague Rules) → 1968년 개정 의정서(Visby 개정) → 헤이그-비스비 규칙.[^강의자료는 “1968년 스웨덴 비스비에서 개정”이라고 적었지만, 개정 의정서는 1968년 브뤼셀에서 서명되었다. ‘비스비’는 개정 논의가 이루어진 국제해법회(CMI) 회의 장소인 스웨덴 고틀란드섬의 도시 이름이다.^]</p>
+<h2>운송인 면책사유</h2><ul><li><b>항해과실</b>(Navigation Fault): 선장·선원의 항해 또는 선박 관리상 과실</li>
+<li><b>화재</b>(Fire): 운송인의 고의·과실이 아닌 화재</li>
+<li><b>불가항력</b>(Act of God) 및 전쟁, 파업, 천재지변[^규칙 제4조 2항은 천재지변, 전쟁, 파업 등을 각각 별도 면책사유로 나열한다. 강의자료는 이를 묶어서 정리했다.^]</li>
+<li>화주의 포장불량</li></ul>
+<p>운송인 과실인데도 면책되는 항해과실 면책이 이 규칙의 큰 특징이다. 이것이 [[jason]], [[btb]]가 나온 배경이다.</p>
+<h2>책임한도</h2><p>다음 중 <b>큰 금액</b>을 적용한다.</p><ul><li>포장당 666.67 [[sdr|SDR]]</li><li>kg당 2 SDR</li></ul>
+<p>예: 1 SDR = USD 1.37이면 666.67 SDR ≈ USD 913.34.</p>
+<h2>소멸시효</h2><p>인도일로부터 1년 안에 소송을 제기해야 한다.</p>`});
+
+add("cogsa",{t:"미국 해상화물운송법",en:"U.S. COGSA (Carriage of Goods by Sea Act, 1936)",abbr:"COGSA",cat:"law",wk:4,
+s:"헤이그 규칙을 미국 국내법으로 받아들인 법. 미국 입출항 화물에 적용된다.",
+b:`<p>책임한도는 <b>포장당 또는 관습적 운임단위당 US$500</b>. [[hvr|Hague-Visby]]의 SDR 기준과 다르므로 [[bl-terms|이면약관]]에서 따로 적는다.</p>`});
+
+add("sdr",{t:"SDR",en:"Special Drawing Rights",abbr:"SDR",cat:"law",wk:4,
+s:"IMF의 특별인출권. 여러 주요 통화를 묶은 가치 단위로, 국제협약의 책임한도 계산에 쓴다.",
+b:`<p>특정 국가 통화의 환율 변동에 휘둘리지 않도록 협약 한도를 SDR로 정한다. 강의자료는 1 SDR = USD 1.37로 계산했다.[^SDR 환율은 매일 바뀐다. 시험에서는 문제에 주어진 환율로 계산하면 된다.^]</p>
+<p>계산 예: 화물 1,000kg짜리 1포장 → 2 SDR × 1,000 = 2,000 SDR vs 666.67 SDR → 큰 쪽인 2,000 SDR 적용. ([[hvr]])</p>`});
+
+add("ga",{t:"공동해손",en:"General Average",abbr:"GA",cat:"law",wk:4,
+s:"항해 중 선박과 화물을 모두 구하려고 일부를 희생하거나 특별한 비용을 쓴 경우, 그 손실을 선박·화물·운임 이해관계자가 가치에 비례해 나눠 지는 제도.",
+b:`<h2>원리</h2><p>“모두를 살리기 위해 일부가 희생됐다면, 살아남은 모두가 함께 책임진다.” 폭풍 속에서 배를 가볍게 하려고 화물 일부를 바다에 던지는(투하, Jettison) 장면이 고전적인 예다.</p>
+<h2>계산 예 (강의자료)</h2><div class="tbl"><table><tr><th>이해관계</th><th>가치</th><th>비율</th><th>분담액 (GA 1,000억)</th></tr>
+<tr><td>선박</td><td class="num">5,000억</td><td class="num">50%</td><td class="num">500억</td></tr>
+<tr><td>화물</td><td class="num">4,000억</td><td class="num">40%</td><td class="num">400억</td></tr>
+<tr><td>운임</td><td class="num">1,000억</td><td class="num">10%</td><td class="num">100억</td></tr>
+<tr><td><b>합계</b></td><td class="num">10,000억</td><td class="num">100%</td><td class="num">1,000억</td></tr></table></div>
+<p>→ 선사: 500억 + 100억(운임 몫) = 600억 / 화주: 400억.</p>
+<h2>관련 규칙·보험</h2><ul><li>정산 규칙: [[yar|York-Antwerp Rules]]</li><li>운송인 과실이어도 분담: [[jason|New Jason Clause]]</li>
+<li>선박 분담분은 [[hm|H&M]], 화물 분담분은 [[cargo-ins|적하보험]]이 담보</li>
+<li>미지급 분담금은 [[lien|유치권]] 대상</li></ul>
+<p>사례: [[evergiven]].</p>`});
+
+add("yar",{t:"요크-앤트워프 규칙",en:"York-Antwerp Rules",abbr:"YAR",cat:"law",wk:4,
+s:"공동해손(GA)의 성립 요건과 정산 방법을 정한 국제 통일규칙. 법이 아니라 계약(B/L, C/P)에 넣어 적용한다.",
+b:`<p>여러 판이 있으며(1974, 1994, 2004, 2016), 어느 판을 쓸지 [[bl-terms|B/L 이면약관]]이나 [[cp|C/P]]에 적는다. 강의 예시 HMM B/L은 1994년판을 적용한다. GA가 선포되면 화주는 GA 보증장(Guarantee)과 Bond를 내야 화물을 받을 수 있다. ([[ga]])</p>`});
+
+add("jason",{t:"뉴 제이슨 조항",en:"New Jason Clause",cat:"law",wk:4,
+s:"운송인의 항해과실로 사고가 났더라도 공동해손이 선포되면 화주도 GA 비용을 분담하도록 하는 B/L 조항.",
+b:`<h2>배경</h2><p>미국 법원은 “선주의 항해과실로 사고가 났다면 화주는 [[ga|공동해손]] 비용을 분담할 필요가 없다”고 판단했다. 선주들은 이를 뒤집기 위해 B/L에 화주도 GA를 분담한다는 조항을 넣었고, 이것이 Jason Clause다. 이후 미국 [[cogsa|COGSA]](1936) 체계에 맞춰 문구를 고친 것이 New Jason Clause다.</p>
+<p>강의자료는 1895년 미국 “The Jason”호 사건(Old Jason Case)으로 소개한다.[^판례사를 정확히 보면, 화주 분담을 부정한 판결은 1898년 The Irrawaddy 사건이고, 1912년 The Jason 사건에서 미국 대법원이 이 조항의 효력을 인정했다. 조항 이름은 이 1912년 사건에서 왔다.^]</p>
+<h2>논리</h2><p>[[hvr|Hague-Visby]]는 항해과실을 면책한다 → 운송인에게 법적 책임이 없는 사고라면 GA 분담도 공평하게 해야 한다는 것.</p>`});
+
+add("btb",{t:"쌍방과실충돌조항",en:"Both-to-Blame Collision Clause",cat:"law",wk:4,
+s:"두 선박 모두의 과실로 충돌한 경우, 화주가 상대 선박에서 받은 배상 중 운송인에게 되돌아간 몫을 화주가 운송인에게 환급하도록 한 B/L 조항.",
+b:`<h2>조항 내용 (제27조 예시)</h2><ol><li>화주는 손해에 대해 운송인에게 클레임을 걸 수 있으나, 운송인은 [[hvr|헤이그-비스비 규칙]] 또는 [[cogsa|COGSA]] 등 적용 법령의 <b>책임 한도 안에서만</b> 배상한다.</li>
+<li>운송인이 지급한 배상액 중 일부를 상대 선박으로부터 구상(Recourse)받게 되는 경우, 화주는 그 구상액만큼을 운송인에게 환급해야 한다.</li></ol>
+<h2>왜 필요한가</h2><p>미국법에서는 화주가 [[hvr|항해과실 면책]] 때문에 자기 배(운송인)에는 청구하지 못하고 상대 선박에 손해 전액을 청구할 수 있다. 상대 선박은 이를 충돌 손해 정산에 넣어 운송인 쪽에 절반을 다시 청구한다. 결국 운송인은 면책을 받고도 간접적으로 화물손해를 물게 된다. 이 우회를 막는 조항이다.[^미국 대법원은 1952년 정기선 B/L에 들어간 이 조항을 무효로 본 적이 있어, 미국에서는 효력이 제한적이다. 용선계약에서는 유효하게 쓰인다.^]</p>`});
+
+add("lien",{t:"유치권",en:"Lien",cat:"law",wk:4,s:"받을 돈이 있는 운송인이 그 돈을 받을 때까지 화물을 넘겨주지 않을 권리.",
+b:`<p>대상: 미지급 운임, [[demurrage|체선료]], [[ga|GA 분담금]] 등. [[bl-terms|B/L 이면약관]]과 [[cp|C/P]]에 근거를 둔다.</p>`});
+
+/* ───────── 대문 ───────── */
+const MAIN=`<p>해운실무 2·3·4·6주차 강의자료의 개념, 약어, 사례를 문서 단위로 나눠 서로 연결했다. 밑줄 점선 링크를 누르면 해당 문서로 이동하고, 각 문서 아래에는 그 문서를 가리키는 <b>역링크</b>가 있다. 강의자료와 일반 문헌의 설명이 다른 곳은 [각주]로 표시했다.</p>
+<h2>주차별 흐름</h2>
+<div class="cards">
+<a href="#marine-ins"><b>2주차</b><span>향신료 → 대항해시대 → VOC → 선급 → H&amp;M · P&amp;I</span></a>
+<a href="#charter"><b>3주차</b><span>용선 3유형 · COA · 해운동맹 · 선종별 운항</span></a>
+<a href="#bl"><b>4주차</b><span>NOR · Laytime · 체선료 · B/L · 이면약관 · GA</span></a>
+<a href="#nype"><b>6주차</b><span>V/C·T/C 시간 구조 · WWD · SHINC/SHEX · TCT · NYPE 2015 조항</span></a></div>
+<h2>핵심 연결 고리</h2>
+<ol><li>위험을 나눈다: [[voc]] → [[lr|로이드]] → [[pandi-club]] → [[igpi]] → [[ga]]</li>
+<li>내 배 vs 남에 대한 책임: [[hm]] ↔ [[pandi]], 경계 사례 [[stolt]]</li>
+<li>사고가 규칙을 만든다: [[torrey]] → [[marpol]] · [[clc]]</li>
+<li>항구 시계: [[nor]] → [[laytime]] ([[wwd]] · [[shinc|SHINC/SHEX]]) → [[sof]] → [[demurrage]] / [[despatch]]</li>
+<li>정기용선의 생애: [[laycan]] → [[delivery]] → [[survey|On-Hire Survey]] → [[hire]] → [[offhire]] → [[redelivery]]</li>
+<li>누가 무엇을 내나: [[owners-provide|선주 6조]] ↔ [[charterers-provide|용선자 7조]]</li>
+<li>서류의 흐름: [[mr|Mate's Receipt]] → [[bl]] → [[endorsement|배서]] → 화물 인도</li>
+<li>항해과실 면책의 파급: [[hvr]] → [[jason]] · [[btb]]</li></ol>
+<h2>강의 속 질문(???) 모아보기</h2><ul>
+<li>조선선급협회는? → [[kr]]</li><li>영업손실은? → [[loh]]</li><li>해양오염 처리 비용은? → [[torrey]]</li>
+<li>MV BOW DALIAN은? → [[stolt]]</li><li>COA의 단점은? → [[coa]]</li><li>SCA란? → [[sca]]</li></ul>
+<h2>바로가기</h2><p>[[abbr|약어 사전]] · [[units|선박 크기 단위]] · [[ops|선종별 운항방식 요약표]]</p>`;
+add("main",{t:"해운실무 위키",en:"Shipping Practice · 대문",cat:null,s:null,b:MAIN});
+
+/* 약어 사전 (자동 + 수동) */
+const EXTRA=[["BBCHP","Bareboat Charter Hire Purchase — 국적취득조건부 나용선","bbc"],["DHD","Despatch Half Demurrage — 조출료는 체선료의 절반","despatch"],
+["CBM","Cubic Meter","units"],["MT","Metric Ton","units"],["TEU","Twenty-foot Equivalent Unit","units"],["CEU","Car Equivalent Unit","units"],["DWT","Deadweight Tonnage","units"],["LOA","Length Overall","units"],["GT","Gross Tonnage","units"],
+["MR / LR1 / LR2","Product tanker 크기 구분","ops"],["VLCC","Very Large Crude Carrier — 초대형 원유운반선","ops"],["PCTC","Pure Car & Truck Carrier — 자동차운반선","ops"],["LNG","Liquefied Natural Gas","ops"],
+["RDC","Running Down Clause","rdc"],["WRC","Wreck Removal Convention 2007","bluecard"],["PLR","Passenger Liability Regulation (Athens)","bluecard"],["MLC","Maritime Labour Convention 2006","bluecard"],
+["SOLAS","International Convention for the Safety of Life at Sea","class"],["ISM","International Safety Management Code","class"],["ISPS","International Ship and Port Facility Security Code","class"],["IMO","International Maritime Organization","class"],
+["L/I","Letter of Indemnity — 파손화물보상장","clean-bl"],["SOSP / EOSP","Start / End of Sea Passage","sof"],["SLC","Shipper's Load & Count","bl-terms"],["BIMCO","Baltic and International Maritime Council — 표준양식 제정 단체","cp"],
+["ROB","Remaining on Board — 연료 잔량","survey"],["CVE","Communications, Victualling and Entertainment — 통신·식사 등 경비","hire"],["UTC","Coordinated Universal Time — 용선료 계산 기준 시각","hire"],
+["NAABSA","Not Always Afloat But Safely Aground — 안전한 좌주 허용","nype-1"],["SHEX","Sundays and Holidays Excepted","shinc"],["PSC","Port State Control — 항만국통제","offhire"],["ICA","Inter-Club Agreement — 화물 클레임 분담 협정","performance"]];
+add("abbr",{t:"약어 사전",en:"Abbreviations",cat:null,s:"강의에 나온 약어를 알파벳순으로 모았다. 약어를 누르면 해당 문서로 간다.",b:"__ABBR__"});
+
+/* ───────── 렌더링 ───────── */
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const strip=h=>h.replace(/<[^>]+>/g,"").replace(/\[\[([^\]|]+)\|?([^\]]*)\]\]/g,(m,a,b)=>b||(A[a]?A[a].t:a));
+function links(h){
+  return h.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g,(m,id,lab)=>{
+    const a=A[id];const text=lab||(a?a.t:id);
+    if(!a)return `<a class="wl miss" title="없는 문서">${text}</a>`;
+    return `<a class="wl" href="#${id}" title="${esc(strip(a.s||a.t)).replace(/"/g,"&quot;")}">${text}</a>`;
+  });
+}
+function renderBody(b){
+  const notes=[];
+  b=b.replace(/\[\^([\s\S]*?)\^\]/g,(m,t)=>{notes.push(t);const n=notes.length;
+    return `<sup class="fn" id="r${n}"><a href="#" data-fn="${n}" title="${esc(strip(t)).replace(/"/g,"&quot;")}">[${n}]</a></sup>`;});
+  let html=links(b);
+  if(notes.length)html+=`<section class="notes"><h3>각주</h3><ol>${notes.map((t,i)=>`<li id="f${i+1}">${links(t)} <a href="#" data-ret="${i+1}" aria-label="본문으로">↑</a></li>`).join("")}</ol></section>`;
+  return html;
+}
+function abbrPage(){
+  const rows=[];
+  for(const [id,a] of Object.entries(A)) if(a.abbr) rows.push([a.abbr,`${a.t} · ${a.en}`,id]);
+  EXTRA.forEach(r=>rows.push(r));
+  rows.sort((x,y)=>x[0].localeCompare(y[0]));
+  return `<div class="tbl"><table class="dict"><tr><th>약어</th><th>풀이</th></tr>${rows.map(r=>`<tr><td><a class="wl" href="#${r[2]}">${esc(r[0])}</a></td><td>${esc(r[1])}</td></tr>`).join("")}</table></div>`;
+}
+const back={};
+for(const [id,a] of Object.entries(A)){const s=new Set();(a.b.match(/\[\[([^\]|]+)/g)||[]).forEach(m=>s.add(m.slice(2)));
+  s.forEach(t=>{if(t!==id){(back[t]=back[t]||[]).push(id)}});}
+
+/* 방문 기록: 이 브라우저에만 저장 */
+const VK="shipwiki.visits",SK="shipwiki.sort";
+let V={};try{V=JSON.parse(localStorage.getItem(VK))||{}}catch(e){V={}}
+function saveV(){try{localStorage.setItem(VK,JSON.stringify(V))}catch(e){}}
+function visit(id){const v=V[id]||{n:0,last:0};v.n++;v.last=Date.now();V[id]=v;saveV()}
+let mode="topic";try{mode=localStorage.getItem(SK)||"topic"}catch(e){}
+const sortSel=document.getElementById("sortSel");sortSel.value=mode;
+let curId="main";
+sortSel.addEventListener("change",()=>{mode=sortSel.value;try{localStorage.setItem(SK,mode)}catch(e){}buildSide(curId)});
+
+const side=document.getElementById("side"),list=document.getElementById("sideList"),prog=document.getElementById("prog");
+const NO=["nype","nype-1","safeport","delivery","laycan","redelivery","survey","owners-provide","charterers-provide","performance","slow-steaming","hire","hold-cleaning","supercargo","sailing-orders","offhire"];
+const ko=(x,y)=>A[x].t.localeCompare(A[y].t,"ko");
+function item(id,cur){
+  const n=V[id]?V[id].n:0,a=A[id];
+  return `<a href="#${id}" class="${id===cur?"cur":""}${n?"":" unseen"}"><span class="nm">${a.t}${a.abbr?` <span class="abbr">${esc(a.abbr)}</span>`:""}</span>${n?`<span class="cnt${n>=5?" hot":""}" title="${n}회 방문">${n}</span>`:""}</a>`;
+}
+function group(title,ids,cur){return ids.length?`<h4>${title}</h4>`+ids.map(i=>item(i,cur)).join(""):""}
+function buildSide(cur){
+  const all=Object.keys(A).filter(i=>A[i].cat);
+  const seen=all.filter(i=>V[i]),unseen=all.filter(i=>!V[i]);
+  let h=group("시작",["main","abbr"],cur);
+  if(mode==="topic"){for(const [c,name] of Object.entries(CATS)){let ids=all.filter(i=>A[i].cat===c);if(c==="nype")ids.sort((x,y)=>NO.indexOf(x)-NO.indexOf(y));h+=group(name,ids,cur)}}
+  else if(mode==="week"){for(const [w,name] of Object.entries(W))h+=group(name,all.filter(i=>A[i].wk==w),cur)}
+  else if(mode==="visits"){h+=group("많이 본 문서",seen.sort((x,y)=>V[y].n-V[x].n||V[y].last-V[x].last),cur)+group("아직 안 본 문서",unseen.sort(ko),cur)}
+  else if(mode==="recent"){h+=group("최근 본 문서",seen.sort((x,y)=>V[y].last-V[x].last),cur)+group("아직 안 본 문서",unseen.sort(ko),cur)}
+  else if(mode==="unread"){h+=group("아직 안 본 문서",unseen,cur);for(const [c,name] of Object.entries(CATS))h+=group(name+" · 본 문서",seen.filter(i=>A[i].cat===c),cur)}
+  else{h+=group("가나다순",all.sort(ko),cur)}
+  list.innerHTML=h;
+  const pct=Math.round(seen.length/all.length*100);
+  prog.innerHTML=`${all.length}개 중 ${seen.length}개 읽음 (${pct}%)<i><b style="width:${pct}%"></b></i>`;
+}
+const resetBtn=document.getElementById("resetBtn");let armed=false;
+resetBtn.addEventListener("click",()=>{
+  if(!armed){armed=true;resetBtn.textContent="한 번 더 누르면 지워집니다";resetBtn.classList.add("warn");setTimeout(()=>{armed=false;resetBtn.textContent="방문 기록 지우기";resetBtn.classList.remove("warn")},3000);return}
+  V={};saveV();armed=false;resetBtn.textContent="방문 기록 지우기";resetBtn.classList.remove("warn");buildSide(curId)});
+const doc=document.getElementById("doc");
+function show(id){
+  if(!A[id])id="main";
+  const a=A[id];curId=id;visit(id);
+  let body=a.b==="__ABBR__"?abbrPage():renderBody(a.b);
+  const bl=(back[id]||[]).filter(x=>x!=="main");
+  doc.innerHTML=`<div class="crumb">${a.cat?`<span>${CATS[a.cat]}</span>`:"<span>해운실무 위키</span>"}${a.wk?`<span class="chip">${W[a.wk]}</span>`:""}<span class="chip">${V[id].n}번째 방문</span></div>
+  <h1>${a.t}</h1><div class="en">${esc(a.en||"")}</div>
+  ${a.s?`<div class="summary"><b>한 줄 정의</b>${links(a.s)}</div>`:""}
+  ${body}
+  ${bl.length?`<section class="back"><h3>이 문서를 가리키는 문서</h3><div>${bl.map(x=>`<a href="#${x}">${A[x].t}</a>`).join("")}</div></section>`:""}`;
+  doc.querySelectorAll("[data-fn]").forEach(el=>el.addEventListener("click",e=>{e.preventDefault();const t=document.getElementById("f"+el.dataset.fn);t.scrollIntoView({block:"center"});flash(t)}));
+  doc.querySelectorAll("[data-ret]").forEach(el=>el.addEventListener("click",e=>{e.preventDefault();document.getElementById("r"+el.dataset.ret).scrollIntoView({block:"center"})}));
+  buildSide(id);document.title=(id==="main"?"해운실무 위키":a.t+" · 해운실무 위키");
+  side.classList.remove("open");tocBtn.setAttribute("aria-expanded","false");
+  window.scrollTo(0,0);
+}
+function flash(el){el.style.background="var(--mark)";setTimeout(()=>el.style.background="",1600)}
+function route(){show((location.hash||"#main").slice(1))}
+window.addEventListener("hashchange",route);
+
+const tocBtn=document.getElementById("tocBtn");
+tocBtn.onclick=()=>{const o=side.classList.toggle("open");tocBtn.setAttribute("aria-expanded",o)};
+
+/* 검색 */
+const q=document.getElementById("q"),res=document.getElementById("res");let hits=[],sel=0;
+const norm=s=>(s||"").toLowerCase().replace(/[\s\-·'’/&]/g,"");
+q.addEventListener("input",()=>{
+  const v=norm(q.value);if(!v){res.hidden=true;return}
+  hits=Object.entries(A).map(([id,a])=>{
+    const t=norm(a.t),ab=norm(a.abbr),en=norm(a.en),sm=norm(strip(a.s||""));
+    let sc=0; if(ab===v||t===v)sc=100; else if(ab.startsWith(v)||t.startsWith(v))sc=60; else if(t.includes(v)||ab.includes(v))sc=40; else if(en.includes(v))sc=25; else if(sm.includes(v))sc=10;
+    return [sc,id,a];}).filter(x=>x[0]).sort((a,b)=>b[0]-a[0]).slice(0,10);
+  sel=0;
+  res.innerHTML=hits.length?hits.map((h,i)=>`<a href="#${h[1]}" class="${i===0?"sel":""}">${h[2].t}<span>${esc(h[2].abbr||h[2].en||"")}</span></a>`).join(""):`<a>결과 없음</a>`;
+  res.hidden=false;
+});
+q.addEventListener("keydown",e=>{
+  const items=res.querySelectorAll("a[href]");
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();if(!items.length)return;sel=(sel+(e.key==="ArrowDown"?1:-1)+items.length)%items.length;items.forEach((x,i)=>x.classList.toggle("sel",i===sel))}
+  if(e.key==="Enter"&&hits[sel]){location.hash=hits[sel][1];q.value="";res.hidden=true;q.blur()}
+  if(e.key==="Escape"){res.hidden=true}
+});
+res.addEventListener("click",()=>{q.value="";res.hidden=true});
+document.addEventListener("click",e=>{if(!e.target.closest(".search"))res.hidden=true});
+route();
+</script>
+
+</body></html>
