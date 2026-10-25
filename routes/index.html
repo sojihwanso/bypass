@@ -158,6 +158,27 @@
   }
 
   .empty-find { padding: 30px 0; color: var(--muted); font-weight: 700; }
+
+  /* 자료 허브 표지판: 학부·교수님으로 거르고 정렬 */
+  .hub { min-width: 0; padding-bottom: 30px; }
+  .hub .spots { padding-bottom: 0; }
+  .hub-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 12px; margin: 0 0 18px; padding: 12px 14px; border-radius: 12px; background: #fff; border: 1.5px solid var(--rule); }
+  .hub-field { display: flex; flex-direction: column; gap: 4px; flex: 1 1 150px; min-width: 0; }
+  .hub-field label { font-size: 12.5px; font-weight: 700; color: var(--muted); }
+  .hub-field select { width: 100%; font: inherit; font-size: 15px; font-weight: 700; color: var(--ink); padding: 7px 30px 7px 10px; border: 1.5px solid var(--post); border-radius: 8px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%231C211E' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 10px center / 12px 8px; appearance: none; -webkit-appearance: none; cursor: pointer; }
+  .hub-field select:hover { border-color: var(--c); }
+  .hub-field select.is-set { border-color: var(--c); box-shadow: inset 0 0 0 1px var(--c); }
+  .hub-count { flex: 0 0 auto; margin-left: auto; padding-bottom: 8px; font-size: 13.5px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+  .hub-reset { flex: 0 0 auto; font: inherit; font-size: 13.5px; font-weight: 700; padding: 7px 10px; border: 0; border-radius: 8px; background: none; color: var(--green); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .spot-meta { margin-top: -5px; font-size: 12px; font-weight: 500; line-height: 1.4; color: var(--muted); text-align: center; word-break: keep-all; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .hub-empty { grid-column: 1 / -1; margin: 0; padding: 10px 0 18px; color: var(--muted); font-weight: 700; }
+  @media (max-width: 760px) {
+    .hub { padding-bottom: 22px; }
+    .hub-bar { padding: 10px 12px; gap: 8px 10px; }
+    .hub-field { flex-basis: calc(50% - 5px); }
+    .hub-field.is-sort { flex-basis: 100%; }
+    .hub-count { margin-left: 0; padding-bottom: 0; }
+  }
   .map-note { margin: 34px 0 0; font-size: 14.5px; color: var(--muted); }
 </style>
 </head>
@@ -201,7 +222,7 @@
       <div>
         <p class="sign-code">BYPASS 노선 안내</p>
         <h1 id="page-title">개통 노선도</h1>
-        <p class="lead">본 국이 개통한 지름길을 한곳에 모았습니다. 학교생활에서 불필요한 절차를 만나면, 먼저 이 노선도에서 지름길을 찾아보십시오.</p>
+        <p class="lead">본 국이 개통한 지름길과 과목 자료를 한곳에 모았습니다. 학교생활에서 불필요한 절차를 만나면, 먼저 이 노선도에서 지름길을 찾아보십시오.</p>
       </div>
       <figure class="linemap" aria-label="노선별 지름길 수" data-linemap>
         <p class="linemap-note">불러오는 중…</p>
@@ -254,6 +275,7 @@
 <script>
 (async function () {
   const TYPE = { app: '앱', wiki: '위키', channel: '카톡 채널' };
+  const profName = p => !p ? '' : /교수(님)?$/.test(p) ? p : `${p} 교수`;
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 
   // 로그인 기록이 있으면 '로그인' 대신 '공사장'
@@ -273,7 +295,7 @@
   async function fromDb() {
     const get = q => fetch(`${SB_URL}/rest/v1/${q}`, { headers: { apikey: SB_KEY } }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
     const [lines, routes] = await Promise.all([
-      get('route_lines?select=id,name,no,color,description,sort&order=sort.asc'),
+      get('route_lines?select=*&order=sort.asc'),
       get('routes?select=*&order=sort.asc,created_at.asc')
     ]);
     if (!lines.length) throw new Error('empty');
@@ -304,7 +326,7 @@
     dlg.className = `route-dlg${isWarm(line.color) ? ' is-warm' : ''}${building ? ' is-building' : ''}`;
     dlg.style.setProperty('--c', line.color || '#0F5A3A');
     dlg.querySelector('[data-dlg-icon]').replaceChildren(tile(r));
-    const tags = [line.name, TYPE[r.type] || r.type, building ? '공사 중' : '개통'].filter(Boolean).map(t => el('span', 'dlg-tag', t));
+    const tags = [line.name, TYPE[r.type] || r.type, building ? '공사 중' : '개통', r.department, profName(r.professor)].filter(Boolean).map(t => el('span', 'dlg-tag', t));
     if (r.sample) tags.push(el('span', 'dlg-tag is-sample', '견본'));
     dlg.querySelector('[data-dlg-tags]').replaceChildren(...tags);
     dlg.querySelector('[data-dlg-title]').textContent = r.title;
@@ -329,7 +351,7 @@
   map.replaceChildren(...data.lines.map(l => {
     const stops = data.routes.filter(r => r.line === l.id);
     const row = el('div', 'linemap-row'); row.style.setProperty('--line', l.color);
-    const badge = el('span', 'linemap-badge'); const b = el('b', null, l.no); b.style.background = l.color; badge.append(b, document.createTextNode(l.name.replace(/ (노선|지름길)$/, '')));
+    const badge = el('span', 'linemap-badge'); const b = el('b', null, l.no); b.style.background = l.color; badge.append(b, document.createTextNode(l.name.replace(/ (노선|지름길|허브)$/, '')));
     const track = el('div', 'linemap-track'); const st = el('div', 'linemap-stops');
     stops.forEach(r => {
       const s = el('button', `linemap-stop${r.status === 'building' ? ' is-building' : ''}`); s.type = 'button';
@@ -346,16 +368,91 @@
   function spot(r) {
     const line = lineOf[r.line] || {};
     const li = el('li', 'spot');
+    li.dataset.id = r.id;
     li.dataset.type = r.type;
-    li.dataset.search = [r.title, r.subject, r.desc, TYPE[r.type], line.name].join(' ').toLowerCase();
+    li.dataset.search = [r.title, r.subject, r.desc, TYPE[r.type], line.name, r.department, r.professor].join(' ').toLowerCase();
+    li.dataset.dept = r.department || '';
+    li.dataset.prof = r.professor || '';
     const btn = el('button', 'spot-btn'); btn.type = 'button'; btn.setAttribute('aria-haspopup', 'dialog');
     const wrap = el('span', 'tile-wrap'); wrap.append(tile(r));
     if (r.sample) wrap.append(el('span', 'sticker', '견본'));
     btn.append(wrap, el('span', 'spot-name', r.title));
+    if (line.kind === 'hub' && (r.professor || r.department)) {
+      const meta = el('span', 'spot-meta', profName(r.professor) || r.department);
+      if (r.professor && r.department) meta.title = `${r.department} · ${profName(r.professor)}`;
+      btn.append(meta);
+    }
     if (r.status === 'building') btn.append(el('span', 'spot-state', '공사 중'));
     btn.addEventListener('click', () => openRoute(r));
     li.append(btn);
     return li;
+  }
+
+  /* ===== 자료 허브: 학부·교수님 거르기, 정렬 =====
+     고른 값은 주소에도 남는다(/routes/?dept=…&prof=…) → 그대로 공유하면 같은 목록이 열린다 */
+  const ko = (a, b) => (a || '').localeCompare(b || '', 'ko');
+  const lastKo = (a, b) => (!a) - (!b) || ko(a, b);  // 빈 값은 맨 뒤
+  const SORTS = [
+    ['base', '기본 순서', null],
+    ['new', '최근 올린 순', (a, b) => String(b.created_at || '').localeCompare(String(a.created_at || ''))],
+    ['title', '이름순', (a, b) => ko(a.title, b.title)],
+    ['dept', '학부순', (a, b) => lastKo(a.department, b.department) || ko(a.subject || a.title, b.subject || b.title)],
+    ['prof', '교수님순', (a, b) => lastKo(a.professor, b.professor) || ko(a.subject || a.title, b.subject || b.title)]
+  ];
+  const params = new URLSearchParams(location.search);
+  const hubs = [];
+  function hubPanel(l, routes, list) {
+    const wrap = el('div', 'hub');
+    const bar = el('div', 'hub-bar'); bar.setAttribute('role', 'group'); bar.setAttribute('aria-label', `${l.name} 거르기와 정렬`);
+    const field = (label, id, cls) => { const f = el('div', `hub-field${cls ? ' ' + cls : ''}`); const lab = el('label', null, label); lab.htmlFor = id; const s = el('select'); s.id = id; f.append(lab, s); return [f, s]; };
+    const [fDept, sDept] = field('학부', `hub-${l.id}-dept`);
+    const [fProf, sProf] = field('교수님', `hub-${l.id}-prof`);
+    const [fSort, sSort] = field('정렬', `hub-${l.id}-sort`, 'is-sort');
+    const count = el('span', 'hub-count'); count.setAttribute('aria-live', 'polite');
+    const reset = el('button', 'hub-reset', '모두 보기'); reset.type = 'button';
+    bar.append(fDept, fProf, fSort, count, reset);
+    const uniq = arr => [...new Set(arr.filter(Boolean))].sort(ko);
+    const opt = (v, t) => { const o = el('option', null, t); o.value = v; return o; };
+    sSort.append(...SORTS.map(([k, t]) => opt(k, t)));
+    const state = { dept: '', prof: '', sort: 'base' };
+    const hasDept = routes.some(r => r.department), hasProf = routes.some(r => r.professor);
+    fDept.hidden = !hasDept; fProf.hidden = !hasProf;
+    function fillOptions() {
+      sDept.replaceChildren(opt('', '전체 학부'), ...uniq(routes.map(r => r.department)).map(d => opt(d, d)));
+      const profs = uniq(routes.filter(r => !state.dept || r.department === state.dept).map(r => r.professor));
+      if (state.prof && !profs.includes(state.prof)) state.prof = '';
+      sProf.replaceChildren(opt('', '전체 교수님'), ...profs.map(p => opt(p, profName(p))));
+      sDept.value = state.dept; sProf.value = state.prof; sSort.value = state.sort;
+      sDept.classList.toggle('is-set', !!state.dept); sProf.classList.toggle('is-set', !!state.prof); sSort.classList.toggle('is-set', state.sort !== 'base');
+    }
+    function reorder() {
+      const cmp = (SORTS.find(x => x[0] === state.sort) || SORTS[0])[2];
+      const items = [...list.querySelectorAll(':scope > .spot')];
+      const order = cmp ? routes.slice().sort(cmp) : routes;
+      const byId = new Map(items.map(li => [li.dataset.id, li]));
+      order.forEach(r => { const li = byId.get(String(r.id)); if (li) list.append(li); });
+      const empty = list.querySelector('.hub-empty'); if (empty) list.append(empty);
+    }
+    function remember() {
+      if (hubs.length > 1) return;  // 허브 표지판이 하나일 때만 주소에 남긴다
+      const p = new URLSearchParams(location.search);
+      [['dept', state.dept], ['prof', state.prof], ['sort', state.sort === 'base' ? '' : state.sort]].forEach(([k, v]) => { if (v) p.set(k, v); else p.delete(k); });
+      const qs = p.toString();
+      history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+    }
+    const update = () => { fillOptions(); reorder(); remember(); apply(); };
+    sDept.addEventListener('change', () => { state.dept = sDept.value; update(); });
+    sProf.addEventListener('change', () => { state.prof = sProf.value; update(); });
+    sSort.addEventListener('change', () => { state.sort = sSort.value; update(); });
+    reset.addEventListener('click', () => { state.dept = ''; state.prof = ''; update(); sDept.focus(); });
+    // 주소로 들어온 값
+    if (params.get('dept') && routes.some(r => r.department === params.get('dept'))) state.dept = params.get('dept');
+    if (params.get('prof') && routes.some(r => r.professor === params.get('prof'))) state.prof = params.get('prof');
+    if (SORTS.some(x => x[0] === params.get('sort'))) state.sort = params.get('sort');
+    fillOptions(); reorder();
+    hubs.push({ zone: null, list, state, count, reset, matches: li => (!state.dept || li.dataset.dept === state.dept) && (!state.prof || li.dataset.prof === state.prof) });
+    wrap.append(bar, list);
+    return wrap;
   }
 
   const box = document.querySelector('[data-lines]');
@@ -375,13 +472,14 @@
     const building = routes.length - open;
     sign.append(top, h);
     if (l.desc) sign.append(el('p', 'zsign-desc', l.desc));
-    sign.append(el('p', 'zsign-count', `개통 ${open}곳${building ? ` · 공사 중 ${building}곳` : ''}`));
+    const isHub = l.kind === 'hub';
+    sign.append(el('p', 'zsign-count', isHub ? `자료 ${open}건${building ? ` · 준비 중 ${building}건` : ''}` : `개통 ${open}곳${building ? ` · 공사 중 ${building}곳` : ''}`));
     post.append(sign, el('div', 'zone-legs'));
 
     const list = el('ul', 'spots');
     if (routes.length) routes.forEach(r => list.append(spot(r)));
-    else list.append(el('li', 'spots-empty', '아직 개통된 지름길이 없습니다.'));
-    zone.append(post, list);
+    else list.append(el('li', 'spots-empty', isHub ? '아직 올라온 자료가 없습니다.' : '아직 개통된 지름길이 없습니다.'));
+    zone.append(post, isHub && routes.length ? hubPanel(l, routes, list) : list);
     return zone;
   }));
 
@@ -400,18 +498,33 @@
     const q = find.value.trim().toLowerCase();
     let shown = 0;
     box.querySelectorAll('.zone').forEach(zone => {
-      let n = 0;
+      let n = 0, hubHidden = 0;
+      const hub = hubs.find(h => zone.contains(h.list));
       zone.querySelectorAll('.spot').forEach(li => {
         const ok = (type === 'all' || li.dataset.type === type) && (!q || li.dataset.search.includes(q));
-        li.hidden = !ok; if (ok) n++;
+        const inHub = !hub || hub.matches(li);
+        li.hidden = !(ok && inHub); if (ok) n++;
+        if (ok && !inHub) hubHidden++;
       });
+      if (hub) {
+        const visible = n - hubHidden;
+        const filtered = !!(hub.state.dept || hub.state.prof);
+        hub.count.textContent = filtered ? `${visible}건 / 전체 ${n}건` : `${n}건`;
+        hub.reset.hidden = !filtered;
+        let empty = hub.list.querySelector('.hub-empty');
+        if (n && !visible) {
+          if (!empty) { empty = el('li', 'hub-empty', '고른 조건에 맞는 자료가 없습니다. ‘모두 보기’를 눌러 주십시오.'); hub.list.append(empty); }
+        } else if (empty) empty.remove();
+      }
+      // 거르기로 0건이 되어도 허브 표지판은 남겨 둔다 (다시 고를 수 있게)
       zone.hidden = !n; shown += n;
     });
     document.querySelector('[data-empty]').hidden = shown > 0;
   }
   // 주소로 바로 찾기: /routes/?q=위키
   const q0 = new URLSearchParams(location.search).get('q');
-  if (q0) { find.value = q0; apply(); }
+  if (q0) find.value = q0;
+  apply();
 })();
 </script>
 </body>

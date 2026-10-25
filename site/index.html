@@ -339,6 +339,10 @@
                 <input class="input file-input" id="wk-file" type="file" accept=".html,.htm,text/html" required>
                 <label class="field-label" for="wk-desc">한 줄 설명 <span class="opt">(선택)</span></label>
                 <input class="input" id="wk-desc" maxlength="300" placeholder="예: 강의 요점과 시험 범위 정리">
+                <div class="form-cols" data-wk-hub>
+                  <div><label class="field-label" for="wk-dept">학부 <span class="opt">(자료 허브일 때)</span></label><input class="input" id="wk-dept" maxlength="40" placeholder="예: 항해정보시스템학부"></div>
+                  <div><label class="field-label" for="wk-prof">교수님 <span class="opt">(이름만)</span></label><input class="input" id="wk-prof" maxlength="40" placeholder="예: 홍길동"></div>
+                </div>
                 <p class="form-error" role="alert" hidden></p>
                 <div class="form-actions"><button type="submit" class="btn btn-primary btn-small">위키 올리기</button><button type="button" class="btn btn-secondary btn-small" data-form-close>취소</button></div>
               </form>
@@ -1023,13 +1027,17 @@
       routeForm.querySelector('[type="submit"]').textContent = '올리기';
       showForm(routeForm, routeForm.hidden);
     });
-    document.querySelector('[data-wiki-open]').addEventListener('click', () => { wikiForm.reset(); wikiDone.hidden = true; showForm(wikiForm, wikiForm.hidden); });
+    document.querySelector('[data-wiki-open]').addEventListener('click', () => { wikiForm.reset(); if (rtLines.length) fillLineSelects(); wikiDone.hidden = true; showForm(wikiForm, wikiForm.hidden); });
 
     function fillLineSelects() {
       ['rt-line', 'wk-line'].forEach(id => {
         const sel = document.getElementById(id);
         sel.replaceChildren(...rtLines.map(l => { const o = el('option', null, l.name); o.value = l.id; return o; }));
       });
+      // 위키는 과목 자료 허브(종류 hub)로 먼저 고르고, 허브가 없으면 학부·교수 칸을 숨긴다
+      const hub = rtLines.find(l => l.kind === 'hub');
+      if (hub) document.getElementById('wk-line').value = hub.id;
+      document.querySelector('[data-wk-hub]').hidden = !hub;
     }
 
     function routeRow(r) {
@@ -1093,7 +1101,7 @@
 
     (async () => {
       const [ls, rs] = await Promise.all([
-        B.sb.from('route_lines').select('id, name, no, color, sort').order('sort'),
+        B.sb.from('route_lines').select('*').order('sort'),
         B.sb.from('routes').select('id, title, type, line, status, url, description, subject, sample, sort, created_at').order('sort').order('created_at')
       ]);
       if (ls.error || rs.error) {
@@ -1153,6 +1161,12 @@
       const url = `/wiki/${slug}/`;
       const same = rtRoutes.find(r => r.url === url);
       const row = { title: `${subject} 위키`, subject, type: 'wiki', line, status: 'open', url, description: desc || same?.description || `${subject} 과목 정리 위키입니다.`, sample: false };
+      // 자료 허브로 올리면 학부·교수님도 함께 (011 SQL 뒤에만 있는 칸)
+      if ((rtLines.find(l => l.id === line) || {}).kind === 'hub') {
+        const dept = v('wk-dept'), prof = v('wk-prof').replace(/\s*교수(님)?$/, '');
+        if (dept) row.department = dept;
+        if (prof) row.professor = prof;
+      }
       const q = same ? B.sb.from('routes').update(row).eq('id', same.id).select().single()
                      : B.sb.from('routes').insert({ ...row, sort: Math.max(0, ...rtRoutes.filter(r => r.line === line).map(r => r.sort || 0)) + 10 }).select().single();
       const saved = await q;
