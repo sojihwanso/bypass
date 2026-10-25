@@ -366,6 +366,35 @@ kbd { font-family: var(--f-mono); font-size: 10.5px; border: 1px solid var(--hai
 .rk-name em { font-style: normal; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .1em; color: var(--brass); margin-left: 8px; }
 a.quiet { text-decoration: none; }
 
+/* ---------- BYPASS: 이름 변경 요청 · 운영진 관리 (supabase/021_a2z_moderation.sql) ---------- */
+.p-lead.flag { margin: -6px 0 0; padding: 12px 14px; border: 1px solid rgba(201, 88, 76, .45); border-radius: 12px; background: rgba(201, 88, 76, .08); color: var(--ivory); }
+.p-lead.flag b { color: var(--ember); font-weight: 500; }
+.staff-btn { color: var(--brass); }
+.panel.wide { width: min(640px, 100%); }
+.adm-modes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.adm-find { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; }
+.adm-in { flex: 1 1 180px; min-width: 0; background: transparent; border: 0; border-bottom: 1px solid var(--hair); color: var(--ivory); font: inherit; font-size: 14px; padding: 7px 2px; outline: none; }
+.adm-in:focus { border-bottom-color: var(--brass); }
+.adm-list { list-style: none; margin: 0; padding: 0; }
+.adm-row { padding: 14px 4px; border-bottom: 1px solid var(--faint); display: flex; flex-direction: column; gap: 10px; }
+.adm-row:last-child { border-bottom: 0; }
+.adm-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.adm-name { font-size: 14.5px; min-width: 0; overflow-wrap: anywhere; }
+.adm-t { font-family: var(--f-mono); font-size: 14px; letter-spacing: .06em; font-variant-numeric: tabular-nums; flex: none; }
+.adm-sub { font-family: var(--f-mono); font-size: 11px; color: var(--dim); letter-spacing: .05em; }
+.tag { display: inline-block; font-size: 10.5px; letter-spacing: .08em; border-radius: 999px; padding: 2px 8px; margin-left: 8px; vertical-align: 2px; border: 1px solid; }
+.tag.req { color: var(--ember); border-color: rgba(201, 88, 76, .55); }
+.tag.off { color: var(--pewter); border-color: var(--hair); }
+.adm-note { font-size: 12px; color: var(--pewter); }
+.adm-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.adm-acts .pill { padding: 5px 12px; font-size: 12px; }
+.pill.warn { color: var(--ember); border-color: rgba(201, 88, 76, .45); }
+.pill.armed { background: rgba(201, 88, 76, .16); color: var(--ivory); border-color: var(--ember); }
+.pill:disabled { opacity: .5; cursor: progress; }
+.adm-ask { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.adm-msg { margin: 0; font-size: 12.5px; color: var(--brass); min-height: 1.4em; }
+.adm-msg.bad { color: var(--ember); }
+
 @media (max-width: 520px) {
   .quiet { letter-spacing: .14em; padding: 10px; }
   .whisper { letter-spacing: .16em; }
@@ -394,6 +423,9 @@ a.quiet { text-decoration: none; }
       </a>
       <button type="button" class="quiet icon" id="rankBtn" aria-label="기록 순위" title="기록 순위">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5h17M5 20.5v-7h4.5v7M9.5 20.5v-12h5v12M14.5 20.5v-5h4.5v5"/></svg>
+      </button>
+      <button type="button" class="quiet icon staff-btn" id="adminBtn" aria-label="운영진 랭킹 관리" title="운영진 · 랭킹 관리" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2 19 6v5.6c0 4.3-2.9 7.7-7 9.2-4.1-1.5-7-4.9-7-9.2V6z"/><path d="m9 12 2.2 2.2L15.4 10"/></svg>
       </button>
       <button type="button" class="quiet icon" id="setBtn" aria-label="설정" title="설정">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5h8.5M17.5 7.5H20M4 16.5h2.5M11.5 16.5H20"/><circle cx="15" cy="7.5" r="2.4"/><circle cx="9" cy="16.5" r="2.4"/></svg>
@@ -457,6 +489,7 @@ a.quiet { text-decoration: none; }
       <div><span class="p-kick">Call sign</span><h2 id="nickTitle">닉네임</h2></div>
       <button type="button" class="quiet icon x" data-close aria-label="나중에 정하기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button>
     </div>
+    <p class="p-lead flag" id="nickFlag" role="status" hidden></p>
     <p class="p-lead" id="nickLead">종합 랭킹에 이 이름으로 기록이 올라갑니다. 실명이 아니어도 됩니다. 설정에서 언제든 바꿀 수 있습니다.</p>
     <form class="nick-form" id="nickForm" novalidate>
       <label class="sr" for="nickIn">닉네임 (1~16자)</label>
@@ -468,6 +501,38 @@ a.quiet { text-decoration: none; }
       </div>
     </form>
     <p class="p-note">닉네임과 완주 기록(시간·오타·정확도)만 저장합니다. 이 브라우저를 바꾸면 같은 닉네임이라도 새 사람으로 셉니다.</p>
+  </div>
+</div>
+
+<div class="veil" id="adminVeil" hidden>
+  <div class="panel wide" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+    <div class="p-head">
+      <div><span class="p-kick">BYPASS 운영진</span><h2 id="adminTitle">랭킹 관리</h2></div>
+      <button type="button" class="quiet icon x" data-close aria-label="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button>
+    </div>
+    <p class="p-lead">이름 변경을 요청하면 그 사람의 기록은 본인이 이름을 바꿀 때까지 종합 랭킹에서 빠지고, 그 이름은 누구도 다시 쓸 수 없습니다. 랭킹 제외는 풀 때까지 빠집니다. 기록 자체는 남습니다.</p>
+    <div class="adm-modes">
+      <div class="seg sm" role="radiogroup" aria-label="연습 대상">
+        <button type="button" role="radio" data-aset="letters">알파벳</button>
+        <button type="button" role="radio" data-aset="digits">숫자</button>
+        <button type="button" role="radio" data-aset="all">함께</button>
+      </div>
+      <div class="seg sm" role="radiogroup" aria-label="순서">
+        <button type="button" role="radio" data-aorder="seq">순서대로</button>
+        <button type="button" role="radio" data-aorder="mix">섞어서</button>
+      </div>
+    </div>
+    <div class="adm-find">
+      <label class="sr" for="admFind">닉네임 찾기</label>
+      <input class="adm-in" id="admFind" type="search" placeholder="닉네임으로 찾기" autocomplete="off" spellcheck="false">
+      <div class="seg sm" role="radiogroup" aria-label="보기">
+        <button type="button" role="radio" data-afilter="all">전체</button>
+        <button type="button" role="radio" data-afilter="flag">조치 중</button>
+      </div>
+    </div>
+    <p class="adm-msg" id="admMsg" role="status"></p>
+    <ul class="adm-list" id="admList"></ul>
+    <p class="p-note">이 창은 BYPASS 운영진으로 로그인한 경우에만 보입니다. 조치는 서버에서 운영진인지 다시 확인한 뒤 적용됩니다.</p>
   </div>
 </div>
 
@@ -854,6 +919,8 @@ a.quiet { text-decoration: none; }
   };
   const saveMe = () => saveJSON(ME_KEY, me);
   saveMe();
+  // 운영진 조치 상태 (서버에서 매번 확인): req = 이름 변경 요청, note = 사유, off = 랭킹 제외
+  const flag = { req: false, note: '', off: false };
 
   async function rpc(fn, body) {
     const r = await fetch(SB_RPC + fn, { method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -864,6 +931,7 @@ a.quiet { text-decoration: none; }
   async function join(nick) {
     const id = await rpc('a2z_join', { p_key: me.key, p_nick: nick });
     me.nick = nick; me.id = Number(id); me.later = false; saveMe();
+    flag.req = false; flag.note = '';
     return me.id;
   }
   // 완주 기록 올리기: 성공하면 true
@@ -879,6 +947,16 @@ a.quiet { text-decoration: none; }
     delete boardCache[rec.mode];
     return true;
   }
+  async function checkMe() {
+    if (!me.id && !me.nick) return;
+    try {
+      const rows = await rpc('a2z_me', { p_key: me.key });
+      const r = Array.isArray(rows) ? rows[0] : null;
+      if (!r) return;
+      flag.req = !!r.rename_req; flag.note = typeof r.rename_note === 'string' ? r.rename_note.slice(0, 100) : ''; flag.off = !!r.hidden;
+      if (typeof r.nickname === 'string' && r.nickname) { me.nick = r.nickname.slice(0, 16); me.id = Number(r.id) || me.id; saveMe(); }
+    } catch (e) { /* 021 실행 전이거나 연결 실패: 조용히 넘어감 */ }
+  }
   const boardCache = {};
   async function fetchBoard(mode) {
     const c = boardCache[mode];
@@ -893,7 +971,7 @@ a.quiet { text-decoration: none; }
 
   // ---------- panels ----------
   let openVeil = null, abandon = false, rankSet = prefs.set, rankOrder = prefs.order, rankToken = 0, rankScope = me.nick ? 'all' : 'me';
-  const VEIL = { rank: '#rankVeil', set: '#setVeil', nick: '#nickVeil' };
+  const VEIL = { rank: '#rankVeil', set: '#setVeil', nick: '#nickVeil', admin: '#adminVeil' };
 
   function show(which) {
     if (openVeil) return;
@@ -904,10 +982,18 @@ a.quiet { text-decoration: none; }
     v.hidden = false;
     if (which === 'rank') { rankSet = prefs.set; rankOrder = prefs.order; renderRanks(); }
     else if (which === 'set') renderSettings();
+    else if (which === 'admin') { renderAdmin(); loadAdmin(); }
     if (which === 'nick') {
-      $('#nickIn').value = me.nick; $('#nickErr').textContent = '';
+      $('#nickIn').value = flag.req ? '' : me.nick; $('#nickErr').textContent = '';
+      const fl = $('#nickFlag');
+      fl.hidden = !flag.req;
+      if (flag.req) {
+        fl.replaceChildren();
+        const b = document.createElement('b'); b.textContent = '운영진이 닉네임 변경을 요청했습니다.';
+        fl.append(b, document.createTextNode(` 지금 이름 ‘${me.nick}’${flag.note ? ` · 사유: ${flag.note}` : ''}. 새 이름으로 바꾸면 종합 랭킹에 기록이 다시 보입니다.`));
+      }
       $('#nickGo').textContent = me.nick ? '이 이름으로 바꾸기' : '이 이름으로 시작';
-      $('#nickLater').textContent = me.nick ? '그대로 두기' : '나중에 정하기';
+      $('#nickLater').textContent = flag.req ? '나중에 바꾸기' : me.nick ? '그대로 두기' : '나중에 정하기';
       setTimeout(() => { try { $('#nickIn').focus({ preventScroll: true }); } catch (e) { $('#nickIn').focus(); } }, 60);
       return;
     }
@@ -1033,7 +1119,9 @@ a.quiet { text-decoration: none; }
     if (myIdx >= 0) { bb.textContent = fmt(rows[myIdx].best); const em = document.createElement('em'); em.textContent = `${myIdx + 1}위 / ${rows.length}명`; bb.append(em); }
     else bb.textContent = '—';
     mb.append(sp, bb);
-    if (!me.nick) noteWithJoin('닉네임을 정하면 다음 완주부터 종합 랭킹에 오릅니다.', '닉네임 정하기');
+    if (flag.req) noteWithJoin('운영진이 닉네임 변경을 요청해, 이름을 바꿀 때까지 내 기록이 종합 랭킹에 보이지 않습니다.', '이름 바꾸기');
+    else if (flag.off) noteWithJoin('운영진이 내 기록을 종합 랭킹에서 제외했습니다. 개인 랭킹에는 그대로 남습니다.');
+    else if (!me.nick) noteWithJoin('닉네임을 정하면 다음 완주부터 종합 랭킹에 오릅니다.', '닉네임 정하기');
     else if (myIdx < 0 && mine !== null) noteWithJoin('닉네임을 정하기 전 기록은 개인 랭킹에만 있습니다. 한 번 더 완주하면 종합 랭킹에 오릅니다.');
     list.innerHTML = '';
     if (!rows.length) { list.innerHTML = `<li class="p-empty">아직 ${labelOf(k)} 종합 기록이 없습니다.<br>첫 번째 이름을 남겨 보세요.</li>`; return; }
@@ -1047,7 +1135,7 @@ a.quiet { text-decoration: none; }
   document.querySelectorAll('.tabs .seg button').forEach((b) => b.addEventListener('click', () => { rankOrder = b.dataset.o; renderRanks(); }));
 
   function renderSettings() {
-    $('#nickNow').textContent = me.nick ? `종합 랭킹 이름: ${me.nick}` : '아직 정하지 않았습니다. 정하면 종합 랭킹에 기록이 올라갑니다.';
+    $('#nickNow').textContent = flag.req ? `운영진이 ‘${me.nick}’ 이름 변경을 요청했습니다. 바꾸면 종합 랭킹에 다시 보입니다.` : me.nick ? `종합 랭킹 이름: ${me.nick}` : '아직 정하지 않았습니다. 정하면 종합 랭킹에 기록이 올라갑니다.';
     $('#nickBtn').textContent = me.nick ? '바꾸기' : '정하기';
     const weak = weakList(prefs.set);
     $('#weakN').textContent = weak.length;
@@ -1077,6 +1165,115 @@ a.quiet { text-decoration: none; }
     abandon = false; newSession(); renderSettings();
   });
 
+  // ---------- BYPASS 운영진: 랭킹 관리 ----------
+  // BYPASS 에 운영진으로 로그인한 브라우저에서만 버튼이 보인다. 화면은 표시일 뿐, 조치는 서버(a2z_admin_*)가 운영진인지 다시 확인한다.
+  const AUTH_LS = 'sb-itzdjdgjqcpmxdfssfel-auth-token';
+  let staffSb = null, admSet = prefs.set, admOrder = prefs.order, admFilter = 'all', admRows = null, admToken = 0, admAsk = null;
+  function loadScript(src) {
+    return new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+  }
+  async function initStaff() {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(AUTH_LS) || 'null'); } catch (e) { saved = null; }
+    if (!saved || !saved.refresh_token) return;
+    try {
+      if (!window.supabase) await loadScript('/assets/vendor/supabase-js-2.117.2.js');
+      if (!window.BYPASS) await loadScript('/assets/auth.js');
+      const B = window.BYPASS;
+      if (!B || !B.sb) return;
+      const { data } = await B.sb.auth.getSession();
+      const user = data && data.session && data.session.user;
+      if (!user || B.roleOf(user).key !== 'staff') return;
+      staffSb = B.sb;
+      $('#adminBtn').hidden = false;
+    } catch (e) { /* 로그인 정보를 확인하지 못하면 버튼을 보이지 않는다 */ }
+  }
+  function admMsg(text, bad) { const m = $('#admMsg'); m.textContent = text || ''; m.classList.toggle('bad', !!bad); }
+  function admErr(e) {
+    const t = (e && (e.message || '')) + ' ' + (e && e.code || '');
+    if (/PGRST202|a2z_admin|Could not find the function/.test(t)) return '관리 기능 설정이 아직 끝나지 않았습니다. supabase/021_a2z_moderation.sql 을 실행해 주세요.';
+    if (/staff only|42501/.test(t)) return '운영진만 할 수 있습니다. BYPASS 에 다시 로그인해 주세요.';
+    return '처리하지 못했습니다. 잠시 후 다시 해 주세요.';
+  }
+  async function loadAdmin() {
+    if (!staffSb) return;
+    const token = ++admToken;
+    admRows = null; renderAdmin();
+    const { data, error } = await staffSb.rpc('a2z_admin_players', { p_mode: keyOf(admSet, admOrder) });
+    if (token !== admToken) return;
+    if (error) { admRows = []; renderAdmin(); admMsg(admErr(error), true); return; }
+    admRows = Array.isArray(data) ? data : [];
+    renderAdmin();
+  }
+  function renderAdmin() {
+    document.querySelectorAll('[data-aset]').forEach((b) => { const on = b.dataset.aset === admSet; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+    document.querySelectorAll('[data-aorder]').forEach((b) => { const on = b.dataset.aorder === admOrder; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+    document.querySelectorAll('[data-afilter]').forEach((b) => { const on = b.dataset.afilter === admFilter; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+    const list = $('#admList');
+    list.replaceChildren();
+    const empty = (text) => { const li = document.createElement('li'); li.className = 'p-empty'; li.textContent = text; list.append(li); };
+    if (admRows === null) { empty('불러오는 중입니다'); return; }
+    const q = $('#admFind').value.trim().toLowerCase();
+    const rows = admRows.filter((r) => (admFilter === 'all' || r.rename_req || r.hidden) && (!q || String(r.nickname || '').toLowerCase().includes(q)));
+    if (!rows.length) { empty(admRows.length ? '조건에 맞는 사람이 없습니다.' : '아직 닉네임을 정한 사람이 없습니다.'); return; }
+    rows.slice(0, 200).forEach((r) => list.append(admRow(r)));
+  }
+  function admRow(r) {
+    const li = document.createElement('li'); li.className = 'adm-row';
+    const top = document.createElement('div'); top.className = 'adm-top';
+    const nm = document.createElement('span'); nm.className = 'adm-name'; nm.textContent = r.nickname || '이름 없음';
+    if (r.rename_req) { const t = document.createElement('span'); t.className = 'tag req'; t.textContent = '이름 변경 요청 중'; nm.append(t); }
+    if (r.hidden) { const t = document.createElement('span'); t.className = 'tag off'; t.textContent = '랭킹 제외'; nm.append(t); }
+    const tm = document.createElement('span'); tm.className = 'adm-t'; tm.textContent = r.best_ms ? fmt(num(r.best_ms)) : '—';
+    top.append(nm, tm);
+    const sub = document.createElement('span'); sub.className = 'adm-sub';
+    sub.textContent = `${labelOf(keyOf(admSet, admOrder))} ${num(r.mode_runs)}회 · 전체 ${num(r.all_runs)}회 완주${r.last_at ? ' · 최근 ' + when(Date.parse(r.last_at)) : ''} · #${r.id}`;
+    li.append(top, sub);
+    if (r.rename_req && r.rename_note) { const n = document.createElement('span'); n.className = 'adm-note'; n.textContent = `요청 사유: ${r.rename_note}`; li.append(n); }
+    const acts = document.createElement('div'); acts.className = 'adm-acts';
+    const btn = (label, cls, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'pill' + (cls ? ' ' + cls : ''); b.textContent = label; b.addEventListener('click', () => fn(b)); acts.append(b); return b; };
+    if (admAsk === r.id) {
+      // 이름 변경 요청: 사유(선택)를 적고 보내기
+      const ask = document.createElement('form'); ask.className = 'adm-ask';
+      const inp = document.createElement('input'); inp.className = 'adm-in'; inp.maxLength = 100; inp.placeholder = '사유 (선택, 본인에게 보임)'; inp.setAttribute('aria-label', '요청 사유');
+      const send = document.createElement('button'); send.type = 'submit'; send.className = 'pill warn'; send.textContent = '요청 보내기';
+      const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'pill'; cancel.textContent = '취소';
+      cancel.addEventListener('click', () => { admAsk = null; renderAdmin(); });
+      ask.addEventListener('submit', (e) => { e.preventDefault(); act(r, 'request', send, inp.value.trim()); });
+      ask.append(inp, send, cancel);
+      li.append(ask);
+      setTimeout(() => inp.focus(), 30);
+      return li;
+    }
+    if (r.rename_req) btn('요청 취소', '', (b) => act(r, 'cancel', b));
+    else btn('이름 변경 요청', 'warn', () => { admAsk = r.id; renderAdmin(); });
+    btn(r.hidden ? '제외 풀기' : '랭킹에서 제외', r.hidden ? '' : 'warn', (b) => act(r, r.hidden ? 'unhide' : 'hide', b));
+    if (num(r.all_runs)) btn('기록 모두 지우기', 'warn', (b) => {
+      if (!b.classList.contains('armed')) { b.classList.add('armed'); b.textContent = '한 번 더 누르면 지웁니다'; setTimeout(() => { if (b.isConnected) { b.classList.remove('armed'); b.textContent = '기록 모두 지우기'; } }, 4000); return; }
+      act(r, 'clear', b);
+    });
+    li.append(acts);
+    return li;
+  }
+  const DONE = { request: '이름 변경을 요청했습니다. 바꿀 때까지 랭킹에서 빠집니다.', cancel: '요청을 거뒀습니다. 랭킹에 다시 보입니다.', hide: '랭킹에서 제외했습니다.', unhide: '제외를 풀었습니다.', clear: '기록을 모두 지웠습니다.' };
+  async function act(r, action, b, note) {
+    if (!staffSb) return;
+    b.disabled = true; admMsg('');
+    const { error } = await staffSb.rpc('a2z_admin_set', { p_id: r.id, p_action: action, p_note: note || null });
+    b.disabled = false;
+    if (error) { admMsg(admErr(error), true); return; }
+    admAsk = null;
+    Object.keys(boardCache).forEach((k) => delete boardCache[k]);
+    admMsg(`${r.nickname || '#' + r.id}: ${DONE[action]}`);
+    if (r.id === me.id) checkMe();
+    loadAdmin();
+  }
+  $('#adminBtn').addEventListener('click', () => { admSet = prefs.set; admOrder = prefs.order; admAsk = null; admMsg(''); show('admin'); });
+  document.querySelectorAll('[data-aset]').forEach((b) => b.addEventListener('click', () => { admSet = b.dataset.aset; admAsk = null; loadAdmin(); }));
+  document.querySelectorAll('[data-aorder]').forEach((b) => b.addEventListener('click', () => { admOrder = b.dataset.aorder; admAsk = null; loadAdmin(); }));
+  document.querySelectorAll('[data-afilter]').forEach((b) => b.addEventListener('click', () => { admFilter = b.dataset.afilter; renderAdmin(); }));
+  $('#admFind').addEventListener('input', () => renderAdmin());
+
   // ---------- controls & input plumbing ----------
   function focusTyper() { try { typer.focus({ preventScroll: true }); } catch (e) { typer.focus(); } }
   $('#orderBtn').addEventListener('click', () => {
@@ -1095,7 +1292,7 @@ a.quiet { text-decoration: none; }
     const err = $('#nickErr'), go = $('#nickGo');
     if (!nick) { err.textContent = '닉네임을 한 글자 이상 넣어 주세요.'; return; }
     if (/[<>]/.test(nick)) { err.textContent = '< > 는 쓸 수 없습니다.'; return; }
-    if (nick === me.nick && me.id) { hide(); return; }
+    if (nick === me.nick && me.id) { if (flag.req) { err.textContent = '운영진이 바꿔 달라고 한 이름입니다. 다른 이름으로 정해 주세요.'; return; } hide(); return; }
     go.disabled = true; err.textContent = '';
     try {
       await join(nick);
@@ -1106,7 +1303,8 @@ a.quiet { text-decoration: none; }
       setWhisper(`<span class="br">${nick.replace(/[&<>"]/g, '')}</span>  ·  종합 랭킹에 기록이 올라갑니다`, 3200);
     } catch (x) {
       go.disabled = false;
-      err.textContent = /bad nickname/.test(x.message) ? '이 닉네임은 쓸 수 없습니다. 1~16자로 다시 정해 주세요.' : '연결하지 못했습니다. 잠시 후 다시 해 주세요. (기록은 이 브라우저에 남습니다)';
+      err.textContent = /blocked nickname/.test(x.message) ? '쓸 수 없는 이름입니다. 다른 이름으로 정해 주세요.'
+        : /bad nickname/.test(x.message) ? '이 닉네임은 쓸 수 없습니다. 1~16자로 다시 정해 주세요.' : '연결하지 못했습니다. 잠시 후 다시 해 주세요. (기록은 이 브라우저에 남습니다)';
     }
   });
   $('#setBtn').addEventListener('click', () => show('set'));
@@ -1146,6 +1344,12 @@ a.quiet { text-decoration: none; }
   if (!me.nick && !me.later) setTimeout(() => { if (!openVeil && !S.started) show('nick'); }, 900);
   // 닉네임은 있는데 서버 번호를 모르면(예전 기록) 조용히 다시 등록
   else if (me.nick && !me.id) join(me.nick).catch(() => {});
+  // 운영진이 이름 변경을 요청했으면 알려 주고 닉네임 창을 연다
+  checkMe().then(() => {
+    if (!flag.req) return;
+    setTimeout(() => { if (!openVeil && !S.started) show('nick'); else setWhisper('운영진이 닉네임 변경을 요청했습니다  ·  설정에서 바꿔 주세요', 4200); }, 900);
+  });
+  initStaff();
 })();
 </script>
 <script src="/assets/track.js" defer></script>
