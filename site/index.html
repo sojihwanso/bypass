@@ -12,6 +12,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/bypass.css">
+<style>
+  .hq-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .hq-links .mini-btn, .board-tools a.mini-btn { text-decoration: none; }
+</style>
 </head>
 <body class="is-checking">
 
@@ -114,9 +118,23 @@
         <a class="desk-tab" href="#home" role="tab" data-tab-btn="home" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/></svg><span class="desk-tab-name">내 공사장</span><span class="desk-tab-badge" data-tab-badge="home" hidden></span></a>
         <a class="desk-tab" href="#meeting" role="tab" data-tab-btn="meeting" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v3H8zM6 6h2v2h8V6h2v15H6z"/><path d="M9 12h6M9 16h4" stroke="var(--tab-bg)" stroke-width="1.8"/></svg><span class="desk-tab-name">회의실</span><span class="desk-tab-badge" data-tab-badge="meeting" hidden></span></a>
         <a class="desk-tab" href="#inbox" role="tab" data-tab-btn="inbox" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M4 13h4l1.5 2.5h5L16 13h4" fill="none" stroke="var(--tab-bg)" stroke-width="1.8"/></svg><span class="desk-tab-name">접수함</span><span class="desk-tab-badge" data-tab-badge="inbox" hidden></span></a>
-        <a class="desk-tab" href="#admin" role="tab" data-tab-btn="admin" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 3.5a5 5 0 0 0-4.6 6.9L3.5 16.8l3.7 3.7 6.4-6.4a5 5 0 0 0 6.9-4.6l-3 3-3.2-.8-.8-3.2z"/></svg><span class="desk-tab-name">관리실</span><span class="desk-tab-badge" data-tab-badge="admin" hidden></span></a>
       </nav>
       <div class="desk-grid">
+
+        <!-- 운영진: 관리 업무는 HQ 에서 -->
+        <article data-tab="home" class="card card-wide card-hq" aria-labelledby="c-hq" data-staff-only hidden>
+          <div class="card-head"><p class="card-no">운영진</p><h2 id="c-hq">관리 업무는 HQ에서</h2></div>
+          <div class="card-body">
+            <p class="card-lead">접수함의 처리, 합류 신청, 회원 관리, 준공 현황·위키 올리기, 공지 쓰기는 모두 HQ로 옮겼습니다. 공사장은 회원이 보는 화면 그대로 둡니다.</p>
+            <div class="hq-links">
+              <a class="mini-btn mini-go" href="/hq/#reports">불편 제보</a>
+              <a class="mini-btn mini-go" href="/hq/#applications">합류 신청</a>
+              <a class="mini-btn mini-go" href="/hq/#members">회원</a>
+              <a class="mini-btn mini-go" href="/hq/#routes">준공 현황·위키</a>
+              <a class="mini-btn mini-go" href="/hq/#notices">공지</a>
+            </div>
+          </div>
+        </article>
 
         <!-- A구역: 내 정보 -->
         <article data-tab="home" class="card" aria-labelledby="c-info">
@@ -172,20 +190,11 @@
           </div>
         </article>
 
-        <!-- C구역: 공지 (운영진이 여기서 쓰고 지움) -->
+        <!-- C구역: 공지 (운영진은 HQ 에서 씀) -->
         <article data-tab="home" class="card" aria-labelledby="c-notice">
           <div class="card-head card-head-row"><div><p class="card-no">C구역</p><h2 id="c-notice">공지</h2></div><span class="card-count" data-count="notices" hidden></span></div>
           <div class="card-body">
-            <div class="board-tools" data-staff-only hidden><button type="button" class="mini-btn mini-go" data-form-open="notice">+ 공지 쓰기</button></div>
-            <form class="board-form" data-form="notice" novalidate hidden>
-              <label class="field-label" for="nt-title">제목</label>
-              <input class="input" id="nt-title" maxlength="200" required>
-              <label class="field-label" for="nt-body">내용 <span class="opt">(선택)</span></label>
-              <textarea class="input" id="nt-body" maxlength="2000" rows="3"></textarea>
-              <label class="check"><input type="checkbox" id="nt-pin"> 맨 위에 고정</label>
-              <p class="form-error" role="alert" hidden></p>
-              <div class="form-actions"><button type="submit" class="btn btn-primary btn-small">올리기</button><button type="button" class="btn btn-secondary btn-small" data-form-close>취소</button></div>
-            </form>
+            <div class="board-tools" data-staff-only hidden><a class="mini-btn mini-go" href="/hq/#notices">HQ에서 공지 쓰기 ↗</a></div>
             <ul class="notices" data-list="notices" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
           </div>
         </article>
@@ -254,101 +263,6 @@
               <p class="card-lead" data-lead></p>
               <div class="slip-filter" role="group" aria-label="처리 상태로 거르기" data-filter hidden></div>
               <ul class="inbox slips" data-list="reports" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
-            </div>
-          </div>
-        </article>
-
-        <!-- F구역: 합류 신청 (운영진) -->
-        <article data-tab="inbox" class="card card-wide card-locked" aria-labelledby="c-apps" data-zone="apps">
-          <div class="card-head card-head-row"><div><p class="card-no">F구역</p><h2 id="c-apps">합류 신청</h2></div><span class="card-count" data-count="apps" hidden></span></div>
-          <div class="card-body">
-            <div data-locked>
-              <div class="lock-band" aria-hidden="true"></div>
-              <p class="lock-title">운영진 전용 구역</p>
-              <p class="lock-text">합류 신청서에는 이름과 연락처가 있어 운영진만 열람합니다.</p>
-            </div>
-            <div data-open hidden>
-              <p class="card-lead">이름·연락처는 합류 안내에만 쓰고, 안내가 끝나면 지워 주세요.</p>
-              <ul class="inbox slips" data-list="apps" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
-            </div>
-          </div>
-        </article>
-
-        <!-- G구역: 회원 관리 (운영진) -->
-        <article data-tab="admin" class="card card-wide card-locked" aria-labelledby="c-members" data-zone="members">
-          <div class="card-head card-head-row"><div><p class="card-no">G구역</p><h2 id="c-members">회원 관리</h2></div><span class="card-count" data-count="members" hidden></span></div>
-          <div class="card-body">
-            <div data-locked>
-              <div class="lock-band" aria-hidden="true"></div>
-              <p class="lock-title">운영진 전용 구역</p>
-              <p class="lock-text">회원을 국원·운영진으로 등록하거나 해제하는 곳입니다.</p>
-            </div>
-            <div data-open hidden>
-              <p class="card-lead">구분을 바꾸면 바로 저장됩니다. 바뀐 구분은 그 회원이 다시 로그인하면(늦어도 1시간 안에) 적용됩니다. 자기 자신의 구분은 바꿀 수 없습니다.</p>
-              <label class="sr-only" for="member-search">회원 찾기</label>
-              <input class="input member-search" id="member-search" type="search" placeholder="이름이나 아이디로 찾기" autocomplete="off" data-member-search>
-              <ul class="inbox member-list member-grid" data-list="members" aria-live="polite"><li class="inbox-state">불러오는 중…</li></ul>
-            </div>
-          </div>
-        </article>
-
-        <!-- H구역: 준공 현황 관리 (운영진) -->
-        <article data-tab="admin" class="card card-wide card-locked" aria-labelledby="c-routes" data-zone="routes">
-          <div class="card-head card-head-row"><div><p class="card-no">H구역</p><h2 id="c-routes">준공 현황 관리</h2></div><span class="card-count" data-count="routes" hidden></span></div>
-          <div class="card-body">
-            <div data-locked>
-              <div class="lock-band" aria-hidden="true"></div>
-              <p class="lock-title">운영진 전용 구역</p>
-              <p class="lock-text">준공 현황에 지름길을 올리고, 과목 위키 파일을 올리는 곳입니다.</p>
-            </div>
-            <div data-open hidden>
-              <p class="card-lead hq-moved">지름길 목록·아이콘·분류는 이제 <a href="/hq/#routes">HQ의 준공 현황</a>에서 관리합니다. 이곳은 위키 올리기가 HQ로 옮겨 갈 때까지 함께 둡니다.</p>
-              <p class="card-lead">여기서 고친 목록은 <a href="/routes/" target="_blank" rel="noopener">준공 현황</a>에 바로 반영됩니다. 위키 파일은 올린 뒤 사이트에 열리기까지 1~몇 분 걸립니다.</p>
-              <div class="board-tools routes-tools">
-                <button type="button" class="mini-btn mini-go" data-route-open>+ 지름길 추가</button>
-                <button type="button" class="mini-btn mini-go" data-wiki-open>위키 올리기</button>
-              </div>
-
-              <form class="board-form" data-route-form novalidate hidden>
-                <p class="form-title" data-route-form-title>지름길 추가</p>
-                <div class="form-cols">
-                  <div><label class="field-label" for="rt-title">이름</label><input class="input" id="rt-title" maxlength="100" required placeholder="예: 수강플래너"></div>
-                  <div><label class="field-label" for="rt-line">분류</label><select class="input" id="rt-line"></select></div>
-                  <div><label class="field-label" for="rt-type">종류</label>
-                    <select class="input" id="rt-type"><option value="app">앱</option><option value="wiki">위키</option><option value="channel">카톡 채널</option></select></div>
-                  <div><label class="field-label" for="rt-status">상태</label>
-                    <select class="input" id="rt-status"><option value="open">개통</option><option value="building">공사 중</option></select></div>
-                </div>
-                <label class="field-label" for="rt-url">주소 <span class="opt">(공사 중이면 비워도 됨)</span></label>
-                <input class="input" id="rt-url" maxlength="1000" placeholder="https://… 또는 /wiki/과목이름/">
-                <label class="field-label" for="rt-desc">한 줄 설명</label>
-                <input class="input" id="rt-desc" maxlength="300" placeholder="무엇을 어떻게 건너뛰는지 한 줄로">
-                <p class="form-error" role="alert" hidden></p>
-                <div class="form-actions"><button type="submit" class="btn btn-primary btn-small">올리기</button><button type="button" class="btn btn-secondary btn-small" data-form-close>취소</button></div>
-              </form>
-
-              <form class="board-form" data-wiki-form novalidate hidden>
-                <p class="form-title">위키 올리기</p>
-                <p class="hint">위키 HTML 파일을 고르면 사이트의 <b>/wiki/주소이름/</b> 에 올라가고, 준공 현황에도 개통으로 추가됩니다. 같은 주소이름으로 다시 올리면 고쳐집니다.</p>
-                <div class="form-cols">
-                  <div><label class="field-label" for="wk-subject">과목 이름</label><input class="input" id="wk-subject" maxlength="60" required placeholder="예: 항해학개론"></div>
-                  <div><label class="field-label" for="wk-slug">주소 이름 <span class="opt">(영문)</span></label><input class="input" id="wk-slug" maxlength="49" required placeholder="예: navigation-101" autocapitalize="none" spellcheck="false"></div>
-                  <div><label class="field-label" for="wk-line">분류</label><select class="input" id="wk-line"></select></div>
-                </div>
-                <label class="field-label" for="wk-file">위키 파일 (.html)</label>
-                <input class="input file-input" id="wk-file" type="file" accept=".html,.htm,text/html" required>
-                <label class="field-label" for="wk-desc">한 줄 설명 <span class="opt">(선택)</span></label>
-                <input class="input" id="wk-desc" maxlength="300" placeholder="예: 강의 요점과 시험 범위 정리">
-                <div class="form-cols" data-wk-hub>
-                  <div><label class="field-label" for="wk-dept">학부 <span class="opt">(자료 허브일 때)</span></label><input class="input" id="wk-dept" maxlength="40" placeholder="예: 항해정보시스템학부"></div>
-                  <div><label class="field-label" for="wk-prof">교수님 <span class="opt">(이름만)</span></label><input class="input" id="wk-prof" maxlength="40" placeholder="예: 홍길동"></div>
-                </div>
-                <p class="form-error" role="alert" hidden></p>
-                <div class="form-actions"><button type="submit" class="btn btn-primary btn-small">위키 올리기</button><button type="button" class="btn btn-secondary btn-small" data-form-close>취소</button></div>
-              </form>
-              <div class="wiki-done" role="status" data-wiki-done hidden></div>
-
-              <div data-list="routes" aria-live="polite"><p class="inbox-state">불러오는 중…</p></div>
             </div>
           </div>
         </article>
@@ -489,7 +403,6 @@
 
   function statusChip(status) { return el('span', `st st-${STATUS[status] || 'received'}`, status); }
 
-  const ROLE_LABEL = { general: '일반 회원', member: '국원', staff: '운영진' };
   const bumpCount = (key, d) => { const c = document.querySelector(`[data-count="${key}"]`); const n = (parseInt(c.textContent, 10) || 0) + d; c.textContent = `${n}건`; };
 
   /* 두 번 눌러야 지워지는 삭제 버튼: '삭제' → '정말 삭제?' */
@@ -527,42 +440,14 @@
     li.dataset.status = status;
   }
 
-  function reportItem(row, opts) {
+  function reportItem(row) {
     const li = el('li');
     paintStatus(li, row.status);
     const meta = el('div', 'inbox-meta');
     meta.append(el('span', 'inbox-no', receiptNo('BYP', row)), el('span', null, B.dateText(row.created_at)));
-    if (opts.canEdit) {
-      const sel = el('select', 'st-select');
-      sel.setAttribute('aria-label', `${receiptNo('BYP', row)} 처리 상태`);
-      Object.keys(STATUS).forEach(k => { const o = el('option', null, k); o.value = k; if (k === row.status) o.selected = true; sel.append(o); });
-      sel.addEventListener('change', async () => {
-        const prev = row.status; sel.disabled = true;
-        const { error } = await B.sb.from('reports').update({ status: sel.value }).eq('id', row.id);
-        sel.disabled = false;
-        if (error) { sel.value = prev; alertLine(li, '상태를 바꾸지 못했습니다.'); } else { row.status = sel.value; paintStatus(li, row.status); refreshFilter(); }
-      });
-      meta.append(sel);
-    } else {
-      meta.append(statusChip(row.status));
-    }
+    meta.append(statusChip(row.status));
     li.append(meta, el('p', 'inbox-title', row.what));
     const how = el('p', 'inbox-text'); how.append(el('b', null, '지금은'), document.createTextNode(row.how)); li.append(how);
-    if (opts.contact) {
-      const pv = el('p', 'inbox-private'); pv.append(el('b', null, '운영진만'), document.createTextNode(`연락처 ${opts.contact}`)); li.append(pv);
-    }
-    if (opts.canEdit) {
-      const act = el('div', 'inbox-actions');
-      const toAgenda = el('button', 'mini-btn', '회의 안건으로');
-      toAgenda.type = 'button';
-      toAgenda.dataset.agendaBtn = row.id;
-      toAgenda.addEventListener('click', async () => {
-        if (!(await reportToAgenda(row, toAgenda))) alertLine(li, '안건에 올리지 못했습니다.');
-      });
-      act.append(toAgenda);
-      act.append(deleteButton(receiptNo('BYP', row), () => removeRow('reports', row.id, li, 'reports', 'reports', '아직 접수된 제보가 없습니다.')));
-      li.append(act);
-    }
     return li;
   }
 
@@ -570,121 +455,6 @@
     li.querySelectorAll(':scope > .inbox-alert').forEach(x => x.remove());
     const p = el('p', `inbox-text inbox-alert${good ? ' is-good' : ''}`, text); p.setAttribute('role', good ? 'status' : 'alert'); li.append(p);
     setTimeout(() => p.remove(), good ? 3000 : 6000);
-  }
-
-  /* 회원 구분 바꾸기 (운영진). 성공하면 화면의 같은 회원 표시도 함께 고친다. */
-  async function changeRole(member, newRole) {
-    const { error } = await B.sb.rpc('set_member_role', { p_user: member.id, p_role: newRole });
-    if (error) return error.message && /[가-힣]/.test(error.message) ? error.message : '구분을 바꾸지 못했습니다.';
-    member.role = newRole;
-    document.querySelectorAll(`[data-member-role="${member.id}"]`).forEach(x => { x.value = newRole; });
-    document.querySelectorAll(`[data-applicant="${member.id}"]`).forEach(x => x.dispatchEvent(new Event('rolechange')));
-    return null;
-  }
-
-  function appItem(row, members) {
-    const li = el('li');
-    const meta = el('div', 'inbox-meta');
-    meta.append(el('span', 'inbox-no', receiptNo('JOIN', row)), el('span', null, B.dateText(row.created_at)));
-    li.append(meta, el('p', 'inbox-title', row.major ? `${row.name} · ${row.major}` : row.name));
-    const want = el('p', 'inbox-text'); want.append(el('b', null, '하고 싶은 것'), document.createTextNode(row.want)); li.append(want);
-    const pv = el('p', 'inbox-private'); pv.append(el('b', null, '운영진만'), document.createTextNode(`연락처 ${row.contact}`)); li.append(pv);
-
-    const act = el('div', 'inbox-actions');
-    const member = row.applicant && members.get(row.applicant);
-    if (member) {
-      // 로그인한 채로 신청한 경우: 회원 계정과 바로 연결
-      const who = el('span', 'inbox-account');
-      const promote = el('button', 'mini-btn mini-go', '국원으로 등록');
-      promote.type = 'button';
-      promote.dataset.applicant = member.id;
-      const paint = () => {
-        who.textContent = `회원 계정 ${member.username} · ${ROLE_LABEL[member.role] || member.role}`;
-        promote.hidden = member.role !== 'general';
-      };
-      promote.addEventListener('rolechange', paint);
-      promote.addEventListener('click', async () => {
-        promote.disabled = true; promote.textContent = '등록 중…';
-        const err = await changeRole(member, 'member');
-        promote.disabled = false; promote.textContent = '국원으로 등록';
-        if (err) alertLine(li, err); else paint();
-      });
-      paint();
-      act.append(who, promote);
-    } else {
-      act.append(el('span', 'inbox-account', '로그인하지 않고 신청함 · 연락처로 안내'));
-    }
-    act.append(deleteButton(receiptNo('JOIN', row), () => removeRow('applications', row.id, li, 'apps', 'apps', '아직 들어온 합류 신청이 없습니다.')));
-    li.append(act);
-    return li;
-  }
-
-  function memberItem(m) {
-    const li = el('li', 'member-row');
-    li.dataset.search = `${m.display_name} ${m.username}`.toLowerCase();
-    const info = el('div', 'member-info');
-    info.append(el('p', 'inbox-title', m.display_name));
-    info.append(el('p', 'inbox-meta', `${m.username} · 가입 ${B.dateText(m.created_at)}${m.last_sign_in_at ? ` · 최근 로그인 ${B.dateText(m.last_sign_in_at)}` : ''}`));
-    li.append(info);
-    if (m.id === user.id) {
-      li.append(el('span', `role${m.role !== 'general' ? ` role-${m.role}` : ''}`, `${ROLE_LABEL[m.role] || m.role} (나)`));
-      return li;
-    }
-    const sel = el('select', 'st-select member-role');
-    sel.dataset.memberRole = m.id;
-    sel.setAttribute('aria-label', `${m.display_name} 회원 구분`);
-    Object.entries(ROLE_LABEL).forEach(([k, v]) => { const o = el('option', null, v); o.value = k; if (k === m.role) o.selected = true; sel.append(o); });
-    let staffConfirm = null;
-    sel.addEventListener('change', async () => {
-      const prev = m.role, next = sel.value;
-      if (next === 'staff' && !staffConfirm) {
-        // 운영진은 연락처·합류 신청까지 보므로 한 번 더 확인
-        sel.value = prev;
-        staffConfirm = setTimeout(() => { staffConfirm = null; }, 6000);
-        alertLine(li, '운영진은 연락처와 합류 신청까지 볼 수 있습니다. 맞으면 6초 안에 한 번 더 ‘운영진’을 고르세요.');
-        return;
-      }
-      clearTimeout(staffConfirm); staffConfirm = null;
-      sel.disabled = true;
-      const err = await changeRole(m, next);
-      sel.disabled = false;
-      if (err) { sel.value = prev; alertLine(li, err); } else { alertLine(li, `${ROLE_LABEL[next]}(으)로 바꿨습니다.`, true); resetBtn.hidden = next === 'staff'; }
-    });
-
-    // 비밀번호를 잊은 회원: 임시 비밀번호 발급 (운영진에게는 발급 불가)
-    const resetBtn = el('button', 'mini-btn', '임시 비밀번호');
-    resetBtn.type = 'button';
-    resetBtn.setAttribute('aria-label', `${m.display_name} 임시 비밀번호 발급`);
-    resetBtn.hidden = m.role === 'staff';
-    let armed = null;
-    resetBtn.addEventListener('click', async () => {
-      if (!armed) {
-        resetBtn.textContent = '발급할까요?'; resetBtn.classList.add('mini-danger', 'is-armed');
-        armed = setTimeout(() => { armed = null; resetBtn.textContent = '임시 비밀번호'; resetBtn.classList.remove('mini-danger', 'is-armed'); }, 4000);
-        return;
-      }
-      clearTimeout(armed); armed = null;
-      resetBtn.disabled = true; resetBtn.textContent = '발급 중…';
-      const { data, error } = await B.sb.rpc('reset_member_password', { p_user: m.id });
-      resetBtn.disabled = false; resetBtn.textContent = '임시 비밀번호'; resetBtn.classList.remove('mini-danger', 'is-armed');
-      if (error) { alertLine(li, error.message && /[가-힣]/.test(error.message) ? error.message : '발급하지 못했습니다.'); return; }
-      li.querySelectorAll(':scope > .temp-pw').forEach(x => x.remove());
-      const box = el('div', 'temp-pw');
-      box.setAttribute('role', 'status');
-      const code = el('span', 'temp-pw-code', data);
-      const copy = el('button', 'mini-btn', '복사');
-      copy.type = 'button';
-      copy.addEventListener('click', async () => {
-        try { await navigator.clipboard.writeText(data); copy.textContent = '복사됨'; } catch (e) { copy.textContent = '직접 복사해 주세요'; }
-      });
-      box.append(el('b', null, `${m.display_name} 님 임시 비밀번호 `), code, copy);
-      li.append(box);
-    });
-
-    const tools = el('div', 'member-tools');
-    tools.append(sel, resetBtn);
-    li.append(tools);
-    return li;
   }
 
   /* E구역 상태 거르기: 전체 / 접수 / 심의 / 개통 / 반려 */
@@ -783,24 +553,6 @@
     t.append(document.createTextNode(n.title));
     li.append(t);
     if (n.body) li.append(el('p', 'n-body', n.body));
-    if (isStaffUser) {
-      const act = el('div', 'inbox-actions');
-      const pin = el('button', 'mini-btn', n.pinned ? '고정 해제' : '맨 위에 고정');
-      pin.type = 'button';
-      pin.addEventListener('click', async () => {
-        pin.disabled = true;
-        const { error } = await B.sb.from('notices').update({ pinned: !n.pinned }).eq('id', n.id);
-        pin.disabled = false;
-        if (error) { alertLine(li, '바꾸지 못했습니다.'); return; }
-        n.pinned = !n.pinned; renderNotices();
-      });
-      act.append(pin, deleteButton(`공지 ${n.title}`, async () => {
-        const ok = await removeRow('notices', n.id, li, 'notices', 'notices', '아직 올라온 공지가 없습니다.');
-        if (ok) notices = notices.filter(x => x.id !== n.id);
-        return ok;
-      }));
-      li.append(act);
-    }
     return li;
   }
   let notices = [];
@@ -817,14 +569,6 @@
     if (error) { setState('notices', failText(error).replace('접수함', '공지')); return; }
     notices = data; renderNotices();
   })();
-  bindBoardForm('notice', {
-    table: 'notices',
-    read: () => ({ 'nt-title': document.getElementById('nt-title').value.trim(), 'nt-body': document.getElementById('nt-body').value.trim(), pin: document.getElementById('nt-pin').checked }),
-    required: ['nt-title'],
-    toRow: v => ({ title: v['nt-title'], body: v['nt-body'] || null, pinned: v.pin }),
-    render: n => n,
-    prepend: n => { notices.push(n); renderNotices(); }
-  });
 
   // ----- 회의 안건 · 자료실 (국원·운영진) -----
   const agendaReports = new Set();   // 안건에 올라간 제보 번호 (E구역 버튼 표시용)
@@ -937,265 +681,37 @@
     });
   }
 
-  /* E구역 제보 → 회의 안건으로 (운영진) */
-  async function reportToAgenda(row, btn) {
-    btn.disabled = true; btn.textContent = '올리는 중…';
-    const { data, error } = await B.sb.from('agenda_items').insert({ title: row.what.slice(0, 200), report_id: row.id }).select().single();
-    if (error) { btn.disabled = false; btn.textContent = '회의 안건으로'; return false; }
-    agenda.unshift(data); agendaReports.add(row.id);
-    renderAgenda(); paintAgendaButtons();
-    return true;
-  }
-
   // E구역: 접수된 제보 (국원·운영진)
   if (role.key !== 'general') {
     openZone('reports');
-    const isStaff = role.key === 'staff';
-    document.querySelector('[data-zone="reports"] [data-lead]').textContent = isStaff
-      ? '운영진은 처리 상태를 바꾸거나 제보를 지울 수 있습니다. 바꾼 상태는 제보자의 ‘내 제보’에도 바로 보입니다.'
+    document.querySelector('[data-zone="reports"] [data-lead]').textContent = role.key === 'staff'
+      ? '최근 접수 순입니다. 처리 상태 바꾸기·연락처·메모는 HQ › 불편 제보에서 합니다.'
       : '최근 접수 순입니다. 제보자 연락처는 운영진만 봅니다.';
     (async () => {
-      const [{ data, error }, contacts] = await Promise.all([
-        B.sb.from('reports').select('id, created_at, what, how, status').order('created_at', { ascending: false }).limit(LIMIT),
-        isStaff ? B.sb.from('report_contacts').select('report_id, contact') : Promise.resolve({ data: [] })
-      ]);
+      const { data, error } = await B.sb.from('reports').select('id, created_at, what, how, status').order('created_at', { ascending: false }).limit(LIMIT);
       if (error) { setState('reports', failText(error)); return; }
       setCount('reports', data.length);
       if (!data.length) { setState('reports', '아직 접수된 제보가 없습니다.'); return; }
-      const contactOf = new Map((contacts.data || []).map(c => [c.report_id, c.contact]));
-      listOf('reports').replaceChildren(...data.map(r => reportItem(r, { canEdit: isStaff, contact: contactOf.get(r.id) })));
+      listOf('reports').replaceChildren(...data.map(r => reportItem(r)));
       refreshFilter();
-      paintAgendaButtons();
     })();
-  }
-
-  // F구역 합류 신청 · G구역 회원 관리 (운영진)
-  if (role.key === 'staff') {
-    openZone('apps');
-    openZone('members');
-    (async () => {
-      const [apps, mem] = await Promise.all([
-        B.sb.from('applications').select('id, created_at, name, contact, major, want, applicant')
-          .order('created_at', { ascending: false }).limit(LIMIT),
-        B.sb.rpc('list_members')
-      ]);
-      const members = new Map((mem.data || []).map(m => [m.id, m]));
-
-      if (mem.error) setState('members', failText(mem.error));
-      else {
-        setCount('members', mem.data.length);
-        document.querySelector('[data-count="members"]').textContent = `${mem.data.length}명`;
-        listOf('members').replaceChildren(...mem.data.map(memberItem));
-        const search = document.querySelector('[data-member-search]');
-        search.addEventListener('input', () => {
-          const q = search.value.trim().toLowerCase();
-          listOf('members').querySelectorAll('.member-row').forEach(li => { li.hidden = Boolean(q) && !li.dataset.search.includes(q); });
-        });
-      }
-
-      if (apps.error) { setState('apps', failText(apps.error)); return; }
-      setCount('apps', apps.data.length);
-      if (!apps.data.length) { setState('apps', '아직 들어온 합류 신청이 없습니다.'); return; }
-      listOf('apps').replaceChildren(...apps.data.map(r => appItem(r, members)));
-    })();
-  }
-
-
-  /* ===== H구역 준공 현황 관리 (운영진) =====
-     목록: routes · route_lines 표 (supabase/005_routes.sql)
-     위키 파일: Edge Function publish-wiki 가 GitHub 저장소 wiki/<주소이름>/index.html 로 저장 */
-  if (role.key === 'staff') {
-    openZone('routes');
-    const RT_TYPE = { app: '앱', wiki: '위키', channel: '카톡 채널' };
-    const RT_STATE = { open: '개통', building: '공사 중' };
-    const routeForm = document.querySelector('[data-route-form]');
-    const wikiForm = document.querySelector('[data-wiki-form]');
-    const wikiDone = document.querySelector('[data-wiki-done]');
-    const v = id => document.getElementById(id).value.trim();
-    let rtLines = [], rtRoutes = [], editingId = null;
-
-    const showForm = (form, open) => {
-      [routeForm, wikiForm].forEach(f => { f.hidden = f !== form || !open; });
-      if (open) { form.querySelector('.form-error').hidden = true; form.querySelector('input').focus(); }
-    };
-    [routeForm, wikiForm].forEach(f => f.querySelector('[data-form-close]').addEventListener('click', () => { f.hidden = true; editingId = null; }));
-    const fail = (form, text, field) => { const b = form.querySelector('.form-error'); b.textContent = text; b.hidden = false; if (field) document.getElementById(field).focus(); };
-
-    document.querySelector('[data-route-open]').addEventListener('click', () => {
-      editingId = null; routeForm.reset();
-      routeForm.querySelector('[data-route-form-title]').textContent = '지름길 추가';
-      routeForm.querySelector('[type="submit"]').textContent = '올리기';
-      showForm(routeForm, routeForm.hidden);
-    });
-    document.querySelector('[data-wiki-open]').addEventListener('click', () => { wikiForm.reset(); if (rtLines.length) fillLineSelects(); wikiDone.hidden = true; showForm(wikiForm, wikiForm.hidden); });
-
-    function fillLineSelects() {
-      ['rt-line', 'wk-line'].forEach(id => {
-        const sel = document.getElementById(id);
-        sel.replaceChildren(...rtLines.map(l => { const o = el('option', null, l.name); o.value = l.id; return o; }));
-      });
-      // 위키는 과목 자료 허브(종류 hub)로 먼저 고르고, 허브가 없으면 학부·교수 칸을 숨긴다
-      const hub = rtLines.find(l => l.kind === 'hub');
-      if (hub) document.getElementById('wk-line').value = hub.id;
-      document.querySelector('[data-wk-hub]').hidden = !hub;
-    }
-
-    function routeRow(r) {
-      const li = el('li');
-      const info = el('div');
-      info.append(el('p', 'rt-title', r.title));
-      const meta = el('p', 'rt-meta');
-      meta.append(el('span', `st ${r.status === 'open' ? 'st-open' : 'st-received'}`, RT_STATE[r.status]), el('span', null, RT_TYPE[r.type] || r.type));
-      if (r.url) { const a = el('a', null, r.url); a.href = r.url; a.target = '_blank'; a.rel = 'noopener'; meta.append(a); }
-      if (r.sample) meta.append(el('span', 'bl-tag', '견본'));
-      info.append(meta);
-      if (r.description) info.append(el('p', 'bl-note', r.description));
-      const act = el('div', 'rt-actions');
-      const edit = el('button', 'mini-btn', '고치기'); edit.type = 'button';
-      edit.addEventListener('click', () => {
-        editingId = r.id;
-        document.getElementById('rt-title').value = r.title;
-        document.getElementById('rt-line').value = r.line;
-        document.getElementById('rt-type').value = r.type;
-        document.getElementById('rt-status').value = r.status;
-        document.getElementById('rt-url').value = r.url || '';
-        document.getElementById('rt-desc').value = r.description || '';
-        routeForm.querySelector('[data-route-form-title]').textContent = `고치기: ${r.title}`;
-        routeForm.querySelector('[type="submit"]').textContent = '고친 내용 저장';
-        showForm(routeForm, true);
-        routeForm.scrollIntoView({ block: 'center' });
-      });
-      const toggle = el('button', 'mini-btn', r.status === 'open' ? '공사 중으로' : '개통하기'); toggle.type = 'button';
-      toggle.addEventListener('click', async () => {
-        const next = r.status === 'open' ? 'building' : 'open';
-        if (next === 'open' && !r.url) { alertLine(li, '개통하려면 먼저 ‘고치기’로 주소를 넣어 주세요.'); return; }
-        toggle.disabled = true;
-        const { error } = await B.sb.from('routes').update({ status: next, sample: false }).eq('id', r.id);
-        toggle.disabled = false;
-        if (error) { alertLine(li, '바꾸지 못했습니다.'); return; }
-        r.status = next; r.sample = false; renderRoutes();
-      });
-      act.append(edit, toggle, deleteButton(`지름길 ${r.title}`, async () => {
-        const { error } = await B.sb.from('routes').delete().eq('id', r.id);
-        if (error) { alertLine(li, '삭제하지 못했습니다.'); return false; }
-        rtRoutes = rtRoutes.filter(x => x.id !== r.id); renderRoutes(); return true;
-      }));
-      li.append(info, act);
-      return li;
-    }
-
-    function renderRoutes() {
-      const box = listOf('routes');
-      setCount('routes', rtRoutes.length);
-      if (!rtLines.length) { box.replaceChildren(el('p', 'inbox-state', '노선이 없습니다.')); return; }
-      box.replaceChildren(...rtLines.map(l => {
-        const sec = el('section', 'rt-line');
-        const h = el('h3'); const b = el('b', null, l.no); b.style.background = l.color; h.append(b, document.createTextNode(l.name));
-        const items = rtRoutes.filter(r => r.line === l.id);
-        const ul = el('ul', 'rt-list');
-        if (items.length) ul.append(...items.map(routeRow)); else ul.append(el('li', 'inbox-state', '아직 지름길이 없습니다.'));
-        sec.append(h, ul);
-        return sec;
-      }));
-    }
-
-    (async () => {
-      const [ls, rs] = await Promise.all([
-        B.sb.from('route_lines').select('*').order('sort'),
-        B.sb.from('routes').select('id, title, type, line, status, url, description, subject, sample, sort, created_at').order('sort').order('created_at')
-      ]);
-      if (ls.error || rs.error) {
-        const e = ls.error || rs.error;
-        listOf('routes').replaceChildren(el('p', 'inbox-state', e.code === 'PGRST205' ? '준공 현황 설정이 아직 끝나지 않았습니다. supabase/005_routes.sql 을 실행해 주세요.' : '준공 현황 목록을 불러오지 못했습니다.'));
-        return;
-      }
-      rtLines = ls.data; rtRoutes = rs.data;
-      fillLineSelects(); renderRoutes();
-    })();
-
-    // 지름길 추가·고치기
-    routeForm.addEventListener('submit', async e => {
-      e.preventDefault();
-      routeForm.querySelector('.form-error').hidden = true;
-      const row = { title: v('rt-title'), line: v('rt-line'), type: v('rt-type'), status: v('rt-status'), url: v('rt-url') || null, description: v('rt-desc') || null };
-      if (!row.title) return fail(routeForm, '이름을 넣어 주세요.', 'rt-title');
-      if (row.url && !/^https?:\/\//i.test(row.url) && !/^\/[a-z0-9/_-]*$/.test(row.url)) return fail(routeForm, '주소는 https:// 로 시작하거나 /wiki/주소이름/ 형태여야 합니다.', 'rt-url');
-      if (row.status === 'open' && !row.url) return fail(routeForm, '개통하려면 주소가 있어야 합니다. 아직이면 상태를 ‘공사 중’으로 두세요.', 'rt-url');
-      const btn = routeForm.querySelector('[type="submit"]');
-      B.setBusy(btn, true, '저장 중…');
-      const q = editingId ? B.sb.from('routes').update({ ...row, sample: false }).eq('id', editingId).select().single()
-                          : B.sb.from('routes').insert({ ...row, sort: Math.max(0, ...rtRoutes.filter(r => r.line === row.line).map(r => r.sort || 0)) + 10 }).select().single();
-      const { data, error } = await q;
-      B.setBusy(btn, false);
-      if (error) return fail(routeForm, '저장하지 못했습니다. 잠시 후 다시 시도해 주세요.');
-      if (editingId) rtRoutes = rtRoutes.map(r => r.id === editingId ? data : r); else rtRoutes.push(data);
-      editingId = null; routeForm.hidden = true; renderRoutes();
-    });
-
-    // 위키 올리기
-    wikiForm.addEventListener('submit', async e => {
-      e.preventDefault();
-      wikiForm.querySelector('.form-error').hidden = true;
-      const subject = v('wk-subject'), slug = v('wk-slug').toLowerCase(), line = v('wk-line'), desc = v('wk-desc');
-      const file = document.getElementById('wk-file').files[0];
-      if (!subject) return fail(wikiForm, '과목 이름을 넣어 주세요.', 'wk-subject');
-      if (!/^[a-z0-9][a-z0-9-]{1,48}$/.test(slug)) return fail(wikiForm, '주소 이름은 영문 소문자·숫자·하이픈(-)으로 2~49자로 정해 주세요. 예: navigation-101', 'wk-slug');
-      if (!file) return fail(wikiForm, '위키 HTML 파일을 골라 주세요.', 'wk-file');
-      if (file.size > 5_000_000) return fail(wikiForm, '파일이 너무 큽니다. 5MB 이하로 올려 주세요.', 'wk-file');
-      const html = await file.text();
-      if (!/<html[\s>]/i.test(html)) return fail(wikiForm, 'HTML 파일이 아닌 것 같습니다. 위키 .html 파일을 골라 주세요.', 'wk-file');
-
-      const btn = wikiForm.querySelector('[type="submit"]');
-      B.setBusy(btn, true, '올리는 중…');
-      const { data, error } = await B.sb.functions.invoke('publish-wiki', { body: { slug, title: subject, html } });
-      if (error) {
-        B.setBusy(btn, false);
-        let text = '위키를 올리지 못했습니다.';
-        try { const j = await error.context.json(); if (j && j.error) text = j.error; } catch (x) {
-          if (error.context && error.context.status === 404) text = '위키 올리기 설정이 아직 끝나지 않았습니다. (publish-wiki 함수 배포 필요)';
-        }
-        return fail(wikiForm, text);
-      }
-
-      // 준공 현황에도 개통으로 올림 (같은 주소가 있으면 고침)
-      const url = `/wiki/${slug}/`;
-      const same = rtRoutes.find(r => r.url === url);
-      const row = { title: `${subject} 위키`, subject, type: 'wiki', line, status: 'open', url, description: desc || same?.description || `${subject} 과목 정리 위키입니다.`, sample: false };
-      // 자료 허브로 올리면 학부·교수님도 함께 (011 SQL 뒤에만 있는 칸)
-      if ((rtLines.find(l => l.id === line) || {}).kind === 'hub') {
-        const dept = v('wk-dept'), prof = v('wk-prof').replace(/\s*교수(님)?$/, '');
-        if (dept) row.department = dept;
-        if (prof) row.professor = prof;
-      }
-      const q = same ? B.sb.from('routes').update(row).eq('id', same.id).select().single()
-                     : B.sb.from('routes').insert({ ...row, sort: Math.max(0, ...rtRoutes.filter(r => r.line === line).map(r => r.sort || 0)) + 10 }).select().single();
-      const saved = await q;
-      B.setBusy(btn, false);
-      if (!saved.error) { if (same) rtRoutes = rtRoutes.map(r => r.id === same.id ? saved.data : r); else rtRoutes.push(saved.data); renderRoutes(); }
-
-      wikiForm.hidden = true;
-      wikiDone.classList.toggle('is-bad', Boolean(saved.error));
-      const link = el('a', null, url); link.href = url; link.target = '_blank'; link.rel = 'noopener';
-      wikiDone.replaceChildren(
-        el('b', null, data && data.updated ? `‘${subject}’ 위키를 고쳤습니다. ` : `‘${subject}’ 위키를 올렸습니다. `),
-        document.createTextNode('1~몇 분 뒤 '), link, document.createTextNode(' 에서 열립니다.'),
-        document.createTextNode(saved.error ? ' (준공 현황 목록에는 넣지 못했으니 ‘+ 지름길 추가’로 넣어 주세요.)' : ' 준공 현황에도 개통으로 올렸습니다.')
-      );
-      wikiDone.hidden = false;
-    });
   }
 
   /* ===== 공사장 탭 =====
      PC는 왼쪽 세로 탭, 휴대폰은 아래쪽 탭. 회원 구분에 따라 볼 수 있는 탭만 보인다.
      주소로 바로 가기: /site/#meeting (또는 #회의실) */
   (function () {
-    const ORDER = ['home', 'meeting', 'inbox', 'admin'];
-    const ALIAS = { '내공사장': 'home', '회의실': 'meeting', '접수함': 'inbox', '관리실': 'admin' };
+    const ORDER = ['home', 'meeting', 'inbox'];
+    const ALIAS = { '내공사장': 'home', '회의실': 'meeting', '접수함': 'inbox' };
+    // 예전 관리실 주소(#admin)는 HQ 로 (관리실은 HQ 로 옮겼다)
+    const oldAdmin = () => { if (!/^(admin|관리실)$/.test(decodeURIComponent(location.hash.slice(1)))) return false; location.replace(role.key === 'staff' ? '/hq/#members' : '/site/#home'); return true; };
+    if (oldAdmin()) return;
     const cards = [...document.querySelectorAll('.desk-grid > [data-tab]')];
     // 일반 회원: 국원 전용 칸은 '내 공사장'에 맛보기로 남기고, 나머지 잠긴 칸은 숨긴다
     const crewCard = document.querySelector('[data-crew-card]');
     if (role.key === 'general' && crewCard) crewCard.dataset.tab = 'home';
     cards.forEach(c => { if (c.classList.contains('card-locked') && c !== crewCard) { c.dataset.tab = 'none'; c.hidden = true; } });
+    if (role.key !== 'staff') cards.forEach(c => { if (c.hasAttribute('data-staff-only')) { c.dataset.tab = 'none'; c.hidden = true; } });
     const tabs = ORDER.filter(t => cards.some(c => c.dataset.tab === t));
     const nav = document.querySelector('[data-desk-tabs]');
     if (tabs.length < 2) return;   // 탭이 하나뿐이면 지금처럼 한 화면
@@ -1217,22 +733,22 @@
       const top = document.querySelector('.desk').getBoundingClientRect().top + scrollY - 8;
       if (scrollY > top) scrollTo({ top, behavior: 'smooth' });
     }));
-    window.addEventListener('hashchange', () => select(fromHash()));
+    window.addEventListener('hashchange', () => { if (!oldAdmin()) select(fromHash()); });
     select(fromHash());
 
     // 임시 비밀번호 안내의 '지금 바꾸기'는 내 공사장 탭에서 열린다
     const go = document.querySelector('[data-mustchange-go]');
     if (go) go.addEventListener('click', () => select('home', true), true);
 
-    // 숫자 배지: 회의실 = 처리 전 안건, 접수함 = '접수' 상태 제보 + 합류 신청
+    // 숫자 배지: 회의실 = 처리 전 안건, 접수함 = '접수' 상태 제보
     const badge = (k, n) => { const b = nav.querySelector(`[data-tab-badge="${k}"]`); b.textContent = n > 99 ? '99+' : String(n); b.hidden = !n; };
     const items = sel => [...document.querySelectorAll(sel)].filter(li => !li.classList.contains('inbox-state'));
     function paintBadges() {
       badge('meeting', items('[data-list="agenda"] > li').length);
-      badge('inbox', items('[data-list="reports"] > li[data-status="접수"]').length + items('[data-list="apps"] > li').length);
+      badge('inbox', items('[data-list="reports"] > li[data-status="접수"]').length);
     }
     const watch = new MutationObserver(paintBadges);
-    ['agenda', 'reports', 'apps'].forEach(k => { const l = document.querySelector(`[data-list="${k}"]`); if (l) watch.observe(l, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-status'] }); });
+    ['agenda', 'reports'].forEach(k => { const l = document.querySelector(`[data-list="${k}"]`); if (l) watch.observe(l, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-status'] }); });
     paintBadges();
 
     // 휴대폰: 글을 쓰는 동안(키보드가 올라온 동안) 아래 탭 줄을 숨긴다
