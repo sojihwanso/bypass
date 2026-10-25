@@ -1,4 +1,4 @@
-/* BYPASS 지름길 아이콘 (개통 노선도 · HQ 공용)
+/* BYPASS 지름길 아이콘 (준공 현황 · HQ 공용)
    - icon     : 'auto'(이름 낱말로 고름) | 'upload'(직접 올린 그림) | 기본 그림 이름
    - tile     : 판 색 'auto' | 'line'(분류 색) | 'white' | 'yellow' | '#RRGGBB'
    - icon_full: 올린 그림이 판 전체를 채움

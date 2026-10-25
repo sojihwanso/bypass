@@ -381,7 +381,7 @@ a { color: var(--green); text-underline-offset: 3px; }
 .temp-pw-code { display: inline-block; margin: 4px 8px 4px 0; padding: 2px 10px; border-radius: 5px; background: #fff; border: 1.5px solid var(--ink); font: 900 19px/1.5 ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; letter-spacing: 0.08em; }
 .member-tools { display: flex; align-items: center; gap: 8px; }
 
-/* ===== H구역 노선도 관리 ===== */
+/* ===== H구역 준공 현황 관리 ===== */
 .routes-tools { gap: 8px; }
 .form-title { margin: 12px 0 0; font-weight: 900; font-size: 16px; }
 .form-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0 14px; }
@@ -446,7 +446,7 @@ a { color: var(--green); text-underline-offset: 3px; }
   .has-tabs .card-crew .crew-part + .crew-part { margin-top: 12px; padding-top: 0; border-top: 0; padding-left: 32px; border-left: 3px solid var(--ink); }
 }
 
-/* ===== 지름길 아이콘 판 (개통 노선도 · HQ 공용, assets/route-icons.js) ===== */
+/* ===== 지름길 아이콘 판 (준공 현황 · HQ 공용, assets/route-icons.js) ===== */
 .tile {
   --tile-size: 76px;
   position: relative; display: grid; place-items: center; flex: none;

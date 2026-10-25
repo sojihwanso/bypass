@@ -173,7 +173,7 @@
   .pv-go { margin-top: 10px; padding: 8px; border-radius: 8px; background: #fff; color: var(--c); text-align: center; font-weight: 900; font-size: 14px; }
   .pv-dlg.is-light .pv-go { background: var(--ink); color: #fff; }
   .pv-dlg.is-building .pv-go { background: repeating-linear-gradient(-45deg, var(--orange) 0 9px, var(--ink) 9px 18px); color: transparent; height: 12px; padding: 0; }
-  /* 분류 미리보기: 노선도의 큰 표지판 */
+  /* 분류 미리보기: 준공 현황의 큰 표지판 */
   .mini-zsign { --c: var(--green); margin: 16px 0 4px; padding: 16px 18px; border-radius: 14px; background: var(--c); color: #fff; box-shadow: inset 0 0 0 5px var(--c), inset 0 0 0 7.5px #fff; }
   .mini-zsign.is-light { color: var(--ink); box-shadow: inset 0 0 0 5px var(--c), inset 0 0 0 7.5px var(--ink); }
   .mini-zsign .lno { width: 32px; height: 32px; font-size: 16px; background: #fff; color: var(--c); }
@@ -354,17 +354,17 @@
         <p><b>데이터베이스 설정이 한 단계 남았습니다.</b> Supabase SQL Editor에서 <code>supabase/009_hq_phase1.sql</code>을 실행해 주세요. 그 전에는 아이콘·판 색·숨김을 저장할 수 없고, 이름·주소 같은 기존 칸만 저장됩니다.</p>
       </div>
 
-      <!-- 개통 노선도 -->
+      <!-- 준공 현황 -->
       <section data-view="routes" hidden>
         <div class="view-head">
           <div>
             <a class="view-back" href="#g-content">‹ 콘텐츠</a>
             <p class="view-kicker">콘텐츠</p>
-            <h1 tabindex="-1">개통 노선도</h1>
+            <h1 tabindex="-1">준공 현황</h1>
           </div>
-          <a class="mini-btn" href="/routes/" target="_blank" rel="noopener">노선도 열기 ↗</a>
+          <a class="mini-btn" href="/routes/" target="_blank" rel="noopener">준공 현황 열기 ↗</a>
         </div>
-        <div class="subtabs" role="tablist" aria-label="개통 노선도">
+        <div class="subtabs" role="tablist" aria-label="준공 현황">
           <button type="button" class="subtab" role="tab" id="tab-routes" aria-controls="pane-routes" aria-selected="true" data-subtab="routes">지름길</button>
           <button type="button" class="subtab" role="tab" id="tab-lines" aria-controls="pane-lines" aria-selected="false" data-subtab="lines">분류</button>
         </div>
@@ -376,7 +376,7 @@
             <input class="input" id="route-find" type="search" placeholder="이름·과목·주소로 찾기" autocomplete="off">
           </div>
           <div data-route-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
-          <p class="list-hint">왼쪽 손잡이를 끌거나, 손잡이를 고른 뒤 ↑↓ 키로 순서를 바꿉니다. 순서는 바로 저장되고 노선도에도 그대로 보입니다.</p>
+          <p class="list-hint">왼쪽 손잡이를 끌거나, 손잡이를 고른 뒤 ↑↓ 키로 순서를 바꿉니다. 순서는 바로 저장되고 준공 현황에도 그대로 보입니다.</p>
         </div>
 
         <div id="pane-lines" role="tabpanel" aria-labelledby="tab-lines" data-pane="lines" hidden>
@@ -384,7 +384,7 @@
             <button type="button" class="btn btn-primary btn-small" data-new-line>+ 분류 추가</button>
           </div>
           <div data-line-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
-          <p class="list-hint">분류는 노선도의 큰 표지판입니다. 손잡이로 표지판 순서를 바꿉니다.</p>
+          <p class="list-hint">분류는 준공 현황의 큰 표지판입니다. 손잡이로 표지판 순서를 바꿉니다.</p>
         </div>
       </section>
 
@@ -585,7 +585,7 @@
 
           <fieldset>
             <legend>보이기</legend>
-            <label class="check"><input type="checkbox" id="f-hidden" data-needs-sql-input> <span>노선도에서 숨기기 <small>(지우지 않고 잠시 내릴 때)</small></span></label>
+            <label class="check"><input type="checkbox" id="f-hidden" data-needs-sql-input> <span>준공 현황에서 숨기기 <small>(지우지 않고 잠시 내릴 때)</small></span></label>
             <label class="check"><input type="checkbox" id="f-sample"> <span>‘견본’ 딱지 붙이기</span></label>
             <label class="check"><input type="checkbox" id="f-featured"> <span>메인 페이지 소개 대상</span></label>
           </fieldset>
@@ -648,13 +648,13 @@
           <fieldset data-kind-set style="margin-top:16px">
             <legend>종류</legend>
             <div class="seg" role="radiogroup" aria-label="분류 종류">
-              <button type="button" role="radio" data-kind="shortcut">지름길</button>
+              <button type="button" role="radio" data-kind="shortcut">도구 허브</button>
               <button type="button" role="radio" data-kind="hub">자료 허브</button>
             </div>
             <p class="hint" data-kind-hint></p>
           </fieldset>
           <label class="field-label" for="l-name">이름</label>
-          <input class="input" id="l-name" maxlength="30" required placeholder="예: 학업 지름길">
+          <input class="input" id="l-name" maxlength="30" required placeholder="예: 학업 허브">
           <div class="form-cols3">
             <div><label class="field-label" for="l-no">번호</label><input class="input" id="l-no" maxlength="4" required placeholder="예: 3"></div>
             <div style="grid-column: span 2"><label class="field-label" for="l-id">주소용 이름 <span class="opt">(영문)</span></label>
@@ -771,7 +771,7 @@
     { id: 'reports', group: 'inbox', name: '불편 제보', when: '3단계', legacy: 'inbox' },
     { id: 'applications', group: 'inbox', name: '합류 신청', when: '3단계', legacy: 'inbox' },
     { id: 'dockets', group: 'content', name: '처리 현황', ready: true },
-    { id: 'routes', group: 'content', name: '개통 노선도', ready: true },
+    { id: 'routes', group: 'content', name: '준공 현황', ready: true },
     { id: 'wiki', group: 'content', name: '위키', legacy: 'admin' },
     { id: 'notices', group: 'content', name: '공지', when: '4단계', legacy: 'home' },
     { id: 'faq', group: 'content', name: '자주 묻는 질문', when: '4단계' },
@@ -853,7 +853,7 @@
     clearTimeout(toastTimer); toastTimer = setTimeout(() => { toastBox.hidden = true; }, bad ? 6000 : 3000);
   }
 
-  /* ===== 개통 노선도: 데이터 ===== */
+  /* ===== 준공 현황: 데이터 ===== */
   let lines = [], routes = [];
   let hasIconCols = true;  // 009 SQL 실행 여부
   const lineById = () => Object.fromEntries(lines.map(l => [l.id, l]));
@@ -878,7 +878,7 @@
   function errText(e, what, ctx) {
     if (!e) return '';
     if (e.code === '42501' || /row-level security|permission/i.test(e.message || '')) return '운영진 권한이 확인되지 않습니다. 로그아웃했다가 다시 로그인해 주세요.';
-    if (e.code === 'PGRST205' || e.code === '42P01') return ctx === 'docket' || ctx === 'status' ? '표가 아직 없습니다. supabase/010_hq_phase2.sql을 먼저 실행해 주세요.' : '노선도 표가 아직 없습니다. supabase/005_routes.sql을 먼저 실행해 주세요.';
+    if (e.code === 'PGRST205' || e.code === '42P01') return ctx === 'docket' || ctx === 'status' ? '표가 아직 없습니다. supabase/010_hq_phase2.sql을 먼저 실행해 주세요.' : '준공 현황 표가 아직 없습니다. supabase/005_routes.sql을 먼저 실행해 주세요.';
     if (ctx === 'docket' && e.code === '23505') return '같은 번호의 안건이 이미 있습니다. 다른 번호를 써 주세요.';
     if (ctx === 'docket' && e.code === '23514') return '입력한 값의 형식이 맞지 않습니다. 번호에는 < > 를 쓸 수 없고, 글자 수를 확인해 주세요.';
     if (ctx === 'status' && e.code === '23514') return '입력한 값의 형식이 맞지 않습니다. 날짜와 문구 길이(120자)를 확인해 주세요.';
@@ -974,7 +974,7 @@
     if (bad) { toast('순서를 저장하지 못했습니다. ' + errText(bad.error, '저장'), true); await loadAll(); return; }
     arr.sort((a, b) => a.sort - b.sort);
     if (table === 'route_lines') renderRoutes();
-    toast('순서를 저장했습니다. 노선도에 바로 반영됩니다.');
+    toast('순서를 저장했습니다. 준공 현황에 바로 반영됩니다.');
   }
 
   /* ===== 지름길 목록 ===== */
@@ -1285,7 +1285,7 @@
     const row = el('div', 'pv-row');
     const item = (size, label, extra, r) => { const it = el('div', 'pv-item'); it.append(I.tile(r || d, line.color, { size })); if (extra) it.append(el('b', null, extra)); it.append(el('small', null, label)); return it; };
     const other = { ...d, status: d.status === 'open' ? 'building' : 'open' };
-    row.append(item(76, '노선도', name), item(64, '휴대폰'), item(48, d.status === 'open' ? '공사 중일 때' : '개통하면', null, other));
+    row.append(item(76, '준공 현황', name), item(64, '휴대폰'), item(48, d.status === 'open' ? '공사 중일 때' : '개통하면', null, other));
     const building = d.status === 'building';
     const dlg = el('div', `pv-dlg${I.fgOf(line.color || '#0F5A3A') === '#FFFFFF' ? '' : ' is-light'}${building ? ' is-building' : ''}`);
     dlg.style.setProperty('--c', line.color || '#0F5A3A');
@@ -1297,7 +1297,7 @@
     dlg.append(top);
     if (d.description) dlg.append(el('p', 'pv-desc', d.description));
     dlg.append(el('div', 'pv-go', building ? '' : '이용하기 →'));
-    const title = el('p', 'pv-title', d.hidden ? '미리보기 · 지금은 노선도에서 숨김' : '미리보기');
+    const title = el('p', 'pv-title', d.hidden ? '미리보기 · 지금은 준공 현황에서 숨김' : '미리보기');
     pv.replaceChildren(title, row, el('p', 'pv-title', '아이콘을 눌렀을 때'), dlg);
     pv.children[2].style.margin = '14px 0 0';
   }
@@ -1334,7 +1334,7 @@
     $$('[aria-invalid]', formRoute).forEach(x => x.removeAttribute('aria-invalid'));
     delBtn.hidden = !r;
     syncIconUI(); syncHubUI(); renderRoutePreview();
-    openDrawer('route', r ? `고치기: ${r.title}` : '지름길 추가', '개통 노선도 · 지름길');
+    openDrawer('route', r ? `고치기: ${r.title}` : '지름길 추가', '준공 현황 · 지름길');
     markCurrent();
   }
   $('[data-new-route]').addEventListener('click', () => openRouteForm(null));
@@ -1633,7 +1633,7 @@
     routes.sort((a, b) => (a.sort - b.sort) || String(a.created_at).localeCompare(String(b.created_at)));
     closeDrawer();
     renderRoutes(); renderLines(); renderDockets();
-    toast(`${target ? '저장' : '추가'}했습니다. 노선도에 바로 반영됩니다.${saved.hidden ? ' (숨김 상태)' : ''}${published ? ` 올린 페이지(${row.url})는 1~몇 분 뒤 열립니다.` : ''}`);
+    toast(`${target ? '저장' : '추가'}했습니다. 준공 현황에 바로 반영됩니다.${saved.hidden ? ' (숨김 상태)' : ''}${published ? ` 올린 페이지(${row.url})는 1~몇 분 뒤 열립니다.` : ''}`);
   }
 
   async function deleteRoute() {
@@ -1679,14 +1679,14 @@
     sign.style.setProperty('--c', lineColor);
     sign.append(el('span', 'lno', F('l-no').value.trim() || '?'), el('h3', null, F('l-name').value.trim() || '분류 이름'));
     const desc = F('l-desc').value.trim(); if (desc) sign.append(el('p', null, desc));
-    pv.replaceChildren(el('p', 'pv-title', '미리보기 · 노선도의 큰 표지판'), sign);
+    pv.replaceChildren(el('p', 'pv-title', '미리보기 · 준공 현황의 큰 표지판'), sign);
     pv.firstChild.style.margin = '16px 0 0';
   }
   formLine.addEventListener('input', syncLineUI);
   let lineKind = 'shortcut';
   const KIND_HINT = {
     shortcut: '앱·카톡 채널처럼 절차를 건너뛰는 도구를 아이콘으로 늘어놓습니다.',
-    hub: '과목 자료를 모읍니다. 노선도에서 학부·교수님으로 거르고 정렬할 수 있습니다.'
+    hub: '과목 자료를 모읍니다. 준공 현황에서 학부·교수님으로 거르고 정렬할 수 있습니다.'
   };
   function syncKindUI() {
     $$('[data-kind]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.kind === lineKind)));
@@ -1709,7 +1709,7 @@
     delBtn.hidden = !l;
     $$('[aria-invalid]', formLine).forEach(x => x.removeAttribute('aria-invalid'));
     syncLineUI();
-    openDrawer('line', l ? `고치기: ${l.name}` : '분류 추가', '개통 노선도 · 분류');
+    openDrawer('line', l ? `고치기: ${l.name}` : '분류 추가', '준공 현황 · 분류');
     $$('.rrow', $('[data-line-list]')).forEach(li => li.classList.toggle('is-current', l && li.dataset.id === l.id));
   }
   $('[data-new-line]').addEventListener('click', () => openLineForm(null));
@@ -1738,7 +1738,7 @@
     if (i >= 0) lines[i] = saved; else lines.push(saved);
     lines.sort((a, b) => a.sort - b.sort);
     closeDrawer(); renderLines(); renderRoutes();
-    toast(`분류를 ${target ? '저장' : '추가'}했습니다. 노선도에 바로 반영됩니다.`);
+    toast(`분류를 ${target ? '저장' : '추가'}했습니다. 준공 현황에 바로 반영됩니다.`);
   }
   async function deleteLine() {
     const target = editing;
@@ -1919,7 +1919,7 @@
     const warn = $('[data-route-warn]');
     let w = '';
     if (r && (d.status === 'done' || d.status === 'new')) {
-      if (r.hidden) w = '연결한 지름길이 노선도에서 숨김 상태라 바로가기 버튼이 보이지 않습니다.';
+      if (r.hidden) w = '연결한 지름길이 준공 현황에서 숨김 상태라 바로가기 버튼이 보이지 않습니다.';
       else if (r.status !== 'open' || !r.url) w = '연결한 지름길이 아직 공사 중이라 바로가기 버튼이 보이지 않습니다. 개통하면 저절로 생깁니다.';
     }
     if (!r && (d.status === 'done' || d.status === 'new')) w = '';

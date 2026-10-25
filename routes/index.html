@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>개통 노선도 | BYPASS</title>
-<meta name="description" content="BYPASS가 개통한 지름길 모음. 수강플래너, 졸업이수학점 계산기, 과목별 위키, 학식 알리미까지 국립목포해양대학교 학교생활의 불필요한 절차를 건너뛰는 도구를 한곳에 모았습니다.">
+<title>준공 현황 | BYPASS</title>
+<meta name="description" content="BYPASS가 준공한 학업·생활 허브와 과목 자료 모음. 수강플래너, 졸업이수학점 계산기, 과목별 위키, 학식 알리미까지 국립목포해양대학교 학교생활의 불필요한 절차를 건너뛰는 도구를 한곳에 모았습니다.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="BYPASS">
 <meta property="og:url" content="https://teambypass.vercel.app/routes/">
-<meta property="og:title" content="개통 노선도 | BYPASS">
-<meta property="og:description" content="수강플래너, 졸업이수학점 계산기, 과목별 위키, 학식 알리미. 학교생활의 지름길을 한곳에.">
+<meta property="og:title" content="준공 현황 | BYPASS">
+<meta property="og:description" content="수강플래너, 졸업이수학점 계산기, 과목별 위키, 학식 알리미. 학교생활에 필요한 것을 한곳에.">
 <meta property="og:image" content="https://teambypass.vercel.app/assets/og-bypass-crew.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
@@ -220,11 +220,11 @@
   <section class="map-hero" aria-labelledby="page-title">
     <div class="wrap">
       <div>
-        <p class="sign-code">BYPASS 노선 안내</p>
-        <h1 id="page-title">개통 노선도</h1>
-        <p class="lead">본 국이 개통한 지름길과 과목 자료를 한곳에 모았습니다. 학교생활에서 불필요한 절차를 만나면, 먼저 이 노선도에서 지름길을 찾아보십시오.</p>
+        <p class="sign-code">BYPASS 준공 안내</p>
+        <h1 id="page-title">준공 현황</h1>
+        <p class="lead">본 국이 준공한 허브와 과목 자료를 한눈에 볼 수 있게 모았습니다. 학교생활에서 불필요한 절차를 만나면, 먼저 이곳에서 찾아보십시오.</p>
       </div>
-      <figure class="linemap" aria-label="노선별 지름길 수" data-linemap>
+      <figure class="linemap" aria-label="허브별 항목 수" data-linemap>
         <p class="linemap-note">불러오는 중…</p>
       </figure>
     </div>
@@ -232,7 +232,7 @@
 
   <div class="finder">
     <div class="wrap">
-      <label class="sr-only" for="find">지름길 찾기</label>
+      <label class="sr-only" for="find">찾기</label>
       <input class="input" id="find" type="search" placeholder="과목 이름, 앱 이름으로 찾기" autocomplete="off">
       <div class="chips" role="group" aria-label="종류로 거르기" data-chips></div>
     </div>
@@ -241,8 +241,8 @@
   <div class="lines">
     <div class="wrap">
       <div data-lines aria-live="polite"></div>
-      <p class="empty-find" data-empty hidden>찾는 지름길이 아직 개통되지 않았습니다. <a href="/?report=1">불편 제보</a>로 알려 주시면 심의하겠습니다.</p>
-      <p class="map-note">※ 아이콘을 누르면 설명과 이용 버튼이 나옵니다. 공사 중인 지름길은 개통되는 대로 이곳에 공고됩니다. 새로 건너뛰고 싶은 절차가 있다면 <a href="/?report=1">제보</a>해 주십시오.</p>
+      <p class="empty-find" data-empty hidden>찾는 것이 아직 준공되지 않았습니다. <a href="/?report=1">불편 제보</a>로 알려 주시면 심의하겠습니다.</p>
+      <p class="map-note">※ 아이콘을 누르면 설명과 이용 버튼이 나옵니다. 공사 중인 것은 준공되는 대로 이곳에 공고됩니다. 새로 건너뛰고 싶은 절차가 있다면 <a href="/?report=1">제보</a>해 주십시오.</p>
     </div>
   </div>
 </main>
@@ -308,7 +308,7 @@
   try { data = await fromDb(); }
   catch (e) {
     try { data = await (await fetch('/assets/routes.json', { cache: 'no-cache' })).json(); }
-    catch (e2) { document.querySelector('[data-lines]').textContent = '노선도를 불러오지 못했습니다. 새로고침해 주십시오.'; return; }
+    catch (e2) { document.querySelector('[data-lines]').textContent = '준공 현황을 불러오지 못했습니다. 새로고침해 주십시오.'; return; }
   }
 
   const lineOf = Object.fromEntries(data.lines.map(l => [l.id, l]));
@@ -478,7 +478,7 @@
 
     const list = el('ul', 'spots');
     if (routes.length) routes.forEach(r => list.append(spot(r)));
-    else list.append(el('li', 'spots-empty', isHub ? '아직 올라온 자료가 없습니다.' : '아직 개통된 지름길이 없습니다.'));
+    else list.append(el('li', 'spots-empty', isHub ? '아직 올라온 자료가 없습니다.' : '아직 준공된 것이 없습니다.'));
     zone.append(post, isHub && routes.length ? hubPanel(l, routes, list) : list);
     return zone;
   }));
