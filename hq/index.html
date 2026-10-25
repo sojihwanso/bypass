@@ -258,6 +258,29 @@
   .card-foot .form-error { flex-basis: 100%; margin: 0 0 4px; }
   .saved-at { margin-left: auto; font-size: 13px; color: var(--muted); }
 
+  /* 접수: 불편 제보 · 합류 신청 */
+  .fchips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .fchip { font: inherit; font-size: 14px; font-weight: 700; line-height: 1.4; padding: 6px 12px; border-radius: 999px; cursor: pointer; background: #fff; color: var(--ink); border: 1.5px solid var(--post); }
+  .fchip:hover { border-color: var(--green); }
+  .fchip[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .fchip span { margin-left: 4px; font-variant-numeric: tabular-nums; opacity: 0.75; }
+  .in-no { flex: none; font-size: 12.5px; font-weight: 900; color: var(--green); font-variant-numeric: tabular-nums; }
+  .in-st { flex: none; font-size: 12px; font-weight: 900; line-height: 1.7; padding: 0 7px; border-radius: 4px; border: 1.5px solid var(--ink); }
+  .in-st-접수, .in-st-새신청 { background: var(--amber); }
+  .in-st-심의, .in-st-연락함 { background: #fff; }
+  .in-st-개통, .in-st-합류 { background: var(--green); color: #fff; border-color: var(--green); }
+  .in-st-반려, .in-st-보류 { background: #fff; color: var(--orange-ink); border-style: dashed; border-color: var(--orange-ink); }
+  .rrow.is-fresh .rrow-title::before { content: ""; display: inline-block; width: 8px; height: 8px; margin: 0 6px 2px 0; border-radius: 50%; background: var(--orange); vertical-align: middle; }
+  .slip { margin: 16px 0 4px; padding: 14px 16px; border-radius: 12px; background: #FFFDF6; border: 1.5px dashed var(--post); }
+  .slip-top { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; font-weight: 700; color: var(--muted); }
+  .slip dl { margin: 10px 0 0; }
+  .slip dt { margin-top: 10px; font-size: 12.5px; font-weight: 700; color: var(--muted); }
+  .slip dd { margin: 2px 0 0; font-size: 15.5px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .slip .private { color: var(--orange-ink); }
+  .nav-count { flex: none; min-width: 22px; margin-left: auto; padding: 0 6px; border-radius: 999px; background: var(--orange); color: var(--ink); font-size: 12px; font-weight: 900; line-height: 1.7; text-align: center; }
+  .nav-item .nav-count + .soon-tag { margin-left: 6px; }
+  .act-col { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+
   /* 링크 미리보기: 카톡 카드처럼 */
   .share-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
   .share-card { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: #fff; border: 1px solid var(--rule); border-radius: 12px; }
@@ -366,6 +389,9 @@
       <div class="banner banner-warn" role="alert" data-sql-warn2 hidden>
         <p><b>데이터베이스 설정이 한 단계 남았습니다.</b> Supabase SQL Editor에서 <code>supabase/010_hq_phase2.sql</code>을 실행해 주세요. 그 전에는 사이트 상태와 처리 현황을 저장할 수 없습니다.</p>
       </div>
+      <div class="banner banner-warn" role="alert" data-sql-warn4 hidden>
+        <p><b>데이터베이스 설정이 한 단계 남았습니다.</b> Supabase SQL Editor에서 <code>supabase/015_hq_inbox.sql</code>을 실행해 주세요. 그 전에는 합류 신청 처리 상태·메모와 제보 메모를 저장할 수 없습니다.</p>
+      </div>
       <div class="banner banner-warn" role="alert" data-sql-warn3 hidden>
         <p><b>데이터베이스 설정이 한 단계 남았습니다.</b> Supabase SQL Editor에서 <code>supabase/011_subject_hub.sql</code>을 실행해 주세요. 그 전에는 과목 자료 허브 표지판과 학부·교수님 칸을 쓸 수 없습니다.</p>
       </div>
@@ -405,6 +431,44 @@
           <div data-line-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
           <p class="list-hint">분류는 준공 현황의 큰 표지판입니다. 손잡이로 표지판 순서를 바꿉니다.</p>
         </div>
+      </section>
+
+      <!-- 불편 제보 -->
+      <section data-view="reports" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-inbox">‹ 접수</a>
+            <p class="view-kicker">접수</p>
+            <h1 tabindex="-1">불편 제보</h1>
+          </div>
+          <button type="button" class="mini-btn" data-inbox-reload>새로 불러오기</button>
+        </div>
+        <div class="toolbar">
+          <div class="fchips" role="group" aria-label="상태로 거르기" data-rep-chips></div>
+          <label class="sr-only" for="rep-find">제보 찾기</label>
+          <input class="input" id="rep-find" type="search" placeholder="번호·내용으로 찾기" autocomplete="off">
+        </div>
+        <div data-rep-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
+        <p class="list-hint">최근 접수 순입니다. 바꾼 상태는 제보자의 ‘내 제보’에도 바로 보입니다. 점(●)은 아직 ‘접수’ 상태인 제보입니다.</p>
+      </section>
+
+      <!-- 합류 신청 -->
+      <section data-view="applications" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-inbox">‹ 접수</a>
+            <p class="view-kicker">접수</p>
+            <h1 tabindex="-1">합류 신청</h1>
+          </div>
+          <button type="button" class="mini-btn" data-inbox-reload>새로 불러오기</button>
+        </div>
+        <div class="toolbar">
+          <div class="fchips" role="group" aria-label="상태로 거르기" data-app-chips></div>
+          <label class="sr-only" for="app-find">신청 찾기</label>
+          <input class="input" id="app-find" type="search" placeholder="이름·학과·내용으로 찾기" autocomplete="off">
+        </div>
+        <div data-app-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
+        <p class="list-hint">최근 신청 순입니다. 연락처와 메모는 운영진만 봅니다.</p>
       </section>
 
       <!-- 처리 현황 -->
@@ -624,6 +688,48 @@
           </fieldset>
         </form>
 
+        <!-- 불편 제보 -->
+        <form data-form="report" novalidate hidden>
+          <div class="slip" data-rep-slip></div>
+          <fieldset>
+            <legend>처리 상태</legend>
+            <div class="seg" role="radiogroup" aria-label="처리 상태" data-rep-status></div>
+            <p class="hint">바꾼 상태는 제보자의 ‘내 제보’에도 바로 보입니다.</p>
+          </fieldset>
+          <div data-rep-memo-box>
+            <label class="field-label" for="r-memo">운영진 메모 <span class="opt">(운영진만 봄)</span></label>
+            <textarea class="input" id="r-memo" maxlength="1000" rows="3" placeholder="예: 10/27 회의에서 심의 예정"></textarea>
+          </div>
+          <fieldset>
+            <legend>다음 처리</legend>
+            <div class="act-col">
+              <button type="button" class="mini-btn" data-rep-docket>처리 현황 안건으로 올리기</button>
+              <button type="button" class="mini-btn" data-rep-agenda>회의 안건으로 보내기</button>
+              <button type="button" class="mini-btn mini-danger" data-rep-wipe hidden>연락처 지우기</button>
+            </div>
+            <p class="hint" data-rep-links></p>
+          </fieldset>
+        </form>
+
+        <!-- 합류 신청 -->
+        <form data-form="application" novalidate hidden>
+          <div class="slip" data-app-slip></div>
+          <fieldset data-app-needs>
+            <legend>처리 상태</legend>
+            <div class="seg" role="radiogroup" aria-label="처리 상태" data-app-status></div>
+            <p class="hint" data-app-hint></p>
+          </fieldset>
+          <div data-app-needs-memo>
+            <label class="field-label" for="a-memo">메모 <span class="opt">(운영진만 봄)</span></label>
+            <textarea class="input" id="a-memo" maxlength="1000" rows="3" placeholder="예: 10/25 카톡으로 연락, 다음 회의에 초대"></textarea>
+          </div>
+          <fieldset>
+            <legend>회원 계정</legend>
+            <p class="hint" style="margin-top:0" data-app-account></p>
+            <button type="button" class="mini-btn mini-go" data-app-promote hidden>국원으로 등록</button>
+          </fieldset>
+        </form>
+
         <!-- 처리 현황 안건 -->
         <form data-form="docket" novalidate hidden>
           <div class="pv" aria-label="미리보기"><p class="pv-title" data-docket-pv-title>미리보기 · 메인 안내판</p><div class="pv-board" data-docket-pv></div></div>
@@ -824,8 +930,8 @@
   const MENUS = [
     { id: 'dashboard', group: 'home', name: '대시보드', when: '3단계' },
     { id: 'stats', group: 'home', name: '통계', when: '3단계', note: '방문·이용 기록은 지금부터 쌓이고 있습니다.' },
-    { id: 'reports', group: 'inbox', name: '불편 제보', when: '3단계', legacy: 'inbox' },
-    { id: 'applications', group: 'inbox', name: '합류 신청', when: '3단계', legacy: 'inbox' },
+    { id: 'reports', group: 'inbox', name: '불편 제보', ready: true },
+    { id: 'applications', group: 'inbox', name: '합류 신청', ready: true },
     { id: 'dockets', group: 'content', name: '처리 현황', ready: true },
     { id: 'routes', group: 'content', name: '준공 현황', ready: true },
     { id: 'wiki', group: 'content', name: '위키', legacy: 'admin' },
@@ -1121,7 +1227,8 @@
   const hq = $('[data-hq]'), drawer = $('[data-drawer]'), scrim = $('[data-scrim]');
   const formRoute = $('[data-form="route"]'), formLine = $('[data-form="line"]'), formDocket = $('[data-form="docket"]');
   const formShare = $('[data-form="share"]');
-  const FORMS = { route: formRoute, line: formLine, docket: formDocket, share: formShare };
+  const formReport = $('[data-form="report"]'), formApp = $('[data-form="application"]');
+  const FORMS = { route: formRoute, line: formLine, docket: formDocket, share: formShare, report: formReport, application: formApp };
   const errBox = $('.drawer-foot .form-error');
   const saveBtn = $('[data-save]'), delBtn = $('[data-delete]');
   let mode = null;            // 'route' | 'line'
@@ -1179,13 +1286,13 @@
   delBtn.addEventListener('click', () => {
     if (!armed) { armed = true; delBtn.classList.add('is-armed'); delBtn.textContent = '한 번 더 누르면 지웁니다'; return; }
     disarm();
-    if (mode === 'route') deleteRoute(); else if (mode === 'line') deleteLine(); else if (mode === 'docket') deleteDocket();
+    if (mode === 'route') deleteRoute(); else if (mode === 'line') deleteLine(); else if (mode === 'docket') deleteDocket(); else if (mode === 'report') deleteReport(); else if (mode === 'application') deleteApp();
   });
-  saveBtn.addEventListener('click', () => { if (mode === 'route') saveRoute(); else if (mode === 'line') saveLine(); else if (mode === 'docket') saveDocket(); else if (mode === 'share') saveShare(); });
+  saveBtn.addEventListener('click', () => { if (mode === 'route') saveRoute(); else if (mode === 'line') saveLine(); else if (mode === 'docket') saveDocket(); else if (mode === 'share') saveShare(); else if (mode === 'report') saveReport(); else if (mode === 'application') saveApp(); });
   Object.values(FORMS).forEach(f => f.addEventListener('submit', e => { e.preventDefault(); saveBtn.click(); }));
   Object.values(FORMS).forEach(f => f.addEventListener('input', e => { if (e.target.removeAttribute) e.target.removeAttribute('aria-invalid'); errBox.hidden = true; }));
   // 다른 메뉴로 가면 서랍을 닫는다 (저장 중이면 그대로)
-  const VIEW_OF = { route: 'routes', line: 'routes', docket: 'dockets', share: 'share' };
+  const VIEW_OF = { route: 'routes', line: 'routes', docket: 'dockets', share: 'share', report: 'reports', application: 'applications' };
   viewHooks.push(view => { if (mode && VIEW_OF[mode] !== view && !busy) closeDrawer(); });
 
   /* ===== 지름길 편집 ===== */
@@ -2327,8 +2434,303 @@
     toast(changed ? '저장했습니다. 1~몇 분 뒤 배포되면 반영됩니다. 카톡에는 공유 디버거에서 캐시 초기화 후 반영됩니다.' : '바뀐 내용이 없습니다.');
   }
 
+  /* ===== 접수: 불편 제보 · 합류 신청 =====
+     표: reports, report_contacts, report_memos(015), applications(015: status·memo), agenda_items, 회원 목록(list_members) */
+  const REP_ST = ['접수', '심의', '개통', '반려'];
+  const REP_LABEL = { 접수: '접수', 심의: '심의', 개통: '준공', 반려: '반려' };
+  const APP_ST = ['새 신청', '연락함', '합류', '보류'];
+  const ROLE_NAME = { general: '일반 회원', member: '국원', staff: '운영진' };
+  const stClass = v => 'in-st in-st-' + String(v).replace(/\s/g, '');
+  const noOf = (pre, r) => `${pre}-${new Date(r.created_at).getFullYear()}-${String(r.id).padStart(3, '0')}`;
+  let inReports = [], inContacts = new Map(), inMemos = new Map(), inApps = [], inAgenda = new Map(), inMembers = new Map();
+  let hasMemos = true, hasAppCols = true, inboxLoaded = false, repFilter = 'all', appFilter = 'all';
+  const repList = $('[data-rep-list]'), appList = $('[data-app-list]');
+
+  async function loadInbox() {
+    const [r, c, m, a, g, mem] = await Promise.all([
+      B.sb.from('reports').select('id, created_at, what, how, status, reporter').order('created_at', { ascending: false }).limit(500),
+      B.sb.from('report_contacts').select('report_id, contact'),
+      B.sb.from('report_memos').select('report_id, memo'),
+      B.sb.from('applications').select('*').order('created_at', { ascending: false }).limit(500),
+      B.sb.from('agenda_items').select('id, report_id, done').not('report_id', 'is', null),
+      B.sb.rpc('list_members')
+    ]);
+    if (r.error) repList.replaceChildren(el('p', 'list-state', errText(r.error, '불러오기')));
+    else inReports = r.data.slice().sort((x, y) => String(y.created_at).localeCompare(String(x.created_at)));
+    inContacts = new Map((Array.isArray(c.data) ? c.data : []).map(x => [x.report_id, x.contact]));
+    hasMemos = !m.error;
+    inMemos = new Map((Array.isArray(m.data) ? m.data : []).map(x => [x.report_id, x.memo]));
+    if (a.error) appList.replaceChildren(el('p', 'list-state', errText(a.error, '불러오기')));
+    else { inApps = a.data.slice().sort((x, y) => String(y.created_at).localeCompare(String(x.created_at))); hasAppCols = !inApps.length || 'status' in inApps[0]; }
+    if (a.data && !a.data.length) {
+      // 신청이 없으면 칸이 있는지 알 수 없으니 한 번 물어본다
+      const probe = await B.sb.from('applications').select('status').limit(1);
+      hasAppCols = !probe.error;
+    }
+    inAgenda = new Map((Array.isArray(g.data) ? g.data : []).map(x => [x.report_id, x]));
+    inMembers = new Map((Array.isArray(mem.data) ? mem.data : []).map(x => [x.id, x]));
+    $('[data-sql-warn4]').hidden = hasMemos && hasAppCols;
+    inboxLoaded = true;
+    if (!r.error) renderReports();
+    if (!a.error) renderApps();
+    paintNavCounts();
+  }
+  function paintNavCounts() {
+    const n = { reports: inReports.filter(x => x.status === '접수').length, applications: hasAppCols ? inApps.filter(x => x.status === '새 신청').length : 0 };
+    Object.entries(n).forEach(([id, k]) => {
+      $$(`.nav-item[data-menu="${id}"] .nav-count`).forEach(x => x.remove());
+      const item = $(`.nav-item[data-menu="${id}"]`);
+      if (item && k) { const b = el('span', 'nav-count', String(k)); b.setAttribute('aria-label', `새로 ${k}건`); item.append(b); }
+    });
+  }
+  function chips(box, states, labels, rows, key, cur, onPick) {
+    const all = [['all', '전체', rows.length]].concat(states.map(v => [v, labels[v] || v, rows.filter(r => r[key] === v).length]));
+    box.replaceChildren(...all.map(([v, t, n]) => {
+      const b = el('button', 'fchip', t); b.type = 'button'; b.append(el('span', null, String(n)));
+      b.setAttribute('aria-pressed', String(v === cur));
+      b.addEventListener('click', () => onPick(v));
+      return b;
+    }));
+  }
+  function inboxRow(li, title, metaParts, flags, onOpen, fresh) {
+    li.className = `rrow${fresh ? ' is-fresh' : ''}`;
+    const main = el('button', 'rrow-main'); main.type = 'button'; main.style.paddingLeft = '16px';
+    const text = el('span', 'rrow-text');
+    text.append(el('span', 'rrow-title', title));
+    const meta = el('span', 'rrow-meta'); meta.append(...metaParts); text.append(meta);
+    const f = el('span', 'rrow-flags'); flags.forEach(x => f.append(x));
+    main.append(text, f);
+    main.addEventListener('click', onOpen);
+    li.append(main);
+    return li;
+  }
+  const docketOfReport = id => dockets.find(d => String(d.report_id) === String(id));
+
+  // ----- 불편 제보 목록 -----
+  function renderReports() {
+    chips($('[data-rep-chips]'), REP_ST, REP_LABEL, inReports, 'status', repFilter, v => { repFilter = v; renderReports(); });
+    const q = $('#rep-find').value.trim().toLowerCase();
+    const rows = inReports.filter(r => (repFilter === 'all' || r.status === repFilter) && (!q || [noOf('BYP', r), r.what, r.how].join(' ').toLowerCase().includes(q)));
+    const sec = el('section', 'lgroup'); const ul = el('ul', 'rlist');
+    if (!rows.length) ul.append(el('li', 'rempty', inReports.length ? '조건에 맞는 제보가 없습니다.' : '아직 접수된 제보가 없습니다.'));
+    rows.forEach(r => {
+      const li = el('li'); li.dataset.id = r.id;
+      const flags = [];
+      const dk = docketOfReport(r.id);
+      if (dk) flags.push(el('span', 'flag flag-feat', `제${dk.no}호`));
+      if (inAgenda.has(r.id)) flags.push(el('span', 'flag', '회의 안건'));
+      if (inMemos.has(r.id)) flags.push(el('span', 'flag', '메모'));
+      inboxRow(li, r.what, [el('span', stClass(r.status), REP_LABEL[r.status] || r.status), el('span', 'in-no', noOf('BYP', r)), el('span', null, B.dateText(r.created_at)), el('span', null, `· ${r.how.length > 40 ? r.how.slice(0, 40) + '…' : r.how}`)], flags, () => openReport(r), r.status === '접수');
+      if (mode === 'report' && editing && editing.id === r.id) li.classList.add('is-current');
+      ul.append(li);
+    });
+    sec.append(ul); repList.replaceChildren(sec);
+  }
+  $('#rep-find').addEventListener('input', () => { if (inboxLoaded) renderReports(); });
+
+  // ----- 불편 제보 서랍 -----
+  let repStatus = '접수';
+  $('[data-rep-status]').replaceChildren(...REP_ST.map(v => { const b = el('button', null, REP_LABEL[v]); b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.v = v; b.addEventListener('click', () => { repStatus = v; syncRepUI(); }); return b; }));
+  function slip(box, top, rows) {
+    const t = el('div', 'slip-top'); top.forEach(x => t.append(el('span', null, x)));
+    const dl = el('dl');
+    rows.forEach(([k, v, cls]) => { if (v == null || v === '') return; dl.append(el('dt', cls || null, k), el('dd', cls || null, v)); });
+    box.replaceChildren(t, dl);
+  }
+  function syncRepUI() {
+    $$('[data-rep-status] button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === repStatus)));
+    const r = editing;
+    if (!r) return;
+    const dk = docketOfReport(r.id), ag = inAgenda.get(r.id);
+    $('[data-rep-docket]').textContent = dk ? `처리 현황 제${dk.no}호 열기` : '처리 현황 안건으로 올리기';
+    $('[data-rep-agenda]').disabled = !!ag;
+    $('[data-rep-agenda]').textContent = ag ? (ag.done ? '회의 안건 (완료)' : '회의 안건에 올라가 있음') : '회의 안건으로 보내기';
+    const links = [];
+    if (dk) links.push(`처리 현황: 제${dk.no}호 ${dk.title}`);
+    if (ag) links.push('공사장 회의실 안건에 있습니다');
+    $('[data-rep-links]').textContent = links.join(' · ');
+    $('[data-rep-wipe]').hidden = !inContacts.has(r.id);
+  }
+  function openReport(r) {
+    if (waitBusy()) return;
+    editing = r; currentId = null;
+    repStatus = r.status;
+    const contact = inContacts.get(r.id);
+    slip($('[data-rep-slip]'), [noOf('BYP', r), B.dateText(r.created_at)], [
+      ['무엇이 불편합니까', r.what], ['지금은 어떻게 하고 있습니까', r.how],
+      ['연락처 · 운영진만', contact || '남기지 않음', contact ? 'private' : null],
+      ['낸 사람', r.reporter ? (() => { const m = inMembers.get(r.reporter); return m ? `회원 ${m.display_name} (${m.username})` : '로그인한 회원'; })() : '로그인하지 않고 냄']
+    ]);
+    const wipe = $('[data-rep-wipe]'); wipe.dataset.armed = ''; wipe.textContent = '연락처 지우기';
+    $('[data-rep-memo-box]').hidden = !hasMemos;
+    F('r-memo').value = inMemos.get(r.id) || '';
+    delBtn.hidden = false;
+    openDrawer('report', `제보 ${noOf('BYP', r)}`, '접수 · 불편 제보');
+    syncRepUI(); renderReports();
+  }
+  async function saveReport() {
+    if (busy || !editing) return;
+    const r = editing, st = repStatus, memo = F('r-memo').value.trim();
+    setBusy(true); B.setBusy(saveBtn, true, '저장 중…');
+    const done = () => { setBusy(false); B.setBusy(saveBtn, false); };
+    if (st !== r.status) {
+      const { error } = await B.sb.from('reports').update({ status: st }).eq('id', r.id);
+      if (error) { done(); return fail(errText(error, '저장')); }
+      r.status = st;
+    }
+    if (hasMemos) {
+      const had = inMemos.get(r.id) || '';
+      let res = null;
+      if (memo && had) res = await B.sb.from('report_memos').update({ memo }).eq('report_id', r.id);
+      else if (memo) res = await B.sb.from('report_memos').insert({ report_id: r.id, memo });
+      else if (had) res = await B.sb.from('report_memos').delete().eq('report_id', r.id);
+      if (res && res.error) { done(); renderReports(); return fail('상태는 저장했지만 메모를 저장하지 못했습니다. ' + errText(res.error, '저장')); }
+      if (memo) inMemos.set(r.id, memo); else inMemos.delete(r.id);
+    }
+    done(); closeDrawer(); renderReports(); paintNavCounts();
+    toast(`${noOf('BYP', r)}: ${REP_LABEL[st]}${st === '개통' || st === '반려' ? ' · 처리가 끝났으면 연락처를 지워 주세요' : ''}`);
+  }
+  async function deleteReport() {
+    const r = editing;
+    if (!r || busy) return;
+    setBusy(true); B.setBusy(delBtn, true, '지우는 중…');
+    const { error } = await B.sb.from('reports').delete().eq('id', r.id);
+    setBusy(false); B.setBusy(delBtn, false);
+    if (error) return fail(errText(error, '지우기'));
+    inReports = inReports.filter(x => x.id !== r.id); inContacts.delete(r.id); inMemos.delete(r.id);
+    dockets.forEach(d => { if (String(d.report_id) === String(r.id)) d.report_id = null; });
+    closeDrawer(); renderReports(); paintNavCounts();
+    toast(`제보 ${noOf('BYP', r)}을(를) 지웠습니다.`);
+  }
+  $('[data-rep-agenda]').addEventListener('click', async () => {
+    const r = editing, btn = $('[data-rep-agenda]');
+    if (!r || busy) return;
+    B.setBusy(btn, true, '보내는 중…');
+    const { data, error } = await B.sb.from('agenda_items').insert({ title: r.what.slice(0, 200), report_id: r.id }).select('id, report_id, done').single();
+    B.setBusy(btn, false);
+    if (error) return fail('회의 안건으로 보내지 못했습니다. ' + errText(error, '저장'));
+    inAgenda.set(r.id, data);
+    syncRepUI(); renderReports();
+    toast('공사장 회의실 안건에 올렸습니다.');
+  });
+  $('[data-rep-wipe]').addEventListener('click', async () => {
+    const r = editing, btn = $('[data-rep-wipe]');
+    if (!r || busy) return;
+    if (btn.dataset.armed !== '1') { btn.dataset.armed = '1'; btn.textContent = '한 번 더 누르면 연락처를 지웁니다'; return; }
+    btn.dataset.armed = ''; B.setBusy(btn, true, '지우는 중…');
+    const { error } = await B.sb.from('report_contacts').delete().eq('report_id', r.id);
+    B.setBusy(btn, false); btn.textContent = '연락처 지우기';
+    if (error) return fail(error.code === '42501' || /permission/i.test(error.message || '') ? '연락처를 지울 권한이 없습니다. supabase/015_hq_inbox.sql을 실행해 주세요.' : errText(error, '지우기'));
+    inContacts.delete(r.id);
+    openReport(r); toast('연락처를 지웠습니다.');
+  });
+  // 처리 현황 안건으로: 처리 현황 메뉴로 옮겨 새 안건 서랍을 제보 내용으로 채운다
+  $('[data-rep-docket]').addEventListener('click', () => {
+    const r = editing;
+    if (!r || busy) return;
+    const dk = docketOfReport(r.id);
+    closeDrawer();
+    history.pushState(null, '', '#dockets'); route();
+    if (dk) { openDocketForm(dk); return; }
+    openDocketForm(null);
+    if (!hasPhase2 || !docketsLoaded) return;
+    F('d-title').value = r.what.slice(0, 60);
+    F('d-old').value = r.how.slice(0, 300);
+    if (!$$('#d-report option').some(o => o.value === String(r.id))) { const o = el('option', null, `${noOf('BYP', r)} · ${r.what.slice(0, 34)}`); o.value = r.id; F('d-report').append(o); }
+    F('d-report').value = String(r.id);
+    syncDocketUI();
+    toast('제보 내용으로 새 안건을 채웠습니다. 공고에 맞게 다듬어 저장해 주세요.');
+  });
+
+  // ----- 합류 신청 -----
+  function renderApps() {
+    const box = $('[data-app-chips]');
+    if (hasAppCols) chips(box, APP_ST, {}, inApps, 'status', appFilter, v => { appFilter = v; renderApps(); });
+    else box.replaceChildren();
+    const q = $('#app-find').value.trim().toLowerCase();
+    const rows = inApps.filter(a => (!hasAppCols || appFilter === 'all' || a.status === appFilter) && (!q || [noOf('JOIN', a), a.name, a.major, a.want, a.memo].join(' ').toLowerCase().includes(q)));
+    const sec = el('section', 'lgroup'); const ul = el('ul', 'rlist');
+    if (!rows.length) ul.append(el('li', 'rempty', inApps.length ? '조건에 맞는 신청이 없습니다.' : '아직 들어온 합류 신청이 없습니다.'));
+    rows.forEach(a => {
+      const li = el('li'); li.dataset.id = a.id;
+      const flags = [];
+      const m = a.applicant && inMembers.get(a.applicant);
+      if (m) flags.push(el('span', `flag${m.role === 'general' ? '' : ' flag-feat'}`, ROLE_NAME[m.role] || m.role));
+      if (a.memo) flags.push(el('span', 'flag', '메모'));
+      const meta = [];
+      if (hasAppCols) meta.push(el('span', stClass(a.status), a.status));
+      meta.push(el('span', 'in-no', noOf('JOIN', a)), el('span', null, B.dateText(a.created_at)), el('span', null, `· ${a.want.length > 40 ? a.want.slice(0, 40) + '…' : a.want}`));
+      inboxRow(li, a.major ? `${a.name} · ${a.major}` : a.name, meta, flags, () => openApp(a), hasAppCols && a.status === '새 신청');
+      if (mode === 'application' && editing && editing.id === a.id) li.classList.add('is-current');
+      ul.append(li);
+    });
+    sec.append(ul); appList.replaceChildren(sec);
+  }
+  $('#app-find').addEventListener('input', () => { if (inboxLoaded) renderApps(); });
+  let appStatus = '새 신청';
+  $('[data-app-status]').replaceChildren(...APP_ST.map(v => { const b = el('button', null, v); b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.v = v; b.addEventListener('click', () => { appStatus = v; syncAppUI(); }); return b; }));
+  function syncAppUI() {
+    $$('[data-app-status] button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === appStatus)));
+    const a = editing; if (!a) return;
+    const m = a.applicant && inMembers.get(a.applicant);
+    $('[data-app-hint]').textContent = appStatus === '합류' && m && m.role === 'general' ? '합류로 바꾸면 아래 ‘국원으로 등록’도 눌러 주세요. 공사장 회의실이 열립니다.' : '';
+    $('[data-app-account]').textContent = m ? `${m.display_name} (${m.username}) · 지금 ${ROLE_NAME[m.role] || m.role}` : a.applicant ? '로그인한 회원이 냈지만 회원 목록에서 찾지 못했습니다.' : '로그인하지 않고 신청했습니다. 회원가입을 안내한 뒤 HQ › 회원(또는 공사장 관리실)에서 국원으로 바꿔 주세요.';
+    $('[data-app-promote]').hidden = !(m && m.role === 'general');
+  }
+  function openApp(a) {
+    if (waitBusy()) return;
+    editing = a; currentId = null;
+    appStatus = hasAppCols ? a.status : '새 신청';
+    slip($('[data-app-slip]'), [noOf('JOIN', a), B.dateText(a.created_at)], [
+      ['이름', a.name], ['학과', a.major], ['연락처 · 운영진만', a.contact, 'private'], ['하고 싶은 것', a.want]
+    ]);
+    $('[data-app-needs]').disabled = !hasAppCols; $('[data-app-needs-memo]').hidden = !hasAppCols;
+    F('a-memo').value = a.memo || '';
+    delBtn.hidden = false;
+    openDrawer('application', `합류 신청 ${noOf('JOIN', a)}`, '접수 · 합류 신청');
+    syncAppUI(); renderApps();
+  }
+  async function saveApp() {
+    if (busy || !editing) return;
+    const a = editing;
+    if (!hasAppCols) return fail('supabase/015_hq_inbox.sql을 실행해야 처리 상태를 저장할 수 있습니다.');
+    const body = { status: appStatus, memo: F('a-memo').value.trim() || null };
+    setBusy(true); B.setBusy(saveBtn, true, '저장 중…');
+    const { data, error } = await B.sb.from('applications').update(body).eq('id', a.id).select().single();
+    setBusy(false); B.setBusy(saveBtn, false);
+    if (error) { fail(errText(error, '저장')); if (error.code === 'PGRST116') loadInbox(); return; }
+    Object.assign(a, data);
+    closeDrawer(); renderApps(); paintNavCounts();
+    toast(`${noOf('JOIN', a)}: ${a.status}`);
+  }
+  async function deleteApp() {
+    const a = editing;
+    if (!a || busy) return;
+    setBusy(true); B.setBusy(delBtn, true, '지우는 중…');
+    const { error } = await B.sb.from('applications').delete().eq('id', a.id);
+    setBusy(false); B.setBusy(delBtn, false);
+    if (error) return fail(errText(error, '지우기'));
+    inApps = inApps.filter(x => x.id !== a.id);
+    closeDrawer(); renderApps(); paintNavCounts();
+    toast(`합류 신청 ${noOf('JOIN', a)}을(를) 지웠습니다.`);
+  }
+  $('[data-app-promote]').addEventListener('click', async () => {
+    const a = editing, btn = $('[data-app-promote]');
+    const m = a && a.applicant && inMembers.get(a.applicant);
+    if (!m || busy) return;
+    B.setBusy(btn, true, '등록 중…');
+    const { error } = await B.sb.rpc('set_member_role', { p_user: m.id, p_role: 'member' });
+    B.setBusy(btn, false);
+    if (error) return fail('국원으로 등록하지 못했습니다. ' + (error.message || ''));
+    m.role = 'member';
+    syncAppUI(); renderApps();
+    toast(`${m.display_name} 님을 국원으로 등록했습니다. 다시 로그인하면 적용됩니다.`);
+  });
+  $$('[data-inbox-reload]').forEach(b => b.addEventListener('click', () => { B.setBusy(b, true, '불러오는 중…'); loadInbox().finally(() => B.setBusy(b, false)); }));
+
   await Promise.all([loadAll(), loadStatus()]);
   await loadDockets();
+  await loadInbox();
 })();
 </script>
 </body>
