@@ -82,6 +82,18 @@
   /* 운영 상태: 도로 전광판 */
   .vms { background: var(--vms); color: var(--amber); font-size: 15px; line-height: 1.5; font-weight: 700; border-bottom: 4px solid var(--post-dark); }
   .vms .wrap { display: flex; align-items: center; gap: 14px; padding-top: 10px; padding-bottom: 10px; }
+  /* 전체 공개 공지: 전광판 둘째 줄 (HQ › 공지) */
+  .vms-notice { border-top: 1px dashed rgba(255, 177, 59, 0.35); }
+  .vms-notice .wrap { padding-top: 8px; padding-bottom: 9px; }
+  .vms-notice button { display: inline-flex; align-items: baseline; gap: 10px; min-width: 0; max-width: 100%; padding: 0; border: 0; background: none; color: #fff; font: inherit; font-weight: 700; text-align: left; cursor: pointer; }
+  .vms-notice button:hover .vms-notice-t { text-decoration: underline; text-underline-offset: 3px; }
+  .vms-notice-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vms-notice-more { flex: none; color: var(--amber); font-size: 13px; }
+  .notice-list { list-style: none; margin: 0; padding: 0; }
+  .notice-list li + li { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--rule); }
+  .notice-list h3 { margin: 0; font-size: 19px; font-weight: 900; line-height: 1.4; }
+  .notice-list time { display: block; margin-top: 2px; font-size: 13.5px; color: var(--muted); }
+  .notice-list p { margin: 10px 0 0; white-space: pre-line; }
   .vms-label { flex-shrink: 0; border: 1.5px solid var(--amber); border-radius: 3px; padding: 0 8px; font-size: 13px; line-height: 1.7; }
 
   /* 머리글 */
@@ -568,10 +580,16 @@
 
 <a class="skip" href="#main">본문 바로가기</a>
 
-<div class="vms" role="status">
-  <div class="wrap">
+<div class="vms">
+  <div class="wrap" role="status">
     <span class="vms-label">운영 상태</span>
     <span id="status-text">본 국은 현재 정상 운영 중입니다. 제보는 상시 접수합니다.</span>
+  </div>
+  <div class="vms-notice" data-vms-notice hidden>
+    <div class="wrap">
+      <span class="vms-label">공지</span>
+      <button type="button" data-open-notice aria-haspopup="dialog"><span class="vms-notice-t" data-vms-notice-title></span><span class="vms-notice-more" data-vms-notice-more></span></button>
+    </div>
   </div>
 </div>
 
@@ -948,6 +966,15 @@
   </div>
 </footer>
 
+<!-- 전체 공개 공지 대화상자 (HQ › 공지에서 '전체 공개'로 올린 것) -->
+<dialog class="form-dialog notice-dialog" id="notice-dialog" aria-labelledby="notice-title">
+  <div class="dlg-head on-green">
+    <h2 id="notice-title">공지</h2>
+    <button type="button" class="dlg-close" data-close>닫기</button>
+  </div>
+  <div class="dlg-body"><ul class="notice-list" data-notice-list></ul></div>
+</dialog>
+
 <!-- 불편 제보 대화상자 -->
 <dialog class="form-dialog" id="report-dialog" aria-labelledby="report-title">
   <div class="dlg-head on-green">
@@ -1094,9 +1121,33 @@
     });
   }
 
+  /* ===== 전체 공개 공지: 전광판 둘째 줄 =====
+     HQ › 공지에서 '전체 공개'로 올리고 게시 기간 안인 것만 데이터베이스가 내준다(019). 누르면 내용 */
+  function applyNotices(list) {
+    if (!list.length) return;
+    const bar = document.querySelector('[data-vms-notice]');
+    document.querySelector('[data-vms-notice-title]').textContent = list[0].title;
+    document.querySelector('[data-vms-notice-more]').textContent = list.length > 1 ? `외 ${list.length - 1}건` : '';
+    bar.hidden = false;
+    const ul = document.querySelector('[data-notice-list]');
+    ul.replaceChildren(...list.map(n => {
+      const li = document.createElement('li');
+      const h = document.createElement('h3'); h.textContent = n.title;
+      const t = document.createElement('time'); t.dateTime = n.created_at;
+      const d = new Date(n.created_at); t.textContent = `${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}.`;
+      li.append(h, t);
+      if (n.body) { const p = document.createElement('p'); p.textContent = n.body; li.append(p); }
+      return li;
+    }));
+    const dlg = document.getElementById('notice-dialog');
+    document.querySelector('[data-open-notice]').addEventListener('click', () => dlg.showModal());
+    dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+    dlg.querySelector('[data-close]').addEventListener('click', () => dlg.close());
+  }
+
   (async function loadFromDb() {
     const get = (q, extra) => fetch(`${SB_URL}/rest/v1/${q}`, { headers: { apikey: SB_KEY, ...extra } });
-    const [st, dk, fq, tx] = await Promise.allSettled([
+    const [st, dk, fq, tx, nt] = await Promise.allSettled([
       get('site_settings?key=eq.status&select=value').then(r => r.ok ? r.json() : Promise.reject(r.status)),
       window.BYPASS_DOCKETS
         ? get(`dockets?select=${window.BYPASS_DOCKETS.SELECT}&hidden=is.false&order=sort.asc,id.asc&limit=4`, { Prefer: 'count=exact' })
@@ -1109,8 +1160,10 @@
             })
         : Promise.reject('no module'),
       get('faqs?select=question,answer&hidden=is.false&order=sort.asc,id.asc').then(r => r.ok ? r.json() : Promise.reject(r.status)),
-      get('site_settings?key=eq.texts&select=value').then(r => r.ok ? r.json() : Promise.reject(r.status))
+      get('site_settings?key=eq.texts&select=value').then(r => r.ok ? r.json() : Promise.reject(r.status)),
+      get('notices?select=id,title,body,created_at,pinned&audience=eq.public&order=pinned.desc,created_at.desc&limit=5').then(r => r.ok ? r.json() : Promise.reject(r.status))
     ]);
+    if (nt.status === 'fulfilled' && Array.isArray(nt.value)) applyNotices(nt.value);
     if (tx.status === 'fulfilled' && tx.value[0] && window.BYPASS_TEXTS) window.BYPASS_TEXTS.apply(document, tx.value[0].value);
     if (fq.status === 'fulfilled' && Array.isArray(fq.value)) applyFaqs(fq.value);
     if (st.status === 'fulfilled' && st.value[0]) applyStatus(st.value[0].value);
@@ -1168,7 +1221,7 @@
     });
   });
 
-  document.querySelectorAll('.form-dialog').forEach(dlg => {
+  document.querySelectorAll('.form-dialog:not(.notice-dialog)').forEach(dlg => {
     dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
     dlg.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => dlg.close()));
 
