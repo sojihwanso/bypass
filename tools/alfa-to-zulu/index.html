@@ -109,6 +109,10 @@ button { font: inherit; color: inherit; }
 .order.flip span, .order.flip svg { animation: flip .5s cubic-bezier(.2, .8, .2, 1); }
 @keyframes flip { from { opacity: 0; transform: translateY(6px); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
 .tools { display: flex; gap: 2px; }
+.left { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.set-seg { border-color: var(--faint); }
+.set-seg button { padding: 6px 11px; font-size: 12px; letter-spacing: .1em; color: var(--dim); }
+.set-seg button:hover { color: var(--ivory); }
 .icon { width: 42px; height: 42px; padding: 0; justify-content: center; position: relative; }
 .icon .dot { position: absolute; top: 10px; right: 9px; width: 5px; height: 5px; border-radius: 50%; background: var(--brass); box-shadow: 0 0 8px var(--brass); }
 
@@ -211,6 +215,25 @@ button { font: inherit; color: inherit; }
 .f-time.gleam::after { animation: gleam 1.4s ease-out; }
 .f-meta { margin: 0; font-family: var(--f-mono); font-weight: 300; font-size: 12.5px; letter-spacing: .2em; color: var(--pewter); }
 .f-again { margin: 1.4cqh 0 0; font-size: 11.5px; letter-spacing: .3em; color: var(--dim); }
+/* 이름 변경 요청 중에 완주하면: 작은 닉네임 바꾸기 칸 */
+.mini-nick {
+  width: min(380px, 100%); margin-top: 1.2cqh; padding: 14px 16px 12px; text-align: left;
+  border: 1px solid rgba(201, 88, 76, .45); border-radius: 16px;
+  background: linear-gradient(180deg, rgba(30, 22, 24, .9), rgba(14, 12, 16, .92));
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .9);
+  display: flex; flex-direction: column; gap: 10px;
+  animation: fin .8s cubic-bezier(.16, .84, .24, 1) both;
+}
+.mini-nick p { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--pewter); }
+.mini-nick p b { color: var(--ember); font-weight: 500; }
+.mini-row { display: flex; gap: 8px; align-items: center; }
+.mini-in { flex: 1 1 auto; min-width: 0; background: transparent; border: 0; border-bottom: 1px solid var(--hair); border-radius: 0; color: var(--ivory); font-family: var(--f-mono); font-size: 16px; letter-spacing: .06em; padding: 6px 2px; outline: none; }
+.mini-in:focus { border-bottom-color: var(--brass); }
+.mini-row .go { padding: 8px 14px; font-size: 12.5px; letter-spacing: .08em; flex: none; }
+.mini-row .pill { padding: 7px 11px; font-size: 12px; }
+.mini-err { min-height: 1.2em; font-size: 12px !important; color: var(--ember) !important; }
+.mini-err.ok { color: var(--brass) !important; }
+.mini-err:empty { display: none; }
 
 /* ---------- clock ---------- */
 .clock { display: flex; flex-direction: column; align-items: center; gap: 14px; position: relative; z-index: 2; }
@@ -397,6 +420,9 @@ a.quiet { text-decoration: none; }
 
 @media (max-width: 520px) {
   .quiet { letter-spacing: .14em; padding: 10px; }
+  .order span { display: none; }
+  .order { padding: 10px 8px; }
+  .set-seg button { padding: 6px 9px; letter-spacing: .04em; }
   .whisper { letter-spacing: .16em; }
   .word { letter-spacing: .3em; padding-left: .3em; }
   .opt:not(.col) { flex-direction: column; align-items: flex-start; }
@@ -416,7 +442,14 @@ a.quiet { text-decoration: none; }
   <div class="ember" id="ember" aria-hidden="true"></div>
 
   <header class="bar">
-    <button type="button" class="quiet order" id="orderBtn" aria-label="순서 바꾸기"></button>
+    <div class="left">
+      <div class="seg sm set-seg" role="radiogroup" aria-label="연습 대상">
+        <button type="button" role="radio" data-qset="letters">A–Z</button>
+        <button type="button" role="radio" data-qset="digits">0–9</button>
+        <button type="button" role="radio" data-qset="all">함께</button>
+      </div>
+      <button type="button" class="quiet order" id="orderBtn" aria-label="순서 바꾸기"></button>
+    </div>
     <div class="tools">
       <a class="quiet icon" href="/routes/" aria-label="BYPASS 준공 현황로 돌아가기" title="준공 현황">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h5l6-12h5"/><circle cx="4" cy="18" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="20" cy="6" r="1.6"/></svg>
@@ -444,6 +477,16 @@ a.quiet { text-decoration: none; }
       <p class="f-time" id="fTime" data-t=""></p>
       <p class="f-meta" id="fMeta"></p>
       <p class="f-again" id="fAgain"></p>
+      <form class="mini-nick" id="miniNick" novalidate hidden>
+        <p id="miniText"></p>
+        <div class="mini-row">
+          <label class="sr" for="miniIn">새 닉네임 (1~16자)</label>
+          <input class="mini-in" id="miniIn" maxlength="16" autocomplete="nickname" autocapitalize="none" spellcheck="false" placeholder="새 닉네임">
+          <button type="submit" class="go" id="miniGo">바꾸기</button>
+          <button type="button" class="pill" id="miniLater">나중에</button>
+        </div>
+        <p class="mini-err" id="miniErr" role="alert"></p>
+      </form>
     </div>
     <p class="sr" id="live" aria-live="polite"></p>
   </section>
@@ -686,6 +729,7 @@ a.quiet { text-decoration: none; }
     S.ranked = !S.weak && !S.preview;
     room.classList.remove('running', 'done');
     $('#final').hidden = true;
+    $('#miniNick').hidden = true;
     typer.value = '';
     showLetter(cur()[0], boot ? 'boot' : false);
     renderWord(); renderClock(); renderChrome(); setWhisper();
@@ -733,7 +777,8 @@ a.quiet { text-decoration: none; }
 
   function renderChrome() {
     const ob = $('#orderBtn');
-    ob.innerHTML = (prefs.order === 'mix' ? ICON_MIX : ICON_SEQ) + '<span>' + SETS[prefs.set] + '  ·  ' + KIND[prefs.order] + '</span>';
+    ob.innerHTML = (prefs.order === 'mix' ? ICON_MIX : ICON_SEQ) + '<span>' + KIND[prefs.order] + '</span>';
+    document.querySelectorAll('[data-qset]').forEach((b) => { const on = b.dataset.qset === prefs.set; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
     ob.setAttribute('aria-label', SETS[prefs.set] + ', 순서: ' + KIND[prefs.order] + ' (눌러서 바꾸기)');
     $('#setDot').hidden = !(prefs.scope === 'weak' || prefs.preview);
   }
@@ -879,14 +924,28 @@ a.quiet { text-decoration: none; }
 
     if (S.ranked && !me.id) $('#fAgain').textContent = '닉네임을 정하면 다음 기록부터 종합 랭킹에 오릅니다  ·  ' + $('#fAgain').textContent;
     const runSeq = S;
-    if (boardP) Promise.resolve(boardP).then((ok) => {
-      if (!ok || S !== runSeq) return;
+    if (boardP) Promise.resolve(boardP).then(async (ok) => {
+      if (S !== runSeq) return;
+      await checkMe();   // 그사이 운영진이 요청했을 수도 있으니 매번 확인
+      if (S !== runSeq) return;
+      if (flag.req) { showMiniNick(); return; }
+      if (flag.off) { $('#fAgain').textContent = '운영진이 랭킹에서 제외해 종합 랭킹에는 반영되지 않았습니다  ·  ' + $('#fAgain').textContent; return; }
+      if (!ok) return;
       return fetchBoard(rec.mode).then((rows) => {
         if (S !== runSeq || !rows) return;
         const i = rows.findIndex((r) => r.player_id === me.id);
         if (i >= 0) $('#fKick').textContent = kick + `  ·  종합 ${i + 1}위`;
       });
     }).catch(() => {});
+  }
+  function showMiniNick() {
+    const t = $('#miniText');
+    t.replaceChildren();
+    const b = document.createElement('b'); b.textContent = '닉네임 변경 요청 중이라 이 기록은 종합 랭킹에 반영되지 않았습니다.';
+    t.append(b, document.createTextNode(` 지금 이름 ‘${me.nick}’${flag.note ? ` · 사유: ${flag.note}` : ''}. 이름을 바꾸면 이 기록도 함께 올라갑니다.`));
+    $('#miniIn').value = ''; $('#miniErr').textContent = ''; $('#miniErr').classList.remove('ok');
+    $('#miniGo').disabled = false;
+    $('#miniNick').hidden = false;
   }
   function countUp(el, target, done) {
     if (RM) { el.textContent = fmt(target); done(); return; }
@@ -1286,42 +1345,73 @@ a.quiet { text-decoration: none; }
   $('#rankBtn').addEventListener('click', () => show('rank'));
   $('#nickBtn').addEventListener('click', () => { hide(); show('nick'); });
   $('#nickLater').addEventListener('click', () => hide());
-  $('#nickForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const nick = $('#nickIn').value.replace(/\s+/g, ' ').trim();
-    const err = $('#nickErr'), go = $('#nickGo');
-    if (!nick) { err.textContent = '닉네임을 한 글자 이상 넣어 주세요.'; return; }
-    if (/[<>]/.test(nick)) { err.textContent = '< > 는 쓸 수 없습니다.'; return; }
-    if (nick === me.nick && me.id) { if (flag.req) { err.textContent = '운영진이 바꿔 달라고 한 이름입니다. 다른 이름으로 정해 주세요.'; return; } hide(); return; }
+  // 닉네임 저장 공통: 성공하면 true, 실패하면 err 칸에 이유
+  async function saveNick(nick, err, go) {
+    if (!nick) { err.textContent = '닉네임을 한 글자 이상 넣어 주세요.'; return false; }
+    if (/[<>]/.test(nick)) { err.textContent = '< > 는 쓸 수 없습니다.'; return false; }
+    if (flag.req && nick === me.nick) { err.textContent = '운영진이 바꿔 달라고 한 이름입니다. 다른 이름으로 정해 주세요.'; return false; }
     go.disabled = true; err.textContent = '';
     try {
       await join(nick);
       Object.keys(boardCache).forEach((k) => delete boardCache[k]);
-      rankScope = 'all';
       go.disabled = false;
-      hide();
-      setWhisper(`<span class="br">${nick.replace(/[&<>"]/g, '')}</span>  ·  종합 랭킹에 기록이 올라갑니다`, 3200);
+      return true;
     } catch (x) {
       go.disabled = false;
       err.textContent = /blocked nickname/.test(x.message) ? '쓸 수 없는 이름입니다. 다른 이름으로 정해 주세요.'
         : /bad nickname/.test(x.message) ? '이 닉네임은 쓸 수 없습니다. 1~16자로 다시 정해 주세요.' : '연결하지 못했습니다. 잠시 후 다시 해 주세요. (기록은 이 브라우저에 남습니다)';
+      return false;
     }
+  }
+  $('#miniNick').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nick = $('#miniIn').value.replace(/\s+/g, ' ').trim();
+    const runSeq = S;
+    if (!(await saveNick(nick, $('#miniErr'), $('#miniGo')))) return;
+    rankScope = 'all';
+    $('#miniErr').classList.add('ok');
+    $('#miniErr').textContent = `‘${nick}’ 으로 바꿨습니다. 이 기록이 종합 랭킹에 올라갑니다.`;
+    $('#miniGo').disabled = true;
+    try {
+      const rows = await fetchBoard(S.kind);
+      if (S !== runSeq) return;
+      const i = rows.findIndex((r) => r.player_id === me.id);
+      if (i >= 0) $('#fKick').textContent += `  ·  종합 ${i + 1}위`;
+    } catch (x) { /* 순위는 랭킹 창에서 */ }
+    setTimeout(() => { if (S === runSeq) { $('#miniNick').hidden = true; focusTyper(); } }, 2200);
+  });
+  $('#miniLater').addEventListener('click', () => { $('#miniNick').hidden = true; focusTyper(); });
+  // 위 칸 연습 대상 바꾸기 (설정과 같은 값)
+  document.querySelectorAll('[data-qset]').forEach((b) => b.addEventListener('click', () => {
+    if (prefs.set !== b.dataset.qset) { prefs.set = b.dataset.qset; savePrefs(); abandon = false; newSession(); }
+    focusTyper();
+  }));
+  $('#nickForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nick = $('#nickIn').value.replace(/\s+/g, ' ').trim();
+    if (nick && nick === me.nick && me.id && !flag.req) { hide(); return; }
+    if (!(await saveNick(nick, $('#nickErr'), $('#nickGo')))) return;
+    rankScope = 'all';
+    $('#miniNick').hidden = true;
+    hide();
+    setWhisper(`<span class="br">${nick.replace(/[&<>"]/g, '')}</span>  ·  종합 랭킹에 기록이 올라갑니다`, 3200);
   });
   $('#setBtn').addEventListener('click', () => show('set'));
 
   room.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.bar')) return;
+    if (e.target.closest('.bar, .mini-nick')) return;
     e.preventDefault();
     if (S.done) newSession();
     focusTyper();
   });
   room.addEventListener('click', (e) => {
-    if (e.target.closest('.bar')) return;
+    if (e.target.closest('.bar, .mini-nick')) return;
     if (document.activeElement !== typer) focusTyper();
   });
   document.addEventListener('keydown', (e) => {
     if (openVeil) { if (e.key === 'Escape') { e.preventDefault(); hide(); } return; }
     if (document.activeElement === typer) return;
+    if (e.target && e.target.closest && e.target.closest('.mini-nick')) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key === 'Escape') { newSession(); return; }
     if (e.key === 'Enter' && S.done) { e.preventDefault(); newSession(); focusTyper(); return; }
