@@ -258,6 +258,25 @@
   .card-foot .form-error { flex-basis: 100%; margin: 0 0 4px; }
   .saved-at { margin-left: auto; font-size: 13px; color: var(--muted); }
 
+  /* 링크 미리보기: 카톡 카드처럼 */
+  .share-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .share-card { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: #fff; border: 1px solid var(--rule); border-radius: 12px; }
+  .share-card.is-current { box-shadow: inset 0 0 0 2px var(--green); }
+  .share-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .share-head b { font-size: 16px; font-weight: 900; }
+  .share-head code { font-size: 12.5px; color: var(--muted); }
+  .share-state { font-size: 12.5px; font-weight: 700; color: var(--orange-ink); }
+  .kcard { width: 100%; max-width: 340px; overflow: hidden; border-radius: 12px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 33, 30, 0.12), 0 4px 14px rgba(28, 33, 30, 0.08); font-family: -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
+  .kcard-img { display: block; width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; background: var(--pave); }
+  .kcard-body { padding: 10px 12px 11px; }
+  .kcard-t { margin: 0; font-size: 14px; font-weight: 700; line-height: 1.4; color: #111; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .kcard-d { margin: 3px 0 0; font-size: 12.5px; line-height: 1.45; color: #666; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .kcard-u { margin: 6px 0 0; font-size: 11.5px; color: #999; }
+  .kchat { padding: 16px 14px; border-radius: 12px; background: #B2C7D9; }
+  .kchat .kcard { margin-left: auto; max-width: 290px; }
+  .count { float: right; font-size: 12.5px; font-weight: 500; color: var(--muted); }
+  .count.is-over { color: var(--orange-ink); font-weight: 700; }
+
   .toast { position: fixed; left: 50%; bottom: 24px; z-index: 60; transform: translateX(-50%); max-width: calc(100% - 32px); padding: 10px 16px; border-radius: 8px; background: var(--ink); color: #fff; font-weight: 700; font-size: 14.5px; line-height: 1.5; box-shadow: 0 6px 20px rgba(28, 33, 30, 0.3); }
   .toast.is-bad { background: var(--orange); color: var(--ink); }
 
@@ -461,6 +480,20 @@
         </form>
       </section>
 
+      <!-- 링크 미리보기 -->
+      <section data-view="share" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-ops">‹ 운영</a>
+            <p class="view-kicker">운영</p>
+            <h1 tabindex="-1">링크 미리보기</h1>
+          </div>
+          <button type="button" class="mini-btn" data-share-reload>새로 불러오기</button>
+        </div>
+        <p class="list-hint" style="margin:0 0 16px">카톡·SNS로 링크를 보낼 때 뜨는 카드입니다. 저장하면 그 페이지 HTML이 고쳐져 1~몇 분 뒤 배포됩니다. 카톡은 한 번 본 미리보기를 한동안 기억하므로, 바로 바꾸려면 저장 뒤 <a href="https://developers.kakao.com/tool/debugger/sharing" target="_blank" rel="noopener">카카오 공유 디버거</a>에서 주소를 넣고 ‘캐시 초기화’를 눌러 주세요.</p>
+        <div class="share-grid" data-share-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
+      </section>
+
       <!-- 아직 열리지 않은 메뉴 -->
       <section data-view="soon" hidden>
         <div class="view-head">
@@ -642,6 +675,29 @@
           </fieldset>
         </form>
 
+        <!-- 링크 미리보기 -->
+        <form data-form="share" novalidate hidden>
+          <div class="pv"><p class="pv-title">미리보기 · 카톡 대화방</p><div class="kchat" data-share-pv></div></div>
+          <label class="field-label" for="s-title">제목 <span class="count" data-count="s-title"></span></label>
+          <input class="input" id="s-title" maxlength="90" required>
+          <p class="hint">카톡에서는 두 줄까지 보입니다. 40자 안쪽이 좋습니다.</p>
+          <label class="field-label" for="s-desc">설명 <span class="count" data-count="s-desc"></span></label>
+          <textarea class="input" id="s-desc" maxlength="200" rows="3" required></textarea>
+          <p class="hint">카톡에서는 두 줄(약 60자)까지 보입니다. 앞부분에 핵심을 쓰세요.</p>
+          <fieldset>
+            <legend>그림</legend>
+            <label class="drop" for="s-file" data-share-drop>
+              <img class="drop-img" alt="" data-share-img style="width:96px;height:50px;border-radius:6px">
+              <span class="drop-text"><b data-share-drop-title>새 그림을 끌어다 놓거나 눌러서 고르기</b><small>1200×630px로 가운데를 맞춰 자릅니다 · PNG·JPG·WebP</small></span>
+            </label>
+            <input class="sr-only" id="s-file" type="file" accept="image/png,image/jpeg,image/webp">
+            <p class="file-note" data-share-note hidden></p>
+            <button type="button" class="mini-btn" data-share-keep hidden style="margin-top:8px">원래 그림으로 되돌리기</button>
+            <label class="field-label" for="s-alt">그림 설명 <span class="opt">(화면 낭독기용)</span></label>
+            <input class="input" id="s-alt" maxlength="120" placeholder="예: 도도새가 그려진 주황색 마름모 표지판과 BYPASS 글자">
+          </fieldset>
+        </form>
+
         <!-- 분류 -->
         <form data-form="line" novalidate hidden>
           <div data-line-pv></div>
@@ -777,7 +833,7 @@
     { id: 'faq', group: 'content', name: '자주 묻는 질문', when: '4단계' },
     { id: 'texts', group: 'content', name: '페이지 문구', when: '4단계' },
     { id: 'status', group: 'ops', name: '사이트 상태', ready: true },
-    { id: 'share', group: 'ops', name: '링크 미리보기', when: '2단계 두 번째 묶음' },
+    { id: 'share', group: 'ops', name: '링크 미리보기', ready: true },
     { id: 'members', group: 'ops', name: '회원', when: '3단계', legacy: 'admin' },
     { id: 'log', group: 'ops', name: '변경 기록', when: '4단계' }
   ];
@@ -1064,7 +1120,8 @@
   /* ===== 고치기 서랍 ===== */
   const hq = $('[data-hq]'), drawer = $('[data-drawer]'), scrim = $('[data-scrim]');
   const formRoute = $('[data-form="route"]'), formLine = $('[data-form="line"]'), formDocket = $('[data-form="docket"]');
-  const FORMS = { route: formRoute, line: formLine, docket: formDocket };
+  const formShare = $('[data-form="share"]');
+  const FORMS = { route: formRoute, line: formLine, docket: formDocket, share: formShare };
   const errBox = $('.drawer-foot .form-error');
   const saveBtn = $('[data-save]'), delBtn = $('[data-delete]');
   let mode = null;            // 'route' | 'line'
@@ -1099,7 +1156,9 @@
     drawer.hidden = true; scrim.hidden = true;
     hq.classList.remove('has-drawer');
     document.body.style.overflow = '';
+    const wasShare = mode === 'share';
     mode = null; editing = null; currentId = null;
+    if (wasShare) { clearShareFile(); sharePage = null; renderShare(); }
     clearPending();
     $$('.rrow.is-current').forEach(x => x.classList.remove('is-current'));
     if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
@@ -1122,11 +1181,11 @@
     disarm();
     if (mode === 'route') deleteRoute(); else if (mode === 'line') deleteLine(); else if (mode === 'docket') deleteDocket();
   });
-  saveBtn.addEventListener('click', () => { if (mode === 'route') saveRoute(); else if (mode === 'line') saveLine(); else if (mode === 'docket') saveDocket(); });
+  saveBtn.addEventListener('click', () => { if (mode === 'route') saveRoute(); else if (mode === 'line') saveLine(); else if (mode === 'docket') saveDocket(); else if (mode === 'share') saveShare(); });
   Object.values(FORMS).forEach(f => f.addEventListener('submit', e => { e.preventDefault(); saveBtn.click(); }));
   Object.values(FORMS).forEach(f => f.addEventListener('input', e => { if (e.target.removeAttribute) e.target.removeAttribute('aria-invalid'); errBox.hidden = true; }));
   // 다른 메뉴로 가면 서랍을 닫는다 (저장 중이면 그대로)
-  const VIEW_OF = { route: 'routes', line: 'routes', docket: 'dockets' };
+  const VIEW_OF = { route: 'routes', line: 'routes', docket: 'dockets', share: 'share' };
   viewHooks.push(view => { if (mode && VIEW_OF[mode] !== view && !busy) closeDrawer(); });
 
   /* ===== 지름길 편집 ===== */
@@ -2088,6 +2147,185 @@
     const v = ST.view(d);
     toast(`저장했습니다. 메인 전광판: ${ST.MODES[v.mode]}`);
   });
+
+  /* ===== 링크 미리보기 =====
+     제목·설명·그림은 각 페이지 HTML 의 og 태그에 직접 적힌다 (카톡은 스크립트를 실행하지 않으므로).
+     지금 값은 페이지를 직접 읽어 오고, 저장은 Edge Function publish-meta 가 GitHub 의 HTML 을 고친다. */
+  const SHARE_PAGES = [
+    { path: '/', name: '메인', slug: 'home' },
+    { path: '/routes/', name: '준공 현황', slug: 'routes' },
+    { path: '/dockets/', name: '처리 현황 전체 보기', slug: 'dockets' },
+    { path: '/tools/alfa-to-zulu/', name: 'Alfa to Zulu', slug: 'alfa-to-zulu' }
+  ];
+  const SHARE_BUCKET = 'share-images', OG_W = 1200, OG_H = 630;
+  const shareData = {};          // path → { title, description, image, alt, pending }
+  let shareLoaded = false, shareFile = null, sharePreview = null, sharePage = null;
+  const shareList = $('[data-share-list]');
+  const hostOf = () => 'teambypass.vercel.app';
+  function kcard(v) {
+    const c = el('div', 'kcard');
+    const img = el('img', 'kcard-img'); img.alt = ''; img.loading = 'lazy';
+    if (v.image) img.src = v.image;
+    img.addEventListener('error', () => { img.style.visibility = 'hidden'; }, { once: true });  // 그림을 못 읽으면 빈 판만
+    const body = el('div', 'kcard-body');
+    body.append(el('p', 'kcard-t', v.title || '제목 없음'), el('p', 'kcard-d', v.description || ''), el('p', 'kcard-u', hostOf()));
+    c.append(img, body);
+    return c;
+  }
+  async function readPage(path) {
+    const r = await fetch(path, { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status);
+    const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+    const og = k => { const m = doc.querySelector(`meta[property="${k}"]`); return m ? m.getAttribute('content') || '' : ''; };
+    return { title: og('og:title') || doc.title, description: og('og:description'), image: og('og:image'), alt: og('og:image:alt') };
+  }
+  async function loadShare() {
+    shareList.replaceChildren(el('p', 'list-state', '불러오는 중…'));
+    await Promise.all(SHARE_PAGES.map(async p => {
+      try {
+        const v = await readPage(p.path);
+        const old = shareData[p.path];
+        // 저장했는데 아직 배포 전이면 저장한 값을 그대로 보여 준다
+        if (old && old.pending && (v.title !== old.title || v.description !== old.description || (old.image && v.image !== old.image))) return;
+        shareData[p.path] = v;
+      } catch (e) { shareData[p.path] = shareData[p.path] || { error: true }; }
+    }));
+    shareLoaded = true;
+    renderShare();
+  }
+  function renderShare() {
+    shareList.replaceChildren(...SHARE_PAGES.map(p => {
+      const v = shareData[p.path] || {};
+      const card = el('section', `share-card${mode === 'share' && sharePage === p.path ? ' is-current' : ''}`);
+      const head = el('div', 'share-head');
+      head.append(el('b', null, p.name), el('code', null, p.path));
+      card.append(head);
+      if (v.error) card.append(el('p', 'list-state', '페이지를 읽지 못했습니다.'));
+      else card.append(kcard(v));
+      if (v.pending) card.append(el('p', 'share-state', '저장함 · 배포되면(1~몇 분) 반영됩니다'));
+      const b = el('button', 'btn btn-secondary btn-small', '고치기'); b.type = 'button';
+      b.disabled = !!v.error;
+      b.addEventListener('click', () => openShareForm(p));
+      card.append(b);
+      return card;
+    }));
+  }
+  viewHooks.push(view => { if (view === 'share' && !shareLoaded) loadShare(); });
+  if (decodeURIComponent(location.hash.slice(1)) === 'share') loadShare();
+  $('[data-share-reload]').addEventListener('click', loadShare);
+
+  function shareDraft() {
+    const v = shareData[sharePage] || {};
+    return { title: F('s-title').value.trim(), description: F('s-desc').value.trim(), image: sharePreview || v.image, alt: F('s-alt').value.trim() };
+  }
+  function syncShareUI() {
+    [['s-title', 40], ['s-desc', 60]].forEach(([id, soft]) => {
+      const n = F(id).value.trim().length, c = $(`[data-count="${id}"]`);
+      c.textContent = `${n}자`; c.classList.toggle('is-over', n > soft);
+    });
+    const d = shareDraft();
+    $('[data-share-pv]').replaceChildren(kcard(d));
+    const img = $('[data-share-img]');
+    if (d.image) img.src = d.image; else img.removeAttribute('src');
+    $('[data-share-drop-title]').textContent = sharePreview ? '다른 그림으로 바꾸려면 끌어다 놓거나 누르기' : '새 그림을 끌어다 놓거나 눌러서 고르기';
+    $('[data-share-keep]').hidden = !sharePreview;
+  }
+  formShare.addEventListener('input', syncShareUI);
+  function clearShareFile() {
+    if (sharePreview) URL.revokeObjectURL(sharePreview);
+    shareFile = null; sharePreview = null; F('s-file').value = '';
+    const n = $('[data-share-note]'); n.hidden = true; n.textContent = '';
+  }
+  function openShareForm(p) {
+    if (waitBusy()) return;
+    const v = shareData[p.path] || {};
+    editing = { id: p.path }; sharePage = p.path; currentId = null;
+    clearShareFile();
+    F('s-title').value = v.title || ''; F('s-desc').value = v.description || ''; F('s-alt').value = v.alt || '';
+    delBtn.hidden = true;
+    openDrawer('share', `고치기: ${p.name}`, '링크 미리보기');
+    syncShareUI(); renderShare();
+  }
+  $('[data-share-keep]').addEventListener('click', () => { clearShareFile(); syncShareUI(); });
+  // 고른 그림을 1200×630 으로 가운데 맞춰 자른다 (카톡·페이스북 권장 비율)
+  function coverTo(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file), img = new Image();
+      img.onload = async () => {
+        const c = document.createElement('canvas'); c.width = OG_W; c.height = OG_H;
+        const g = c.getContext('2d');
+        g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, OG_W, OG_H);
+        const sc = Math.max(OG_W / img.naturalWidth, OG_H / img.naturalHeight);
+        const w = img.naturalWidth * sc, h = img.naturalHeight * sc;
+        g.imageSmoothingQuality = 'high';
+        g.drawImage(img, (OG_W - w) / 2, (OG_H - h) / 2, w, h);
+        URL.revokeObjectURL(url);
+        const toBlob = (t, q) => new Promise(r => c.toBlob(r, t, q));
+        let blob = await toBlob('image/png'), ext = 'png';
+        if (!blob || blob.size > 1500 * 1024) { blob = await toBlob('image/jpeg', 0.88); ext = 'jpg'; }
+        resolve({ file: new File([blob], `og.${ext}`, { type: blob.type }), small: img.naturalWidth < 600, cut: Math.abs(img.naturalWidth / img.naturalHeight - OG_W / OG_H) > 0.08 });
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('read')); };
+      img.src = url;
+    });
+  }
+  async function takeShareImage(file) {
+    if (!file) return;
+    const n = $('[data-share-note]');
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) { n.textContent = 'PNG·JPG·WebP 그림만 쓸 수 있습니다.'; n.hidden = false; return; }
+    if (file.size > 15 * 1024 * 1024) { n.textContent = '원본이 15MB를 넘습니다. 더 작은 그림으로 해 주세요.'; n.hidden = false; return; }
+    const seq = formSeq;
+    try {
+      const out = await coverTo(file);
+      if (seq !== formSeq) return;
+      clearShareFile();
+      shareFile = out.file; sharePreview = URL.createObjectURL(out.file);
+      const notes = [];
+      if (out.cut) notes.push('비율이 달라 가운데를 기준으로 위아래(또는 양옆)를 잘랐습니다.');
+      if (out.small) notes.push('원본이 작아 흐릿할 수 있습니다. 가로 1200px 이상을 권합니다.');
+      n.textContent = notes.join(' '); n.hidden = !notes.length;
+    } catch (e) { n.textContent = '그림을 읽지 못했습니다. 다른 파일로 해 주세요.'; n.hidden = false; }
+    F('s-file').value = '';
+    syncShareUI();
+  }
+  F('s-file').addEventListener('change', () => takeShareImage(F('s-file').files[0]));
+  const shareDrop = $('[data-share-drop]');
+  ['dragenter', 'dragover'].forEach(t => shareDrop.addEventListener(t, e => { e.preventDefault(); shareDrop.classList.add('is-over'); }));
+  ['dragleave', 'drop'].forEach(t => shareDrop.addEventListener(t, () => shareDrop.classList.remove('is-over')));
+  shareDrop.addEventListener('drop', e => { e.preventDefault(); takeShareImage(e.dataTransfer.files[0]); });
+
+  async function saveShare() {
+    if (busy) return;
+    const page = sharePage, p = SHARE_PAGES.find(x => x.path === page);
+    const d = shareDraft(), file0 = shareFile;
+    $$('[aria-invalid]', formShare).forEach(x => x.removeAttribute('aria-invalid'));
+    if (!d.title) return fail('제목을 입력해 주세요.', 's-title');
+    if (!d.description) return fail('설명을 입력해 주세요.', 's-desc');
+    setBusy(true); B.setBusy(saveBtn, true, '저장 중…');
+    const done = () => { setBusy(false); B.setBusy(saveBtn, false); };
+    let image = (shareData[page] || {}).image || '';
+    if (file0) {
+      B.setBusy(saveBtn, true, '그림 올리는 중…');
+      const path = `${p.slug}-${Date.now()}.${file0.type === 'image/png' ? 'png' : 'jpg'}`;
+      const { error } = await B.sb.storage.from(SHARE_BUCKET).upload(path, file0, { contentType: file0.type, cacheControl: '31536000', upsert: false });
+      if (error) { done(); return fail(/bucket/i.test(error.message || '') ? '미리보기 그림 저장소가 아직 없습니다. supabase/014_share_images.sql을 실행해 주세요.' : `그림을 올리지 못했습니다. (${error.message || error.statusCode || '오류'})`); }
+      image = B.sb.storage.from(SHARE_BUCKET).getPublicUrl(path).data.publicUrl;
+    }
+    B.setBusy(saveBtn, true, '페이지 고치는 중…');
+    const { data, error } = await B.sb.functions.invoke('publish-meta', { body: { page, title: d.title, description: d.description, image, image_alt: d.alt } });
+    done();
+    if (error) {
+      let text = '페이지를 고치지 못했습니다.';
+      try { const j = await error.context.json(); if (j && j.error) text = j.error; }
+      catch (x) { if (error.context && error.context.status === 404) text = '링크 미리보기 설정이 아직 끝나지 않았습니다. (Edge Function publish-meta 배포 필요)'; }
+      return fail(text);
+    }
+    const changed = !data || data.changed !== false;
+    shareData[page] = { title: d.title, description: d.description, image, alt: d.alt, pending: changed };
+    clearShareFile();
+    closeDrawer(); sharePage = null; renderShare();
+    toast(changed ? '저장했습니다. 1~몇 분 뒤 배포되면 반영됩니다. 카톡에는 공유 디버거에서 캐시 초기화 후 반영됩니다.' : '바뀐 내용이 없습니다.');
+  }
 
   await Promise.all([loadAll(), loadStatus()]);
   await loadDockets();
