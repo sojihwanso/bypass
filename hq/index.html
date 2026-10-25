@@ -258,6 +258,24 @@
   .card-foot .form-error { flex-basis: 100%; margin: 0 0 4px; }
   .saved-at { margin-left: auto; font-size: 13px; color: var(--muted); }
 
+  /* 대시보드 */
+  .dash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .dtile { display: flex; flex-direction: column; gap: 2px; padding: 16px 18px 15px; border-radius: 12px; background: #fff; border: 1px solid var(--rule); border-left: 6px solid var(--rule); color: var(--ink); text-decoration: none; }
+  .dtile:hover { border-color: var(--green); border-left-color: var(--green); }
+  .dtile.is-todo { border-left-color: var(--orange); }
+  .dtile b { font-size: 34px; font-weight: 900; line-height: 1.15; font-variant-numeric: tabular-nums; }
+  .dtile span { font-size: 15px; font-weight: 700; }
+  .dtile small { font-size: 13px; line-height: 1.5; color: var(--muted); }
+  .dash-h { margin: 28px 0 10px; font-size: 18px; font-weight: 900; }
+  .dash-sub { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+  .dstat { padding: 12px 14px; border-radius: 10px; background: var(--vms); color: var(--amber); }
+  .dstat b { display: block; font-size: 24px; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
+  .dstat span { font-size: 13px; font-weight: 700; }
+  /* 회원 */
+  .pw-box { margin-top: 12px; padding: 14px; border-radius: 10px; background: var(--vms); color: #fff; }
+  .pw-box code { display: block; margin: 6px 0 8px; font-size: 26px; font-weight: 900; letter-spacing: 0.12em; color: var(--amber); user-select: all; }
+  .pw-box p { margin: 0; font-size: 13px; line-height: 1.6; color: #C9CFCB; }
+
   /* 접수: 불편 제보 · 합류 신청 */
   .fchips { display: flex; flex-wrap: wrap; gap: 6px; }
   .fchip { font: inherit; font-size: 14px; font-weight: 700; line-height: 1.4; padding: 6px 12px; border-radius: 999px; cursor: pointer; background: #fff; color: var(--ink); border: 1.5px solid var(--post); }
@@ -431,6 +449,42 @@
           <div data-line-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
           <p class="list-hint">분류는 준공 현황의 큰 표지판입니다. 손잡이로 표지판 순서를 바꿉니다.</p>
         </div>
+      </section>
+
+      <!-- 대시보드 -->
+      <section data-view="dashboard" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-home">‹ 홈</a>
+            <p class="view-kicker">홈</p>
+            <h1 tabindex="-1">대시보드</h1>
+          </div>
+          <button type="button" class="mini-btn" data-dash-reload>새로 불러오기</button>
+        </div>
+        <h2 class="dash-h" style="margin-top:0">처리할 일</h2>
+        <div class="dash-grid" data-dash-todo aria-live="polite"><p class="list-state">불러오는 중…</p></div>
+        <h2 class="dash-h">방문</h2>
+        <div class="dash-sub" data-dash-visits></div>
+        <h2 class="dash-h">최근 들어온 것</h2>
+        <div data-dash-recent></div>
+      </section>
+
+      <!-- 회원 -->
+      <section data-view="members" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-ops">‹ 운영</a>
+            <p class="view-kicker">운영</p>
+            <h1 tabindex="-1">회원</h1>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="fchips" role="group" aria-label="회원 구분으로 거르기" data-mem-chips></div>
+          <label class="sr-only" for="mem-find">회원 찾기</label>
+          <input class="input" id="mem-find" type="search" placeholder="이름·아이디로 찾기" autocomplete="off">
+        </div>
+        <div data-mem-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
+        <p class="list-hint">바꾼 회원 구분은 그 회원이 다시 로그인하거나 로그인 정보가 새로 고쳐질 때(최대 1시간) 적용됩니다.</p>
       </section>
 
       <!-- 불편 제보 -->
@@ -688,6 +742,22 @@
           </fieldset>
         </form>
 
+        <!-- 회원 -->
+        <form data-form="member" novalidate hidden>
+          <div class="slip" data-mem-slip></div>
+          <fieldset data-mem-role-set>
+            <legend>회원 구분</legend>
+            <div class="seg" role="radiogroup" aria-label="회원 구분" data-mem-role></div>
+            <p class="hint" data-mem-hint></p>
+          </fieldset>
+          <fieldset data-mem-pw-set>
+            <legend>비밀번호를 잊었을 때</legend>
+            <p class="hint" style="margin-top:0">임시 비밀번호를 만들어 이 회원에게 직접 전해 주세요. 로그인하면 비밀번호를 바꾸라는 안내가 뜹니다. 운영진의 비밀번호는 여기서 바꿀 수 없습니다.</p>
+            <button type="button" class="mini-btn" data-mem-pw>임시 비밀번호 만들기</button>
+            <div class="pw-box" data-mem-pw-box hidden></div>
+          </fieldset>
+        </form>
+
         <!-- 불편 제보 -->
         <form data-form="report" novalidate hidden>
           <div class="slip" data-rep-slip></div>
@@ -928,7 +998,7 @@
   const GROUPS = [['home', '홈'], ['inbox', '접수'], ['content', '콘텐츠'], ['ops', '운영']];
   const LEGACY = { inbox: ['/site/#inbox', '공사장 접수함'], admin: ['/site/#admin', '공사장 관리실'], home: ['/site/#home', '공사장 내 공사장 탭'] };
   const MENUS = [
-    { id: 'dashboard', group: 'home', name: '대시보드', when: '3단계' },
+    { id: 'dashboard', group: 'home', name: '대시보드', ready: true },
     { id: 'stats', group: 'home', name: '통계', when: '3단계', note: '방문·이용 기록은 지금부터 쌓이고 있습니다.' },
     { id: 'reports', group: 'inbox', name: '불편 제보', ready: true },
     { id: 'applications', group: 'inbox', name: '합류 신청', ready: true },
@@ -940,7 +1010,7 @@
     { id: 'texts', group: 'content', name: '페이지 문구', when: '4단계' },
     { id: 'status', group: 'ops', name: '사이트 상태', ready: true },
     { id: 'share', group: 'ops', name: '링크 미리보기', ready: true },
-    { id: 'members', group: 'ops', name: '회원', when: '3단계', legacy: 'admin' },
+    { id: 'members', group: 'ops', name: '회원', ready: true },
     { id: 'log', group: 'ops', name: '변경 기록', when: '4단계' }
   ];
   const menuById = Object.fromEntries(MENUS.map(m => [m.id, m]));
@@ -982,7 +1052,7 @@
       }));
       markNav(null, g); show('group'); focusTitle('group');
     } else {
-      const m = menuById[h] || menuById.routes;
+      const m = menuById[h] || menuById.dashboard;
       markNav(m.id, m.group);
       if (m.ready) { show(m.id); }
       else {
@@ -1227,8 +1297,8 @@
   const hq = $('[data-hq]'), drawer = $('[data-drawer]'), scrim = $('[data-scrim]');
   const formRoute = $('[data-form="route"]'), formLine = $('[data-form="line"]'), formDocket = $('[data-form="docket"]');
   const formShare = $('[data-form="share"]');
-  const formReport = $('[data-form="report"]'), formApp = $('[data-form="application"]');
-  const FORMS = { route: formRoute, line: formLine, docket: formDocket, share: formShare, report: formReport, application: formApp };
+  const formReport = $('[data-form="report"]'), formApp = $('[data-form="application"]'), formMember = $('[data-form="member"]');
+  const FORMS = { member: formMember, route: formRoute, line: formLine, docket: formDocket, share: formShare, report: formReport, application: formApp };
   const errBox = $('.drawer-foot .form-error');
   const saveBtn = $('[data-save]'), delBtn = $('[data-delete]');
   let mode = null;            // 'route' | 'line'
@@ -1288,11 +1358,11 @@
     disarm();
     if (mode === 'route') deleteRoute(); else if (mode === 'line') deleteLine(); else if (mode === 'docket') deleteDocket(); else if (mode === 'report') deleteReport(); else if (mode === 'application') deleteApp();
   });
-  saveBtn.addEventListener('click', () => { if (mode === 'route') saveRoute(); else if (mode === 'line') saveLine(); else if (mode === 'docket') saveDocket(); else if (mode === 'share') saveShare(); else if (mode === 'report') saveReport(); else if (mode === 'application') saveApp(); });
+  saveBtn.addEventListener('click', () => { if (mode === 'route') saveRoute(); else if (mode === 'line') saveLine(); else if (mode === 'docket') saveDocket(); else if (mode === 'share') saveShare(); else if (mode === 'report') saveReport(); else if (mode === 'application') saveApp(); else if (mode === 'member') saveMember(); });
   Object.values(FORMS).forEach(f => f.addEventListener('submit', e => { e.preventDefault(); saveBtn.click(); }));
   Object.values(FORMS).forEach(f => f.addEventListener('input', e => { if (e.target.removeAttribute) e.target.removeAttribute('aria-invalid'); errBox.hidden = true; }));
   // 다른 메뉴로 가면 서랍을 닫는다 (저장 중이면 그대로)
-  const VIEW_OF = { route: 'routes', line: 'routes', docket: 'dockets', share: 'share', report: 'reports', application: 'applications' };
+  const VIEW_OF = { route: 'routes', line: 'routes', docket: 'dockets', share: 'share', report: 'reports', application: 'applications', member: 'members' };
   viewHooks.push(view => { if (mode && VIEW_OF[mode] !== view && !busy) closeDrawer(); });
 
   /* ===== 지름길 편집 ===== */
@@ -2728,9 +2798,135 @@
   });
   $$('[data-inbox-reload]').forEach(b => b.addEventListener('click', () => { B.setBusy(b, true, '불러오는 중…'); loadInbox().finally(() => B.setBusy(b, false)); }));
 
+  /* ===== 회원 ===== (002: list_members · set_member_role, 004: reset_member_password) */
+  let memFilter = 'all', memRole = 'general';
+  const memList = $('[data-mem-list]');
+  const MEM_ROLES = ['staff', 'member', 'general'];
+  const memberArr = () => [...inMembers.values()];
+  function renderMembers() {
+    const all = memberArr();
+    chips($('[data-mem-chips]'), MEM_ROLES, ROLE_NAME, all, 'role', memFilter, v => { memFilter = v; renderMembers(); });
+    const q = $('#mem-find').value.trim().toLowerCase();
+    const rows = all.filter(m => (memFilter === 'all' || m.role === memFilter) && (!q || [m.display_name, m.username].join(' ').toLowerCase().includes(q)));
+    const sec = el('section', 'lgroup'); const ul = el('ul', 'rlist');
+    if (!rows.length) ul.append(el('li', 'rempty', all.length ? '조건에 맞는 회원이 없습니다.' : '회원 목록을 불러오지 못했거나 아직 회원이 없습니다.'));
+    rows.forEach(m => {
+      const li = el('li'); li.dataset.id = m.id;
+      const flags = [];
+      if (m.id === user.id) flags.push(el('span', 'flag flag-feat', '나'));
+      inboxRow(li, m.display_name, [el('span', stClass(m.role === 'staff' ? '개통' : m.role === 'member' ? '연락함' : '접수'), ROLE_NAME[m.role] || m.role), el('span', 'in-no', m.username), el('span', null, `가입 ${B.dateText(m.created_at)}`), el('span', null, m.last_sign_in_at ? `· 최근 로그인 ${B.dateText(m.last_sign_in_at)}` : '· 로그인 기록 없음')], flags, () => openMember(m), false);
+      if (mode === 'member' && editing && editing.id === m.id) li.classList.add('is-current');
+      ul.append(li);
+    });
+    sec.append(ul); memList.replaceChildren(sec);
+  }
+  $('#mem-find').addEventListener('input', () => { if (inboxLoaded) renderMembers(); });
+  $('[data-mem-role]').replaceChildren(...['general', 'member', 'staff'].map(v => { const b = el('button', null, ROLE_NAME[v]); b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.v = v; b.addEventListener('click', () => { if (editing && editing.id !== user.id) { memRole = v; syncMemUI(); } }); return b; }));
+  const ROLE_HINT = {
+    general: '회원가입만 한 상태. 공사장에서 내 제보와 공지를 봅니다.',
+    member: '국원. 공사장 회의실(안건·자료)과 접수된 제보를 봅니다.',
+    staff: '운영진. HQ와 모든 관리 권한을 갖습니다. 꼭 필요한 사람에게만 주세요.'
+  };
+  function syncMemUI() {
+    const m = editing; if (!m) return;
+    const self = m.id === user.id;
+    $$('[data-mem-role] button').forEach(b => { b.setAttribute('aria-checked', String(b.dataset.v === memRole)); b.disabled = self; });
+    $('[data-mem-hint]').textContent = self ? '자기 자신의 구분은 바꿀 수 없습니다. (실수로 운영진 권한을 잃지 않도록)' : ROLE_HINT[memRole] + (memRole !== m.role ? ' 저장하면 바뀝니다.' : '');
+    $('[data-mem-pw-set]').hidden = self || m.role === 'staff';
+  }
+  function openMember(m) {
+    if (waitBusy()) return;
+    editing = m; currentId = null; memRole = m.role;
+    slip($('[data-mem-slip]'), [m.username, ROLE_NAME[m.role] || m.role], [
+      ['이름', m.display_name], ['아이디', m.username], ['가입', B.dateText(m.created_at)], ['최근 로그인', m.last_sign_in_at ? B.dateText(m.last_sign_in_at) : '기록 없음']
+    ]);
+    const pw = $('[data-mem-pw]'); pw.dataset.armed = ''; pw.textContent = '임시 비밀번호 만들기'; pw.disabled = false;
+    $('[data-mem-pw-box]').hidden = true; $('[data-mem-pw-box]').replaceChildren();
+    delBtn.hidden = true;
+    openDrawer('member', m.display_name, '운영 · 회원');
+    syncMemUI(); renderMembers();
+  }
+  async function saveMember() {
+    const m = editing;
+    if (!m || busy) return;
+    if (memRole === m.role || m.id === user.id) { closeDrawer(); return; }
+    setBusy(true); B.setBusy(saveBtn, true, '저장 중…');
+    const { error } = await B.sb.rpc('set_member_role', { p_user: m.id, p_role: memRole });
+    setBusy(false); B.setBusy(saveBtn, false);
+    if (error) return fail('회원 구분을 바꾸지 못했습니다. ' + (error.message || ''));
+    m.role = memRole;
+    closeDrawer(); renderMembers(); renderApps();
+    toast(`${m.display_name} 님을 ${ROLE_NAME[m.role]}(으)로 바꿨습니다. 다시 로그인하면 적용됩니다.`);
+  }
+  $('[data-mem-pw]').addEventListener('click', async () => {
+    const m = editing, btn = $('[data-mem-pw]');
+    if (!m || busy) return;
+    if (btn.dataset.armed !== '1') { btn.dataset.armed = '1'; btn.textContent = '한 번 더 누르면 지금 비밀번호가 바뀝니다'; return; }
+    btn.dataset.armed = '';
+    B.setBusy(btn, true, '만드는 중…');
+    const { data, error } = await B.sb.rpc('reset_member_password', { p_user: m.id });
+    B.setBusy(btn, false); btn.textContent = '임시 비밀번호 다시 만들기';
+    if (error) return fail('임시 비밀번호를 만들지 못했습니다. ' + (error.message || ''));
+    const box = $('[data-mem-pw-box]');
+    const code = el('code', null, String(data));
+    const copy = el('button', 'mini-btn', '복사'); copy.type = 'button';
+    copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(String(data)); copy.textContent = '복사함'; } catch (e) { copy.textContent = '직접 골라 복사해 주세요'; } });
+    box.replaceChildren(el('p', null, `${m.display_name} 님의 임시 비밀번호`), code, copy, el('p', null, '이 창을 닫으면 다시 볼 수 없습니다. 카톡 등으로 본인에게만 전해 주세요.'));
+    box.style.display = ''; box.hidden = false;
+    $$('p', box)[1].style.marginTop = '10px';
+  });
+
+  /* ===== 대시보드 ===== 처리할 일을 모아 보고, 숫자를 누르면 그 메뉴로 */
+  async function countVisits(sinceIso, kind) {
+    let q = B.sb.from('stats_events').select('id', { count: 'exact', head: true }).gte('at', sinceIso);
+    if (kind) q = q.eq('kind', kind);
+    const { count, error } = await q;
+    return error ? null : count;
+  }
+  async function renderDashboard() {
+    const todo = [];
+    const tile = (n, label, sub, href) => { const a = el('a', `dtile${n ? ' is-todo' : ''}`); a.href = href; a.append(el('b', null, n == null ? '—' : String(n)), el('span', null, label)); if (sub) a.append(el('small', null, sub)); return a; };
+    if (inboxLoaded) {
+      todo.push(tile(inReports.filter(r => r.status === '접수').length, '새 불편 제보', '아직 ‘접수’ 상태 · 심의할 차례', '#reports'));
+      if (hasAppCols) todo.push(tile(inApps.filter(a => a.status === '새 신청').length, '새 합류 신청', '아직 연락하지 않은 신청', '#applications'));
+      todo.push(tile(inReports.filter(r => (r.status === '개통' || r.status === '반려') && inContacts.has(r.id)).length, '지울 연락처', '처리가 끝났는데 연락처가 남은 제보', '#reports'));
+    }
+    if (docketsLoaded) {
+      const late = dockets.filter(d => d.status === 'building' && (() => { const r = routes.find(x => String(x.id) === String(d.route_id)); return r && r.status === 'open'; })());
+      todo.push(tile(late.length, '준공했지만 안건이 공사 중', late.length ? late.map(d => `제${d.no}호`).join(' · ') : '지름길이 준공되면 안건 상태도 바꿔 주세요', '#dockets'));
+    }
+    todo.push(tile(routes.filter(r => r.status === 'building').length, '공사 중인 지름길', '준공 현황에 공사 중으로 보이는 것', '#routes'));
+    $('[data-dash-todo]').replaceChildren(...todo);
+
+    // 방문: 오늘(자정부터) · 최근 7일
+    const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const week = new Date(today); week.setDate(week.getDate() - 6);
+    const [t, w, g] = await Promise.all([countVisits(today.toISOString(), 'view'), countVisits(week.toISOString(), 'view'), countVisits(week.toISOString(), 'go')]);
+    const stat = (n, label) => { const d = el('div', 'dstat'); d.append(el('b', null, n == null ? '—' : n.toLocaleString('ko-KR')), el('span', null, label)); return d; };
+    $('[data-dash-visits]').replaceChildren(stat(t, '오늘 방문'), stat(w, '최근 7일 방문'), stat(g, '최근 7일 ‘이용하기’'));
+
+    // 최근 들어온 것: 제보·신청 섞어서 5건
+    const recent = [
+      ...inReports.map(r => ({ at: r.created_at, kind: '제보', text: r.what, no: noOf('BYP', r), open: () => { history.pushState(null, '', '#reports'); route(); openReport(r); } })),
+      ...inApps.map(a => ({ at: a.created_at, kind: '합류 신청', text: a.major ? `${a.name} · ${a.major}` : a.name, no: noOf('JOIN', a), open: () => { history.pushState(null, '', '#applications'); route(); openApp(a); } }))
+    ].sort((x, y) => String(y.at).localeCompare(String(x.at))).slice(0, 5);
+    const sec = el('section', 'lgroup'); const ul = el('ul', 'rlist');
+    if (!recent.length) ul.append(el('li', 'rempty', '아직 들어온 제보·신청이 없습니다.'));
+    recent.forEach(x => { const li = el('li'); inboxRow(li, x.text, [el('span', 'flag', x.kind), el('span', 'in-no', x.no), el('span', null, B.dateText(x.at))], [], x.open, false); ul.append(li); });
+    sec.append(ul); $('[data-dash-recent]').replaceChildren(sec);
+  }
+  viewHooks.push(view => { if (view === 'dashboard' && inboxLoaded) renderDashboard(); if (view === 'members' && inboxLoaded) renderMembers(); });
+  $('[data-dash-reload]').addEventListener('click', async () => {
+    const b = $('[data-dash-reload]'); B.setBusy(b, true, '불러오는 중…');
+    await Promise.all([loadAll(), loadInbox()]); await loadDockets();
+    B.setBusy(b, false); renderDashboard();
+  });
+
   await Promise.all([loadAll(), loadStatus()]);
   await loadDockets();
   await loadInbox();
+  renderMembers();
+  renderDashboard();
 })();
 </script>
 </body>
