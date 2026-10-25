@@ -78,6 +78,16 @@
       "featured": true,
       "url": "https://pf.kakao.com/_uuxfmX",
       "desc": "카카오톡 채널 ‘목해대 꿀꿀이’에서 학식 식단을 바로 확인합니다."
+    },
+    {
+      "id": "alfa-to-zulu",
+      "title": "Alfa to Zulu",
+      "type": "app",
+      "line": "hub",
+      "status": "open",
+      "url": "/tools/alfa-to-zulu/",
+      "subject": "해사통신영어",
+      "desc": "IMO SMCP 포네틱 알파벳과 숫자 발음을 타자로 익히고, 다른 사람들과 기록을 겨룹니다."
     }
   ]
 }

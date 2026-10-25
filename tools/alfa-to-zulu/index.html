@@ -1,0 +1,1153 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Alfa to Zulu | BYPASS</title>
+<meta name="description" content="IMO SMCP 포네틱 알파벳과 숫자 발음을 타자로 익히는 연습장. 개인 기록과 종합 랭킹으로 겨룹니다. BYPASS 과목 자료 허브.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="BYPASS">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:url" content="https://teambypass.vercel.app/tools/alfa-to-zulu/">
+<meta property="og:title" content="Alfa to Zulu | BYPASS">
+<meta property="og:description" content="Alfa부터 Zulu까지, SMCP 포네틱 알파벳을 타자로 익히고 기록을 겨룹니다.">
+<meta name="theme-color" content="#05070b">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500&family=Noto+Serif+KR:wght@400&display=swap">
+<style>
+/* BYPASS 과목 자료 허브 · Alfa to Zulu (원본: 첨부 파일). 종합 랭킹은 Supabase: supabase/012_alfa_to_zulu.sql
+   Layout: one dark room lit by a single overhead lamp. Center: the letter. Bottom: the clock. Three quiet controls in the corners; ranking and settings open as glass panels. Deliberately single-theme (night bridge). */
+:root {
+  color-scheme: dark;
+  --ink: #05070b;
+  --ivory: #eee8dd;
+  --pewter: #8d97a4;
+  --dim: #5b6572;
+  --ctl: #aeb7c3;
+  --faint: rgba(238, 232, 221, .07);
+  --hair: rgba(238, 232, 221, .13);
+  --brass: #c9ae78;
+  --brass-soft: rgba(201, 174, 120, .11);
+  --ember: #c9584c;
+  --moon: rgba(176, 198, 226, .13);
+  --f-glyph: 'Bodoni Moda', 'Bodoni 72', 'Didot', 'Noto Serif KR', Georgia, serif;
+  --f-head: 'Bodoni Moda', 'Noto Serif KR', 'Nanum Myeongjo', Georgia, serif;
+  --f-mono: 'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --f-ui: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; overflow: hidden; background: var(--ink); color: var(--ivory); }
+body { font-family: var(--f-ui); font-weight: 400; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 1px solid var(--brass); outline-offset: 3px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- the room ---------- */
+.room {
+  position: fixed; left: 0; right: 0; top: 0;
+  height: var(--vvh, 100%);
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+  padding-top: max(14px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(26px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  overflow: hidden; isolation: isolate; cursor: text;
+}
+.light { position: absolute; inset: 0; z-index: -3; pointer-events: none; opacity: 0; transition: opacity 2.2s cubic-bezier(.3, 0, .2, 1); }
+.room.lit .light { opacity: 1; }
+.lamp {
+  position: absolute; inset: -8%;
+  background:
+    radial-gradient(ellipse 34% 46% at 50% 42%, var(--moon), transparent 70%),
+    radial-gradient(ellipse 20% 34% at 50% -8%, rgba(214, 226, 242, .11), transparent 75%);
+  animation: breathe 9s ease-in-out infinite alternate;
+  transition: filter 1.4s ease;
+}
+.room.running .lamp { filter: brightness(1.15); }
+.warm {
+  position: absolute; inset: -8%;
+  background: radial-gradient(ellipse 38% 46% at 50% 44%, rgba(201, 174, 120, .17), transparent 70%);
+  opacity: 0; transition: opacity 2.4s ease;
+}
+.room.done .warm { opacity: 1; }
+@keyframes breathe { from { opacity: .78; } to { opacity: 1; } }
+.vignette { position: absolute; inset: 0; z-index: -2; pointer-events: none; background: radial-gradient(ellipse 80% 74% at 50% 46%, transparent 52%, rgba(0, 0, 0, .62) 100%); }
+.grain {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .045;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.ember {
+  position: absolute; left: 50%; top: 50%; z-index: -1; pointer-events: none;
+  width: 70vmin; height: 40vmin; transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(201, 88, 76, .30), transparent);
+  opacity: 0;
+}
+.ember.on { animation: ember .7s ease-out; }
+@keyframes ember { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ---------- corner controls ---------- */
+.bar { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; transition: opacity 1s ease; }
+.room.running .bar { opacity: .6; }
+.room.running .bar:hover, .room.running .bar:focus-within { opacity: 1; }
+.quiet {
+  background: none; border: 0; color: var(--ctl); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: 999px;
+  font-size: 12.5px; letter-spacing: .2em;
+  transition: color .45s ease, background .45s ease;
+}
+.quiet:hover { color: #fff; background: rgba(238, 232, 221, .09); }
+.quiet svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.55; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.order span { display: inline-block; }
+.order.flip span, .order.flip svg { animation: flip .5s cubic-bezier(.2, .8, .2, 1); }
+@keyframes flip { from { opacity: 0; transform: translateY(6px); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
+.tools { display: flex; gap: 2px; }
+.icon { width: 42px; height: 42px; padding: 0; justify-content: center; position: relative; }
+.icon .dot { position: absolute; top: 10px; right: 9px; width: 5px; height: 5px; border-radius: 50%; background: var(--brass); box-shadow: 0 0 8px var(--brass); }
+
+/* ---------- center ---------- */
+.center {
+  position: relative; min-height: 0; container-type: size;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2.6cqh; padding-bottom: 2cqh;
+}
+.glyphs { display: grid; place-items: center; filter: drop-shadow(0 0 1px rgba(255, 250, 240, .35)) drop-shadow(0 0 42px rgba(200, 214, 236, .17)); transition: opacity .5s ease; }
+.glyphs.shake { animation: shake .34s ease; }
+@keyframes shake { 25% { transform: translateX(-5px); } 55% { transform: translateX(4px); } 80% { transform: translateX(-2px); } }
+.glyph {
+  grid-area: 1 / 1; position: relative;
+  font-family: var(--f-glyph); font-weight: 500; font-optical-sizing: auto;
+  font-size: min(38vh, 56vw);
+  font-size: min(52cqh, 64cqw);
+  line-height: .9; letter-spacing: 0;
+  padding: .02em .06em .16em; margin-bottom: -.16em;
+  background: linear-gradient(180deg, #fffbf3 4%, #efe9de 48%, #a3acb8 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  opacity: 0; user-select: none; pointer-events: none;
+}
+.glyph::after {
+  content: attr(data-l); position: absolute; inset: 0;
+  padding: inherit;
+  background: linear-gradient(100deg, transparent 40%, rgba(255, 249, 236, .95) 50%, transparent 60%);
+  background-size: 300% 100%; background-position: 100% 0;
+  -webkit-background-clip: text; background-clip: text; color: transparent; opacity: 0;
+}
+.glyph.on { opacity: 1; }
+.glyph.wide { font-size: min(24vh, 18vw); font-size: min(34cqh, 23cqw); }
+.glyph.enter { animation: gin .6s cubic-bezier(.16, .84, .24, 1); }
+.glyph.enter.slow { animation: gin 1.6s cubic-bezier(.16, .84, .24, 1) .7s both; }
+.glyph.leave { animation: gout .34s ease-in forwards; }
+.glyph.gleam::after { animation: gleam 1.1s ease-out; }
+@keyframes gin { from { opacity: 0; transform: translateY(5cqh) scale(.985); filter: blur(14px); } to { opacity: 1; transform: none; filter: blur(0); } }
+@keyframes gout { 0% { opacity: 1; filter: brightness(1.5) blur(0); } 100% { opacity: 0; transform: translateY(-6cqh) scale(1.02); filter: brightness(1.5) blur(12px); } }
+@keyframes gleam { 0% { opacity: 1; background-position: 100% 0; } 100% { opacity: 1; background-position: 0 0; } }
+
+.horizon { width: min(44cqw, 520px); height: 1px; background: linear-gradient(90deg, transparent, var(--hair), transparent); transition: opacity .5s ease; }
+
+.word {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 1.7em; white-space: nowrap;
+  font-family: var(--f-mono); font-weight: 300;
+  font-size: clamp(17px, 2.3vw, 24px);
+  letter-spacing: .42em; padding-left: .42em;
+  text-transform: uppercase;
+  transition: opacity .5s ease;
+}
+#typed { color: var(--ivory); }
+#ghost { color: rgba(238, 232, 221, .2); }
+.caret { width: 1px; height: 1.15em; margin-right: .3em; background: var(--brass); box-shadow: 0 0 10px var(--brass); animation: blink 1.25s ease-in-out infinite; }
+.room.idle .caret { background: var(--dim); box-shadow: none; animation: none; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: .12; } }
+.bad { display: inline-block; color: var(--ember); text-shadow: 0 0 12px rgba(201, 88, 76, .6); animation: badout .6s ease-out forwards; }
+@keyframes badout { 0% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-16px); filter: blur(2px); } }
+.word.ok::after {
+  content: ""; position: absolute; left: 18%; right: 18%; bottom: -4px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--brass), transparent);
+  animation: okline .7s ease-out forwards;
+}
+@keyframes okline { 0% { opacity: 1; transform: scaleX(.3); } 100% { opacity: 0; transform: scaleX(1); } }
+
+.whisper {
+  margin: 0; min-height: 1.6em; text-align: center;
+  font-size: 12px; letter-spacing: .26em; color: var(--dim);
+  transition: opacity .5s ease;
+}
+.whisper .em { color: var(--ember); }
+.whisper .br { color: var(--brass); }
+
+.room.done .glyphs, .room.done .word, .room.done .whisper, .room.done .horizon { opacity: 0; pointer-events: none; }
+.final {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2.4cqh; text-align: center; padding-bottom: 2cqh;
+  animation: fin 1.1s cubic-bezier(.16, .84, .24, 1) .25s both;
+}
+@keyframes fin { from { opacity: 0; transform: translateY(3cqh); filter: blur(10px); } to { opacity: 1; transform: none; filter: none; } }
+.f-kick { margin: 0; font-size: 12px; letter-spacing: .32em; color: var(--brass); }
+.f-time {
+  position: relative; margin: 0;
+  font-family: var(--f-glyph); font-weight: 400;
+  font-size: min(20vh, 14vw);
+  font-size: min(25cqh, 15cqw);
+  line-height: 1; font-variant-numeric: lining-nums tabular-nums;
+  padding: 0 .05em .08em;
+  background: linear-gradient(180deg, #f8f3e9 10%, #b6afa3 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.f-time::after {
+  content: attr(data-t); position: absolute; inset: 0; padding: inherit;
+  background: linear-gradient(100deg, transparent 40%, rgba(255, 249, 236, .95) 50%, transparent 60%);
+  background-size: 300% 100%; background-position: 100% 0;
+  -webkit-background-clip: text; background-clip: text; color: transparent; opacity: 0;
+}
+.f-time.gleam::after { animation: gleam 1.4s ease-out; }
+.f-meta { margin: 0; font-family: var(--f-mono); font-weight: 300; font-size: 12.5px; letter-spacing: .2em; color: var(--pewter); }
+.f-again { margin: 1.4cqh 0 0; font-size: 11.5px; letter-spacing: .3em; color: var(--dim); }
+
+/* ---------- clock ---------- */
+.clock { display: flex; flex-direction: column; align-items: center; gap: 14px; position: relative; z-index: 2; }
+.track { width: min(180px, 42vw); height: 1px; background: var(--faint); position: relative; }
+.track i {
+  position: absolute; left: 0; top: 0; height: 1px; width: 0;
+  background: linear-gradient(90deg, rgba(201, 174, 120, .15), var(--brass));
+  box-shadow: 0 0 8px rgba(201, 174, 120, .55);
+  transition: width .6s cubic-bezier(.2, .8, .2, 1);
+}
+.timer {
+  font-family: var(--f-mono); font-weight: 300; font-size: 15px;
+  letter-spacing: .34em; padding-left: .34em;
+  font-variant-numeric: tabular-nums; color: var(--dim);
+  transition: color .9s ease, text-shadow .9s ease;
+}
+.room.running .timer { color: var(--ivory); }
+.room.done .timer { color: var(--brass); text-shadow: 0 0 18px rgba(201, 174, 120, .35); }
+
+#typer { position: absolute; left: 50%; bottom: 0; width: 1px; height: 1px; opacity: 0; font-size: 16px; border: 0; padding: 0; }
+
+/* ---------- glass panels ---------- */
+.veil {
+  position: fixed; inset: 0; z-index: 30;
+  display: grid; place-items: center;
+  padding-top: max(16px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: rgba(3, 5, 8, .5);
+  backdrop-filter: blur(16px) saturate(.8); -webkit-backdrop-filter: blur(16px) saturate(.8);
+  animation: veilin .45s ease-out;
+}
+.veil.closing { animation: veilout .26s ease-in forwards; }
+@keyframes veilin { from { opacity: 0; } to { opacity: 1; } }
+@keyframes veilout { to { opacity: 0; } }
+.panel {
+  width: min(500px, 100%); max-height: 100%; overflow: auto;
+  background: linear-gradient(180deg, rgba(22, 27, 37, .94), rgba(10, 13, 19, .96));
+  border: 1px solid var(--hair); border-radius: 22px;
+  padding: 26px 24px 22px;
+  box-shadow: 0 50px 120px -30px rgba(0, 0, 0, .9), inset 0 1px 0 rgba(255, 255, 255, .05);
+  display: flex; flex-direction: column; gap: 18px;
+  animation: panelin .65s cubic-bezier(.16, .84, .24, 1);
+}
+.veil.closing .panel { animation: panelout .26s ease-in forwards; }
+@keyframes panelin { from { opacity: 0; transform: translateY(16px) scale(.985); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes panelout { to { opacity: 0; transform: translateY(8px) scale(.99); } }
+.p-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.p-kick { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .28em; text-transform: uppercase; color: var(--dim); }
+.panel h2 { font-family: var(--f-head); font-weight: 400; font-size: 32px; line-height: 1.1; margin: 6px 0 0; }
+.x { width: 36px; height: 36px; margin: -6px -8px 0 0; }
+
+.tabs { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 24px; border-bottom: 1px solid var(--faint); }
+.tabs > button { background: none; border: 0; color: var(--dim); cursor: pointer; font-size: 13px; letter-spacing: .18em; padding: 0 0 12px; position: relative; transition: color .35s ease; }
+.tabs > button:hover { color: var(--pewter); }
+.tabs > button.on { color: var(--ivory); }
+.tabs > button.on::after { content: ""; position: absolute; left: 0; right: .18em; bottom: -1px; height: 1px; background: var(--brass); box-shadow: 0 0 8px var(--brass); }
+.mybest { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.mybest span { font-size: 12px; letter-spacing: .2em; color: var(--dim); }
+.mybest b { font-family: var(--f-mono); font-weight: 300; font-size: 22px; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+.mybest em { font-style: normal; font-family: var(--f-mono); font-size: 12px; color: var(--brass); letter-spacing: .12em; margin-left: 10px; }
+.ranks { list-style: none; margin: 0; padding: 0; }
+.trend { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.trend figcaption, .r-head { display: flex; justify-content: space-between; gap: 12px; font-size: 11.5px; letter-spacing: .16em; color: var(--dim); }
+.r-head { margin-bottom: -6px; }
+.trend svg { width: 100%; height: auto; display: block; overflow: visible; }
+.trend .grid { stroke: var(--faint); stroke-width: 1; }
+.trend .ln { fill: none; stroke: var(--brass); stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1; animation: draw 1.4s cubic-bezier(.3, 0, .2, 1) .15s both; }
+.trend .glow { fill: none; stroke: var(--brass); stroke-width: 7; opacity: .16; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1; filter: blur(3px); animation: draw 1.4s cubic-bezier(.3, 0, .2, 1) .15s both; }
+.trend .area { animation: fadein 1.2s ease .7s both; }
+.trend .pt { fill: #0b0f16; stroke: var(--pewter); stroke-width: 1.2; animation: fadein .6s ease 1s both; }
+.trend .best { fill: var(--brass); filter: drop-shadow(0 0 6px rgba(201, 174, 120, .9)); animation: fadein .6s ease 1.2s both; }
+.trend .last { fill: var(--ivory); animation: fadein .6s ease 1.3s both; }
+.trend text { font-family: var(--f-mono); font-size: 10.5px; fill: var(--dim); letter-spacing: .05em; }
+.trend text.hi { fill: var(--brass); }
+.t-empty { margin: 0; padding: 18px 0; text-align: center; font-size: 12.5px; color: var(--dim); border-top: 1px solid var(--faint); border-bottom: 1px solid var(--faint); }
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes fadein { from { opacity: 0; } }
+.rk-bar { display: block; height: 2px; margin-top: 8px; background: var(--faint); border-radius: 2px; overflow: hidden; }
+.rk-bar i {
+  display: block; height: 100%; width: calc(var(--w, 1) * 100%); border-radius: 2px;
+  background: linear-gradient(90deg, rgba(238, 232, 221, .12), rgba(238, 232, 221, .6));
+  transform-origin: left; animation: grow 1.1s cubic-bezier(.16, .84, .24, 1) both; animation-delay: calc(var(--k, 0) * 45ms + 150ms);
+}
+.rk.first .rk-bar i, .rk.me .rk-bar i { background: linear-gradient(90deg, rgba(201, 174, 120, .2), var(--brass)); box-shadow: 0 0 8px rgba(201, 174, 120, .45); }
+@keyframes grow { from { transform: scaleX(0); } }
+.rk {
+  display: grid; grid-template-columns: 2em 26px minmax(0, 1fr) auto;
+  gap: 14px; align-items: center; padding: 12px 8px; border-bottom: 1px solid var(--faint);
+  animation: rowin .5s cubic-bezier(.16, .84, .24, 1) both; animation-delay: calc(var(--k, 0) * 40ms);
+}
+.rk:last-child { border-bottom: 0; }
+.rk.loc { grid-template-columns: 2em minmax(0, 1fr) auto; }
+@keyframes rowin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.rk-n { font-family: var(--f-head); font-style: italic; font-size: 19px; color: var(--pewter); text-align: center; line-height: 1; }
+.rk.first .rk-n { color: var(--brass); }
+.rk img, .rk .av { width: 26px; height: 26px; border-radius: 50%; display: block; background: var(--faint); }
+.rk-who { min-width: 0; }
+.rk-name { display: block; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rk-sub { display: block; font-family: var(--f-mono); font-size: 11px; color: var(--dim); letter-spacing: .06em; margin-top: 2px; }
+.rk-t { font-family: var(--f-mono); font-size: 15px; letter-spacing: .06em; font-variant-numeric: tabular-nums; }
+.rk.me { background: var(--brass-soft); border-radius: 12px; border-bottom-color: transparent; }
+.rk.me .rk-name { color: var(--brass); }
+.p-empty { padding: 26px 8px; text-align: center; color: var(--pewter); font-size: 13.5px; line-height: 1.75; }
+.p-note { margin: 0; font-size: 11.5px; line-height: 1.7; color: var(--dim); }
+
+.opt { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 16px; border-top: 1px solid var(--faint); }
+.opt.col { flex-direction: column; align-items: stretch; gap: 12px; }
+.opt b { display: block; font-weight: 500; font-size: 14px; }
+.opt small { display: block; font-size: 12px; color: var(--dim); margin-top: 3px; line-height: 1.6; }
+.seg { display: inline-flex; flex: none; border: 1px solid var(--hair); border-radius: 999px; padding: 3px; }
+.seg button { background: none; border: 0; color: var(--dim); font-size: 12.5px; padding: 7px 13px; border-radius: 999px; cursor: pointer; white-space: nowrap; transition: background .35s, color .35s; }
+.seg button.on { background: rgba(238, 232, 221, .09); color: var(--ivory); }
+.seg button:disabled { opacity: .35; cursor: default; }
+.tabs .seg { margin: 0 0 8px auto; }
+.seg.sm button { padding: 5px 11px; font-size: 12px; }
+.seg em { font-style: normal; font-family: var(--f-mono); color: var(--ember); margin-left: 5px; }
+.switch { flex: none; width: 40px; height: 22px; border-radius: 999px; border: 1px solid var(--hair); background: transparent; position: relative; cursor: pointer; padding: 0; transition: background .3s, border-color .3s; }
+.switch i { position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--pewter); transition: transform .4s cubic-bezier(.3, 1.4, .5, 1), background .3s, box-shadow .3s; }
+.switch[aria-checked="true"] { background: var(--brass-soft); border-color: rgba(201, 174, 120, .5); }
+.switch[aria-checked="true"] i { transform: translateX(18px); background: var(--brass); box-shadow: 0 0 10px var(--brass); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; border: 1px solid var(--hair); border-radius: 999px; padding: 5px 11px; }
+.chip sup { color: var(--ember); font-size: 9.5px; margin-left: 4px; letter-spacing: 0; }
+.chips .none { font-size: 12.5px; color: var(--dim); }
+.keys { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 12.5px; color: var(--pewter); }
+kbd { font-family: var(--f-mono); font-size: 10.5px; border: 1px solid var(--hair); border-radius: 5px; padding: 2px 6px; margin-right: 6px; color: var(--ivory); }
+
+/* ---------- BYPASS: 개인/종합 토글 · 닉네임 ---------- */
+.scope-seg { align-self: flex-start; }
+.scope-seg button { font-size: 13px; padding: 8px 16px; letter-spacing: .08em; }
+.p-lead { margin: -6px 0 0; font-size: 13px; line-height: 1.75; color: var(--pewter); }
+.nick-form { display: flex; flex-direction: column; gap: 14px; }
+.nick-in {
+  width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--hair); border-radius: 0;
+  color: var(--ivory); font-family: var(--f-mono); font-weight: 300; font-size: 26px; letter-spacing: .08em;
+  padding: 8px 2px 10px; outline: none; transition: border-color .35s ease;
+}
+.nick-in::placeholder { color: var(--dim); }
+.nick-in:focus { border-bottom-color: var(--brass); box-shadow: 0 1px 0 var(--brass); }
+.nick-err { margin: 0; min-height: 1.5em; font-size: 12.5px; color: var(--ember); }
+.nick-acts { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.go {
+  background: var(--brass-soft); border: 1px solid rgba(201, 174, 120, .55); color: var(--ivory); cursor: pointer;
+  border-radius: 999px; padding: 11px 22px; font-size: 13.5px; letter-spacing: .12em; transition: background .35s, box-shadow .35s;
+}
+.go:hover { background: rgba(201, 174, 120, .22); box-shadow: 0 0 18px rgba(201, 174, 120, .25); }
+.go:disabled { opacity: .5; cursor: progress; }
+.pill { flex: none; background: none; border: 1px solid var(--hair); color: var(--ctl); cursor: pointer; border-radius: 999px; padding: 7px 14px; font-size: 12.5px; letter-spacing: .08em; transition: color .35s, border-color .35s; }
+.pill:hover { color: var(--ivory); border-color: rgba(201, 174, 120, .55); }
+.p-note .pill { margin-left: 8px; padding: 4px 11px; font-size: 11.5px; }
+.rk-name em { font-style: normal; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .1em; color: var(--brass); margin-left: 8px; }
+a.quiet { text-decoration: none; }
+
+@media (max-width: 520px) {
+  .quiet { letter-spacing: .14em; padding: 10px; }
+  .whisper { letter-spacing: .16em; }
+  .word { letter-spacing: .3em; padding-left: .3em; }
+  .opt:not(.col) { flex-direction: column; align-items: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .glyph.on { opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<main class="room idle" id="room">
+  <div class="light" aria-hidden="true"><div class="lamp"></div><div class="warm"></div></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="ember" id="ember" aria-hidden="true"></div>
+
+  <header class="bar">
+    <button type="button" class="quiet order" id="orderBtn" aria-label="순서 바꾸기"></button>
+    <div class="tools">
+      <a class="quiet icon" href="/routes/" aria-label="BYPASS 개통 노선도로 돌아가기" title="개통 노선도">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h5l6-12h5"/><circle cx="4" cy="18" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="20" cy="6" r="1.6"/></svg>
+      </a>
+      <button type="button" class="quiet icon" id="rankBtn" aria-label="기록 순위" title="기록 순위">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5h17M5 20.5v-7h4.5v7M9.5 20.5v-12h5v12M14.5 20.5v-5h4.5v5"/></svg>
+      </button>
+      <button type="button" class="quiet icon" id="setBtn" aria-label="설정" title="설정">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5h8.5M17.5 7.5H20M4 16.5h2.5M11.5 16.5H20"/><circle cx="15" cy="7.5" r="2.4"/><circle cx="9" cy="16.5" r="2.4"/></svg>
+        <i class="dot" id="setDot" hidden></i>
+      </button>
+    </div>
+  </header>
+
+  <section class="center" id="center">
+    <div class="glyphs" id="glyphs"><span class="glyph" id="g0" aria-hidden="true"></span><span class="glyph" id="g1" aria-hidden="true"></span></div>
+    <div class="horizon" aria-hidden="true"></div>
+    <div class="word" id="word"><span id="typed"></span><span class="caret"></span><span id="fx"></span><span id="ghost"></span></div>
+    <p class="whisper" id="whisper"></p>
+    <div class="final" id="final" hidden>
+      <p class="f-kick" id="fKick"></p>
+      <p class="f-time" id="fTime" data-t=""></p>
+      <p class="f-meta" id="fMeta"></p>
+      <p class="f-again" id="fAgain"></p>
+    </div>
+    <p class="sr" id="live" aria-live="polite"></p>
+  </section>
+
+  <footer class="clock">
+    <span class="track" aria-hidden="true"><i id="prog"></i></span>
+    <span class="timer" id="timer">0:00.00</span>
+  </footer>
+
+  <input id="typer" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" aria-label="포네틱 단어 입력">
+</main>
+
+<div class="veil" id="rankVeil" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="rankTitle">
+    <div class="p-head">
+      <div><span class="p-kick">IMO SMCP · Ranking</span><h2 id="rankTitle">랭킹</h2></div>
+      <button type="button" class="quiet icon x" data-close aria-label="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button>
+    </div>
+    <div class="seg scope-seg" role="radiogroup" aria-label="랭킹 보기">
+      <button type="button" role="radio" data-scope-r="me" id="rs-me">개인 랭킹</button>
+      <button type="button" role="radio" data-scope-r="all" id="rs-all">종합 랭킹</button>
+    </div>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" data-set="letters" id="tab-letters">알파벳</button>
+      <button type="button" role="tab" data-set="digits" id="tab-digits">숫자</button>
+      <button type="button" role="tab" data-set="all" id="tab-all">함께</button>
+      <div class="seg sm" role="radiogroup" aria-label="순서">
+        <button type="button" role="radio" data-o="seq" id="ro-seq">순서대로</button>
+        <button type="button" role="radio" data-o="mix" id="ro-mix">섞어서</button>
+      </div>
+    </div>
+    <div class="mybest" id="myBest"></div>
+    <figure class="trend" id="trend"></figure>
+    <div class="r-head"><span id="rHead">순위</span><span>막대가 길수록 빠름</span></div>
+    <ol class="ranks" id="ranks"></ol>
+    <p class="p-note" id="rankNote" hidden></p>
+  </div>
+</div>
+
+<div class="veil" id="nickVeil" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="nickTitle">
+    <div class="p-head">
+      <div><span class="p-kick">Call sign</span><h2 id="nickTitle">닉네임</h2></div>
+      <button type="button" class="quiet icon x" data-close aria-label="나중에 정하기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button>
+    </div>
+    <p class="p-lead" id="nickLead">종합 랭킹에 이 이름으로 기록이 올라갑니다. 실명이 아니어도 됩니다. 설정에서 언제든 바꿀 수 있습니다.</p>
+    <form class="nick-form" id="nickForm" novalidate>
+      <label class="sr" for="nickIn">닉네임 (1~16자)</label>
+      <input class="nick-in" id="nickIn" maxlength="16" autocomplete="nickname" autocapitalize="none" spellcheck="false" placeholder="예: 3항사 칼렙">
+      <p class="nick-err" id="nickErr" role="alert"></p>
+      <div class="nick-acts">
+        <button type="button" class="quiet" id="nickLater">나중에 정하기</button>
+        <button type="submit" class="go" id="nickGo">이 이름으로 시작</button>
+      </div>
+    </form>
+    <p class="p-note">닉네임과 완주 기록(시간·오타·정확도)만 저장합니다. 이 브라우저를 바꾸면 같은 닉네임이라도 새 사람으로 셉니다.</p>
+  </div>
+</div>
+
+<div class="veil" id="setVeil" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+    <div class="p-head">
+      <div><span class="p-kick">Settings</span><h2 id="setTitle">설정</h2></div>
+      <button type="button" class="quiet icon x" data-close aria-label="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button>
+    </div>
+    <div class="opt">
+      <div><b>닉네임</b><small id="nickNow">종합 랭킹에 쓰는 이름</small></div>
+      <button type="button" class="pill" id="nickBtn">정하기</button>
+    </div>
+    <div class="opt">
+      <div><b>연습 대상</b><small>숫자는 SMCP 발음 표기로 입력합니다. 예: 3 → TREE, 9 → NI-NER</small></div>
+      <div class="seg" role="radiogroup" aria-label="연습 대상">
+        <button type="button" role="radio" data-set="letters" id="set-letters">알파벳</button>
+        <button type="button" role="radio" data-set="digits" id="set-digits">숫자</button>
+        <button type="button" role="radio" data-set="all" id="set-all">함께</button>
+      </div>
+    </div>
+    <div class="opt">
+      <div><b>연습 범위</b><small>오답만 고르면 자주 틀린 단어만 반복합니다. 기록 순위에는 남지 않습니다.</small></div>
+      <div class="seg" role="radiogroup" aria-label="연습 범위">
+        <button type="button" role="radio" data-scope="all" id="scope-all">전체 <span id="allN">26</span></button>
+        <button type="button" role="radio" data-scope="weak" id="scope-weak">오답만<em id="weakN">0</em></button>
+      </div>
+    </div>
+    <div class="opt">
+      <div><b>단어 미리 보기</b><small>정답을 흐리게 보여 줍니다. 처음 익힐 때만 쓰세요. 기록에 남지 않습니다.</small></div>
+      <button type="button" class="switch" role="switch" id="pvSwitch" aria-checked="false" aria-label="단어 미리 보기"><i></i></button>
+    </div>
+    <div class="opt col">
+      <div><b>오답 노트</b><small>틀리거나 힌트를 본 단어가 모입니다. 3회 연속 정확히 입력하면 빠집니다.</small></div>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="opt col">
+      <div><b>단축키</b></div>
+      <div class="keys"><span><kbd>Tab</kbd>힌트 +3초</span><span><kbd>Esc</kbd>처음부터</span><span><kbd>Enter</kbd>완주 후 다시</span></div>
+    </div>
+    <p class="p-note">개인 랭킹은 이 브라우저에 남은 기록, 종합 랭킹은 닉네임을 정한 모든 사람의 최고 기록입니다. 철자와 숫자 발음은 IMO 표준해사통신용어(SMCP, 결의 A.918(22))를 따릅니다. 숫자는 0–9와 1000(TOU-SAND)을 연습합니다. 대소문자는 구분하지 않고, X-ray·NI-NER 같은 표기의 하이픈은 생략해도 됩니다. 기록은 소요 시간에 힌트 1회당 3초를 더한 값입니다.</p>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---------- IMO SMCP phonetic alphabet + digit pronunciation (A.918(22), General 2.1–2.2) ----------
+  // [shown, what to type, spelling note shown after a mistake]
+  const LETTERS = [
+    ['A', 'Alfa', 'ph가 아니라 f'], ['B', 'Bravo', ''], ['C', 'Charlie', ''], ['D', 'Delta', ''],
+    ['E', 'Echo', ''], ['F', 'Foxtrot', ''], ['G', 'Golf', ''], ['H', 'Hotel', ''],
+    ['I', 'India', ''], ['J', 'Juliett', 't가 두 개'], ['K', 'Kilo', ''], ['L', 'Lima', ''],
+    ['M', 'Mike', ''], ['N', 'November', ''], ['O', 'Oscar', ''], ['P', 'Papa', ''],
+    ['Q', 'Quebec', ''], ['R', 'Romeo', ''], ['S', 'Sierra', 'r이 두 개'], ['T', 'Tango', ''],
+    ['U', 'Uniform', ''], ['V', 'Victor', ''], ['W', 'Whiskey', 'e를 빠뜨리지 않기'], ['X', 'X-ray', '하이픈 포함'],
+    ['Y', 'Yankee', ''], ['Z', 'Zulu', ''],
+  ];
+  const DIGITS = [
+    ['0', 'ZEE-RO', 'e가 두 개'], ['1', 'WUN', '소리 나는 대로'], ['2', 'TOO', '소리 나는 대로'], ['3', 'TREE', 'h 없이'],
+    ['4', 'FOW-ER', '끝에 -ER'], ['5', 'FIFE', 'v가 아니라 f'], ['6', 'SIX', ''], ['7', 'SE-VEN', ''],
+    ['8', 'AIT', 'eigh가 아니라 ai'], ['9', 'NI-NER', '끝에 -ER'], ['1000', 'TOU-SAND', 'h 없이'],
+  ];
+  const W = LETTERS.map((x) => [...x, 'L']).concat(DIGITS.map((x) => [...x, 'D']));
+  const HINT_MS = 3000;
+  const LS_KEY = 'alfa-zulu.v1', PREF_KEY = 'alfa-zulu.prefs';
+  const KIND = { seq: '순서대로', mix: '섞어서' };
+  const SETS = { letters: 'A–Z', digits: '0–9', all: 'A–Z · 0–9' };
+  const KEYS = ['seq', 'mix', 'dseq', 'dmix', 'aseq', 'amix'];
+  const keyOf = (set, order) => (set === 'digits' ? 'd' : set === 'all' ? 'a' : '') + order;
+  const splitKey = (k) => ({ set: k[0] === 'd' ? 'digits' : k[0] === 'a' ? 'all' : 'letters', order: k.endsWith('mix') ? 'mix' : 'seq' });
+  const labelOf = (k) => { const x = splitKey(k); return SETS[x.set] + ' · ' + KIND[x.order]; };
+  const inSet = (set) => (w) => set === 'all' || (set === 'digits' ? w[3] === 'D' : w[3] === 'L');
+  const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const COARSE = window.matchMedia('(pointer: coarse)').matches;
+  const $ = (s) => document.querySelector(s);
+  const targets = (w) => { const c = w[1].toLowerCase(); return c.includes('-') ? [c, c.replace(/-/g, '')] : [c]; };
+  const isPrefix = (p, ts) => ts.some((t) => t.startsWith(p));
+  const num = (v, d = 0) => { const n = Number(v); return Number.isFinite(n) ? n : d; };
+
+  const ICON_SEQ = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h10M4 12h7M4 17.5h4"/><path d="M18 5.5v13m0 0-3-3m3 3 3-3"/></svg>';
+  const ICON_MIX = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h3.2c2 0 3 1 4.4 3.4l2.2 3.6c1.4 2.4 2.4 3.4 4.4 3.4H21"/><path d="M3 17.4h3.2c1.3 0 2.2-.4 3-1.3M13.8 8.3c.8-.9 1.7-1.3 3-1.3H21"/><path d="m18.2 4.2 2.8 2.8-2.8 2.8M18.2 14.6l2.8 2.8-2.8 2.8"/></svg>';
+
+  // ---------- storage ----------
+  function blankStats() { const o = {}; W.forEach((w) => { o[w[0]] = { seen: 0, miss: 0, streak: 0, last: 0 }; }); return o; }
+  function cleanStore(j) {
+    const out = { stats: blankStats(), runs: [] };
+    if (j && typeof j === 'object') {
+      if (j.stats && typeof j.stats === 'object') W.forEach((w) => {
+        const s = j.stats[w[0]];
+        if (s && typeof s === 'object') out.stats[w[0]] = { seen: num(s.seen), miss: num(s.miss), streak: num(s.streak), last: num(s.last) };
+      });
+      if (Array.isArray(j.runs)) out.runs = j.runs.filter((r) => r && num(r.ms) > 0).map((r) => ({
+        at: num(r.at), ms: num(r.ms), raw: num(r.raw), err: num(r.err), hints: num(r.hints), acc: num(r.acc, 1), mode: KEYS.includes(r.mode) ? r.mode : 'seq',
+      })).slice(-120);
+    }
+    return out;
+  }
+  function loadJSON(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+  function saveJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage unavailable */ } }
+  let store = cleanStore(loadJSON(LS_KEY));
+  const saveLocal = () => saveJSON(LS_KEY, store);
+  const p0 = loadJSON(PREF_KEY) || {};
+  const prefs = { set: ['letters', 'digits', 'all'].includes(p0.set) ? p0.set : 'letters', order: p0.order === 'mix' ? 'mix' : 'seq', scope: p0.scope === 'weak' ? 'weak' : 'all', preview: !!p0.preview };
+  const savePrefs = () => saveJSON(PREF_KEY, prefs);
+
+  // ---------- helpers ----------
+  function fmt(ms) { ms = Math.max(0, ms); const m = Math.floor(ms / 60000); return m + ':' + ((ms % 60000) / 1000).toFixed(2).padStart(5, '0'); }
+  const pct = (a) => Math.round(Math.max(0, Math.min(1, a)) * 100) + '%';
+  function when(t) {
+    if (!t) return '';
+    const d = new Date(t), now = new Date();
+    if (d.toDateString() === now.toDateString()) return '오늘 ' + d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+    return (d.getMonth() + 1) + '월 ' + d.getDate() + '일';
+  }
+  function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  const bestOf = (k) => { const r = store.runs.filter((x) => x.mode === k); return r.length ? Math.min(...r.map((x) => x.ms)) : null; };
+  function weakList(set) {
+    const keep = set ? inSet(set) : () => true;
+    return W.map((w, i) => ({ i, w, st: store.stats[w[0]] }))
+      .filter((x) => keep(x.w) && x.st.miss > 0 && x.st.streak < 3)
+      .sort((a, b) => (b.st.miss / Math.max(1, b.st.seen)) - (a.st.miss / Math.max(1, a.st.seen)) || b.st.miss - a.st.miss);
+  }
+  function updateStat(L, missed) {
+    const s = store.stats[L];
+    s.seen += 1;
+    if (missed) { s.miss += 1; s.streak = 0; s.last = Date.now(); } else s.streak += 1;
+    saveLocal();
+  }
+
+  // ---------- session ----------
+  const room = $('#room'), typer = $('#typer'), G = [$('#g0'), $('#g1')];
+  let gi = 0, S = null, raf = 0, whisperTimer = 0;
+  const cur = () => W[S.queue[S.pos]];
+
+  function newSession(boot) {
+    let set = W.map((_, i) => i).filter((i) => inSet(prefs.set)(W[i]));
+    if (prefs.scope === 'weak') {
+      const weak = weakList(prefs.set).map((x) => x.i).sort((a, b) => a - b);
+      if (weak.length) set = weak; else { prefs.scope = 'all'; savePrefs(); }
+    }
+    const order = prefs.order === 'mix' ? shuffle(set) : set;
+    cancelAnimationFrame(raf);
+    S = {
+      queue: order, pos: 0, typed: '', wErr: 0, wHint: false,
+      started: false, t0: 0, tw: 0, tEnd: 0, err: 0, hints: 0, keys: 0,
+      cleared: 0, total: order.length, done: false,
+      weak: prefs.scope === 'weak', preview: prefs.preview, kind: keyOf(prefs.set, prefs.order),
+    };
+    S.ranked = !S.weak && !S.preview;
+    room.classList.remove('running', 'done');
+    $('#final').hidden = true;
+    typer.value = '';
+    showLetter(cur()[0], boot ? 'boot' : false);
+    renderWord(); renderClock(); renderChrome(); setWhisper();
+  }
+
+  function showLetter(L, mode) {
+    const a = G[gi], b = G[1 - gi];
+    const wd = (el) => (el.textContent.length > 1 ? ' wide' : '');
+    $('#live').textContent = L;
+    if (!mode || RM) {
+      a.textContent = L; a.dataset.l = L; a.className = 'glyph on' + wd(a);
+      b.className = 'glyph';
+      return;
+    }
+    if (mode === 'boot') {
+      a.textContent = L; a.dataset.l = L; b.className = 'glyph';
+      a.className = 'glyph' + wd(a); void a.offsetWidth; a.className = 'glyph on enter slow' + wd(a);
+      return;
+    }
+    b.textContent = L; b.dataset.l = L;
+    a.className = 'glyph leave' + wd(a);
+    b.className = 'glyph' + wd(b); void b.offsetWidth; b.className = 'glyph on enter' + wd(b);
+    gi = 1 - gi;
+  }
+
+  function renderWord() {
+    const w = cur(); if (!w) return;
+    const t = S.typed.toUpperCase();
+    const m = targets(w).map((x) => x.toUpperCase()).find((x) => x.startsWith(t));
+    const rest = m ? m.slice(t.length) : '';
+    $('#typed').textContent = t;
+    $('#ghost').textContent = (S.wHint || S.preview) ? rest : '';
+  }
+
+  const elapsed = () => S.started ? (S.done ? S.tEnd : performance.now()) - S.t0 : 0;
+  function renderClock() {
+    $('#timer').textContent = fmt(elapsed() + S.hints * HINT_MS);
+    const p = S.weak ? S.cleared / S.total : S.pos / S.total;
+    $('#prog').style.width = (p * 100).toFixed(2) + '%';
+  }
+  function tick() {
+    $('#timer').textContent = fmt(elapsed() + S.hints * HINT_MS);
+    if (S.started && !S.done) raf = requestAnimationFrame(tick);
+  }
+
+  function renderChrome() {
+    const ob = $('#orderBtn');
+    ob.innerHTML = (prefs.order === 'mix' ? ICON_MIX : ICON_SEQ) + '<span>' + SETS[prefs.set] + '  ·  ' + KIND[prefs.order] + '</span>';
+    ob.setAttribute('aria-label', SETS[prefs.set] + ', 순서: ' + KIND[prefs.order] + ' (눌러서 바꾸기)');
+    $('#setDot').hidden = !(prefs.scope === 'weak' || prefs.preview);
+  }
+
+  function setWhisper(html, hold) {
+    const el = $('#whisper');
+    clearTimeout(whisperTimer);
+    if (html !== undefined) {
+      el.innerHTML = html;
+      if (hold) whisperTimer = setTimeout(() => setWhisper(), hold);
+      return;
+    }
+    if (S.done || S.started) { el.textContent = ''; return; }
+    const focused = document.activeElement === typer;
+    const pre = S.weak ? `오답 ${S.total}개  ·  ` : S.preview ? '미리 보기  ·  ' : '';
+    el.textContent = pre + (focused ? '입력을 시작하면 시간이 흐릅니다' : (COARSE ? '화면을 눌러 시작' : '아무 키나 눌러 시작'));
+  }
+
+  function startClock() {
+    if (S.started) return;
+    S.started = true;
+    S.t0 = S.tw = performance.now();
+    room.classList.add('running');
+    setWhisper();
+    raf = requestAnimationFrame(tick);
+  }
+
+  function wrong(ch) {
+    S.err++; S.wErr++;
+    const sp = document.createElement('span');
+    sp.className = 'bad'; sp.textContent = ch.toUpperCase();
+    $('#fx').appendChild(sp);
+    setTimeout(() => sp.remove(), 620);
+    if (!RM) {
+      const em = $('#ember'), gl = $('#glyphs');
+      em.classList.remove('on'); gl.classList.remove('shake'); void em.offsetWidth;
+      em.classList.add('on'); gl.classList.add('shake');
+    }
+    const w = cur();
+    if (S.wErr >= 3 && !S.wHint && !S.preview) {
+      S.wHint = true; S.hints++;
+      setWhisper('<span class="em">정답을 보여 드립니다</span>  ·  +3초', 2600);
+    } else if (w[2]) setWhisper(`<span class="em">${w[2]}</span>`, 2400);
+    renderWord();
+  }
+
+  function useHint() {
+    if (S.done || S.wHint || S.preview) return;
+    startClock();
+    S.wHint = true; S.hints++;
+    const w = cur();
+    setWhisper(`힌트  ·  +3초${w[2] ? '  ·  <span class="em">' + w[2] + '</span>' : ''}`, 2400);
+    renderWord();
+  }
+
+  typer.addEventListener('compositionend', () => { if (S) typer.value = S.typed; });
+  typer.addEventListener('input', (e) => {
+    if (!S || S.done) { typer.value = ''; return; }
+    const raw = typer.value;
+    if (e.isComposing || /[ᄀ-ᇿ㄰-㆏가-힯]/.test(raw)) {
+      if (!e.isComposing) typer.value = S.typed;
+      setWhisper('<span class="br">한/영 키로 영문 입력으로 바꿔 주세요</span>', 2600);
+      return;
+    }
+    const v = raw.replace(/\s+/g, '').toLowerCase();
+    const ts = targets(cur());
+    if (!v.startsWith(S.typed)) {
+      let p = '';
+      for (const ch of v) { if (isPrefix(p + ch, ts)) p += ch; else break; }
+      S.typed = p; typer.value = p; renderWord(); return;
+    }
+    let p = S.typed;
+    for (const ch of v.slice(p.length)) {
+      startClock();
+      S.keys++;
+      if (isPrefix(p + ch, ts)) { p += ch; if (ts.includes(p)) break; }
+      else { S.typed = p; wrong(ch); break; }
+    }
+    S.typed = p; typer.value = p;
+    if (ts.includes(p)) completeWord(); else renderWord();
+  });
+  typer.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); useHint(); }
+    else if (e.key === 'Escape') { e.preventDefault(); newSession(); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (S.done) newSession(); }
+  });
+  typer.addEventListener('focus', () => { room.classList.remove('idle'); setWhisper(); });
+  typer.addEventListener('blur', () => { room.classList.add('idle'); if (!S.started) setWhisper(); });
+
+  function completeWord() {
+    const i = S.queue[S.pos], w = W[i];
+    S.tw = performance.now();
+    const missed = S.wErr > 0 || S.wHint;
+    if (!S.preview) updateStat(w[0], missed);
+    if (S.weak) {
+      if (missed) S.queue.splice(Math.min(S.queue.length, S.pos + 4), 0, i);
+      else S.cleared++;
+    }
+    S.pos++; S.typed = ''; S.wErr = 0; S.wHint = false; typer.value = '';
+    const wd = $('#word');
+    wd.classList.remove('ok'); void wd.offsetWidth; wd.classList.add('ok');
+    if (S.pos >= S.queue.length) { renderClock(); finish(); return; }
+    showLetter(cur()[0], true);
+    renderWord(); renderClock();
+  }
+
+  // ---------- finish ----------
+  function finish() {
+    S.done = true; S.tEnd = S.tw;
+    cancelAnimationFrame(raf);
+    const raw = S.tEnd - S.t0, total = raw + S.hints * HINT_MS;
+    const acc = S.keys ? (S.keys - S.err) / S.keys : 1;
+    if (!RM) G[gi].className = 'glyph leave';
+    room.classList.remove('running');
+    room.classList.add('done');
+    $('#timer').textContent = fmt(total);
+    $('#typed').textContent = ''; $('#ghost').textContent = '';
+    setWhisper();
+
+    let kick, meta = `오타 ${S.err}   ·   정확도 ${pct(acc)}   ·   힌트 ${S.hints}`, boardP = null, rec = null, prev = null;
+    if (S.ranked) {
+      prev = bestOf(S.kind);
+      rec = { at: Date.now(), ms: Math.round(total), raw: Math.round(raw), err: S.err, hints: S.hints, acc: Math.round(acc * 1000) / 1000, mode: S.kind };
+      store.runs.push(rec); store.runs = store.runs.slice(-120);
+      saveLocal();
+      const pb = prev === null || rec.ms < prev;
+      kick = pb ? `${labelOf(S.kind)}  ·  개인 최고 기록` : `${labelOf(S.kind)}  ·  완주`;
+      if (!pb) meta += `   ·   최고 ${fmt(prev)}`;
+      boardP = pushBoard(rec);
+    } else if (S.weak) {
+      const left = weakList(prefs.set).length;
+      kick = '오답 연습 완료';
+      meta += left ? `   ·   남은 오답 ${left}` : '   ·   오답 노트 비움';
+    } else kick = '미리 보기 연습  ·  기록 미반영';
+
+    const fT = $('#fTime');
+    $('#fKick').textContent = kick;
+    $('#fMeta').textContent = meta;
+    $('#fAgain').textContent = COARSE ? '화면을 눌러 다시' : 'Enter  ·  다시 시작';
+    fT.textContent = fmt(0); fT.dataset.t = fmt(total); fT.classList.remove('gleam');
+    $('#final').hidden = false;
+    countUp(fT, total, () => { if (!RM) { void fT.offsetWidth; fT.classList.add('gleam'); } });
+
+    if (S.ranked && !me.id) $('#fAgain').textContent = '닉네임을 정하면 다음 기록부터 종합 랭킹에 오릅니다  ·  ' + $('#fAgain').textContent;
+    const runSeq = S;
+    if (boardP) Promise.resolve(boardP).then((ok) => {
+      if (!ok || S !== runSeq) return;
+      return fetchBoard(rec.mode).then((rows) => {
+        if (S !== runSeq || !rows) return;
+        const i = rows.findIndex((r) => r.player_id === me.id);
+        if (i >= 0) $('#fKick').textContent = kick + `  ·  종합 ${i + 1}위`;
+      });
+    }).catch(() => {});
+  }
+  function countUp(el, target, done) {
+    if (RM) { el.textContent = fmt(target); done(); return; }
+    const t0 = performance.now(), dur = 1300, delay = 350;
+    const step = (t) => {
+      const k = Math.max(0, Math.min(1, (t - t0 - delay) / dur));
+      el.textContent = fmt(target * (1 - Math.pow(1 - k, 4)));
+      if (k < 1) requestAnimationFrame(step); else done();
+    };
+    requestAnimationFrame(step);
+  }
+
+  // ---------- 종합 랭킹 (BYPASS Supabase) ----------
+  // 로그인 없이 닉네임만으로 참여한다. 브라우저마다 비밀 열쇠(key)를 만들어 두고, 서버에는 열쇠의 지문만 남는다.
+  // 표 구조와 함수: supabase/012_alfa_to_zulu.sql (a2z_join · a2z_submit · a2z_board)
+  const SB_RPC = 'https://itzdjdgjqcpmxdfssfel.supabase.co/rest/v1/rpc/';
+  const SB_KEY = 'sb_publishable_L2FP31VpA_dZfwqH4u6H0Q_UWJlCS6G';
+  const ME_KEY = 'alfa-zulu.me';
+  function newKey() {
+    const b = new Uint8Array(32);
+    (window.crypto || {}).getRandomValues ? crypto.getRandomValues(b) : b.forEach((_, i) => { b[i] = Math.floor(Math.random() * 256); });
+    return btoa(String.fromCharCode(...b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  const m0 = loadJSON(ME_KEY) || {};
+  const me = {
+    key: typeof m0.key === 'string' && /^[A-Za-z0-9_-]{32,80}$/.test(m0.key) ? m0.key : newKey(),
+    nick: typeof m0.nick === 'string' ? m0.nick.slice(0, 16) : '',
+    id: Number.isFinite(m0.id) ? m0.id : null,
+    later: !!m0.later,
+  };
+  const saveMe = () => saveJSON(ME_KEY, me);
+  saveMe();
+
+  async function rpc(fn, body) {
+    const r = await fetch(SB_RPC + fn, { method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    let j = null; try { j = await r.json(); } catch (e) { /* 빈 응답 */ }
+    if (!r.ok) { const err = new Error((j && j.message) || String(r.status)); err.status = r.status; throw err; }
+    return j;
+  }
+  async function join(nick) {
+    const id = await rpc('a2z_join', { p_key: me.key, p_nick: nick });
+    me.nick = nick; me.id = Number(id); me.later = false; saveMe();
+    return me.id;
+  }
+  // 완주 기록 올리기: 성공하면 true
+  async function pushBoard(rec) {
+    if (!me.nick) return false;
+    const body = { p_key: me.key, p_mode: rec.mode, p_ms: rec.ms, p_raw: rec.raw, p_err: rec.err, p_hints: rec.hints, p_acc: rec.acc };
+    try { await rpc('a2z_submit', body); }
+    catch (e) {
+      // 다른 기기에서 지워졌거나 처음이면 다시 등록하고 한 번 더
+      if (/join first/.test(e.message)) { try { await join(me.nick); await rpc('a2z_submit', body); } catch (e2) { return false; } }
+      else return false;
+    }
+    delete boardCache[rec.mode];
+    return true;
+  }
+  const boardCache = {};
+  async function fetchBoard(mode) {
+    const c = boardCache[mode];
+    if (c && Date.now() - c.at < 15000) return c.rows;
+    const rows = await rpc('a2z_board', { p_mode: mode, p_limit: 100 });
+    const clean = (Array.isArray(rows) ? rows : []).map((r) => ({
+      player_id: Number(r.player_id), nickname: String(r.nickname || ''), best: num(r.best_ms), err: num(r.err), hints: num(r.hints), acc: num(r.acc, 1), at: Date.parse(r.at) || 0, runs: num(r.runs, 1),
+    })).filter((r) => r.best > 0);
+    boardCache[mode] = { rows: clean, at: Date.now() };
+    return clean;
+  }
+
+  // ---------- panels ----------
+  let openVeil = null, abandon = false, rankSet = prefs.set, rankOrder = prefs.order, rankToken = 0, rankScope = me.nick ? 'all' : 'me';
+  const VEIL = { rank: '#rankVeil', set: '#setVeil', nick: '#nickVeil' };
+
+  function show(which) {
+    if (openVeil) return;
+    openVeil = which;
+    abandon = S.started && !S.done;
+    if (abandon) { cancelAnimationFrame(raf); }
+    const v = $(VEIL[which]);
+    v.hidden = false;
+    if (which === 'rank') { rankSet = prefs.set; rankOrder = prefs.order; renderRanks(); }
+    else if (which === 'set') renderSettings();
+    if (which === 'nick') {
+      $('#nickIn').value = me.nick; $('#nickErr').textContent = '';
+      $('#nickGo').textContent = me.nick ? '이 이름으로 바꾸기' : '이 이름으로 시작';
+      $('#nickLater').textContent = me.nick ? '그대로 두기' : '나중에 정하기';
+      setTimeout(() => { try { $('#nickIn').focus({ preventScroll: true }); } catch (e) { $('#nickIn').focus(); } }, 60);
+      return;
+    }
+    const x = v.querySelector('[data-close]'); if (x) x.focus();
+  }
+  function hide() {
+    if (!openVeil) return;
+    const v = $(VEIL[openVeil]);
+    if (openVeil === 'nick' && !me.nick && !me.later) { me.later = true; saveMe(); }
+    openVeil = null;
+    const end = () => { v.hidden = true; v.classList.remove('closing'); };
+    if (RM) end(); else { v.classList.add('closing'); setTimeout(end, 260); }
+    if (abandon) { abandon = false; newSession(); }
+    focusTyper();
+  }
+  document.querySelectorAll('.veil').forEach((v) => {
+    v.addEventListener('pointerdown', (e) => { if (e.target === v) hide(); });
+    v.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', hide));
+  });
+
+  function trendSVG(runs) {
+    const Wd = 380, Hd = 126, l = 6, r = 312, t = 12, b = 98;
+    const ys = runs.map((x) => x.ms);
+    const lo = Math.min(...ys), hi = Math.max(...ys), span = Math.max(1, hi - lo);
+    const X = (i) => l + (i / (runs.length - 1)) * (r - l);
+    const Y = (v) => t + ((v - lo) / span) * (b - t); // faster sits higher
+    const pts = runs.map((x, i) => [X(i), Y(x.ms)]);
+    const d = pts.map(([x, y], i) => (i ? 'L' : 'M') + x.toFixed(1) + ',' + y.toFixed(1)).join(' ');
+    const area = `${d} L${pts[pts.length - 1][0].toFixed(1)},${b} L${pts[0][0].toFixed(1)},${b} Z`;
+    const bi = ys.indexOf(lo), li = runs.length - 1;
+    const dots = pts.map(([x, y], i) => (i === bi || i === li) ? '' : `<circle class="pt" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2"/>`).join('');
+    const mid = ((t + b) / 2).toFixed(1);
+    return `<svg viewBox="0 0 ${Wd} ${Hd}" role="img" aria-label="내 완주 기록 추이, 최고 ${fmt(lo)}">` +
+      `<defs><linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9ae78" stop-opacity=".26"/><stop offset="1" stop-color="#c9ae78" stop-opacity="0"/></linearGradient></defs>` +
+      `<line class="grid" x1="${l}" x2="${r}" y1="${t}" y2="${t}"/><line class="grid" x1="${l}" x2="${r}" y1="${mid}" y2="${mid}"/><line class="grid" x1="${l}" x2="${r}" y1="${b}" y2="${b}"/>` +
+      `<path class="area" d="${area}" fill="url(#trendFill)"/>` +
+      `<path class="glow" d="${d}" pathLength="1"/><path class="ln" d="${d}" pathLength="1"/>` + dots +
+      (li !== bi ? `<circle class="last" cx="${pts[li][0].toFixed(1)}" cy="${pts[li][1].toFixed(1)}" r="3.2"/>` : '') +
+      `<circle class="best" cx="${pts[bi][0].toFixed(1)}" cy="${pts[bi][1].toFixed(1)}" r="4"/>` +
+      `<text class="hi" x="${r + 10}" y="${t + 4}">${fmt(lo)}</text><text x="${r + 10}" y="${b + 4}">${fmt(hi)}</text>` +
+      `<text x="${l}" y="${Hd - 3}">첫 완주</text><text x="${r}" y="${Hd - 3}" text-anchor="end">최근</text></svg>`;
+  }
+  function renderTrend(k) {
+    const runs = store.runs.filter((r) => r.mode === k).sort((a, b) => a.at - b.at).slice(-24);
+    const cap = `<figcaption><span>내 기록 추이</span><span>${runs.length >= 2 ? '위로 갈수록 빠름 · 최근 ' + runs.length + '회' : ''}</span></figcaption>`;
+    $('#trend').innerHTML = cap + (runs.length >= 2
+      ? trendSVG(runs)
+      : `<p class="t-empty">${runs.length ? '한 번 더 완주하면 추이 그래프가 그려집니다' : labelOf(k) + ' 완주 기록이 쌓이면 추이 그래프가 그려집니다'}</p>`);
+  }
+  const barW = (best, lead, worst) => worst > lead ? 1 - .82 * (best - lead) / (worst - lead) : 1;
+
+  function rankRow(n, name, sub, ms, lead, worst, cls) {
+    const li = document.createElement('li');
+    li.className = 'rk loc' + (n === 0 ? ' first' : '') + (cls || '');
+    li.style.setProperty('--k', Math.min(n, 12));
+    const rn = document.createElement('span'); rn.className = 'rk-n'; rn.textContent = n + 1;
+    const who = document.createElement('span'); who.className = 'rk-who';
+    const nm = document.createElement('span'); nm.className = 'rk-name'; nm.textContent = name;
+    if (cls && cls.includes(' me')) { const em = document.createElement('em'); em.textContent = '나'; nm.append(em); }
+    const sb = document.createElement('span'); sb.className = 'rk-sub'; sb.textContent = sub;
+    const bar = document.createElement('span'); bar.className = 'rk-bar';
+    const fill = document.createElement('i'); fill.style.setProperty('--w', barW(ms, lead, worst).toFixed(3)); bar.appendChild(fill);
+    who.append(nm, sb, bar);
+    const tm = document.createElement('span'); tm.className = 'rk-t'; tm.textContent = fmt(ms);
+    li.append(rn, who, tm);
+    return li;
+  }
+  function noteWithJoin(text, label) {
+    const note = $('#rankNote');
+    note.textContent = text;
+    if (label) {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'pill'; b.textContent = label;
+      b.addEventListener('click', () => { hide(); show('nick'); });
+      note.append(b);
+    }
+    note.hidden = false;
+  }
+
+  async function renderRanks() {
+    const token = ++rankToken, k = keyOf(rankSet, rankOrder);
+    document.querySelectorAll('[data-scope-r]').forEach((b) => { const on = b.dataset.scopeR === rankScope; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+    document.querySelectorAll('.tabs > button[data-set]').forEach((b) => { const on = b.dataset.set === rankSet; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+    document.querySelectorAll('.tabs .seg button').forEach((b) => { const on = b.dataset.o === rankOrder; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+    const list = $('#ranks'), note = $('#rankNote'), mb = $('#myBest');
+    const mine = bestOf(k);
+    const myRuns = store.runs.filter((r) => r.mode === k).length;
+    note.hidden = true; note.textContent = '';
+
+    // 개인 랭킹: 이 브라우저에서 완주한 기록 상위 10회 + 추이
+    if (rankScope === 'me') {
+      $('#trend').hidden = false; renderTrend(k);
+      $('#rHead').textContent = '내 기록 상위 10회';
+      mb.innerHTML = '';
+      const sp = document.createElement('span'); sp.textContent = '내 최고';
+      const bb = document.createElement('b'); bb.textContent = mine === null ? '—' : fmt(mine);
+      if (mine !== null) { const em = document.createElement('em'); em.textContent = myRuns + '회 완주'; bb.append(em); }
+      mb.append(sp, bb);
+      const runs = store.runs.filter((r) => r.mode === k).sort((a, b) => a.ms - b.ms).slice(0, 10);
+      list.innerHTML = '';
+      if (!runs.length) { list.innerHTML = `<li class="p-empty">아직 ${labelOf(k)} 완주 기록이 없습니다.</li>`; return; }
+      const lead = runs[0].ms, worst = runs[runs.length - 1].ms;
+      runs.forEach((r, n) => list.appendChild(rankRow(n, when(r.at), `오타 ${r.err} · ${pct(r.acc)} · 힌트 ${r.hints}`, r.ms, lead, worst)));
+      noteWithJoin('개인 랭킹은 이 브라우저에 남은 기록입니다. 오답만·미리 보기 연습은 들어가지 않습니다.');
+      return;
+    }
+
+    // 종합 랭킹: 닉네임을 정한 모든 사람의 최고 기록
+    $('#trend').hidden = true;
+    $('#rHead').textContent = '종합 순위';
+    mb.innerHTML = '';
+    list.innerHTML = '<li class="p-empty">종합 랭킹을 불러오는 중입니다</li>';
+    let rows;
+    try { rows = await fetchBoard(k); }
+    catch (e) {
+      if (token !== rankToken) return;
+      list.innerHTML = '<li class="p-empty">종합 랭킹을 불러오지 못했습니다.<br>잠시 후 다시 열어 주세요.</li>';
+      return;
+    }
+    if (token !== rankToken) return;
+    const myIdx = me.id ? rows.findIndex((r) => r.player_id === me.id) : -1;
+    const sp = document.createElement('span'); sp.textContent = me.nick ? me.nick : '내 순위';
+    const bb = document.createElement('b');
+    if (myIdx >= 0) { bb.textContent = fmt(rows[myIdx].best); const em = document.createElement('em'); em.textContent = `${myIdx + 1}위 / ${rows.length}명`; bb.append(em); }
+    else bb.textContent = '—';
+    mb.append(sp, bb);
+    if (!me.nick) noteWithJoin('닉네임을 정하면 다음 완주부터 종합 랭킹에 오릅니다.', '닉네임 정하기');
+    else if (myIdx < 0 && mine !== null) noteWithJoin('닉네임을 정하기 전 기록은 개인 랭킹에만 있습니다. 한 번 더 완주하면 종합 랭킹에 오릅니다.');
+    list.innerHTML = '';
+    if (!rows.length) { list.innerHTML = `<li class="p-empty">아직 ${labelOf(k)} 종합 기록이 없습니다.<br>첫 번째 이름을 남겨 보세요.</li>`; return; }
+    const shown = rows.slice(0, 50);
+    const lead = shown[0].best, worst = shown[shown.length - 1].best;
+    shown.forEach((r, n) => list.appendChild(rankRow(n, r.nickname || '이름 없는 항해사', `오타 ${r.err} · ${pct(r.acc)} · ${r.runs}회 · ${when(r.at)}`, r.best, lead, worst, r.player_id === me.id ? ' me' : '')));
+    if (myIdx >= 50) list.appendChild(rankRow(myIdx, rows[myIdx].nickname, `오타 ${rows[myIdx].err} · ${pct(rows[myIdx].acc)} · ${rows[myIdx].runs}회`, rows[myIdx].best, lead, Math.max(worst, rows[myIdx].best), ' me'));
+  }
+  document.querySelectorAll('[data-scope-r]').forEach((b) => b.addEventListener('click', () => { rankScope = b.dataset.scopeR; renderRanks(); }));
+  document.querySelectorAll('.tabs > button[data-set]').forEach((b) => b.addEventListener('click', () => { rankSet = b.dataset.set; renderRanks(); }));
+  document.querySelectorAll('.tabs .seg button').forEach((b) => b.addEventListener('click', () => { rankOrder = b.dataset.o; renderRanks(); }));
+
+  function renderSettings() {
+    $('#nickNow').textContent = me.nick ? `종합 랭킹 이름: ${me.nick}` : '아직 정하지 않았습니다. 정하면 종합 랭킹에 기록이 올라갑니다.';
+    $('#nickBtn').textContent = me.nick ? '바꾸기' : '정하기';
+    const weak = weakList(prefs.set);
+    $('#weakN').textContent = weak.length;
+    $('#allN').textContent = W.filter(inSet(prefs.set)).length;
+    document.querySelectorAll('[data-set][id^="set-"]').forEach((b) => { const on = b.dataset.set === prefs.set; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+    const sa = $('#scope-all'), sw = $('#scope-weak');
+    sa.classList.toggle('on', prefs.scope === 'all'); sa.setAttribute('aria-checked', prefs.scope === 'all');
+    sw.classList.toggle('on', prefs.scope === 'weak'); sw.setAttribute('aria-checked', prefs.scope === 'weak');
+    sw.disabled = !weak.length && prefs.scope !== 'weak';
+    $('#pvSwitch').setAttribute('aria-checked', prefs.preview);
+    $('#chips').innerHTML = weak.length
+      ? weak.map(({ w, st }) => `<span class="chip">${w[1]}<sup>${st.miss}</sup></span>`).join('')
+      : '<span class="none">아직 모인 오답이 없습니다.</span>';
+  }
+  document.querySelectorAll('[data-set][id^="set-"]').forEach((b) => b.addEventListener('click', () => {
+    if (prefs.set === b.dataset.set) return;
+    prefs.set = b.dataset.set; savePrefs();
+    abandon = false; newSession(); renderSettings();
+  }));
+  document.querySelectorAll('[data-scope]').forEach((b) => b.addEventListener('click', () => {
+    if (b.disabled || prefs.scope === b.dataset.scope) return;
+    prefs.scope = b.dataset.scope; savePrefs();
+    abandon = false; newSession(); renderSettings();
+  }));
+  $('#pvSwitch').addEventListener('click', () => {
+    prefs.preview = !prefs.preview; savePrefs();
+    abandon = false; newSession(); renderSettings();
+  });
+
+  // ---------- controls & input plumbing ----------
+  function focusTyper() { try { typer.focus({ preventScroll: true }); } catch (e) { typer.focus(); } }
+  $('#orderBtn').addEventListener('click', () => {
+    prefs.order = prefs.order === 'seq' ? 'mix' : 'seq'; savePrefs();
+    newSession();
+    const ob = $('#orderBtn');
+    if (!RM) { ob.classList.remove('flip'); void ob.offsetWidth; ob.classList.add('flip'); }
+    focusTyper();
+  });
+  $('#rankBtn').addEventListener('click', () => show('rank'));
+  $('#nickBtn').addEventListener('click', () => { hide(); show('nick'); });
+  $('#nickLater').addEventListener('click', () => hide());
+  $('#nickForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nick = $('#nickIn').value.replace(/\s+/g, ' ').trim();
+    const err = $('#nickErr'), go = $('#nickGo');
+    if (!nick) { err.textContent = '닉네임을 한 글자 이상 넣어 주세요.'; return; }
+    if (/[<>]/.test(nick)) { err.textContent = '< > 는 쓸 수 없습니다.'; return; }
+    if (nick === me.nick && me.id) { hide(); return; }
+    go.disabled = true; err.textContent = '';
+    try {
+      await join(nick);
+      Object.keys(boardCache).forEach((k) => delete boardCache[k]);
+      rankScope = 'all';
+      go.disabled = false;
+      hide();
+      setWhisper(`<span class="br">${nick.replace(/[&<>"]/g, '')}</span>  ·  종합 랭킹에 기록이 올라갑니다`, 3200);
+    } catch (x) {
+      go.disabled = false;
+      err.textContent = /bad nickname/.test(x.message) ? '이 닉네임은 쓸 수 없습니다. 1~16자로 다시 정해 주세요.' : '연결하지 못했습니다. 잠시 후 다시 해 주세요. (기록은 이 브라우저에 남습니다)';
+    }
+  });
+  $('#setBtn').addEventListener('click', () => show('set'));
+
+  room.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('.bar')) return;
+    e.preventDefault();
+    if (S.done) newSession();
+    focusTyper();
+  });
+  room.addEventListener('click', (e) => {
+    if (e.target.closest('.bar')) return;
+    if (document.activeElement !== typer) focusTyper();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (openVeil) { if (e.key === 'Escape') { e.preventDefault(); hide(); } return; }
+    if (document.activeElement === typer) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'Escape') { newSession(); return; }
+    if (e.key === 'Enter' && S.done) { e.preventDefault(); newSession(); focusTyper(); return; }
+    if (e.key.length === 1 && /[a-z\-]/i.test(e.key) && !(document.activeElement && document.activeElement.closest('.bar'))) focusTyper();
+  });
+
+  // keep the letter and clock above a phone's on-screen keyboard
+  const vv = window.visualViewport;
+  function fitViewport() {
+    if (!vv) return;
+    document.documentElement.style.setProperty('--vvh', vv.height + 'px');
+    room.style.top = vv.offsetTop + 'px';
+  }
+  if (vv) { vv.addEventListener('resize', fitViewport); vv.addEventListener('scroll', fitViewport); fitViewport(); }
+
+  // ---------- boot ----------
+  newSession(true);
+  requestAnimationFrame(() => requestAnimationFrame(() => room.classList.add('lit')));
+  // 처음 왔을 때(닉네임도 없고 '나중에'도 고르지 않았을 때) 닉네임부터 묻는다
+  if (!me.nick && !me.later) setTimeout(() => { if (!openVeil && !S.started) show('nick'); }, 900);
+  // 닉네임은 있는데 서버 번호를 모르면(예전 기록) 조용히 다시 등록
+  else if (me.nick && !me.id) join(me.nick).catch(() => {});
+})();
+</script>
+<script src="/assets/track.js" defer></script>
+</body>
+</html>
