@@ -531,6 +531,27 @@
         <p class="list-hint">메인 ‘자주 묻는 질문’에 이 순서대로 보입니다. 손잡이로 순서를 바꾸면 바로 저장됩니다.</p>
       </section>
 
+      <!-- 공지 -->
+      <section data-view="notices" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-content">‹ 콘텐츠</a>
+            <p class="view-kicker">콘텐츠</p>
+            <h1 tabindex="-1">공지</h1>
+          </div>
+          <a class="mini-btn" href="/" target="_blank" rel="noopener">메인에서 보기 ↗</a>
+        </div>
+        <div class="banner banner-warn" role="alert" data-sql-warn7 hidden>
+          <p><b>데이터베이스 설정이 한 단계 남았습니다.</b> Supabase SQL Editor에서 <code>supabase/019_public_notices.sql</code>을 실행해 주세요. 그 전에는 회원 전용 공지만 쓸 수 있고, 제목·내용은 새로 쓸 때만 정할 수 있습니다.</p>
+        </div>
+        <div class="toolbar">
+          <button type="button" class="btn btn-primary btn-small" data-new-notice>+ 공지 쓰기</button>
+          <div class="fchips" role="group" aria-label="대상으로 거르기" data-nt-chips></div>
+        </div>
+        <div data-nt-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
+        <p class="list-hint">회원 전용 공지는 공사장에만, 전체 공개 공지는 게시 기간 동안 메인 전광판 둘째 줄에도 보입니다. 고정한 공지가 맨 위에 옵니다.</p>
+      </section>
+
       <!-- 페이지 문구 -->
       <section data-view="texts" hidden>
         <div class="view-head">
@@ -900,6 +921,35 @@
           </fieldset>
         </form>
 
+        <!-- 공지 -->
+        <form data-form="notice" novalidate hidden>
+          <div class="pv" data-nt-pv-box><p class="pv-title">미리보기 · 메인 전광판</p>
+            <div class="pv-vms" style="flex-direction:column;gap:6px"><span style="display:flex;gap:10px"><span class="pv-vms-label">운영 상태</span><span style="opacity:.75">…</span></span><span style="display:flex;gap:10px;color:#fff"><span class="pv-vms-label">공지</span><span data-nt-pv></span></span></div>
+            <p class="hint" data-nt-pv-note style="margin-top:8px"></p>
+          </div>
+          <label class="field-label" for="n-title">제목</label>
+          <input class="input" id="n-title" maxlength="200" required placeholder="예: 11월 국원 공개 모집 설명회 안내">
+          <label class="field-label" for="n-body">내용 <span class="opt">(선택)</span></label>
+          <textarea class="input" id="n-body" maxlength="2000" rows="5" placeholder="메인에서 공지를 누르면 보입니다. 줄바꿈은 그대로 보입니다."></textarea>
+          <fieldset data-nt-needs>
+            <legend>대상</legend>
+            <div class="seg" role="radiogroup" aria-label="공지 대상" data-nt-aud>
+              <button type="button" role="radio" data-v="members">회원 전용</button>
+              <button type="button" role="radio" data-v="public">전체 공개</button>
+            </div>
+            <p class="hint" data-nt-aud-hint></p>
+            <div class="date-cols" style="margin-top:6px">
+              <div><label class="field-label" for="n-start">게시 시작 <span class="opt">(선택)</span></label><input class="input" id="n-start" type="date"></div>
+              <div><label class="field-label" for="n-end">게시 끝 <span class="opt">(선택)</span></label><input class="input" id="n-end" type="date"></div>
+            </div>
+            <p class="hint">비워 두면 바로 시작해 직접 내릴 때까지 보입니다. 끝나는 날은 그날 밤 12시까지 보입니다.</p>
+          </fieldset>
+          <fieldset>
+            <legend>보이기</legend>
+            <label class="check"><input type="checkbox" id="n-pinned"> <span>맨 위에 고정</span></label>
+          </fieldset>
+        </form>
+
         <!-- 자주 묻는 질문 -->
         <form data-form="faq" novalidate hidden>
           <div class="pv"><p class="pv-title" data-faq-pv-title>미리보기 · 메인 (눌러서 펼쳐 보기)</p><div class="faq-pv" data-faq-pv></div></div>
@@ -1178,7 +1228,7 @@
     { id: 'dockets', group: 'content', name: '처리 현황', ready: true },
     { id: 'routes', group: 'content', name: '준공 현황', ready: true },
     { id: 'wiki', group: 'content', name: '위키', legacy: 'admin' },
-    { id: 'notices', group: 'content', name: '공지', when: '4단계', legacy: 'home' },
+    { id: 'notices', group: 'content', name: '공지', ready: true },
     { id: 'faq', group: 'content', name: '자주 묻는 질문', ready: true },
     { id: 'texts', group: 'content', name: '페이지 문구', ready: true },
     { id: 'status', group: 'ops', name: '사이트 상태', ready: true },
@@ -1470,8 +1520,8 @@
   const hq = $('[data-hq]'), drawer = $('[data-drawer]'), scrim = $('[data-scrim]');
   const formRoute = $('[data-form="route"]'), formLine = $('[data-form="line"]'), formDocket = $('[data-form="docket"]');
   const formShare = $('[data-form="share"]');
-  const formReport = $('[data-form="report"]'), formApp = $('[data-form="application"]'), formMember = $('[data-form="member"]'), formFaq = $('[data-form="faq"]');
-  const FORMS = { member: formMember, faq: formFaq, route: formRoute, line: formLine, docket: formDocket, share: formShare, report: formReport, application: formApp };
+  const formReport = $('[data-form="report"]'), formApp = $('[data-form="application"]'), formMember = $('[data-form="member"]'), formFaq = $('[data-form="faq"]'), formNotice = $('[data-form="notice"]');
+  const FORMS = { member: formMember, faq: formFaq, notice: formNotice, route: formRoute, line: formLine, docket: formDocket, share: formShare, report: formReport, application: formApp };
   const errBox = $('.drawer-foot .form-error');
   const saveBtn = $('[data-save]'), delBtn = $('[data-delete]');
   let mode = null;            // 'route' | 'line'
@@ -1529,13 +1579,13 @@
   delBtn.addEventListener('click', () => {
     if (!armed) { armed = true; delBtn.classList.add('is-armed'); delBtn.textContent = '한 번 더 누르면 지웁니다'; return; }
     disarm();
-    if (mode === 'route') deleteRoute(); else if (mode === 'line') deleteLine(); else if (mode === 'docket') deleteDocket(); else if (mode === 'report') deleteReport(); else if (mode === 'application') deleteApp(); else if (mode === 'faq') deleteFaq();
+    if (mode === 'route') deleteRoute(); else if (mode === 'line') deleteLine(); else if (mode === 'docket') deleteDocket(); else if (mode === 'report') deleteReport(); else if (mode === 'application') deleteApp(); else if (mode === 'faq') deleteFaq(); else if (mode === 'notice') deleteNotice();
   });
-  saveBtn.addEventListener('click', () => { if (mode === 'route') saveRoute(); else if (mode === 'line') saveLine(); else if (mode === 'docket') saveDocket(); else if (mode === 'share') saveShare(); else if (mode === 'report') saveReport(); else if (mode === 'application') saveApp(); else if (mode === 'member') saveMember(); else if (mode === 'faq') saveFaq(); });
+  saveBtn.addEventListener('click', () => { if (mode === 'route') saveRoute(); else if (mode === 'line') saveLine(); else if (mode === 'docket') saveDocket(); else if (mode === 'share') saveShare(); else if (mode === 'report') saveReport(); else if (mode === 'application') saveApp(); else if (mode === 'member') saveMember(); else if (mode === 'faq') saveFaq(); else if (mode === 'notice') saveNotice(); });
   Object.values(FORMS).forEach(f => f.addEventListener('submit', e => { e.preventDefault(); saveBtn.click(); }));
   Object.values(FORMS).forEach(f => f.addEventListener('input', e => { if (e.target.removeAttribute) e.target.removeAttribute('aria-invalid'); errBox.hidden = true; }));
   // 다른 메뉴로 가면 서랍을 닫는다 (저장 중이면 그대로)
-  const VIEW_OF = { route: 'routes', line: 'routes', docket: 'dockets', share: 'share', report: 'reports', application: 'applications', member: 'members', faq: 'faq' };
+  const VIEW_OF = { route: 'routes', line: 'routes', docket: 'dockets', share: 'share', report: 'reports', application: 'applications', member: 'members', faq: 'faq', notice: 'notices' };
   viewHooks.push(view => { if (mode && VIEW_OF[mode] !== view && !busy) closeDrawer(); });
 
   /* ===== 지름길 편집 ===== */
@@ -3307,6 +3357,114 @@
   }
   viewHooks.push(view => { if (view === 'faq' && !faqsLoaded && hasFaqs) loadFaqs(); });
   if (decodeURIComponent(location.hash.slice(1)) === 'faq') loadFaqs();
+
+  /* ===== 공지 ===== (003 notices + 019: audience · starts_at · ends_at) */
+  let notices = [], ntLoaded = false, hasNtCols = true, ntFilter = 'all', ntAud = 'members';
+  const ntList = $('[data-nt-list]');
+  const AUD = { members: '회원 전용', public: '전체 공개' };
+  // 날짜 칸(YYYY-MM-DD) ↔ 저장 값: 시작은 그날 0시, 끝은 다음 날 0시(= 그날 밤 12시까지)
+  const dayStart = d => d ? new Date(`${d}T00:00:00`).toISOString() : null;
+  const dayEndExcl = d => { if (!d) return null; const x = new Date(`${d}T00:00:00`); x.setDate(x.getDate() + 1); return x.toISOString(); };
+  const isoDay = iso => { const d = new Date(iso); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+  const prevDay = iso => { const d = new Date(iso); d.setMinutes(d.getMinutes() - 1); return isoDay(d.toISOString()); };
+  function ntState(n) {
+    const now = Date.now();
+    if (n.starts_at && Date.parse(n.starts_at) > now) return 'wait';
+    if (n.ends_at && Date.parse(n.ends_at) <= now) return 'ended';
+    return 'on';
+  }
+  async function loadNotices() {
+    const { data, error } = await B.sb.from('notices').select('*').order('created_at', { ascending: false }).limit(300);
+    if (error) { ntList.replaceChildren(el('p', 'list-state', errText(error, '불러오기'))); return; }
+    notices = data;
+    hasNtCols = notices.length ? 'audience' in notices[0] : !(await B.sb.from('notices').select('audience').limit(1)).error;
+    $('[data-sql-warn7]').hidden = hasNtCols;
+    ntLoaded = true; renderNotices();
+  }
+  function renderNotices() {
+    const rows0 = notices.slice().sort((a, b) => (b.pinned - a.pinned) || String(b.created_at).localeCompare(String(a.created_at)));
+    if (hasNtCols) chips($('[data-nt-chips]'), ['public', 'members'], AUD, rows0, 'audience', ntFilter, v => { ntFilter = v; renderNotices(); });
+    const rows = rows0.filter(n => ntFilter === 'all' || n.audience === ntFilter);
+    const sec = el('section', 'lgroup'); const ul = el('ul', 'rlist');
+    if (!rows.length) ul.append(el('li', 'rempty', notices.length ? '조건에 맞는 공지가 없습니다.' : '아직 올라온 공지가 없습니다.'));
+    rows.forEach(n => {
+      const li = el('li'); li.dataset.id = n.id;
+      const flags = [];
+      if (n.pinned) flags.push(el('span', 'flag flag-feat', '고정'));
+      const meta = [];
+      if (hasNtCols) {
+        meta.push(el('span', stClass(n.audience === 'public' ? '개통' : '연락함'), AUD[n.audience] || n.audience));
+        const st = ntState(n);
+        if (st === 'wait') flags.push(el('span', 'flag', `${isoDay(n.starts_at).slice(5).replace('-', '/')}부터`));
+        if (st === 'ended') flags.push(el('span', 'flag flag-hidden', '게시 끝'));
+        if (n.audience === 'public' && st === 'on') flags.push(el('span', 'flag flag-feat', '메인에 보임'));
+      }
+      meta.push(el('span', null, B.dateText(n.created_at)), el('span', null, n.author_name ? `· ${n.author_name}` : ''));
+      inboxRow(li, n.title, meta, flags, () => openNotice(n), false);
+      if (mode === 'notice' && editing && editing.id === n.id) li.classList.add('is-current');
+      ul.append(li);
+    });
+    sec.append(ul); ntList.replaceChildren(sec);
+  }
+  $$('[data-nt-aud] button').forEach(b => b.addEventListener('click', () => { ntAud = b.dataset.v; syncNoticeUI(); }));
+  function syncNoticeUI() {
+    $$('[data-nt-aud] button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === ntAud)));
+    $('[data-nt-aud-hint]').textContent = ntAud === 'public' ? '로그인하지 않은 방문자도 메인 전광판 둘째 줄에서 봅니다. 누르면 내용이 열립니다.' : '로그인한 회원만 공사장에서 봅니다.';
+    $('[data-nt-pv-box]').hidden = !(hasNtCols && ntAud === 'public');
+    $('[data-nt-pv]').textContent = F('n-title').value.trim() || '공지 제목';
+    const s0 = F('n-start').value, e0 = F('n-end').value;
+    $('[data-nt-pv-note]').textContent = s0 || e0 ? `${s0 ? ST.md(s0) : '지금'}부터 ${e0 ? ST.md(e0) + '까지' : '직접 내릴 때까지'} 메인에 보입니다.` : '저장하면 바로 메인에 보입니다.';
+  }
+  formNotice.addEventListener('input', syncNoticeUI);
+  function openNotice(n) {
+    if (waitBusy()) return;
+    editing = n || null; currentId = null;
+    F('n-title').value = n ? n.title : ''; F('n-body').value = n && n.body ? n.body : ''; F('n-pinned').checked = !!(n && n.pinned);
+    ntAud = n && n.audience === 'public' ? 'public' : 'members';
+    F('n-start').value = n && n.starts_at ? isoDay(n.starts_at) : '';
+    F('n-end').value = n && n.ends_at ? prevDay(n.ends_at) : '';
+    $('[data-nt-needs]').disabled = !hasNtCols;
+    // 019 전에는 제목·내용을 고칠 권한이 없다
+    F('n-title').readOnly = F('n-body').readOnly = !!n && !hasNtCols;
+    $$('[aria-invalid]', formNotice).forEach(x => x.removeAttribute('aria-invalid'));
+    delBtn.hidden = !n;
+    openDrawer('notice', n ? '공지 고치기' : '공지 쓰기', '콘텐츠 · 공지');
+    syncNoticeUI(); renderNotices();
+  }
+  $('[data-new-notice]').addEventListener('click', () => openNotice(null));
+  async function saveNotice() {
+    if (busy) return;
+    const target = editing;
+    const title = F('n-title').value.trim(), body = F('n-body').value.replace(/\r\n/g, '\n').trim();
+    if (!title) return fail('제목을 입력해 주세요.', 'n-title');
+    const s0 = F('n-start').value, e0 = F('n-end').value;
+    if (s0 && e0 && e0 < s0) return fail('게시 끝이 시작보다 빠릅니다.', 'n-end');
+    let row;
+    if (hasNtCols) row = { title, body: body || null, pinned: F('n-pinned').checked, audience: ntAud, starts_at: dayStart(s0), ends_at: dayEndExcl(e0) };
+    else row = target ? { pinned: F('n-pinned').checked } : { title, body: body || null, pinned: F('n-pinned').checked };
+    setBusy(true); B.setBusy(saveBtn, true, '저장 중…');
+    const res = target ? await B.sb.from('notices').update(row).eq('id', target.id).select().single() : await B.sb.from('notices').insert(row).select().single();
+    setBusy(false); B.setBusy(saveBtn, false);
+    if (res.error) { fail(errText(res.error, '저장')); if (res.error.code === 'PGRST116') loadNotices(); return; }
+    const i = notices.findIndex(n => n.id === res.data.id);
+    if (i >= 0) notices[i] = res.data; else notices.unshift(res.data);
+    closeDrawer(); renderNotices();
+    const onMain = hasNtCols && res.data.audience === 'public' && ntState(res.data) === 'on';
+    toast(`${target ? '저장' : '올렸'}습니다. ${onMain ? '메인 전광판에 바로 보입니다.' : hasNtCols && res.data.audience === 'public' ? '게시 기간이 되면 메인에 보입니다.' : '공사장 공지에 보입니다.'}`);
+  }
+  async function deleteNotice() {
+    const target = editing;
+    if (!target || busy) return;
+    setBusy(true); B.setBusy(delBtn, true, '지우는 중…');
+    const { error } = await B.sb.from('notices').delete().eq('id', target.id);
+    setBusy(false); B.setBusy(delBtn, false);
+    if (error) return fail(errText(error, '지우기'));
+    notices = notices.filter(n => n.id !== target.id);
+    closeDrawer(); renderNotices();
+    toast('공지를 지웠습니다.');
+  }
+  viewHooks.push(view => { if (view === 'notices' && !ntLoaded) loadNotices(); });
+  if (decodeURIComponent(location.hash.slice(1)) === 'notices') loadNotices();
 
   /* ===== 페이지 문구 ===== (site_settings 'texts', 모양은 assets/site-texts.js) */
   const TX = window.BYPASS_TEXTS;
