@@ -347,6 +347,9 @@
       <div class="banner banner-warn" role="alert" data-sql-warn2 hidden>
         <p><b>데이터베이스 설정이 한 단계 남았습니다.</b> Supabase SQL Editor에서 <code>supabase/010_hq_phase2.sql</code>을 실행해 주세요. 그 전에는 사이트 상태와 처리 현황을 저장할 수 없습니다.</p>
       </div>
+      <div class="banner banner-warn" role="alert" data-sql-warn3 hidden>
+        <p><b>데이터베이스 설정이 한 단계 남았습니다.</b> Supabase SQL Editor에서 <code>supabase/011_subject_hub.sql</code>을 실행해 주세요. 그 전에는 과목 자료 허브 표지판과 학부·교수님 칸을 쓸 수 없습니다.</p>
+      </div>
       <div class="banner banner-warn" role="alert" data-sql-warn hidden>
         <p><b>데이터베이스 설정이 한 단계 남았습니다.</b> Supabase SQL Editor에서 <code>supabase/009_hq_phase1.sql</code>을 실행해 주세요. 그 전에는 아이콘·판 색·숨김을 저장할 수 없고, 이름·주소 같은 기존 칸만 저장됩니다.</p>
       </div>
@@ -539,8 +542,19 @@
           <label class="field-label" for="f-desc">한 줄 설명</label>
           <textarea class="input" id="f-desc" maxlength="300" rows="2" placeholder="무엇을 어떻게 건너뛰는지 한 줄로"></textarea>
 
-          <label class="field-label" for="f-subject">과목 <span class="opt">(위키일 때)</span></label>
+          <label class="field-label" for="f-subject">과목 <span class="opt">(자료일 때)</span></label>
           <input class="input" id="f-subject" maxlength="60" placeholder="예: 레이더">
+
+          <fieldset data-hub-set hidden>
+            <legend>자료 정보</legend>
+            <p class="hint" style="margin-top:0">과목 자료 허브에서 학부·교수님으로 거르고 정렬할 때 씁니다. 이미 쓴 이름이 아래에 뜨니 골라 쓰면 같은 묶음으로 모입니다.</p>
+            <div class="form-cols3">
+              <div style="grid-column: span 2"><label class="field-label" for="f-dept">학부</label><input class="input" id="f-dept" maxlength="40" list="dl-dept" placeholder="예: 항해정보시스템학부" autocomplete="off"></div>
+              <div><label class="field-label" for="f-prof">교수님</label><input class="input" id="f-prof" maxlength="40" list="dl-prof" placeholder="예: 홍길동" autocomplete="off"></div>
+            </div>
+            <p class="hint">교수님은 이름만 쓰면 ‘홍길동 교수’로 보입니다.</p>
+            <datalist id="dl-dept"></datalist><datalist id="dl-prof"></datalist>
+          </fieldset>
 
           <fieldset data-needs-sql>
             <legend>아이콘</legend>
@@ -631,6 +645,14 @@
         <!-- 분류 -->
         <form data-form="line" novalidate hidden>
           <div data-line-pv></div>
+          <fieldset data-kind-set style="margin-top:16px">
+            <legend>종류</legend>
+            <div class="seg" role="radiogroup" aria-label="분류 종류">
+              <button type="button" role="radio" data-kind="shortcut">지름길</button>
+              <button type="button" role="radio" data-kind="hub">자료 허브</button>
+            </div>
+            <p class="hint" data-kind-hint></p>
+          </fieldset>
           <label class="field-label" for="l-name">이름</label>
           <input class="input" id="l-name" maxlength="30" required placeholder="예: 학업 지름길">
           <div class="form-cols3">
@@ -837,6 +859,16 @@
   const lineById = () => Object.fromEntries(lines.map(l => [l.id, l]));
   const NEW_COLS = ['icon', 'icon_url', 'tile', 'icon_full', 'hidden'];
   const missingCol = e => e && (e.code === 'PGRST204' || /column/i.test(e.message || '') && NEW_COLS.some(c => (e.message || '').includes(c)));
+  // 011 SQL 실행 여부: 분류 종류(kind), 학부·교수 칸
+  let hasKind = true, hasHubCols = true;
+  const HUB_COLS = ['department', 'professor'];
+  function setHubCols(kindOk, colsOk) {
+    hasKind = kindOk; hasHubCols = colsOk;
+    $('[data-sql-warn3]').hidden = kindOk && colsOk;
+    $('[data-kind-set]').hidden = !kindOk;
+  }
+  const isHub = lineId => !!(lines.find(l => l.id === lineId) || {}).kind && (lines.find(l => l.id === lineId) || {}).kind === 'hub';
+  const profName = p => !p ? '' : /교수(님)?$/.test(p) ? p : `${p} 교수`;
   function setIconCols(ok) {
     hasIconCols = ok;
     $('[data-sql-warn]').hidden = ok;
@@ -872,6 +904,7 @@
     }
     lines = l.data; routes = r.data;
     if (routes.length) setIconCols('icon' in routes[0]);
+    setHubCols(lines.length ? 'kind' in lines[0] : true, routes.length ? 'department' in routes[0] : true);
     renderRoutes(); renderLines();
     return true;
   }
@@ -951,7 +984,7 @@
     const line = lineById()[r.line] || {};
     const li = el('li', `rrow${String(r.id) === String(currentId) ? ' is-current' : ''}`);
     li.dataset.id = r.id;
-    li.dataset.search = [r.title, r.subject, r.url, r.description].join(' ').toLowerCase();
+    li.dataset.search = [r.title, r.subject, r.url, r.description, r.department, r.professor].join(' ').toLowerCase();
     const grip = el('button', 'grip'); grip.type = 'button'; grip.innerHTML = GRIP;
     grip.setAttribute('aria-label', `${r.title} 순서 바꾸기 (위아래 화살표 키)`);
     const main = el('button', 'rrow-main'); main.type = 'button';
@@ -960,7 +993,8 @@
     text.append(el('span', 'rrow-title', r.title));
     const meta = el('span', 'rrow-meta');
     meta.append(el('span', `st ${r.status === 'open' ? 'st-open' : 'st-review'}`, r.status === 'open' ? '개통' : '공사 중'), el('span', null, TYPE[r.type] || r.type));
-    if (r.url) meta.append(el('span', null, `· ${shortUrl(r.url)}`));
+    if (r.professor || r.department) meta.append(el('span', null, `· ${[r.department, profName(r.professor)].filter(Boolean).join(' ')}`));
+    else if (r.url) meta.append(el('span', null, `· ${shortUrl(r.url)}`));
     text.append(meta);
     const flags = el('span', 'rrow-flags');
     if (r.hidden) flags.append(el('span', 'flag flag-hidden', '숨김'));
@@ -980,10 +1014,12 @@
       const items = routes.filter(r => r.line === l.id);
       const head = el('h2', 'lgroup-head');
       const no = el('span', 'lno', l.no); no.style.background = l.color; no.style.color = I.fgOf(l.color);
-      head.append(no, el('span', null, l.name), el('span', 'lcount', `${items.length}곳`));
+      head.append(no, el('span', null, l.name));
+      if (l.kind === 'hub') head.append(el('span', 'flag flag-feat', '자료 허브'));
+      head.append(el('span', 'lcount', l.kind === 'hub' ? `${items.length}건` : `${items.length}곳`));
       const ul = el('ul', 'rlist'); ul.dataset.line = l.id;
       if (items.length) items.forEach(r => ul.append(routeRow(r)));
-      else ul.append(el('li', 'rempty', '아직 지름길이 없습니다.'));
+      else ul.append(el('li', 'rempty', l.kind === 'hub' ? '아직 자료가 없습니다.' : '아직 지름길이 없습니다.'));
       sec.append(head, ul);
       return sec;
     }));
@@ -1007,7 +1043,7 @@
     const no = el('span', 'lno', l.no); no.style.background = l.color; no.style.color = I.fgOf(l.color);
     no.style.width = no.style.height = '36px'; no.style.fontSize = '17px'; no.style.marginLeft = '4px';
     const text = el('span', 'rrow-text');
-    text.append(el('span', 'rrow-title', l.name), el('span', 'rrow-meta', l.description || '설명 없음'));
+    text.append(el('span', 'rrow-title', l.name), el('span', 'rrow-meta', `${l.kind === 'hub' ? '자료 허브 · ' : ''}${l.description || '설명 없음'}`));
     const n = routes.filter(r => r.line === l.id).length;
     main.append(no, text, el('span', 'lcount', `지름길 ${n}곳`));
     main.addEventListener('click', () => openLineForm(l));
@@ -1220,9 +1256,27 @@
       url: srcMode === 'html' ? htmlPath() : F('f-url').value.trim(), description: F('f-desc').value.trim(), subject: F('f-subject').value.trim(),
       icon, icon_url: icon === 'upload' ? (pendingPreview || uploadedUrl) : null,
       tile: tileVal, icon_full: iconMode === 'upload' && F('f-full').checked,
-      hidden: F('f-hidden').checked, sample: F('f-sample').checked, featured: F('f-featured').checked
+      hidden: F('f-hidden').checked, sample: F('f-sample').checked, featured: F('f-featured').checked,
+      department: F('f-dept').value.trim(), professor: F('f-prof').value.trim().replace(/\s*교수(님)?$/, '')
     };
   }
+  // 자료 허브 분류일 때만 학부·교수 칸을 보인다. 이미 쓴 이름은 고를 수 있게 목록으로
+  function syncHubUI() {
+    const show = hasHubCols && isHub(F('f-line').value);
+    $('[data-hub-set]').hidden = !show;
+    if (!show) return;
+    const uniq = k => [...new Set(routes.map(r => r[k]).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'));
+    const dept = F('f-dept').value.trim();
+    $('#dl-dept').replaceChildren(...uniq('department').map(v => { const o = el('option'); o.value = v; return o; }));
+    const profs = [...new Set(routes.filter(r => !dept || r.department === dept).map(r => r.professor).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'));
+    $('#dl-prof').replaceChildren(...profs.map(v => { const o = el('option'); o.value = v; return o; }));
+  }
+  // 새 지름길을 '위키'로 고르면 자료 허브 분류로 옮겨 준다
+  F('f-type').addEventListener('change', () => {
+    if (editing || F('f-type').value !== 'wiki' || isHub(F('f-line').value)) return;
+    const hub = lines.find(l => l.kind === 'hub');
+    if (hub) { F('f-line').value = hub.id; syncHubUI(); renderRoutePreview(); }
+  });
   function renderRoutePreview() {
     const d = draft();
     const name = d.title || '이름';
@@ -1237,7 +1291,7 @@
     dlg.style.setProperty('--c', line.color || '#0F5A3A');
     const top = el('div', 'pv-dlg-top');
     const tags = el('div', 'pv-tags');
-    [line.name, TYPE[d.type], building ? '공사 중' : '개통'].concat(d.sample ? ['견본'] : []).filter(Boolean).forEach(t => tags.append(el('span', 'pv-tag', t)));
+    [line.name, TYPE[d.type], building ? '공사 중' : '개통'].concat(isHub(d.line) ? [d.department, profName(d.professor)] : []).concat(d.sample ? ['견본'] : []).filter(Boolean).forEach(t => tags.append(el('span', 'pv-tag', t)));
     const txt = el('div'); txt.append(tags, el('h3', null, name));
     top.append(I.tile(d, line.color, { size: 48 }), txt);
     dlg.append(top);
@@ -1247,8 +1301,8 @@
     pv.replaceChildren(title, row, el('p', 'pv-title', '아이콘을 눌렀을 때'), dlg);
     pv.children[2].style.margin = '14px 0 0';
   }
-  formRoute.addEventListener('input', () => { if (iconMode === 'auto') syncIconUI(); syncTileUI(); syncSrcUI(); renderRoutePreview(); });
-  formRoute.addEventListener('change', () => { syncTileUI(); syncSrcUI(); renderRoutePreview(); });
+  formRoute.addEventListener('input', () => { if (iconMode === 'auto') syncIconUI(); syncTileUI(); syncSrcUI(); syncHubUI(); renderRoutePreview(); });
+  formRoute.addEventListener('change', () => { syncTileUI(); syncSrcUI(); syncHubUI(); renderRoutePreview(); });
 
   function fillLineSelect() {
     F('f-line').replaceChildren(...lines.map(l => { const o = el('option', null, l.name); o.value = l.id; return o; }));
@@ -1266,6 +1320,7 @@
     F('f-url').value = v.url || '';
     F('f-desc').value = v.description || '';
     F('f-subject').value = v.subject || '';
+    F('f-dept').value = v.department || ''; F('f-prof').value = v.professor || '';
     F('f-hidden').checked = !!v.hidden; F('f-sample').checked = !!v.sample; F('f-featured').checked = !!v.featured;
     F('f-full').checked = !!v.icon_full;
     const icon = v.icon || 'auto';
@@ -1278,7 +1333,7 @@
     resetSrc();
     $$('[aria-invalid]', formRoute).forEach(x => x.removeAttribute('aria-invalid'));
     delBtn.hidden = !r;
-    syncIconUI(); renderRoutePreview();
+    syncIconUI(); syncHubUI(); renderRoutePreview();
     openDrawer('route', r ? `고치기: ${r.title}` : '지름길 추가', '개통 노선도 · 지름길');
     markCurrent();
   }
@@ -1513,6 +1568,12 @@
       icon_url: mode0 === 'upload' ? kept0 : null,
       tile: tile0, icon_full: mode0 === 'upload' && d.icon_full, hidden: d.hidden
     };
+    // 학부·교수: 자료 허브에 있을 때만 남기고, 다른 분류로 옮기면 비운다
+    if (hasHubCols) {
+      const hub0 = isHub(d.line);
+      row.department = hub0 && d.department ? d.department : null;
+      row.professor = hub0 && d.professor ? d.professor : null;
+    }
     // 새 지름길이거나 분류를 옮기면 그 분류의 맨 뒤로
     if (!target || target.line !== row.line) {
       row.sort = Math.max(0, ...routes.filter(r => r.line === row.line && (!target || r.id !== target.id)).map(r => r.sort || 0)) + 10;
@@ -1551,6 +1612,9 @@
       ? B.sb.from('routes').update(body).eq('id', target.id).select().single()
       : B.sb.from('routes').insert(body).select().single();
     let res = await send(hasIconCols ? row : strip(row));
+    if (res.error && hasHubCols && res.error.code === 'PGRST204' && HUB_COLS.some(c => (res.error.message || '').includes(c))) {
+      setHubCols(hasKind, false); HUB_COLS.forEach(k => delete row[k]); res = await send(hasIconCols ? row : strip(row));
+    }
     if (res.error && hasIconCols && missingCol(res.error)) { setIconCols(false); res = await send(strip(row)); }
     done();
     if (res.error) {
@@ -1619,6 +1683,16 @@
     pv.firstChild.style.margin = '16px 0 0';
   }
   formLine.addEventListener('input', syncLineUI);
+  let lineKind = 'shortcut';
+  const KIND_HINT = {
+    shortcut: '앱·카톡 채널처럼 절차를 건너뛰는 도구를 아이콘으로 늘어놓습니다.',
+    hub: '과목 자료를 모읍니다. 노선도에서 학부·교수님으로 거르고 정렬할 수 있습니다.'
+  };
+  function syncKindUI() {
+    $$('[data-kind]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.kind === lineKind)));
+    $('[data-kind-hint]').textContent = KIND_HINT[lineKind];
+  }
+  $$('[data-kind]').forEach(b => b.addEventListener('click', () => { lineKind = b.dataset.kind; syncKindUI(); }));
   function openLineForm(l) {
     if (waitBusy()) return;
     editing = l || null;
@@ -1629,6 +1703,7 @@
     F('l-id').value = v.id || '';
     F('l-id').readOnly = !!l; F('l-id').classList.toggle('readonly', !!l);
     F('l-desc').value = v.description || '';
+    lineKind = v.kind === 'hub' ? 'hub' : 'shortcut'; syncKindUI();
     lineColor = v.color || '#0F5A3A';
     if (!LINE_COLORS.some(([c]) => c.toLowerCase() === lineColor.toLowerCase())) { lineCustom = lineColor; lsw.querySelector('input[type="color"]').value = lineColor; }
     delBtn.hidden = !l;
@@ -1651,6 +1726,7 @@
       if (lines.some(l => l.id === id)) return fail('같은 주소용 이름이 이미 있습니다.', 'l-id');
     }
     const row = { name, no, color: lineColor, description: description || null };
+    if (hasKind) row.kind = lineKind;
     setBusy(true); B.setBusy(saveBtn, true, '저장 중…');
     const res = target
       ? await B.sb.from('route_lines').update(row).eq('id', target.id).select().single()
