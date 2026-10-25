@@ -900,6 +900,7 @@
         </div>
         <div class="faq" id="faq">
           <h2 class="sec-title">자주 묻는 질문</h2>
+          <!-- 질문은 HQ › 자주 묻는 질문에서 고친다. 아래는 데이터베이스를 못 읽을 때 보이는 기본 질문 -->
           <details>
             <summary><span class="q">Q.</span><span>코딩을 전혀 몰라도 됩니까?</span></summary>
             <p>됩니다. AI와 함께 만드는 방법은 활동하며 함께 익힙니다.</p>
@@ -1072,9 +1073,28 @@
     more.hidden = !(total > 0);
   }
 
+  /* ===== 자주 묻는 질문 =====
+     HQ › 자주 묻는 질문에서 고친 것(Supabase faqs)으로 바꿔 끼운다. 읽기 전·실패하면 HTML에 적힌 질문 그대로. */
+  function applyFaqs(list) {
+    if (!list.length) return;
+    const box = document.getElementById('faq');
+    box.querySelectorAll(':scope > details').forEach(d => d.remove());
+    list.forEach(f => {
+      const d = document.createElement('details');
+      const sm = document.createElement('summary');
+      const q = document.createElement('span'); q.className = 'q'; q.textContent = 'Q.';
+      const t = document.createElement('span'); t.textContent = f.question;
+      sm.append(q, t);
+      const p = document.createElement('p');
+      String(f.answer).split('\n').forEach((line, i) => { if (i) p.append(document.createElement('br')); p.append(line); });
+      d.append(sm, p);
+      box.append(d);
+    });
+  }
+
   (async function loadFromDb() {
     const get = (q, extra) => fetch(`${SB_URL}/rest/v1/${q}`, { headers: { apikey: SB_KEY, ...extra } });
-    const [st, dk] = await Promise.allSettled([
+    const [st, dk, fq] = await Promise.allSettled([
       get('site_settings?key=eq.status&select=value').then(r => r.ok ? r.json() : Promise.reject(r.status)),
       window.BYPASS_DOCKETS
         ? get(`dockets?select=${window.BYPASS_DOCKETS.SELECT}&hidden=is.false&order=sort.asc,id.asc&limit=4`, { Prefer: 'count=exact' })
@@ -1085,8 +1105,10 @@
               const list = await r.json();
               return { list, total: Number.isFinite(total) ? total : list.length };
             })
-        : Promise.reject('no module')
+        : Promise.reject('no module'),
+      get('faqs?select=question,answer&hidden=is.false&order=sort.asc,id.asc').then(r => r.ok ? r.json() : Promise.reject(r.status))
     ]);
+    if (fq.status === 'fulfilled' && Array.isArray(fq.value)) applyFaqs(fq.value);
     if (st.status === 'fulfilled' && st.value[0]) applyStatus(st.value[0].value);
     if (dk.status === 'fulfilled' && Array.isArray(dk.value.list)) applyDockets(dk.value.list, dk.value.total);
   })();

@@ -288,6 +288,17 @@
   .rank .meter i { display: block; height: 100%; border-radius: 3px; }
   .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
 
+  /* 자주 묻는 질문 미리보기: 메인과 같은 모양 */
+  .faq-pv { padding: 4px 14px; border-radius: 12px; background: var(--ground); }
+  .faq-pv details { border-bottom: 2px solid var(--rule); }
+  .faq-pv details:first-child { border-top: 2px solid var(--ink); }
+  .faq-pv summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 2.2em 1fr 1.5em; align-items: baseline; padding: 14px 0; font-weight: 700; font-size: 16px; }
+  .faq-pv summary::-webkit-details-marker { display: none; }
+  .faq-pv summary::after { content: "+"; font-weight: 500; font-size: 22px; line-height: 1; color: var(--green); justify-self: end; }
+  .faq-pv details[open] summary::after { content: "\2212"; }
+  .faq-pv .q { font-weight: 900; color: var(--green); }
+  .faq-pv details p { margin: 0; padding: 0 1.5em 16px 2.2em; font-size: 15.5px; line-height: 1.7; overflow-wrap: anywhere; }
+
   /* 대시보드 */
   .dash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
   .dtile { display: flex; flex-direction: column; gap: 2px; padding: 16px 18px 15px; border-radius: 12px; background: #fff; border: 1px solid var(--rule); border-left: 6px solid var(--rule); color: var(--ink); text-decoration: none; }
@@ -479,6 +490,26 @@
           <div data-line-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
           <p class="list-hint">분류는 준공 현황의 큰 표지판입니다. 손잡이로 표지판 순서를 바꿉니다.</p>
         </div>
+      </section>
+
+      <!-- 자주 묻는 질문 -->
+      <section data-view="faq" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-content">‹ 콘텐츠</a>
+            <p class="view-kicker">콘텐츠</p>
+            <h1 tabindex="-1">자주 묻는 질문</h1>
+          </div>
+          <a class="mini-btn" href="/#faq" target="_blank" rel="noopener">메인에서 보기 ↗</a>
+        </div>
+        <div class="banner banner-warn" role="alert" data-sql-warn6 hidden>
+          <p><b>데이터베이스 설정이 한 단계 남았습니다.</b> Supabase SQL Editor에서 <code>supabase/017_faqs.sql</code>을 실행해 주세요. 지금 메인에 있는 질문 4개가 그대로 옮겨집니다.</p>
+        </div>
+        <div class="toolbar">
+          <button type="button" class="btn btn-primary btn-small" data-new-faq>+ 질문 추가</button>
+        </div>
+        <div data-faq-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
+        <p class="list-hint">메인 ‘자주 묻는 질문’에 이 순서대로 보입니다. 손잡이로 순서를 바꾸면 바로 저장됩니다.</p>
       </section>
 
       <!-- 통계 -->
@@ -803,6 +834,20 @@
           </fieldset>
         </form>
 
+        <!-- 자주 묻는 질문 -->
+        <form data-form="faq" novalidate hidden>
+          <div class="pv"><p class="pv-title" data-faq-pv-title>미리보기 · 메인 (눌러서 펼쳐 보기)</p><div class="faq-pv" data-faq-pv></div></div>
+          <label class="field-label" for="q-q">질문</label>
+          <input class="input" id="q-q" maxlength="200" required placeholder="예: 활동 시간은 언제입니까?">
+          <label class="field-label" for="q-a">답</label>
+          <textarea class="input" id="q-a" maxlength="1000" rows="5" required placeholder="줄을 바꾸면 메인에서도 줄이 바뀝니다."></textarea>
+          <p class="hint">말투는 메인처럼 ‘~입니다’로 맞추면 좋습니다.</p>
+          <fieldset>
+            <legend>보이기</legend>
+            <label class="check"><input type="checkbox" id="q-hidden"> <span>숨기기 <small>(지우지 않고 잠시 내릴 때)</small></span></label>
+          </fieldset>
+        </form>
+
         <!-- 회원 -->
         <form data-form="member" novalidate hidden>
           <div class="slip" data-mem-slip></div>
@@ -1067,7 +1112,7 @@
     { id: 'routes', group: 'content', name: '준공 현황', ready: true },
     { id: 'wiki', group: 'content', name: '위키', legacy: 'admin' },
     { id: 'notices', group: 'content', name: '공지', when: '4단계', legacy: 'home' },
-    { id: 'faq', group: 'content', name: '자주 묻는 질문', when: '4단계' },
+    { id: 'faq', group: 'content', name: '자주 묻는 질문', ready: true },
     { id: 'texts', group: 'content', name: '페이지 문구', when: '4단계' },
     { id: 'status', group: 'ops', name: '사이트 상태', ready: true },
     { id: 'share', group: 'ops', name: '링크 미리보기', ready: true },
@@ -1358,8 +1403,8 @@
   const hq = $('[data-hq]'), drawer = $('[data-drawer]'), scrim = $('[data-scrim]');
   const formRoute = $('[data-form="route"]'), formLine = $('[data-form="line"]'), formDocket = $('[data-form="docket"]');
   const formShare = $('[data-form="share"]');
-  const formReport = $('[data-form="report"]'), formApp = $('[data-form="application"]'), formMember = $('[data-form="member"]');
-  const FORMS = { member: formMember, route: formRoute, line: formLine, docket: formDocket, share: formShare, report: formReport, application: formApp };
+  const formReport = $('[data-form="report"]'), formApp = $('[data-form="application"]'), formMember = $('[data-form="member"]'), formFaq = $('[data-form="faq"]');
+  const FORMS = { member: formMember, faq: formFaq, route: formRoute, line: formLine, docket: formDocket, share: formShare, report: formReport, application: formApp };
   const errBox = $('.drawer-foot .form-error');
   const saveBtn = $('[data-save]'), delBtn = $('[data-delete]');
   let mode = null;            // 'route' | 'line'
@@ -1417,13 +1462,13 @@
   delBtn.addEventListener('click', () => {
     if (!armed) { armed = true; delBtn.classList.add('is-armed'); delBtn.textContent = '한 번 더 누르면 지웁니다'; return; }
     disarm();
-    if (mode === 'route') deleteRoute(); else if (mode === 'line') deleteLine(); else if (mode === 'docket') deleteDocket(); else if (mode === 'report') deleteReport(); else if (mode === 'application') deleteApp();
+    if (mode === 'route') deleteRoute(); else if (mode === 'line') deleteLine(); else if (mode === 'docket') deleteDocket(); else if (mode === 'report') deleteReport(); else if (mode === 'application') deleteApp(); else if (mode === 'faq') deleteFaq();
   });
-  saveBtn.addEventListener('click', () => { if (mode === 'route') saveRoute(); else if (mode === 'line') saveLine(); else if (mode === 'docket') saveDocket(); else if (mode === 'share') saveShare(); else if (mode === 'report') saveReport(); else if (mode === 'application') saveApp(); else if (mode === 'member') saveMember(); });
+  saveBtn.addEventListener('click', () => { if (mode === 'route') saveRoute(); else if (mode === 'line') saveLine(); else if (mode === 'docket') saveDocket(); else if (mode === 'share') saveShare(); else if (mode === 'report') saveReport(); else if (mode === 'application') saveApp(); else if (mode === 'member') saveMember(); else if (mode === 'faq') saveFaq(); });
   Object.values(FORMS).forEach(f => f.addEventListener('submit', e => { e.preventDefault(); saveBtn.click(); }));
   Object.values(FORMS).forEach(f => f.addEventListener('input', e => { if (e.target.removeAttribute) e.target.removeAttribute('aria-invalid'); errBox.hidden = true; }));
   // 다른 메뉴로 가면 서랍을 닫는다 (저장 중이면 그대로)
-  const VIEW_OF = { route: 'routes', line: 'routes', docket: 'dockets', share: 'share', report: 'reports', application: 'applications', member: 'members' };
+  const VIEW_OF = { route: 'routes', line: 'routes', docket: 'dockets', share: 'share', report: 'reports', application: 'applications', member: 'members', faq: 'faq' };
   viewHooks.push(view => { if (mode && VIEW_OF[mode] !== view && !busy) closeDrawer(); });
 
   /* ===== 지름길 편집 ===== */
@@ -3095,6 +3140,106 @@
   }
   $$('[data-st-range] button').forEach(b => b.addEventListener('click', () => { stDays = Number(b.dataset.days); loadStats(); }));
   viewHooks.push(view => { if (view === 'stats' && !stLoaded) loadStats(); });
+
+  /* ===== 자주 묻는 질문 ===== (017: faqs) */
+  let faqs = [], faqsLoaded = false, hasFaqs = true;
+  const faqList = $('[data-faq-list]');
+  async function loadFaqs() {
+    const { data, error } = await B.sb.from('faqs').select('*').order('sort').order('id');
+    if (error) {
+      hasFaqs = !missingTable(error);
+      $('[data-sql-warn6]').hidden = hasFaqs;
+      faqList.replaceChildren(el('p', 'list-state', hasFaqs ? errText(error, '불러오기') : '017 SQL을 실행하면 이곳에서 고칠 수 있습니다.'));
+      return;
+    }
+    faqs = data; faqsLoaded = true; renderFaqs();
+  }
+  function renderFaqs() {
+    const sec = el('section', 'lgroup'); const ul = el('ul', 'rlist');
+    if (!faqs.length) ul.append(el('li', 'rempty', '질문이 없습니다. 비어 있으면 메인에는 HTML에 적힌 기본 질문이 보입니다.'));
+    faqs.forEach((f, i) => {
+      const li = el('li', `rrow${mode === 'faq' && editing && editing.id === f.id ? ' is-current' : ''}`); li.dataset.id = f.id;
+      const grip = el('button', 'grip'); grip.type = 'button'; grip.innerHTML = GRIP; grip.setAttribute('aria-label', `${f.question} 순서 바꾸기 (위아래 화살표 키)`);
+      const main = el('button', 'rrow-main'); main.type = 'button';
+      const text = el('span', 'rrow-text');
+      text.append(el('span', 'rrow-title', `Q. ${f.question}`), el('span', 'rrow-meta', f.answer.replace(/\n/g, ' ').slice(0, 70) + (f.answer.length > 70 ? '…' : '')));
+      const flags = el('span', 'rrow-flags'); if (f.hidden) flags.append(el('span', 'flag flag-hidden', '숨김'));
+      main.append(text, flags);
+      main.addEventListener('click', () => openFaq(f));
+      li.append(grip, main);
+      bindSort(grip, li, () => saveFaqOrder(li.parentElement));
+      ul.append(li);
+    });
+    sec.append(ul); faqList.replaceChildren(sec);
+  }
+  let faqChain = Promise.resolve();
+  function saveFaqOrder(list) {
+    const ids = $$(':scope > li[data-id]', list).map(li => li.dataset.id);
+    faqChain = faqChain.then(async () => {
+      const jobs = [];
+      ids.forEach((id, i) => { const f = faqs.find(x => String(x.id) === id), sort = (i + 1) * 10; if (f && f.sort !== sort) { f.sort = sort; jobs.push(B.sb.from('faqs').update({ sort }).eq('id', f.id)); } });
+      if (!jobs.length) return;
+      const bad = (await Promise.all(jobs)).find(x => x.error);
+      if (bad) { toast('순서를 저장하지 못했습니다. ' + errText(bad.error, '저장'), true); await loadFaqs(); return; }
+      faqs.sort((a, b) => a.sort - b.sort || a.id - b.id);
+      const focused = document.activeElement && document.activeElement.classList.contains('grip') && faqList.contains(document.activeElement) ? document.activeElement.closest('li').dataset.id : null;
+      renderFaqs();
+      if (focused) { const g = $(`li[data-id="${focused}"] .grip`, faqList); if (g) g.focus({ preventScroll: true }); }
+      toast('순서를 저장했습니다. 메인에 바로 반영됩니다.');
+    }).catch(() => {});
+  }
+  function renderFaqPreview() {
+    const q = F('q-q').value.trim() || '질문', a = F('q-a').value.trim() || '답';
+    const d = el('details'); d.open = true;
+    const sm = el('summary'); sm.append(el('span', 'q', 'Q.'), el('span', null, q));
+    const p = el('p'); a.split('\n').forEach((line, i) => { if (i) p.append(el('br')); p.append(line); });
+    d.append(sm, p);
+    $('[data-faq-pv]').replaceChildren(d);
+    $('[data-faq-pv-title]').textContent = F('q-hidden').checked ? '미리보기 · 지금은 숨김 (메인에 안 보임)' : '미리보기 · 메인 (눌러서 접어 보기)';
+  }
+  formFaq.addEventListener('input', renderFaqPreview);
+  formFaq.addEventListener('change', renderFaqPreview);
+  function openFaq(f) {
+    if (waitBusy()) return;
+    if (!hasFaqs) { toast('supabase/017_faqs.sql을 먼저 실행해 주세요.', true); return; }
+    editing = f || null; currentId = null;
+    F('q-q').value = f ? f.question : ''; F('q-a').value = f ? f.answer : ''; F('q-hidden').checked = !!(f && f.hidden);
+    $$('[aria-invalid]', formFaq).forEach(x => x.removeAttribute('aria-invalid'));
+    delBtn.hidden = !f;
+    openDrawer('faq', f ? '질문 고치기' : '질문 추가', '콘텐츠 · 자주 묻는 질문');
+    renderFaqPreview(); renderFaqs();
+  }
+  $('[data-new-faq]').addEventListener('click', () => openFaq(null));
+  async function saveFaq() {
+    if (busy) return;
+    const target = editing;
+    const row = { question: F('q-q').value.trim(), answer: F('q-a').value.replace(/\r\n/g, '\n').trim(), hidden: F('q-hidden').checked };
+    if (!row.question) return fail('질문을 입력해 주세요.', 'q-q');
+    if (!row.answer) return fail('답을 입력해 주세요.', 'q-a');
+    if (!target) row.sort = Math.max(0, ...faqs.map(f => f.sort || 0)) + 10;   // 새 질문은 맨 아래
+    setBusy(true); B.setBusy(saveBtn, true, '저장 중…');
+    const res = target ? await B.sb.from('faqs').update(row).eq('id', target.id).select().single() : await B.sb.from('faqs').insert(row).select().single();
+    setBusy(false); B.setBusy(saveBtn, false);
+    if (res.error) { fail(errText(res.error, '저장')); if (res.error.code === 'PGRST116') loadFaqs(); return; }
+    const i = faqs.findIndex(f => f.id === res.data.id);
+    if (i >= 0) faqs[i] = res.data; else faqs.push(res.data);
+    faqs.sort((a, b) => a.sort - b.sort || a.id - b.id);
+    closeDrawer(); renderFaqs();
+    toast(`${target ? '저장' : '추가'}했습니다. ${res.data.hidden ? '(숨김 상태라 메인에는 안 보입니다)' : '메인에 바로 반영됩니다.'}`);
+  }
+  async function deleteFaq() {
+    const target = editing;
+    if (!target || busy) return;
+    setBusy(true); B.setBusy(delBtn, true, '지우는 중…');
+    const { error } = await B.sb.from('faqs').delete().eq('id', target.id);
+    setBusy(false); B.setBusy(delBtn, false);
+    if (error) return fail(errText(error, '지우기'));
+    faqs = faqs.filter(f => f.id !== target.id);
+    closeDrawer(); renderFaqs();
+    toast('질문을 지웠습니다.');
+  }
+  viewHooks.push(view => { if (view === 'faq' && !faqsLoaded && hasFaqs) loadFaqs(); });
+  if (decodeURIComponent(location.hash.slice(1)) === 'faq') loadFaqs();
 
   await Promise.all([loadAll(), loadStatus()]);
   await loadDockets();
