@@ -288,6 +288,25 @@
   .rank .meter i { display: block; height: 100%; border-radius: 3px; }
   .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
 
+  /* 페이지 문구 */
+  .tx-card { max-width: 860px; }
+  .tx-block { margin-top: 14px; padding: 12px 14px 14px; border: 1px solid var(--rule); border-radius: 10px; background: #FAFBF9; }
+  .tx-head { display: flex; align-items: center; gap: 8px; }
+  .tx-head .input { flex: 1; font-weight: 700; }
+  .tx-tools { display: flex; gap: 4px; flex: none; }
+  .tx-tools .mini-btn { padding: 4px 9px; }
+  .tx-block textarea.input { margin-top: 8px; width: 100%; }
+  .tx-items { margin: 10px 0 0; padding: 0; list-style: none; counter-reset: it; }
+  .tx-items li { display: grid; grid-template-columns: 1.6em minmax(0, 0.8fr) minmax(0, 1.6fr) minmax(0, 1.4fr) auto; gap: 6px; align-items: center; padding: 4px 0; counter-increment: it; }
+  .tx-items li::before { content: counter(it) "."; font-weight: 900; color: var(--muted); text-align: right; }
+  .tx-items.is-ban li { grid-template-columns: 1.6em minmax(0, 2fr) minmax(0, 1.2fr) auto; }
+  .tx-items .input { padding: 7px 9px; font-size: 14.5px; }
+  .tx-add { margin-top: 8px; }
+  @media (max-width: 760px) {
+    .tx-items li, .tx-items.is-ban li { grid-template-columns: 1.6em minmax(0, 1fr) auto; }
+    .tx-items li > .input:not(:first-of-type) { grid-column: 2 / 3; }
+  }
+
   /* 자주 묻는 질문 미리보기: 메인과 같은 모양 */
   .faq-pv { padding: 4px 14px; border-radius: 12px; background: var(--ground); }
   .faq-pv details { border-bottom: 2px solid var(--rule); }
@@ -510,6 +529,53 @@
         </div>
         <div data-faq-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
         <p class="list-hint">메인 ‘자주 묻는 질문’에 이 순서대로 보입니다. 손잡이로 순서를 바꾸면 바로 저장됩니다.</p>
+      </section>
+
+      <!-- 페이지 문구 -->
+      <section data-view="texts" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-content">‹ 콘텐츠</a>
+            <p class="view-kicker">콘텐츠</p>
+            <h1 tabindex="-1">페이지 문구</h1>
+          </div>
+          <a class="mini-btn" href="/#statute" target="_blank" rel="noopener">메인에서 보기 ↗</a>
+        </div>
+        <p class="list-hint" style="margin:0 0 14px" data-tx-source></p>
+        <form class="tx-form" data-tx-form novalidate>
+          <div class="card tx-card">
+            <h2>설치 규정</h2>
+            <p class="hint" style="margin-top:2px">조문을 고치면 제목 옆에 ‘개정 (저장한 날)’이 붙습니다.</p>
+            <label class="field-label" for="tx-enacted">제정일</label>
+            <input class="input" id="tx-enacted" maxlength="30" placeholder="예: 2026. 10. 19." style="max-width:220px">
+            <div data-tx-articles></div>
+            <button type="button" class="mini-btn tx-add" data-tx-add-article>+ 조 추가</button>
+          </div>
+          <div class="card tx-card">
+            <h2>업무 범위</h2>
+            <label class="field-label" for="tx-ban-article">설치 규정 제5조(금지) 문구</label>
+            <textarea class="input" id="tx-ban-article" maxlength="300" rows="2"></textarea>
+            <label class="field-label" for="tx-ban-lead">안내 문구</label>
+            <input class="input" id="tx-ban-lead" maxlength="120">
+            <p class="field-label">접수하지 않는 안건 <span class="opt">(내용 · 예시)</span></p>
+            <ol class="tx-items is-ban" data-tx-ban></ol>
+            <button type="button" class="mini-btn tx-add" data-tx-add-ban>+ 항목 추가</button>
+          </div>
+          <div class="card tx-card">
+            <h2>문의 창구 · 바닥글</h2>
+            <label class="field-label" for="tx-contact-label">연락처 이름</label>
+            <input class="input" id="tx-contact-label" maxlength="80" placeholder="예: 카카오톡 1:1 오픈채팅 ‘문의 창구’">
+            <label class="field-label" for="tx-contact-url">연락처 주소</label>
+            <input class="input" id="tx-contact-url" maxlength="300" inputmode="url" autocapitalize="none" spellcheck="false" placeholder="https://open.kakao.com/o/…">
+            <p class="hint">모집 요강의 ‘1:1 문의 창구’ 버튼과 바닥글 연락처가 함께 바뀝니다. 바닥글 ‘최종 개정’은 저장한 날로 저절로 바뀝니다.</p>
+            <div class="card-foot">
+              <p class="form-error" role="alert" data-tx-error hidden></p>
+              <button type="submit" class="btn btn-primary btn-small" data-tx-save>저장</button>
+              <button type="button" class="btn btn-secondary btn-small" data-tx-reset>되돌리기</button>
+              <span class="saved-at" data-tx-saved></span>
+            </div>
+          </div>
+        </form>
       </section>
 
       <!-- 통계 -->
@@ -1070,6 +1136,7 @@
 <script src="/assets/route-icons.js"></script>
 <script src="/assets/site-status.js"></script>
 <script src="/assets/dockets.js"></script>
+<script src="/assets/site-texts.js"></script>
 <script>
 (async function () {
   const B = window.BYPASS, I = window.BYPASS_ICONS, DK = window.BYPASS_DOCKETS, ST = window.BYPASS_STATUS;
@@ -1113,7 +1180,7 @@
     { id: 'wiki', group: 'content', name: '위키', legacy: 'admin' },
     { id: 'notices', group: 'content', name: '공지', when: '4단계', legacy: 'home' },
     { id: 'faq', group: 'content', name: '자주 묻는 질문', ready: true },
-    { id: 'texts', group: 'content', name: '페이지 문구', when: '4단계' },
+    { id: 'texts', group: 'content', name: '페이지 문구', ready: true },
     { id: 'status', group: 'ops', name: '사이트 상태', ready: true },
     { id: 'share', group: 'ops', name: '링크 미리보기', ready: true },
     { id: 'members', group: 'ops', name: '회원', ready: true },
@@ -3240,6 +3307,114 @@
   }
   viewHooks.push(view => { if (view === 'faq' && !faqsLoaded && hasFaqs) loadFaqs(); });
   if (decodeURIComponent(location.hash.slice(1)) === 'faq') loadFaqs();
+
+  /* ===== 페이지 문구 ===== (site_settings 'texts', 모양은 assets/site-texts.js) */
+  const TX = window.BYPASS_TEXTS;
+  let tx = null, txBase = null, txRow = null, txLoaded = false, txBusy = false;
+  const txErr = $('[data-tx-error]');
+  const todayIso = () => { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`; };
+  const statuteKey = st => JSON.stringify({ enacted: st.enacted, articles: st.articles });
+  async function loadTexts() {
+    $('[data-tx-source]').textContent = '불러오는 중…';
+    const { data, error } = await B.sb.from('site_settings').select('*').eq('key', 'texts').maybeSingle();
+    if (error && missingTable(error)) { setPhase2(false); $('[data-tx-source]').textContent = '사이트 설정 표가 없습니다. supabase/010_hq_phase2.sql을 먼저 실행해 주세요.'; return; }
+    txRow = error ? null : data;
+    if (txRow) { tx = TX.clean(txRow.value); $('[data-tx-source]').textContent = '저장된 문구입니다. 고친 뒤 저장하면 메인에 바로 반영됩니다.'; }
+    else {
+      // 아직 저장한 적이 없으면 지금 메인 HTML 문구에서 시작
+      try { const html = await (await fetch('/', { cache: 'no-store' })).text(); tx = TX.parse(new DOMParser().parseFromString(html, 'text/html')); }
+      catch (e) { tx = TX.clean({}); }
+      $('[data-tx-source]').textContent = '지금 메인에 적힌 문구에서 시작합니다. 처음 저장하면 이때부터 HQ에서 관리합니다.';
+    }
+    txBase = JSON.parse(JSON.stringify(tx));
+    txLoaded = true;
+    fillTexts();
+    $('[data-tx-saved]').textContent = txRow && txRow.updated_at ? `마지막 저장 ${new Date(txRow.updated_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}` : '';
+  }
+  const inp = (val, max, ph, onIn, tag) => { const e = el(tag || 'input', 'input'); if (!tag) e.maxLength = max; else { e.maxLength = max; e.rows = 2; } e.value = val || ''; if (ph) e.placeholder = ph; e.addEventListener('input', () => { onIn(e.value); txErr.hidden = true; }); return e; };
+  const tool = (text, label, fn, disabled) => { const b = el('button', 'mini-btn', text); b.type = 'button'; b.setAttribute('aria-label', label); b.disabled = !!disabled; b.addEventListener('click', fn); return b; };
+  function fillTexts() {
+    F('tx-enacted').value = tx.statute.enacted;
+    F('tx-ban-article').value = tx.scope.article; F('tx-ban-lead').value = tx.scope.lead;
+    F('tx-contact-label').value = tx.contact.label; F('tx-contact-url').value = tx.contact.url;
+    renderArticles(); renderBan();
+  }
+  function move(arr, i, d) { const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; }
+  function renderArticles() {
+    const box = $('[data-tx-articles]');
+    box.replaceChildren(...tx.statute.articles.map((a, i, all) => {
+      const b = el('div', 'tx-block');
+      const head = el('div', 'tx-head');
+      const t = inp(a.title, 60, `예: 제${i + 1}조(목적)`, v => { a.title = v; }); t.setAttribute('aria-label', `${i + 1}번째 조 제목`);
+      const tools = el('span', 'tx-tools');
+      tools.append(tool('↑', '위로', () => { move(all, i, -1); renderArticles(); }, i === 0), tool('↓', '아래로', () => { move(all, i, 1); renderArticles(); }, i === all.length - 1),
+        tool('지우기', `${a.title || i + 1 + '번째 조'} 지우기`, () => { all.splice(i, 1); renderArticles(); }));
+      head.append(t, tools);
+      const body = inp(a.body, 600, '조문 본문', v => { a.body = v; }, 'textarea'); body.setAttribute('aria-label', `${a.title || i + 1 + '번째 조'} 본문`);
+      const ol = el('ol', 'tx-items');
+      a.items.forEach((it, k) => {
+        const li = el('li');
+        const term = inp(it.term, 40, '항목 (예: 중복 입력)', v => { it.term = v; }); term.setAttribute('aria-label', `${k + 1}호 항목`);
+        const text = inp(it.text, 300, '설명', v => { it.text = v; }); text.setAttribute('aria-label', `${k + 1}호 설명`);
+        const ex = inp(it.example, 200, '예: …', v => { it.example = v; }); ex.setAttribute('aria-label', `${k + 1}호 예시`);
+        li.append(term, text, ex, tool('지우기', `${k + 1}호 지우기`, () => { a.items.splice(k, 1); renderArticles(); }));
+        ol.append(li);
+      });
+      const add = tool('+ 호 추가', '호 추가', () => { a.items.push({ term: '', text: '', example: '' }); renderArticles(); });
+      add.classList.add('tx-add');
+      b.append(head, body, ol, add);
+      return b;
+    }));
+  }
+  function renderBan() {
+    const ol = $('[data-tx-ban]');
+    ol.replaceChildren(...tx.scope.items.map((it, k) => {
+      const li = el('li');
+      const text = inp(it.text, 200, '접수하지 않는 안건', v => { it.text = v; }); text.setAttribute('aria-label', `${k + 1}번째 항목`);
+      const ex = inp(it.example, 200, '(예: …)', v => { it.example = v; }); ex.setAttribute('aria-label', `${k + 1}번째 항목 예시`);
+      li.append(text, ex, tool('지우기', `${k + 1}번째 항목 지우기`, () => { tx.scope.items.splice(k, 1); renderBan(); }));
+      return li;
+    }));
+  }
+  $('[data-tx-add-article]').addEventListener('click', () => { tx.statute.articles.push({ title: `제${tx.statute.articles.length + 1}조()`, body: '', items: [] }); renderArticles(); $$('[data-tx-articles] .tx-head .input').pop().focus(); });
+  $('[data-tx-add-ban]').addEventListener('click', () => { tx.scope.items.push({ text: '', example: '' }); renderBan(); $$('[data-tx-ban] .input').slice(-2)[0].focus(); });
+  F('tx-enacted').addEventListener('input', e => { tx.statute.enacted = e.target.value; });
+  F('tx-ban-article').addEventListener('input', e => { tx.scope.article = e.target.value; });
+  F('tx-ban-lead').addEventListener('input', e => { tx.scope.lead = e.target.value; });
+  F('tx-contact-label').addEventListener('input', e => { tx.contact.label = e.target.value; });
+  F('tx-contact-url').addEventListener('input', e => { tx.contact.url = e.target.value.trim(); F('tx-contact-url').removeAttribute('aria-invalid'); });
+  $('[data-tx-reset]').addEventListener('click', () => { if (!txBase) return; tx = JSON.parse(JSON.stringify(txBase)); fillTexts(); txErr.hidden = true; toast('저장된 문구로 되돌렸습니다.'); });
+  function txFail(text, id) { txErr.textContent = text; txErr.hidden = false; if (id) { F(id).setAttribute('aria-invalid', 'true'); F(id).focus(); } }
+  $('[data-tx-form]').addEventListener('submit', async e => {
+    e.preventDefault();
+    if (txBusy || !tx) return;
+    if (tx.contact.url && !/^https:\/\/[^\s"<>]+$/i.test(tx.contact.url)) return txFail('연락처 주소는 https:// 로 시작해야 합니다.', 'tx-contact-url');
+    const empty = tx.statute.articles.findIndex(a => !a.title.trim());
+    if (empty >= 0) return txFail(`${empty + 1}번째 조의 제목을 입력해 주세요.`);
+    const value = TX.clean(tx);
+    if (!value.statute.articles.length) return txFail('설치 규정에 조가 하나 이상 있어야 합니다.');
+    const today = todayIso();
+    value.revised = today;
+    value.statute.revised = statuteKey(value.statute) !== statuteKey(TX.clean(txBase).statute) ? today : (txBase.statute.revised || null);
+    if (JSON.stringify(value).length > 20000) return txFail('문구가 너무 깁니다. 조금 줄여 주세요.');
+    txBusy = true; const btn = $('[data-tx-save]'); B.setBusy(btn, true, '저장 중…');
+    const res = txRow
+      ? await B.sb.from('site_settings').update({ value }).eq('key', 'texts').select().single()
+      : await B.sb.from('site_settings').insert({ key: 'texts', value }).select().single();
+    txBusy = false; B.setBusy(btn, false);
+    if (res.error) {
+      if (missingTable(res.error)) return txFail('사이트 설정 표가 없습니다. supabase/010_hq_phase2.sql을 먼저 실행해 주세요.');
+      if (res.error.code === '23514') return txFail('저장 한도를 넘었거나 형식이 맞지 않습니다. supabase/018_page_texts.sql을 실행했는지 확인해 주세요.');
+      return txFail(errText(res.error, '저장', 'status'));
+    }
+    txRow = res.data; tx = TX.clean(txRow.value); txBase = JSON.parse(JSON.stringify(tx));
+    fillTexts();
+    $('[data-tx-source]').textContent = '저장된 문구입니다. 고친 뒤 저장하면 메인에 바로 반영됩니다.';
+    $('[data-tx-saved]').textContent = `마지막 저장 ${new Date().toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`;
+    toast(`저장했습니다. 메인에 바로 반영됩니다.${value.statute.revised === today ? ' (설치 규정 개정일도 오늘로)' : ''}`);
+  });
+  viewHooks.push(view => { if (view === 'texts' && !txLoaded) loadTexts(); });
+  if (decodeURIComponent(location.hash.slice(1)) === 'texts') loadTexts();
 
   await Promise.all([loadAll(), loadStatus()]);
   await loadDockets();
