@@ -6,8 +6,8 @@
 (function () {
   const STATUS = {
     building: { name: '공사 중', badge: '공사 중', rows: ['기존 절차', '개선 계획'] },
-    done:     { name: '완료',     badge: '개통',    rows: ['기존 절차', '개선 후'] },
-    new:      { name: '신설 개통', badge: '신설 개통', rows: ['기존 절차', '개선 후'] },
+    done:     { name: '완료',     badge: '준공',    rows: ['기존 절차', '개선 후'] },
+    new:      { name: '신설 준공', badge: '신설 준공', rows: ['기존 절차', '개선 후'] },
     rejected: { name: '반려',     badge: '반려',    rows: ['접수 내용', '반려 사유'] }
   };
   const TILTS = [-11, 7, -4, 9, -7, 3];
@@ -23,7 +23,7 @@
 
   const label = d => `제${d.no}호${d.no_note ? ` (${d.no_note})` : ''}`;
   const isExternal = url => /^https?:\/\//i.test(url || '');
-  // 바로가기는 완료·신설 개통 안건에, 연결한 지름길이 개통되어 있을 때만
+  // 바로가기는 완료·신설 준공 안건에, 연결한 지름길이 개통되어 있을 때만
   const goOf = d => (d.status === 'done' || d.status === 'new') && d.route && d.route.status === 'open' && d.route.url ? d.route : null;
 
   function seal(kind, tilt) {
@@ -31,7 +31,7 @@
     svg.setAttribute('class', kind === 'new' ? 'open-seal' : 'done-seal');
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', kind === 'new'
-      ? '신설 개통 인장. 이 길은 원래 지도에 없었습니다.'
+      ? '신설 준공 인장. 이 길은 원래 지도에 없었습니다.'
       : '도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다.');
     if (kind !== 'new' && tilt != null) svg.style.setProperty('--r', `${tilt}deg`);
     const use = document.createElementNS(SVG_NS, 'use');
@@ -74,7 +74,7 @@
     }
     if (d.status === 'done') foot.append(seal('done', TILTS[(opts.index || 0) % TILTS.length]));
     if (d.status === 'new') foot.append(seal('new'));
-    if (d.status === 'building') { const tape = el('div', 'board-tape'); tape.append(el('span', null, '개통 준비 중')); foot.append(tape); }
+    if (d.status === 'building') { const tape = el('div', 'board-tape'); tape.append(el('span', null, '준공 준비 중')); foot.append(tape); }
     art.append(foot);
     const legs = el('div', 'legs'); legs.setAttribute('aria-hidden', 'true');
     unit.append(art, legs);
@@ -130,7 +130,7 @@
 <circle cx="104" cy="70" r="15"/></g>
 <circle cx="104" cy="70" r="4.2"/>
 <path d="M99 86 L92 110 L98 106 L101 112 L105 88 Z"/>
-<path d="M109 86 L116 110 L110 106 L107 112 L103 88 Z"/><g mask="url(#open-behind)"><path d="M194.63 41.56 L198.31 98.73 L199.31 98.71 L200.22 41.43 Z"/></g><path d="M4 70.5 H140 Q166 70.5 178 84" fill="none" stroke="#0F5A3A" stroke-width="13"/><path d="M236 70.5 H222 Q206 70.5 198.5 86" fill="none" stroke="#0F5A3A" stroke-width="13"/><path d="M197.43 41.49 L196.21 28.11" fill="none" stroke="#0F5A3A" stroke-width="2.8" stroke-linecap="round"/><circle cx="195.70" cy="22.53" r="5.6" fill="none" stroke="#0F5A3A" stroke-width="2.8"/><path d="M197.43 41.49 L206.28 31.38" fill="none" stroke="#0F5A3A" stroke-width="2.8" stroke-linecap="round"/><circle cx="209.97" cy="27.17" r="5.6" fill="none" stroke="#0F5A3A" stroke-width="2.8"/><g mask="url(#open-near)" fill="#fff"><path d="M195.14 39.87 L164.16 87.31 L164.98 87.89 L199.71 43.12 Z" stroke="#fff" stroke-width="2.6" paint-order="stroke" stroke-linejoin="round"/></g><path d="M195.14 39.87 L164.16 87.31 L164.98 87.89 L199.71 43.12 Z"/><circle cx="197.43" cy="41.49" r="2.3"/><text x="120" y="142" text-anchor="middle" font-size="33" font-weight="900" letter-spacing="2">신설 개통</text>
+<path d="M109 86 L116 110 L110 106 L107 112 L103 88 Z"/><g mask="url(#open-behind)"><path d="M194.63 41.56 L198.31 98.73 L199.31 98.71 L200.22 41.43 Z"/></g><path d="M4 70.5 H140 Q166 70.5 178 84" fill="none" stroke="#0F5A3A" stroke-width="13"/><path d="M236 70.5 H222 Q206 70.5 198.5 86" fill="none" stroke="#0F5A3A" stroke-width="13"/><path d="M197.43 41.49 L196.21 28.11" fill="none" stroke="#0F5A3A" stroke-width="2.8" stroke-linecap="round"/><circle cx="195.70" cy="22.53" r="5.6" fill="none" stroke="#0F5A3A" stroke-width="2.8"/><path d="M197.43 41.49 L206.28 31.38" fill="none" stroke="#0F5A3A" stroke-width="2.8" stroke-linecap="round"/><circle cx="209.97" cy="27.17" r="5.6" fill="none" stroke="#0F5A3A" stroke-width="2.8"/><g mask="url(#open-near)" fill="#fff"><path d="M195.14 39.87 L164.16 87.31 L164.98 87.89 L199.71 43.12 Z" stroke="#fff" stroke-width="2.6" paint-order="stroke" stroke-linejoin="round"/></g><path d="M195.14 39.87 L164.16 87.31 L164.98 87.89 L199.71 43.12 Z"/><circle cx="197.43" cy="41.49" r="2.3"/><text x="120" y="142" text-anchor="middle" font-size="33" font-weight="900" letter-spacing="2">신설 준공</text>
 <text x="120" y="164" text-anchor="middle" font-size="13" font-weight="700">이 길은 원래 지도에</text>
 <text x="120" y="180" text-anchor="middle" font-size="13" font-weight="700">없었습니다</text></g></symbol>`;
 
