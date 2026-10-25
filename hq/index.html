@@ -609,7 +609,7 @@
             <div class="seg" role="radiogroup" aria-label="안건 상태" data-docket-status>
               <button type="button" role="radio" data-st="building">공사 중</button>
               <button type="button" role="radio" data-st="done">완료</button>
-              <button type="button" role="radio" data-st="new">신설 개통</button>
+              <button type="button" role="radio" data-st="new">신설 준공</button>
               <button type="button" role="radio" data-st="rejected">반려</button>
             </div>
             <p class="hint" data-st-hint></p>
@@ -628,7 +628,7 @@
 
           <label class="field-label" for="d-route">연결한 지름길</label>
           <select class="input" id="d-route"></select>
-          <p class="hint">완료·신설 개통 안건에 개통된 지름길을 이으면 ‘지름길 바로가기’ 버튼이 저절로 달립니다.</p>
+          <p class="hint">완료·신설 준공 안건에 개통된 지름길을 이으면 ‘지름길 바로가기’ 버튼이 저절로 달립니다.</p>
           <p class="warn-note" data-route-warn hidden></p>
 
           <label class="field-label" for="d-report">시작된 제보 <span class="opt">(선택)</span></label>
@@ -1761,7 +1761,7 @@
   const ST_HINT = {
     building: '심의를 통과해 만드는 중인 안건. 공사 띠가 붙고 직인은 없습니다.',
     done: '기존 업무 방식을 대체한 안건. 도도새 직인을 찍습니다.',
-    new: '원래 없던 길을 새로 만든 안건. 신설 개통 인장을 찍습니다.',
+    new: '원래 없던 길을 새로 만든 안건. 신설 준공 인장을 찍습니다.',
     rejected: '심의에서 반려한 안건. 직인 없이 반려 사유를 함께 공고합니다.'
   };
   const receiptOf = r => `BYP-${new Date(r.created_at).getFullYear()}-${String(r.id).padStart(3, '0')}`;
