@@ -258,6 +258,36 @@
   .card-foot .form-error { flex-basis: 100%; margin: 0 0 4px; }
   .saved-at { margin-left: auto; font-size: 13px; color: var(--muted); }
 
+  /* 통계: 한 차트에 한 가지 값 (방문은 녹색, 이용하기는 주황) */
+  .st-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 18px; }
+  .st-sum { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin-bottom: 22px; }
+  .chart-card { position: relative; padding: 16px 18px 12px; margin-bottom: 16px; background: #fff; border: 1px solid var(--rule); border-radius: 12px; }
+  .chart-card h2 { margin: 0; font-size: 17px; font-weight: 900; }
+  .chart-card .sub { margin: 2px 0 10px; font-size: 13px; color: var(--muted); }
+  .chart { display: block; width: 100%; height: auto; overflow: visible; }
+  .chart .grid { stroke: var(--rule); stroke-width: 1; }
+  .chart .axis { fill: var(--muted); font-size: 11px; font-family: var(--sans); }
+  .chart .bar { transition: opacity .15s; }
+  .chart .hit { fill: transparent; cursor: default; }
+  .chart .hit:hover + .bar, .chart .bar.is-on { opacity: 0.75; }
+  .chart-tip { position: absolute; z-index: 3; pointer-events: none; padding: 6px 10px; border-radius: 8px; background: var(--ink); color: #fff; font-size: 13px; font-weight: 700; line-height: 1.45; white-space: nowrap; transform: translate(-50%, calc(-100% - 8px)); }
+  .chart-tip small { display: block; font-weight: 500; color: #C9CFCB; }
+  .chart-card details { margin-top: 8px; font-size: 13.5px; }
+  .chart-card summary { cursor: pointer; font-weight: 700; color: var(--green); }
+  .chart-card table { width: 100%; margin-top: 8px; border-collapse: collapse; font-size: 13.5px; }
+  .chart-card th, .chart-card td { padding: 4px 6px; border-bottom: 1px solid var(--rule); text-align: right; font-variant-numeric: tabular-nums; }
+  .chart-card th:first-child, .chart-card td:first-child { text-align: left; }
+  .rank { list-style: none; margin: 4px 0 0; padding: 0; }
+  .rank li { display: grid; grid-template-columns: 1.8em minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--rule); }
+  .rank li:last-child { border-bottom: 0; }
+  .rank .n { font-weight: 900; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+  .rank .name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; font-size: 14.5px; }
+  .rank .name small { margin-left: 6px; font-weight: 500; color: var(--muted); }
+  .rank .v { font-weight: 900; font-variant-numeric: tabular-nums; }
+  .rank .meter { grid-column: 2 / 4; height: 6px; border-radius: 3px; background: var(--ground); overflow: hidden; }
+  .rank .meter i { display: block; height: 100%; border-radius: 3px; }
+  .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+
   /* 대시보드 */
   .dash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
   .dtile { display: flex; flex-direction: column; gap: 2px; padding: 16px 18px 15px; border-radius: 12px; background: #fff; border: 1px solid var(--rule); border-left: 6px solid var(--rule); color: var(--ink); text-decoration: none; }
@@ -449,6 +479,37 @@
           <div data-line-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
           <p class="list-hint">분류는 준공 현황의 큰 표지판입니다. 손잡이로 표지판 순서를 바꿉니다.</p>
         </div>
+      </section>
+
+      <!-- 통계 -->
+      <section data-view="stats" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-home">‹ 홈</a>
+            <p class="view-kicker">홈</p>
+            <h1 tabindex="-1">통계</h1>
+          </div>
+        </div>
+        <div class="banner banner-warn" role="alert" data-sql-warn5 hidden>
+          <p><b>데이터베이스 설정이 한 단계 남았습니다.</b> Supabase SQL Editor에서 <code>supabase/016_hq_stats.sql</code>을 실행해 주세요. 방문 기록은 그 전부터 계속 쌓이고 있습니다.</p>
+        </div>
+        <div class="st-bar">
+          <div class="seg" role="radiogroup" aria-label="기간" data-st-range>
+            <button type="button" role="radio" data-days="7">최근 7일</button>
+            <button type="button" role="radio" data-days="30">최근 30일</button>
+            <button type="button" role="radio" data-days="90">최근 90일</button>
+            <button type="button" role="radio" data-days="365">최근 1년</button>
+          </div>
+          <span class="hint" style="margin:0" data-st-unit></span>
+        </div>
+        <div class="dash-sub st-sum" data-st-sum></div>
+        <div class="chart-card" data-st-views></div>
+        <div class="chart-card" data-st-goes></div>
+        <div class="two-col">
+          <div class="chart-card"><h2>페이지별 방문</h2><p class="sub">많이 연 페이지 순</p><ol class="rank" data-st-pages></ol></div>
+          <div class="chart-card"><h2>지름길별 ‘이용하기’</h2><p class="sub">준공 현황에서 ‘이용하기’를 누른 수</p><ol class="rank" data-st-routes></ol></div>
+        </div>
+        <p class="list-hint">공개 페이지를 열 때와 ‘이용하기’를 누를 때 한 줄씩 셉니다. 미리보기 주소·내 컴퓨터에서 연 것과 검색 로봇은 세지 않습니다. 이름·아이디 같은 개인 정보는 남기지 않습니다.</p>
       </section>
 
       <!-- 대시보드 -->
@@ -999,7 +1060,7 @@
   const LEGACY = { inbox: ['/site/#inbox', '공사장 접수함'], admin: ['/site/#admin', '공사장 관리실'], home: ['/site/#home', '공사장 내 공사장 탭'] };
   const MENUS = [
     { id: 'dashboard', group: 'home', name: '대시보드', ready: true },
-    { id: 'stats', group: 'home', name: '통계', when: '3단계', note: '방문·이용 기록은 지금부터 쌓이고 있습니다.' },
+    { id: 'stats', group: 'home', name: '통계', ready: true },
     { id: 'reports', group: 'inbox', name: '불편 제보', ready: true },
     { id: 'applications', group: 'inbox', name: '합류 신청', ready: true },
     { id: 'dockets', group: 'content', name: '처리 현황', ready: true },
@@ -2922,11 +2983,125 @@
     B.setBusy(b, false); renderDashboard();
   });
 
+  /* ===== 통계 ===== (016: hq_stats_daily · hq_stats_pages · hq_stats_routes) */
+  let stDays = 30, stSeq = 0, stLoaded = false;
+  const C_VIEW = '#0F5A3A', C_GO = '#C2541A';   // 녹색 = 방문, 짙은 주황 = 이용하기 (흰 바탕 대비 확보)
+  const PAGE_NAMES = { '/': '메인', '/routes/': '준공 현황', '/dockets/': '처리 현황 전체 보기', '/tools/alfa-to-zulu/': 'Alfa to Zulu', '/login/': '로그인', '/join/': '회원가입', '/site/': '공사장' };
+  const pageName = path => PAGE_NAMES[path] || (routes.find(r => r.url === path) || {}).title || path;
+  const fmtN = n => Number(n || 0).toLocaleString('ko-KR');
+  const md = d => `${d.getMonth() + 1}. ${d.getDate()}.`;
+  // 7·30일은 하루, 90일은 주, 1년은 달로 묶는다
+  function bucket(rows, days) {
+    const parse = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+    const list = rows.map(r => ({ d: parse(r.day), views: Number(r.views), goes: Number(r.goes) }));
+    if (days <= 30) return list.map(x => ({ label: md(x.d), tip: `${x.d.getMonth() + 1}월 ${x.d.getDate()}일`, views: x.views, goes: x.goes }));
+    const out = [], key = days <= 90 ? (x => { const m = new Date(x.d); m.setDate(m.getDate() - ((m.getDay() + 6) % 7)); return m.getTime(); }) : (x => new Date(x.d.getFullYear(), x.d.getMonth(), 1).getTime());
+    list.forEach(x => {
+      const k = key(x), last = out[out.length - 1];
+      if (last && last.k === k) { last.views += x.views; last.goes += x.goes; last.end = x.d; }
+      else out.push({ k, start: x.d, end: x.d, views: x.views, goes: x.goes });
+    });
+    return out.map(b => days <= 90
+      ? { label: md(b.start), tip: `${md(b.start)} ~ ${md(b.end)} 주`, views: b.views, goes: b.goes }
+      : { label: `${b.start.getMonth() + 1}월`, tip: `${b.start.getFullYear()}년 ${b.start.getMonth() + 1}월`, views: b.views, goes: b.goes });
+  }
+  // 막대 차트 한 개 = 값 한 가지. 막대에 마우스를 올리면 말풍선
+  // 그림 폭을 카드 폭에 맞춰 그려서 글자 크기가 화면마다 같게 한다 (창 크기가 바뀌면 다시 그림)
+  const charts = new Set();
+  let chartTimer;
+  window.addEventListener('resize', () => { clearTimeout(chartTimer); chartTimer = setTimeout(() => [...charts].forEach(args => { if (args[0].isConnected && !args[0].closest('[hidden]')) barChart(...args); }), 150); });
+  function barChart(card, title, sub, data, key, color, unit) {
+    charts.forEach(a => { if (a[0] === card) charts.delete(a); });
+    charts.add([card, title, sub, data, key, color, unit]);
+    const W = Math.max(280, Math.round(card.clientWidth - 36)), H = 200, L = 34, R = 6, T = 12, Bt = 24;
+    const max = Math.max(1, ...data.map(d => d[key]));
+    const nice = (() => { const p = Math.pow(10, Math.floor(Math.log10(max))); const m = max / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p; })();
+    const y = v => T + (H - T - Bt) * (1 - v / nice);
+    const step = (W - L - R) / data.length, bw = Math.max(2, Math.min(28, step - 2));
+    const NS = 'http://www.w3.org/2000/svg', mk = (t, a) => { const e = document.createElementNS(NS, t); Object.entries(a).forEach(([k, v]) => e.setAttribute(k, v)); return e; };
+    const svg = mk('svg', { class: 'chart', viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `${title}: ${data.length}개 구간, 가장 많은 구간 ${fmtN(max)}${unit}` });
+    [0, nice / 2, nice].forEach(v => {
+      svg.append(mk('line', { class: 'grid', x1: L, x2: W - R, y1: y(v), y2: y(v) }));
+      const t = mk('text', { class: 'axis', x: L - 6, y: y(v) + 4, 'text-anchor': 'end' }); t.textContent = fmtN(v); svg.append(t);
+    });
+    const every = Math.ceil(data.length / Math.max(3, Math.floor(W / 80)));
+    const tipBox = el('div', 'chart-tip'); tipBox.hidden = true;
+    data.forEach((d, i) => {
+      const x = L + i * step + (step - bw) / 2, top = y(d[key]), h = Math.max(0, H - Bt - top);
+      const hit = mk('rect', { class: 'hit', x: L + i * step, y: T, width: step, height: H - T - Bt });
+      const r = Math.min(4, bw / 2, h);
+      const bar = mk('path', { class: 'bar', fill: color, d: h <= 0 ? '' : `M${x},${H - Bt} V${top + r} Q${x},${top} ${x + r},${top} H${x + bw - r} Q${x + bw},${top} ${x + bw},${top + r} V${H - Bt} Z` });
+      const show = () => {
+        bar.classList.add('is-on');
+        tipBox.replaceChildren(document.createTextNode(`${fmtN(d[key])}${unit}`), el('small', null, d.tip));
+        const box = svg.getBoundingClientRect(), cb = card.getBoundingClientRect();
+        tipBox.style.left = `${box.left - cb.left + (x + bw / 2) / W * box.width}px`;
+        tipBox.style.top = `${box.top - cb.top + top / H * box.height}px`;
+        tipBox.hidden = false;
+      };
+      const hide = () => { bar.classList.remove('is-on'); tipBox.hidden = true; };
+      hit.addEventListener('pointerenter', show); hit.addEventListener('pointerleave', hide);
+      hit.addEventListener('pointerdown', show);
+      svg.append(hit, bar);
+      if (i % every === 0) {
+        const t = mk('text', { class: 'axis', x: L + i * step + step / 2, y: H - 6, 'text-anchor': 'middle' }); t.textContent = d.label; svg.append(t);
+      }
+    });
+    // 표로 보기 (색 없이 숫자만)
+    const det = el('details'); det.append(el('summary', null, '표로 보기'));
+    const tb = el('table'); const tr0 = el('tr'); tr0.append(el('th', null, '구간'), el('th', null, title)); tb.append(tr0);
+    data.forEach(d => { const tr = el('tr'); tr.append(el('td', null, d.tip), el('td', null, fmtN(d[key]))); tb.append(tr); });
+    det.append(tb);
+    const total = data.reduce((a, d) => a + d[key], 0);
+    card.replaceChildren(el('h2', null, title), el('p', 'sub', `${sub} · 합계 ${fmtN(total)}${unit}`), svg, tipBox, det);
+  }
+  function rankList(box, rows, color, empty) {
+    if (!rows.length) { box.replaceChildren(el('li', 'rempty', empty)); return; }
+    const top = rows[0].n || 1;
+    box.replaceChildren(...rows.slice(0, 15).map((r, i) => {
+      const li = el('li');
+      const name = el('span', 'name', r.name); name.title = r.name; if (r.sub) name.append(el('small', null, r.sub));
+      const meter = el('span', 'meter'); const fill = el('i'); fill.style.width = `${Math.max(2, r.n / top * 100)}%`; fill.style.background = color; meter.append(fill);
+      li.append(el('span', 'n', String(i + 1)), name, el('span', 'v', fmtN(r.n)), meter);
+      return li;
+    }));
+  }
+  async function loadStats() {
+    const seq = ++stSeq, days = stDays;
+    $$('[data-st-range] button').forEach(b => b.setAttribute('aria-checked', String(Number(b.dataset.days) === days)));
+    $('[data-st-unit]').textContent = days <= 30 ? '하루 단위' : days <= 90 ? '주 단위' : '달 단위';
+    const [d, p, r] = await Promise.all([
+      B.sb.rpc('hq_stats_daily', { p_days: days }), B.sb.rpc('hq_stats_pages', { p_days: days }), B.sb.rpc('hq_stats_routes', { p_days: days })
+    ]);
+    if (seq !== stSeq) return;
+    const missing = [d, p, r].some(x => x.error && (x.error.code === 'PGRST202' || /function/i.test(x.error.message || '')));
+    $('[data-sql-warn5]').hidden = !missing;
+    if (d.error || !Array.isArray(d.data)) {
+      ['[data-st-views]', '[data-st-goes]'].forEach(s => $(s).replaceChildren(el('p', 'list-state', missing ? '016 SQL을 실행하면 그래프가 보입니다.' : errText(d.error, '불러오기'))));
+      $('[data-st-sum]').replaceChildren();
+    } else {
+      const data = bucket(d.data, days);
+      const tv = d.data.reduce((a, x) => a + Number(x.views), 0), tg = d.data.reduce((a, x) => a + Number(x.goes), 0);
+      const best = d.data.reduce((a, x) => Number(x.views) > Number(a.views) ? x : a, { views: -1 });
+      const stat = (n, label) => { const e = el('div', 'dstat'); e.append(el('b', null, n), el('span', null, label)); return e; };
+      $('[data-st-sum]').replaceChildren(stat(fmtN(tv), '방문'), stat(fmtN(tg), '‘이용하기’'), stat(fmtN(Math.round(tv / days * 10) / 10), '하루 평균 방문'),
+        stat(best.views > 0 ? `${Number(best.day.slice(5, 7))}. ${Number(best.day.slice(8))}.` : '—', best.views > 0 ? `가장 많이 본 날 (${fmtN(best.views)})` : '가장 많이 본 날'));
+      barChart($('[data-st-views]'), '방문', '공개 페이지를 연 수', data, 'views', C_VIEW, '회');
+      barChart($('[data-st-goes]'), '‘이용하기’', '지름길·자료로 넘어간 수', data, 'goes', C_GO, '회');
+    }
+    rankList($('[data-st-pages]'), (Array.isArray(p.data) ? p.data : []).map(x => ({ name: pageName(x.page), sub: PAGE_NAMES[x.page] || pageName(x.page) !== x.page ? x.page : '', n: Number(x.views) })), C_VIEW, '이 기간에 방문 기록이 없습니다.');
+    rankList($('[data-st-routes]'), (Array.isArray(r.data) ? r.data : []).map(x => ({ name: x.title || `지운 지름길 ${x.route_id ?? ''}`.trim(), n: Number(x.goes) })), C_GO, '이 기간에 ‘이용하기’ 기록이 없습니다.');
+    stLoaded = true;
+  }
+  $$('[data-st-range] button').forEach(b => b.addEventListener('click', () => { stDays = Number(b.dataset.days); loadStats(); }));
+  viewHooks.push(view => { if (view === 'stats' && !stLoaded) loadStats(); });
+
   await Promise.all([loadAll(), loadStatus()]);
   await loadDockets();
   await loadInbox();
   renderMembers();
   renderDashboard();
+  if (decodeURIComponent(location.hash.slice(1)) === 'stats') loadStats();
 })();
 </script>
 </body>
