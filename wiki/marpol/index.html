@@ -90,10 +90,10 @@ h1,h2,h3{text-wrap:balance;margin:0}
 
 /* home */
 .hero{display:grid;grid-template-columns:1.25fr 1fr;gap:36px;align-items:end;padding-bottom:28px;border-bottom:1px solid var(--rule)}
-.hero{grid-template-columns:minmax(0,1fr) auto;column-gap:40px}
-.hero-l{display:grid;gap:14px;min-width:0}
-.hero h1{font-size:clamp(28px,3.4vw,40px);line-height:1.25;margin-top:-8px}
-@media (min-width:1200px){.hero h1{white-space:nowrap}}
+.hero{row-gap:16px}
+.hero-t{grid-column:1/-1}
+.hero h1{font-size:clamp(28px,4.4vw,40px);line-height:1.25;margin-top:4px}
+@media (min-width:901px){.hero h1{white-space:nowrap}}
 .hero p{margin:0;max-width:34em;color:var(--muted)}
 .hero .meta{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);line-height:1.9;border-left:2px solid var(--rule);padding-left:14px}
 .hero .meta b{color:var(--ink);font-weight:600}
@@ -1555,9 +1555,9 @@ function vHome(){
   };
   app.innerHTML = `
   <section class="hero">
-    <div class="hero-l"><div class="eyebrow">해양환경협약 학습 위키</div>
-      <h1 class="disp">해양에서의 오염 방지를 위한 국제 협약</h1>
-      <p>MARPOL 73/78 부속서 Ⅰ(기름), Ⅳ(오수), Ⅴ(폐기물)를 안 광 교수님의 강의자료 기준으로 정리했습니다. 문서를 읽고, 배출 판정기로 상황을 확인하고, 퀴즈와 시험 모드로 점검하세요.</p></div>
+    <div class="hero-t"><div class="eyebrow">해양환경협약 학습 위키</div>
+      <h1 class="disp">해양에서의 오염 방지를 위한 국제 협약</h1></div>
+    <div><p>MARPOL 73/78 부속서 Ⅰ(기름), Ⅳ(오수), Ⅴ(폐기물)를 안 광 교수님의 강의자료 기준으로 정리했습니다. 문서를 읽고, 배출 판정기로 상황을 확인하고, 퀴즈와 시험 모드로 점검하세요.</p></div>
     <div class="meta">채택 <b>1973.11.2</b> / 의정서 <b>1978.2.17</b><br>발효 <b>1983.10.2</b> · 한국 가입 <b>1984.7</b><br>Ⅰ 1983 · Ⅴ 1988 · Ⅳ 2003<br>문서 <b>${DOCS.length}</b>편 · 문제 <b>${Q.length}</b>개<br>중간 예상 객관식 <b>${MQ.length}</b> · 서술형 <b>${ESSAY.length}</b></div>
   </section>
   <div class="annexes">${["I","IV","V"].map(card).join("")}</div>
