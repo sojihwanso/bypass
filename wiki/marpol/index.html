@@ -1,0 +1,1955 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="안 광 교수님의 해양환경협약 강의자료를 바탕으로 정리한 MARPOL 부속서 Ⅰ·Ⅳ·Ⅴ 학습 위키">
+<link rel="canonical" href="https://teambypass.vercel.app/wiki/marpol/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://teambypass.vercel.app/wiki/marpol/">
+<meta property="og:title" content="MARPOL 학습 위키">
+<meta property="og:description" content="MARPOL 부속서 Ⅰ·Ⅳ·Ⅴ 문서, 배출 판정기, 퀴즈, 시험 모드, 2026.2학기 중간 시험 대비">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>MARPOL 학습 위키</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Nanum+Gothic:wght@700;800&display=swap">
+<style>
+/* Layout: sticky chart-room header, wiki body = sidebar index + article column; annex colors code every doc. */
+:root{
+  --paper:#F3F6F7; --surface:#FFFFFF; --ink:#12202A; --muted:#566571; --rule:#D3DBE0; --soft:#E8EEF1;
+  --navy:#173B57; --navy-ink:#FFFFFF;
+  --oil:#93530F; --oil-bg:#FBF1E4;
+  --sew:#17705F; --sew-bg:#E3F3EF;
+  --gar:#4752A0; --gar-bg:#EAECF8;
+  --ov:#4A5864; --ov-bg:#EBEFF2;
+  --ok:#1E7A3C; --ok-bg:#E3F4E8; --bad:#B3261E; --bad-bg:#FBE7E5; --warn:#8A5A00; --warn-bg:#FBF0D9;
+  --kr:#1F5E8C; --kr-bg:#E8F0F7;
+  --f-disp:"Nanum Gothic","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0D1419; --surface:#141E25; --ink:#E3EAEE; --muted:#93A2AD; --rule:#25333D; --soft:#1A262E;
+  --navy:#0F2A3F; --navy-ink:#E3EAEE;
+  --oil:#E3A55C; --oil-bg:#2A1F12; --sew:#5BC4AE; --sew-bg:#10261F; --gar:#9EA8F2; --gar-bg:#1A1D33; --ov:#A9B6C0; --ov-bg:#1B252C;
+  --ok:#6BD18A; --ok-bg:#12291A; --bad:#F2867E; --bad-bg:#2E1513; --warn:#E8BC5E; --warn-bg:#2B2210; --kr:#86BCE6; --kr-bg:#122230; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0D1419; --surface:#141E25; --ink:#E3EAEE; --muted:#93A2AD; --rule:#25333D; --soft:#1A262E;
+  --navy:#0F2A3F; --navy-ink:#E3EAEE;
+  --oil:#E3A55C; --oil-bg:#2A1F12; --sew:#5BC4AE; --sew-bg:#10261F; --gar:#9EA8F2; --gar-bg:#1A1D33; --ov:#A9B6C0; --ov-bg:#1B252C;
+  --ok:#6BD18A; --ok-bg:#12291A; --bad:#F2867E; --bad-bg:#2E1513; --warn:#E8BC5E; --warn-bg:#2B2210; --kr:#86BCE6; --kr-bg:#122230; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15.5px;line-height:1.7;word-break:keep-all;overflow-wrap:anywhere}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--navy)}
+a{color:inherit}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gar);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--navy);color:var(--navy-ink)}
+header.top .wrap{display:flex;align-items:center;gap:20px;padding-block:10px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:10px;text-decoration:none;flex:none}
+.brand b{font-family:var(--f-disp);font-size:20px;font-weight:800;letter-spacing:.01em}
+.brand span{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;opacity:.75}
+nav.main{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+nav.main::-webkit-scrollbar{display:none}
+nav.main a{flex:none;text-decoration:none;font-size:14px;padding:6px 11px;border-radius:6px;opacity:.85;white-space:nowrap}
+nav.main a:hover{opacity:1;background:rgba(255,255,255,.08)}
+nav.main a.on{opacity:1;background:rgba(255,255,255,.16);font-weight:600}
+nav.main a.star{color:#FFD58A}
+main{padding-block:28px 64px}
+
+/* type */
+h1,h2,h3{text-wrap:balance;margin:0}
+.disp{font-family:var(--f-disp);font-weight:800;letter-spacing:-.01em}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono)}
+
+/* annex tags */
+.tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:11.5px;font-weight:600;letter-spacing:.06em;padding:2px 8px;border-radius:4px;white-space:nowrap}
+.tI{color:var(--oil);background:var(--oil-bg)} .tIV{color:var(--sew);background:var(--sew-bg)} .tV{color:var(--gar);background:var(--gar-bg)} .tOV{color:var(--ov);background:var(--ov-bg)}
+.cI{--ac:var(--oil);--acbg:var(--oil-bg)} .cIV{--ac:var(--sew);--acbg:var(--sew-bg)} .cV{--ac:var(--gar);--acbg:var(--gar-bg)} .cOV{--ac:var(--ov);--acbg:var(--ov-bg)}
+.net{font-family:var(--f-mono);font-size:11px;color:var(--warn);background:var(--warn-bg);padding:2px 7px;border-radius:4px;white-space:nowrap}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);background:var(--surface);padding:8px 14px;border-radius:7px;cursor:pointer;text-decoration:none;font-size:14.5px;font-weight:500}
+.btn:hover{border-color:var(--muted)}
+.btn.pri{background:var(--navy);color:var(--navy-ink);border-color:var(--navy)}
+:root[data-theme="dark"] .btn.pri{background:#2B5A80;border-color:#2B5A80}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.pri{background:#2B5A80;border-color:#2B5A80}}
+.btn.ghost{background:transparent}
+.btn[disabled]{opacity:.45;cursor:default}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--rule);background:var(--surface);border-radius:999px;padding:5px 13px;font-size:13.5px;cursor:pointer}
+.chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+/* home */
+.hero{display:grid;grid-template-columns:1.25fr 1fr;gap:36px;align-items:end;padding-bottom:28px;border-bottom:1px solid var(--rule)}
+.hero h1{font-size:clamp(30px,5vw,48px);line-height:1.2}
+.hero p{margin:12px 0 0;max-width:34em;color:var(--muted)}
+.hero .meta{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);line-height:1.9;border-left:2px solid var(--rule);padding-left:14px}
+.hero .meta b{color:var(--ink);font-weight:600}
+.annexes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:26px}
+.acard{background:var(--surface);border:1px solid var(--rule);border-top:3px solid var(--ac);border-radius:8px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:10px;text-decoration:none}
+.acard:hover{border-color:var(--ac)}
+.acard .num{font-family:var(--f-disp);font-size:26px;font-weight:800;color:var(--ac);line-height:1}
+.acard h3{font-size:16.5px;font-weight:600}
+.acard p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.6}
+.acard .stats{display:flex;gap:14px;font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-top:auto;padding-top:6px;border-top:1px dashed var(--rule)}
+.bar{height:4px;background:var(--soft);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ac)}
+.section{margin-top:40px}
+.sh{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.sh h2{font-size:22px}
+.sh p{margin:4px 0 0;color:var(--muted);font-size:14px}
+
+/* distance chart */
+.chart{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:18px 18px 10px;overflow-x:auto}
+.chart-in{min-width:620px}
+.crow{display:grid;grid-template-columns:200px 1fr;gap:14px;align-items:center;padding:7px 0;border-bottom:1px solid var(--soft)}
+.crow:last-child{border-bottom:0}
+.crow .lab{font-size:13.5px;line-height:1.35}
+.crow .lab small{display:block;color:var(--muted);font-size:11.5px;font-family:var(--f-mono)}
+.track{position:relative;height:24px;border-radius:3px;background:repeating-linear-gradient(-45deg,var(--bad-bg) 0 6px,transparent 6px 11px);border:1px solid var(--rule)}
+.track .ok{position:absolute;top:0;bottom:0;right:0;background:var(--acbg);border-left:2px solid var(--ac)}
+.track .ok span{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11.5px;font-family:var(--f-mono);color:var(--ac);white-space:nowrap;font-weight:600}
+.track .cond{background:repeating-linear-gradient(90deg,var(--acbg) 0 8px,transparent 8px 12px)}
+.track .no{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-family:var(--f-mono);color:var(--bad);font-weight:600}
+.axis{display:grid;grid-template-columns:200px 1fr;gap:14px;margin-bottom:6px}
+.axis .ticks{position:relative;height:30px;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.axis .ticks span{position:absolute;bottom:0;transform:translateX(-50%);white-space:nowrap}
+.axis .ticks span::after{content:"";display:block;width:1px;height:6px;background:var(--muted);margin:2px auto 0}
+.axis .ticks span.land{transform:none}
+.axis .ticks span.land::after{margin-left:0}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+.legend i{display:inline-block;width:18px;height:10px;border:1px solid var(--rule);vertical-align:-1px;margin-right:6px}
+
+.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.tool{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px;text-decoration:none;display:flex;flex-direction:column;gap:6px}
+.tool:hover{border-color:var(--muted)}
+.tool b{font-size:15.5px}
+.tool span{font-size:13px;color:var(--muted);line-height:1.55}
+.tool em{font-style:normal;font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;color:var(--muted)}
+
+/* wiki layout */
+.wiki{display:grid;grid-template-columns:250px minmax(0,1fr);gap:40px;align-items:start}
+aside.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px);max-height:calc(100vh - 100px);overflow-y:auto;font-size:13.5px;padding-right:6px}
+aside.side h4{margin:16px 0 6px;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;color:var(--ac)}
+aside.side h4:first-child{margin-top:0}
+aside.side a{display:flex;gap:8px;text-decoration:none;padding:4px 8px;border-radius:5px;color:var(--muted);line-height:1.45}
+aside.side a:hover{background:var(--soft);color:var(--ink)}
+aside.side a.on{background:var(--acbg);color:var(--ink);font-weight:600}
+aside.side a .r{font-family:var(--f-mono);font-size:11px;flex:none;width:64px;opacity:.8;padding-top:1px}
+aside.side a.read::after{content:"✓";margin-left:auto;color:var(--ok);font-size:11px}
+
+article.doc{max-width:760px;min-width:0}
+.doc-head{display:flex;flex-direction:column;gap:10px;padding-bottom:18px;border-bottom:1px solid var(--rule)}
+.doc-head .line{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.doc-head h1{font-size:clamp(26px,4vw,36px);line-height:1.25}
+.doc-head .en{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.summary{margin:20px 0 6px;padding:14px 16px;background:var(--acbg);border-radius:7px;font-size:15px}
+.summary b{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;color:var(--ac);display:block;margin-bottom:2px}
+.body{font-size:15.5px}
+.body h3{font-size:18px;margin:28px 0 8px;font-weight:700}
+.body p{margin:10px 0;max-width:40em}
+.body ul,.body ol{padding-left:1.3em;margin:10px 0}
+.body li{margin:4px 0}
+.body .tw{overflow-x:auto;margin:14px 0;border:1px solid var(--rule);border-radius:7px;background:var(--surface)}
+.body table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+.body th,.body td{padding:8px 12px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+.body th{background:var(--soft);font-weight:600;font-size:13px;white-space:nowrap}
+.body tr:last-child td{border-bottom:0}
+.body .note{border-left:3px solid var(--warn);background:var(--warn-bg);padding:10px 14px;border-radius:0 6px 6px 0;font-size:14px;margin:14px 0}
+.body .note b{color:var(--warn)}
+.body .krcon{border-left:3px solid var(--kr);background:var(--kr-bg);padding:10px 14px 12px;border-radius:0 6px 6px 0;font-size:14px;margin:14px 0}
+.body .krcon > b:first-child{display:block;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;color:var(--kr);margin-bottom:4px}
+.body .krcon ul{margin:4px 0 0}
+.body .krcon p{margin:4px 0}
+.body .key{border-left:3px solid var(--ac);padding:2px 0 2px 14px;margin:14px 0}
+.body .num{font-family:var(--f-mono);font-weight:600;color:var(--ac)}
+.body .defs{display:grid;gap:10px;margin:14px 0}
+.body .def{background:var(--surface);border:1px solid var(--rule);border-radius:7px;padding:12px 14px}
+.body .def dt{font-weight:700}
+.body .def dt span{font-family:var(--f-mono);font-weight:500;font-size:12.5px;color:var(--muted);margin-left:6px}
+.body .def dd{margin:4px 0 0;font-size:14.5px}
+.body .vs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.body .vs > div{background:var(--surface);border:1px solid var(--rule);border-radius:7px;padding:12px 14px;min-width:0}
+.body .vs h5{margin:0 0 4px;font-size:14.5px}
+.body .steps{counter-reset:s;list-style:none;padding:0}
+.body .steps li{counter-increment:s;padding-left:34px;position:relative;margin:8px 0}
+.body .steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;background:var(--acbg);color:var(--ac);font-family:var(--f-mono);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.points{margin:24px 0 0;padding:16px 18px;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+.points h4{margin:0 0 8px;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.12em;color:var(--ac)}
+.points ul{margin:0;padding-left:1.2em}
+.points li{margin:3px 0;font-size:14.5px}
+.src{margin-top:18px;font-size:12.5px;color:var(--muted);font-family:var(--f-mono);line-height:1.7}
+.doc-foot{display:flex;justify-content:space-between;gap:10px;margin-top:28px;padding-top:18px;border-top:1px solid var(--rule);flex-wrap:wrap}
+.doc-foot a{text-decoration:none;max-width:48%;display:flex;flex-direction:column;gap:2px;font-size:14px}
+.doc-foot a small{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.doc-foot a.nx{text-align:right;margin-left:auto}
+.doc-quiz{margin-top:26px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:14px 16px;background:var(--soft);border-radius:8px}
+.doc-quiz span{flex:1;min-width:180px;font-size:14px}
+
+/* list */
+.search{width:100%;max-width:420px;padding:10px 14px;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+.lgroup{margin-top:26px}
+.lgroup h3{font-size:16px;display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.litem{display:grid;grid-template-columns:80px minmax(0,1fr) auto;gap:14px;align-items:baseline;padding:11px 4px;border-bottom:1px solid var(--rule);text-decoration:none}
+.litem:hover{background:var(--surface)}
+.litem .r{font-family:var(--f-mono);font-size:12px;color:var(--ac)}
+.litem .t{font-weight:600}
+.litem .t small{display:block;font-weight:400;color:var(--muted);font-size:13.5px;margin-top:1px}
+.litem .s{font-size:11.5px;font-family:var(--f-mono);color:var(--muted);white-space:nowrap}
+.litem.read .s::before{content:"✓ ";color:var(--ok)}
+
+/* quiz */
+.qwrap{max-width:720px}
+.qbox{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:22px;margin-top:16px}
+.qmeta{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.qtext{font-size:17.5px;font-weight:600;margin:12px 0 16px;line-height:1.55}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;border:1px solid var(--rule);background:var(--paper);border-radius:8px;padding:11px 14px;cursor:pointer;display:flex;gap:12px;align-items:flex-start;line-height:1.5}
+.opt:hover:not([disabled]){border-color:var(--muted)}
+.opt i{font-style:normal;font-family:var(--f-mono);font-size:12px;width:22px;height:22px;flex:none;border-radius:50%;border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;margin-top:1px}
+.opt.sel{border-color:var(--ink)}
+.opt.sel i{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}
+.opt.right i{background:var(--ok);color:var(--surface);border-color:var(--ok)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt.wrong i{background:var(--bad);color:var(--surface);border-color:var(--bad)}
+.opt[disabled]{cursor:default}
+.explain{margin-top:14px;padding:12px 14px;border-radius:8px;font-size:14.5px}
+.explain.ok{background:var(--ok-bg)} .explain.no{background:var(--bad-bg)}
+.explain b{display:block;margin-bottom:2px}
+.explain.ok b{color:var(--ok)} .explain.no b{color:var(--bad)}
+.explain a{font-size:13px;color:var(--muted)}
+.qnav{display:flex;justify-content:space-between;gap:10px;margin-top:16px;flex-wrap:wrap}
+.score{display:flex;gap:18px;align-items:baseline;flex-wrap:wrap}
+.score .big{font-family:var(--f-disp);font-size:52px;font-weight:800;line-height:1}
+.grid-nums{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.grid-nums button{width:34px;height:34px;border-radius:6px;border:1px solid var(--rule);background:var(--paper);font-family:var(--f-mono);font-size:12px;cursor:pointer}
+.grid-nums button.done{background:var(--soft);border-color:var(--muted)}
+.grid-nums button.cur{border-color:var(--ink);border-width:2px}
+.grid-nums button.r{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.grid-nums button.w{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.setup{display:grid;gap:16px}
+.setup label.h{font-size:13px;font-weight:600;display:block;margin-bottom:6px}
+.review{margin-top:20px;display:grid;gap:10px}
+.rv{border:1px solid var(--rule);border-radius:8px;padding:12px 14px;background:var(--surface);font-size:14px}
+.rv .q{font-weight:600}
+.rv .a{margin-top:4px}
+.rv .a .y{color:var(--bad)} .rv .a .c{color:var(--ok)}
+.empty{padding:36px 20px;text-align:center;border:1px dashed var(--rule);border-radius:10px;color:var(--muted)}
+.confirm{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
+
+/* checker */
+.checker{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:20px;display:grid;gap:16px}
+.panel label.h{font-size:13px;font-weight:600;display:block;margin-bottom:6px}
+select,input[type=number]{width:100%;padding:9px 12px;border:1px solid var(--rule);border-radius:7px;background:var(--paper)}
+input[type=range]{width:100%;accent-color:var(--navy)}
+.seg{display:flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{flex:1;padding:8px 10px;border:0;background:var(--paper);cursor:pointer;font-size:13.5px;border-right:1px solid var(--rule);min-width:80px}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--ink);color:var(--paper);font-weight:600}
+.cb{display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer}
+.cb input{margin-top:5px;accent-color:var(--navy)}
+.dist{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.dist b{color:var(--ink);font-size:16px}
+.verdict{border-radius:10px;padding:20px;border:1px solid var(--rule);background:var(--surface)}
+.verdict .v{font-family:var(--f-disp);font-size:30px;font-weight:800;line-height:1.2}
+.verdict.ok{border-color:var(--ok)} .verdict.ok .v{color:var(--ok)}
+.verdict.no{border-color:var(--bad)} .verdict.no .v{color:var(--bad)}
+.verdict.cd{border-color:var(--warn)} .verdict.cd .v{color:var(--warn)}
+.verdict ul{margin:10px 0 0;padding-left:1.2em;font-size:14.5px}
+.verdict .ref{margin-top:12px;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.sea{margin-top:14px;position:relative;height:46px;border-radius:6px;overflow:hidden;border:1px solid var(--rule);background:linear-gradient(90deg,var(--soft),var(--surface))}
+.sea .land{position:absolute;left:0;top:0;bottom:0;width:8%;background:var(--muted);opacity:.35}
+.sea .mk{position:absolute;top:0;bottom:0;border-left:1px dashed var(--muted);font-family:var(--f-mono);font-size:10.5px;color:var(--muted);padding-left:4px}
+.sea .ship{position:absolute;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:var(--navy);border:2px solid var(--surface);box-shadow:0 0 0 1px var(--navy);transition:left .2s}
+
+footer{border-top:1px solid var(--rule);padding-block:20px;font-size:12.5px;color:var(--muted)}
+footer .ver-row{display:flex;justify-content:center;margin-top:12px}
+.ver{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em;background:none;border:0;padding:4px 6px;border-radius:4px;cursor:pointer;color:inherit;opacity:.75;user-select:none}
+.ver:hover{opacity:1}
+header.top .ver{margin-left:auto;flex:none}
+.fold{border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+.fold summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary small{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.fold-ic{width:10px;height:10px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s;flex:none;margin-right:4px}
+.fold[open] .fold-ic{transform:rotate(-135deg)}
+.fold-body{padding:0 18px 18px}
+.fold .chart{border:0;padding:0}
+.egg{position:fixed;inset:0;z-index:50;background:rgba(10,18,24,.55);display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.egg-card{background:#FFFFFF;color:#12202A;border-radius:14px;padding:26px 30px 24px;text-align:center;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.35);animation:pop .35s ease-out}
+.egg-card img{width:100%;max-width:280px;display:block;margin:0 auto 10px}
+.egg-card .ev{font-family:var(--f-mono);font-size:15px;font-weight:600}
+.egg-card .eb{font-family:var(--f-disp);font-size:20px;font-weight:800;margin-top:4px}
+.egg-card small{display:block;margin-top:14px;font-size:12px;color:#6B7A86}
+/* midterm */
+.tmid{color:var(--warn);background:var(--warn-bg)}
+.chip.mid{border-color:var(--warn);color:var(--warn)}
+.chip.mid.on{background:var(--warn);color:var(--surface);border-color:var(--warn)}
+.mid-note{margin-top:10px;font-size:13.5px;color:var(--warn);background:var(--warn-bg);padding:8px 12px;border-radius:7px}
+.mid-card{border-color:var(--warn);border-width:1px 1px 1px 4px}
+.mid-meta{display:flex;gap:8px 18px;flex-wrap:wrap;font-size:13.5px;color:var(--muted)}
+.mid-meta b{color:var(--ink);font-weight:600}
+.ess-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px}
+.ess-timer{font-family:var(--f-mono);font-size:14px;font-weight:600;background:var(--soft);padding:6px 12px;border-radius:7px;font-variant-numeric:tabular-nums}
+.ess-timer.warn{background:var(--warn-bg);color:var(--warn)} .ess-timer.over{background:var(--bad-bg);color:var(--bad)}
+.ess-ta{width:100%;border:1px solid var(--rule);border-radius:8px;background:var(--paper);padding:12px 14px;font:inherit;font-size:15px;line-height:1.65;resize:vertical;min-height:150px}
+.ess-ta:focus{outline:2px solid var(--gar);outline-offset:1px}
+.ess-sc{font-weight:700;color:var(--ink);font-size:13px}
+.ess-ans{background:var(--soft);border-radius:8px;padding:10px 14px;font-size:14px;line-height:1.65;margin-bottom:12px}
+.ess-ans b{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:2px}
+.rub{display:grid;gap:6px}
+.rb{display:grid;grid-template-columns:24px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:7px 10px;border-radius:7px;font-size:14px}
+.rb.full{background:var(--ok-bg)} .rb.part{background:var(--warn-bg)} .rb.none{background:var(--bad-bg)}
+.rb .ic{font-weight:700;text-align:center} .rb.full .ic{color:var(--ok)} .rb.part .ic{color:var(--warn)} .rb.none .ic{color:var(--bad)}
+.rb .rl small{font-size:11px;color:var(--ok);font-weight:600}
+.rb .rp{font-family:var(--f-mono);font-size:12.5px;font-weight:600}
+.rbtn{padding:3px 10px;font-size:12.5px}
+.model{margin-top:12px;border-top:1px dashed var(--rule);padding-top:10px}
+.model summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--gar)}
+.model p{font-size:14.5px;line-height:1.7;margin:8px 0}
+.model a{font-size:13px;color:var(--muted)}
+@media (max-width:520px){.rb{grid-template-columns:22px minmax(0,1fr) auto}.rb .rbtn{grid-column:2/4;justify-self:start}}
+/* viz */
+.viz{margin:18px 0;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px 18px}
+.viz-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.viz-h b{font-size:15px}
+.viz-h span{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;color:var(--muted)}
+.viz-x{overflow-x:auto}
+.viz-foot{margin-top:10px;font-size:12.5px;color:var(--muted);line-height:1.6}
+.fold .viz{border:0;padding:0;margin:0;background:none}
+.fold + .fold{margin-top:14px}
+/* IOPP timeline */
+.tl{min-width:600px}
+.tl-row{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center;min-height:38px}
+.tl-lab{font-size:13px;font-weight:600}
+.tl-track{position:relative;height:30px}
+.tl-track::before{content:"";position:absolute;left:12px;right:12px;top:50%;height:1px;background:var(--rule)}
+.tk{position:absolute;left:12px;right:12px;top:0;bottom:0}
+.tl .win{position:absolute;top:5px;bottom:5px;border:1px solid var(--oil);background:var(--oil-bg);border-radius:4px}
+.tl .win.alt{border-style:dashed;background:repeating-linear-gradient(45deg,var(--oil-bg) 0 5px,var(--surface) 5px 9px)}
+.tl .pt{position:absolute;top:3px;bottom:3px;width:2px;margin-left:-1px;background:var(--oil)}
+.tl .dot{position:absolute;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--oil);border:2px solid var(--surface);box-shadow:0 0 0 1px var(--oil)}
+.tl .dl{position:absolute;top:50%;transform:translateY(-50%);font-size:12px;font-weight:600;color:var(--oil);white-space:nowrap}
+.tl .mid{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:11.5px;color:var(--muted);background:var(--surface);padding:0 6px;white-space:nowrap}
+.tl-axis .tl-track::before{display:none}
+.tl-axis .ax{position:absolute;top:0;transform:translateX(-50%);font-family:var(--f-mono);font-size:11px;color:var(--muted);white-space:nowrap;text-align:center}
+.tl-axis .ax::before{content:"";display:block;width:1px;height:6px;background:var(--muted);margin:0 auto 3px}
+.tl-axis .ax.end{transform:translateX(-100%)} .tl-axis .ax.end::before{margin:0 0 3px auto}
+.tl-axis .ax.st{transform:none} .tl-axis .ax.st::before{margin:0 0 3px 0}
+/* ladder */
+.ld{min-width:680px;border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
+.body .ld th,.body .ld td,.ld th,.ld td{white-space:normal;background:none}
+.ld{table-layout:fixed}
+.ld col.c0{width:92px}
+.body .gt th,.body .gt td{white-space:normal;border-bottom:0}
+.ld th,.ld td{padding:8px;vertical-align:top;text-align:left;border-bottom:1px solid var(--rule)}
+.ld thead th{border-bottom:2px solid var(--oil);vertical-align:bottom;padding-bottom:6px}
+.ld tbody tr:last-child td,.ld tbody tr:last-child th{border-bottom:0}
+.ld .rung{display:block;background:var(--oil-bg);border:1px solid var(--oil);border-bottom:0;border-radius:4px 4px 0 0;margin-bottom:6px}
+.ld .gt{font-family:var(--f-mono);font-weight:600;font-size:14px;color:var(--oil);display:block}
+.ld .gt small{font-weight:400;font-size:11px;color:var(--muted);margin-left:2px}
+.ld tbody th{font-size:13px;white-space:nowrap;width:92px}
+.ld .dz{display:block;background:var(--oil-bg);color:var(--ink);border-radius:5px;padding:4px 7px;margin-bottom:5px;line-height:1.4;font-size:12.5px}
+.ld .dz i{font-style:normal;font-family:var(--f-mono);font-size:10.5px;color:var(--oil);margin-left:4px;white-space:nowrap}
+.ld .none{color:var(--muted);font-size:12px}
+/* reg15 flow */
+.fl{display:grid;gap:0;max-width:640px}
+.fl-box{border-radius:8px;padding:10px 14px;font-weight:600;font-size:14px}
+.fl-start{background:var(--soft);border:1px solid var(--rule)}
+.fl-end{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok)}
+.fl-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+.fl-q{border:1px solid var(--oil);background:var(--surface);border-radius:8px;padding:9px 12px;font-size:14px;display:flex;gap:10px;align-items:flex-start;min-width:0}
+.fl-q .n{flex:none;width:22px;height:22px;border-radius:50%;background:var(--oil);color:var(--surface);font-family:var(--f-mono);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.fl-q small{display:block;color:var(--muted);font-size:12px}
+.fl-no{display:flex;align-items:center;gap:6px;font-size:12.5px;white-space:nowrap}
+.fl-no .a{color:var(--bad);font-family:var(--f-mono);font-size:11.5px}
+.fl-no .ban{background:var(--bad-bg);color:var(--bad);border:1px solid var(--bad);border-radius:999px;padding:3px 10px;font-weight:600}
+.fl-yes{font-family:var(--f-mono);font-size:11.5px;color:var(--ok);padding:4px 0 4px 22px;position:relative;height:28px}
+.fl-yes::before{content:"";position:absolute;left:11px;top:0;bottom:0;width:2px;background:var(--ok)}
+.fl-note{margin-top:12px;font-size:13px;border-left:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0 6px 6px 0}
+/* special area map */
+.sam{min-width:680px}
+.sam-map{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(5,minmax(70px,auto)) auto;gap:6px;padding:10px;border-radius:8px;background-color:var(--soft);background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gradient(90deg,var(--rule) 1px,transparent 1px);background-size:100% 25%,12.5% 100%}
+.sa{background:var(--surface);border:1px solid var(--rule);border-radius:7px;padding:7px 9px;display:flex;flex-direction:column;gap:5px;transition:opacity .2s}
+.sa b{font-size:13px;line-height:1.3}
+.sa small{font-family:var(--f-mono);font-size:10px;color:var(--muted);line-height:1.3}
+.sa .mks{display:flex;gap:4px;flex-wrap:wrap;margin-top:auto}
+.mk{font-family:var(--f-mono);font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:4px;border:1px solid}
+.mk.I{color:var(--oil);border-color:var(--oil)} .mk.IV{color:var(--sew);border-color:var(--sew)} .mk.V{color:var(--gar);border-color:var(--gar)}
+.mk.I.on{background:var(--oil);color:var(--surface)} .mk.IV.on{background:var(--sew);color:var(--surface)} .mk.V.on{background:var(--gar);color:var(--surface)}
+.mk.off{border-style:dashed;background:transparent}
+.sa.dim{opacity:.28}
+.sa-land{display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);letter-spacing:.2em}
+.sam-leg{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:10px;font-size:12px;color:var(--muted)}
+/* garbage rule table */
+.gt{min-width:720px;border-collapse:separate;border-spacing:3px;width:100%;font-size:13px}
+.gt th{background:var(--navy);color:var(--navy-ink);font-weight:600;padding:9px 10px;border-radius:5px;text-align:center;line-height:1.4;font-size:12.5px}
+.gt th small{display:block;font-weight:400;opacity:.8;font-size:11px}
+.gt th.r{text-align:left}
+.gt td{padding:8px 10px;border-radius:5px;vertical-align:middle;line-height:1.4}
+.gt td.w{background:var(--soft);font-weight:600}
+.gt td.w small{display:block;font-weight:400;color:var(--muted);font-size:11.5px;margin-top:2px}
+.gt td.k{text-align:center;font-weight:700}
+.gt td.k small{display:block;font-weight:400;font-size:11px;opacity:.85;margin-top:2px}
+.gt .k-ok{background:var(--ok-bg);color:var(--ok)}
+.gt .k-3{background:var(--sew-bg);color:var(--sew)}
+.gt .k-12{background:var(--gar-bg);color:var(--gar)}
+.gt .k-cd{background:var(--warn-bg);color:var(--warn)}
+.gt .k-far{background:var(--oil-bg);color:var(--oil)}
+.gt .k-no{background:var(--bad-bg);color:var(--bad)}
+.gt-leg{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.gt-leg span{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px}
+.gt-fn{margin:10px 0 0;padding-left:1.2em;font-size:12.5px;color:var(--muted)}
+.gt-fn li{margin:2px 0}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr;gap:18px}
+  .annexes{grid-template-columns:1fr}
+  .tools{grid-template-columns:1fr 1fr}
+  .wiki{grid-template-columns:1fr}
+  aside.side{display:none}
+  .checker{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  .tools{grid-template-columns:1fr}
+  .litem{grid-template-columns:62px minmax(0,1fr)}
+  .litem .s{display:none}
+  .body .vs{grid-template-columns:1fr}
+  .qbox{padding:16px}
+  .doc-foot a{max-width:100%}
+  .brand span{display:none}
+}
+.body .tw table,.gt,.ld{overflow-wrap:normal}
+.body .tw td.mono{white-space:nowrap}
+@media (max-width:520px){.crow,.axis{grid-template-columns:118px 1fr;gap:10px}.chart-in{min-width:500px}.crow .lab{font-size:12.5px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#home"><b>MARPOL 위키</b><span>ANNEX Ⅰ · Ⅳ · Ⅴ</span></a>
+    <nav class="main" id="nav">
+      <a href="#home" data-r="home">홈</a>
+      <a href="#list" data-r="list">문서 목록</a>
+      <a href="#check" data-r="check">배출 판정기</a>
+      <a href="#quiz" data-r="quiz">무작위 퀴즈</a>
+      <a href="#exam" data-r="exam" class="star">★ 시험 모드</a>
+      <a href="#wrong" data-r="wrong">오답 노트</a>
+    </nav>
+    <button class="ver" type="button" aria-label="버전 1.3.0">v1.3.0</button>
+  </div>
+</header>
+<main class="wrap" id="app"></main>
+<footer><div class="wrap">해양환경협약(목포해양대학교 항해정보시스템학부) 1·3·4·5·9강 강의자료를 바탕으로 정리한 학습용 요약입니다. 본문은 강의자료 내용 그대로이며, 2026.10.26 한국선급 KR-CON의 MARPOL 통합본과 다른 점은 본문 아래 파란 상자(KR-CON 원문과 다른 점)에 따로 적었습니다. <span class="net">인터넷 보완</span> 표시는 강의자료 밖에서 IMO 공개자료 등으로 보충한 내용입니다. 시험·실무 전 협약 원문으로 확인하세요.<div class="ver-row"><button class="ver" type="button" aria-label="버전 1.3.0">v1.3.0</button></div></div></footer>
+
+<script>
+/* ================= DATA ================= */
+const ANNEX = {
+  OV:{name:"MARPOL 개요", short:"개요", roman:"총론", desc:"채택 배경, 협약 구성, 주요 조문"},
+  I:{name:"부속서 Ⅰ · 기름", short:"Ⅰ", roman:"Ⅰ", desc:"기름에 의한 오염방지규칙. 정의, 검사·증서, 기관구역 요건, 배출통제"},
+  IV:{name:"부속서 Ⅳ · 오수", short:"Ⅳ", roman:"Ⅳ", desc:"선박으로부터 오수에 의한 오염방지규칙. 적용, 설비, 배출기준"},
+  V:{name:"부속서 Ⅴ · 폐기물", short:"Ⅴ", roman:"Ⅴ", desc:"선박으로부터 폐기물에 의한 오염방지규칙. 배출금지, 특별해역, 기록부"}
+};
+const tw = h => `<div class="tw"><table>${h}</table></div>`;
+const vizBox=(name,title,src,extra="")=>`<div class="viz"><div class="viz-h"><b>${title}</b><span>${src}</span></div><div data-viz="${name}"${extra}></div></div>`;
+
+const DOCS = [
+/* ---------- 개요 ---------- */
+{id:"ov-marpol",annex:"OV",reg:"협약",title:"MARPOL 73/78 기본 정보",en:"International Convention for the Prevention of Pollution from Ships",src:"3강 p.6, p.13, p.17",
+sum:"1973년 협약과 1978년 의정서를 하나로 묶어 MARPOL 73/78이라 부른다. 1983.10.2 발효, 우리나라는 1984.7 가입.",
+body:`
+${tw(`<tr><th>구분</th><th>내용</th></tr>
+<tr><td>채택</td><td>1973.11.2 (MARPOL 73) / 1978.2.17 (78 Protocol)</td></tr>
+<tr><td>발효</td><td>1983.10.2 (본문 + 부속서 Ⅰ·Ⅱ)</td></tr>
+<tr><td>우리나라 가입</td><td>1984.7</td></tr>
+<tr><td>구성</td><td>본문 20개 조문, 의정서 Ⅰ·Ⅱ, 부속서 6개</td></tr>`)}
+<h3>부속서 6개와 발효일</h3>
+${tw(`<tr><th>부속서</th><th>대상</th><th>발효</th><th>증서</th></tr>
+<tr><td>Ⅰ</td><td>기름 (Oil)</td><td class="mono">1983.10.02</td><td>IOPP</td></tr>
+<tr><td>Ⅱ</td><td>산적 유해액체물질 (Chemical)</td><td class="mono">1983.10.02</td><td>NLS / IBC·BCH</td></tr>
+<tr><td>Ⅲ</td><td>포장 유해물질</td><td class="mono">1992.07.01</td><td>CDG</td></tr>
+<tr><td>Ⅳ</td><td>오수 (Sewage)</td><td class="mono">2003.09.27</td><td>ISPP</td></tr>
+<tr><td>Ⅴ</td><td>폐기물 (Garbage)</td><td class="mono">1988.12.31</td><td>IGPP</td></tr>
+<tr><td>Ⅵ</td><td>대기오염 (1997 Protocol)</td><td class="mono">2005.05.19</td><td>IAPP / EIAPP</td></tr>`)}
+<p>발효 순서가 부속서 번호 순서와 다르다는 점이 자주 출제된다. 1978 의정서는 본문과 부속서 Ⅰ·Ⅱ를 동시에 발효시키고, Ⅲ·Ⅳ·Ⅴ는 선택적으로 수락할 수 있게 했기 때문에 Ⅲ·Ⅳ·Ⅴ의 발효가 늦어졌다. 특히 Ⅴ(1988)가 Ⅲ(1992)·Ⅳ(2003)보다 먼저 발효되었다.</p>
+<h3>부속서별 적용 대상</h3>
+${tw(`<tr><th>부속서</th><th>대상선박 (강의자료 3강 p.20)</th></tr>
+<tr><td>Ⅰ</td><td>총톤수 150 이상 유조선 또는 총톤수 400 이상 유조선 외 선박</td></tr>
+<tr><td>Ⅱ</td><td>케미컬탱커·NLS 탱커</td></tr>
+<tr><td>Ⅲ</td><td>모든 선박</td></tr>
+<tr><td>Ⅳ</td><td>총톤수 400 이상 또는 15인 초과 승선 (16인 이상)</td></tr>
+<tr><td>Ⅴ</td><td>모든 선박 (기록부 등은 톤수·인원 기준이 따로 있음)</td></tr>
+<tr><td>Ⅵ</td><td>총톤수 400 이상 (증서 기준)</td></tr>`)}
+<h3>MARPOL은 계속 개정되는 협약</h3>
+<p>부속서 Ⅵ는 2011년 EEDI·SEEMP, 2020년 황함유량 0.5% 규제(IMO 2020), 2023년 EEXI·CII, 2025년 Net-Zero Framework 논의로 이어지며 지금도 개정 중이다.</p>`,
+pts:["MARPOL 73/78 = 1973 협약 + 1978 의정서","발효 1983.10.2, 우리나라 가입 1984.7","부속서 발효 순서: Ⅰ·Ⅱ(1983) → Ⅴ(1988) → Ⅲ(1992) → Ⅳ(2003) → Ⅵ(2005)","증서: Ⅰ IOPP, Ⅳ ISPP, Ⅴ IGPP, Ⅵ IAPP"],
+q:[
+{q:"MARPOL 73/78의 발효일은?",c:["1973.11.2","1978.2.17","1983.10.2","1984.7"],a:2,e:"1973년 채택, 1978년 의정서 채택 후 1983.10.2에 본문과 부속서 Ⅰ·Ⅱ가 발효됐다. 1984.7은 우리나라 가입 시기다."},
+{q:"다음 중 가장 늦게 발효된 부속서는? (Ⅵ 제외)",c:["부속서 Ⅲ","부속서 Ⅳ","부속서 Ⅴ","부속서 Ⅱ"],a:1,e:"부속서 Ⅳ(오수)는 2003.9.27에 발효되었다. Ⅴ는 1988, Ⅲ는 1992."},
+{q:"부속서와 증서의 연결이 바르지 않은 것은?",c:["Ⅰ - IOPP","Ⅳ - ISPP","Ⅴ - IGPP","Ⅵ - IOPP"],a:3,e:"부속서 Ⅵ의 증서는 IAPP(국제대기오염방지증서)다."},
+{q:"부속서 Ⅴ(폐기물)는 부속서 Ⅲ보다 먼저 발효되었다.",c:["O","X"],a:0,e:"Ⅴ는 1988.12.31, Ⅲ는 1992.7.1 발효."}
+]},
+{id:"ov-history",annex:"OV",reg:"배경",title:"도입 배경과 주요 오염사고",en:"OILPOL 1954 → Torrey Canyon → MARPOL",src:"3강 p.7~13",
+sum:"OILPOL 1954에서 시작해 Torrey Canyon(1967)이 MARPOL 73 채택을, Amoco Cadiz(1978)가 1978 의정서와 발효를 앞당겼다.",
+body:`
+<h3>OILPOL 1954 — 최초의 국제 해양오염방지협약</h3>
+<ul><li>1954년 5월 채택, <span class="num">1958.7.26</span> 발효</li>
+<li>유조선 화물구역과 모든 선박의 기관구역에서 나오는 유성혼합물을 규제</li>
+<li>영해기선으로부터 <span class="num">50해리</span>를 기름배출 금지구역으로 지정, <span class="num">100ppm</span> 이상 배출 금지</li></ul>
+<h3>주요 사고</h3>
+${tw(`<tr><th>사고</th><th>개요</th><th>의미</th></tr>
+<tr><td>Torrey Canyon<br><span class="mono muted">1967.3.18</span></td><td>원유 약 12만 톤을 싣고 영국 Milford Haven으로 향하다 Scilly Isles 부근에서 항해과실로 좌초. 영국 공군이 잔여 기름을 태우려고 선박을 폭파</td><td>1969년 OILPOL 개정, 1973 MARPOL 채택의 직접적 계기</td></tr>
+<tr><td>Amoco Cadiz<br><span class="mono muted">1978.3.16</span></td><td>원유 22만 3천 톤 적재, 황천항해 중 방향타 고장으로 프랑스 브르타뉴 연안 좌초. 약 6,900만 갤런 유출</td><td>미국 주도 1978 TSPP 회의 → 1978 Protocol, MARPOL 73/78 발효를 앞당김</td></tr>
+<tr><td>허베이 스피리트<br><span class="mono muted">2007.12.7</span></td><td>태안 앞바다에서 크레인선(삼성 1호)이 정박 중인 유조선과 충돌. 원유 약 12,547㎘ 유출</td><td>국내 최대 유류오염사고. 연인원 200만 명 이상 자원봉사, 국내 대응체계 정비 계기</td></tr>`)}
+<div class="note"><b>참고</b> 강의자료는 Torrey Canyon 유출량을 약 3만 톤으로 적고 있으나, 문헌에 따라 추정치 차이가 크다. 시험에서는 강의 기준을 따르는 것이 안전하다.</div>
+<h3>두 축: 안전과 환경</h3>
+<p>타이타닉호(1912)가 해사안전(SOLAS) 체계의 출발점이라면, 토리캐년호(1967)는 해양환경(MARPOL) 체계의 출발점이다. 국내법으로는 각각 선박안전법·해사안전법, 해양환경관리법으로 이어진다.</p>
+<h3>1973 협약이 발효되지 못한 이유</h3>
+<p>1973 MARPOL은 5개 부속서로 채택되었지만 당시 기술수준 문제로 발효되지 못했다. 1978 의정서가 이를 수정·보완해 실제로 발효시킨 것이다.</p>`,
+pts:["OILPOL 1954: 50해리 금지구역, 100ppm","Torrey Canyon 1967 → MARPOL 73","Amoco Cadiz 1978 → 1978 Protocol","타이타닉=SOLAS, 토리캐년=MARPOL"],
+q:[
+{q:"OILPOL 1954에서 지정한 기름배출 금지구역은 영해기선으로부터 몇 해리인가?",c:["12해리","25해리","50해리","100해리"],a:2,e:"OILPOL은 50해리 이내를 금지구역으로 하고 100ppm 이상 배출을 금지했다."},
+{q:"1973 MARPOL 협약 채택의 직접적인 계기가 된 사고는?",c:["Amoco Cadiz","Torrey Canyon","Exxon Valdez","Hebei Spirit"],a:1,e:"1967년 Torrey Canyon 좌초 사고가 계기다. Amoco Cadiz는 1978 의정서와 연결된다."},
+{q:"Amoco Cadiz호 사고의 직접적 원인은?",c:["충돌","화재","방향타(Rudder) 고장으로 좌초","선체 균열"],a:2,e:"1978년 황천항해 중 방향타 고장으로 브르타뉴 연안 암초에 좌초했다."},
+{q:"OILPOL 1954의 발효일은?",c:["1954.5","1958.7.26","1969","1973.11.2"],a:1,e:"1954년 5월 채택, 1958년 7월 26일 발효."}
+]},
+{id:"ov-articles",annex:"OV",reg:"본문",title:"협약 본문 주요 조문",en:"Articles 1–15",src:"3강 p.24~28",
+sum:"정의(제2조), 적용(제3조), 위반(제4조), 부당한 지연(제7조), 선택적 부속서(제14조), 발효요건(제15조)이 핵심이다.",
+body:`
+<div class="defs">
+<dl class="def"><dt>제1조 일반적 의무</dt><dd>당사국은 본문·부속서·1978 의정서를 모두 이행한다. 협약과 의정서는 하나의 문서로 해석한다.</dd></dl>
+<dl class="def"><dt>제2조 정의</dt><dd><b>배출(Discharge)</b>: 원인을 불문한 선박으로부터의 모든 유출(유실·폐기·누출·배수 등). 단, 런던협약상 투기, 해저자원 개발상 유출, 적법한 과학연구 목적 유출은 제외.<br><b>선박(Ship)</b>: 해양환경에서 운항하는 모든 형태의 배. 수중익선·공기부양선·잠수선·부유선·고정/부양 플랫폼 포함.<br><b>주관청</b>: 선박이 그 권한하에 운항되는 국가의 정부(원칙적으로 기국).<br><b>사고(Incident)</b>: 유해물질이 배출되었거나 배출될 우려가 있는 사건.<br><b>기구</b>: IMO (舊 정부간해사자문기구, 1982.5.22 명칭 변경).</dd></dl>
+<dl class="def"><dt>제3조 적용</dt><dd>당사국 국기 게양 자격이 있는 선박, 또는 자격은 없으나 당사국 권한하에 운항되는 선박. <b>군함·해군보조함 등 비상업용 국가 선박에는 적용하지 않는다</b>(가능한 범위에서 취지에 합치하도록 행동).</dd></dl>
+<dl class="def"><dt>제4조 위반</dt><dd>발생 장소를 불문하고 주관청 법률로 제재, 당사국 관할권 내 위반은 그 국가 법률로 제재. 벌칙은 위반 억지에 충분히 엄격하고 장소와 무관하게 동등해야 한다.</dd></dl>
+<dl class="def"><dt>제5조 증서·검사 특별규정</dt><dd>당사국 항구·해양터미널에서 권한 있는 관리의 검사를 받는다. 유효한 증서가 없으면 해양환경을 부당하게 해치지 않고 항해할 수 있을 때까지 출항을 막는다.</dd></dl>
+<dl class="def"><dt>제7조 부당한 지연</dt><dd>검사로 선박이 부당하게 억류·지연되지 않도록 노력해야 하며, 부당하게 지연된 선박은 손해배상을 청구할 수 있다.</dd></dl>
+<dl class="def"><dt>제12조 해양사고</dt><dd>주관청은 자국 선박의 중대한 해양환경 해난을 조사하고 정보를 IMO에 제공한다.</dd></dl>
+<dl class="def"><dt>제14조 선택적 부속서</dt><dd>서명·비준·수락·가입 시 <b>부속서 Ⅲ·Ⅳ·Ⅴ</b>의 전부 또는 일부를 수락하지 않을 수 있다.</dd></dl>
+<dl class="def"><dt>제15조 발효</dt><dd>세계 상선 선복량(총톤수) <b>50% 이상</b>을 차지하는 <b>15개국 이상</b>이 가입한 날로부터 <b>12개월 후</b> 발효.</dd></dl>
+</div>`,
+pts:["군함·비상업용 국가 선박은 적용 제외(제3조)","선택적 부속서: Ⅲ·Ⅳ·Ⅴ(제14조)","발효요건: 15개국·선복량 50%·12개월 후(제15조)","부당 지연 시 손해배상 청구 가능(제7조)"],
+q:[
+{q:"MARPOL 제14조에 따라 비준 시 수락하지 않을 수 있는 선택적 부속서는?",c:["Ⅰ·Ⅱ","Ⅲ·Ⅳ·Ⅴ","Ⅳ·Ⅴ·Ⅵ","Ⅱ·Ⅲ"],a:1,e:"부속서 Ⅰ·Ⅱ는 필수, Ⅲ·Ⅳ·Ⅴ는 선택적 부속서다."},
+{q:"MARPOL 협약의 발효 요건(제15조)으로 옳은 것은?",c:["10개국·선복량 50%·6개월 후","15개국·선복량 50%·12개월 후","25개국·선복량 25%·12개월 후","30개국·선복량 35%·1년 후"],a:1,e:"15개국 이상, 세계 상선 선복량 50% 이상, 12개월 후. 30개국·35%는 BWM 협약 요건이다."},
+{q:"MARPOL은 군함과 해군보조함에도 그대로 적용된다.",c:["O","X"],a:1,e:"제3조에 따라 군함·해군보조함 등 비상업용 국가 선박에는 적용하지 않는다."},
+{q:"제2조의 '배출(Discharge)'에서 제외되는 것이 아닌 것은?",c:["런던협약상 투기","해저자원 개발상 유출","적법한 과학연구 목적 유출","선박 손상으로 인한 누출"],a:3,e:"배출은 원인을 불문한 모든 유출이며, 손상으로 인한 누출도 배출에 포함된다. 위 세 가지만 정의에서 제외된다."}
+]},
+{id:"ov-law",annex:"OV",reg:"국내법",title:"국제협약과 국내법의 관계",en:"해양환경관리법 제2조·제4조",src:"3강 p.5, 5강 p.11",
+sum:"국제협약 기준과 해양환경관리법이 다르면 국제협약이 우선한다. 다만 국내법이 더 엄격하면 국내법을 따른다.",
+body:`
+<h3>해양환경관리법 제4조 (국제협약과의 관계)</h3>
+<div class="key">해양환경 및 해양오염과 관련하여 국제적으로 발효된 국제협약에서 정하는 기준과 이 법에서 규정하는 내용이 다른 때에는 국제협약의 효력을 우선한다. 다만, 이 법의 규정내용이 국제협약의 기준보다 강화된 기준을 포함하는 때에는 그러하지 아니하다.</div>
+<p>즉 원칙은 <b>국제협약 우선</b>, 예외는 <b>국내법이 더 강한 경우</b>다.</p>
+<h3>해양환경관리법 제2조의 정의</h3>
+<div class="defs">
+<dl class="def"><dt>해양환경</dt><dd>해양에 서식하는 생물체와 이를 둘러싸고 있는 해양수·해양지·해양대기 등 비생물적 환경 및 해양에서의 인간의 행동양식을 포함하는 해양의 자연 및 생활상태</dd></dl>
+<dl class="def"><dt>해양오염</dt><dd>해양에 유입되거나 해양에서 발생되는 물질 또는 에너지로 인하여 해양환경에 해로운 결과를 미치거나 미칠 우려가 있는 상태</dd></dl></div>`,
+pts:["원칙: 국제협약 우선","예외: 국내법이 더 강화된 기준이면 국내법","근거: 해양환경관리법 제4조"],
+q:[
+{q:"해양환경관리법 제4조에 따르면, 국제협약 기준과 국내법이 다를 때 원칙적으로 적용되는 것은?",c:["국내법","국제협약","더 완화된 기준","주관청 재량"],a:1,e:"국제협약이 우선하되, 국내법이 더 강화된 기준을 두면 국내법이 적용된다."},
+{q:"국내법이 국제협약보다 강화된 기준을 둔 경우에도 국제협약이 우선한다.",c:["O","X"],a:1,e:"제4조 단서에 따라 이 경우에는 국제협약 우선 원칙이 적용되지 않는다."}
+]},
+
+{id:"ov-ghg",annex:"OV",reg:"2강",title:"친환경선박 국제동향 · EEXI와 CII",en:"EEDI · SEEMP · EEXI · CII · Net-Zero Framework",src:"2강 p.3~14",
+sum:"EEDI·SEEMP(2013~)에 이어 2023년부터 현존선에 EEXI(설계 효율, 1회 인증)와 CII(운항 탄소집약도, 매년 A~E 등급)가 적용된다.",
+body:`
+<h3>MARPOL 부속서 Ⅵ의 효율 규제 흐름</h3>
+${tw(`<tr><th>연도</th><th>내용</th></tr>
+<tr><td class="mono">2011</td><td>MARPOL 부속서 Ⅵ 개정 채택 — EEDI 기준 · SEEMP 비치 의무화 (2013년부터 신조선 적용)</td></tr>
+<tr><td class="mono">2016</td><td>총톤수 5천톤 이상 선박의 연료소모량 보고 제도(DCS) 도입</td></tr>
+<tr><td class="mono">2020.1.1</td><td>전 세계 해역 연료유 황 함유량 3.5% → 0.5% (IMO 2020), ECA는 0.1%</td></tr>
+<tr><td class="mono">2023</td><td>EEXI · CII 현존선 규제 시행, 개정 GHG 전략(2050년경 Net-Zero)</td></tr>
+<tr><td class="mono">2025</td><td>Net-Zero Framework 잠정 합의(MEPC 83) → 2025.10 임시총회 부결 → 2026 재논의</td></tr>`)}
+<div class="vs">
+<div><h5>EEDI · 에너지효율설계지수</h5><p style="margin:0;font-size:14.5px">신조선 설계단계에서 수송능력(화물량·속력) 대비 CO₂ 배출량을 지수화. 낮을수록 효율 우수. 2013년부터 신조선 의무, 단계(Phase)별 강화. <b>설계(하드웨어)</b> 관점.</p></div>
+<div><h5>SEEMP · 선박에너지효율관리계획서</h5><p style="margin:0;font-size:14.5px">신조선·현존선 구분 없이 모든 선박이 비치하는 운항관리 문서. 항로·속력 관리, 프로펠러·선체 정비 등. Part Ⅲ는 CII 등급 개선계획과 연동(2023~). <b>운항(소프트웨어)</b> 관점.</p></div>
+</div>
+<h3>EEXI와 CII — 현존선 규제 (2023년 시행)</h3>
+${tw(`<tr><th>구분</th><th>EEXI</th><th>CII</th></tr>
+<tr><td>명칭</td><td>현존선 에너지효율지수 (Energy Efficiency Existing Ship Index)</td><td>탄소집약도지수 (Carbon Intensity Indicator)</td></tr>
+<tr><td>대상</td><td>2023.1.1 이후 총톤수 400톤 이상 선박</td><td>현존 대형선박 (운항 실적 기준)</td></tr>
+<tr><td>방식</td><td><b>1회성 인증</b>으로 기준 충족</td><td><b>매년</b> 실측 운항실적으로 <b>A~E 등급</b> 산정</td></tr>
+<tr><td>성격</td><td>설계·기술(하드웨어) 측면, 현존선판 EEDI</td><td>운항(소프트웨어) 측면, 실제 탄소배출 성과</td></tr>
+<tr><td>대응</td><td>엔진 출력 제한 등</td><td>3년 연속 D등급 또는 1회 E등급 → SEEMP Part Ⅲ 개선계획(시정조치계획) 제출 의무</td></tr>`)}
+<p>등급: A·B 우수, C 기준, D·E 개선요구(시정조치 의무 발생). 실무에서 가장 먼저 마주치는 것은 신조선 EEDI가 아니라 이미 운항 중인 선박에 적용되는 EEXI·CII다.</p>
+<h3>IMO 온실가스 감축전략 (기준연도 2008)</h3>
+${tw(`<tr><th>구분</th><th>2018 초기전략</th><th>2023 개정전략</th></tr>
+<tr><td>탄소집약도</td><td>2030년까지 40% 감축</td><td>동일 유지 + 이행 점검 강화</td></tr>
+<tr><td>2030년</td><td>명시적 중간목표 없음</td><td>총배출량 20%(노력 30%) 감축, 대체연료 5~10%</td></tr>
+<tr><td>2040년</td><td>명시적 중간목표 없음</td><td>총배출량 70%(노력 80%) 감축</td></tr>
+<tr><td>2050년</td><td>총배출량 50% 감축</td><td>2050년경 Net-Zero</td></tr>`)}
+<h3>EU 역내 규제</h3>
+<p><b>EU ETS</b>: 2024년부터 해운 부문 단계적 편입, 역내 항해 배출량만큼 배출권 구매·제출. <b>FuelEU Maritime</b>: 2025.1.1 시행, 선박연료 GHG 원단위 단계적 감축.</p>`,
+pts:["EEXI = 현존선 설계효율, 2023.1.1~, 400GT 이상, 1회성 인증","CII = 매년 운항실적, A~E 등급","3년 연속 D 또는 1회 E → SEEMP Part Ⅲ 개선계획 제출","EEDI = 신조선 설계, SEEMP = 운항관리"],
+q:[
+{q:"CII 등급에서 시정조치(개선계획 제출)가 요구되는 조건은?",c:["1회 C등급","2년 연속 D등급","3년 연속 D등급 또는 1회 E등급","1회 D등급"],a:2,e:"3년 연속 D등급 또는 1회 E등급이면 SEEMP Part Ⅲ 개선계획을 제출해야 한다."},
+{q:"EEXI에 대한 설명으로 옳은 것은?",c:["매년 운항실적으로 등급을 매긴다","현존선의 설계 에너지효율을 1회성 인증으로 확인한다","신조선에만 적용된다","EU 역내 규제다"],a:1,e:"EEXI는 2023.1.1 이후 400GT 이상 현존선에 대한 1회성 인증 규제다."},
+{q:"신조선·현존선 구분 없이 모든 선박이 비치해야 하는 운항관리 문서는?",c:["EEDI","SEEMP","DCS","EEXI"],a:1,e:"SEEMP(선박에너지효율관리계획서)."}
+]},
+
+/* ---------- 부속서 Ⅰ ---------- */
+{id:"a1-structure",annex:"I",reg:"구조",title:"부속서 Ⅰ의 구조",en:"Regulations for the Prevention of Pollution by Oil",src:"4강 p.3~12, 5강 p.4",
+sum:"11개 장, 47개 이상의 규칙, 3개 부록. 유조선(화물구역)과 모든 선박(기관구역)이 대상이다.",
+body:`
+${tw(`<tr><th>장</th><th>내용</th><th>규칙</th></tr>
+<tr><td>제1장</td><td>일반</td><td>1 정의 · 2 적용 · 3 면제 · 4 예외 · 5 동등물</td></tr>
+<tr><td>제2장</td><td>검사 및 증서 발급</td><td>6 검사 · 7 증서 발행 · 8 타 정부 발행 · 9 서식 · 10 유효기간 · 11 PSC</td></tr>
+<tr><td>제3장</td><td>모든 선박의 기관구역 요건</td><td>A편 구조 12·12A·13 / B편 설비 14 / C편 배출통제 15·16·17</td></tr>
+<tr><td>제4장</td><td>유탱커 화물구역 요건</td><td>A편 구조 18~30 / B편 설비 31~33 / C편 배출통제 34~36</td></tr>
+<tr><td>제5장</td><td>기름오염사고로부터의 오염방지</td><td>37 선박기름오염비상계획서(SOPEP)</td></tr>
+<tr><td>제6장</td><td>수용시설</td><td>38</td></tr>
+<tr><td>제7장</td><td>고정식·부유식 플랫폼 특별요건</td><td>39</td></tr>
+<tr><td>제8장</td><td>해상 유탱커 간 기름화물 이송</td><td>40~42</td></tr>
+<tr><td>제9장</td><td>극지방(남극해·북극해) 특별요건</td><td>43 · 43A(43-1)</td></tr>
+<tr><td>제10장</td><td>준수 검증 (III Code)</td><td>44 · 45</td></tr>
+<tr><td>제11장</td><td>극지운항선박 국제코드 (Polar Code)</td><td>46 · 47</td></tr>`)}
+<h3>부록 (Appendix)</h3>
+<ul><li>부록 Ⅰ — 기름의 목록</li><li>부록 Ⅱ — 국제기름오염방지증서(IOPP) 및 추록 양식</li><li>부록 Ⅲ — 기름기록부 양식</li></ul>
+<div class="note"><b>참고</b> 북극해 HFO 규정처럼 번호 사이에 신설 규칙이 계속 추가되므로, 총 규칙 수는 개정 때마다 IMO 공식 목차로 다시 확인해야 한다.</div>`,
+pts:["11장 · 47+규칙 · 3부록","제3장 = 모든 선박 기관구역, 제4장 = 유탱커 화물구역","제37규칙 SOPEP, 제38규칙 수용시설","제10장 III Code, 제11장 Polar Code"],
+q:[
+{q:"부속서 Ⅰ에서 '모든 선박의 기관구역에 대한 요건'을 다루는 장은?",c:["제2장","제3장","제4장","제6장"],a:1,e:"제3장(Reg.12~17)이 기관구역, 제4장(Reg.18~36)이 유탱커 화물구역이다."},
+{q:"부속서 Ⅰ의 부록 Ⅲ에 들어 있는 것은?",c:["기름의 목록","IOPP 증서 양식","기름기록부 양식","SOPEP 양식"],a:2,e:"부록 Ⅰ 기름의 목록, 부록 Ⅱ IOPP 양식, 부록 Ⅲ 기름기록부 양식."},
+{q:"부속서 Ⅰ 제11장의 내용은?",c:["III Code","Polar Code","수용시설","해상 STS 이송"],a:1,e:"제10장 III Code(준수 검증), 제11장 Polar Code(극지운항선박 국제코드)."},
+{q:"선박기름오염비상계획서(SOPEP)를 규정한 규칙은?",c:["제17규칙","제36규칙","제37규칙","제38규칙"],a:2,e:"제5장 제37규칙이 선박기름오염비상계획서다. 제38규칙은 수용시설."}
+]},
+{id:"a1-def-oil",annex:"I",reg:"Reg.1",title:"정의 ① 기름과 유탱커",en:"Oil · Crude oil · Oily mixture · Oil tanker",src:"4강 p.14~16",
+sum:"'기름'은 원유·연료유·슬러지·폐유·정제유 등 모든 형태의 석유이며, 부속서 Ⅱ의 석유화학물질은 제외한다.",
+body:`
+<div class="defs">
+<dl class="def"><dt>기름<span>Oil</span></dt><dd>원유·연료유·슬러지·폐유 및 정제유를 포함한 모든 형태의 석유. 부속서 Ⅱ의 석유화학물질은 제외하며, 부록 Ⅰ에 열거된 물질을 포함한다.</dd></dl>
+<dl class="def"><dt>원유<span>Crude oil</span></dt><dd>운송 적합 처리 여부와 관계없이 지하에 자연적으로 존재하는 액체상태의 탄화수소혼합물. 일부 분류물이 제거·첨가된 것도 포함.</dd></dl>
+<dl class="def"><dt>유성혼합물<span>Oily mixture</span></dt><dd>유분을 함유한 모든 혼합물.</dd></dl>
+<dl class="def"><dt>연료유<span>Oil fuel</span></dt><dd>선박의 추진기관·보조기관과 관련하여 연료로 사용되는 모든 기름.</dd></dl>
+<dl class="def"><dt>유탱커<span>Oil tanker</span></dt><dd>화물창에 주로 산적으로 기름을 운송하기 위해 건조·개조된 선박. 겸용선, NLS 탱커, 가스운반선이 산적 기름을 운송하는 경우도 포함.</dd></dl>
+<dl class="def"><dt>원유탱커<span>Crude oil tanker</span></dt><dd>원유를 운송하는 무역에 종사하는 유탱커.</dd></dl>
+<dl class="def"><dt>정제유운반선<span>Product carrier</span></dt><dd>원유 이외의 기름을 운송하는 무역에 종사하는 유탱커.</dd></dl>
+<dl class="def"><dt>겸용선<span>Combination carrier</span></dt><dd>산적으로 기름 또는 고체화물을 운송하도록 설계된 선박.</dd></dl>
+</div>`,
+pts:["부속서 Ⅱ 석유화학물질은 '기름'에서 제외","NLS 탱커·가스운반선도 산적 기름 운송 시 유탱커","원유탱커 vs 정제유운반선 = 화물이 원유냐 아니냐"],
+q:[
+{q:"부속서 Ⅰ의 '기름(Oil)' 정의에서 제외되는 것은?",c:["슬러지","폐유","정제유","부속서 Ⅱ의 석유화학물질"],a:3,e:"모든 형태의 석유를 포함하되 부속서 Ⅱ에서 규제하는 석유화학물질은 제외한다."},
+{q:"원유 이외의 기름을 운송하는 무역에 종사하는 유탱커는?",c:["Crude oil tanker","Product carrier","Combination carrier","NLS tanker"],a:1,e:"Product carrier(정제유운반선)의 정의다."},
+{q:"NLS 탱커가 산적으로 기름을 운송하는 경우에도 '유탱커'에 포함된다.",c:["O","X"],a:0,e:"유탱커 정의는 겸용선·NLS 탱커·가스운반선이 산적 기름을 운송하는 경우를 포함한다."},
+{q:"'산적으로 기름 또는 고체화물을 운송하도록 설계된 선박'의 정의는?",c:["겸용선","유탱커","정제유운반선","산적화물선"],a:0,e:"Combination carrier(겸용선)의 정의다."}
+]},
+{id:"a1-def-misc",annex:"I",reg:"Reg.1",title:"정의 ② 육지·개조·탱크",en:"Nearest land · Major conversion · Tanks · Residues",src:"4강 p.16, p.20, p.39~40",
+sum:"'가장 가까운 육지'는 영해기선으로부터의 거리다. 배출 거리 기준(3·12해리 등)은 모두 이 기선에서 잰다.",
+body:`
+<div class="defs">
+<dl class="def"><dt>가장 가까운 육지<span>Nearest land</span></dt><dd>국제법에 따라 영해를 설정하기 위한 <b>기선(基線)</b>으로부터의 거리. 즉 영해기선으로부터의 거리가 '가장 가까운 육지까지의 거리'다.</dd></dl>
+<dl class="def"><dt>주요개조<span>Major conversion</span></dt><dd>① 선박의 치수 또는 운송용량을 실질적으로 변경 ② 선박의 종류를 변경 ③ 주관청이 선령연장 목적으로 인정하는 개조 ④ 현존선이 신선 적용 협약을 받게 될 정도의 개조.</dd></dl>
+<dl class="def"><dt>유분의 순간배출율<span>Instantaneous rate of discharge</span></dt><dd>어느 순간의 시간당 리터 단위 배출량을 그 순간 노트 단위 선속으로 나눈 비율 (L/해리).</dd></dl>
+<dl class="def"><dt>탱크<span>Tank</span></dt><dd>선박의 영구적 구조로 형성되고 산적으로 액체를 운송하도록 설계된 폐위구역.</dd></dl>
+<dl class="def"><dt>선측탱크 / 중앙탱크<span>Wing / Centre tank</span></dt><dd>선측외판에 인접한 탱크 / 종통격벽 내측의 탱크.</dd></dl>
+<dl class="def"><dt>슬롭탱크<span>Slop tank</span></dt><dd>탱크배수·탱크세정수 및 기타 유성혼합물을 모으기 위해 특별히 지정된 탱크.</dd></dl>
+<dl class="def"><dt>유성잔류물(슬러지)<span>Oil residue (sludge)</span></dt><dd>연료유·윤활유 청정 발생물, 기름필터장치 폐유, 기름받이 폐유, 폐유압유·폐윤활유 등 통상 운항 중 발생하는 잔존 폐유.</dd></dl>
+<dl class="def"><dt>슬러지탱크<span>Oil residue (sludge) tank</span></dt><dd>표준배출연결구 또는 승인된 처리수단으로 직접 처리할 수 있는 슬러지를 저장하는 탱크.</dd></dl>
+<dl class="def"><dt>유성빌지수<span>Oily bilge water</span></dt><dd>기관구역 누설·보수작업으로 기름에 오염된 물. 빌지웰·빌지배관·탱크상부·빌지저장탱크로 유입되는 액체 포함.</dd></dl>
+<dl class="def"><dt>유성빌지수 저장탱크<span>Oily bilge water holding tank</span></dt><dd>유성빌지수를 배출·이송·처분 전에 저장하는 탱크.</dd></dl>
+<dl class="def"><dt>기타</dt><dd><b>연차일</b>: IOPP 증서 만료일에 해당하는 매년의 월일. <b>ppm</b>: 부피 단위에 의한 물의 백만분의 일. <b>침수율</b>: 어느 구역 전 용적 중 물이 채워질 수 있는 용적의 비율. <b>용적·면적</b>: 모든 경우 형선(型線)까지 계산.</dd></dl>
+</div>`,
+pts:["가장 가까운 육지 = 영해기선으로부터","순간배출율 = (L/h) ÷ (knot)","연차일 = IOPP 만료일에 해당하는 매년의 월일","ppm은 부피 기준"],
+q:[
+{q:"MARPOL에서 '가장 가까운 육지로부터의 거리'의 기준점은?",c:["저조선","만조선","영해기선","배타적경제수역 경계"],a:2,e:"국제법에 따라 영해를 설정하기 위한 기선(영해기선)으로부터 잰다."},
+{q:"'유분의 순간배출율'의 정의로 옳은 것은?",c:["시간당 배출량(L) ÷ 선속(knot)","시간당 배출량(L) × 선속(knot)","총 배출량 ÷ 화물량","배출 유분농도(ppm)"],a:0,e:"어느 순간의 시간당 리터 배출량을 그 순간의 노트 단위 선속으로 나눈 값이다."},
+{q:"'연차일(Anniversary date)'의 정의는?",c:["선박 인도일","최초검사일","IOPP 증서 만료일에 해당하는 매년의 월일","증서 발급일로부터 1년 후"],a:2,e:"국제기름오염방지증서 만료일에 해당하는 매년의 월일이다."},
+{q:"탱크배수·탱크세정수 및 기타 유성혼합물을 모으기 위해 특별히 지정된 탱크는?",c:["Wing tank","Slop tank","Sludge tank","Centre tank"],a:1,e:"Slop tank(슬롭탱크)의 정의다. Sludge tank는 유성잔류물(슬러지) 저장 탱크."}
+]},
+{id:"a1-special",annex:"I",reg:"Reg.1",title:"부속서 Ⅰ 특별해역",en:"Special Areas under Annex I",src:"4강 p.17~19, 9강 IMO 표",
+sum:"기름 관련 특별해역은 10개. 지정만 되고 실제 시행되지 않은 해역(홍해·아덴만·오만 아라비아해)이 있다.",
+body:`
+<p><b>특별해역</b>: 해양학상·생태학상 조건과 교통의 특수성으로 인해 기름에 의한 해양오염 방지를 위한 특별한 강제조치의 채택이 요구되는 해역.</p>
+${vizBox("samap","특별해역 지도형 카드","4강 p.17~18 · 9강 IMO 표",' data-annex="I"')}
+${tw(`<tr><th>특별해역</th><th>채택</th><th>발효</th><th>실제 시행</th></tr>
+<tr><td>지중해</td><td class="mono">1973</td><td class="mono">1983</td><td class="mono">1983.10.2</td></tr>
+<tr><td>발틱해</td><td class="mono">1973</td><td class="mono">1983</td><td class="mono">1983.10.2</td></tr>
+<tr><td>흑해</td><td class="mono">1973</td><td class="mono">1983</td><td class="mono">1983.10.2</td></tr>
+<tr><td>홍해</td><td class="mono">1973</td><td class="mono">1983</td><td>미시행 *</td></tr>
+<tr><td>걸프해역</td><td class="mono">1973</td><td class="mono">1983</td><td class="mono">2008.8.1</td></tr>
+<tr><td>아덴만</td><td class="mono">1987</td><td class="mono">1989</td><td>미시행 *</td></tr>
+<tr><td>남극해</td><td class="mono">1990</td><td class="mono">1992</td><td class="mono">1992.3.17</td></tr>
+<tr><td>북서유럽해역</td><td class="mono">1997</td><td class="mono">1999</td><td class="mono">1999.8.1</td></tr>
+<tr><td>오만 아라비아해</td><td class="mono">2004</td><td class="mono">2007</td><td>미시행 *</td></tr>
+<tr><td>남아프리카 남부해역</td><td class="mono">2006</td><td class="mono">2008</td><td class="mono">2008.8.1</td></tr>`)}
+<p class="muted" style="font-size:13.5px">* 연안국이 수용시설 확보를 IMO에 통보하지 않아 특별해역 배출요건이 아직 효력을 갖지 않는 해역. 9강의 IMO 표 기준.</p>
+<div class="note"><b>최신 동향</b> 2008년 이후 새로 지정된 특별해역은 없다. 대신 특정 연료(HFO) 자체를 금지하는 북극해 규정(제43A규칙, 2024.7.1 발효)처럼 다른 방식의 지역 규제가 등장했다.</div>
+${tw(`<tr><th>구분</th><th>특별해역</th><th>북극해 HFO 금지</th></tr>
+<tr><td>규제 방식</td><td>해역 지정 후 배출기준 강화</td><td>특정 연료(HFO)의 사용·운송 자체를 금지</td></tr>
+<tr><td>사례</td><td>지중해·발틱해 등 10개</td><td>북극해</td></tr>
+<tr><td>동향</td><td>2008년 이후 신규 지정 없음</td><td>2021 채택 → 2024.7.1 발효</td></tr>`)}`,
+pts:["부속서 Ⅰ 특별해역 10개","미시행: 홍해·아덴만·오만 아라비아해","걸프해역은 1983 발효, 2008 시행","2008년 이후 신규 지정 없음"],
+q:[
+{q:"부속서 Ⅰ 특별해역의 개수는?",c:["6개","8개","10개","12개"],a:2,e:"지중해·발틱해·흑해·홍해·걸프·아덴만·남극해·북서유럽·오만 아라비아해·남아프리카 남부 = 10개."},
+{q:"다음 중 부속서 Ⅰ의 특별해역이 아닌 것은?",c:["북서유럽해역","남아프리카 남부해역","북해(North Sea)","오만 아라비아해"],a:2,e:"북해는 부속서 Ⅴ의 특별해역(그리고 부속서 Ⅵ ECA)이다. 부속서 Ⅰ에서는 북서유럽해역에 포함된다."},
+{q:"부속서 Ⅰ 특별해역 중 현재 실제로 시행되지 않는 해역은?",c:["걸프해역","아덴만","남극해","지중해"],a:1,e:"아덴만은 지정·발효되었으나 시행되지 않는다(홍해·오만 아라비아해도 동일)."},
+{q:"걸프해역 특별해역이 실제로 시행된 해는?",c:["1983","1992","1999","2008"],a:3,e:"1983년에 발효되었지만 실제 시행은 2008.8.1부터다."},
+{q:"2008년 이후 부속서 Ⅰ에 새로 지정된 특별해역이 있다.",c:["O","X"],a:1,e:"2008년 이후 신규 지정은 없다. 대신 북극해 HFO 금지라는 다른 방식의 규제가 도입되었다."}
+]},
+{id:"a1-ballast",annex:"I",reg:"Reg.1",title:"청정평형수와 분리평형수",en:"Clean ballast vs Segregated ballast",src:"4강 p.24~30",
+sum:"청정평형수는 '얼마나 깨끗한가'(수질), 분리평형수는 '어느 탱크에 담겼는가'(구조적 분리)를 정의한다.",
+body:`
+<div class="vs">
+<div><h5>청정평형수 (Clean ballast)</h5><p style="margin:0;font-size:14.5px">기름을 실었던 화물탱크를, 청명한 날 정지 상태에서 잔잔한 해면에 배출했을 때 <b>눈에 보이는 유막이 없고</b> 슬러지·에멀젼을 만들지 않을 정도로 세정한 뒤 실은 평형수.<br><br>기름배출감시제어장치(ODME)로 <b>15ppm 이하</b>임이 확인되면 유막과 관계없이 청정평형수로 인정.</p></div>
+<div><h5>분리평형수 (Segregated ballast)</h5><p style="margin:0;font-size:14.5px">화물유 계통 및 연료유 계통으로부터 <b>완전히 분리</b>되어 있고, 평형수 또는 기름·유해물질 이외의 화물을 적재하기 위해 <b>영구적으로 설치된 탱크</b>에 실은 평형수.<br><br>이런 탱크를 분리평형수탱크(SBT)라 한다.</p></div>
+</div>
+<h3>평형수의 역할</h3>
+<p>선박은 화물 적재량에 따라 평형수 양을 조절해 흘수와 복원성을 유지한다. 화물 만재 시 평형수 최소, 비적재 시 최대.</p>
+<ol class="steps"><li>출항 시 화물 하역 후 평형수 주입</li><li>항해 중 평형수 유지</li><li>입항지에서 화물 적재 전 평형수 배출</li></ol>
+<p><b>공소구획(Void space)</b>은 화물유탱크와 외판 사이에 둔 빈 공간으로, 손상 시 기름유출을 줄이는 완충 역할을 한다.</p>
+<div class="note"><b>구분</b> 평형수를 통한 생물 이동 문제는 MARPOL이 아니라 선박평형수관리협약(BWM Convention, 2017 발효)이 규제한다.</div>`,
+pts:["Clean = 수질 기준, Segregated = 구조적 분리","ODME 15ppm 이하면 유막과 무관하게 Clean ballast","평형수 생물 이동은 BWM 협약 소관"],
+q:[
+{q:"기름배출감시제어장치(ODME)로 배출할 때 청정평형수로 인정되는 유분농도 기준은?",c:["5ppm 이하","15ppm 이하","30ppm 이하","100ppm 이하"],a:1,e:"ODME 기록상 15ppm 이하이면 유막 발생과 관계없이 Clean ballast로 인정된다."},
+{q:"화물유·연료유 계통과 완전히 분리된 전용 탱크에 실은 평형수는?",c:["Clean ballast","Dirty ballast","Segregated ballast","Departure ballast"],a:2,e:"구조적 분리를 기준으로 한 Segregated ballast(분리평형수) 정의다."},
+{q:"청정평형수는 '어느 탱크에 담겼는가'를 기준으로 정의하는 개념이다.",c:["O","X"],a:1,e:"청정평형수는 수질(얼마나 깨끗한가), 분리평형수가 구조(어느 탱크인가) 기준이다."},
+{q:"선박평형수 내 수중생물 이동을 규제하는 협약은?",c:["MARPOL 부속서 Ⅰ","BWM 협약","AFS 협약","홍콩협약"],a:1,e:"선박평형수관리협약(BWM Convention)은 2017년 발효되었다."}
+]},
+{id:"a1-dimension",annex:"I",reg:"Reg.1",title:"선박 치수의 정의",en:"Length · Breadth · Deadweight · Lightweight",src:"4강 p.31~33, p.39",
+sum:"MARPOL의 '길이'는 전장(LOA)이 아니다. COLREG는 LOA를 쓰므로 협약마다 길이가 다르다.",
+body:`
+<div class="vs">
+<div><h5>MARPOL Reg.1 — 길이(L)</h5><p style="margin:0;font-size:14.5px">용골 상면으로부터 측정한 최소형심의 85% 지점 수선에서 <b>전장의 95%</b>, 또는 그 수선상 선수재 전단에서 타두재 중심까지의 거리 중 <b>큰 것</b>. 미터 단위.</p></div>
+<div><h5>COLREG Rule 3 — 길이</h5><p style="margin:0;font-size:14.5px">The 'length' of a vessel means her <b>length overall (LOA)</b>.</p></div>
+</div>
+<div class="krcon"><b>KR-CON 원문과 다른 점</b><p>원문 Reg.1.19는 <b>96 per cent</b>다: “Length (L) means 96 per cent of the total length on a waterline at 85 per cent of the least moulded depth…”</p></div>
+<div class="defs">
+<dl class="def"><dt>전부수선·후부수선<span>Forward / After perpendiculars</span></dt><dd>길이(L)의 전단·후단에서 취한 수선. 전부수선은 선수재 전단과 일치.</dd></dl>
+<dl class="def"><dt>선체중앙<span>Amidships</span></dt><dd>길이(L)의 중앙.</dd></dl>
+<dl class="def"><dt>폭<span>Breadth (B)</span></dt><dd>선체 중앙에서 프레임(또는 선체) 외면부터 외면까지 측정한 최대 너비. 미터 단위.</dd></dl>
+<dl class="def"><dt>재화중량<span>Deadweight (DW)</span></dt><dd>비중 1.025 해수에서 지정 만재흘수선까지 적재한 배수량과 경하중량의 차. 실을 수 있는 화물 등의 총 무게.</dd></dl>
+<dl class="def"><dt>경하중량<span>Lightweight</span></dt><dd>화물·연료·윤활유·밸러스트수·탱크 내 청수 및 보일러급수·소모품, 여객·승무원 및 소지품을 공제한 선박 배수량(미터톤).</dd></dl>
+</div>
+<p>주요 치수 개관: LOA(전장), LBP(수선간장), 전부·후부수선, 선체중앙, 깊이·흘수·건현.</p>`,
+pts:["MARPOL 길이 = 85% 형심 수선 전장의 95% 또는 선수재~타두재 중 큰 것 (원문은 96%)","COLREG 길이 = LOA","DW = 만재 배수량 − 경하중량 (해수 비중 1.025)"],
+q:[
+{q:"COLREG에서 선박의 '길이'는?",c:["수선간장(LBP)","전장(LOA)","형심 85% 수선 전장의 95%","등록장"],a:1,e:"COLREG Rule 3: length overall. MARPOL과 정의가 다르다."},
+{q:"재화중량(DW)은 비중 1.025 해수에서 만재흘수선까지의 배수량에서 무엇을 뺀 값인가?",c:["총톤수","순톤수","경하중량","화물 중량"],a:2,e:"DW = 만재 배수량 − 경하중량(Lightweight)."},
+{q:"MARPOL에서 '폭(B)'은 어디에서 측정하는가?",c:["선수부","선체 중앙(Amidships)","선미부","수선 최대 지점"],a:1,e:"선체 중앙에서 프레임(또는 선체) 외면부터 외면까지 측정한 최대 너비."},
+{q:"경하중량(Lightweight) 산정 시 공제하지 않는 것은?",c:["연료","밸러스트수","승무원 및 소지품","선체 구조물"],a:3,e:"선체 구조물은 선박 자체의 무게로 경하중량에 포함된다."}
+]},
+{id:"a1-tonnage",annex:"I",reg:"Reg.1",title:"선박의 톤수",en:"Gross · Net · Displacement · Deadweight Tonnage",src:"4강 p.34~38",
+sum:"톤수는 용적톤(GT·NT)과 중량톤(배수톤수·재화중량톤수)으로 나뉜다. MARPOL 적용 기준(150·400톤)은 총톤수(GT)다.",
+body:`
+<div class="vs">
+<div><h5>용적톤 (Measurement)</h5><p style="margin:0;font-size:14.5px">폐위된 공간의 부피 기준. 무게에 비해 부피가 큰 용적화물은 용적이 운임 단위.</p></div>
+<div><h5>중량톤 (Weight)</h5><p style="margin:0;font-size:14.5px">물에 잠긴 부분 부피 × 밀도. 부피에 비해 무게가 큰 중량화물은 무게가 운임 단위.</p></div>
+</div>
+${tw(`<tr><th>톤수</th><th>정의</th><th>쓰임</th></tr>
+<tr><td>총톤수 (GT)</td><td>밀폐된 장소의 총 용적</td><td>선박 크기 기준(군함 제외), 등록세·검사수수료·입거료</td></tr>
+<tr><td>순톤수 (NT)</td><td>화물·여객 운송에 쓰이는 공간의 용적</td><td>항세·톤세·운하통과료·등대사용료·항만시설사용료</td></tr>
+<tr><td>만재배수톤수</td><td>해수 1.025에서 기준흘수선까지 잠긴 배수톤수</td><td>군함 크기 표시</td></tr>
+<tr><td>경하배수톤수</td><td>아무것도 싣지 않은 상태의 배수톤수</td><td>선박 자체 중량</td></tr>
+<tr><td>재화중량톤수 (DWT)</td><td>적재 가능한 화물 등의 최대중량</td><td>용선료 산정, 화물선 크기 표시</td></tr>`)}
+<h3>국제총톤수 산정</h3>
+<div class="key"><span class="mono">GT = K₁ × V</span>, &nbsp; <span class="mono">K₁ = 0.2 + 0.02 × log₁₀V</span><br><span class="muted" style="font-size:13.5px">V: 모든 폐위장소의 총 용적(㎥). 1969 선박톤수측정협약(ITC 69)</span></div>
+<p>(국내)총톤수 = 국제총톤수 × 톤수산정계수(k). 계수가 1 이상이면 1로 하므로, 총톤수 약 4,000톤 이상 선박은 국내·국제 총톤수가 같다.</p>
+<h3>선박법 제3조의 정의</h3>
+<ul><li><b>국제총톤수</b>: 1969 선박톤수측정협약에 따라 국제항해 종사 선박의 크기를 나타내는 지표</li>
+<li><b>(국내)총톤수</b>: 우리나라 해사 법령 적용 시 선박의 크기를 나타내는 지표</li>
+<li><b>순톤수</b>: 여객 또는 화물 운송용 장소의 크기를 나타내는 지표</li>
+<li><b>재화중량톤수</b>: 항행 안전을 확보할 수 있는 한도에서 여객·화물 등 최대적재량을 무게로 표시</li></ul>`,
+pts:["GT = 크기·등록·검사수수료 / NT = 항세·톤세·운하료","DWT = 용선료·화물선 크기","만재배수톤수 = 군함 크기","GT = (0.2 + 0.02 log₁₀V) × V"],
+q:[
+{q:"항세·톤세·운하통과료의 부과 기준이 되는 톤수는?",c:["총톤수","순톤수","재화중량톤수","만재배수톤수"],a:1,e:"직접 상행위에 쓰이는 용적인 순톤수(NT)가 기준이다."},
+{q:"군함의 크기를 나타낼 때 주로 쓰는 톤수는?",c:["총톤수","순톤수","만재배수톤수","재화중량톤수"],a:2,e:"만재배수톤수(Full load displacement)."},
+{q:"국제총톤수 산정 계수 K₁은?",c:["0.2 + 0.02 log₁₀V","0.25 + 0.01 log₁₀V","0.2 + 0.2 log₁₀V","0.02 + 0.2 log₁₀V"],a:0,e:"GT = K₁V, K₁ = 0.2 + 0.02 log₁₀V (ITC 69)."},
+{q:"용선료 산정 기준과 화물선 크기 표시에 주로 쓰이는 톤수는?",c:["총톤수","순톤수","재화중량톤수","경하배수톤수"],a:2,e:"재화중량톤수(DWT)."}
+]},
+{id:"a1-app",annex:"I",reg:"Reg.2·3",title:"적용과 적용면제",en:"Application · Exemptions and Waivers",src:"5강 p.5~6",
+sum:"별도 규정이 없으면 모든 선박에 적용한다. 구조상 요건 적용이 어려운 수중익선·공기부양선 등은 면제될 수 있다.",
+body:`
+<h3>제2규칙 적용</h3>
+<div class="key">별도의 명문 규정이 없는 한, 이 부속서는 <b>모든 선박</b>에 적용된다.</div>
+<h3>제3규칙 면제</h3>
+<p>구조적 특징상 구조·설비 관련 규정의 적용이 어려운 다음 선박은 면제될 수 있다.</p>
+${tw(`<tr><th>선박</th><th>영문</th></tr>
+<tr><td>수중익선</td><td>Hydrofoil</td></tr><tr><td>공기부양선</td><td>Air-cushion vehicle</td></tr>
+<tr><td>해면부근 항행선박</td><td>Near-surface craft</td></tr><tr><td>잠수함</td><td>Submarine craft</td></tr>`)}
+<ol class="steps"><li>주관청이 승인한 면제 사항은 증서(Exemption Certificate)에 표시한다.</li>
+<li>면제를 승인한 주관청은 <b>90일 이내</b>에 조속히 면제의 상세와 이유를 IMO에 보고한다.</li></ol>`,
+pts:["원칙: 모든 선박에 적용","면제 대상: 수중익선·공기부양선·해면부근 항행선박·잠수함","면제 승인 후 90일 내 IMO 보고"],
+q:[
+{q:"부속서 Ⅰ 제3규칙에 따른 면제 대상이 아닌 것은?",c:["수중익선","공기부양선","잠수함","여객선"],a:3,e:"면제 대상은 구조적 특성상 요건 적용이 어려운 수중익선·공기부양선·해면부근 항행선박·잠수함이다."},
+{q:"면제를 승인한 주관청은 며칠 이내에 IMO에 보고해야 하는가?",c:["30일","60일","90일","180일"],a:2,e:"90일 내에 조속히 면제의 상세와 이유를 IMO에 보고한다."}
+]},
+{id:"a1-survey",annex:"I",reg:"Reg.6",title:"검사의 종류",en:"Surveys — MARPOL vs 해양환경관리법",src:"5강 p.8",
+sum:"MARPOL 검사는 최초·정기(갱신)·중간·연차·추가검사. 국내법은 정기·제1종 중간·제2종 중간·임시검사로 부른다.",
+body:`
+<div class="vs">
+<div><h5>국제협약 (MARPOL Reg.6)</h5><p style="margin:0 0 6px;font-size:13.5px" class="muted">대상: 총톤수 150 이상 모든 유탱커, 총톤수 400 이상 유탱커 이외 모든 선박</p>
+<ul style="margin:0;padding-left:1.1em;font-size:14.5px">
+<li><b>최초검사</b> Initial — 취항 전</li>
+<li><b>정기(갱신)검사</b> Renewal — 5년을 넘지 않는 간격</li>
+<li><b>중간검사</b> Intermediate — 2번째 또는 3번째 연차일 전후 3개월 이내</li>
+<li><b>연차검사</b> Annual — 매 연차일 전후 3개월 이내</li>
+<li><b>추가검사</b> Additional — 수리·개조 등 필요 시</li></ul></div>
+<div><h5>국내법 (해양환경관리법)</h5><p style="margin:0 0 6px;font-size:13.5px" class="muted">대상: 해양오염방지설비(기름·유해액체물질·폐기물)를 설치하는 선박</p>
+<ul style="margin:0;padding-left:1.1em;font-size:14.5px">
+<li><b>정기검사</b> — 취항 전 또는 검사유효기간(5년) 만료 시</li>
+<li><b>제1종 중간검사</b> — 정기검사 후 2·3번째 검사기준일 전후 3개월 이내</li>
+<li><b>제2종 중간검사</b> — 검사기준일 전후 3개월 이내</li>
+<li><b>임시검사</b> — 해양오염방지설비 교체·개조·수리 시</li></ul></div>
+</div>
+<div class="note"><b>검사기준일</b> MARPOL은 '연차일'(증서 만료일에 해당하는 매년의 월일), 국내법은 '검사증서 유효기간 개시일부터 매 1년이 만료되는 날'을 기준으로 한다.</div>
+<h3>참고: SOLAS 검사</h3>
+<p>화물선은 최초·갱신(5년)·정기(2·3번째 검사기준일)·연차·추가검사, 여객선은 최초·갱신검사를 <b>매 12개월</b>마다 받는다.</p>`,
+pts:["MARPOL 검사 5종: 최초·정기·중간·연차·추가","중간검사 = 2·3번째 연차일 ±3개월","연차검사 = 매 연차일 ±3개월","국내: 정기·제1종 중간·제2종 중간·임시"],
+q:[
+{q:"MARPOL 부속서 Ⅰ의 중간검사 시기는?",c:["매 연차일 전후 3개월","2번째 또는 3번째 연차일 전후 3개월","발급 후 30개월 이내","갱신검사 6개월 전"],a:1,e:"Intermediate survey는 2번째 또는 3번째 연차일 전후 3개월 이내에 시행한다."},
+{q:"MARPOL Reg.6 검사 대상으로 옳은 것은?",c:["총톤수 100 이상 모든 선박","총톤수 150 이상 유탱커와 총톤수 400 이상 유탱커 외 선박","총톤수 400 이상 유탱커와 총톤수 150 이상 일반선박","모든 유탱커와 총톤수 1,000 이상 선박"],a:1,e:"150GT 이상 유탱커, 400GT 이상 그 밖의 선박."},
+{q:"해양환경관리법상 해양오염방지설비를 교체·개조·수리할 때 받는 검사는?",c:["정기검사","제1종 중간검사","제2종 중간검사","임시검사"],a:3,e:"설비의 교체·개조·수리 시에는 임시검사를 받는다."},
+{q:"SOLAS상 여객선의 갱신검사 주기는?",c:["매 12개월","매 2년","매 3년","매 5년"],a:0,e:"여객선은 Renewal survey를 매 12개월마다 받는다(화물선은 5년)."}
+]},
+{id:"a1-iopp",annex:"I",reg:"Reg.7·10",title:"IOPP 증서와 5년 주기",en:"International Oil Pollution Prevention Certificate",src:"5강 p.9~10, 4강 p.12",
+sum:"IOPP는 부속서 Ⅰ의 구조·설비 요건 충족을 증명하는 국제증서. 유효기간은 5년을 넘지 않는다.",
+body:`
+${tw(`<tr><th>항목</th><th>내용</th></tr>
+<tr><td>정식 명칭</td><td>국제기름오염방지증서 (International Oil Pollution Prevention Certificate)</td></tr>
+<tr><td>발급기관</td><td>주관청 또는 주관청으로부터 권한을 위임받은 기관 (RO: KR, BV, KOMSA 등)</td></tr>
+<tr><td>유효기간</td><td><b>5년</b>을 넘지 않는 범위</td></tr>
+<tr><td>발급 요건</td><td>검사(Survey) 통과</td></tr>
+<tr><td>양식</td><td>부록 Ⅱ (증서 및 추록)</td></tr>`)}
+<h3>5년 검사 주기</h3>
+${tw(`<tr><th>시점</th><th>발급</th><th>1년</th><th>2년</th><th>3년</th><th>4년</th><th>5년</th></tr>
+<tr><td>검사</td><td>Initial</td><td>Annual</td><td>Annual / Intermediate</td><td>Annual / Intermediate</td><td>Annual</td><td>Renewal</td></tr>`)}
+<p>발급 후 5년 이내에 갱신검사를 받아야 하며, 그 사이 매년 연차검사, 2·3번째 해 중 한 번 중간검사를 받는다.</p>
+${vizBox("iopp","IOPP 5년 타임라인","5강 p.10 · Reg.6")}
+<p><span class="net">인터넷 보완</span> 추록(Supplement)은 유탱커 이외 선박용 Form A, 유탱커용 Form B로 나뉜다.</p>`,
+pts:["IOPP 유효기간 ≤ 5년","주관청 또는 RO가 발급","Initial → Annual → Intermediate(2·3년) → Renewal"],
+q:[
+{q:"IOPP 증서의 유효기간은?",c:["1년","3년","5년을 넘지 않는 기간","10년"],a:2,e:"IOPP는 5년을 넘지 않는 범위에서 발급된다."},
+{q:"IOPP 증서를 발급할 수 있는 기관은?",c:["항만국만","IMO","주관청 또는 권한을 위임받은 기관(RO)","선급협회 연합"],a:2,e:"주관청 또는 위임받은 기관(KR, BV, KOMSA 등)이 발급한다."},
+{q:"IOPP 증서의 양식은 부속서 Ⅰ의 어느 부록에 있는가?",c:["부록 Ⅰ","부록 Ⅱ","부록 Ⅲ","부록 Ⅳ"],a:1,e:"부록 Ⅱ: 국제기름오염방지증서 및 추록의 양식."}
+]},
+{id:"a1-psc",annex:"I",reg:"Reg.11",title:"항만국통제 (PSC)",en:"Port State Control on operational requirements",src:"5강 p.13~16",
+sum:"선장·선원이 기름오염방지 필수절차에 익숙하지 않다고 믿을 명백한 근거가 있으면 운항요건을 점검하고 출항을 정지할 수 있다.",
+body:`
+<h3>제11규칙의 내용</h3>
+<ol class="steps">
+<li>선장 또는 선원이 기름오염방지에 관한 선내 필수절차에 익숙하지 못하다고(not familiar with essential shipboard procedures) 믿을 만한 <b>명백한 근거(clear grounds)</b>가 있는 경우,</li>
+<li>타 당사국 항구에 있는 선박은 운항상 요건에 관하여 항만당국 검사관(<b>PSCO</b>)의 점검을 받는다.</li>
+<li>당사국은 요건이 만족될 때까지 선박이 <b>출항하지 못하도록</b> 조치한다.</li>
+<li>IMO 항만국통제 절차서를 따른다: <b>Res.A.1206(34)</b>, Procedures for Port State Control, 2025 — 2026.1.1 시행 (A.1155(32)·A.1185(33) 대체).</li></ol>
+<h3>PSC의 목적과 정의</h3>
+<p><b>목적</b>: 기준미달선박(Sub-standard vessel)에 의한 해양사고로부터 연안국의 해양환경을 보호하고, 해상에서 인명과 재산을 보호.</p>
+<p><b>정의</b>: 자국 관할 항만에 입항하는 <b>외국적 선박</b>을 대상으로 국제협약의 안전·환경기준 미달 여부를 점검해 결함을 시정시키거나 출항정지 등 조치를 취하는 제도.</p>
+<h3>시행근거</h3>
+<div class="vs"><div><h5>국제협약</h5><p style="margin:0;font-size:14px">LL 66 · SOLAS 74/78 · MARPOL 73/78 · STCW 78 · COLREG 72 · ITC 69 · MLC 2006 · ILO 147</p></div>
+<div><h5>국내법</h5><p style="margin:0;font-size:14px">선박안전법 · 선박법 · 선원법 · 선박직원법 · 해상교통안전법 · 해양환경관리법</p></div></div>
+<h3>세 관리주체</h3>
+${tw(`<tr><th>주체</th><th>역할</th></tr>
+<tr><td>항만국 Port State</td><td>선박이 입항한 항구에 주권을 행사하는 국가</td></tr>
+<tr><td>기국 Flag State</td><td>선박에 국적을 부여하고 선내에 주권을 행사하는 국가</td></tr>
+<tr><td>연안국 Coastal State</td><td>영해까지 주권을 행사하는 국가 (선박 통과 관련)</td></tr>`)}`,
+pts:["PSC 대상 = 외국적 선박","발동 요건: 명백한 근거(clear grounds)","조치: 요건 충족 시까지 출항정지","절차서: Res.A.1206(34), 2026.1.1 시행"],
+q:[
+{q:"항만국통제(PSC)의 대상 선박은?",c:["자국적 선박","자국 항만에 입항한 외국적 선박","공해상의 모든 선박","자국 영해를 통과하는 선박"],a:1,e:"PSC는 자국 관할 항만에 입항하는 외국적 선박을 점검한다."},
+{q:"운항요건 점검을 위한 PSC 발동 요건으로 제11규칙이 요구하는 것은?",c:["선주의 요청","명백한 근거(clear grounds)","선박의 선령 15년 초과","주관청 통보"],a:1,e:"선원이 필수절차에 익숙하지 않다고 믿을 만한 명백한 근거가 있어야 한다."},
+{q:"2026.1.1부터 시행되는 IMO 항만국통제 절차서 결의는?",c:["Res.A.1155(32)","Res.A.1185(33)","Res.A.1206(34)","MEPC.107(49)"],a:2,e:"Res.A.1206(34)가 기존 A.1155(32)·A.1185(33)를 대체한다."},
+{q:"선박에 국적을 부여하고 선내에 주권을 행사하는 국가는?",c:["항만국","기국","연안국","선주국"],a:1,e:"Flag State(기국)."},
+{q:"PSC 시행근거인 국제협약이 아닌 것은?",c:["MLC 2006","STCW 78","ITC 69","CLC 69"],a:3,e:"강의자료의 시행근거 목록은 LL66·SOLAS·MARPOL·STCW·COLREG·ITC69·MLC2006·ILO147이다."}
+]},
+{id:"a1-reg12",annex:"I",reg:"Reg.12~13",title:"슬러지탱크 · 연료유탱크 보호 · 표준배출연결구",en:"Sludge tank · Fuel oil tank protection · Standard discharge connection",src:"5강 p.19~21",
+sum:"총톤수 400 이상 선박은 충분한 용량의 슬러지탱크와 전용펌프를 갖추고, 표준배출연결구 외에는 선외로 직접 연결하면 안 된다.",
+body:`
+<h3>제12규칙 유성잔류물(슬러지)탱크</h3>
+<ul><li>적용: <b>총톤수 400 이상</b> 모든 선박</li>
+<li>슬러지는 연료유·윤활유 정제와 기관구역 누출로 발생하며, 표준배출구를 통해 육상에 배출하거나 승인된 방법으로 소각한다.</li>
+<li>기관 형식과 항해 길이를 고려해, 처리할 수 없는 슬러지를 수용할 <b>충분한 용량</b>의 슬러지탱크를 설치한다.</li>
+<li>슬러지탱크에서 흡입할 수 있는 <b>전용펌프</b>를 설치한다.</li>
+<li><b>표준배출연결구를 제외하고 선외로 직접 연결되어서는 안 된다.</b></li></ul>
+<h3>제12A규칙 연료유탱크 보호</h3>
+<div class="key">개별 연료유탱크의 용적은 <span class="num">2,500㎥</span>를 넘어서는 안 된다.</div>
+<p>충돌·좌초 시 연료유 대량 유출을 막기 위해 연료유탱크를 선체 구조상 보호된 위치에 배치하고 탱크별 최대 용적을 제한한다.</p>
+<div class="krcon"><b>KR-CON 원문 추가 내용</b><p>제12A규칙은 연료유 총 용량 600㎥ 이상이고 2010.8.1 이후 인도된 선박에 적용된다.</p></div>
+<h3>제13규칙 표준배출연결구</h3>
+<p>수용시설의 관을 선박 기관구역 빌지 및 슬러지탱크의 배출관과 연결할 수 있도록 하는 관. 플랜지 표준치수는 부속서 Ⅳ와 같은 형식이다(<a href="#d-a4-equip">부속서 Ⅳ 설비</a> 참조).</p>
+<p>톤수별 의무 전체는 <a href="#d-a1-reg14">톤수 기준 사다리</a>에서 한눈에 볼 수 있다.</p>`,
+pts:["슬러지탱크: 400GT 이상, 충분한 용량, 전용펌프","표준배출연결구 외 선외 직접 연결 금지","개별 연료유탱크 ≤ 2,500㎥"],
+q:[
+{q:"제12A규칙에 따른 개별 연료유탱크의 최대 용적은?",c:["1,000㎥","2,000㎥","2,500㎥","5,000㎥"],a:2,e:"개별 연료유탱크의 용적은 2,500㎥를 넘을 수 없다."},
+{q:"슬러지탱크 설치 요건(제12규칙)의 적용 대상은?",c:["모든 선박","총톤수 150 이상","총톤수 400 이상","총톤수 10,000 이상"],a:2,e:"총톤수 400 이상의 모든 선박."},
+{q:"슬러지탱크는 표준배출연결구 외에도 선외로 직접 연결할 수 있다.",c:["O","X"],a:1,e:"표준배출연결구를 제외하고 선외로 직접 연결되어서는 안 된다."}
+]},
+{id:"a1-reg14",annex:"I",reg:"Reg.14",title:"기름필터장치",en:"Oil Filtering Equipment",src:"5강 p.22~23, 3강 p.21~22",
+sum:"총톤수 400 이상 선박은 15ppm 기름필터장치, 10,000 이상은 여기에 경보장치와 자동배출정지장치를 더한다.",
+body:`
+${tw(`<tr><th>선박 크기</th><th>요구 설비</th></tr>
+<tr><td>총톤수 400 이상 ~ 10,000 미만</td><td>기름필터장치</td></tr>
+<tr><td>총톤수 10,000 이상</td><td>기름필터장치 + <b>경보장치</b> + <b>자동배출정지장치</b></td></tr>
+<tr><td>총톤수 400 미만 (유조선 외)</td><td>빌지저장탱크 (3강 설비표)</td></tr>`)}
+<div class="key">유성혼합물의 유분농도가 <span class="num">15ppm</span> 이하가 되도록 정제하는 장치로, 15ppm을 초과하면 자동으로 정지될 수 있어야 한다. 주관청 승인 제품이어야 한다.</div>
+<p><b>근거 결의서</b>: MEPC.107(49) — Revised Guidelines and Specifications for Pollution Prevention Equipment for Machinery Space Bilges of Ships (2003년 채택, 기존 MEPC.60(33) 대체).</p>
+<p>구성 예시: 빌지 분리기(OWS), 재순환설비, 자동정지장치, 15ppm 빌지경보장치(유분농도계).</p>
+${vizBox("ladder","톤수 기준 사다리","4·5강 · 3강 설비표")}
+<h3>형식승인 대상 해양오염방지설비 (3강)</h3>
+<div class="vs"><div><h5>유탱커</h5><p style="margin:0;font-size:14px">기름배출감시제어장치(ODMC/ODME), 유량계, 밸러스트용 유분농도계, 유수경계면검출기, 원유세정기(COW)</p></div>
+<div><h5>일반 선박</h5><p style="margin:0;font-size:14px">기름여과장치, 15ppm 빌지경보장치, 선저폐수용 유분농도계, 분뇨처리장치, 분뇨마쇄소독장치, 소각기, 유화기</p></div></div>`,
+pts:["400~10,000GT: 기름필터장치","10,000GT 이상: + 경보장치 + 자동정지장치","기준 15ppm, 근거 MEPC.107(49)"],
+q:[
+{q:"총톤수 10,000 이상 선박에 기름필터장치와 함께 요구되는 것은?",c:["원유세정장치","경보장치와 자동배출정지장치","슬롭탱크","유수경계면검출기"],a:1,e:"10,000GT 이상은 기름필터장치에 경보장치·자동배출정지장치를 더해야 한다."},
+{q:"기름필터장치의 처리 기준 유분농도는?",c:["5ppm","15ppm","50ppm","100ppm"],a:1,e:"15ppm 이하로 정제해야 하며, 초과 시 자동 정지되어야 한다."},
+{q:"기름필터장치의 근거 결의서는?",c:["MEPC.60(33)","MEPC.107(49)","MEPC.201(62)","Res.A.1206(34)"],a:1,e:"MEPC.107(49)(2003)가 기존 MEPC.60(33)을 대체했다."},
+{q:"총톤수 6,000인 일반 화물선은 기름필터장치에 자동배출정지장치를 반드시 추가해야 한다.",c:["O","X"],a:1,e:"자동배출정지장치·경보장치의 추가 요건은 10,000GT 이상 선박이다."}
+]},
+{id:"a1-reg15",annex:"I",reg:"Reg.15",title:"기관구역 기름배출의 통제",en:"Control of Discharge of Oil",src:"5강 p.24~25",
+sum:"총톤수 400 이상 선박은 항행 중, 필터장치를 거쳐, 15ppm 이하일 때만 배출할 수 있다. 남극해역은 어떤 배출도 금지.",
+body:`
+<h3>특별해역 외 (북극해역 제외)</h3>
+<p>총톤수 400 이상 선박은 다음 <b>모든</b> 조건을 만족할 때만 배출할 수 있다.</p>
+<ol class="steps">
+<li>선박이 <b>항행 중</b>일 것</li>
+<li>유성혼합물이 <b>기름필터장치</b>를 통해 처리될 것 (10,000GT 이상은 경보·자동배출제어장치 포함)</li>
+<li>유출액 중 유분농도가 <b>15ppm</b>을 초과하지 않을 것</li>
+<li>유조선의 <b>화물펌프실 빌지</b>에서 생성되지 않을 것</li>
+<li>유탱커의 경우 <b>화물유 잔류물</b>과 혼합되지 않을 것</li></ol>
+${vizBox("reg15","제15규칙 배출 체크리스트","5강 p.24~25")}
+<h3>특별해역 내</h3>
+<p>위와 같은 조건(항행 중 · 필터장치(경보·자동제어 포함) · 15ppm 이하 · 화물펌프실 빌지 아님 · 화물유 잔류물 미혼합)을 모두 만족하는 경우를 제외하고 금지.</p>
+<h3>남극해역</h3>
+<div class="key">남극지역에서는 선박으로부터 기름 또는 유성혼합물의 <b>어떠한 해양 배출도 전면 금지</b>. 제43규칙(남극해 HFO 금지)과 함께 가장 엄격한 해역이다.</div>
+<p>기관구역 배출은 거리 조건이 없다는 점이 부속서 Ⅳ·Ⅴ와 다르다. 화물구역 배출은 제34규칙이 따로 정한다(<a href="#d-a1-ch4">제4장</a> 참조).</p>`,
+pts:["조건 5가지: 항행 중 · 필터 · 15ppm · 펌프실 빌지 아님 · 화물잔류물 미혼합","기관구역 배출은 거리 조건 없음","남극해역은 전면 금지"],
+q:[
+{q:"특별해역 외에서 총톤수 400 이상 선박이 기관구역 유성혼합물을 배출할 수 있는 조건이 아닌 것은?",c:["항행 중일 것","기름필터장치로 처리할 것","유분농도 15ppm 이하일 것","가장 가까운 육지로부터 12해리 이상일 것"],a:3,e:"기관구역 배출(제15규칙)에는 거리 조건이 없다."},
+{q:"선박으로부터 기름·유성혼합물의 어떠한 해양 배출도 전면 금지되는 해역은?",c:["지중해","발틱해","남극해역","걸프해역"],a:2,e:"남극지역은 예외 없이 전면 금지."},
+{q:"유조선의 화물펌프실 빌지는 15ppm 이하로 처리하면 기관구역 빌지처럼 배출할 수 있다.",c:["O","X"],a:1,e:"제15규칙 조건상 유성혼합물이 화물펌프실 빌지에서 생성되지 않아야 한다."},
+{q:"정박 중인 선박이 15ppm 이하로 처리한 빌지를 배출하는 것은 허용된다.",c:["O","X"],a:1,e:"선박이 항행 중(en route)이어야 한다."}
+]},
+{id:"a1-reg16",annex:"I",reg:"Reg.16",title:"기름과 평형수의 분리",en:"Segregation of Oil and Water Ballast",src:"5강 p.26",
+sum:"총톤수 4,000 이상 일반선박과 150 이상 유탱커는 연료유탱크에 평형수를 실을 수 없다. 400 이상 선박은 선수탱크에 기름 적재 금지.",
+body:`
+<ol class="steps">
+<li>총톤수 <b>4,000 이상</b>의 유탱커 이외 선박과 총톤수 <b>150 이상</b>의 유탱커는 <b>연료유탱크에 평형수</b>를 적재해서는 안 된다.</li>
+<li>대량의 연료유 적재 필요로 연료유탱크에 청정평형수가 아닌 평형수를 실어야 하는 경우, 이 평형수는 수용시설에 배출하거나 제14.2규칙 설비(15ppm)를 이용해 바다로 배출한다.</li>
+<li>총톤수 <b>400 이상</b> 선박은 <b>선수탱크 또는 충돌격벽보다 전방</b>에 있는 탱크에 기름을 적재해서는 안 된다.</li></ol>`,
+pts:["연료유탱크 평형수 금지: 4,000GT↑ 일반선, 150GT↑ 유탱커","불가피한 경우 수용시설 또는 15ppm 설비로 배출","400GT↑: 선수탱크·충돌격벽 전방 기름 적재 금지"],
+q:[
+{q:"연료유탱크에 평형수를 적재할 수 없는 유탱커 이외 선박의 기준은?",c:["총톤수 400 이상","총톤수 1,000 이상","총톤수 4,000 이상","총톤수 10,000 이상"],a:2,e:"유탱커 이외 선박은 4,000GT 이상, 유탱커는 150GT 이상."},
+{q:"총톤수 400 이상 선박에서 기름 적재가 금지되는 장소는?",c:["이중저 탱크","선수탱크 또는 충돌격벽 전방 탱크","선미탱크","기관실 서비스탱크"],a:1,e:"선수탱크 또는 충돌격벽보다 전방에 있는 탱크에는 기름을 실을 수 없다."}
+]},
+{id:"a1-reg17",annex:"I",reg:"Reg.17",title:"기름기록부 Ⅰ부 (ORB Part I)",en:"Oil Record Book, Part I — Machinery space operations",src:"5강 p.27",
+sum:"총톤수 150 이상 유탱커와 400 이상 일반선박은 기관구역 작업을 기름기록부 Ⅰ부에 기록하고 3년간 보관한다.",
+body:`
+<p><b>적용</b>: 총톤수 150 이상 모든 유탱커, 총톤수 400 이상 유탱커 이외 모든 선박.</p>
+<h3>기록 대상 작업</h3>
+<ol class="steps">
+<li>연료유탱크의 밸러스팅 또는 세정</li>
+<li>연료유탱크로부터의 더러운 밸러스트 또는 세정수의 배출</li>
+<li>유성잔류물(슬러지)의 수집 및 처분</li>
+<li>기관구역에 축적된 빌지수의 선외 배출 또는 기타 처분</li>
+<li>연료유 또는 대량 윤활유의 벙커링</li></ol>
+<div class="key">기름기록부는 공식항해일지의 일부로서 정해진 서식(부록 Ⅲ)에 따라 기록하며, <span class="num">3년</span>간 보관한다.</div>
+<p>유탱커의 화물·평형수 작업은 <b>기름기록부 Ⅱ부</b>(제36규칙)에 따로 기록한다.</p>`,
+pts:["ORB Ⅰ부 = 기관구역 작업, Ⅱ부 = 화물/평형수 작업(제36규칙)","보관 3년","적용: 150GT↑ 유탱커, 400GT↑ 일반선"],
+q:[
+{q:"기름기록부의 보관 기간은?",c:["1년","2년","3년","5년"],a:2,e:"기름기록부는 3년간 보관한다. 폐기물기록부는 2년."},
+{q:"기름기록부 Ⅰ부의 기록 대상이 아닌 것은?",c:["연료유 벙커링","슬러지의 수집 및 처분","빌지수의 선외 배출","화물유의 적재 및 양하"],a:3,e:"화물유 작업은 유탱커의 기름기록부 Ⅱ부(제36규칙) 기록 사항이다."},
+{q:"유탱커의 화물·평형수 작업을 기록하는 기름기록부 Ⅱ부를 규정한 규칙은?",c:["제17규칙","제34규칙","제36규칙","제37규칙"],a:2,e:"제36규칙 기름기록부 Ⅱ부(화물/평형수 조작)."}
+]},
+{id:"a1-ch4",annex:"I",reg:"제4장",title:"유탱커 화물구역 요건 개관",en:"Requirements for the Cargo Area of Oil Tankers (Reg.18~36)",src:"4강 p.7~8",
+sum:"분리평형수탱크, 이중선체, 슬롭탱크, ODME, 원유세정, 화물구역 배출통제(제34규칙), 기름기록부 Ⅱ부를 다룬다.",
+body:`
+${tw(`<tr><th>편</th><th>규칙</th></tr>
+<tr><td>A편 구조</td><td>18 분리평형수탱크 · 19·20 이중선체·이중저(1996.7.6 전후 인도선 구분) · 21 중질유 운송 유탱커 · 22 펌프룸 바닥 보호 · 23~25 사고 시 유출비율·손상가정·가상유출량 · 26 화물탱크 크기·배치 제한 · 27·28 비손상 복원성·구획 · 29 슬롭탱크 · 30 펌핑·배관·배출설비</td></tr>
+<tr><td>B편 설비</td><td>31 기름배출감시제어장치(ODME) · 32 유수경계면검출기 · 33 원유세정 요건</td></tr>
+<tr><td>C편 운항상 배출통제</td><td>34 기름배출의 통제 · 35 원유세정 작업 · 36 기름기록부 Ⅱ부</td></tr>`)}
+<p>3강 설비표 기준으로 총톤수 150 이상 유조선은 슬롭탱크·ODME·유수경계면검출기를, 총톤수 20,000 이상 원유탱커는 원유세정장치를 갖춘다.</p>
+<div class="krcon"><b>KR-CON 원문과 다른 점</b><p>원유세정장치(제33규칙)는 총톤수가 아니라 <b>재화중량 20,000톤 이상</b> 원유탱커에 요구된다. 1982.6.1 이후 인도된 정제유운반선은 재화중량 30,000톤 이상.</p></div>
+<div class="krcon"><b>KR-CON 원문 추가 내용 — 제34규칙 화물구역 기름배출</b><p>강의에서 세부를 다루지 않은 부분이다. 특별해역 밖에서 다음을 모두 만족해야 한다.</p>
+<ul><li>특별해역 내에 있지 않을 것</li><li>가장 가까운 육지로부터 <b>50해리</b>를 넘을 것</li><li>항행 중일 것</li>
+<li>순간배출율이 해리당 <b>30리터</b>를 넘지 않을 것</li>
+<li>총 배출량이 직전 화물 총량의 <b>1/30,000</b>(1979.12.31 이전 인도된 현존선은 1/15,000)을 넘지 않을 것</li>
+<li>ODME와 슬롭탱크 설비가 작동 중일 것</li></ul>
+<p>OILPOL 1954의 50해리 금지구역이 이 규칙에 남아 있는 셈이다. 특별해역 안에서는 화물구역 유성혼합물 배출이 금지된다(청정·분리평형수 제외).</p></div>`,
+pts:["제18규칙 SBT, 제19·20규칙 이중선체","제31규칙 ODME, 제33규칙 원유세정","제34규칙: 50해리 · 30L/해리 · 1/30,000","제36규칙 ORB Ⅱ부"],
+q:[
+{q:"유탱커의 기름배출감시제어장치(ODME)를 규정한 규칙은?",c:["제29규칙","제31규칙","제32규칙","제33규칙"],a:1,e:"B편 설비: 31 ODME, 32 유수경계면검출기, 33 원유세정 요건."},
+{q:"제34규칙상 유탱커 화물구역 유성혼합물의 순간배출율 한도는?",c:["해리당 15리터","해리당 30리터","해리당 60리터","15ppm"],a:1,e:"순간배출율 30L/해리 이하, 육지로부터 50해리 초과, 특별해역 밖, 항행 중 등이 조건이다."},
+{q:"제34규칙상 신선(1979년 이후 인도)의 총 배출량 한도는 직전 화물 총량의 얼마인가?",c:["1/10,000","1/15,000","1/30,000","1/50,000"],a:2,e:"신선 1/30,000, 현존선 1/15,000."}
+]},
+{id:"a1-polar",annex:"I",reg:"제9~11장",title:"극지방 특별요건",en:"Antarctic & Arctic · III Code · Polar Code",src:"4강 p.10~11, 5강 p.4",
+sum:"남극해(제43규칙)에 이어 북극해 HFO 금지(제43A규칙)가 2024.7.1 발효되었다. 일부 북극권 연안국 선박은 2029년까지 유예.",
+body:`
+<div class="vs">
+<div><h5>제43규칙 — 남극해</h5><p style="margin:0;font-size:14.5px">남극해(남위 60° 이남)를 항행하는 선박의 중유(HFO) 운송·사용을 금지. 오래전부터 시행 중.</p></div>
+<div><h5>제43A규칙(43-1) — 북극해 (신설)</h5><p style="margin:0;font-size:14.5px"><b>2021년 채택, 2024.7.1 발효</b>. 북극해 항행 선박의 중유 사용·운송을 원칙적으로 금지하되, 일부 북극권 연안국 국기 선박은 <b>2029년까지 유예</b>.</p></div>
+</div>
+<div class="krcon"><b>KR-CON 원문과 다른 점</b><p>2029.7.1까지 유예되는 경우가 두 가지다.</p><ul><li>연료유탱크 보호 요건(제12A규칙 또는 Polar Code Part Ⅱ-A 1.2.1)을 충족하는 선박</li><li>북극권 연안국이 자국 영해·관할수역에서 자국 국기 선박에 면제를 준 경우</li></ul><p>또 수색구조, 선박 안전 확보, 기름오염 대응 전용선은 처음부터 적용 제외다.</p></div>
+<p>극지방 환경규제가 남극 중심에서 북극까지 확장된 최신 사례이며, 제11장 Polar Code와 함께 적용된다.</p>
+${tw(`<tr><th>장</th><th>내용</th></tr>
+<tr><td>제10장 (III Code)</td><td>협약요건 준수에 대한 검증 — 44 적용, 45 준수 검증</td></tr>
+<tr><td>제11장 (Polar Code)</td><td>극지운항선박 국제코드 — 46 정의, 47 적용 및 요건</td></tr>`)}`,
+pts:["남극해: 남위 60° 이남, HFO 금지(제43규칙)","북극해 HFO 금지: 2021 채택, 2024.7.1 발효, 일부 2029 유예","제10장 III Code, 제11장 Polar Code"],
+q:[
+{q:"북극해 중유(HFO) 사용·운송 금지 규정의 발효일은?",c:["2020.1.1","2021.6.17","2024.7.1","2029.7.1"],a:2,e:"2021년 채택, 2024.7.1 발효. 2029년은 일부 국기선 유예 종료 시점."},
+{q:"부속서 Ⅰ에서 남극해역의 범위는?",c:["남위 50° 이남","남위 60° 이남","남위 66.5° 이남","남극대륙 연안 200해리"],a:1,e:"남위 60° 이남 해역."},
+{q:"북극해 HFO 규정은 특별해역 지정 방식으로 도입되었다.",c:["O","X"],a:1,e:"특정 연료 자체의 사용·운송을 금지하는 방식으로, 특별해역 제도와는 다르다."}
+]},
+
+/* ---------- 부속서 Ⅳ ---------- */
+{id:"a4-overview",annex:"IV",reg:"Reg.2",title:"부속서 Ⅳ 개요와 적용",en:"Regulations for the Prevention of Pollution by Sewage from Ships",src:"9강 p.2~10",
+sum:"2003.9.27 발효. 국제항해 선박 중 총톤수 400 이상 신선, 15인 초과 승선 400 미만 신선, 그리고 2008.9.27부터 현존선에 적용.",
+body:`
+<p>5,400명이 타는 크루즈선(Oasis of the Seas, 225,282GT)의 오수는 어떻게 처리될까? 부속서 Ⅳ는 이 질문에 답하는 규칙이다.</p>
+<h3>제2규칙 적용 — 국제항해 선박</h3>
+<ol class="steps">
+<li>총톤수 <b>400 이상</b> 신선</li>
+<li><b>15인을 초과</b>하여 사람을 탑승하는 총톤수 400 미만 신선</li>
+<li>현존선은 부속서 발효일로부터 <b>5년 후(2008.9.27)</b>부터 적용</li></ol>
+<p class="muted" style="font-size:13.5px">* 신선: 부속서 발효일 이후 건조계약을 체결했거나, 발효일로부터 3년 이후 인도된 선박</p>
+<div class="key">MARPOL Annex Ⅳ 발효: <span class="num">2003.09.27</span></div>
+<h3>규칙 구성</h3>
+${tw(`<tr><th>규칙</th><th>내용</th></tr>
+<tr><td>1</td><td>정의 (오수, 특별해역 등)</td></tr><tr><td>2</td><td>적용</td></tr><tr><td>3</td><td>적용제외</td></tr>
+<tr><td>4 · 5</td><td>검사 · ISPP 증서 발행</td></tr><tr><td>9</td><td>오수설비</td></tr><tr><td>10</td><td>표준배출연결구</td></tr>
+<tr><td>11</td><td>오수의 배출</td></tr><tr><td>13</td><td>PSC (운항상 요건) <span class="net">인터넷 보완</span></td></tr>`)}`,
+pts:["발효 2003.9.27","적용: 400GT↑ 신선, 15인 초과 400GT 미만 신선","현존선: 2008.9.27부터","증서: ISPP"],
+q:[
+{q:"MARPOL 부속서 Ⅳ의 발효일은?",c:["1988.12.31","1992.7.1","2003.9.27","2005.5.19"],a:2,e:"부속서 Ⅳ(오수)는 2003.9.27 발효."},
+{q:"총톤수 400 미만 신선에 부속서 Ⅳ가 적용되는 승선인원 기준은?",c:["10인 초과","12인 초과","15인 초과","20인 초과"],a:2,e:"15인을 초과하여(16인 이상) 탑승하는 400GT 미만 신선."},
+{q:"부속서 Ⅳ가 현존선에 적용되기 시작한 날은?",c:["2003.9.27","2005.8.1","2008.9.27","2013.1.1"],a:2,e:"발효일로부터 5년 후인 2008.9.27."}
+]},
+{id:"a4-def",annex:"IV",reg:"Reg.1",title:"오수의 정의",en:"Definition of Sewage",src:"9강 p.6~7",
+sum:"화장실·소변소 배수, 의료구역 배수, 살아있는 동물 구역 배수, 그리고 이와 섞인 폐수가 오수다. 중수(grey water)는 제외.",
+body:`
+<ol class="steps">
+<li>모든 형태의 <b>화장실·소변소</b> 및 화장실 배출구로부터의 배수 및 기타 폐물</li>
+<li><b>의료구역</b>(의무실, 병실 등)의 세면기·세탁대야·배수구를 통해 나오는 배수</li>
+<li><b>살아있는 동물</b>이 들어있는 장소로부터의 배수</li>
+<li>위의 배수와 <b>혼합된</b> 기타 폐수</li></ol>
+<div class="note"><b>중수(grey water)</b> 샤워·세면·주방 배수 같은 중수는 오수 정의에서 제외되어 MARPOL이 직접 규율하지 않는다. 북극해역 등 일부 지역은 자체 규제 추세다.</div>
+<p>참고: 블랙워터(black water)는 오수, 그레이워터(grey water)는 일반 생활 배수를 뜻하는 실무 용어다.</p>`,
+pts:["오수 4종: 화장실, 의료구역, 동물 구역, 이와 혼합된 폐수","중수(grey water)는 제외"],
+q:[
+{q:"부속서 Ⅳ의 '오수(sewage)'에 해당하지 않는 것은?",c:["화장실 배수","의무실 세면기 배수","살아있는 동물 구역 배수","주방·샤워 배수(중수)"],a:3,e:"중수(grey water)는 오수 정의에서 제외된다. 단, 오수와 혼합되면 오수가 된다."},
+{q:"의무실 세면기에서 나오는 배수는 오수에 해당한다.",c:["O","X"],a:0,e:"의료구역의 세면기·세탁대야·배수구 배수는 오수에 포함된다."}
+]},
+{id:"a4-special",annex:"IV",reg:"Reg.1",title:"부속서 Ⅳ 특별해역 — 발트해",en:"Special Area: Baltic Sea",src:"9강 p.8~9, IMO 표",
+sum:"현재 유일한 부속서 Ⅳ 특별해역은 발트해. 여객선 오수 배출 금지가 2019~2023년 단계적으로 전면 시행되었다.",
+body:`
+<ul><li>부속서 Ⅰ에서 특별해역으로 정의된 <b>Baltic Sea Area</b></li>
+<li>IMO Res.A.927(22)에 따라 부속서 Ⅳ 특별해역으로 지정: <b>MEPC.200(62), 2011.7.15 채택</b>, 2013.1.1 발효</li></ul>
+${tw(`<tr><th>대상</th><th>여객선 배출금지 시행</th></tr>
+<tr><td>신조 여객선</td><td class="mono">2019.6.1</td></tr>
+<tr><td>현존 여객선</td><td class="mono">2021.6.1</td></tr>
+<tr><td>일부 항로(러시아 동부 직항 등)</td><td class="mono">2023.6.1</td></tr>`)}
+<div class="note"><b>날짜 주의</b> 9강 배출 슬라이드에는 '신조 2016.1.1 / 현존 2018.1.1'로 적힌 부분이 있다. 이는 개정 전 일정이며, 이후 MEPC.274(69) 개정으로 위 표의 날짜로 미뤄졌다. 강의자료 특별해역 슬라이드도 위 날짜를 쓴다.</div>
+<p>규범은 계속 갱신된다. 2026년 2월 PPR 13에서 오수처리장치(STP) 관련 부속서 Ⅳ 이행지침 개정이 원칙 합의되었다.</p>`,
+pts:["유일한 Annex Ⅳ 특별해역: 발트해","지정 MEPC.200(62), 2011","신조 여객선 2019.6.1 / 현존 2021.6.1 / 일부 항로 2023.6.1"],
+q:[
+{q:"현재 유일한 부속서 Ⅳ 특별해역은?",c:["지중해","북해","발트해","남극해"],a:2,e:"발트해가 2011년 MEPC.200(62)로 지정된 유일한 부속서 Ⅳ 특별해역이다."},
+{q:"발트해 특별해역에서 신조 여객선의 오수 배출금지가 시행된 날은? (최신 개정 기준)",c:["2013.1.1","2016.1.1","2019.6.1","2021.6.1"],a:2,e:"신조 여객선 2019.6.1, 현존 여객선 2021.6.1, 일부 항로 2023.6.1."}
+]},
+{id:"a4-exempt",annex:"IV",reg:"Reg.3",title:"적용제외",en:"Exceptions",src:"9강 p.11",
+sum:"인명 안전·구조를 위한 배출, 손상에 따른 배출(합리적 조치를 다한 경우)은 배출규정의 적용이 제외된다.",
+body:`
+<ol class="steps">
+<li>해상에서 선박 및 승선자의 <b>안전을 확보</b>하거나 <b>인명을 구조</b>하기 위해 필요한 선박으로부터의 오수 배출</li>
+<li>선박 또는 설비의 <b>손상</b>에 기인하는 오수 배출. 다만 손상 발생 전후에 배출을 방지하거나 최소화하기 위한 <b>합리적인 모든 조치</b>가 취해져 있어야 한다.</li></ol>
+<p>부속서 Ⅴ 제7규칙의 적용제외와 구조가 같다. 부속서 Ⅴ는 여기에 어구 관련 예외가 추가된다.</p>`,
+pts:["안전 확보·인명 구조","손상 기인 배출(합리적 조치 전제)"],
+q:[
+{q:"선박 손상으로 인한 오수 배출이 적용제외가 되기 위한 조건은?",c:["주관청 사전 승인","손상 전후 배출 방지·최소화를 위한 합리적 조치","12해리 밖일 것","항만국 통보"],a:1,e:"손상 발생 전후에 배출을 막거나 최소화하기 위한 합리적인 모든 조치가 취해져 있어야 한다."}
+]},
+{id:"a4-cert",annex:"IV",reg:"Reg.4·5",title:"검사와 ISPP 증서",en:"Surveys · International Sewage Pollution Prevention Certificate",src:"9강 p.12",
+sum:"최초·정기·추가검사를 받고 국제하수오염방지증서(ISPP)를 발급받는다.",
+body:`
+<h3>제4규칙 검사</h3>
+<p>최초검사, 정기검사, 추가검사 등.</p>
+<h3>제5규칙 증서의 발행 또는 이서</h3>
+<div class="key"><b>ISPP</b> — International Sewage Pollution Prevention Certificate (국제하수오염방지증서)</div>
+<div class="krcon"><b>KR-CON 원문 추가 내용</b><p>ISPP의 유효기간은 주관청이 정하되 5년을 넘지 않는다(제8규칙). 부속서 Ⅰ과 달리 연차·중간검사 요건은 없다.</p></div>`,
+pts:["증서: ISPP (국제하수오염방지증서)","검사: 최초·정기·추가"],
+q:[
+{q:"부속서 Ⅳ에 따라 발급되는 증서는?",c:["IOPP","ISPP","IGPP","IAPP"],a:1,e:"ISPP: International Sewage Pollution Prevention Certificate."}
+]},
+{id:"a4-equip",annex:"IV",reg:"Reg.9·10",title:"오수설비와 표준배출연결구",en:"Sewage systems · Standard discharge connections",src:"9강 p.13~16",
+sum:"오수처리장치, 분뇨마쇄소독장치, 오수저장탱크 중 하나를 설치한다. 특별해역 여객선은 마쇄소독장치를 쓸 수 없다.",
+body:`
+<h3>제9규칙 오수장치 — 다음 중 하나를 설치</h3>
+<ol class="steps">
+<li><b>오수처리장치</b> (Sewage Treatment Plant)</li>
+<li><b>분뇨마쇄소독장치</b> — 오수를 분쇄하고 소독하는 장치. 이 경우 가장 가까운 육지로부터 3해리 이내에 있을 때 오수를 임시 저장하기 위한 주관청 승인 설비를 갖춰야 한다.</li>
+<li><b>오수저장탱크</b> (Holding tank) — 선박 운항, 승선자 수 등을 고려해 전 오수량을 저장하기에 충분한 용량으로 주관청이 승인한 것. 구조요건에 적합하고 내용물을 시각적으로 표시하는 수단을 갖출 것.</li></ol>
+<h3>특별해역 여객선의 예외</h3>
+<p>특별해역의 여객선은 <b>오수처리장치</b> 또는 <b>오수저장탱크</b> 중 하나만 설치할 수 있다(분뇨마쇄소독장치 불가).</p>
+<h3>제10규칙 표준배출연결구 — 플랜지 표준치수</h3>
+${tw(`<tr><th>항목</th><th>치수</th></tr>
+<tr><td>바깥지름</td><td class="mono">210 mm</td></tr>
+<tr><td>안지름</td><td>관의 바깥지름에 따른 지름</td></tr>
+<tr><td>볼트원의 지름</td><td class="mono">170 mm</td></tr>
+<tr><td>플랜지의 두께</td><td class="mono">16 mm</td></tr>
+<tr><td>볼트 및 너트</td><td>지름 16 mm, 적당한 길이의 것 4개</td></tr>`)}
+<ul><li>안지름 최대 <b>100 mm</b> 관까지 부착할 수 있도록 설계, 강재 또는 동등 재질로 평평한 면</li>
+<li>적당한 가스켓 사용 시 <b>6 kg/㎠</b>의 상용압력에 견딜 것</li>
+<li>형심 <b>5 m 이하</b> 선박은 배출연결구 안지름 <b>38 mm</b>도 가능</li></ul>
+<div class="krcon"><b>KR-CON 원문과 다른 점</b><ul><li>현행 원문은 상용압력을 <b>600 kPa</b>로 표기한다(약 6 kg/㎠).</li><li>강의 표에 없는 항목: 플랜지 슬롯 — 지름 18mm 구멍 4개를 볼트원 위에 같은 간격으로 두고 바깥쪽까지 홈을 낸다(홈 너비 18mm).</li></ul></div>`,
+pts:["설비 3종: 처리장치 / 마쇄소독장치 / 저장탱크","특별해역 여객선: 처리장치 또는 저장탱크만","플랜지: 바깥지름 210, 볼트원 170, 두께 16, 볼트 16mm×4","6 kg/㎠, 형심 5m 이하는 안지름 38mm"],
+q:[
+{q:"오수 표준배출연결구 플랜지의 바깥지름은?",c:["170 mm","180 mm","210 mm","250 mm"],a:2,e:"바깥지름 210mm, 볼트원 지름 170mm, 두께 16mm."},
+{q:"표준배출연결구 플랜지의 볼트·너트 규격은?",c:["지름 12mm, 4개","지름 16mm, 4개","지름 16mm, 8개","지름 20mm, 6개"],a:1,e:"각각 지름 16mm, 적당한 길이의 것 4개."},
+{q:"형심 5m 이하 선박의 배출연결구 안지름은 몇 mm여도 되는가?",c:["25 mm","38 mm","50 mm","100 mm"],a:1,e:"형심 5m 이하 선박은 38mm여도 된다."},
+{q:"특별해역 내 여객선이 설치할 수 없는 오수장치는?",c:["오수처리장치","오수저장탱크","분뇨마쇄소독장치","모두 설치 가능"],a:2,e:"특별해역 여객선 예외규칙은 처리장치와 저장탱크만 허용한다."},
+{q:"표준배출연결구 플랜지가 견뎌야 하는 상용압력은?",c:["3 kg/㎠","6 kg/㎠","10 kg/㎠","16 kg/㎠"],a:1,e:"적당한 가스켓 사용 시 6kg/㎠."}
+]},
+{id:"a4-discharge",annex:"IV",reg:"Reg.11",title:"오수의 배출",en:"Discharge of Sewage",src:"9강 p.17~19",
+sum:"마쇄·소독한 오수는 3해리 밖, 처리하지 않은 오수는 12해리 밖에서, 4노트 이상 항행 중 적당한 비율로 배출한다.",
+body:`
+<h3>A. 모든 해역의 여객선 이외 선박 / 특별해역 밖의 여객선</h3>
+<ol class="steps">
+<li>가장 가까운 육지로부터 <b>3해리</b>를 넘는 거리에서 <b>마쇄·소독한</b> 오수를 배출</li>
+<li>가장 가까운 육지로부터 <b>12해리</b>를 넘는 거리에서 <b>마쇄·소독하지 않은</b> 오수를 배출</li>
+<li>어떤 경우에도 저장탱크의 오수 또는 살아있는 동물 구역의 오수는 한꺼번에 배출하면 안 되고, 선박이 <b>4노트 이상</b>으로 항행 중에 <b>적당한 비율</b>로 배출</li></ol>
+<p>* 승인된 오수처리장치를 조작 중인 선박은 거리 제한이 없지만, 유출액이 주위 물에 <b>눈에 보이는 부유고형물</b>을 만들거나 <b>변색</b>을 일으키지 않아야 한다.</p>
+${tw(`<tr><th>거리 (육지로부터)</th><th>~3해리</th><th>3~12해리</th><th>12해리 초과</th></tr>
+<tr><td>마쇄·소독한 오수</td><td>금지</td><td>허용</td><td>허용</td></tr>
+<tr><td>마쇄·소독하지 않은 오수</td><td>금지</td><td>금지</td><td>허용 (4노트↑)</td></tr>
+<tr><td>승인 처리장치 유출액</td><td colspan="3">허용 (부유고형물·변색 없을 것)</td></tr>`)}
+<h3>B. 특별해역 내 여객선</h3>
+<p>오수 배출 금지. 다만 제9.2.1규칙의 조작요건(영양염류 제거 기준)에 적합하다고 주관청이 증명한 <b>승인 오수처리장치</b>를 조작 중이고, 유출액이 부유고형물·변색을 만들지 않는 경우는 제외.</p>
+<h3>C. 일반 요건</h3>
+<p>오수가 다른 부속서의 적용을 받는 폐기물·폐수와 혼합되어 있으면, 그 부속서의 요건이 이 부속서의 요건에 <b>추가로</b> 적용된다.</p>
+<p><span class="net">인터넷 보완</span> '적당한 비율'은 MEPC.157(55) 표준에 따라 주관청이 승인한 배출률을 말한다.</p>`,
+pts:["마쇄·소독: 3해리 초과","미처리: 12해리 초과","저장 오수: 4노트 이상 항행 중, 적당한 비율","승인 STP: 거리 무관, 부유고형물·변색 없음","특별해역 여객선: 9.2.1 STP만"],
+q:[
+{q:"마쇄·소독한 오수를 배출할 수 있는 거리는 가장 가까운 육지로부터?",c:["1해리 초과","3해리 초과","4해리 초과","12해리 초과"],a:1,e:"마쇄·소독한 오수는 3해리, 처리하지 않은 오수는 12해리를 넘는 거리에서 배출."},
+{q:"저장탱크에 저장한 오수를 배출할 때 선박의 최저 속력은?",c:["2노트","3노트","4노트","6노트"],a:2,e:"4노트 이상으로 항행 중에 적당한 비율로 배출해야 한다."},
+{q:"승인된 오수처리장치를 조작 중인 일반선박의 배출 조건은?",c:["12해리 밖일 것","항만 내 금지","유출액이 부유고형물·변색을 일으키지 않을 것","정박 중일 것"],a:2,e:"거리 제한은 없으나 눈에 보이는 부유고형물이나 변색을 일으키지 않아야 한다."},
+{q:"마쇄·소독하지 않은 오수를 육지로부터 8해리에서 배출하는 것은 허용된다.",c:["O","X"],a:1,e:"미처리 오수는 12해리를 넘어야 한다."},
+{q:"오수가 다른 부속서 적용 폐기물과 혼합된 경우 적용되는 요건은?",c:["부속서 Ⅳ만","다른 부속서만","부속서 Ⅳ에 더해 그 부속서 요건도","더 완화된 쪽"],a:2,e:"그 부속서의 요건이 이 부속서 요건에 추가로 적용된다."}
+]},
+
+/* ---------- 부속서 Ⅴ ---------- */
+{id:"a5-overview",annex:"V",reg:"개요",title:"부속서 Ⅴ 개요와 최신 전략",en:"Regulations for the Prevention of Pollution by Garbage from Ships",src:"9강 p.20~21",
+sum:"1988.12.31 발효, 개정 부속서 Ⅴ(MEPC.201(62))는 2013.1.1 발효. 원칙은 '모든 폐기물 배출 금지, 예외만 허용'이다.",
+body:`
+<div class="key">MARPOL Annex Ⅴ 발효: <span class="num">1988.12.31</span> · 개정 부속서(MEPC.201(62)) 발효: <span class="num">2013.1.1</span></div>
+<h3>규칙 구성</h3>
+${tw(`<tr><th>규칙</th><th>내용</th></tr>
+<tr><td>1</td><td>정의</td></tr><tr><td>2</td><td>적용 — 모든 선박</td></tr>
+<tr><td>3</td><td>해상 폐기물 처분의 일반적 금지</td></tr>
+<tr><td>4</td><td>특별해역 밖 배출</td></tr>
+<tr><td>5</td><td>고정식·부유식 플랫폼 특별요건</td></tr>
+<tr><td>6</td><td>특별해역 내 배출</td></tr>
+<tr><td>7</td><td>적용제외</td></tr>
+<tr><td>8 · 9</td><td>수용시설 · PSC</td></tr>
+<tr><td>10</td><td>플래카드, 폐기물관리계획, 폐기물기록부</td></tr>`)}
+<h3>IMO 2026 해양플라스틱쓰레기 전략·행동계획</h3>
+<ul><li>2026년 4~5월 MEPC 84 채택 예정: 「2026 Strategy and Action Plan to Address Marine Plastic Litter from Ships」</li>
+<li>2021년 전략(MEPC.341(77))과 2025년 행동계획(MEPC.404(83))을 통합·대체</li>
+<li>핵심 목표: <b>2030년까지 선박으로부터 해양 플라스틱쓰레기 배출 제로</b></li>
+<li>추진 방향: 항만 수용시설 실효성 제고, 이행·단속 강화, 선원 교육·인식 제고</li></ul>
+<p>Annex Ⅴ는 '배출 금지'라는 정적 규정을 넘어 구체적 감축 목표와 이행 로드맵을 갖는 정책으로 발전하고 있다.</p>`,
+pts:["발효 1988.12.31 (부속서 Ⅲ·Ⅳ보다 먼저)","개정 부속서 2013.1.1 — 원칙 금지, 예외 허용","2030 플라스틱 배출 제로 목표"],
+q:[
+{q:"MARPOL 부속서 Ⅴ의 최초 발효일은?",c:["1983.10.2","1988.12.31","1992.7.1","2013.1.1"],a:1,e:"1988.12.31 발효. 2013.1.1은 개정 부속서(MEPC.201(62)) 발효일."},
+{q:"IMO 해양플라스틱 전략의 핵심 목표는?",c:["2025년까지 50% 감축","2030년까지 선박발 플라스틱 배출 제로","2050년까지 Net-Zero","2040년까지 어구 사용 금지"],a:1,e:"2030년까지 선박으로부터의 해양 플라스틱쓰레기 배출 제로가 목표다."},
+{q:"부속서 Ⅴ의 규정은 별도 명문규정이 없으면 모든 선박에 적용된다.",c:["O","X"],a:0,e:"제2규칙: 별도의 명문규정이 없는 한 모든 선박에 적용."}
+]},
+{id:"a5-def",annex:"V",reg:"Reg.1",title:"폐기물 관련 정의",en:"Garbage · Cargo residues · Domestic · Operational wastes",src:"9강 p.22~23",
+sum:"'폐기물'은 통상 운항 중 발생해 처분되는 음식·생활·운항상 쓰레기, 모든 플라스틱, 화물잔류물, 식용유, 어구, 동물사체를 말한다.",
+body:`
+<div class="defs">
+<dl class="def"><dt>폐기물<span>Garbage</span></dt><dd>타 부속서에 정의·열거된 물질을 제외하고, 선박의 통상 운항 중 발생해 연속적 또는 주기적으로 처분되는 모든 종류의 <b>음식쓰레기, 생활쓰레기, 운항상 쓰레기, 모든 플라스틱, 화물잔류물, 식용유, 어구 및 동물사체</b>.<br><span class="muted">항해 중 어업활동이나 양식 활동에 따라 발생하는 신선한 어류 및 그 일부는 포함하지 않는다.</span></dd></dl>
+<dl class="def"><dt>화물잔류물<span>Cargo residues</span></dt><dd>타 부속서의 적용을 받지 않는 화물의 잔존물로서 선적 또는 하역 후 갑판이나 화물창에 남아있는 것.</dd></dl>
+<dl class="def"><dt>생활쓰레기<span>Domestic wastes</span></dt><dd>타 부속서의 적용을 받지 않는, 선박 거주구역에서 발생한 모든 종류의 폐기물. <b>중수(grey water)는 미포함</b>.</dd></dl>
+<dl class="def"><dt>운항상 쓰레기<span>Operational wastes</span></dt><dd>화물 적재·취급에 사용되거나 통상 선박 운항·정비로 선내에 수집되는, 다른 부속서로 규제받지 않는 모든 고체 쓰레기(현탁액 포함). 화물창·외부 세정수에 포함된 세정제·첨가물 포함. 중수·빌지수 등은 제외. 예: 던니지(dunnage).</dd></dl>
+</div>`,
+pts:["폐기물 = 음식·생활·운항상 쓰레기 + 플라스틱 + 화물잔류물 + 식용유 + 어구 + 동물사체","중수(grey water)는 생활쓰레기·운항상 쓰레기에서 제외","어업·양식 활동의 신선한 어류는 폐기물 아님"],
+q:[
+{q:"부속서 Ⅴ의 '폐기물(garbage)'에 포함되지 않는 것은?",c:["식용유","어구","동물사체","어업활동 중 발생한 신선한 어류"],a:3,e:"항해 중 어업활동·양식활동에 따라 발생하는 신선한 어류 및 그 일부는 폐기물이 아니다."},
+{q:"부속서 Ⅴ의 '생활쓰레기'에 중수(grey water)가 포함된다.",c:["O","X"],a:1,e:"생활쓰레기 정의에서 중수는 명시적으로 제외된다."},
+{q:"선적·하역 후 갑판이나 화물창에 남아있는 타 부속서 비적용 화물의 잔존물은?",c:["운항상 쓰레기","화물잔류물","생활쓰레기","소각재"],a:1,e:"Cargo residues(화물잔류물)의 정의다."}
+]},
+{id:"a5-general",annex:"V",reg:"Reg.3",title:"일반적 금지",en:"General prohibition on discharge of garbage into the sea",src:"9강 p.24",
+sum:"제4·5·6·7규칙(과 Polar Code)이 허용하는 경우를 제외하고 해상으로의 모든 폐기물 배출은 금지다. 플라스틱과 식용유는 예외 없이 금지.",
+body:`
+<ol class="steps">
+<li>제4, 5, 6, 7규칙 및 제13.1규칙에 언급된 극지운항선박 코드 Part Ⅱ-A/5.2장의 요건을 제외하고, <b>해상으로의 모든 폐기물 배출은 금지</b>된다.</li>
+<li>제7규칙(적용제외)을 제외하고, 합성로프, 합성어망, 플라스틱 쓰레기봉지, 플라스틱 제품의 소각재를 포함한 <b>모든 플라스틱류</b>의 해양 처분은 금지된다.</li>
+<li>제7규칙을 제외하고, <b>식용유</b>의 해양 처분은 금지된다.</li></ol>
+<p>개정 부속서 Ⅴ의 사고방식은 '허용된 것만 버릴 수 있다'(원칙 금지)이다. 개정 전에는 종이·유리·금속 등도 거리 조건에 따라 배출할 수 있었다.</p>`,
+pts:["원칙: 모든 폐기물 배출 금지","플라스틱(소각재 포함)·식용유: 해역·거리 무관 금지","예외 근거: 제4·5·6·7규칙, Polar Code"],
+q:[
+{q:"부속서 Ⅴ에서 해역·거리와 관계없이 해양 처분이 금지되는 것은?",c:["분쇄된 음식찌꺼기","플라스틱 제품의 소각재","무해한 화물잔류물","갑판 세정수"],a:1,e:"플라스틱류는 소각재까지 포함해 해양 처분이 금지된다."},
+{q:"식용유는 가장 가까운 육지로부터 12해리 밖이면 배출할 수 있다.",c:["O","X"],a:1,e:"제3규칙에 따라 식용유의 해양 처분은 금지된다(제7규칙 예외 제외)."}
+]},
+{id:"a5-outside",annex:"V",reg:"Reg.4",title:"특별해역 밖의 배출",en:"Discharge of garbage outside special areas",src:"9강 p.25~27",
+sum:"항행 중에만, 분쇄 음식찌꺼기 3해리 밖, 일반 음식찌꺼기와 무해 화물잔류물 12해리 밖. 동물사체는 가능한 한 멀리.",
+body:`
+<p>제5·6·7규칙을 조건으로, 다음 폐기물은 <b>선박의 항해 중에만</b>, 가능한 한 육지에서 멀리, 그리고 아래 거리 이상에서만 배출할 수 있다.</p>
+${tw(`<tr><th>폐기물</th><th>최소 거리 (가장 가까운 육지)</th></tr>
+<tr><td>분쇄기·연마기를 거친 음식쓰레기 (<b>25mm 이하</b> 망 통과)</td><td><span class="num">3해리</span></td></tr>
+<tr><td>위 방식으로 처리하지 않은 음식쓰레기</td><td><span class="num">12해리</span></td></tr>
+<tr><td>일반적 하역방법으로 회수할 수 없는 화물잔류물 (해양환경 유해물질 미포함)</td><td><span class="num">12해리</span></td></tr>
+<tr><td>동물사체</td><td>IMO 지침을 고려해 가능한 한 멀리</td></tr>
+<tr><td>화물창 세정수의 세정제·첨가제, 갑판·외판 세정수</td><td>배출 가능 (해양환경에 유해하지 않을 것)</td></tr>`)}
+<p>폐기물이 서로 다른 배출요건을 가진 물질과 혼합되거나 오염되었을 때에는 <b>더 엄격한 쪽</b>의 요건을 적용한다.</p>
+${vizBox("garbage","폐기물 배출 규정표","9강 · 제3~6규칙")}
+<div class="krcon"><b>첨부 규정표 · KR-CON 원문과 다른 점</b><ul>
+<li><b>빙산 → 빙붕·정착빙</b>: 강의자료는 '육지 또는 빙산'이지만, 원문은 '가장 가까운 육지 또는 빙붕(ice shelf)'이고 Polar Code는 정착빙(fast ice)도 포함한다. 첨부 규정표도 '빙붕/정착빙'으로 적었다.</li>
+<li><b>북극해</b>: 첨부 규정표는 특별해역과 북극해를 한 열로 묶는다. Polar Code 5.2에 따라 북극해에서도 음식찌꺼기는 분쇄 후 12해리 이상, 동물사체는 금지, 얼음 위 배출 금지가 적용된다(강의 범위 밖).</li>
+<li><b>동물사체</b>: 첨부 규정표의 '100해리 초과, 최대 수심'은 협약 본문이 아니라 IMO 이행지침의 권고다. 원문은 '가능한 한 멀리, 지침을 고려하여'까지만 정한다.</li>
+<li><b>극지 해빙</b>: 첨부 규정표 각주 3의 '해빙농도 1/10 초과 구역에서 가능한 한 멀리'는 Polar Code 요건이다.</li>
+<li><b>첨부 규정표 표기</b>: 각주 2의 '구명 뚫린 망'은 '구멍 뚫린 망'의 오기다. 각주 4의 '12해리에 위치한'은 원문 기준 '12해리를 넘는 곳에 위치한'이다.</li></ul></div>
+<h3>특별해역 밖 배출 기준 한눈에</h3>
+${tw(`<tr><th>~3해리</th><th>3~12해리</th><th>12해리 초과</th><th>항상 금지</th></tr>
+<tr><td>모든 폐기물 배출금지</td><td>분쇄된 음식찌꺼기</td><td>음식찌꺼기, 무해 화물잔류물</td><td>플라스틱, 플라스틱 소각재, 합성로프·어망, 식용유, 종이·유리·금속·병·도자기 등 생활쓰레기</td></tr>`)}`,
+pts:["모두 '항해 중'일 것","분쇄 음식(25mm) 3해리 / 음식 12해리 / 무해 화물잔류물 12해리","동물사체: 가능한 한 멀리","혼합 시 엄격한 쪽 적용"],
+q:[
+{q:"특별해역 밖에서 분쇄된 음식찌꺼기를 배출할 수 있는 최소 거리는?",c:["1해리","3해리","12해리","25해리"],a:1,e:"분쇄·연마된 음식쓰레기는 3해리, 처리하지 않은 것은 12해리."},
+{q:"분쇄된 음식찌꺼기가 통과해야 하는 스크린의 구멍 크기는?",c:["10mm 이하","15mm 이하","25mm 이하","50mm 이하"],a:2,e:"25mm 이하의 구멍 뚫린 망을 통과할 수 있어야 한다."},
+{q:"특별해역 밖에서 무해한 화물잔류물을 배출할 수 있는 최소 거리는?",c:["3해리","6해리","12해리","50해리"],a:2,e:"일반적 하역방법으로 회수할 수 없고 유해물질이 없는 화물잔류물은 12해리 밖."},
+{q:"특별해역 밖에서 유리병은 12해리 밖이면 배출할 수 있다.",c:["O","X"],a:1,e:"개정 부속서 Ⅴ에서 유리·금속·종이 등 생활쓰레기는 배출 금지다."},
+{q:"배출요건이 다른 폐기물이 혼합되었을 때 적용하는 기준은?",c:["완화된 쪽","엄격한 쪽","양이 많은 쪽","선장 재량"],a:1,e:"보다 엄격한 쪽의 요건을 적용한다."}
+]},
+{id:"a5-inside",annex:"V",reg:"Reg.6",title:"특별해역 내의 배출",en:"Discharge of garbage within special areas",src:"9강 p.28~31",
+sum:"특별해역에서는 분쇄된 음식찌꺼기만 12해리 밖에서 배출 가능. 화물잔류물은 엄격한 4가지 조건을 모두 갖춰야 한다.",
+body:`
+<h3>1. 음식찌꺼기</h3>
+<ul><li>가능한 한 육지에서 멀리, 어떤 경우에도 가장 가까운 육지로부터 <b>12해리 이상</b></li>
+<li>반드시 <b>분쇄·연마</b>되어 <b>25mm 이하</b> 스크린을 통과할 것</li>
+<li>다른 폐기물에 오염되지 않을 것</li>
+<li><b>남극해역</b>: 가금류 및 그 일부를 포함한 외래조류 제품은 살균처리하지 않았다면 배출 금지</li></ul>
+<h3>2. 회수할 수 없는 화물잔류물 — 다음을 모두 만족</h3>
+<ol class="steps">
+<li>화물잔류물·세정제·첨가제에 해양환경 유해물질이 없을 것</li>
+<li>출항 항구와 차기 입항 항구가 모두 특별해역 내에 있고, 그 사이에 특별해역 밖을 지나지 않을 것</li>
+<li>그 항구에 이용 가능한 수용시설이 없을 것</li>
+<li>위 조건을 만족하면, 잔류물을 포함한 화물창 세정수는 가장 가까운 육지 또는 <b>빙산</b>으로부터 <b>12해리 이상</b>에서 배출</li></ol>
+<div class="krcon"><b>KR-CON 원문과 다른 점</b><ul><li>'빙산'은 원문에서 <b>nearest ice shelf(빙붕)</b>이다.</li><li>음식찌꺼기 기준도 원문은 '가장 가까운 육지 <b>또는 빙붕</b>으로부터 12해리'다.</li><li>현행 원문(MEPC.277(70))에는 조건이 하나 더 있다: 곡물을 제외한 고체 산적화물은 부록 Ⅰ 기준으로 분류하고, 화주가 해양환경 유해 여부를 신고해야 한다.</li></ul></div>
+<h3>3. 갑판·외판 세정수</h3>
+<p>세정제·첨가제가 해양환경에 유해하지 않으면 배출 가능.</p>
+<h3>4. 남극해역 추가 규정</h3>
+<ul><li>남극해역으로 출항·도착하는 항구의 당사국은 모든 선박의 모든 폐기물을 받을 적절한 수용시설을 가능한 한 빨리 확보한다.</li>
+<li>당사국은 자국 선박이 남극해역에 들어가기 전에 운항 중 모든 폐기물을 선내 저장할 충분한 용량의 시설을 갖추고, 떠난 후 수용시설에 배출할 장치를 갖추도록 한다.</li></ul>
+<p>혼합·오염된 경우 더 엄격한 요건을 적용한다.</p>
+${vizBox("garbage","폐기물 배출 규정표","9강 · 제3~6규칙")}
+<p class="muted" style="font-size:13.5px">첨부 규정표와 KR-CON 원문의 차이는 <a href="#d-a5-outside">특별해역 밖의 배출</a> 문서 아래 상자에 정리했다.</p>
+${tw(`<tr><th>~12해리</th><th>12해리 초과</th><th>항상 금지</th></tr>
+<tr><td>모든 폐기물 배출금지</td><td>분쇄된 음식찌꺼기 (화물잔류물은 조건부)</td><td>미분쇄 음식찌꺼기, 동물사체, 플라스틱, 소각재, 합성로프·어망, 식용유, 종이·유리·금속 등</td></tr>`)}`,
+pts:["특별해역 음식찌꺼기: 반드시 분쇄 + 12해리","미분쇄 음식찌꺼기는 금지","화물잔류물: 출입항 모두 특별해역 + 수용시설 없음 + 유해물질 없음 + 12해리","남극: 살균 안 된 가금류 제품 금지"],
+q:[
+{q:"특별해역 내에서 음식찌꺼기를 배출할 수 있는 조건은?",c:["3해리 밖, 분쇄 불필요","12해리 밖, 분쇄·연마(25mm 이하)","12해리 밖, 분쇄 불필요","배출 전면 금지"],a:1,e:"특별해역에서는 분쇄된 음식찌꺼기만 12해리 이상에서 배출할 수 있다."},
+{q:"특별해역 내 화물잔류물 배출 조건이 아닌 것은?",c:["출항·입항 항구가 모두 특별해역 내","항구에 수용시설이 없을 것","해양환경 유해물질 미포함","주관청의 사전 허가"],a:3,e:"조건은 유해물질 없음, 출입항 모두 특별해역(밖을 지나지 않음), 수용시설 없음, 12해리 이상."},
+{q:"남극해역에서 살균처리하지 않은 가금류 제품의 배출은?",c:["12해리 밖 허용","25해리 밖 허용","금지","분쇄 시 허용"],a:2,e:"외래조류 제품은 살균처리하지 않았다면 남극해역 배출이 금지된다."},
+{q:"특별해역 내 화물창 세정수 배출 시 거리 기준은 가장 가까운 육지 또는 무엇으로부터 12해리인가?",c:["항만 경계","빙산","EEZ 경계","해양보호구역"],a:1,e:"강의자료 기준 '가장 가까운 육지 또는 빙산으로부터 12해리'. 원문(KR-CON)은 nearest ice shelf(빙붕)."}
+]},
+{id:"a5-special",annex:"V",reg:"Reg.1",title:"부속서 Ⅴ 특별해역",en:"Special Areas under Annex V",src:"9강 IMO 표 (p.15)",
+sum:"8개 해역. 부속서 Ⅰ과 달리 북해와 광역 카리브해가 들어가고, 아덴만·오만·북서유럽·남아프리카는 없다.",
+body:`
+${tw(`<tr><th>특별해역</th><th>채택</th><th>발효</th><th>실제 시행</th></tr>
+<tr><td>지중해</td><td class="mono">1973.11.2</td><td class="mono">1988.12.31</td><td class="mono">2009.5.1</td></tr>
+<tr><td>발틱해</td><td class="mono">1973.11.2</td><td class="mono">1988.12.31</td><td class="mono">1989.10.1</td></tr>
+<tr><td>흑해</td><td class="mono">1973.11.2</td><td class="mono">1988.12.31</td><td>미시행 *</td></tr>
+<tr><td>홍해</td><td class="mono">1973.11.2</td><td class="mono">1988.12.31</td><td>미시행 *</td></tr>
+<tr><td>걸프해역</td><td class="mono">1973.11.2</td><td class="mono">1988.12.31</td><td class="mono">2008.8.1</td></tr>
+<tr><td>북해</td><td class="mono">1989.10.17</td><td class="mono">1991.2.18</td><td class="mono">1991.2.18</td></tr>
+<tr><td>남극해 (남위 60° 이남)</td><td class="mono">1990.11.16</td><td class="mono">1992.3.17</td><td class="mono">1992.3.17</td></tr>
+<tr><td>광역 카리브해 (멕시코만·카리브해 포함)</td><td class="mono">1991.7.4</td><td class="mono">1993.4.4</td><td class="mono">2011.5.1</td></tr>`)}
+<p class="muted" style="font-size:13.5px">* 수용시설 확보 통보 전이라 특별해역 요건이 아직 효력을 갖지 않는 해역.</p>
+${vizBox("samap","특별해역 지도형 카드","9강 IMO 표",' data-annex="V"')}
+<h3>부속서별 특별해역 비교</h3>
+${tw(`<tr><th>해역</th><th>Ⅰ 기름</th><th>Ⅳ 오수</th><th>Ⅴ 폐기물</th></tr>
+<tr><td>지중해 · 흑해 · 홍해 · 걸프</td><td>○</td><td></td><td>○</td></tr>
+<tr><td>발틱해</td><td>○</td><td>○</td><td>○</td></tr>
+<tr><td>남극해</td><td>○</td><td></td><td>○</td></tr>
+<tr><td>아덴만 · 오만 아라비아해 · 북서유럽 · 남아프리카 남부</td><td>○</td><td></td><td></td></tr>
+<tr><td>북해 · 광역 카리브해</td><td></td><td></td><td>○</td></tr>`)}`,
+pts:["부속서 Ⅴ 특별해역 8개","Ⅴ에만 있는 해역: 북해, 광역 카리브해","세 부속서 모두 특별해역: 발틱해","미시행: 흑해, 홍해"],
+q:[
+{q:"부속서 Ⅴ에는 특별해역이지만 부속서 Ⅰ에는 특별해역이 아닌 곳은?",c:["지중해","걸프해역","광역 카리브해","남극해"],a:2,e:"북해와 광역 카리브해는 부속서 Ⅴ에만 있는 특별해역이다."},
+{q:"부속서 Ⅰ·Ⅳ·Ⅴ 모두에서 특별해역인 곳은?",c:["지중해","발틱해","북해","남극해"],a:1,e:"발틱해는 세 부속서 모두에서 특별해역이다."},
+{q:"부속서 Ⅴ 특별해역의 개수는?",c:["6개","8개","10개","12개"],a:1,e:"지중해·발틱해·흑해·홍해·걸프·북해·남극해·광역 카리브해 = 8개."}
+]},
+{id:"a5-platform",annex:"V",reg:"Reg.5",title:"고정식·부유식 플랫폼",en:"Special requirements for fixed or floating platforms",src:"9강 IMO 요약표 (p.36)",net:true,
+sum:"플랫폼과 그로부터 500m 이내 선박은 폐기물 배출 금지. 12해리 밖 플랫폼에서는 분쇄 음식찌꺼기만 허용.",
+body:`
+<p>강의 본문 슬라이드에서 따로 다루지 않았지만, 9강에 실린 IMO 'Simplified overview of the discharge provisions' 표의 마지막 열(Offshore platforms)에 해당하는 규정이다. <span class="net">KR-CON 원문</span></p>
+<ul><li>고정식·부유식 플랫폼, 그리고 그 플랫폼에 계류 중이거나 <b>500m 이내</b>에 있는 모든 선박은 폐기물 배출이 <b>금지</b>된다.</li>
+<li>예외: 가장 가까운 육지로부터 <b>12해리</b>를 넘는 곳에 있는 플랫폼(및 500m 이내 선박)에서 <b>분쇄·연마한 음식찌꺼기</b>(25mm 이하)는 배출할 수 있다.</li></ul>`,
+pts:["플랫폼·500m 이내 선박: 배출 금지","예외: 12해리 밖 플랫폼의 분쇄 음식찌꺼기"],
+q:[
+{q:"플랫폼 주변에서 폐기물 배출이 금지되는 선박의 범위는 플랫폼으로부터?",c:["100m 이내","500m 이내","1해리 이내","3해리 이내"],a:1,e:"플랫폼에 계류 중이거나 500m 이내에 있는 모든 선박."}
+]},
+{id:"a5-exempt",annex:"V",reg:"Reg.7",title:"적용제외",en:"Exceptions",src:"9강 p.32",
+sum:"안전·인명구조, 손상에 의한 우발적 상실, 어구의 사고적 손실, 환경보호·안전을 위한 어구 배출은 적용제외.",
+body:`
+<h3>1. 배출규정의 적용제외</h3>
+<ol class="steps">
+<li>해상에서 선박 및 승선자의 <b>안전을 확보</b>하거나 <b>인명을 구조</b>하기 위해 필요한 폐기물 배출</li>
+<li>선박 또는 설비의 <b>손상</b>에 기인하는 폐기물의 우발적 상실 (손상 전후에 방지·최소화를 위한 합리적 조치를 다한 경우)</li>
+<li>선박으로부터 <b>어구의 손실 사고</b> (상실 방지를 위한 합리적 조치를 다한 경우)</li>
+<li><b>해양환경 보호</b> 또는 선박·선원의 <b>안전</b>을 위한 어구 배출</li></ol>
+<h3>2. '항행 중(도중에)' 요건의 예외</h3>
+<p>음식찌꺼기의 선내 보유가 선원 건강에 <b>즉각적인 위협</b>을 줄 수 있는 것이 명백한 경우, 제4·6규칙과 Polar Code Part Ⅱ-A/5장의 '항행 중' 요건은 음식찌꺼기 배출에 적용하지 않는다.</p>`,
+pts:["적용제외 4가지: 안전·인명구조 / 손상 / 어구 손실 / 환경·안전 위한 어구 배출","음식찌꺼기가 건강을 위협하면 '항행 중' 요건 면제"],
+q:[
+{q:"부속서 Ⅴ 제7규칙의 적용제외에 해당하지 않는 것은?",c:["인명 구조를 위한 배출","손상에 의한 우발적 상실","어구의 사고적 손실","수용시설 비용 절감을 위한 배출"],a:3,e:"경제적 이유는 적용제외 사유가 아니다."},
+{q:"음식찌꺼기 보유가 선원 건강을 즉각 위협하는 경우 면제되는 요건은?",c:["거리 요건","'항행 중' 요건","분쇄 요건","기록 요건"],a:1,e:"이 경우 제4·6규칙의 '항행 중(en route)' 요건이 음식찌꺼기에 적용되지 않는다."}
+]},
+{id:"a5-records",annex:"V",reg:"Reg.10",title:"플래카드 · 관리계획 · 기록부",en:"Placards · Garbage Management Plan · Garbage Record Book",src:"9강 p.33~35",
+sum:"전장 12m 이상은 플래카드, 100GT 이상 또는 15인 이상은 폐기물관리계획, 기록부는 2년 보존. 기록부 적용은 2025년 100GT로 확대.",
+body:`
+${tw(`<tr><th>비치 대상</th><th>적용 선박</th></tr>
+<tr><td>플래카드 (Placards)</td><td>전장 <b>12m 이상</b> 모든 선박, 고정식·부유식 플랫폼</td></tr>
+<tr><td>폐기물관리계획 (GMP)</td><td>총톤수 <b>100 이상</b> 모든 선박, 승선인원 <b>15인 이상</b> 모든 선박, 플랫폼</td></tr>
+<tr><td>폐기물기록부 (GRB)</td><td>총톤수 <b>400 이상</b> 모든 선박, 승선인원 <b>15인 이상</b> 모든 선박, 플랫폼 (강의자료 기준)</td></tr>`)}
+<p><b>폐기물관리계획</b>: 선상장비 사용법, 쓰레기의 최소화·수집·저장·처리·처분을 위한 문서화된 절차를 제공.</p>
+<p><b>폐기물기록부</b>: 본선 공식 항해일지의 일부. 소각 또는 배출 시마다 <b>일자, 시각, 선박위치, 쓰레기 종류와 추정량</b>을 기록하고 <b>최소 2년</b> 보존.</p>
+<h3>폐기물의 범주</h3>
+<ol style="list-style:none;padding:0" class="mono"><li>A 플라스틱류</li><li>B 음식쓰레기</li><li>C 생활쓰레기 (종이류, 걸레, 유리, 금속, 병, 도자기 등)</li><li>D 식용유</li><li>E 소각재</li><li>F 운항상 쓰레기</li><li>G 화물잔류물</li><li>H 동물사체</li><li>I 어구</li></ol>
+<div class="krcon"><b>KR-CON 원문과 다른 점</b><ul><li><b>기록부 비치 대상</b>: MEPC.360(79) 개정으로 <b>2025.5.1</b>부터 총톤수 <b>100 이상</b> 모든 선박. 15인 이상 기준은 다른 당사국 항구·해양터미널로 항해하는 선박에 적용. 전자 기록부도 허용(MEPC.312(74)).</li>
+<li><b>폐기물 범주</b>(MEPC.277(70), 2018.3.1~): Part Ⅰ — A 플라스틱, B 음식쓰레기, C 생활쓰레기, D 식용유, E 소각재, F 운항상 쓰레기, <b>G 동물사체, H 어구, I 전자폐기물(E-waste)</b> / Part Ⅱ — <b>J 화물잔류물(비HME), K 화물잔류물(HME)</b>. 강의 목록의 G·H·I와 기호가 다르다.</li></ul></div>`,
+pts:["플래카드: 전장 12m 이상","GMP: 100GT↑ 또는 15인↑","GRB: 400GT↑ 또는 15인↑ (원문 현행: 100GT↑)","GRB 보존 2년 (ORB는 3년)"],
+q:[
+{q:"폐기물 플래카드를 비치해야 하는 선박의 기준은?",c:["총톤수 100 이상","전장 12m 이상","승선인원 15인 이상","총톤수 400 이상"],a:1,e:"전장 12m 이상 모든 선박과 플랫폼."},
+{q:"폐기물관리계획(GMP)의 비치 기준은?",c:["전장 12m 이상","총톤수 100 이상 또는 15인 이상","총톤수 400 이상 또는 15인 이상","총톤수 400 이상만"],a:1,e:"100GT 이상 모든 선박, 승선인원 15인 이상 모든 선박, 플랫폼."},
+{q:"폐기물기록부의 최소 보존 기간은?",c:["1년","2년","3년","5년"],a:1,e:"최소 2년. 기름기록부(3년)와 구분해서 외워야 한다."},
+{q:"폐기물기록부 기록 항목이 아닌 것은?",c:["일자·시각","선박위치","쓰레기 종류와 추정량","선박의 흘수"],a:3,e:"일자, 시각, 선박위치, 쓰레기 종류와 추정량을 기록한다."},
+{q:"강의자료의 폐기물 범주에서 'D'는?",c:["음식쓰레기","식용유","소각재","운항상 쓰레기"],a:1,e:"A 플라스틱, B 음식, C 생활, D 식용유, E 소각재, F 운항상, G 화물잔류물, H 동물사체, I 어구."},
+{q:"MEPC.360(79) 개정으로 2025.5.1부터 폐기물기록부 비치 대상은 총톤수 몇 이상으로 확대되었나?",c:["50","100","150","200"],a:1,e:"400GT에서 100GT 이상으로 확대되었다."}
+]},
+{id:"a5-trend",annex:"V",reg:"동향",title:"플라스틱 펠릿과 어구 표식",en:"X-Press Pearl · Plastic pellets · Fishing gear marking",src:"9강 p.37~39",
+sum:"2021년 X-Press Pearl호 사고로 약 1,680톤의 플라스틱 펠릿이 유출되며 펠릿 운송 규제 논의가 본격화되었다.",
+body:`
+<h3>X-Press Pearl호 화재·침몰 (2021.5)</h3>
+<ul><li>스리랑카 콜롬보항 인근 정박지에서 싱가포르 선적 컨테이너선에 화재, 약 2주 후 침몰</li>
+<li>플라스틱 펠릿(nurdle) 약 <b>1,680톤</b>(약 750억 개) 해상 유출 — 사상 최대 규모 해양 플라스틱오염 사고</li>
+<li>질산 등 위험물 컨테이너 내부의 화학물질 누출이 화재의 주요 원인</li>
+<li>사고 전 여러 기항지에서 누출 컨테이너 하역을 거부당한 채 운항을 강행 (항만 간 비상조치 공조의 한계)</li>
+<li>타거나 녹은 펠릿이 독성 화학물질·중금속과 결합해 기름 유출보다 복합적인 생태계 피해</li>
+<li>어업 금지로 1만 2천여 가구의 생계 마비. 스리랑카 정부는 펠릿을 환경 유해물질로 취급하도록 IMO에 요청</li></ul>
+<h3>IMO 대응</h3>
+${tw(`<tr><th>시기</th><th>내용</th></tr>
+<tr><td>2024.3 MEPC 81</td><td>펠릿 컨테이너 운송 권고사항(MEPC.1/Circ.909, 자율규정) 채택</td></tr>
+<tr><td>2026.2 PPR 13</td><td>MARPOL 부속서 Ⅲ 및/또는 SOLAS에 근거한 강제 코드 개발 권고</td></tr>
+<tr><td>2026.4 MEPC 84</td><td>강제 코드 개발 착수 확정</td></tr>`)}
+<p>함께 추진 중인 것: <b>어구(fishing gear) 표식 의무화</b>를 위한 부속서 Ⅴ 목표기반 개정안 (PPR 13, FAO 어구표식 지침 연계).</p>
+<p>위험물로 분류되지 않는 화물도 컨테이너 유실 시 대규모 해양오염을 일으킬 수 있다는 점에서, IBC/IMDG Code 논의와 연결되는 규제 확장 사례다.</p>`,
+pts:["X-Press Pearl 2021, 펠릿 약 1,680톤","MEPC.1/Circ.909 (2024, 자율)","2026 강제 코드 개발 착수","어구 표식 의무화 논의"],
+q:[
+{q:"2021년 사상 최대 규모의 플라스틱 펠릿 유출을 일으킨 선박은?",c:["Hebei Spirit","X-Press Pearl","Ever Given","Wakashio"],a:1,e:"X-Press Pearl호(2021.5, 스리랑카). 약 1,680톤의 펠릿이 유출되었다."},
+{q:"2024년 MEPC 81에서 채택된 펠릿 컨테이너 운송 권고의 성격은?",c:["강제 규정","자율 규정","SOLAS 개정","부속서 Ⅴ 개정"],a:1,e:"MEPC.1/Circ.909는 자율규정이며, 이후 강제 코드 개발이 추진되고 있다."}
+]}
+];
+
+/* ================= STATE ================= */
+const store = {
+  get(k,d){try{const v=localStorage.getItem("marpol."+k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem("marpol."+k,JSON.stringify(v))}catch(e){}}
+};
+let wrongSet = new Set(store.get("wrong",[]));
+let readSet = new Set(store.get("read",[]));
+const saveWrong=()=>store.set("wrong",[...wrongSet]);
+const saveRead=()=>store.set("read",[...readSet]);
+
+const Q = [];
+DOCS.forEach(d=>d.q.forEach((q,i)=>Q.push({...q,id:d.id+"-"+i,doc:d.id,annex:d.annex})));
+const docById = id=>DOCS.find(d=>d.id===id);
+const ROM = {OV:"총론",I:"Ⅰ",IV:"Ⅳ",V:"Ⅴ"};
+const tagHtml = a=>`<span class="tag t${a}">${a==="OV"?"MARPOL 개요":"ANNEX "+ROM[a]}</span>`;
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle = a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const app = document.getElementById("app");
+
+/* ================= VIZ ================= */
+const VIZ = {
+iopp(){
+  const p=y=>y/5*100;
+  const win=(y,cls="")=>`<span class="win ${cls}" style="left:${p(y-.25)}%;width:${p(.5)}%"></span><span class="pt" style="left:${p(y)}%"></span>`;
+  return `<div class="viz-x"><div class="tl">
+   <div class="tl-row"><div class="tl-lab">최초 · 갱신</div><div class="tl-track"><div class="tk">
+     <span class="dot" style="left:0"></span><span class="dl" style="left:14px">최초검사 · 증서 발급</span>
+     <span class="dot" style="left:100%"></span><span class="dl" style="right:14px">갱신검사 (5년 이내)</span></div></div></div>
+   <div class="tl-row"><div class="tl-lab">연차검사</div><div class="tl-track"><div class="tk">${[1,2,3,4].map(y=>win(y)).join("")}</div></div></div>
+   <div class="tl-row"><div class="tl-lab">중간검사</div><div class="tl-track"><div class="tk">${[2,3].map(y=>win(y,"alt")).join("")}<span class="mid" style="left:${p(2.5)}%">둘 중 한 번</span></div></div></div>
+   <div class="tl-row tl-axis"><div></div><div class="tl-track"><div class="tk">${["발급","1년","2년","3년","4년","5년 · 만료"].map((t,i)=>`<span class="ax${i===5?" end":i===0?" st":""}" style="left:${p(i)}%">${t}</span>`).join("")}</div></div></div>
+  </div></div>
+  <div class="viz-foot">음영은 연차일 전후 3개월 이내. 빗금은 2번째 또는 3번째 연차일 중 한 번 받는 중간검사로, 그해 연차검사를 대신한다. 연차일은 IOPP 증서 만료일에 해당하는 매년의 월일이다.</div>`;
+},
+ladder(){
+  const T=[["150","미만",10],["150","이상",18],["400","이상",26],["4,000","이상",34],["10,000","이상",42]];
+  const z=a=>a.length?a.map(([t,r])=>`<span class="dz">${t}<i>${r}</i></span>`).join(""):`<span class="none">추가 의무 없음</span>`;
+  return `<div class="viz-x"><table class="ld"><colgroup><col class="c0"><col><col><col><col><col></colgroup><thead><tr><th></th>${T.map(([g,u,h])=>`<th><span class="rung" style="height:${h}px"></span><span class="gt">${g}<small>GT ${u}</small></span></th>`).join("")}</tr></thead><tbody>
+  <tr><th>유탱커</th><td>${z([])}</td>
+   <td>${z([["검사 · IOPP 증서","R6·7"],["기름기록부 Ⅰ부","R17"],["연료유탱크 평형수 금지","R16"],["슬롭탱크 · ODME · 유수경계면검출기","제4장"]])}</td>
+   <td>${z([["슬러지탱크","R12"],["기름필터장치 15ppm","R14"],["기관구역 배출통제","R15"],["선수탱크 기름 적재 금지","R16"]])}</td>
+   <td>${z([])}</td><td>${z([["경보장치 · 자동배출정지장치","R14"]])}</td></tr>
+  <tr><th>유탱커 외<br>선박</th><td colspan="2">${z([["빌지저장탱크 (400GT 미만)","3강"]])}</td>
+   <td>${z([["검사 · IOPP 증서","R6·7"],["기름기록부 Ⅰ부","R17"],["슬러지탱크","R12"],["기름필터장치 15ppm","R14"],["기관구역 배출통제","R15"],["선수탱크 기름 적재 금지","R16"]])}</td>
+   <td>${z([["연료유탱크 평형수 금지","R16"]])}</td><td>${z([["경보장치 · 자동배출정지장치","R14"]])}</td></tr>
+  </tbody></table></div>
+  <div class="viz-foot">각 칸은 그 톤수부터 새로 생기는 의무다. 앞 칸의 의무는 큰 선박에도 계속 적용된다. R은 부속서 Ⅰ의 규칙 번호.</div>`;
+},
+reg15(){
+  const Q=[["항행 중인가?",""],["기름필터장치로 처리하는가?","10,000GT 이상은 경보장치 · 자동배출제어장치 포함"],["유분농도가 15ppm 이하인가?",""],["유조선의 화물펌프실 빌지에서 나온 것이 아닌가?",""],["화물유 잔류물과 섞이지 않았는가?","유탱커의 경우"]];
+  return `<div class="fl"><div class="fl-box fl-start">총톤수 400 이상 선박 · 기관구역 유성혼합물</div><div class="fl-yes"></div>
+  ${Q.map(([q,s],i)=>`<div class="fl-row"><div class="fl-q"><span class="n">${i+1}</span><span>${q}${s?`<small>${s}</small>`:""}</span></div><div class="fl-no"><span class="a">아니오 →</span><span class="ban">배출 금지</span></div></div><div class="fl-yes">예</div>`).join("")}
+  <div class="fl-box fl-end">배출 가능 · 특별해역 안과 밖이 같은 조건</div>
+  <div class="fl-note">남극해역은 이 조건과 관계없이 기름·유성혼합물의 어떤 배출도 금지된다.</div></div>`;
+},
+samap(el){
+  const A=[
+   ["북서유럽해역","NW European",[["I",1]],"3/4","1/3"],["북해","North Sea",[["V",1]],"4/5","1/2"],["발틱해","Baltic",[["I",1],["IV",1],["V",1]],"5/6","1/2"],
+   ["광역 카리브해","Wider Caribbean",[["V",1]],"1/3","2/4"],["지중해","Mediterranean",[["I",1],["V",1]],"4/6","2/3"],["흑해","Black Sea",[["I",1],["V",0]],"6/7","2/3"],
+   ["홍해","Red Sea",[["I",0],["V",0]],"5/6","3/4"],["걸프해역","Gulfs",[["I",1],["V",1]],"7/8","3/4"],["아덴만","Gulf of Aden",[["I",0]],"6/7","4/5"],
+   ["오만 아라비아해","Oman Arabian Sea",[["I",0]],"7/9","4/5"],["남아프리카 남부해역","S. African",[["I",1]],"4/6","5/6"],["남극해","Antarctic · 남위 60° 이남",[["I",1],["V",1]],"1/9","6/7"]];
+  const land=[["유럽","6/9","1/2"],["아프리카","4/5","3/5"],["대서양","1/3","4/6"]];
+  const f=el.dataset.annex||"all";
+  return `<div class="chips sam-f" style="margin-bottom:10px">${[["all","전체"],["I","Ⅰ 기름"],["IV","Ⅳ 오수"],["V","Ⅴ 폐기물"]].map(([k,l])=>`<button class="chip${k===f?" on":""}" data-k="${k}">${l}</button>`).join("")}</div>
+  <div class="viz-x"><div class="sam"><div class="sam-map">
+   ${land.map(([t,c,r])=>`<div class="sa-land" style="grid-column:${c};grid-row:${r}">${t}</div>`).join("")}
+   ${A.map(([n,e,m,c,r])=>`<div class="sa" data-a="${m.map(x=>x[0]).join(" ")}" style="grid-column:${c};grid-row:${r}"><b>${n}</b><small>${e}</small><div class="mks">${m.map(([a,on])=>`<span class="mk ${a} ${on?"on":"off"}">${ROM[a]}</span>`).join("")}</div></div>`).join("")}
+  </div></div></div>
+  <div class="sam-leg"><span><span class="mk I on">Ⅰ</span> 칠한 표시: 실제 시행 중</span><span><span class="mk I off">Ⅰ</span> 점선 표시: 지정·발효됐지만 미시행</span><span>배치는 대략적인 위치</span></div>`;
+},
+garbage(){
+  const c=(k,t,s="")=>`<td class="k k-${k}">${t}${s?`<small>${s}</small>`:""}</td>`;
+  const NO=c("no","배출 금지");
+  const rows=[
+   ["분쇄·연마한 음식찌꺼기","25mm 이하 스크린 통과",c("3","3해리 이상","항해 중, 가능한 한 멀리"),c("12","12해리 이상","항해 중, 가능한 한 멀리"),c("ok","배출 가능","12해리를 넘는 플랫폼")],
+   ["분쇄·연마하지 않은 음식찌꺼기","",c("12","12해리 이상","항해 중, 가능한 한 멀리"),NO,NO],
+   ["화물잔류물 (세정수 미포함)","회수 불가 · 무해한 것",c("12","12해리 이상","항해 중, 가능한 한 멀리"),NO,NO],
+   ["화물잔류물 (세정수 포함)","회수 불가 · 무해한 것",c("12","12해리 이상","항해 중, 가능한 한 멀리"),c("cd","조건부 12해리 이상","육지 또는 빙산으로부터 · 제6규칙 조건"),NO],
+   ["화물창 세정수의 세정제·첨가제","무해한 것",c("ok","배출 가능"),c("cd","조건부 12해리 이상","제6규칙 조건"),NO],
+   ["갑판·외판 세정수의 세정제·첨가제","무해한 것",c("ok","배출 가능"),c("ok","배출 가능"),NO],
+   ["동물사체","",c("far","가능한 한 멀리","항해 중, IMO 지침 고려"),NO,NO],
+   ["그 밖의 모든 폐기물","플라스틱, 합성로프·어망, 쓰레기봉지, 소각재, 식용유, 종이, 유리, 금속, 병, 도자기 등",NO,NO,NO]];
+  return `<div class="viz-x"><table class="gt"><thead><tr><th class="r">폐기물 종류</th><th>특별해역 밖<small>제4규칙 · 가장 가까운 육지로부터</small></th><th>특별해역 안<small>제6규칙</small></th><th>플랫폼 · 500m 이내 선박<small>제5규칙</small></th></tr></thead>
+   <tbody>${rows.map(([w,s,...cs])=>`<tr><td class="w">${w}${s?`<small>${s}</small>`:""}</td>${cs.join("")}</tr>`).join("")}</tbody></table></div>
+   <div class="gt-leg"><span style="background:var(--sew-bg);color:var(--sew)">3해리 이상</span><span style="background:var(--gar-bg);color:var(--gar)">12해리 이상</span><span style="background:var(--warn-bg);color:var(--warn)">조건부</span><span style="background:var(--oil-bg);color:var(--oil)">가능한 한 멀리</span><span style="background:var(--ok-bg);color:var(--ok)">배출 가능</span><span style="background:var(--bad-bg);color:var(--bad)">배출 금지</span></div>
+   <ol class="gt-fn"><li>배출요건이 다른 폐기물이 섞이거나 오염되면 더 엄격한 쪽 요건을 적용한다.</li><li>남극해역에서는 살균처리하지 않은 가금류 등 외래조류 제품의 배출이 금지된다.</li><li>화물잔류물은 일반적인 하역방법으로 회수할 수 없는 것만 해당하며, 세정제·첨가제와 함께 해양환경에 유해하지 않아야 한다.</li><li>제6규칙 조건: 출항·입항 항구가 모두 특별해역 안이고 그 사이 특별해역 밖을 지나지 않으며, 항구에 수용시설이 없을 것.</li></ol>`;
+}
+};
+function hydrate(root){
+  root.querySelectorAll("[data-viz]").forEach(el=>{
+    el.innerHTML=VIZ[el.dataset.viz](el);
+    if(el.dataset.viz==="samap"){
+      const apply=k=>{el.querySelectorAll(".sam-f .chip").forEach(b=>b.classList.toggle("on",b.dataset.k===k));el.querySelectorAll(".sa").forEach(c=>c.classList.toggle("dim",k!=="all"&&!c.dataset.a.split(" ").includes(k)))};
+      el.querySelector(".sam-f").onclick=e=>{const b=e.target.closest(".chip");if(b)apply(b.dataset.k)};
+      apply(el.dataset.annex||"all");
+    }
+  });
+}
+
+
+/* ================= 2026.2학기 중간 시험 ================= */
+const MID_INFO = {title:"2026.2학기 중간 시험", by:"안 광 교수님", range:"1강 강의소개 ~ 5강 MARPOL Annex Ⅰ(2)", form:"서술형 5문항 × 20점 = 100점", time:50};
+const MQ_RAW = [
+ // 1 EEXI·CII
+ [1,"ov-ghg","EEXI의 적용 대상과 방식으로 옳은 것은?",["2023.1.1 이후 총톤수 400톤 이상 선박, 1회성 인증","2013년 이후 신조선, 매년 등급 산정","총톤수 5,000톤 이상 선박, 연료소모량 보고","EU 기항 선박, 배출권 구매"],0,"EEXI는 2023.1.1 이후 400GT 이상 현존선이 1회성 인증으로 기준을 충족하는 제도다."],
+ [1,"ov-ghg","CII에 대한 설명으로 옳은 것은?",["설계단계에서 한 번 계산한다","매년 실측 운항실적으로 A~E 등급을 매긴다","신조선에만 적용된다","황산화물 배출량 지표다"],1,"CII(탄소집약도지수)는 매년 실제 운항실적으로 A~E 등급을 산정한다."],
+ [1,"ov-ghg","CII 등급에 따라 시정조치가 요구되는 조건은?",["1회 D등급","2년 연속 C등급","3년 연속 D등급 또는 1회 E등급","1회 C등급"],2,"3년 연속 D등급 또는 1회 E등급이면 시정조치 의무가 생긴다."],
+ [1,"ov-ghg","CII 시정조치 대상 선박이 해야 할 조치는?",["EEXI 재인증","SEEMP Part Ⅲ 개선계획 제출","스크러버 설치","운항 정지"],1,"SEEMP Part Ⅲ에 등급 개선계획(시정조치계획)을 포함해 제출해야 한다."],
+ [1,"ov-ghg","EEXI와 CII의 비교로 옳은 것은?",["EEXI는 운항, CII는 설계 측면","EEXI는 설계(기술) 측면, CII는 운항 측면","둘 다 신조선 규제","둘 다 매년 등급 산정"],1,"EEXI는 현존선판 EEDI로 설계·기술 효율을, CII는 실제 운항의 탄소집약도를 본다."],
+ // 2 OILPOL → MARPOL
+ [2,"ov-history","OILPOL 1954의 규제 내용으로 옳은 것은?",["12해리 금지구역, 15ppm","50해리 금지구역, 100ppm 이상 배출 금지","100해리 금지구역, 50ppm","전 해역 배출 금지"],1,"OILPOL은 영해기선 50해리를 금지구역으로, 100ppm 이상 배출을 금지했다."],
+ [2,"ov-history","1973 MARPOL 협약이 채택된 직접적 계기는?",["Amoco Cadiz 좌초","Torrey Canyon 좌초(1967)","허베이 스피리트 충돌","타이타닉 침몰"],1,"1967년 Torrey Canyon 사고가 계기다."],
+ [2,"ov-history","1973 MARPOL 협약에 대한 설명으로 옳은 것은?",["채택 즉시 발효되었다","당시 기술수준 문제로 발효되지 못했다","부속서 Ⅰ만 있었다","OILPOL을 대체하지 않았다"],1,"1973 MARPOL은 5개 부속서로 채택됐지만 발효되지 못했고, 1978 의정서가 이를 살렸다."],
+ [2,"ov-history","'MARPOL 73/78'이라는 명칭이 생긴 이유는?",["1973년과 1978년에 각각 발효되어서","1973 협약과 1978 의정서를 하나로 묶어 부르기 때문","1978년에 부속서가 73개가 되어서","1973~1978년 사이 개정이 많아서"],1,"Amoco Cadiz(1978) 이후 채택된 1978 의정서와 1973 협약을 통합해 MARPOL 73/78이라 한다."],
+ [2,"ov-articles","MARPOL 협약 제15조의 발효요건은?",["10개국, 선복량 25%, 6개월 후","15개국 이상, 세계 상선 선복량 50% 이상, 12개월 후","30개국, 선복량 35%, 1년 후","25개국, 선복량 50%, 즉시"],1,"15개국 이상·총톤수 기준 50% 이상이 가입한 날로부터 12개월 후 발효."],
+ // 3 ballast
+ [3,"a1-ballast","청정평형수(Clean ballast)의 정의로 옳은 것은?",["화물유·연료유 계통과 분리된 전용 탱크의 평형수","기름을 실었던 탱크를 세정해 유막이 생기지 않을 정도가 된 평형수","연료유탱크에 실은 평형수","육상 수용시설로 보내는 평형수"],1,"청명한 날 정지 상태 배출 시 눈에 보이는 유막이 없을 정도로 세정된 평형수다."],
+ [3,"a1-ballast","ODME를 통해 배출할 때 청정평형수로 인정되는 기준은?",["5ppm 이하","15ppm 이하","50ppm 이하","100ppm 이하"],1,"15ppm 이하이면 유막과 관계없이 청정평형수로 인정된다."],
+ [3,"a1-ballast","분리평형수(Segregated ballast)의 정의로 옳은 것은?",["화물유·연료유 계통과 완전히 분리된, 평형수 전용으로 영구 설치된 탱크의 평형수","15ppm 이하로 처리한 평형수","세정한 화물탱크의 평형수","선수탱크의 평형수"],0,"구조적으로 분리된 전용 탱크(SBT)에 실은 평형수다."],
+ [3,"a1-ballast","청정평형수와 분리평형수의 차이로 옳은 것은?",["청정평형수는 구조, 분리평형수는 수질 기준","청정평형수는 수질(얼마나 깨끗한가), 분리평형수는 구조(어느 탱크인가) 기준","둘은 같은 개념","둘 다 BWM 협약 용어"],1,"Clean은 수질, Segregated는 탱크의 구조적 분리를 기준으로 한다."],
+ // 4 IOPP
+ [4,"a1-iopp","IOPP 증서 발급 대상 선박은?",["모든 선박","총톤수 150 이상 유탱커와 총톤수 400 이상 그 밖의 선박","총톤수 400 이상 유탱커와 150 이상 그 밖의 선박","총톤수 10,000 이상 선박"],1,"제6규칙 검사 대상과 같다: 150GT 이상 유탱커, 400GT 이상 그 밖의 선박."],
+ [4,"a1-iopp","IOPP 증서의 유효기간은?",["1년","3년","5년을 넘지 않는 기간","10년"],2,"5년을 넘지 않는 범위에서 주관청이 정한다."],
+ [4,"a1-survey","제6규칙 중간검사의 시기는?",["매 연차일 전후 3개월","2번째 또는 3번째 연차일 전후 3개월","발급 후 30개월","갱신 6개월 전"],1,"중간검사는 2·3번째 연차일 전후 3개월 이내, 그해 연차검사를 대신한다."],
+ [4,"a1-survey","제6규칙 연차검사의 시기는?",["매 연차일 전후 3개월 이내","매 연차일 전후 1개월 이내","2년마다","5년마다"],0,"연차검사는 매 연차일 전후 3개월 이내."],
+ [4,"a1-survey","제6규칙에 따른 검사 종류가 아닌 것은?",["최초검사","정기(갱신)검사","임시항해검사","추가검사"],2,"MARPOL 검사는 최초·정기(갱신)·중간·연차·추가검사다."],
+ [4,"ov-law","해양환경관리법 제4조의 내용으로 옳은 것은?",["국내법이 항상 우선","국제협약이 우선하되, 국내법이 더 강화된 기준이면 국내법","더 완화된 기준 적용","주관청이 선택"],1,"원칙은 국제협약 우선, 예외는 국내법이 더 강한 경우."],
+ // 5 Reg15
+ [5,"a1-reg15","특별해역 밖에서 400GT 이상 선박의 기관구역 기름 배출 조건이 아닌 것은?",["항행 중일 것","기름필터장치로 처리할 것","유분농도 15ppm 이하","육지로부터 12해리 이상"],3,"제15규칙에는 거리 조건이 없다."],
+ [5,"a1-reg15","제15규칙 배출 조건으로 옳은 것은?",["유분농도 100ppm 이하","화물펌프실 빌지에서 생성되지 않을 것","정박 중일 것","주관청 사전 허가"],1,"화물펌프실 빌지에서 생성되지 않아야 하고, 유탱커는 화물유 잔류물과 섞이지 않아야 한다."],
+ [5,"a1-reg15","10,000GT 이상 선박의 기름필터장치에 추가로 필요한 것은?",["슬롭탱크","경보장치와 자동배출제어(정지)장치","원유세정장치","유수경계면검출기"],1,"10,000GT 이상은 경보·자동배출제어장치를 포함해야 한다."],
+ [5,"a1-reg15","남극해역에서의 기름 배출 규정은?",["15ppm 이하면 가능","12해리 밖이면 가능","기름·유성혼합물의 어떠한 배출도 전면 금지","특별해역과 동일"],2,"남극해역은 예외 없이 전면 금지된다."],
+ // 6 PSC
+ [6,"a1-psc","항만국통제(PSC)의 목적은?",["자국선 등록 관리","기준미달선박에 의한 사고로부터 연안국 해양환경과 인명·재산 보호","관세 징수","선원 고용 관리"],1,"Sub-standard vessel로부터 해양환경과 인명·재산을 보호하기 위함이다."],
+ [6,"a1-psc","PSC의 정의로 옳은 것은?",["자국적 선박을 점검하는 제도","자국 항만에 입항한 외국적 선박의 국제기준 미달 여부를 점검해 시정·출항정지 등을 하는 제도","공해상 선박 검문","선급 검사"],1,"외국적 선박이 대상이다."],
+ [6,"a1-psc","부속서 Ⅰ 제11규칙에서 운항상 요건 점검이 이루어지는 조건은?",["선박이 입항할 때마다","선장·선원이 필수 절차에 익숙하지 못하다고 믿을 명백한 근거(clear grounds)가 있을 때","선령 15년 이상일 때","기국이 요청할 때"],1,"명백한 근거가 있을 때 PSCO가 점검하고, 요건을 충족할 때까지 출항을 막는다."],
+ [6,"a1-psc","Port State · Flag State · Coastal State의 설명으로 옳은 것은?",["항만국: 국적 부여 / 기국: 입항 항구 / 연안국: 공해","항만국: 입항한 항구에 주권 행사 / 기국: 국적 부여·선내 주권 / 연안국: 영해까지 주권","셋 다 같은 의미","연안국: 선박 소유국"],1,"항만국=입항 항구, 기국=국적 부여, 연안국=영해까지 주권."]
+];
+const MQ = MQ_RAW.map(([n,doc,q,c,a,e],i)=>({id:"mid-"+i,n,doc,q,c,a,e,annex:docById(doc).annex,mid:true}));
+
+const ESSAY = [
+ {n:1,tag:"2강",doc:"ov-ghg",q:"현존선 온실가스 규제인 EEXI와 CII를 각각 설명하고 비교하시오. 그리고 CII 등급에 따라 시정조치가 요구되는 조건과 그때 선박이 해야 할 조치를 쓰시오.",
+  items:[["EEXI 설명",5,[["eexi","현존선에너지효율지수","에너지효율지수"],["설계","기술","1회","일회","인증","출력제한"],["400","2023"]]],
+   ["CII 설명",5,[["cii","탄소집약도"],["매년","운항","실적","실측"],["a~e","a-e","ae등급","등급"]]],
+   ["두 제도의 비교",4,[["설계","기술","하드웨어","1회","일회"],["운항","매년","실적","소프트웨어"]]],
+   ["시정조치 조건",3,[["3년"],["d등급","등급d","d를","d가","d이","d로","d,"],["e등급","등급e","e를","e가","e이","e로","1회e","한번e"]]],
+   ["시정조치 내용",3,[["seemp","선박에너지효율관리계획"],["개선계획","시정조치계획","시정계획","partiii","part3","파트3","파트iii"]]]],
+  model:"EEXI(현존선 에너지효율지수)는 2023.1.1 이후 총톤수 400톤 이상 현존선이 설계상 에너지효율 기준을 1회성 인증으로 충족해야 하는 제도로, 엔진 출력 제한 등으로 대응한다. CII(탄소집약도지수)는 매년 실측 운항실적으로 탄소집약도를 계산해 A~E 등급을 매긴다. EEXI는 설계·기술(하드웨어) 측면의 1회 인증, CII는 운항(소프트웨어) 측면의 매년 평가라는 점이 다르다. 3년 연속 D등급 또는 1회 E등급을 받으면 SEEMP Part Ⅲ에 개선계획(시정조치계획)을 포함해 제출해야 한다."},
+ {n:2,tag:"3강",doc:"ov-history",q:"OILPOL 1954부터 시작하여 'MARPOL 73/78'이라는 명칭이 생기게 된 과정을 설명하시오. 그리고 MARPOL 협약 제15조에 따른 발효요건을 쓰시오.",
+  items:[["OILPOL 1954",3,[["oilpol","1954"],["50해리","100ppm","기관구역","화물구역"]]],
+   ["Torrey Canyon과 1973 협약",5,[["토리캐년","토리캐니언","torreycanyon","torrey","1967"],["1973"],["발효되지","미발효","발효못","발효하지","발효되못"]]],
+   ["Amoco Cadiz와 1978 의정서",4,[["아모코","amoco","카디즈","1978"],["의정서","protocol","tspp"]]],
+   ["MARPOL 73/78 명칭",3,[["통합","합쳐","합친","하나","단일","73/78"]]],
+   ["제15조 발효요건",5,[["15개국","15개국가","15국"],["50%","50퍼센트","절반","선복량"],["12개월","1년"]]]],
+  model:"1954년 기름오염방지협약(OILPOL)이 채택되어 1958년 발효되었다(50해리 금지구역, 100ppm 이상 배출 금지). 1967년 Torrey Canyon호 좌초를 계기로 1973년 5개 부속서로 된 MARPOL 협약이 채택되었으나 당시 기술수준 문제로 발효되지 못했다. 1978년 Amoco Cadiz호 사고 후 TSPP 회의에서 1978 의정서가 채택되어 1973 협약을 수정·보완했고, 두 문서를 하나로 묶어 MARPOL 73/78이라 부른다(1983.10.2 발효). 제15조: 세계 상선 선복량(총톤수) 50% 이상을 차지하는 15개국 이상이 가입한 날로부터 12개월 후 발효한다."},
+ {n:3,tag:"4강",doc:"a1-ballast",q:"MARPOL 부속서 Ⅰ 제1규칙에서 정의하는 청정평형수(Clean ballast)와 분리평형수(Segregated ballast)를 각각 설명하고, 두 개념의 차이를 쓰시오.",
+  items:[["청정평형수",8,[["청정평형수","cleanballast","clean"],["세정","청소","씻"],["유막","기름흔적","유분흔적","슬러지","에멀"],["15ppm","odme","기름배출감시"]]],
+   ["분리평형수",8,[["분리평형수","segregated"],["분리","독립"],["화물유","연료유","기름계통","계통"],["전용","영구","sbt"]]],
+   ["두 개념의 차이",4,[["수질","깨끗","청정도","얼마나"],["구조","탱크","계통","어느"]]]],
+  model:"청정평형수는 기름을 실었던 탱크를 세정하여, 청명한 날 정지 상태에서 잔잔한 해면에 배출했을 때 눈에 보이는 유막이 생기지 않고 슬러지·에멀젼을 만들지 않을 정도로 깨끗해진 평형수다. ODME로 15ppm 이하임이 확인되면 유막과 관계없이 청정평형수로 인정된다. 분리평형수는 화물유·연료유 계통과 완전히 분리되어 평형수(또는 기름·유해물질 외 화물) 전용으로 영구 설치된 탱크(SBT)에 실은 평형수다. 청정평형수는 '얼마나 깨끗한가(수질)', 분리평형수는 '어느 탱크에 담겼는가(구조적 분리)'를 기준으로 한다."},
+ {n:4,tag:"5강",doc:"a1-iopp",q:"국제기름오염방지증서(IOPP Certificate)의 발급 대상 선박과 유효기간을 쓰고, MARPOL 부속서 Ⅰ 제6규칙에 따른 검사의 종류와 각 검사의 시기를 설명하시오. 그리고 해양환경관리법 제4조에 규정된 국제협약과 국내법의 관계를 쓰시오.",
+  items:[["발급 대상 · 유효기간",4,[["150"],["400"],["5년"]]],
+   ["검사 종류와 시기",8,[["최초","initial"],["정기","갱신","renewal"],["중간","intermediate"],["연차","annual"],["추가","additional"],["3개월"]]],
+   ["해양환경관리법 제4조",8,[["국제협약"],["우선"],["강화","엄격","더강","강한"],["국내법","이법"]]]],
+  model:"IOPP는 총톤수 150 이상 유탱커와 총톤수 400 이상 그 밖의 선박에 발급하며, 유효기간은 5년을 넘지 않는다. 검사: 최초검사(취항 전), 정기(갱신)검사(5년을 넘지 않는 간격), 중간검사(2번째 또는 3번째 연차일 전후 3개월 이내), 연차검사(매 연차일 전후 3개월 이내), 추가검사(수리·개조 등 필요 시). 해양환경관리법 제4조: 국제협약 기준과 이 법이 다르면 국제협약의 효력이 우선하나, 이 법이 국제협약보다 강화된 기준을 두면 그렇지 않다(국내법 적용)."},
+ {n:5,tag:"5강",doc:"a1-reg15",q:"총톤수 400톤 이상 선박이 특별해역 밖(북극해역 제외)에서 기관구역의 기름 또는 유성혼합물을 바다로 배출할 수 있는 조건을 MARPOL 부속서 Ⅰ 제15규칙에 따라 모두 쓰시오. 그리고 남극해역에서 적용되는 기름 배출 규정을 쓰시오.",
+  items:[["배출 조건 5가지",15,[["항행","항해중","항해 중","enroute"],["필터","여과","ofe","유수분리","ows"],["15ppm","15피피엠"],["펌프실","펌프룸","pumproom"],["화물유잔류물","화물잔류물","잔류물","잔유"]]],
+   ["남극해역 규정",5,[["남극"],["전면금지","전면 금지","어떠한","모든배출","일체","금지"]]]],
+  model:"① 선박이 항행 중일 것 ② 유성혼합물이 기름필터장치(10,000GT 이상은 경보·자동배출제어장치 포함)로 처리될 것 ③ 유출액의 유분농도가 희석 없이 15ppm을 넘지 않을 것 ④ 유조선의 화물펌프실 빌지에서 생성되지 않을 것 ⑤ 유탱커의 경우 화물유 잔류물과 혼합되지 않을 것. 남극해역에서는 선박으로부터 기름 또는 유성혼합물의 어떠한 해양 배출도 전면 금지된다."},
+ {n:6,tag:"5강",doc:"a1-psc",q:"항만국통제(PSC)의 목적과 정의를 쓰고, 부속서 Ⅰ 제11규칙에 따라 운항상 요건 점검이 이루어지는 조건을 설명하시오. 그리고 Port State, Flag State, Coastal State를 구분하여 쓰시오.",
+  items:[["PSC의 목적",4,[["기준미달","substandard","sub-standard","미달선"],["해양환경","인명","재산","보호"]]],
+   ["PSC의 정의",4,[["외국","외국적"],["항만","입항","항구"],["점검","검사"],["출항정지","시정","조치"]]],
+   ["제11규칙 점검 조건",6,[["명백한근거","cleargrounds","clear grounds","명백한"],["익숙","familiar","필수절차","절차"],["출항","억류"]]],
+   ["세 관리주체",6,[["항만국","portstate","port state"],["기국","flagstate","flag state"],["연안국","coastalstate","coastal state"],["입항","항구"],["국적"],["영해"]]]],
+  model:"목적: 기준미달선박(Sub-standard vessel)에 의한 해양사고로부터 연안국의 해양환경을 보호하고 해상에서의 인명과 재산을 보호하기 위함. 정의: 자국 관할 항만에 입항하는 외국적 선박을 대상으로 국제협약의 안전·환경기준 미달 여부를 점검하여 결함을 시정시키거나 출항정지 등 조치를 취하는 제도. 제11규칙: 선장 또는 선원이 기름오염방지에 관한 선내 필수절차에 익숙하지 못하다고 믿을 만한 명백한 근거(clear grounds)가 있으면, 타 당사국 항구에 있는 선박은 운항상 요건에 관해 PSCO의 점검을 받고, 요건이 만족될 때까지 출항하지 못하도록 조치된다(IMO 절차서 Res.A.1206(34)). Port State(항만국)는 선박이 입항한 항구에 주권을 행사하는 국가, Flag State(기국)는 선박에 국적을 부여하고 선내에 주권을 행사하는 국가, Coastal State(연안국)는 영해까지 주권을 행사하는 국가다."}
+];
+const normA = t=>String(t).toLowerCase().replace(/[\s·.,()\[\]「」'"]/g,"");
+function gradeItem(ans,[label,pts,groups]){
+  const a=normA(ans); const hit=groups.map(g=>g.some(k=>a.includes(normA(k))));
+  const m=hit.filter(Boolean).length, need=Math.max(1,Math.ceil(groups.length*0.6));
+  const sc = m>=need?pts:Math.round(pts*m/need*2)/2;
+  return {label,pts,sc,hit,state:m>=need?"full":m?"part":"none"};
+}
+const ALLQ = () => Q.concat(MQ);
+
+/* ================= VIEWS ================= */
+const fold=(id,title,sub,def,body)=>`<details class="fold" data-f="${id}"${store.get("fold."+id,def)?" open":""}>
+    <summary><span><span class="disp" style="font-size:20px">${title}</span><small>${sub}</small></span><span class="fold-ic" aria-hidden="true"></span></summary>
+    <div class="fold-body">${body}</div></details>`;
+function vHome(){
+  const card = a=>{
+    const ds=DOCS.filter(d=>d.annex===a), qs=Q.filter(q=>q.annex===a), rd=ds.filter(d=>readSet.has(d.id)).length, wr=qs.filter(q=>wrongSet.has(q.id)).length;
+    return `<a class="acard c${a}" href="#d-${ds[0].id}">
+      <div class="num">${a==="OV"?"총론":"Annex "+ROM[a]}</div><h3>${ANNEX[a].name.split(" · ")[1]||ANNEX[a].name}</h3><p>${ANNEX[a].desc}</p>
+      <div class="bar"><i style="width:${Math.round(rd/ds.length*100)}%"></i></div>
+      <div class="stats"><span>문서 ${rd}/${ds.length}</span><span>문제 ${qs.length}</span><span>오답 ${wr}</span></div></a>`;
+  };
+  app.innerHTML = `
+  <section class="hero">
+    <div><div class="eyebrow">해양환경협약 학습 위키</div>
+      <h1 class="disp">해양에서의 오염 방지를 위한<br>국제 협약</h1>
+      <p>MARPOL 73/78 부속서 Ⅰ(기름), Ⅳ(오수), Ⅴ(폐기물)를 안 광 교수님의 강의자료 기준으로 정리했습니다. 문서를 읽고, 배출 판정기로 상황을 확인하고, 퀴즈와 시험 모드로 점검하세요.</p></div>
+    <div class="meta">채택 <b>1973.11.2</b> / 의정서 <b>1978.2.17</b><br>발효 <b>1983.10.2</b> · 한국 가입 <b>1984.7</b><br>Ⅰ 1983 · Ⅴ 1988 · Ⅳ 2003<br>문서 <b>${DOCS.length}</b>편 · 문제 <b>${Q.length}</b>개<br>중간 예상 객관식 <b>${MQ.length}</b> · 서술형 <b>${ESSAY.length}</b></div>
+  </section>
+  <div class="annexes">${["I","IV","V"].map(card).join("")}</div>
+  <div class="section">
+  ${fold("iopp","IOPP 5년 타임라인","부속서 Ⅰ · 최초 → 연차 → 중간 → 갱신검사",true,`<div class="viz" data-viz="iopp"></div>`)}
+  ${fold("ladder","톤수 기준 사다리","부속서 Ⅰ · 150 / 400 / 4,000 / 10,000GT별 의무",false,`<div class="viz" data-viz="ladder"></div>`)}
+  ${fold("reg15","제15규칙 배출 체크리스트","부속서 Ⅰ · 기관구역 유성혼합물 배출 조건 5가지",false,`<div class="viz" data-viz="reg15"></div>`)}
+  ${fold("dist","배출 거리 한눈에","부속서 Ⅰ·Ⅳ·Ⅴ · 가장 가까운 육지(영해기선)로부터의 거리",true,`<div class="sh"><p>줄무늬는 배출 금지 구간입니다.</p>
+      <div class="chips" id="areaChips"><button class="chip on" data-a="gen">일반 해역</button><button class="chip" data-a="sa">특별해역</button></div></div>
+    <div class="chart"><div class="chart-in" id="chart"></div></div>`)}
+  </div>
+  <section class="section">
+    <div class="sh"><div><h2 class="disp">학습 도구</h2></div></div>
+    <div class="tools">
+      <a class="tool" href="#check"><em>SIMULATE</em><b>배출 판정기</b><span>물질·해역·거리·속력을 고르면 배출 가능 여부와 근거 규칙을 보여줍니다.</span></a>
+      <a class="tool" href="#quiz"><em>PRACTICE</em><b>무작위 퀴즈</b><span>한 문제씩 풀고 바로 해설을 확인합니다. 부속서별, 중간 시험 예상문제별로 골라 풀 수 있습니다.</span></a>
+      <a class="tool" href="#exam"><em>TEST</em><b>★ 시험 모드</b><span>객관식 10·20·30문항, 또는 2026.2학기 중간 시험 서술형 5문항을 풀고 한 번에 채점합니다.</span></a>
+      <a class="tool" href="#wrong"><em>REVIEW</em><b>오답 노트</b><span>틀린 문제 ${wrongSet.size}개. 다시 맞히면 목록에서 빠집니다.</span></a>
+    </div>
+  </section>
+  <section class="section">
+    <div class="sh"><div><h2 class="disp">총론부터 읽기</h2></div><a class="btn ghost" href="#list">전체 문서 목록 →</a></div>
+    <div>${DOCS.filter(d=>d.annex==="OV").map(listItem).join("")}</div>
+  </section>`;
+  drawChart("gen"); hydrate(app);
+  app.querySelectorAll("details.fold").forEach(d=>d.addEventListener("toggle",()=>store.set("fold."+d.dataset.f,d.open)));
+  document.getElementById("areaChips").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;
+    document.querySelectorAll("#areaChips .chip").forEach(c=>c.classList.toggle("on",c===b));drawChart(b.dataset.a)};
+}
+
+function drawChart(area){
+  const MAX=20, pct=n=>n/MAX*100;
+  // from: NM where allowed begins; null = prohibited; "all" = any distance; cond = conditional
+  const rows = area==="gen" ? [
+    ["I","기관구역 유성혼합물","Ⅰ Reg.15 · 400GT↑","all","항행 중 · 15ppm 이하면 거리 무관"],
+    ["IV","마쇄·소독한 오수","Ⅳ Reg.11",3,"3해리 초과"],
+    ["IV","마쇄·소독 안 한 오수","Ⅳ Reg.11",12,"12해리 초과 · 4노트↑"],
+    ["V","분쇄 음식찌꺼기 (25mm↓)","Ⅴ Reg.4",3,"3해리 초과 · 항해 중"],
+    ["V","미분쇄 음식찌꺼기","Ⅴ Reg.4",12,"12해리 초과"],
+    ["V","무해 화물잔류물","Ⅴ Reg.4",12,"12해리 초과"],
+    ["V","플라스틱 · 식용유 · 생활쓰레기","Ⅴ Reg.3",null,"항상 금지"]
+  ] : [
+    ["I","기관구역 유성혼합물","Ⅰ Reg.15 · 남극 제외","all","항행 중 · 15ppm (남극해 전면 금지)"],
+    ["IV","여객선 오수 (발트해)","Ⅳ Reg.11","stp","9.2.1 승인 처리장치만"],
+    ["IV","여객선 외 선박 오수","Ⅳ Reg.11",3,"일반 해역과 같음 (마쇄·소독 3해리)"],
+    ["V","분쇄 음식찌꺼기 (25mm↓)","Ⅴ Reg.6",12,"12해리 초과"],
+    ["V","미분쇄 음식찌꺼기","Ⅴ Reg.6",null,"금지"],
+    ["V","무해 화물잔류물","Ⅴ Reg.6",-12,"조건부 · 12해리 초과"],
+    ["V","플라스틱 · 식용유 · 생활쓰레기","Ⅴ Reg.3",null,"항상 금지"]
+  ];
+  const tr = r=>{
+    const [a,l,s,f,t]=r; let inner;
+    if(f===null) inner=`<div class="no">${t}</div>`;
+    else if(f==="all") inner=`<div class="ok" style="left:0"><span>${t}</span></div>`;
+    else if(f==="stp") inner=`<div class="ok cond" style="left:0"><span>${t}</span></div>`;
+    else if(f<0) inner=`<div class="ok cond" style="left:${pct(-f)}%"><span>${t}</span></div>`;
+    else inner=`<div class="ok" style="left:${pct(f)}%"><span>${t}</span></div>`;
+    return `<div class="crow c${a}"><div class="lab">${l}<small>${s}</small></div><div class="track">${inner}</div></div>`;
+  };
+  document.getElementById("chart").innerHTML =
+   `<div class="axis"><div></div><div class="ticks"><span class="land" style="left:0">육지(기선) 0</span><span style="left:${pct(3)}%">3NM</span><span style="left:${pct(12)}%">12NM</span><span style="left:100%;transform:translateX(-100%)">→ 먼 바다</span></div></div>`
+   + rows.map(tr).join("")
+   + `<div class="legend"><span><i style="background:repeating-linear-gradient(-45deg,var(--bad-bg) 0 4px,transparent 4px 7px)"></i>배출 금지</span><span><i style="background:var(--soft)"></i>배출 허용</span><span><i style="background:repeating-linear-gradient(90deg,var(--soft) 0 5px,transparent 5px 8px)"></i>조건부 허용</span><span>눈금은 0~20해리 기준</span></div>`;
+}
+
+function listItem(d){
+  return `<a class="litem c${d.annex}${readSet.has(d.id)?" read":""}" href="#d-${d.id}"><span class="r">${d.reg}</span><span class="t">${d.title}<small>${d.sum}</small></span><span class="s">문제 ${d.q.length}</span></a>`;
+}
+function vList(){
+  app.innerHTML = `<div class="sh"><div><div class="eyebrow">INDEX</div><h1 class="disp" style="font-size:32px">문서 목록</h1><p>${DOCS.length}편 · 읽은 문서 ${[...readSet].filter(id=>docById(id)).length}편</p></div></div>
+  <input class="search" id="q" type="search" placeholder="검색: 15ppm, 특별해역, ISPP, 12해리…" aria-label="문서 검색">
+  <div id="groups"></div>`;
+  const render = term=>{
+    const t=term.trim().toLowerCase();
+    const match = d=>!t||(d.title+d.en+d.sum+d.reg+d.body+d.pts.join(" ")).toLowerCase().includes(t);
+    document.getElementById("groups").innerHTML = ["OV","I","IV","V"].map(a=>{
+      const ds=DOCS.filter(d=>d.annex===a&&match(d)); if(!ds.length) return "";
+      return `<div class="lgroup c${a}"><h3>${tagHtml(a)} ${ANNEX[a].name}</h3>${ds.map(listItem).join("")}</div>`;
+    }).join("") || `<div class="empty" style="margin-top:20px">'${esc(term)}'에 해당하는 문서가 없습니다.</div>`;
+  };
+  const inp=document.getElementById("q"); inp.oninput=()=>render(inp.value); render("");
+}
+
+function vDoc(id){
+  const d=docById(id); if(!d) return vList();
+  readSet.add(id); saveRead();
+  const idx=DOCS.indexOf(d), prev=DOCS[idx-1], next=DOCS[idx+1];
+  const side = ["OV","I","IV","V"].map(a=>`<div class="c${a}"><h4>${a==="OV"?"총론":"ANNEX "+ROM[a]}</h4>${DOCS.filter(x=>x.annex===a).map(x=>`<a href="#d-${x.id}" class="${x.id===id?"on":""}${readSet.has(x.id)?" read":""}"><span class="r">${x.reg}</span><span>${x.title}</span></a>`).join("")}</div>`).join("");
+  app.innerHTML = `<div class="wiki"><aside class="side">${side}</aside>
+  <article class="doc c${d.annex}">
+    <div class="doc-head"><div class="line">${tagHtml(d.annex)}<span class="mono muted" style="font-size:13px">${d.reg}</span>${d.net?'<span class="net">인터넷 보완</span>':""}</div>
+      <h1 class="disp">${d.title}</h1><div class="en">${d.en}</div></div>
+    <div class="summary"><b>요약</b>${d.sum}</div>
+    <div class="body">${d.body}</div>
+    <div class="points"><h4>시험 포인트</h4><ul>${d.pts.map(p=>`<li>${p}</li>`).join("")}</ul></div>
+    <div class="src">출처: 해양환경협약 ${d.src}</div>
+    <div class="doc-quiz"><span>이 문서 문제 <b>${d.q.length}</b>개${d.q.some((_,i)=>wrongSet.has(d.id+"-"+i))?` · 오답 ${d.q.filter((_,i)=>wrongSet.has(d.id+"-"+i)).length}개`:""}</span><button class="btn pri" id="docQuiz">이 문서 퀴즈 풀기</button></div>
+    <div class="doc-foot">${prev?`<a href="#d-${prev.id}"><small>← 이전</small>${prev.title}</a>`:"<span></span>"}${next?`<a class="nx" href="#d-${next.id}"><small>다음 →</small>${next.title}</a>`:""}</div>
+  </article></div>`;
+  hydrate(app);
+  document.getElementById("docQuiz").onclick=()=>startPractice(Q.filter(q=>q.doc===id),`${d.title}`);
+  window.scrollTo(0,0);
+}
+
+/* ---------- practice quiz ---------- */
+let P=null;
+function vQuiz(){
+  app.innerHTML = `<div class="qwrap"><div class="eyebrow">PRACTICE</div><h1 class="disp" style="font-size:32px">무작위 퀴즈</h1>
+  <p class="muted">한 문제씩 풀고 바로 해설을 확인합니다. 틀린 문제는 오답 노트에 저장됩니다.</p>
+  <div class="chips" id="scope">${[["all","전체"],["I","부속서 Ⅰ"],["IV","부속서 Ⅳ"],["V","부속서 Ⅴ"],["OV","총론"],["mid","★ 2026.2학기 중간 시험"]].map(([k,l],i)=>`<button class="chip${i?"":" on"}${k==="mid"?" mid":""}" data-k="${k}">${l} <span class="mono" style="opacity:.6">${k==="all"?Q.length:k==="mid"?MQ.length:Q.filter(q=>q.annex===k).length}</span></button>`).join("")}</div>
+  <div id="midNote" class="mid-note" hidden>안 광 교수님 중간 시험 예상문제 6개(1강~5강)와 관련된 4지선다 문제만 나옵니다. 서술형 연습은 <a href="#exam">시험 모드</a>에서 할 수 있습니다.</div>
+  <div id="qarea"></div></div>`;
+  const go=k=>{document.getElementById("midNote").hidden=k!=="mid";startPractice(k==="all"?Q:k==="mid"?MQ:Q.filter(q=>q.annex===k), null, true)};
+  document.getElementById("scope").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;document.querySelectorAll("#scope .chip").forEach(c=>c.classList.toggle("on",c===b));go(b.dataset.k)};
+  go("all");
+}
+function startPractice(pool,label,inPlace,fromWrong){
+  if(!inPlace){location.hash="quiz-run";}
+  P={list:shuffle(pool),i:0,right:0,done:0,label,fromWrong};
+  if(!inPlace){app.innerHTML=`<div class="qwrap"><div class="eyebrow">${fromWrong?"REVIEW":"PRACTICE"}</div><h1 class="disp" style="font-size:28px">${esc(label||"무작위 퀴즈")}</h1><div id="qarea"></div></div>`;}
+  renderQ();
+}
+function renderQ(){
+  const area=document.getElementById("qarea"); if(!area) return;
+  if(P.i>=P.list.length){
+    area.innerHTML=`<div class="qbox"><div class="score"><span class="big">${P.right}/${P.list.length}</span><span class="muted">정답률 ${Math.round(P.right/P.list.length*100)}%</span></div>
+    <div class="qnav"><button class="btn pri" id="again">다시 섞어서 풀기</button><a class="btn" href="#wrong">오답 노트 보기</a></div></div>`;
+    document.getElementById("again").onclick=()=>{P.list=shuffle(P.list);P.i=0;P.right=0;P.done=0;renderQ()};return;
+  }
+  const q=P.list[P.i], order=q.c.length===2&&q.c[0]==="O"?[0,1]:shuffle(q.c.map((_,i)=>i)), d=docById(q.doc);
+  area.innerHTML=`<div class="qbox c${q.annex}"><div class="qmeta"><span>${q.mid?`<span class="tag tmid">중간 예상 ${q.n}번</span> `:""}${tagHtml(q.annex)} <span style="margin-left:6px">${d.title}</span></span><span>${P.i+1} / ${P.list.length} · 정답 ${P.right}</span></div>
+    <div class="qtext">${q.q}</div><div class="opts">${order.map((oi,k)=>`<button class="opt" data-o="${oi}"><i>${q.c.length===2&&q.c[0]==="O"?q.c[oi]:k+1}</i><span>${q.c.length===2&&q.c[0]==="O"?(oi===0?"맞다":"틀리다"):q.c[oi]}</span></button>`).join("")}</div>
+    <div id="exp"></div><div class="qnav"><span></span><button class="btn pri" id="nextQ" hidden>다음 문제 →</button></div></div>`;
+  area.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    const o=+b.dataset.o, ok=o===q.a;
+    area.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(+x.dataset.o===q.a)x.classList.add("right")});
+    if(!ok)b.classList.add("wrong");
+    if(ok){P.right++; if(wrongSet.has(q.id)){wrongSet.delete(q.id);saveWrong()}} else {wrongSet.add(q.id);saveWrong()}
+    document.getElementById("exp").innerHTML=`<div class="explain ${ok?"ok":"no"}"><b>${ok?"정답입니다.":"오답입니다. 정답: "+esc(q.c[q.a])}</b>${q.e}${ok&&P.fromWrong?" <span class='muted'>(오답 노트에서 제외됨)</span>":""}<div style="margin-top:6px"><a href="#d-${q.doc}">관련 문서: ${d.title} →</a></div></div>`;
+    const n=document.getElementById("nextQ"); n.hidden=false; n.textContent=P.i+1>=P.list.length?"결과 보기":"다음 문제 →"; n.focus();
+    n.onclick=()=>{P.i++;renderQ()};
+  });
+}
+
+/* ---------- exam ---------- */
+let E=null;
+function vExam(){
+  if(ES&&!ES.done){return renderEssay()}
+  if(E&&!E.submitted&&E.list.length){return renderExam()}
+  app.innerHTML=`<div class="qwrap"><div class="eyebrow">TEST</div><h1 class="disp" style="font-size:32px">★ 시험 모드</h1>
+  <p class="muted">모든 문제를 푼 뒤 한 번에 채점합니다. 풀이 중에는 정답이 보이지 않습니다.</p>
+  <div class="qbox mid-card">
+    <div class="eyebrow" style="color:var(--warn)">★ ${MID_INFO.title} · 서술형</div>
+    <h2 class="disp" style="font-size:20px;margin:6px 0 10px">${MID_INFO.by}의 중간 시험 예상문제</h2>
+    <div class="mid-meta"><span>범위 <b>${MID_INFO.range}</b></span><span>문항 <b>${MID_INFO.form}</b></span><span>시간 <b>${MID_INFO.time}분</b></span></div>
+    <p class="muted" style="font-size:13.5px;margin:10px 0 12px">예상문제 6개 중 5문항이 무작위로 나옵니다. 핵심 내용이 들어 있으면 표현이 달라도 점수를 주고, 채점 후 항목마다 '맞음으로 인정'을 눌러 직접 고칠 수 있습니다.</p>
+    <div class="chips" id="midN"><button class="chip on" data-n="5">실전 5문항 · 50분</button><button class="chip" data-n="6">예상문제 6문항 전체</button></div>
+    <div style="margin-top:14px"><button class="btn pri" id="midGo">서술형 시험 시작</button></div>
+  </div>
+  <div class="eyebrow" style="margin-top:26px">객관식 시험</div>
+  <div class="qbox setup">
+    <div><label class="h">출제 범위</label><div class="chips" id="exScope">${[["all","전체"],["I","부속서 Ⅰ"],["IV","부속서 Ⅳ"],["V","부속서 Ⅴ"],["IVV","Ⅳ + Ⅴ"]].map(([k,l],i)=>`<button class="chip${i?"":" on"}" data-k="${k}">${l}</button>`).join("")}</div></div>
+    <div><label class="h">문항 수</label><div class="chips" id="exN">${[10,20,30].map((n,i)=>`<button class="chip${i===1?" on":""}" data-n="${n}">${n}문항</button>`).join("")}</div></div>
+    <div><button class="btn pri" id="exGo">시험 시작</button></div>
+  </div></div>`;
+  let scope="all",n=20;
+  const pick=(id,fn)=>document.getElementById(id).onclick=e=>{const b=e.target.closest(".chip");if(!b)return;document.querySelectorAll("#"+id+" .chip").forEach(c=>c.classList.toggle("on",c===b));fn(b)};
+  pick("exScope",b=>scope=b.dataset.k); pick("exN",b=>n=+b.dataset.n);
+  let mn=5; pick("midN",b=>mn=+b.dataset.n);
+  document.getElementById("midGo").onclick=()=>{const qs=mn===6?ESSAY.slice():shuffle(ESSAY).slice(0,5).sort((a,b)=>a.n-b.n);ES={qs,ans:qs.map(()=>""),t0:Date.now(),limit:mn===6?60:50,done:false,ovr:{},confirm:false};renderEssay()};
+  document.getElementById("exGo").onclick=()=>{
+    const pool=scope==="all"?Q:scope==="IVV"?Q.filter(q=>q.annex==="IV"||q.annex==="V"):Q.filter(q=>q.annex===scope);
+    const list=shuffle(pool).slice(0,n).map(q=>({...q,order:q.c.length===2&&q.c[0]==="O"?[0,1]:shuffle(q.c.map((_,i)=>i))}));
+    E={list,ans:Array(list.length).fill(null),i:0,submitted:false,t0:Date.now(),confirm:false};renderExam();
+  };
+}
+function renderExam(){
+  const q=E.list[E.i], answered=E.ans.filter(a=>a!==null).length;
+  app.innerHTML=`<div class="qwrap"><div class="eyebrow">TEST · ${E.list.length}문항</div><h1 class="disp" style="font-size:28px">★ 시험 모드</h1>
+  <div class="grid-nums" id="nums">${E.list.map((_,k)=>`<button class="${E.ans[k]!==null?"done":""}${k===E.i?" cur":""}" data-k="${k}" aria-label="${k+1}번">${k+1}</button>`).join("")}</div>
+  <div class="qbox c${q.annex}"><div class="qmeta"><span>${tagHtml(q.annex)}</span><span>${E.i+1} / ${E.list.length} · 답함 ${answered} · <span id="tm"></span></span></div>
+  <div class="qtext">${q.q}</div><div class="opts">${q.order.map((oi,k)=>`<button class="opt${E.ans[E.i]===oi?" sel":""}" data-o="${oi}"><i>${q.c.length===2&&q.c[0]==="O"?q.c[oi]:k+1}</i><span>${q.c.length===2&&q.c[0]==="O"?(oi===0?"맞다":"틀리다"):q.c[oi]}</span></button>`).join("")}</div>
+  <div class="qnav"><button class="btn" id="pv" ${E.i?"":"disabled"}>← 이전</button>
+  ${E.i<E.list.length-1?`<button class="btn pri" id="nx">다음 →</button>`:""}</div></div>
+  <div class="qnav" style="margin-top:20px"><button class="btn ghost" id="quit">시험 그만두기</button>
+  <span id="subArea">${E.confirm?`<span class="confirm">${answered<E.list.length?`안 푼 문제 ${E.list.length-answered}개가 오답 처리됩니다.`:"제출할까요?"} <button class="btn pri" id="subYes">제출</button><button class="btn" id="subNo">취소</button></span>`:`<button class="btn pri" id="sub">채점하기</button>`}</span></div></div>`;
+  const tick=()=>{const el=document.getElementById("tm");if(!el)return;const s=Math.floor((Date.now()-E.t0)/1000);el.textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`};tick();
+  clearInterval(window._tm);window._tm=setInterval(tick,1000);
+  app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{E.ans[E.i]=+b.dataset.o; if(E.i<E.list.length-1)E.i++; renderExam()});
+  document.getElementById("nums").onclick=e=>{const b=e.target.closest("button");if(!b)return;E.i=+b.dataset.k;renderExam()};
+  document.getElementById("pv").onclick=()=>{E.i--;renderExam()};
+  const nx=document.getElementById("nx"); if(nx) nx.onclick=()=>{E.i++;renderExam()};
+  document.getElementById("quit").onclick=()=>{E=null;clearInterval(window._tm);vExam()};
+  const sub=document.getElementById("sub"); if(sub) sub.onclick=()=>{E.confirm=true;renderExam()};
+  const sy=document.getElementById("subYes"); if(sy) sy.onclick=gradeExam;
+  const sn=document.getElementById("subNo"); if(sn) sn.onclick=()=>{E.confirm=false;renderExam()};
+}
+function gradeExam(){
+  clearInterval(window._tm); E.submitted=true;
+  let right=0; E.list.forEach((q,k)=>{if(E.ans[k]===q.a){right++; if(wrongSet.has(q.id))wrongSet.delete(q.id)} else wrongSet.add(q.id)}); saveWrong();
+  const s=Math.floor((Date.now()-E.t0)/1000), pct=Math.round(right/E.list.length*100);
+  const byA={}; E.list.forEach((q,k)=>{byA[q.annex]=byA[q.annex]||[0,0];byA[q.annex][1]++;if(E.ans[k]===q.a)byA[q.annex][0]++});
+  app.innerHTML=`<div class="qwrap"><div class="eyebrow">RESULT</div><h1 class="disp" style="font-size:28px">채점 결과</h1>
+  <div class="qbox"><div class="score"><span class="big">${right}/${E.list.length}</span><span style="font-size:18px;font-weight:600">${pct}점</span><span class="muted mono">소요 ${Math.floor(s/60)}분 ${s%60}초</span></div>
+  <div class="chips" style="margin-top:14px">${Object.entries(byA).map(([a,[r,t]])=>`<span class="tag t${a}">${a==="OV"?"총론":"Ⅰ Ⅳ Ⅴ".split(" ")[["I","IV","V"].indexOf(a)]} ${r}/${t}</span>`).join("")}</div>
+  <div class="grid-nums">${E.list.map((q,k)=>`<button class="${E.ans[k]===q.a?"r":"w"}" onclick="document.getElementById('rv${k}').scrollIntoView({behavior:'smooth',block:'center'})">${k+1}</button>`).join("")}</div>
+  <div class="qnav"><button class="btn pri" id="reEx">새 시험</button><a class="btn" href="#wrong">오답 노트 (${wrongSet.size})</a></div></div>
+  <div class="review">${E.list.map((q,k)=>{const ok=E.ans[k]===q.a;return `<div class="rv" id="rv${k}"><div class="q">${k+1}. ${q.q}</div>
+   <div class="a">${ok?`<span class="c">✓ ${esc(q.c[q.a])}</span>`:`<span class="y">✗ 내 답: ${E.ans[k]===null?"(안 풂)":esc(q.c[E.ans[k]])}</span> · <span class="c">정답: ${esc(q.c[q.a])}</span>`}</div>
+   <div class="muted" style="margin-top:4px">${q.e} <a href="#d-${q.doc}">문서 →</a></div></div>`}).join("")}</div></div>`;
+  document.getElementById("reEx").onclick=()=>{E=null;vExam()};
+  window.scrollTo(0,0);
+}
+
+
+/* ---------- midterm essay exam ---------- */
+let ES=null;
+function renderEssay(){
+  clearInterval(window._tm);
+  app.innerHTML=`<div class="qwrap"><div class="eyebrow" style="color:var(--warn)">★ ${MID_INFO.title} · 서술형 ${ES.qs.length}문항</div>
+  <div class="ess-top"><h1 class="disp" style="font-size:26px">서술형 시험</h1><span class="ess-timer" id="etm"></span></div>
+  <p class="muted" style="font-size:13.5px;margin:6px 0 0">문항당 20점. 답안은 이 화면을 떠나도 시험을 마칠 때까지 남아 있습니다.</p>
+  ${ES.qs.map((q,i)=>`<div class="qbox"><div class="qmeta"><span><span class="tag tmid">예상 ${q.n}번</span> <span class="tag tOV">${q.tag}</span></span><span>20점</span></div>
+   <div class="qtext">${i+1}. ${q.q}</div><textarea class="ess-ta" id="ea${i}" rows="7" placeholder="답안을 입력하세요">${esc(ES.ans[i])}</textarea></div>`).join("")}
+  <div class="qnav" style="margin-top:18px"><button class="btn ghost" id="eQuit">시험 그만두기</button>
+  <span>${ES.confirm?`<span class="confirm">${ES.ans.filter(a=>!a.trim()).length?`빈 답안 ${ES.ans.filter(a=>!a.trim()).length}개가 있습니다. 제출할까요?`:"제출할까요?"} <button class="btn pri" id="eYes">제출</button><button class="btn" id="eNo">취소</button></span>`:`<button class="btn pri" id="eSub">채점하기</button>`}</span></div></div>`;
+  ES.qs.forEach((_,i)=>{const t=document.getElementById("ea"+i);t.oninput=()=>ES.ans[i]=t.value});
+  const tick=()=>{const el=document.getElementById("etm");if(!el)return;const left=ES.limit*60-Math.floor((Date.now()-ES.t0)/1000);
+    if(left<=0){el.textContent="시간 종료";el.classList.add("over");return}
+    el.textContent=`남은 시간 ${Math.floor(left/60)}:${String(left%60).padStart(2,"0")}`;el.classList.toggle("warn",left<300)};
+  tick(); window._tm=setInterval(tick,1000);
+  document.getElementById("eQuit").onclick=()=>{ES=null;clearInterval(window._tm);vExam()};
+  const sb=document.getElementById("eSub"); if(sb) sb.onclick=()=>{ES.confirm=true;renderEssay()};
+  const y=document.getElementById("eYes"); if(y) y.onclick=()=>{ES.done=true;ES.used=Math.floor((Date.now()-ES.t0)/1000);clearInterval(window._tm);renderEssayResult()};
+  const n=document.getElementById("eNo"); if(n) n.onclick=()=>{ES.confirm=false;renderEssay()};
+}
+function renderEssayResult(){
+  const res=ES.qs.map((q,i)=>q.items.map((it,j)=>{const g=gradeItem(ES.ans[i],it);if(ES.ovr[i+"-"+j]){g.sc=g.pts;g.state="full";g.ovr=true}return g}));
+  const qs=res.map(r=>Math.min(20,r.reduce((s,g)=>s+g.sc,0)));
+  const total=qs.reduce((a,b)=>a+b,0), max=ES.qs.length*20;
+  app.innerHTML=`<div class="qwrap"><div class="eyebrow" style="color:var(--warn)">★ ${MID_INFO.title} · 채점 결과</div><h1 class="disp" style="font-size:26px">서술형 채점</h1>
+  <div class="qbox"><div class="score"><span class="big">${total}</span><span style="font-size:18px;font-weight:600">/ ${max}점</span><span class="muted mono">소요 ${Math.floor(ES.used/60)}분 ${ES.used%60}초</span></div>
+  <div class="chips" style="margin-top:12px">${ES.qs.map((q,i)=>`<span class="tag tmid">${i+1}번 ${qs[i]}/20</span>`).join("")}</div>
+  <p class="muted" style="font-size:13px;margin:12px 0 0">핵심 개념이 들어 있으면 표현이 달라도 점수를 줍니다. 자동 채점이 놓친 부분은 항목 옆 '맞음으로 인정'을 누르세요. 참고용 점수이며 실제 채점과 다를 수 있습니다.</p>
+  <div class="qnav"><button class="btn pri" id="eAgain">새 서술형 시험</button><a class="btn" href="#d-${ES.qs[0].doc}">관련 문서 보기</a></div></div>
+  ${ES.qs.map((q,i)=>`<div class="qbox"><div class="qmeta"><span><span class="tag tmid">예상 ${q.n}번</span> <span class="tag tOV">${q.tag}</span></span><span class="ess-sc">${qs[i]} / 20</span></div>
+   <div class="qtext">${i+1}. ${q.q}</div>
+   <div class="ess-ans"><b>내 답안</b>${ES.ans[i].trim()?esc(ES.ans[i]).replace(/\n/g,"<br>"):'<span class="muted">(빈 답안)</span>'}</div>
+   <div class="rub">${res[i].map((g,j)=>`<div class="rb ${g.state}"><span class="ic">${g.state==="full"?"✓":g.state==="part"?"△":"✗"}</span><span class="rl">${g.label}${g.ovr?' <small>직접 인정</small>':""}</span><span class="rp">${g.sc} / ${g.pts}</span>${g.state!=="full"?`<button class="btn ghost rbtn" data-k="${i}-${j}">맞음으로 인정</button>`:g.ovr?`<button class="btn ghost rbtn" data-k="${i}-${j}" data-undo="1">인정 취소</button>`:"<span></span>"}</div>`).join("")}</div>
+   <details class="model"><summary>모범 답안 보기</summary><p>${q.model}</p><a href="#d-${q.doc}">관련 문서: ${docById(q.doc).title} →</a></details></div>`).join("")}</div>`;
+  app.querySelectorAll(".rbtn").forEach(b=>b.onclick=()=>{const y=window.scrollY;if(b.dataset.undo)delete ES.ovr[b.dataset.k];else ES.ovr[b.dataset.k]=1;renderEssayResult();window.scrollTo(0,y)});
+  document.getElementById("eAgain").onclick=()=>{ES=null;vExam()};
+}
+
+/* ---------- wrong notes ---------- */
+function vWrong(confirmClear){
+  const ws=ALLQ().filter(q=>wrongSet.has(q.id));
+  app.innerHTML=`<div class="qwrap"><div class="eyebrow">REVIEW</div><h1 class="disp" style="font-size:32px">오답 노트</h1>
+  <p class="muted">퀴즈나 시험에서 틀린 문제가 모입니다. 다시 맞히면 자동으로 빠집니다. 이 기록은 지금 쓰는 브라우저에만 저장됩니다.</p>
+  ${ws.length?`<div class="qnav" style="justify-content:flex-start"><button class="btn pri" id="redo">오답 ${ws.length}문제 다시 풀기</button>
+   ${confirmClear?`<span class="confirm">정말 모두 지울까요? <button class="btn" id="clrYes">모두 지우기</button><button class="btn ghost" id="clrNo">취소</button></span>`:`<button class="btn ghost" id="clr">비우기</button>`}</div>
+   <div class="review">${["OV","I","IV","V"].map(a=>{const g=ws.filter(q=>q.annex===a);return g.length?`<div class="eyebrow" style="margin-top:8px">${a==="OV"?"총론":"ANNEX "+ROM[a]} · ${g.length}</div>`+g.map(q=>`<div class="rv"><div class="q">${q.q}</div><div class="a"><span class="c">정답: ${esc(q.c[q.a])}</span></div><div class="muted" style="margin-top:4px">${q.e} <a href="#d-${q.doc}">${docById(q.doc).title} →</a></div></div>`).join(""):""}).join("")}</div>`
+  :`<div class="empty" style="margin-top:20px">아직 틀린 문제가 없습니다.<br><br><a class="btn pri" href="#quiz">무작위 퀴즈 풀기</a></div>`}</div>`;
+  const r=document.getElementById("redo"); if(r) r.onclick=()=>startPractice(ws,"오답 다시 풀기",false,true);
+  const c=document.getElementById("clr"); if(c) c.onclick=()=>vWrong(true);
+  const cy=document.getElementById("clrYes"); if(cy) cy.onclick=()=>{wrongSet.clear();saveWrong();vWrong()};
+  const cn=document.getElementById("clrNo"); if(cn) cn.onclick=()=>vWrong();
+}
+
+/* ---------- discharge checker ---------- */
+const ITEMS = [
+  {k:"bilge",a:"I",l:"기관구역 빌지 (유성혼합물)",g:"부속서 Ⅰ"},
+  {k:"sw_cd",a:"IV",l:"마쇄·소독한 오수",g:"부속서 Ⅳ"},
+  {k:"sw_raw",a:"IV",l:"마쇄·소독 안 한 오수 (저장탱크)",g:"부속서 Ⅳ"},
+  {k:"sw_stp",a:"IV",l:"승인 오수처리장치(STP) 유출액",g:"부속서 Ⅳ"},
+  {k:"food_c",a:"V",l:"분쇄 음식찌꺼기 (25mm 이하)",g:"부속서 Ⅴ"},
+  {k:"food",a:"V",l:"분쇄하지 않은 음식찌꺼기",g:"부속서 Ⅴ"},
+  {k:"cargo",a:"V",l:"화물잔류물 (해양환경 무해, 회수 불가)",g:"부속서 Ⅴ"},
+  {k:"carcass",a:"V",l:"동물사체",g:"부속서 Ⅴ"},
+  {k:"wash",a:"V",l:"갑판·외판 세정수 (무해 세정제)",g:"부속서 Ⅴ"},
+  {k:"plastic",a:"V",l:"플라스틱 · 합성로프 · 어망 · 플라스틱 소각재",g:"부속서 Ⅴ"},
+  {k:"cookoil",a:"V",l:"식용유",g:"부속서 Ⅴ"},
+  {k:"domestic",a:"V",l:"종이 · 유리 · 금속 · 병 · 도자기 (생활쓰레기)",g:"부속서 Ⅴ"}
+];
+let C={item:"food_c",area:"gen",dist:8,speed:10,pax:false,ppm:true,saPorts:false};
+function judge(){
+  const {item,area,dist,speed,pax,ppm,saPorts}=C, enr=speed>0, R=(v,why,ref,doc)=>({v,why,ref,doc});
+  const no="배출 금지", ok="배출 가능", cd="조건부 가능";
+  const need=[];
+  switch(item){
+    case "bilge":
+      if(area==="ant") return R(no,["남극해역에서는 기름·유성혼합물의 어떠한 배출도 전면 금지"],"부속서 Ⅰ 제15규칙","a1-reg15");
+      if(!enr) need.push("선박이 항행 중이어야 함 (현재 정지)");
+      if(!ppm) need.push("기름필터장치를 거쳐 15ppm 이하로 처리해야 함");
+      if(need.length) return R(no,need,"부속서 Ⅰ 제15규칙 (400GT 이상)","a1-reg15");
+      return R(ok,["항행 중 · 기름필터장치 처리 · 15ppm 이하 충족","거리 조건 없음","화물펌프실 빌지가 아니고 화물유 잔류물과 섞이지 않았어야 함"],"부속서 Ⅰ 제15규칙 · 10,000GT 이상은 경보·자동정지장치 포함","a1-reg15");
+    case "sw_cd": case "sw_raw": case "sw_stp":
+      if(area==="sa"&&pax){
+        if(item==="sw_stp") return R(cd,["발트해 특별해역의 여객선은 제9.2.1규칙(영양염류 기준)을 만족하는 승인 STP만 배출 가능","유출액이 부유고형물·변색을 일으키지 않아야 함"],"부속서 Ⅳ 제11규칙 (특별해역 여객선)","a4-discharge");
+        return R(no,["특별해역(발트해) 내 여객선의 오수 배출 금지","9.2.1 승인 처리장치 유출액만 예외"],"부속서 Ⅳ 제11규칙","a4-discharge");
+      }
+      if(item==="sw_stp") return R(ok,["승인 처리장치 조작 중이면 거리 제한 없음","유출액이 눈에 보이는 부유고형물·변색을 일으키지 않아야 함"],"부속서 Ⅳ 제11규칙","a4-discharge");
+      { const lim=item==="sw_cd"?3:12;
+        if(dist<=lim) need.push(`가장 가까운 육지로부터 ${lim}해리를 넘어야 함 (현재 ${dist}해리)`);
+        if(speed<4) need.push(`저장 오수는 4노트 이상 항행 중 적당한 비율로 배출 (현재 ${speed}노트)`);
+        if(need.length) return R(no,need,"부속서 Ⅳ 제11규칙","a4-discharge");
+        return R(ok,[`${lim}해리 초과 · 4노트 이상 항행 중`,"한꺼번에 배출하지 말고 승인된 적당한 비율로"],"부속서 Ⅳ 제11규칙"+(area==="ant"?" · 남극은 Polar Code 추가 요건 확인":""),"a4-discharge"); }
+    case "plastic": return R(no,["모든 플라스틱류(합성로프·어망·쓰레기봉지·소각재 포함)는 해역·거리와 무관하게 금지"],"부속서 Ⅴ 제3규칙","a5-general");
+    case "cookoil": return R(no,["식용유의 해양 처분은 금지"],"부속서 Ⅴ 제3규칙","a5-general");
+    case "domestic": return R(no,["개정 부속서 Ⅴ(2013)에서 종이·유리·금속 등 생활쓰레기 배출 금지"],"부속서 Ⅴ 제3규칙","a5-general");
+    case "wash": return R(cd,["세정제·첨가제가 해양환경에 유해하지 않아야 함"],area==="gen"?"부속서 Ⅴ 제4규칙":"부속서 Ⅴ 제6규칙",area==="gen"?"a5-outside":"a5-inside");
+  }
+  const sa=area!=="gen", ref=sa?"부속서 Ⅴ 제6규칙":"부속서 Ⅴ 제4규칙", doc=sa?"a5-inside":"a5-outside";
+  if(!enr) need.push("선박이 항해 중(en route)이어야 함");
+  if(item==="food_c"){const lim=sa?12:3; if(dist<lim) need.push(`가장 가까운 육지로부터 ${lim}해리 이상 (현재 ${dist}해리)`);
+    if(need.length) return R(no,need,ref,doc);
+    const w=[`${lim}해리 이상 · 항해 중`,"25mm 이하 스크린 통과"]; if(sa) w.push("다른 폐기물에 오염되지 않아야 함"); if(area==="ant") w.push("살균 안 된 가금류 제품은 남극해역 배출 금지");
+    return R(ok,w,ref,doc);}
+  if(item==="food"){ if(sa) return R(no,["특별해역에서는 반드시 분쇄·연마(25mm 이하)해야 배출 가능"],ref,doc);
+    if(dist<12) need.push(`가장 가까운 육지로부터 12해리 이상 (현재 ${dist}해리)`);
+    return need.length?R(no,need,ref,doc):R(ok,["12해리 이상 · 항해 중"],ref,doc);}
+  if(item==="cargo"){ if(dist<12) need.push(`가장 가까운 육지${sa?"·빙산(원문: 빙붕)":""}로부터 12해리 이상 (현재 ${dist}해리)`);
+    if(sa&&!saPorts) need.push("출항·입항 항구가 모두 특별해역 내이고 그 사이 특별해역 밖을 지나지 않으며, 항구에 수용시설이 없어야 함");
+    if(need.length) return R(no,need,ref,doc);
+    return R(sa?cd:ok,sa?["12해리 이상 · 항해 중","화물창 세정수에 포함된 잔류물만 해당 (세정수 미포함 잔류물은 금지)","유해물질 없음 · 출입항 모두 특별해역 · 수용시설 없음 조건 충족 시"]:["12해리 이상 · 항해 중","일반적 하역방법으로 회수할 수 없고 유해물질이 없어야 함"],ref,doc);}
+  if(item==="carcass"){ if(sa) return R(no,["특별해역 내 동물사체 배출 허용 규정 없음"],ref,doc);
+    if(need.length) return R(no,need,ref,doc);
+    return R(cd,["항해 중, IMO 지침을 고려해 가능한 한 육지에서 멀리"],ref,doc);}
+}
+function vCheck(){
+  app.innerHTML=`<div class="sh"><div><div class="eyebrow">SIMULATE</div><h1 class="disp" style="font-size:32px">배출 판정기</h1><p>상황을 고르면 배출 가능 여부와 근거 규칙을 보여줍니다. 학습용 단순화이므로 실제 판단은 협약 원문으로 확인하세요.</p></div></div>
+  <div class="checker">
+    <div class="panel">
+      <div><label class="h" for="cItem">무엇을 버리나요?</label><select id="cItem">${["부속서 Ⅰ","부속서 Ⅳ","부속서 Ⅴ"].map(g=>`<optgroup label="${g}">${ITEMS.filter(i=>i.g===g).map(i=>`<option value="${i.k}">${i.l}</option>`).join("")}</optgroup>`).join("")}</select></div>
+      <div><label class="h">해역</label><div class="seg" id="cArea"><button data-v="gen">일반 해역</button><button data-v="sa">특별해역</button><button data-v="ant">남극해역</button></div></div>
+      <div><label class="h" for="cDist">가장 가까운 육지(영해기선)로부터 거리</label><input type="range" id="cDist" min="0" max="30" step="0.5"><div class="dist"><span>0</span><b id="cDistV"></b><span>30해리</span></div></div>
+      <div><label class="h" for="cSpeed">선속</label><input type="range" id="cSpeed" min="0" max="20" step="1"><div class="dist"><span>정지</span><b id="cSpeedV"></b><span>20노트</span></div></div>
+      <div id="cExtra" style="display:grid;gap:10px"></div>
+    </div>
+    <div><div id="verdict"></div></div>
+  </div>`;
+  const sel=document.getElementById("cItem"), dist=document.getElementById("cDist"), sp=document.getElementById("cSpeed");
+  sel.value=C.item; dist.value=C.dist; sp.value=C.speed;
+  const upd=()=>{
+    document.querySelectorAll("#cArea button").forEach(b=>b.classList.toggle("on",b.dataset.v===C.area));
+    document.getElementById("cDistV").textContent=C.dist+"해리";
+    document.getElementById("cSpeedV").textContent=C.speed?C.speed+"노트 (항행 중)":"정지 / 정박";
+    const it=ITEMS.find(i=>i.k===C.item); let ex="";
+    if(C.item==="bilge") ex=`<label class="cb"><input type="checkbox" id="xPpm" ${C.ppm?"checked":""}> 기름필터장치를 거쳐 15ppm 이하로 처리함</label>`;
+    if(it.a==="IV"&&C.area==="sa") ex=`<label class="cb"><input type="checkbox" id="xPax" ${C.pax?"checked":""}> 여객선임 (발트해 특별해역 규정 적용)</label>`;
+    if(C.item==="cargo"&&C.area!=="gen") ex=`<label class="cb"><input type="checkbox" id="xPorts" ${C.saPorts?"checked":""}> 출항·입항 항구가 모두 특별해역 안, 그 사이 특별해역 밖을 지나지 않음, 항구에 수용시설 없음</label>`;
+    const box=document.getElementById("cExtra"); box.innerHTML=ex;
+    const b1=document.getElementById("xPpm"); if(b1) b1.onchange=()=>{C.ppm=b1.checked;upd()};
+    const b2=document.getElementById("xPax"); if(b2) b2.onchange=()=>{C.pax=b2.checked;upd()};
+    const b3=document.getElementById("xPorts"); if(b3) b3.onchange=()=>{C.saPorts=b3.checked;upd()};
+    const r=judge(), cls=r.v==="배출 가능"?"ok":r.v==="배출 금지"?"no":"cd";
+    const x=Math.min(C.dist,30)/30*92+8;
+    document.getElementById("verdict").innerHTML=`<div class="verdict ${cls}"><div class="eyebrow">${it.g} · ${it.l}</div><div class="v">${r.v}</div><ul>${r.why.map(w=>`<li>${w}</li>`).join("")}</ul>
+      <div class="sea" aria-hidden="true"><div class="land"></div><div class="mk" style="left:${3/30*92+8}%">3</div><div class="mk" style="left:${12/30*92+8}%">12</div><div class="ship" style="left:${x}%"></div></div>
+      <div class="ref">근거: ${r.ref}</div><div style="margin-top:12px"><a class="btn" href="#d-${r.doc}">관련 문서 읽기 →</a></div></div>`;
+  };
+  sel.onchange=()=>{C.item=sel.value;upd()};
+  dist.oninput=()=>{C.dist=+dist.value;upd()};
+  sp.oninput=()=>{C.speed=+sp.value;upd()};
+  document.getElementById("cArea").onclick=e=>{const b=e.target.closest("button");if(!b)return;C.area=b.dataset.v;upd()};
+  upd();
+}
+
+/* ================= EASTER EGG ================= */
+const VERSION="1.3.0";
+const EGG_IMG="data:image/webp;base64,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";
+let eggN=0, eggT=null;
+document.querySelectorAll(".ver").forEach(b=>b.addEventListener("click",()=>{
+  eggN++; clearTimeout(eggT); eggT=setTimeout(()=>eggN=0,1500);
+  if(eggN>=5){eggN=0; showEgg();}
+}));
+function showEgg(){
+  if(document.querySelector(".egg")) return;
+  const o=document.createElement("div"); o.className="egg"; o.setAttribute("role","dialog"); o.setAttribute("aria-label","Made by Bypass");
+  o.innerHTML=`<div class="egg-card"><img src="${EGG_IMG}" alt="노트북을 하는 주황색 새 캐릭터"><div class="ev">Ver.${VERSION}</div><div class="eb">Made by Bypass</div><small>아무 곳이나 누르면 닫힙니다</small></div>`;
+  const close=()=>{o.remove();document.removeEventListener("keydown",esc)}; const esc=e=>{if(e.key==="Escape")close()};
+  o.addEventListener("click",close); document.addEventListener("keydown",esc); document.body.appendChild(o);
+}
+
+/* ================= ROUTER ================= */
+function route(){
+  const h=(location.hash||"#home").slice(1);
+  clearInterval(window._tm);
+  const base=h.startsWith("d-")?"list":h==="quiz-run"?"quiz":h;
+  document.querySelectorAll("#nav a").forEach(a=>a.classList.toggle("on",a.dataset.r===base));
+  if(h.startsWith("d-")) return vDoc(h.slice(2));
+  if(h==="quiz-run"){ if(P&&document.getElementById("qarea")) return; return vQuiz(); }
+  ({home:vHome,list:vList,quiz:vQuiz,exam:vExam,wrong:()=>vWrong(),check:vCheck}[h]||vHome)();
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",route);
+route();
+</script>
+
+</body>
+</html>
