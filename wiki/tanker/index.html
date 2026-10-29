@@ -516,7 +516,7 @@ footer .disclaimer b{color:var(--warn);margin-right:6px}
       <a href="#quiz" data-r="quiz">무작위 퀴즈</a>
       <a href="#exam" data-r="exam" class="star">★ 2026.2학기 중간고사</a>
     </nav>
-    <button class="ver" type="button" data-ver aria-label="버전 2.1.4">v2.1.4</button>
+    <button class="ver" type="button" data-ver aria-label="버전 2.1.5">v2.1.5</button>
     <a class="tb-home" href="https://teambypass.vercel.app/" aria-label="Team Bypass 메인 페이지로 이동" title="Team Bypass"><svg viewBox="0 0 132 132" width="30" height="30" aria-hidden="true"><path d="M66 4L128 66L66 128L4 66Z" fill="#1C211E" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/><path d="M66 12L120 66L66 120L12 66Z" fill="#EE6A1F"/><path d="M66 18L114 66L66 114L18 66Z" fill="#1C211E"/><path d="M66 25L107 66L66 107L25 66Z" fill="#EE6A1F"/><g transform="translate(36 34) scale(0.6)" fill="#1C211E"><ellipse cx="44" cy="60" rx="27" ry="23"/><path d="M51 45C55 37 58 31 61 25L72 30C68 36 66 44 64 53Z"/><circle cx="66" cy="26" r="10"/><path d="M72 20C83 19 93 24 95 32C96 38 91 41 88 37C86 34 82 33 74 33Z"/><path d="M19 52C10 47 7 40 11 34C14 43 20 46 23 46Z"/><path d="M37 80L35 92L27 95L41 95L42 81Z"/><path d="M51 80L51 92L44 95L58 95L56 81Z"/><circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/><path d="M32 55C40 50 51 54 54 64" fill="none" stroke="#EE6A1F" stroke-width="2.6" stroke-linecap="round"/></g></svg></a>
   </div>
 </header>
@@ -525,7 +525,7 @@ footer .disclaimer b{color:var(--warn);margin-right:6px}
   <div class="wrap">특수선 운용학(항해정보시스템학부) 1~5강 강의자료와 필기를 바탕으로 정리한 학습용 요약입니다. 강의 범위 안에서 전문 설명이 더 필요한 곳만 교재 『탱커 기초교육』을 참고했고, 그 부분은 <span class="net">교재 보완</span>으로 표시했습니다. 강의 필기와 교재가 다른 곳은 본문 아래 파란 상자에 따로 적었습니다. <span class="net web">인터넷 보완</span>은 IMO 공개자료 등으로 보충한 내용입니다.
     <p class="book"><b>참고 서적</b>윤귀호·배병덕·김종성·이형기, 『탱커 기초교육』, 도서출판 상학당, 1판 4쇄 2023.2.25, ISBN 978-89-6587-037-1. 본문의 “교재 p.○○”은 이 책의 인쇄 쪽수입니다. 저작권은 저자에게 있으며, 본 위키는 그 내용을 학습용으로 요약·재구성했습니다.</p>
     <p class="disclaimer" role="note"><b>⚠ 안내</b>본 위키는 참고용이며, 3D 모형과 계통도는 구조를 이해하기 위한 개략도로 실제 선박의 치수·배관과 다릅니다.<br>시험·실무 전에는 강의자료와 선박의 실제 도면·매뉴얼로 확인하세요.</p>
-    <div class="ver-row"><button class="ver" type="button" data-ver aria-label="버전 2.1.4">v2.1.4</button></div>
+    <div class="ver-row"><button class="ver" type="button" data-ver aria-label="버전 2.1.5">v2.1.5</button></div>
   </div>
 </footer>
 
@@ -1700,8 +1700,13 @@ const DOCS = [
  <li><b>움직이는 부품이 없다</b> — 고장이 적고, 공기나 찌꺼기가 섞여도 빨아들인다.</li>
  <li>대신 구동 유체(고압 해수나 화물)가 필요하고 효율은 낮다.</li>
  <li>쓰임: 화물 라인의 잔량, <b>밸러스트 탱크 마지막 잔량</b> 배출, <b>빌지웰</b>의 빌지 배출. ${BK}</li>
-</ul>`,
- pts:['벤튜리: 노즐에서 속도↑ 압력↓ → 흡입','움직이는 부품 없음','화물·밸러스트 잔량, 빌지 배출 (Stripping pump와 비슷한 역할)'],
+</ul>
+<div class="key"><b>벤튜리 효과와 베르누이 원리</b>
+<p style="margin:6px 0 0"><b>베르누이 원리</b>는 기본 법칙이다. 흐름선 위에서 <b>압력 + ½ρv² + ρgh = 일정</b>이므로, 높이가 같으면 빨라지는 곳의 압력이 낮아진다. 다만 왜 빨라지는지는 이 식만으로 알 수 없다.</p>
+<p style="margin:6px 0 0"><b>벤튜리 효과</b>는 이 원리를 좁아지는 관에 적용한 것이다. 연속의 법칙(단면적 × 속도 = 일정) 때문에 좁은 곳에서 반드시 빨라지고, 그래서 압력이 떨어진다. 곧 <b>벤튜리 = 연속의 법칙 + 베르누이 원리</b>로, 서로 다른 원리가 아니라 응용 관계다.</p>
+<p style="margin:6px 0 0">이덕터에서는 노즐(속도↑ 압력↓)과 디퓨저(속도↓ 압력↑)가 베르누이대로 움직인다. 하지만 목에서 빠른 분사가 느린 액체를 끌어당겨 섞는 과정은 운동량을 나눠 주는 혼합이라 손실이 크다. 손실이 없다고 보는 베르누이 식으로는 설명되지 않고, 이것이 이덕터 효율이 낮은 이유다.</p>
+<p style="margin:6px 0 0">시험 답안: “베르누이 정리에 따라 노즐에서 유속이 증가하면 압력이 낮아져(벤튜리관 원리) 주변 액체를 흡입한다.”</p></div>`,
+ pts:['벤튜리: 노즐에서 속도↑ 압력↓ → 흡입 (= 연속의 법칙 + 베르누이 원리)','움직이는 부품 없음','화물·밸러스트 잔량, 빌지 배출 (Stripping pump와 비슷한 역할)'],
  src:'4강 p.22~26 (필기) · 교재 p.137~138'},
 
 {id:'d-pv-pumproom', cat:'pv', r:'5강', t:'펌프룸 설비', en:'Pump room',
@@ -3086,7 +3091,7 @@ window.addEventListener('hashchange', route);
 window.addEventListener('tv-ready', () => { if (current === 'home' && window.__tvPending && document.body.contains(window.__tvPending)) window.TV.mount(window.__tvPending); });
 
 /* 버전 · 이스터 에그: 버전 버튼을 1.5초 안에 5번 */
-const VERSION = '2.1.4';
+const VERSION = '2.1.5';
 let eggN = 0, eggT = 0;
 document.addEventListener('click', e => {
   if (!e.target.closest('[data-ver]')) return;
