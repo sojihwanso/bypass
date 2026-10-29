@@ -516,7 +516,7 @@ footer .disclaimer b{color:var(--warn);margin-right:6px}
       <a href="#quiz" data-r="quiz">무작위 퀴즈</a>
       <a href="#exam" data-r="exam" class="star">★ 2026.2학기 중간고사</a>
     </nav>
-    <button class="ver" type="button" data-ver aria-label="버전 2.1.3">v2.1.3</button>
+    <button class="ver" type="button" data-ver aria-label="버전 2.1.4">v2.1.4</button>
     <a class="tb-home" href="https://teambypass.vercel.app/" aria-label="Team Bypass 메인 페이지로 이동" title="Team Bypass"><svg viewBox="0 0 132 132" width="30" height="30" aria-hidden="true"><path d="M66 4L128 66L66 128L4 66Z" fill="#1C211E" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/><path d="M66 12L120 66L66 120L12 66Z" fill="#EE6A1F"/><path d="M66 18L114 66L66 114L18 66Z" fill="#1C211E"/><path d="M66 25L107 66L66 107L25 66Z" fill="#EE6A1F"/><g transform="translate(36 34) scale(0.6)" fill="#1C211E"><ellipse cx="44" cy="60" rx="27" ry="23"/><path d="M51 45C55 37 58 31 61 25L72 30C68 36 66 44 64 53Z"/><circle cx="66" cy="26" r="10"/><path d="M72 20C83 19 93 24 95 32C96 38 91 41 88 37C86 34 82 33 74 33Z"/><path d="M19 52C10 47 7 40 11 34C14 43 20 46 23 46Z"/><path d="M37 80L35 92L27 95L41 95L42 81Z"/><path d="M51 80L51 92L44 95L58 95L56 81Z"/><circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/><path d="M32 55C40 50 51 54 54 64" fill="none" stroke="#EE6A1F" stroke-width="2.6" stroke-linecap="round"/></g></svg></a>
   </div>
 </header>
@@ -525,7 +525,7 @@ footer .disclaimer b{color:var(--warn);margin-right:6px}
   <div class="wrap">특수선 운용학(항해정보시스템학부) 1~5강 강의자료와 필기를 바탕으로 정리한 학습용 요약입니다. 강의 범위 안에서 전문 설명이 더 필요한 곳만 교재 『탱커 기초교육』을 참고했고, 그 부분은 <span class="net">교재 보완</span>으로 표시했습니다. 강의 필기와 교재가 다른 곳은 본문 아래 파란 상자에 따로 적었습니다. <span class="net web">인터넷 보완</span>은 IMO 공개자료 등으로 보충한 내용입니다.
     <p class="book"><b>참고 서적</b>윤귀호·배병덕·김종성·이형기, 『탱커 기초교육』, 도서출판 상학당, 1판 4쇄 2023.2.25, ISBN 978-89-6587-037-1. 본문의 “교재 p.○○”은 이 책의 인쇄 쪽수입니다. 저작권은 저자에게 있으며, 본 위키는 그 내용을 학습용으로 요약·재구성했습니다.</p>
     <p class="disclaimer" role="note"><b>⚠ 안내</b>본 위키는 참고용이며, 3D 모형과 계통도는 구조를 이해하기 위한 개략도로 실제 선박의 치수·배관과 다릅니다.<br>시험·실무 전에는 강의자료와 선박의 실제 도면·매뉴얼로 확인하세요.</p>
-    <div class="ver-row"><button class="ver" type="button" data-ver aria-label="버전 2.1.3">v2.1.3</button></div>
+    <div class="ver-row"><button class="ver" type="button" data-ver aria-label="버전 2.1.4">v2.1.4</button></div>
   </div>
 </footer>
 
@@ -829,15 +829,23 @@ F.strainer = S(640, 240, '스트레이너와 진공 펌프', m => {
   z += `<path d="M305 200V222H520" style="fill:none;stroke:var(--bad);stroke-width:4"/>` + C(534,222,14,'mt') + P('M530 215L541 222L530 229Z','ink') + Tc(534, 200, 'Cargo pump', 's');
   return z;
 }, {wide:true});
-F.axial = S(600, 210, '축류 펌프', m => {
-  let z = R(40,60,500,80,'wt') + pipeH(40,540,60,140);
-  z += E(270,100,34,12,'mt2') + R(270,96,240,8,'mt2');
-  z += `<path class="mt" d="M262 96C250 70 268 64 282 70L278 96Z"/><path class="mt" d="M262 104C250 130 268 136 282 130L278 104Z"/>`;
-  for (const x of [360,380,400]) z += P(`M${x} 62L${x+10} 80M${x} 138L${x+10} 120`,'ln');
-  z += A(m,'b','M60 100H120') + A(m,'b','M150 84H220') + A(m,'b','M150 116H220') + A(m,'b','M430 84H500') + A(m,'b','M430 116H500');
-  z += Tc(276, 40, 'Propeller (회전날개)', 'b') + LD(276,64,276,46) + Tc(390, 166, 'Guide vane (흐름 정류)', 's') + LD(385,140,390,154);
-  z += Tc(290, 196, '프로펠러의 양력으로 유체를 축 방향으로 밀어냄 — 대용량 · 저양정', 's');
-  z += T(44, 52, '흡입', 's') + Te(536, 52, '토출', 's');
+F.axial = S(640, 300, '축류 펌프', m => {
+  /* 강의자료 4강 p.25처럼: 왼쪽에서 들어온 흐름이 수평관 속 프로펠러를 지나 엘보에서 위로 꺾여 나가고, 축은 엘보 벽을 뚫고 오른쪽 전동기로 */
+  const body = 'M30 150H312Q330 150 330 132V40H410V190Q410 230 370 230H30Z';
+  let z = P(body,'wt') + `<path d="M30 150H312Q330 150 330 132V40M410 40V190Q410 230 370 230H30" style="fill:none;stroke:var(--ink);stroke-width:7;stroke-linejoin:round"/>`;
+  z += R(18,140,12,100,'mt2',2) + R(320,28,100,12,'mt2',2);
+  z += R(396,178,30,24,'mt',3) + R(470,172,50,36,'mt',4) + R(540,160,80,60,'mt',6) + Tc(580, 195, 'M', 'b');
+  z += `<path d="M196 190H540" style="stroke:var(--ink);stroke-width:7"/>`;
+  z += E(184,190,24,10,'mt2');
+  z += `<path class="mt" d="M176 182C160 150 176 146 190 154L188 182Z"/><path class="mt" d="M176 198C160 230 176 234 190 226L188 198Z"/>`;
+  z += `<path d="M216 176A14 14 0 1 1 216 204" class="red" marker-end="url(#${m}r)"/>`;
+  for (const x of [252,270,288]) z += P(`M${x} 154L${x+10} 170M${x} 226L${x+10} 210`,'ln');
+  z += A(m,'b','M44 170H110') + A(m,'b','M44 210H110') + A(m,'b','M300 172Q350 172 352 110') + A(m,'b','M300 212Q388 212 388 120') + A(m,'b','M352 96V50') + A(m,'b','M388 104V54');
+  z += T(44, 140, '흡입 (fluid in)', 's') + T(430, 34, '토출 (fluid out)', 's');
+  z += Tc(176, 128, 'Propeller (회전날개)', 'b') + LD(176,152,176,134);
+  z += Tc(272, 254, 'Guide vane (흐름 정류)', 's') + LD(276,224,274,244);
+  z += T(440, 166, '축 · 베어링', 's') + T(548, 152, '전동기', 's') + Tc(232, 192+30, '', 's');
+  z += Tc(320, 290, '프로펠러의 양력으로 유체를 축 방향으로 밀어낸 뒤 엘보에서 꺾여 나감 — 대용량 · 저양정', 's');
   return z;
 }, {wide:true});
 F.eductor = S(660, 236, '이덕터(이젝터)의 원리', m => {
@@ -1673,7 +1681,7 @@ const DOCS = [
 {id:'d-pv-axial', cat:'pv', parent:'d-pv-pumptypes', r:'4강', t:'축류 펌프 (Propeller pump)', en:'Axial flow pump',
  sum:'원심 펌프의 임펠러 대신 프로펠러를 달아, 날개가 주는 양력으로 유체를 축 방향으로 곧게 밀어낸다. 많은 양을 낮은 높이로 보낼 때 쓴다.',
  body:`
-<div class="fig">{{fig:axial}}<figcaption>관 속 프로펠러가 회전하며 유체를 축 방향으로 민다. 뒤쪽 안내날개(Guide vane)가 소용돌이를 펴서 흐름을 곧게 만든다.</figcaption></div>
+<div class="fig">{{fig:axial}}<figcaption>4강 p.25 그림처럼 엘보(굽은 관) 속에 프로펠러가 들어 있다. 프로펠러가 유체를 축 방향으로 밀면 안내날개(Guide vane)가 소용돌이를 펴 주고, 흐름은 엘보에서 위로 꺾여 나간다. 축은 엘보 벽을 뚫고 나가 바깥 전동기와 연결된다.</figcaption></div>
 <p>4강 필기: 프로펠러가 회전하여 축 방향으로 밀어냄, 대용량·저양정. 교재 p.46: 원심 펌프의 임펠러를 프로펠러로 바꾼 것으로 보통 원심 펌프와 같이 취급되기도 하지만 작동 원리는 아주 다르다. 프로펠러가 액체에 주는 <b>양력</b>으로 송수하며, 액체가 축 방향으로 움직여 축류 펌프라고 한다. ${BK}</p>
 <div class="vs">
  <div><h5>원심 펌프</h5><p style="margin:0">축으로 들어와 <b>반지름 방향</b>으로 던져짐. 원심력. 높은 양정.</p></div>
@@ -3078,7 +3086,7 @@ window.addEventListener('hashchange', route);
 window.addEventListener('tv-ready', () => { if (current === 'home' && window.__tvPending && document.body.contains(window.__tvPending)) window.TV.mount(window.__tvPending); });
 
 /* 버전 · 이스터 에그: 버전 버튼을 1.5초 안에 5번 */
-const VERSION = '2.1.3';
+const VERSION = '2.1.4';
 let eggN = 0, eggT = 0;
 document.addEventListener('click', e => {
   if (!e.target.closest('[data-ver]')) return;
