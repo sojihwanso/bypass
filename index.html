@@ -3,6 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  /* 로그인한 회원은 커뮤니티로. 소개 페이지를 보려면 /?intro (제보·합류 신청 주소 /?report=1, /?join=1 도 그대로) */
+  try {
+    if (!/[?&](intro|report|join)\b/.test(location.search)) {
+      const s = JSON.parse(localStorage.getItem('sb-itzdjdgjqcpmxdfssfel-auth-token') || 'null');
+      if (s && s.refresh_token) location.replace('/community/');
+    }
+  } catch (e) { /* 저장소를 못 쓰면 소개 페이지 그대로 */ }
+</script>
 <title>BYPASS | 느린 시스템의 실용적 대안 마련국</title>
 <meta name="description" content="BYPASS는 국립목포해양대학교 바이브 코딩 크루입니다. 학교생활의 불필요한 절차를 AI와 코드로 건너뜁니다.">
 <!-- 링크 미리보기 (카카오톡·인스타그램·디스코드 등) -->

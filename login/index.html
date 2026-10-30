@@ -92,7 +92,7 @@
   const pwInput = document.getElementById('f-pw');
   const errorBox = form.querySelector('.form-error');
   const submit = form.querySelector('[type="submit"]');
-  const next = B.safeNext(new URLSearchParams(location.search).get('next'), '/site/');
+  const next = B.safeNext(new URLSearchParams(location.search).get('next'), '/community/');
 
   B.bindPasswordToggles(form);
 
