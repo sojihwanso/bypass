@@ -238,6 +238,23 @@
   .seg-wrap { display: flex; flex-wrap: wrap; }
   .seg-wrap .seg { flex-wrap: wrap; }
 
+  /* 올리기 권한 */
+  .up-form { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 12px; }
+  .up-form .input { width: 100%; }
+  .up-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 12px 4px; border-top: 1px solid var(--rule); }
+  .up-row:first-child { border-top: 0; }
+  .up-who { flex: 1 1 220px; min-width: 0; }
+  .up-who b { display: block; font-size: 15.5px; }
+  .up-who small { color: var(--muted); font-size: 13px; }
+  .up-state { flex: none; font-size: 13px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: #EEF0EC; color: var(--muted); }
+  .up-state.on { background: var(--green-tint); color: var(--green); }
+  .up-state.no { background: #FCE9DD; color: #9A3412; }
+  .up-seg { display: inline-flex; border: 1.5px solid var(--post); border-radius: 999px; overflow: hidden; flex: none; }
+  .up-seg button { font: inherit; font-size: 13.5px; font-weight: 700; padding: 5px 11px; border: 0; background: #fff; cursor: pointer; color: var(--ink); }
+  .up-seg button + button { border-left: 1.5px solid var(--post); }
+  .up-seg button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  .up-seg button:disabled { opacity: .5; cursor: progress; }
+  @media (max-width: 700px) { .up-form { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   /* 사이트 상태 */
   .card { max-width: 760px; background: #fff; border: 1px solid var(--rule); border-radius: 12px; padding: 4px 22px 22px; }
   .card + .card { margin-top: 16px; }
@@ -696,6 +713,41 @@
         </div>
         <div data-mem-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
         <p class="list-hint">바꾼 회원 구분은 그 회원이 다시 로그인하거나 로그인 정보가 새로 고쳐질 때(최대 1시간) 적용됩니다.</p>
+      </section>
+
+      <!-- 올리기 권한 -->
+      <section data-view="uploads" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-ops">‹ 운영</a>
+            <p class="view-kicker">운영</p>
+            <h1 tabindex="-1">올리기 권한</h1>
+          </div>
+          <button type="button" class="mini-btn" data-up-reload>새로 불러오기</button>
+        </div>
+        <div class="banner banner-warn" role="alert" data-sql-warn9 hidden>
+          <p><b>데이터베이스 설정이 한 단계 남았습니다.</b> Supabase SQL Editor에서 <code>supabase/023_member_uploads.sql</code>을 실행하고, Edge Function <code>publish-wiki</code>를 새 코드로 다시 배포해 주세요.</p>
+        </div>
+        <form class="card" data-up-rules novalidate>
+          <h2>저절로 열리는 요건</h2>
+          <p class="list-hint" style="margin: 4px 0 0">요건을 모두 채운 회원은 커뮤니티에서 HTML 페이지(/apps/)를 올리고 내 글에 썸네일을 붙일 수 있습니다. 0은 따지지 않습니다. 운영진은 언제나 올릴 수 있습니다.</p>
+          <label class="check"><input type="checkbox" id="up-auto"> 요건을 채우면 저절로 허가 (끄면 아래에서 직접 허가한 회원만)</label>
+          <div class="up-form">
+            <div><label class="field-label" for="up-c">댓글 수 이상</label><input class="input" id="up-c" type="number" min="0" max="1000" inputmode="numeric"></div>
+            <div><label class="field-label" for="up-p">글·결과물 수 이상</label><input class="input" id="up-p" type="number" min="0" max="1000" inputmode="numeric"></div>
+            <div><label class="field-label" for="up-d">가입한 지 (일)</label><input class="input" id="up-d" type="number" min="0" max="3650" inputmode="numeric"></div>
+            <div><label class="field-label" for="up-m">한 사람 페이지 수</label><input class="input" id="up-m" type="number" min="1" max="100" inputmode="numeric"></div>
+          </div>
+          <p class="form-error" role="alert" data-up-err hidden></p>
+          <div style="margin-top: 14px"><button type="submit" class="btn btn-primary btn-small">요건 저장</button></div>
+        </form>
+        <div class="toolbar" style="margin-top: 18px">
+          <div class="fchips" role="group" aria-label="상태로 거르기" data-up-chips></div>
+          <label class="sr-only" for="up-find">회원 찾기</label>
+          <input class="input" id="up-find" type="search" placeholder="이름·아이디로 찾기" autocomplete="off">
+        </div>
+        <div class="card" style="max-width: none; padding: 8px 18px" data-up-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
+        <p class="list-hint">‘자동’은 위 요건을 따릅니다. ‘허가’는 요건과 관계없이 올릴 수 있고, ‘막음’은 요건을 채워도 못 올립니다. 이미 올린 페이지는 그대로 남습니다.</p>
       </section>
 
       <!-- 불편 제보 -->
@@ -1276,6 +1328,7 @@
     { id: 'status', group: 'ops', name: '사이트 상태', ready: true },
     { id: 'share', group: 'ops', name: '링크 미리보기', ready: true },
     { id: 'members', group: 'ops', name: '회원', ready: true },
+    { id: 'uploads', group: 'ops', name: '올리기 권한', ready: true },
     { id: 'log', group: 'ops', name: '변경 기록', ready: true }
   ];
   const menuById = Object.fromEntries(MENUS.map(m => [m.id, m]));
@@ -3652,7 +3705,83 @@
   });
   $('[data-log-reload]').addEventListener('click', loadLog);
   viewHooks.push(view => { if (view === 'log') loadLog(); });
+
+  /* ===== 올리기 권한 (supabase/023_member_uploads.sql) ===== */
+  let upRows = null, upFilter = 'all', upLoaded = false;
+  const UP_REASON = { staff: '운영진', granted: '허가', blocked: '막음', manual: '직접 허가만', rules: '요건' };
+  const UP_ROLE = { general: '일반 회원', member: '국원', staff: '운영진' };
+  async function loadUploads() {
+    upLoaded = true;
+    $('[data-up-err]').hidden = true;
+    const [r, o] = await Promise.all([B.sb.from('upload_rules').select('*').eq('id', 1).maybeSingle(), B.sb.rpc('upload_overview')]);
+    const missingUp = (e) => e && (e.code === 'PGRST205' || e.code === 'PGRST202' || e.code === '42P01' || /Could not find/.test(e.message || ''));
+    $('[data-sql-warn9]').hidden = !(missingUp(r.error) || missingUp(o.error));
+    if (r.data) { $('#up-auto').checked = r.data.auto; $('#up-c').value = r.data.min_comments; $('#up-p').value = r.data.min_posts; $('#up-d').value = r.data.min_days; $('#up-m').value = r.data.max_pages; }
+    upRows = o.error ? [] : o.data;
+    if (o.error && !missingUp(o.error)) $('[data-up-list]').replaceChildren(el('p', 'list-state', errText(o.error, '불러오기')));
+    else renderUploads();
+  }
+  function renderUploads() {
+    if (!upRows) return;
+    const groups = { all: '전체', on: '올릴 수 있음', off: '아직', blocked: '막음' };
+    const of = (m) => m.allowed ? 'on' : m.reason === 'blocked' ? 'blocked' : 'off';
+    $('[data-up-chips]').replaceChildren(...Object.entries(groups).map(([k, name]) => {
+      const n = k === 'all' ? upRows.length : upRows.filter((m) => of(m) === k).length;
+      const b = el('button', 'fchip', `${name} ${n}`); b.type = 'button'; b.setAttribute('aria-pressed', String(k === upFilter));
+      b.addEventListener('click', () => { upFilter = k; renderUploads(); });
+      return b;
+    }));
+    const q = $('#up-find').value.trim().toLowerCase();
+    const rows = upRows.filter((m) => (upFilter === 'all' || of(m) === upFilter) && (!q || `${m.display_name} ${m.username}`.toLowerCase().includes(q)));
+    const box = $('[data-up-list]');
+    if (!rows.length) { box.replaceChildren(el('p', 'list-state', upRows.length ? '조건에 맞는 회원이 없습니다.' : '아직 회원이 없습니다.')); return; }
+    box.replaceChildren(...rows.map((m) => {
+      const row = el('div', 'up-row');
+      const who = el('div', 'up-who'); who.append(el('b', null, m.display_name), el('small', null, `${m.username} · ${UP_ROLE[m.role] || m.role} · 댓글 ${m.comments} · 글 ${m.posts} · 페이지 ${m.pages} · 가입 ${B.dateText(m.created_at)}`));
+      const st = el('span', `up-state${m.allowed ? ' on' : m.reason === 'blocked' ? ' no' : ''}`, m.allowed ? `올릴 수 있음 · ${UP_REASON[m.reason] || ''}` : m.reason === 'blocked' ? '막음' : '아직');
+      row.append(who, st);
+      if (m.role !== 'staff') {
+        const cur = m.granted === true ? 'grant' : m.granted === false ? 'block' : 'auto';
+        const seg = el('div', 'up-seg'); seg.setAttribute('role', 'group'); seg.setAttribute('aria-label', `${m.display_name} 올리기 권한`);
+        [['auto', '자동'], ['grant', '허가'], ['block', '막음']].forEach(([v, name]) => {
+          const b = el('button', null, name); b.type = 'button'; b.setAttribute('aria-pressed', String(v === cur));
+          b.addEventListener('click', () => { if (v !== cur) setGrant(m, v, seg); });
+          seg.append(b);
+        });
+        row.append(seg);
+      }
+      return row;
+    }));
+  }
+  async function setGrant(m, v, seg) {
+    $$('button', seg).forEach((b) => { b.disabled = true; });
+    const res = v === 'auto'
+      ? await B.sb.from('upload_grants').delete().eq('user_id', m.id)
+      : await B.sb.from('upload_grants').upsert({ user_id: m.id, granted: v === 'grant' }, { onConflict: 'user_id' });
+    if (res.error) { $$('button', seg).forEach((b) => { b.disabled = false; }); toast(errText(res.error, '저장'), true); return; }
+    toast(`${m.display_name}: ${{ auto: '요건에 따라 자동', grant: '허가', block: '막음' }[v]}으로 바꿨습니다.`);
+    loadUploads();
+  }
+  $('[data-up-rules]').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const n = (id, lo, hi) => { const x = Number($(id).value); return $(id).value !== '' && Number.isInteger(x) && x >= lo && x <= hi ? x : null; };
+    const row = { auto: $('#up-auto').checked, min_comments: n('#up-c', 0, 1000), min_posts: n('#up-p', 0, 1000), min_days: n('#up-d', 0, 3650), max_pages: n('#up-m', 1, 100) };
+    const err = $('[data-up-err]');
+    if (Object.values(row).some((x) => x === null)) { err.textContent = '숫자를 확인해 주세요. 댓글·글은 0~1000, 가입 일수는 0~3650, 페이지 수는 1~100입니다.'; err.hidden = false; return; }
+    err.hidden = true;
+    const btn = $('[type="submit"]', form); B.setBusy(btn, true, '저장 중…');
+    const { error } = await B.sb.from('upload_rules').update(row).eq('id', 1);
+    B.setBusy(btn, false);
+    if (error) { err.textContent = errText(error, '저장'); err.hidden = false; return; }
+    toast('요건을 저장했습니다. 회원 상태를 다시 계산합니다.');
+    loadUploads();
+  });
+  $('#up-find').addEventListener('input', renderUploads);
+  $('[data-up-reload]').addEventListener('click', loadUploads);
+  viewHooks.push(view => { if (view === 'uploads' && !upLoaded) loadUploads(); });
   if (decodeURIComponent(location.hash.slice(1)) === 'log') loadLog();
+  if (decodeURIComponent(location.hash.slice(1)) === 'uploads') loadUploads();
 
   /* ===== 페이지 문구 ===== (site_settings 'texts', 모양은 assets/site-texts.js) */
   const TX = window.BYPASS_TEXTS;
