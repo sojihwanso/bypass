@@ -447,7 +447,7 @@
       <span><span class="brand-name">BYPASS</span><span class="hq-badge">HQ</span></span>
     </a>
     <div class="head-actions">
-      <a class="head-link" href="/site/">공사장</a>
+      <a class="head-link" href="/community/">커뮤니티</a>
       <span class="head-user"><strong data-name></strong> 님</span>
       <button type="button" class="head-pill" data-logout>로그아웃</button>
     </div>
@@ -462,9 +462,9 @@
     <div class="soon-band" aria-hidden="true"></div>
     <div class="soon-in">
       <h2>관계자 외 출입금지</h2>
-      <p>HQ는 운영진만 들어올 수 있습니다. 운영진 등록은 기존 운영진이 공사장 관리실에서 합니다.</p>
-      <p data-denied-count>잠시 뒤 공사장으로 이동합니다.</p>
-      <a class="btn btn-primary btn-small" href="/site/">공사장으로 가기</a>
+      <p>HQ는 운영진만 들어올 수 있습니다. 운영진 등록은 기존 운영진이 HQ › 회원에서 합니다.</p>
+      <p data-denied-count>잠시 뒤 커뮤니티로 이동합니다.</p>
+      <a class="btn btn-primary btn-small" href="/community/">커뮤니티로 가기</a>
     </div>
   </div>
 </div>
@@ -506,6 +506,7 @@
         <div id="pane-routes" role="tabpanel" aria-labelledby="tab-routes" data-pane="routes">
           <div class="toolbar">
             <button type="button" class="btn btn-primary btn-small" data-new-route>+ 지름길 추가</button>
+            <button type="button" class="btn btn-secondary btn-small" data-new-wiki>위키 올리기</button>
             <label class="sr-only" for="route-find">지름길 찾기</label>
             <input class="input" id="route-find" type="search" placeholder="이름·과목·주소로 찾기" autocomplete="off">
           </div>
@@ -560,7 +561,7 @@
           <div class="fchips" role="group" aria-label="대상으로 거르기" data-nt-chips></div>
         </div>
         <div data-nt-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
-        <p class="list-hint">회원 전용 공지는 공사장에만, 전체 공개 공지는 게시 기간 동안 메인 전광판 둘째 줄에도 보입니다. 고정한 공지가 맨 위에 옵니다.</p>
+        <p class="list-hint">회원 전용 공지는 커뮤니티에만, 전체 공개 공지는 게시 기간 동안 메인 전광판 둘째 줄에도 보입니다. 고정한 공지가 맨 위에 옵니다.</p>
       </section>
 
       <!-- 페이지 문구 -->
@@ -837,7 +838,7 @@
             <h2>공사 중인 메뉴입니다</h2>
             <p data-soon-when></p>
             <p data-soon-legacy hidden></p>
-            <a class="btn btn-secondary btn-small" data-soon-link hidden>공사장에서 열기</a>
+            <a class="btn btn-secondary btn-small" data-soon-link hidden>커뮤니티에서 열기</a>
           </div>
         </div>
       </section>
@@ -1255,13 +1256,13 @@
     $('[data-hq]').hidden = true;
     $('[data-tabs]').hidden = true;
     $('[data-denied]').hidden = false;
-    setTimeout(() => location.replace('/site/'), 4000);
+    setTimeout(() => location.replace('/community/'), 4000);
     return;
   }
 
   /* ===== 메뉴 ===== */
   const GROUPS = [['home', '홈'], ['inbox', '접수'], ['content', '콘텐츠'], ['ops', '운영']];
-  const LEGACY = { inbox: ['/site/#inbox', '공사장 접수함'], admin: ['/site/#admin', '공사장 관리실'], home: ['/site/#home', '공사장 내 공사장 탭'] };
+  const LEGACY = { inbox: ['/community/#meeting', '커뮤니티 회의실'], home: ['/community/#me', '커뮤니티 내 정보'] };
   const MENUS = [
     { id: 'dashboard', group: 'home', name: '대시보드', ready: true },
     { id: 'stats', group: 'home', name: '통계', ready: true },
@@ -1269,7 +1270,6 @@
     { id: 'applications', group: 'inbox', name: '합류 신청', ready: true },
     { id: 'dockets', group: 'content', name: '처리 현황', ready: true },
     { id: 'routes', group: 'content', name: '준공 현황', ready: true },
-    { id: 'wiki', group: 'content', name: '위키', legacy: 'admin' },
     { id: 'notices', group: 'content', name: '공지', ready: true },
     { id: 'faq', group: 'content', name: '자주 묻는 질문', ready: true },
     { id: 'texts', group: 'content', name: '페이지 문구', ready: true },
@@ -1303,8 +1303,10 @@
   }
   function focusTitle(view) { if (!firstRoute) { const h = $(`[data-view="${view}"] h1`); if (h) h.focus({ preventScroll: true }); } }
 
+  let wantWiki = false;       // 예전 주소 #wiki: 준공 현황에서 위키 올리기 서랍을 연다
   function route() {
-    const h = decodeURIComponent(location.hash.slice(1));
+    let h = decodeURIComponent(location.hash.slice(1));
+    if (h === 'wiki') { history.replaceState(null, '', '#routes'); h = 'routes'; if (firstRoute) wantWiki = true; else setTimeout(openWikiForm); }
     if (h.startsWith('g-') && groupName[h.slice(2)]) {
       const g = h.slice(2);
       $('[data-group-title]').textContent = groupName[g];
@@ -1403,6 +1405,7 @@
     if (routes.length) setIconCols('icon' in routes[0]);
     setHubCols(lines.length ? 'kind' in lines[0] : true, routes.length ? 'department' in routes[0] : true);
     renderRoutes(); renderLines();
+    if (wantWiki) { wantWiki = false; setTimeout(openWikiForm); }
     return true;
   }
 
@@ -1840,6 +1843,19 @@
     markCurrent();
   }
   $('[data-new-route]').addEventListener('click', () => openRouteForm(null));
+  // 위키 올리기 = 지름길 추가를 위키 · HTML 파일 올리기 · 과목 자료 허브로 맞춰 둔 것
+  function openWikiForm() {
+    openRouteForm(null);
+    if (mode !== 'route') return;
+    F('f-type').value = 'wiki';
+    const hub = lines.find(l => l.kind === 'hub');
+    if (hub) F('f-line').value = hub.id;
+    $('[data-src="html"]').click();
+    syncHubUI(); syncTileUI(); renderRoutePreview();
+    $('[data-drawer-title]').textContent = '위키 올리기';
+    F('f-title').focus({ preventScroll: true });
+  }
+  $('[data-new-wiki]').addEventListener('click', openWikiForm);
 
   // 그림 파일 고르기 · 끌어다 놓기
   const MAX = 500 * 1024, MAX_SRC = 15 * 1024 * 1024, TYPES = ['image/png', 'image/svg+xml', 'image/jpeg', 'image/webp'];
@@ -2883,7 +2899,7 @@
     $('[data-rep-agenda]').textContent = ag ? (ag.done ? '회의 안건 (완료)' : '회의 안건에 올라가 있음') : '회의 안건으로 보내기';
     const links = [];
     if (dk) links.push(`처리 현황: 제${dk.no}호 ${dk.title}`);
-    if (ag) links.push('공사장 회의실 안건에 있습니다');
+    if (ag) links.push('커뮤니티 회의실 안건에 있습니다');
     $('[data-rep-links]').textContent = links.join(' · ');
     $('[data-rep-wipe]').hidden = !inContacts.has(r.id);
   }
@@ -2947,7 +2963,7 @@
     if (error) return fail('회의 안건으로 보내지 못했습니다. ' + errText(error, '저장'));
     inAgenda.set(r.id, data);
     syncRepUI(); renderReports();
-    toast('공사장 회의실 안건에 올렸습니다.');
+    toast('커뮤니티 회의실 안건에 올렸습니다.');
   });
   $('[data-rep-wipe]').addEventListener('click', async () => {
     const r = editing, btn = $('[data-rep-wipe]');
@@ -3009,8 +3025,8 @@
     $$('[data-app-status] button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === appStatus)));
     const a = editing; if (!a) return;
     const m = a.applicant && inMembers.get(a.applicant);
-    $('[data-app-hint]').textContent = appStatus === '합류' && m && m.role === 'general' ? '합류로 바꾸면 아래 ‘국원으로 등록’도 눌러 주세요. 공사장 회의실이 열립니다.' : '';
-    $('[data-app-account]').textContent = m ? `${m.display_name} (${m.username}) · 지금 ${ROLE_NAME[m.role] || m.role}` : a.applicant ? '로그인한 회원이 냈지만 회원 목록에서 찾지 못했습니다.' : '로그인하지 않고 신청했습니다. 회원가입을 안내한 뒤 HQ › 회원(또는 공사장 관리실)에서 국원으로 바꿔 주세요.';
+    $('[data-app-hint]').textContent = appStatus === '합류' && m && m.role === 'general' ? '합류로 바꾸면 아래 ‘국원으로 등록’도 눌러 주세요. 커뮤니티 회의실이 열립니다.' : '';
+    $('[data-app-account]').textContent = m ? `${m.display_name} (${m.username}) · 지금 ${ROLE_NAME[m.role] || m.role}` : a.applicant ? '로그인한 회원이 냈지만 회원 목록에서 찾지 못했습니다.' : '로그인하지 않고 신청했습니다. 회원가입을 안내한 뒤 HQ › 회원에서 국원으로 바꿔 주세요.';
     $('[data-app-promote]').hidden = !(m && m.role === 'general');
   }
   function openApp(a) {
@@ -3089,8 +3105,8 @@
   $('#mem-find').addEventListener('input', () => { if (inboxLoaded) renderMembers(); });
   $('[data-mem-role]').replaceChildren(...['general', 'member', 'staff'].map(v => { const b = el('button', null, ROLE_NAME[v]); b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.v = v; b.addEventListener('click', () => { if (editing && editing.id !== user.id) { memRole = v; syncMemUI(); } }); return b; }));
   const ROLE_HINT = {
-    general: '회원가입만 한 상태. 공사장에서 내 제보와 공지를 봅니다.',
-    member: '국원. 공사장 회의실(안건·자료)과 접수된 제보를 봅니다.',
+    general: '회원가입만 한 상태. 커뮤니티에서 결과물·글·공지와 내 제보를 봅니다.',
+    member: '국원. 커뮤니티 회의실(안건·자료)과 접수된 제보를 봅니다.',
     staff: '운영진. HQ와 모든 관리 권한을 갖습니다. 꼭 필요한 사람에게만 주세요.'
   };
   function syncMemUI() {
@@ -3191,7 +3207,7 @@
   /* ===== 통계 ===== (016: hq_stats_daily · hq_stats_pages · hq_stats_routes) */
   let stDays = 30, stSeq = 0, stLoaded = false;
   const C_VIEW = '#0F5A3A', C_GO = '#C2541A';   // 녹색 = 방문, 짙은 주황 = 이용하기 (흰 바탕 대비 확보)
-  const PAGE_NAMES = { '/': '메인', '/routes/': '준공 현황', '/dockets/': '처리 현황 전체 보기', '/tools/alfa-to-zulu/': 'Alfa to Zulu', '/login/': '로그인', '/join/': '회원가입', '/site/': '공사장', '/community/': '커뮤니티' };
+  const PAGE_NAMES = { '/': '메인', '/routes/': '준공 현황', '/dockets/': '처리 현황 전체 보기', '/tools/alfa-to-zulu/': 'Alfa to Zulu', '/login/': '로그인', '/join/': '회원가입', '/site/': '공사장(예전)', '/community/': '커뮤니티' };
   const pageName = path => PAGE_NAMES[path] || (routes.find(r => r.url === path) || {}).title || path;
   const fmtN = n => Number(n || 0).toLocaleString('ko-KR');
   const md = d => `${d.getMonth() + 1}. ${d.getDate()}.`;
@@ -3452,7 +3468,7 @@
   $$('[data-nt-aud] button').forEach(b => b.addEventListener('click', () => { ntAud = b.dataset.v; syncNoticeUI(); }));
   function syncNoticeUI() {
     $$('[data-nt-aud] button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === ntAud)));
-    $('[data-nt-aud-hint]').textContent = ntAud === 'public' ? '로그인하지 않은 방문자도 메인 전광판 둘째 줄에서 봅니다. 누르면 내용이 열립니다.' : '로그인한 회원만 공사장에서 봅니다.';
+    $('[data-nt-aud-hint]').textContent = ntAud === 'public' ? '로그인하지 않은 방문자도 메인 전광판 둘째 줄에서 봅니다. 누르면 내용이 열립니다.' : '로그인한 회원만 커뮤니티에서 봅니다.';
     $('[data-nt-pv-box]').hidden = !(hasNtCols && ntAud === 'public');
     $('[data-nt-pv]').textContent = F('n-title').value.trim() || '공지 제목';
     const s0 = F('n-start').value, e0 = F('n-end').value;
@@ -3493,7 +3509,7 @@
     if (i >= 0) notices[i] = res.data; else notices.unshift(res.data);
     closeDrawer(); renderNotices();
     const onMain = hasNtCols && res.data.audience === 'public' && ntState(res.data) === 'on';
-    toast(`${target ? '저장' : '올렸'}습니다. ${onMain ? '메인 전광판에 바로 보입니다.' : hasNtCols && res.data.audience === 'public' ? '게시 기간이 되면 메인에 보입니다.' : '공사장 공지에 보입니다.'}`);
+    toast(`${target ? '저장' : '올렸'}습니다. ${onMain ? '메인 전광판에 바로 보입니다.' : hasNtCols && res.data.audience === 'public' ? '게시 기간이 되면 메인에 보입니다.' : '커뮤니티 공지에 보입니다.'}`);
   }
   async function deleteNotice() {
     const target = editing;
