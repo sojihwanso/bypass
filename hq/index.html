@@ -3755,9 +3755,16 @@
   }
   async function setGrant(m, v, seg) {
     $$('button', seg).forEach((b) => { b.disabled = true; });
-    const res = v === 'auto'
-      ? await B.sb.from('upload_grants').delete().eq('user_id', m.id)
-      : await B.sb.from('upload_grants').upsert({ user_id: m.id, granted: v === 'grant' }, { onConflict: 'user_id' });
+    // upsert 는 user_id 까지 다시 쓰려다 권한에 막힌다(고칠 수 있는 칸은 granted·note 뿐). 그래서 처음이면 넣고, 있으면 고친다
+    let res;
+    if (v === 'auto') res = await B.sb.from('upload_grants').delete().eq('user_id', m.id);
+    else {
+      const granted = v === 'grant';
+      res = m.granted === true || m.granted === false
+        ? await B.sb.from('upload_grants').update({ granted }).eq('user_id', m.id)
+        : await B.sb.from('upload_grants').insert({ user_id: m.id, granted });
+      if (res.error && res.error.code === '23505') res = await B.sb.from('upload_grants').update({ granted }).eq('user_id', m.id);
+    }
     if (res.error) { $$('button', seg).forEach((b) => { b.disabled = false; }); toast(errText(res.error, '저장'), true); return; }
     toast(`${m.display_name}: ${{ auto: '요건에 따라 자동', grant: '허가', block: '막음' }[v]}으로 바꿨습니다.`);
     loadUploads();
