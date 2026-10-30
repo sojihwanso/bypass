@@ -1299,8 +1299,8 @@
     const saved = JSON.parse(localStorage.getItem('sb-itzdjdgjqcpmxdfssfel-auth-token') || 'null');
     if (saved && saved.refresh_token) {
       const account = document.getElementById('nav-account');
-      account.textContent = '공사장';
-      account.href = '/site/';
+      account.textContent = '커뮤니티';
+      account.href = '/community/';
     }
   } catch (e) { /* 저장소를 쓸 수 없으면 '로그인' 그대로 */ }
 

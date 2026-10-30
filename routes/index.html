@@ -271,6 +271,7 @@
 </footer>
 
 <script src="/assets/route-icons.js"></script>
+<script src="/assets/member-nav.js" data-current="routes" defer></script>
 <script src="/assets/track.js" defer></script>
 <script>
 (async function () {
@@ -281,7 +282,7 @@
   // 로그인 기록이 있으면 '로그인' 대신 '공사장'
   try {
     const saved = JSON.parse(localStorage.getItem('sb-itzdjdgjqcpmxdfssfel-auth-token') || 'null');
-    if (saved && saved.refresh_token) { const a = document.getElementById('nav-account'); a.textContent = '공사장'; a.href = '/site/'; }
+    if (saved && saved.refresh_token) { const a = document.getElementById('nav-account'); a.textContent = '커뮤니티'; a.href = '/community/'; }
   } catch (e) { /* 저장소를 못 쓰면 그대로 */ }
 
   /* ===== 아이콘: assets/route-icons.js (HQ와 같은 모듈) ===== */

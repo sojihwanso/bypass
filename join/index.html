@@ -82,7 +82,7 @@
           <label class="field-label" for="f-name">이름 또는 별명</label>
           <input class="input" id="f-name" name="display_name" type="text" required maxlength="20"
                  autocomplete="nickname" aria-describedby="f-name-hint">
-          <p class="hint" id="f-name-hint">공사장에서 이 이름으로 부릅니다. 20자 이내.</p>
+          <p class="hint" id="f-name-hint">커뮤니티에서 이 이름으로 부릅니다. 20자 이내.</p>
 
           <p class="form-error" role="alert" hidden></p>
           <div class="form-actions"><button type="submit" class="btn btn-primary">가입하기</button></div>
@@ -204,7 +204,7 @@
       showError('계정은 만들어졌지만 바로 로그인되지 않았습니다. 운영진에게 알려 주세요. (메일 확인 설정)');
       return;
     }
-    location.replace('/site/?welcome=1');
+    location.replace('/community/?welcome=1');
   });
 })();
 </script>

@@ -114,6 +114,7 @@
 </footer>
 
 <script src="/assets/dockets.js"></script>
+<script src="/assets/member-nav.js" data-current="dockets" defer></script>
 <script src="/assets/track.js" defer></script>
 <script>
 (async function () {
@@ -124,7 +125,7 @@
   // 로그인 기록이 있으면 '로그인' 대신 '공사장'
   try {
     const saved = JSON.parse(localStorage.getItem('sb-itzdjdgjqcpmxdfssfel-auth-token') || 'null');
-    if (saved && saved.refresh_token) { const a = document.getElementById('nav-account'); a.textContent = '공사장'; a.href = '/site/'; }
+    if (saved && saved.refresh_token) { const a = document.getElementById('nav-account'); a.textContent = '커뮤니티'; a.href = '/community/'; }
   } catch (e) { /* 저장소를 못 쓰면 그대로 */ }
 
   /* 안건은 Supabase(dockets)에서 읽는다. 운영진이 HQ › 처리 현황에서 고치면 바로 반영된다. */
