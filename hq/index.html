@@ -550,7 +550,7 @@
             <p class="view-kicker">콘텐츠</p>
             <h1 tabindex="-1">공지</h1>
           </div>
-          <a class="mini-btn" href="/" target="_blank" rel="noopener">메인에서 보기 ↗</a>
+          <a class="mini-btn" href="/?intro" target="_blank" rel="noopener">메인에서 보기 ↗</a>
         </div>
         <div class="banner banner-warn" role="alert" data-sql-warn7 hidden>
           <p><b>데이터베이스 설정이 한 단계 남았습니다.</b> Supabase SQL Editor에서 <code>supabase/019_public_notices.sql</code>을 실행해 주세요. 그 전에는 회원 전용 공지만 쓸 수 있고, 제목·내용은 새로 쓸 때만 정할 수 있습니다.</p>
@@ -765,7 +765,7 @@
             <p class="view-kicker">운영</p>
             <h1 tabindex="-1">사이트 상태</h1>
           </div>
-          <a class="mini-btn" href="/" target="_blank" rel="noopener">메인 열기 ↗</a>
+          <a class="mini-btn" href="/?intro" target="_blank" rel="noopener">메인 열기 ↗</a>
         </div>
         <form class="card" data-status-form novalidate>
           <h2>미리보기</h2>
@@ -3191,7 +3191,7 @@
   /* ===== 통계 ===== (016: hq_stats_daily · hq_stats_pages · hq_stats_routes) */
   let stDays = 30, stSeq = 0, stLoaded = false;
   const C_VIEW = '#0F5A3A', C_GO = '#C2541A';   // 녹색 = 방문, 짙은 주황 = 이용하기 (흰 바탕 대비 확보)
-  const PAGE_NAMES = { '/': '메인', '/routes/': '준공 현황', '/dockets/': '처리 현황 전체 보기', '/tools/alfa-to-zulu/': 'Alfa to Zulu', '/login/': '로그인', '/join/': '회원가입', '/site/': '공사장' };
+  const PAGE_NAMES = { '/': '메인', '/routes/': '준공 현황', '/dockets/': '처리 현황 전체 보기', '/tools/alfa-to-zulu/': 'Alfa to Zulu', '/login/': '로그인', '/join/': '회원가입', '/site/': '공사장', '/community/': '커뮤니티' };
   const pageName = path => PAGE_NAMES[path] || (routes.find(r => r.url === path) || {}).title || path;
   const fmtN = n => Number(n || 0).toLocaleString('ko-KR');
   const md = d => `${d.getMonth() + 1}. ${d.getDate()}.`;

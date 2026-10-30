@@ -138,7 +138,7 @@
 
   // 이미 로그인한 사람은 공사장으로
   const { data: { session } } = await B.sb.auth.getSession();
-  if (session) { location.replace('/site/'); return; }
+  if (session) { location.replace('/community/'); return; }
 
   // 아이디는 소문자로만
   idInput.addEventListener('input', () => {
