@@ -462,7 +462,7 @@
     <div class="soon-band" aria-hidden="true"></div>
     <div class="soon-in">
       <h2>관계자 외 출입금지</h2>
-      <p>HQ는 운영진만 들어올 수 있습니다. 운영진 등록은 기존 운영진이 공사장 관리실에서 합니다.</p>
+      <p>HQ는 운영진만 들어올 수 있습니다. 운영진 등록은 기존 운영진이 HQ › 회원에서 합니다.</p>
       <p data-denied-count>잠시 뒤 공사장으로 이동합니다.</p>
       <a class="btn btn-primary btn-small" href="/site/">공사장으로 가기</a>
     </div>
@@ -506,6 +506,7 @@
         <div id="pane-routes" role="tabpanel" aria-labelledby="tab-routes" data-pane="routes">
           <div class="toolbar">
             <button type="button" class="btn btn-primary btn-small" data-new-route>+ 지름길 추가</button>
+            <button type="button" class="btn btn-secondary btn-small" data-new-wiki>위키 올리기</button>
             <label class="sr-only" for="route-find">지름길 찾기</label>
             <input class="input" id="route-find" type="search" placeholder="이름·과목·주소로 찾기" autocomplete="off">
           </div>
@@ -1269,7 +1270,6 @@
     { id: 'applications', group: 'inbox', name: '합류 신청', ready: true },
     { id: 'dockets', group: 'content', name: '처리 현황', ready: true },
     { id: 'routes', group: 'content', name: '준공 현황', ready: true },
-    { id: 'wiki', group: 'content', name: '위키', legacy: 'admin' },
     { id: 'notices', group: 'content', name: '공지', ready: true },
     { id: 'faq', group: 'content', name: '자주 묻는 질문', ready: true },
     { id: 'texts', group: 'content', name: '페이지 문구', ready: true },
@@ -1303,8 +1303,10 @@
   }
   function focusTitle(view) { if (!firstRoute) { const h = $(`[data-view="${view}"] h1`); if (h) h.focus({ preventScroll: true }); } }
 
+  let wantWiki = false;       // 예전 주소 #wiki: 준공 현황에서 위키 올리기 서랍을 연다
   function route() {
-    const h = decodeURIComponent(location.hash.slice(1));
+    let h = decodeURIComponent(location.hash.slice(1));
+    if (h === 'wiki') { history.replaceState(null, '', '#routes'); h = 'routes'; if (firstRoute) wantWiki = true; else setTimeout(openWikiForm); }
     if (h.startsWith('g-') && groupName[h.slice(2)]) {
       const g = h.slice(2);
       $('[data-group-title]').textContent = groupName[g];
@@ -1403,6 +1405,7 @@
     if (routes.length) setIconCols('icon' in routes[0]);
     setHubCols(lines.length ? 'kind' in lines[0] : true, routes.length ? 'department' in routes[0] : true);
     renderRoutes(); renderLines();
+    if (wantWiki) { wantWiki = false; setTimeout(openWikiForm); }
     return true;
   }
 
@@ -1840,6 +1843,19 @@
     markCurrent();
   }
   $('[data-new-route]').addEventListener('click', () => openRouteForm(null));
+  // 위키 올리기 = 지름길 추가를 위키 · HTML 파일 올리기 · 과목 자료 허브로 맞춰 둔 것
+  function openWikiForm() {
+    openRouteForm(null);
+    if (mode !== 'route') return;
+    F('f-type').value = 'wiki';
+    const hub = lines.find(l => l.kind === 'hub');
+    if (hub) F('f-line').value = hub.id;
+    $('[data-src="html"]').click();
+    syncHubUI(); syncTileUI(); renderRoutePreview();
+    $('[data-drawer-title]').textContent = '위키 올리기';
+    F('f-title').focus({ preventScroll: true });
+  }
+  $('[data-new-wiki]').addEventListener('click', openWikiForm);
 
   // 그림 파일 고르기 · 끌어다 놓기
   const MAX = 500 * 1024, MAX_SRC = 15 * 1024 * 1024, TYPES = ['image/png', 'image/svg+xml', 'image/jpeg', 'image/webp'];
@@ -3010,7 +3026,7 @@
     const a = editing; if (!a) return;
     const m = a.applicant && inMembers.get(a.applicant);
     $('[data-app-hint]').textContent = appStatus === '합류' && m && m.role === 'general' ? '합류로 바꾸면 아래 ‘국원으로 등록’도 눌러 주세요. 공사장 회의실이 열립니다.' : '';
-    $('[data-app-account]').textContent = m ? `${m.display_name} (${m.username}) · 지금 ${ROLE_NAME[m.role] || m.role}` : a.applicant ? '로그인한 회원이 냈지만 회원 목록에서 찾지 못했습니다.' : '로그인하지 않고 신청했습니다. 회원가입을 안내한 뒤 HQ › 회원(또는 공사장 관리실)에서 국원으로 바꿔 주세요.';
+    $('[data-app-account]').textContent = m ? `${m.display_name} (${m.username}) · 지금 ${ROLE_NAME[m.role] || m.role}` : a.applicant ? '로그인한 회원이 냈지만 회원 목록에서 찾지 못했습니다.' : '로그인하지 않고 신청했습니다. 회원가입을 안내한 뒤 HQ › 회원에서 국원으로 바꿔 주세요.';
     $('[data-app-promote]').hidden = !(m && m.role === 'general');
   }
   function openApp(a) {
