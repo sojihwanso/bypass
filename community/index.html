@@ -294,6 +294,38 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.6; }
 .d-sec { margin: 6px 0 0; font-size: 15px; font-weight: 800; }
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 14px; font-size: 14px; z-index: 50; box-shadow: 0 20px 40px -20px rgba(0, 0, 0, .6); max-width: calc(100% - 32px); }
 
+/* ---------- 썸네일 · 올리기 ---------- */
+.thumb img.pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.thumb.has-pic .glyph, .thumb.has-pic .blob { display: none; }
+.pthumb { height: 110px; border-radius: 12px; overflow: hidden; margin-bottom: 2px; background: var(--soft); flex: none; }
+.pthumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.rthumb { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; flex: none; background: var(--soft); }
+.slug-row { display: flex; align-items: center; gap: 6px; }
+.slug-row .pre { font-weight: 700; color: var(--sub); font-size: 14.5px; flex: none; }
+.slug-row .in { flex: 1 1 auto; min-width: 0; }
+.drop { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1.5px dashed #C9CDD3; border-radius: 14px; cursor: pointer; background: var(--soft2); }
+.drop:hover, .drop.over { border-color: var(--ink); background: #fff; }
+.drop b { display: block; font-size: 14px; }
+.drop small { color: var(--sub); font-size: 12.5px; }
+.drop .ico { width: 40px; height: 40px; border-radius: 10px; background: #fff; display: grid; place-items: center; font-family: var(--f-latin); font-weight: 700; font-size: 13px; flex: none; border: 1px solid var(--line); }
+.thumb-pick { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.thumb-prev { width: 160px; height: 96px; border-radius: 12px; overflow: hidden; background: var(--soft); flex: none; display: grid; place-items: center; color: var(--sub); font-size: 12.5px; text-align: center; padding: 6px; position: relative; }
+.thumb-prev img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.thumb-acts { display: flex; gap: 6px; flex-wrap: wrap; }
+.lock-note { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--soft2); font-size: 13px; color: var(--mid); }
+.lock-note b { color: var(--ink); }
+.seg button:disabled { opacity: .45; cursor: not-allowed; }
+.up-chip { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 700; }
+.up-chip.on { background: var(--green-tint); color: var(--green); }
+.up-chip.off { background: var(--soft); color: var(--mid); }
+.up-chip.no { background: var(--accent-tint); color: var(--accent-ink); }
+.reqs { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.reqs li { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-size: 14px; }
+.reqs .bar { grid-column: 1 / -1; height: 6px; border-radius: 999px; background: var(--soft); overflow: hidden; }
+.reqs .bar i { display: block; height: 100%; border-radius: 999px; background: var(--ink); }
+.reqs li.met .bar i { background: var(--green); }
+.reqs b { font-family: var(--f-latin); }
+
 /* ---------- 화면 폭 ---------- */
 @media (max-width: 1100px) { .search { display: none; } .icon-btn.find { display: grid; } }
 @media (max-width: 980px) {
@@ -593,6 +625,11 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.6; }
         <p class="hint" style="margin-top: 6px">로그인한 채로 낸 제보의 처리 상황이 여기에 보입니다.</p>
         <ul class="items" data-myreports></ul>
       </section>
+      <section class="panel" aria-labelledby="t-up" style="grid-column: 1 / -1">
+        <div class="box-head"><h2 id="t-up">올리기 권한</h2><span class="up-chip off" data-up-chip>확인 중</span></div>
+        <p class="hint" style="margin-top: 6px" data-up-lead>권한이 있으면 결과물로 HTML 페이지를 직접 올리고, 내 글에 썸네일 그림을 붙일 수 있습니다.</p>
+        <ul class="reqs" data-up-reqs></ul>
+      </section>
       <section class="panel" aria-labelledby="t-mine" style="grid-column: 1 / -1">
         <div class="box-head"><h2 id="t-mine">내가 올린 것 <small data-mine-n></small></h2></div>
         <ul class="posts" data-mine style="margin-top: 8px"></ul>
@@ -623,10 +660,40 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.6; }
       <label for="w-t">제목</label>
       <input class="in" id="w-t" maxlength="100" autocomplete="off">
     </div>
+    <div class="field" data-w-src-field>
+      <span class="lbl" id="w-src-l">결과물 주소</span>
+      <div class="seg" role="radiogroup" aria-labelledby="w-src-l">
+        <button type="button" role="radio" aria-checked="true" data-src="link">주소 넣기</button>
+        <button type="button" role="radio" aria-checked="false" data-src="html">HTML 파일 올리기</button>
+      </div>
+    </div>
     <div class="field" data-w-url-field>
       <label for="w-url">주소 <small>(https:// 로 시작하거나 사이트 안의 /apps/… 같은 주소)</small></label>
       <input class="in" id="w-url" maxlength="1000" inputmode="url" autocapitalize="none" spellcheck="false" placeholder="https://… 또는 /apps/이름/">
     </div>
+    <div class="field" data-w-html hidden>
+      <label for="w-slug">주소 이름 <small>(영문 소문자·숫자·하이픈 2~49자)</small></label>
+      <div class="slug-row"><span class="pre">/apps/</span><input class="in" id="w-slug" maxlength="49" autocapitalize="none" spellcheck="false" placeholder="예: exam-planner"><span class="pre">/</span></div>
+      <label class="drop" for="w-file" data-w-drop>
+        <span class="ico" aria-hidden="true">&lt;/&gt;</span>
+        <span><b data-w-file-name>HTML 파일을 끌어다 놓거나 눌러서 고르기</b><small>그림·스크립트를 한 파일에 담은 .html · 5MB 이하</small></span>
+      </label>
+      <input class="sr" id="w-file" type="file" accept=".html,.htm,text/html">
+      <p class="hint">올리면 1~몇 분 뒤 teambypass.vercel.app/apps/주소이름/ 에서 열립니다. 내가 올린 페이지는 같은 주소로 다시 올려 고칠 수 있고, 남의 주소는 쓸 수 없습니다. 보안상 올린 페이지는 사이트 로그인 정보와 브라우저 저장소를 쓸 수 없습니다.</p>
+    </div>
+    <div class="field" data-w-thumb-field hidden>
+      <span class="lbl">썸네일 <small style="font-weight: 400; color: var(--sub)">(선택)</small></span>
+      <div class="thumb-pick">
+        <div class="thumb-prev" data-w-thumb-prev>없음<br>(자동 그림)</div>
+        <div class="thumb-acts">
+          <label class="btn btn-soft btn-sm" for="w-thumb">그림 고르기</label>
+          <button type="button" class="btn btn-line btn-sm" data-w-thumb-clear hidden>빼기</button>
+        </div>
+      </div>
+      <input class="sr" id="w-thumb" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+      <p class="hint">PNG·JPG·WebP·GIF. 큰 그림은 가로·세로 1200px 안으로 줄여 2MB 이하로 올립니다. 카드에는 가운데 부분이 보입니다.</p>
+    </div>
+    <p class="lock-note" data-w-lock hidden></p>
     <div class="field">
       <label for="w-b" data-w-body-label>소개</label>
       <textarea class="in" id="w-b" maxlength="5000" rows="5"></textarea>
@@ -657,6 +724,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.6; }
       </button>
       <div class="right">
         <button type="button" class="btn btn-soft" data-d-hide hidden>숨기기</button>
+        <button type="button" class="btn btn-soft" data-d-edit hidden>고치기</button>
         <button type="button" class="btn btn-soft danger" data-d-del hidden>지우기</button>
       </div>
     </div>
@@ -887,7 +955,9 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.6; }
     const h = hash(r.id + r.title);
     blob.style.right = `${-40 + (h % 30)}px`; blob.style.top = `${-40 + ((h >> 5) % 30)}px`;
     const g = el('span', 'glyph', glyphOf(r.title)); g.style.color = a.fg;
-    th.append(blob, g, el('span', 'kind', r.category));
+    th.append(blob, g);
+    if (r.thumb_url) { const im = el('img', 'pic'); im.src = r.thumb_url; im.alt = ''; im.loading = 'lazy'; im.decoding = 'async'; th.classList.add('has-pic'); th.append(im); }
+    th.append(el('span', 'kind', r.category));
     if (Date.now() - Date.parse(r.created_at) < 3 * 86400000) th.append(el('span', 'new', 'NEW'));
     if (r.hidden) th.append(el('span', 'hid', '숨김'));
     const body = el('div', 'card-b');
@@ -918,12 +988,15 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.6; }
     const t = el('span', 'post-txt');
     t.append(el('b', null, (r.hidden ? '[숨김] ' : '') + r.title), el('span', null, `${r.author_name || '회원'} · ${ago(r.created_at)}${r.likes ? ` · 좋아요 ${r.likes}` : ''}`));
     const cm = el('span', 'cnt'); cm.append(icon('talk'), document.createTextNode(String(r.comments || 0))); cm.setAttribute('aria-label', `댓글 ${r.comments || 0}`);
-    b.append(catPill(r), t, cm); li.append(b);
+    b.append(catPill(r), t);
+    if (r.thumb_url) { const im = el('img', 'rthumb'); im.src = r.thumb_url; im.alt = ''; im.loading = 'lazy'; b.append(im); }
+    b.append(cm); li.append(b);
     return li;
   }
   function postCard(r) {
     const b = el('button', 'pcard'); b.type = 'button';
     b.addEventListener('click', () => openDetail(r.id));
+    if (r.thumb_url) { const box = el('span', 'pthumb'); const im = el('img'); im.src = r.thumb_url; im.alt = ''; im.loading = 'lazy'; box.append(im); b.append(box); }
     b.append(catPill(r), el('b', null, (r.hidden ? '[숨김] ' : '') + r.title));
     if (r.body) b.append(el('p', null, r.body));
     b.append(metaRow(r));
@@ -1041,25 +1114,97 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.6; }
   $('[data-search-form]').addEventListener('submit', (e) => { e.preventDefault(); const q = $('#q-top').value; if (location.hash !== '#search') location.hash = 'search'; runSearch(q); });
   $('[data-search-form2]').addEventListener('submit', (e) => { e.preventDefault(); runSearch($('#q-page').value); });
 
-  /* ===== 쓰기 ===== */
+  /* ===== 올리기 권한 (supabase/023_member_uploads.sql) ===== */
+  let up = null;   // { allowed, reason, comments, posts, days, pages, rules, note } · 023 전이면 null
+  const canUp = () => !!(up && up.allowed);
+  async function loadUpload() {
+    const { data, error } = await sb.rpc('upload_status');
+    up = error ? null : data;
+    renderUpload();
+  }
+  function upLines() {
+    if (!up) return [];
+    const r = up.rules || {};
+    return [
+      ['댓글', up.comments, r.min_comments, '개'], ['글·결과물', up.posts, r.min_posts, '개'], ['가입한 지', up.days, r.min_days, '일'],
+    ].filter((x) => x[2] > 0);
+  }
+  function lockText() {
+    if (!up) return '올리기 권한 기능이 아직 준비되지 않았습니다.';
+    if (up.reason === 'blocked') return `운영진이 올리기를 막아 두었습니다.${up.note ? ` (${up.note})` : ''}`;
+    if (up.reason === 'manual') return '올리기 권한은 운영진이 직접 허가합니다. 필요하면 운영진에게 말해 주세요.';
+    const left = upLines().filter((x) => x[1] < x[2]).map((x) => `${x[0]} ${x[2] - x[1]}${x[3]} 더`);
+    return left.length ? `${left.join(', ')} 채우면 HTML 올리기와 썸네일이 저절로 열립니다.` : '곧 열립니다. 새로고침해 보세요.';
+  }
+  function renderUpload() {
+    const chip = $('[data-up-chip]'), lead = $('[data-up-lead]'), ul = $('[data-up-reqs]');
+    if (!up) { chip.className = 'up-chip off'; chip.textContent = '준비 중'; lead.textContent = lockText(); ul.replaceChildren(); return; }
+    const on = up.allowed;
+    chip.className = `up-chip ${on ? 'on' : up.reason === 'blocked' ? 'no' : 'off'}`;
+    chip.textContent = on ? '올릴 수 있음' : up.reason === 'blocked' ? '막힘' : '아직';
+    const why = { staff: '운영진이라 언제든 올릴 수 있습니다.', granted: '운영진이 허가했습니다.', rules: on ? '요건을 모두 채워 저절로 열렸습니다.' : '' }[up.reason] || '';
+    lead.textContent = on ? `${why} 결과물로 HTML 페이지를 직접 올리고(최대 ${up.rules ? up.rules.max_pages : 5}개, 지금 ${up.pages}개), 내 글에 썸네일 그림을 붙일 수 있습니다.` : lockText();
+    const showReqs = up.reason === 'rules' || (up.reason === 'granted' && false);
+    ul.replaceChildren(...(showReqs ? upLines().map(([name, have, need, unit]) => {
+      const li = el('li', have >= need ? 'met' : null);
+      li.append(el('span', null, name), el('span', null, `${Math.min(have, need)} / ${need}${unit}`));
+      const bar = el('span', 'bar'); const fill = el('i'); fill.style.width = `${Math.min(100, Math.round((have / need) * 100))}%`; bar.append(fill); li.append(bar);
+      return li;
+    }) : []));
+  }
+
+  /* ===== 쓰기 · 고치기 ===== */
   const wDlg = $('#write-dlg'), wForm = $('[data-write-form]');
-  let wKind = 'showcase', wCat = '앱', wBusy = false;
-  function openWrite(kind) {
-    wKind = kind;
-    const f = feed[kind];
-    wCat = f.cat !== '전체' ? f.cat : kind === 'showcase' ? '앱' : '질문';
+  const SLUG_RULE = /^[a-z0-9][a-z0-9-]{1,48}$/, HTML_MAX = 5_000_000, IMG_MAX = 2_097_152;
+  let wKind = 'showcase', wCat = '앱', wBusy = false, wEdit = null, wSrc = 'link', wHtml = null, wOwnSlug = null;
+  let wThumb = { url: null, blob: null, preview: null, type: null };
+  function setThumbPreview() {
+    const box = $('[data-w-thumb-prev]'); box.replaceChildren();
+    const src = wThumb.preview || wThumb.url;
+    if (src) { const im = el('img'); im.src = src; im.alt = '고른 썸네일'; box.append(im); }
+    else box.append('없음', el('br'), '(자동 그림)');
+    $('[data-w-thumb-clear]').hidden = !src;
+  }
+  function syncSrc() {
+    const s = wKind === 'showcase';
+    $$('[data-src]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.src === wSrc)));
+    $('[data-w-src-field]').hidden = !s;
+    $('[data-src="html"]').disabled = !canUp();
+    $('[data-w-url-field]').hidden = !s || wSrc !== 'link';
+    $('[data-w-html]').hidden = !s || wSrc !== 'html';
+    $('#w-slug').readOnly = !!wOwnSlug;
+    $('[data-w-thumb-field]').hidden = !canUp();
+    const lock = $('[data-w-lock]');
+    lock.hidden = canUp();
+    if (!canUp()) { lock.replaceChildren(el('b', null, 'HTML 파일 올리기·썸네일은 올리기 권한이 있으면 열립니다. '), document.createTextNode(lockText())); }
+  }
+  function openWrite(kind, post) {
+    wEdit = post || null;
+    wKind = post ? post.kind : kind;
+    const f = feed[wKind];
+    wCat = post ? post.category : f.cat !== '전체' ? f.cat : wKind === 'showcase' ? '앱' : '질문';
     wForm.reset(); $('[data-w-err]').hidden = true; $$('[aria-invalid]', wForm).forEach((x) => x.removeAttribute('aria-invalid'));
-    const s = kind === 'showcase';
+    const s = wKind === 'showcase';
+    // 내가 올린 /apps/ 페이지면 같은 주소로 다시 올려 고칠 수 있다
+    const own = post && post.url && post.url.match(/^\/apps\/([a-z0-9][a-z0-9-]{1,48})\/?$/);
+    wOwnSlug = own ? own[1] : null;
+    wSrc = 'link'; wHtml = null;
+    $('[data-w-file-name]').textContent = 'HTML 파일을 끌어다 놓거나 눌러서 고르기';
+    $('#w-slug').value = wOwnSlug || '';
+    wThumb = { url: post ? post.thumb_url || null : null, blob: null, preview: null, type: null };
+    setThumbPreview();
     $('[data-w-kick]').textContent = s ? 'SHOWCASE' : 'BOARD';
-    $('[data-w-title]').textContent = s ? '결과물 올리기' : '글쓰기';
+    $('[data-w-title]').textContent = post ? '고치기' : s ? '결과물 올리기' : '글쓰기';
     $('[data-w-cat-label]').textContent = s ? '종류' : '말머리';
-    $('[data-w-url-field]').hidden = !s;
     $('[data-w-body-label]').textContent = s ? '소개' : '내용';
     $('#w-b').placeholder = s ? '무엇을 어떻게 건너뛰는지, 어떻게 만들었는지 짧게' : '';
-    $('[data-w-hint]').textContent = s ? '첫 두 줄이 카드에 보입니다. 사이트에 올릴 HTML 파일은 운영진에게 부탁하거나 HQ에서 올려 주세요.' : '로그인한 회원 모두가 봅니다. 연락처 같은 개인정보는 쓰지 마세요.';
+    $('[data-w-hint]').textContent = s ? '첫 두 줄이 카드에 보입니다.' : '로그인한 회원 모두가 봅니다. 연락처 같은 개인정보는 쓰지 마세요.';
     $('#w-t').placeholder = s ? '예: 시험시간표 생성기' : '예: 로그인 세션이 자꾸 풀려요';
-    $('[data-w-go]').textContent = s ? '올리기' : '글 올리기';
-    paintCats();
+    $('#w-t').value = post ? post.title : '';
+    $('#w-b').value = post ? post.body || '' : '';
+    $('#w-url').value = post && post.url ? post.url : '';
+    $('[data-w-go]').textContent = post ? '저장' : s ? '올리기' : '글 올리기';
+    paintCats(); syncSrc();
     wDlg.showModal();
     $('#w-t').focus();
   }
@@ -1071,26 +1216,118 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.6; }
       return b;
     }));
   }
+  $$('[data-src]').forEach((b) => b.addEventListener('click', () => {
+    if (b.disabled) return;
+    wSrc = b.dataset.src;
+    if (wSrc === 'html' && !$('#w-slug').value) { const m = $('#w-url').value.trim().match(/^\/apps\/([a-z0-9-]+)\/?$/); if (m) $('#w-slug').value = m[1]; }
+    syncSrc();
+  }));
   $$('[data-write]').forEach((b) => b.addEventListener('click', () => openWrite(b.dataset.write)));
-  function wFail(text, id) { const e = $('[data-w-err]'); e.textContent = text; e.hidden = false; if (id) { const f = $('#' + id); f.setAttribute('aria-invalid', 'true'); f.focus(); } }
+  function wFail(text, id) { const e = $('[data-w-err]'); e.textContent = text; e.hidden = false; if (id) { const f = $('#' + id); if (f) { f.setAttribute('aria-invalid', 'true'); f.focus(); } } }
   wForm.addEventListener('input', (e) => { if (e.target.removeAttribute) e.target.removeAttribute('aria-invalid'); $('[data-w-err]').hidden = true; });
+
+  // HTML 파일 고르기 · 끌어다 놓기
+  async function takeHtml(file) {
+    $('#w-file').value = '';
+    if (!file) return;
+    if (!/\.html?$/i.test(file.name) && file.type !== 'text/html') return wFail('.html 파일만 올릴 수 있습니다.');
+    if (file.size > HTML_MAX) return wFail(`파일이 ${(file.size / 1e6).toFixed(1)}MB입니다. 5MB 이하로 줄여 주세요.`);
+    const text = await file.text();
+    if (!/<html[\s>]/i.test(text)) return wFail('HTML 파일이 아닌 것 같습니다. <html> 로 된 파일을 골라 주세요.');
+    wHtml = text; $('[data-w-err]').hidden = true;
+    $('[data-w-file-name]').textContent = `${file.name} · ${Math.max(1, Math.round(file.size / 1024))}KB`;
+    if (!$('#w-slug').value) $('#w-slug').value = file.name.replace(/\.html?$/i, '').toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 49);
+  }
+  $('#w-file').addEventListener('change', (e) => takeHtml(e.target.files[0]));
+  const drop = $('[data-w-drop]');
+  drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('over'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+  drop.addEventListener('drop', (e) => { e.preventDefault(); drop.classList.remove('over'); takeHtml(e.dataTransfer.files[0]); });
+
+  // 썸네일: 큰 그림은 1200px 안으로 줄이고 2MB 이하가 될 때까지 압축 (움직이는 GIF 는 2MB 이하면 그대로)
+  function toBlob(canvas, type, q) { return new Promise((ok) => canvas.toBlob(ok, type, q)); }
+  async function shrinkImage(file) {
+    if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type)) throw new Error('PNG·JPG·WebP·GIF 그림만 쓸 수 있습니다.');
+    if (file.size > 20e6) throw new Error('그림이 너무 큽니다. 20MB 이하 그림을 골라 주세요.');
+    if (file.type === 'image/gif' && file.size <= IMG_MAX) return { blob: file, type: 'image/gif', ext: 'gif' };
+    const url = URL.createObjectURL(file);
+    try {
+      const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error('그림을 읽지 못했습니다.')); i.src = url; });
+      const k = Math.min(1, 1200 / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(img.naturalWidth * k)); c.height = Math.max(1, Math.round(img.naturalHeight * k));
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      for (const q of [0.86, 0.76, 0.64, 0.5]) {
+        let blob = await toBlob(c, 'image/webp', q);
+        let type = 'image/webp';
+        if (!blob || blob.type !== 'image/webp') { blob = await toBlob(c, 'image/jpeg', q); type = 'image/jpeg'; }
+        if (blob && blob.size <= IMG_MAX) return { blob, type, ext: type === 'image/webp' ? 'webp' : 'jpg' };
+      }
+      throw new Error('2MB 이하로 줄이지 못했습니다. 더 작은 그림을 골라 주세요.');
+    } finally { URL.revokeObjectURL(url); }
+  }
+  $('#w-thumb').addEventListener('change', async (e) => {
+    const file = e.target.files[0]; e.target.value = '';
+    if (!file) return;
+    try {
+      const out = await shrinkImage(file);
+      if (wThumb.preview) URL.revokeObjectURL(wThumb.preview);
+      wThumb = { url: wThumb.url, blob: out.blob, type: out.type, ext: out.ext, preview: URL.createObjectURL(out.blob) };
+      setThumbPreview(); $('[data-w-err]').hidden = true;
+    } catch (x) { wFail(x.message); }
+  });
+  $('[data-w-thumb-clear]').addEventListener('click', () => { if (wThumb.preview) URL.revokeObjectURL(wThumb.preview); wThumb = { url: null, blob: null, preview: null, type: null }; setThumbPreview(); });
+  wDlg.addEventListener('close', () => { if (wThumb.preview) URL.revokeObjectURL(wThumb.preview); });
+  const myThumbPath = (u) => { const m = String(u || '').match(/\/post-thumbs\/(.+)$/); return m && m[1].startsWith(user.id + '/') ? m[1] : null; };
+
+  async function publishHtml(slug, title) {
+    const { data, error } = await sb.functions.invoke('publish-wiki', { body: { slug, folder: 'apps', title, html: wHtml } });
+    if (!error) return data;
+    let text = 'HTML 파일을 올리지 못했습니다. 잠시 후 다시 해 주세요.';
+    try { const j = await error.context.json(); if (j && j.error) text = j.error; } catch (x) { if (error.context && error.context.status === 404) text = '파일 올리기 설정이 아직 끝나지 않았습니다. (publish-wiki 함수)'; }
+    throw new Error(text);
+  }
   wForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (wBusy) return;
-    const title = $('#w-t').value.trim(), body = $('#w-b').value.trim(), url = $('#w-url').value.trim();
+    const title = $('#w-t').value.trim(), body = $('#w-b').value.trim();
+    let url = $('#w-url').value.trim();
+    const s = wKind === 'showcase';
     if (!title) return wFail('제목을 넣어 주세요.', 'w-t');
-    if (wKind === 'showcase') {
-      if (!url) return wFail('결과물을 열어 볼 주소를 넣어 주세요.', 'w-url');
+    let slug = null;
+    if (s && wSrc === 'html') {
+      slug = $('#w-slug').value.trim().toLowerCase();
+      if (!SLUG_RULE.test(slug)) return wFail('주소 이름은 영문 소문자·숫자·하이픈(-)으로 2~49자로 정해 주세요. 예: exam-planner', 'w-slug');
+      if (!wHtml) { if (wOwnSlug && slug === wOwnSlug) slug = null; else return wFail('올릴 HTML 파일을 골라 주세요.'); }
+      url = `/apps/${slug || wOwnSlug}/`;
+    } else if (s) {
+      if (!url) return wFail('결과물을 열어 볼 주소를 넣거나, HTML 파일을 올려 주세요.', 'w-url');
       if (!/^https:\/\/[^\s<>"]+$/i.test(url) && !/^\/[A-Za-z0-9/_.~%-]*$/.test(url)) return wFail('주소는 https:// 로 시작하거나 /apps/이름/ 처럼 사이트 안의 주소여야 합니다.', 'w-url');
     } else if (!body) return wFail('내용을 넣어 주세요.', 'w-b');
-    wBusy = true; const go = $('[data-w-go]'); go.disabled = true;
-    const row = { kind: wKind, category: wCat, title, body: body || null, url: wKind === 'showcase' ? url : null };
-    const { error } = await sb.from('posts').insert(row).select('id').single();
-    wBusy = false; go.disabled = false;
-    if (error) return wFail(errText(error, '올리기'));
-    wDlg.close();
-    toast(wKind === 'showcase' ? '결과물을 올렸습니다.' : '글을 올렸습니다.');
-    refreshAll(wKind);
+    wBusy = true; const go = $('[data-w-go]'); B.setBusy(go, true, slug ? '올리는 중…' : '저장하는 중…');
+    try {
+      if (slug) await publishHtml(slug, title);
+      let thumbUrl = wThumb.url;
+      if (wThumb.blob) {
+        const path = `${user.id}/${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.${wThumb.ext}`;
+        const upl = await sb.storage.from('post-thumbs').upload(path, wThumb.blob, { contentType: wThumb.type, upsert: false });
+        if (upl.error) throw new Error(/row-level|403|Unauthorized/i.test(upl.error.message || '') ? '썸네일을 올릴 권한이 없습니다.' : /size|413/i.test(upl.error.message || '') ? '그림이 2MB를 넘습니다.' : '썸네일을 올리지 못했습니다.');
+        thumbUrl = sb.storage.from('post-thumbs').getPublicUrl(path).data.publicUrl;
+      }
+      const row = { category: wCat, title, body: body || null, url: s ? url : null };
+      const prevThumb = wEdit ? wEdit.thumb_url || null : null;
+      if (canUp() || thumbUrl !== prevThumb) row.thumb_url = thumbUrl || null;
+      const res = wEdit
+        ? await sb.from('posts').update(row).eq('id', wEdit.id).select('id').single()
+        : await sb.from('posts').insert({ ...row, kind: wKind }).select('id').single();
+      if (res.error) throw new Error(/upload not allowed|not your image/.test(res.error.message || '') ? '썸네일을 붙일 권한이 없습니다.' : errText(res.error, wEdit ? '저장' : '올리기'));
+      // 바꾼 썸네일의 예전 그림은 지운다 (내 폴더 것만)
+      if (prevThumb && prevThumb !== (row.thumb_url === undefined ? prevThumb : row.thumb_url)) { const old = myThumbPath(prevThumb); if (old) sb.storage.from('post-thumbs').remove([old]); }
+      if (wEdit) { byId.delete(wEdit.id); }
+      wDlg.close();
+      toast(slug ? '올렸습니다. 페이지는 1~몇 분 뒤 열립니다.' : wEdit ? '고쳤습니다.' : s ? '결과물을 올렸습니다.' : '글을 올렸습니다.');
+      refreshAll(wKind); loadUpload();
+    } catch (x) { wFail(x.message || '저장하지 못했습니다.'); }
+    finally { wBusy = false; B.setBusy(go, false); }
   });
 
   /* ===== 자세히 · 좋아요 · 댓글 ===== */
@@ -1131,6 +1368,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.6; }
     like.setAttribute('aria-label', `좋아요 ${r.likes || 0}${r.liked ? ', 누름' : ''}`);
     $('[data-d-likes]').textContent = String(r.likes || 0);
     $('[data-d-del]').hidden = !(r.author === user.id || isStaff);
+    $('[data-d-edit]').hidden = r.author !== user.id;
     disarmDel();
     $('[data-d-hide]').hidden = !isStaff;
     $('[data-d-hide]').textContent = r.hidden ? '다시 보이기' : '숨기기';
@@ -1189,6 +1427,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.6; }
     if (cur === r) paintDetail();
     repaintLists();
   });
+  $('[data-d-edit]').addEventListener('click', () => { if (!cur) return; const r = cur; dDlg.close(); openWrite(r.kind, r); });
   const delBtn = $('[data-d-del]');
   function disarmDel() { delBtn.classList.remove('armed'); delBtn.textContent = '지우기'; }
   delBtn.addEventListener('click', async () => {
@@ -1199,6 +1438,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.6; }
     delBtn.disabled = false;
     if (error) { dErr(errText(error, '지우기')); return; }
     dDlg.close(); toast('지웠습니다.');
+    const oldPic = myThumbPath(r.thumb_url); if (oldPic) sb.storage.from('post-thumbs').remove([oldPic]);
     byId.delete(r.id);
     refreshAll(r.kind);
   });
@@ -1491,7 +1731,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.6; }
 
   /* ===== 시작 ===== */
   route(true);
-  await Promise.all([loadHome(), loadNotices(), loadCounts(), loadDockets(), loadRoutes(), loadCrewCount()]);
+  await Promise.all([loadHome(), loadNotices(), loadCounts(), loadDockets(), loadRoutes(), loadCrewCount(), loadUpload()]);
 })();
 </script>
 <script src="/assets/track.js" defer></script>
