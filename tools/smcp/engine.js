@@ -120,12 +120,39 @@ function beep(freq, dur, vol) {
   o.connect(g).connect(c.destination); o.start(); o.stop(c.currentTime + (dur || 60) / 1000);
 }
 
+/* 영어 목소리 고르기
+   안드로이드 Chrome 등은 목소리를 직접 지정하지 않으면 lang 을 무시하고 기기 기본(한국어) 목소리로 읽음.
+   그래서 반드시 영어 목소리 객체를 찾아서 지정함. 목록은 늦게 도착할 수 있어서 기다렸다가 고름 */
 let voice = null;
+const isEn = v => /^en([-_]|$)/i.test(v.lang || '') && !/ko|kr|korea/i.test(v.lang + ' ' + v.name);
+function score(v) {
+  const l = (v.lang || '').replace('_', '-').toLowerCase(), n = (v.name || '').toLowerCase();
+  let s = 0;
+  if (l === 'en-gb') s += 30; else if (l === 'en-us') s += 25; else if (/en-(au|ie|in|za|nz|ca)/.test(l)) s += 18; else s += 10;
+  if (/google|natural|neural|premium|enhanced/.test(n)) s += 8;
+  if (/daniel|serena|kate|arthur|samantha|karen|moira|libby|ryan|sonia/.test(n)) s += 5;
+  if (v.localService) s += 2;
+  return s;
+}
 function pickVoice() {
-  const vs = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
-  voice = vs.find(v => /en-GB/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null;
+  const vs = ((window.speechSynthesis && speechSynthesis.getVoices()) || []).filter(isEn);
+  voice = vs.sort((a, b) => score(b) - score(a))[0] || null;
+  return voice;
+}
+let voicesReady = null;
+function ensureVoice() {
+  if (voice || !window.speechSynthesis) return Promise.resolve(voice);
+  if (pickVoice()) return Promise.resolve(voice);
+  if (!voicesReady) voicesReady = new Promise(res => {
+    const done = () => { pickVoice(); res(voice); };
+    speechSynthesis.addEventListener && speechSynthesis.addEventListener('voiceschanged', done, { once: true });
+    let n = 0; const poll = setInterval(() => { if (pickVoice() || ++n > 20) { clearInterval(poll); res(voice); } }, 100);
+  });
+  return voicesReady;
 }
 if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+/* 이 기기에 영어 목소리가 있는지 (안내 문구용) */
+function voiceInfo() { return ensureVoice().then(v => v ? { ok: true, name: v.name, lang: v.lang } : { ok: !window.speechSynthesis ? null : false }); }
 
 let speakToken = 0;
 function stopSpeaking() { speakToken++; if (window.speechSynthesis) speechSynthesis.cancel(); }
@@ -133,7 +160,8 @@ function stopSpeaking() { speakToken++; if (window.speechSynthesis) speechSynthe
 function speak(text, opts) {
   opts = opts || {};
   const my = ++speakToken;
-  return new Promise(res => {
+  return ensureVoice().then(() => new Promise(res => {
+    if (my !== speakToken) return res();
     squelch();
     if (!window.speechSynthesis) return setTimeout(res, 600);
     speechSynthesis.cancel();
@@ -149,7 +177,7 @@ function speak(text, opts) {
       if (!p.trim()) return setTimeout(nextPart, i > 1 ? 700 : 0);
       const u = new SpeechSynthesisUtterance(p.replace(/-/g, ' '));
       if (voice) u.voice = voice;
-      u.lang = voice ? voice.lang : 'en-GB'; u.rate = opts.rate || .92;
+      u.lang = voice ? voice.lang.replace('_', '-') : 'en-US'; u.rate = opts.rate || .92;
       // 목소리가 없는 기기에서는 onend 가 안 올 수 있어서, 길이로 어림한 시간이 지나면 넘어감
       let fired = false;
       const after = () => { if (fired) return; fired = true; clearTimeout(guard); setTimeout(nextPart, i < parts.length ? 700 : 0); };
@@ -158,7 +186,7 @@ function speak(text, opts) {
       speechSynthesis.speak(u);
     };
     setTimeout(nextPart, 180);
-  });
+  }));
 }
 
 /* ───────── 음성인식 (누르고 말하기) ─────────
@@ -209,5 +237,5 @@ const best = {
 
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-window.SMCP_ENGINE = { D, norm, grade, skeleton, scenario, fill, audio, noise, squelch, beep, speak, stopSpeaking, listener, SR: !!SR, best, esc };
+window.SMCP_ENGINE = { D, norm, grade, skeleton, scenario, fill, audio, noise, squelch, beep, speak, stopSpeaking, voiceInfo, listener, SR: !!SR, best, esc };
 })();

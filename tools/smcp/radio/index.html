@@ -297,6 +297,7 @@ function open(id) {
   $('#lbMeta').textContent = `${sc.ship.name} · ${sc.ship.callsign}`;
   $('#entries').innerHTML = `<li class="empty">아직 기록이 없어요. 무전기의 PWR을 눌러 전원을 켜세요.</li>`;
   $('#subs').checked = false; applySubs();
+  E.voiceInfo().then(i => { if (i.ok === false) entry('note', '', '이 기기에는 영어 읽기 목소리가 없어서 상대 말이 한국어 발음으로 나올 수 있어요. 휴대폰 설정의 텍스트 음성 변환(TTS)에서 영어 음성 데이터를 내려받거나, PC의 Chrome으로 열어 주세요.'); });
   $('#pick').hidden = true; $('#play').hidden = false; $('#toPick').hidden = false;
   $('#wrap').classList.add('playing');
   setType(typeMode);
