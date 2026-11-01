@@ -4,555 +4,93 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMCP 무전 교신 훈련소 | BYPASS</title>
-<meta name="description" content="상대 무전을 듣고, 버튼을 누르고 말하면 바로 채점되는 SMCP VHF 교신 훈련장.">
+<meta name="description" content="연습실에서 SMCP 표준 문장을 익히고, 실전 교신에서 무전기를 잡고 VTS와 교신해 보는 훈련장.">
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#05070b">
+<meta name="theme-color" content="#0a1220">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<link rel="icon" href="/assets/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=IBM+Plex+Sans+KR:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
 <style>
-/* BYPASS · SMCP 무전 교신 훈련소
-   화면과 엔진은 이 파일, 문제 데이터는 scenarios.js. 문제를 고칠 때는 scenarios.js 만 고치면 됩니다. */
+@font-face{font-family:'DSEG7';src:url(fonts/DSEG7Classic-Bold.woff2) format('woff2');font-display:block}
 :root{
-  color-scheme: dark;
-  --ink:#05070b; --deck:#0b1018; --panel:#101722; --ivory:#eee8dd; --pewter:#8d97a4; --dim:#5b6572;
-  --hair:rgba(238,232,221,.13); --faint:rgba(238,232,221,.06);
-  --brass:#c9ae78; --brass-soft:rgba(201,174,120,.12);
-  --ember:#c9584c; --ember-soft:rgba(201,88,76,.14);
-  --sea:#7fb2d9; --sea-soft:rgba(127,178,217,.12);
-  --ok:#7cc29a; --ok-soft:rgba(124,194,154,.12);
-  --f-mono:'DM Mono',ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+  --night:#0a1220; --hull:#121c2c; --line:rgba(214,222,232,.12);
+  --paper:#e6e1d4; --mist:#93a1b3; --lamp:#f0a63a; --lamp-dim:rgba(240,166,58,.14); --tx:#e2493b;
   --f-ui:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
 }
 *{box-sizing:border-box}
-[hidden]{display:none!important}
-html,body{margin:0;background:var(--ink);color:var(--ivory)}
-body{font-family:var(--f-ui);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh}
-button,input{font:inherit;color:inherit}
-a{color:var(--brass)}
-:focus-visible{outline:1px solid var(--brass);outline-offset:3px}
-.wrap{max-width:760px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) 16px max(32px,env(safe-area-inset-bottom))}
-.mono{font-family:var(--f-mono)}
+html,body{margin:0;background:var(--night);color:var(--paper)}
+body{font-family:var(--f-ui);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;min-height:100vh}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--lamp);outline-offset:3px}
+.wrap{max-width:880px;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) 18px 48px}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--mist);padding-bottom:40px}
+.top a{text-decoration:none}
+.top b{color:var(--paper);font-weight:600;letter-spacing:.04em}
 
-/* top bar */
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0 18px;border-bottom:1px solid var(--hair);margin-bottom:22px}
-.top .brand{font-family:var(--f-mono);font-size:11px;letter-spacing:.28em;color:var(--pewter);text-decoration:none}
-.top .brand b{color:var(--brass);font-weight:500}
-.ghost{background:none;border:1px solid var(--hair);border-radius:999px;padding:6px 14px;font-size:13px;color:var(--pewter);cursor:pointer;text-decoration:none}
-.ghost:hover{color:var(--ivory);border-color:var(--pewter)}
+.hero{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center;margin-bottom:44px}
+.lcd{background:var(--lamp);color:#2a1806;border-radius:10px;padding:14px 18px 10px;box-shadow:inset 0 0 0 3px #1b1409,inset 0 0 26px rgba(80,40,0,.45),0 0 40px rgba(240,166,58,.18);position:relative;min-width:150px}
+.lcd small{display:flex;justify-content:space-between;font-size:11px;font-weight:600;letter-spacing:.06em;opacity:.8}
+.lcd .ch{font-family:'DSEG7',monospace;font-size:64px;line-height:1;position:relative;text-align:right;margin-top:6px}
+.lcd .ch::before{content:'88';position:absolute;right:0;opacity:.09}
+.blink{animation:blink 1.1s steps(2,start) infinite}
+@keyframes blink{to{visibility:hidden}}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.2;margin:0 0 8px;font-weight:600;letter-spacing:-.015em}
+.hero p{margin:0;color:var(--mist);max-width:34em}
 
-/* home */
-.kick{font-family:var(--f-mono);font-size:11px;letter-spacing:.3em;color:var(--brass);text-transform:uppercase}
-h1{font-size:30px;line-height:1.25;margin:8px 0 8px;font-weight:600;letter-spacing:-.01em}
-.lead{color:var(--pewter);margin:0 0 26px}
-.notice{border:1px solid var(--hair);background:var(--faint);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--pewter);margin-bottom:22px}
-.notice b{color:var(--ivory);font-weight:500}
-.sector{border:1px solid var(--hair);border-radius:14px;padding:16px 16px 8px;margin-bottom:14px;background:var(--deck)}
-.sector-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.sector-no{font-family:var(--f-mono);font-size:12px;color:var(--ink);background:var(--brass);border-radius:4px;padding:1px 7px;font-weight:500}
-.sector-h h2{margin:0;font-size:18px;font-weight:600}
-.sector-h .rank{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;color:var(--dim)}
-.sector p{margin:4px 0 10px;color:var(--pewter);font-size:13.5px}
-.scen{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--faint);padding:11px 2px;cursor:pointer}
-.scen:hover .scen-t{color:var(--brass)}
-.scen-t{flex:1;font-size:15px}
-.scen-m{font-family:var(--f-mono);font-size:11.5px;color:var(--dim);white-space:nowrap}
-.best{font-family:var(--f-mono);font-size:12px;min-width:46px;text-align:right;color:var(--dim)}
-.best.pass{color:var(--ok)}
-.linkrow{display:inline-block;margin:0 0 10px;font-size:14px}
-
-/* play */
-.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
-.ch{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;color:var(--sea);border:1px solid var(--sea-soft);background:var(--sea-soft);border-radius:6px;padding:3px 9px}
-.timer{font-family:var(--f-mono);font-size:13px;color:var(--pewter)}
-.timer.late{color:var(--ember)}
-.ptitle{font-size:22px;font-weight:600;margin:0 0 4px}
-.psub{font-family:var(--f-mono);font-size:11.5px;color:var(--dim);letter-spacing:.08em;margin-bottom:14px}
-.brief{border:1px solid var(--brass-soft);background:var(--brass-soft);border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:14px}
-.brief .k{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.24em;color:var(--brass);display:block;margin-bottom:3px}
-.ship{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--f-mono);font-size:12px;color:var(--pewter);margin-top:8px}
-.ship b{color:var(--ivory);font-weight:500}
-
-.log{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
-.msg{border-radius:12px;padding:10px 13px;border:1px solid var(--hair);background:var(--panel);max-width:92%}
-.msg .who{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.2em;display:block;margin-bottom:3px}
-.msg .txt{font-family:var(--f-mono);font-size:14px;line-height:1.55;word-break:break-word}
-.msg.them{align-self:flex-start;border-color:var(--sea-soft)}
-.msg.them .who{color:var(--sea)}
-.msg.me{align-self:flex-end;border-color:var(--brass-soft);background:#14130f}
-.msg.me .who{color:var(--brass)}
-.msg.sys{align-self:center;font-size:12.5px;color:var(--dim);background:none;border:0;padding:2px}
-.msg .replay{background:none;border:0;color:var(--sea);cursor:pointer;font-size:12px;padding:0;margin-left:6px}
-.blur .txt{filter:blur(5px);user-select:none}
-
-.result{border:1px solid var(--hair);border-radius:12px;padding:12px 14px;background:var(--deck);align-self:stretch}
-.score{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
-.score b{font-family:var(--f-mono);font-size:26px;font-weight:500}
-.score b.pass{color:var(--ok)} .score b.fail{color:var(--ember)}
-.score span{font-size:12.5px;color:var(--pewter)}
-.chk{list-style:none;margin:0 0 10px;padding:0}
-.chk li{display:flex;gap:9px;padding:5px 0;border-top:1px solid var(--faint);font-size:14px}
-.chk .ic{font-family:var(--f-mono);width:16px;flex:none}
-.chk .y .ic{color:var(--ok)} .chk .n .ic{color:var(--ember)}
-.chk .tip{display:block;font-size:12.5px;color:var(--pewter)}
-.model{font-size:12.5px;color:var(--pewter)}
-.model .mono{display:block;color:var(--ivory);font-size:13px;margin-top:2px}
-
-/* controls */
-.dock{position:sticky;bottom:0;background:linear-gradient(transparent,var(--ink) 22%);padding-top:22px;padding-bottom:max(10px,env(safe-area-inset-bottom))}
-.hintbox{border:1px dashed var(--hair);border-radius:10px;padding:8px 12px;font-family:var(--f-mono);font-size:13.5px;color:var(--pewter);margin-bottom:10px}
-.toggles{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-.seg{display:inline-flex;border:1px solid var(--hair);border-radius:999px;overflow:hidden}
-.seg button{background:none;border:0;padding:5px 11px;font-size:12.5px;color:var(--pewter);cursor:pointer}
-.seg button[aria-pressed="true"]{background:var(--brass-soft);color:var(--brass)}
-.interim{min-height:22px;font-family:var(--f-mono);font-size:13.5px;color:var(--brass);margin-bottom:8px;text-align:center}
-.ptt{width:100%;border:0;border-radius:999px;padding:17px;font-size:16px;font-weight:600;background:var(--ember);color:#fff;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;transition:transform .08s,box-shadow .2s}
-.ptt.on{transform:scale(.985);box-shadow:0 0 0 6px var(--ember-soft),0 0 34px rgba(201,88,76,.45)}
-.ptt:disabled{background:#2a2f37;color:var(--dim);cursor:default;box-shadow:none}
-.typerow{display:flex;gap:8px;margin-top:10px}
-.typerow input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--hair);border-radius:10px;padding:11px 12px;font-family:var(--f-mono);font-size:14px}
-.btn{border:1px solid var(--brass);background:var(--brass);color:var(--ink);border-radius:10px;padding:10px 16px;font-weight:600;cursor:pointer;white-space:nowrap}
-.btn.line{background:none;color:var(--brass)}
-.btn:disabled{opacity:.4;cursor:default}
-.next{display:flex;gap:8px;margin-top:4px}
-.next .btn{flex:1}
-.small{font-size:12px;color:var(--dim);text-align:center;margin-top:8px}
-
-.done{text-align:center;padding:18px 0 6px}
-.done b{font-family:var(--f-mono);font-size:52px;font-weight:500;display:block;line-height:1.1}
-@media (max-width:480px){h1{font-size:25px}.msg{max-width:100%}}
+.rooms{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.room{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:16px;padding:22px 22px 20px;background:var(--hull);text-decoration:none;transition:border-color .15s}
+.room:hover{border-color:rgba(214,222,232,.35)}
+.room h2{margin:0 0 6px;font-size:22px;font-weight:600}
+.room p{margin:0 0 18px;color:var(--mist);font-size:15px;flex:1}
+.room ul{margin:0 0 20px;padding:0;list-style:none;font-size:14px;color:var(--paper)}
+.room li{padding:6px 0;border-top:1px solid var(--line)}
+.go{align-self:flex-start;font-weight:600;font-size:15px;border-radius:999px;padding:10px 18px;border:1px solid var(--paper)}
+.room.live{background:linear-gradient(160deg,#1a1410,#121c2c 60%);border-color:rgba(240,166,58,.35)}
+.room.live .go{background:var(--lamp);border-color:var(--lamp);color:#1d1205}
+.foot{margin-top:28px;font-size:14px;color:var(--mist)}
+.foot a{color:var(--paper)}
+@media (max-width:680px){.rooms{grid-template-columns:1fr}.hero{grid-template-columns:1fr;gap:18px}.lcd{justify-self:start}}
+@media (prefers-reduced-motion:reduce){.blink{animation:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="top">
-    <a class="brand" href="/"><b>BYPASS</b> · SMCP RADIO SCHOOL</a>
-    <button class="ghost" id="homeBtn" hidden>← 목록</button>
-  </header>
+  <header class="top"><a href="/"><b>BYPASS</b></a><span>훈련용 가상 교신입니다</span></header>
 
-  <!-- ══════════ 목록 화면 ══════════ -->
-  <main id="home">
-    <div class="kick">VHF · IMO SMCP</div>
-    <h1>SMCP 무전 교신 훈련소</h1>
-    <p class="lead">상대 무전을 듣고, 버튼을 누른 채 말하면 바로 채점됩니다. 마이크가 안 되면 타자로 답해도 돼요.</p>
-    <div class="notice" id="support"></div>
-    <div id="sectors"></div>
-    <p class="small">모든 교신은 훈련용 가상 상황입니다. 실제 기관의 채널·절차와 다를 수 있어요.</p>
-  </main>
-
-  <!-- ══════════ 교신 화면 ══════════ -->
-  <main id="play" hidden>
-    <div class="bar">
-      <span class="ch" id="chan">CH 16</span>
-      <span class="timer" id="timer"></span>
+  <section class="hero">
+    <div class="lcd" aria-hidden="true"><small><span>CH</span><span class="blink">CALL</span></small><div class="ch">16</div></div>
+    <div>
+      <h1>SMCP 무전 교신 훈련소</h1>
+      <p>연습실에서 표준 문장을 한 문장씩 익히고, 실전 교신에서 무전기를 직접 잡아 VTS와 교신해 보세요.</p>
     </div>
-    <h2 class="ptitle" id="ptitle"></h2>
-    <div class="psub" id="psub"></div>
-    <div class="brief"><span class="k">BRIEFING</span><span id="brief"></span>
-      <div class="ship" id="shipinfo"></div>
-    </div>
+  </section>
 
-    <div class="log" id="log" aria-live="polite"></div>
+  <div class="rooms">
+    <a class="room" href="practice/">
+      <h2>연습실</h2>
+      <p>문장을 보고, 듣고, 따라 말해요. 말하자마자 무엇이 빠졌는지 채점표가 나와요.</p>
+      <ul>
+        <li>힌트를 빈칸 뼈대나 전체 문장으로 켜고 끌 수 있어요</li>
+        <li>문장마다 표준 예시와 해설</li>
+        <li>표준 절차부터 비상 교신까지 12개 상황</li>
+      </ul>
+      <span class="go">연습실 들어가기</span>
+    </a>
+    <a class="room live" href="radio/">
+      <h2>실전 교신</h2>
+      <p>힌트 없이 무전기를 잡아요. 채널을 맞추고, 송화기를 누르고, 상대의 말을 듣고 답해요.</p>
+      <ul>
+        <li>채널이 틀리면 아무도 대답하지 않아요</li>
+        <li>못 알아들으면 상대가 되물어요</li>
+        <li>채점은 교신이 끝난 뒤 무선 일지로</li>
+      </ul>
+      <span class="go">무전기 켜기</span>
+    </a>
+  </div>
 
-    <div class="dock" id="dock">
-      <div class="toggles">
-        <span class="seg" aria-label="힌트">
-          <button data-hint="0" aria-pressed="true">힌트 없음</button>
-          <button data-hint="1" aria-pressed="false">뼈대</button>
-          <button data-hint="2" aria-pressed="false">전체 문장</button>
-        </span>
-        <span class="seg" aria-label="자막">
-          <button data-sub="1" aria-pressed="true">자막 켬</button>
-          <button data-sub="0" aria-pressed="false">자막 끔</button>
-        </span>
-      </div>
-      <div class="hintbox" id="hint" hidden></div>
-
-      <div id="answerArea">
-        <div class="interim" id="interim"></div>
-        <button class="ptt" id="ptt" disabled>● 누른 채로 말하기</button>
-        <div class="typerow">
-          <input id="typed" placeholder="타자로 답하기 (Enter)" autocomplete="off" autocapitalize="off" spellcheck="false">
-          <button class="btn line" id="send">보내기</button>
-        </div>
-        <div class="small" id="pttHelp">PC에서는 스페이스바를 누르고 있어도 돼요.</div>
-      </div>
-      <div class="next" id="nextArea" hidden>
-        <button class="btn line" id="retry">다시 하기</button>
-        <button class="btn" id="next">다음 →</button>
-      </div>
-    </div>
-  </main>
+  <p class="foot">발음 알파벳과 숫자부터 다지고 싶다면 <a href="/tools/alfa-to-zulu/">Alfa to Zulu</a>에서 시작하세요.</p>
 </div>
-
-<script src="scenarios.js"></script>
-<script>
-(() => {
-'use strict';
-const D = window.SMCP;
-const $ = s => document.querySelector(s);
-const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-
-/* ───────────── 1. 문장 정리 (채점용) ─────────────
-   소문자 → 문장부호 제거 → 잘못 알아들은 말 고치기 → 숫자 말을 숫자로 → 붙은 숫자 합치기
-   "Zero-niner-zero" / "0 9 0" / "090" → 모두 "090". "ninety"는 그대로 남아서 틀림 처리됨 */
-const NUM = { zero:'0', zeero:'0', one:'1', wun:'1', two:'2', too:'2', three:'3', tree:'3',
-  four:'4', fower:'4', five:'5', fife:'5', six:'6', seven:'7', eight:'8', ait:'8', nine:'9', niner:'9', nina:'9' };
-const aliasList = [];
-for (const [right, wrongs] of Object.entries(D.aliases || {}))
-  for (const w of wrongs) aliasList.push([w.toLowerCase().replace(/[-.']/g, ' ').replace(/\s+/g, ' ').trim(), right]);
-aliasList.sort((a, b) => b[0].length - a[0].length);
-
-function norm(s) {
-  let t = ' ' + String(s).toLowerCase().replace(/[-–—_/]/g, ' ').replace(/[^a-z0-9à-ÿ\s]/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
-  for (const [w, r] of aliasList) t = t.split(' ' + w + ' ').join(' ' + r + ' ');
-  let toks = t.trim().split(' ').filter(Boolean).map(w => NUM[w] ?? w);
-  const out = [];
-  for (const w of toks) {
-    if (/^\d+$/.test(w) && out.length && /^\d+$/.test(out[out.length - 1])) out[out.length - 1] += w;
-    else out.push(w);
-  }
-  return ' ' + out.join(' ') + ' ';
-}
-function count(hay, needle) {
-  if (!needle.trim()) return 0;
-  let n = 0, i = 0;
-  while ((i = hay.indexOf(needle, i)) !== -1) { n++; i += needle.length - 1; }
-  return n;
-}
-
-/* ───────────── 2. 채점 ───────────── */
-function fill(s, sc) { return s.replace(/\{ship\}/g, sc.ship.name).replace(/\{station\}/g, sc.station); }
-function resolve(c) {
-  if (typeof c === 'string') {
-    const p = D.presets[c];
-    if (!p) { console.warn('scenarios.js: 없는 preset 이름', c); return { label: c, say: [c] }; }
-    return p;
-  }
-  return c;
-}
-function grade(answer, turn, sc, late) {
-  const a = norm(answer);
-  const items = turn.check.map(resolve).map(c => {
-    let ok;
-    if (c.not) ok = !c.not.some(x => count(a, norm(fill(x, sc))) > 0);
-    else {
-      const need = c.times || 1;
-      ok = (c.say || []).some(x => count(a, norm(fill(x, sc))) >= need);
-    }
-    return { label: c.label, tip: c.tip ? fill(c.tip, sc) : '', ok, pts: c.pts || 1 };
-  });
-  if (late) items.push({ label: '제한 시간 안에 답하기', tip: `이 상황은 ${sc.timeLimit}초 안에 보내야 해요.`, ok: false, pts: 1 });
-  const total = items.reduce((s, x) => s + x.pts, 0);
-  const got = items.reduce((s, x) => s + (x.ok ? x.pts : 0), 0);
-  return { items, score: Math.round(got / total * 100) };
-}
-
-/* ───────────── 3. 힌트 뼈대: 표준 답안에서 값만 빈칸으로 ───────────── */
-const KEEP = new Set(('this is over out my your i will am is are the of to at in on and a an all stations ' +
-  'position course speed eta draft degrees knots miles mile metres metre persons board require request ' +
-  'information intention question answer warning advice instruction correction say again ' +
-  'mayday pan securite call sign negative affirmative changing channel').split(' '));
-function skeleton(model, sc) {
-  // 선명·상대 이름은 통째로 남김 (BYPASS ONE 의 ONE 을 숫자로 보고 지우지 않도록)
-  const NB = '\u00a0';
-  for (const n of [sc.ship.name, sc.station]) model = model.split(n).join(n.replace(/ /g, NB));
-  const out = [];
-  for (const raw of model.split(/ +/)) {
-    const core = raw.toLowerCase().replace(/[^a-z\u00a0-]/g, '');
-    const keep = core && (raw.includes(NB) || KEEP.has(core) || core === 'pan-pan' ||
-      [sc.ship.name, sc.station].some(n => n.toLowerCase() === core));
-    if (keep) out.push(raw);
-    else {
-      const tail = (raw.match(/[.,]$/) || [''])[0];
-      if (out.length && /^_+[.,]?$/.test(out[out.length - 1]) && !/[.,]$/.test(out[out.length - 1])) out[out.length - 1] = '_____' + tail;
-      else out.push('_____' + tail);
-    }
-  }
-  return out.join(' ');
-}
-
-/* ───────────── 4. 소리: 읽어 주기 + 무전 잡음 ───────────── */
-let ac = null, noiseBuf = null;
-function audio() {
-  if (!ac) {
-    try {
-      ac = new (window.AudioContext || window.webkitAudioContext)();
-      noiseBuf = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
-      const d = noiseBuf.getChannelData(0);
-      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    } catch (e) { ac = null; }
-  }
-  if (ac && ac.state === 'suspended') ac.resume();
-  return ac;
-}
-function noise(vol, dur) {
-  const c = audio(); if (!c) return () => {};
-  const src = c.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
-  const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1800; bp.Q.value = .7;
-  const g = c.createGain(); g.gain.value = vol;
-  src.connect(bp).connect(g).connect(c.destination); src.start();
-  const stop = () => { try { g.gain.setTargetAtTime(0, c.currentTime, .03); src.stop(c.currentTime + .2); } catch (e) {} };
-  if (dur) setTimeout(stop, dur);
-  return stop;
-}
-const squelch = () => noise(.22, 140);
-
-let voice = null;
-function pickVoice() {
-  const vs = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
-  voice = vs.find(v => /en-GB/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null;
-}
-if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-
-function speak(text) {
-  return new Promise(res => {
-    squelch();
-    if (!window.speechSynthesis) return setTimeout(res, 400);
-    speechSynthesis.cancel();
-    // "..." 는 잡음으로 묻힌 부분: 읽지 않고 잡음만 크게
-    const parts = text.split(/\s*\.\.\.\s*(?:\.\.\.\s*)?/);
-    const bed = noise(.035);
-    let i = 0;
-    const nextPart = () => {
-      if (i >= parts.length) { bed(); setTimeout(() => { squelch(); res(); }, 150); return; }
-      const p = parts[i++];
-      if (i > 1) noise(.25, 700);
-      if (!p.trim()) return setTimeout(nextPart, i > 1 ? 700 : 0);
-      const u = new SpeechSynthesisUtterance(p.replace(/-/g, ' '));
-      if (voice) u.voice = voice;
-      u.lang = voice ? voice.lang : 'en-GB'; u.rate = .92;
-      u.onend = () => setTimeout(nextPart, i < parts.length ? 700 : 0);
-      u.onerror = u.onend;
-      speechSynthesis.speak(u);
-    };
-    setTimeout(nextPart, 180);
-  });
-}
-
-/* ───────────── 5. 음성인식 (PTT) ───────────── */
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let rec = null, recText = '', recLive = '', recPrev = '', holding = false, wantSubmit = false;
-function startListen() {
-  if (!SR || busy || $('#ptt').disabled) return;
-  if (window.speechSynthesis) speechSynthesis.cancel();
-  holding = true; wantSubmit = false; recText = ''; recLive = ''; recPrev = '';
-  $('#ptt').classList.add('on'); $('#ptt').textContent = '● 말하는 중… 다 말하면 떼세요';
-  $('#interim').textContent = '';
-  noise(.12, 90);
-  rec = new SR(); rec.lang = 'en-US'; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
-  rec.onresult = e => {
-    let fin = '', mid = '';
-    for (let i = 0; i < e.results.length; i++) (e.results[i].isFinal ? (fin += e.results[i][0].transcript + ' ') : (mid += e.results[i][0].transcript));
-    recText = fin; recLive = fin + mid; $('#interim').textContent = (recPrev + ' ' + recLive).trim();
-  };
-  rec.onerror = e => {
-    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-      $('#interim').textContent = '마이크 권한이 없어요. 타자로 답해 주세요.';
-      $('#ptt').disabled = true;
-    } else if (e.error === 'network') {
-      $('#interim').textContent = '음성인식에 인터넷 연결이 필요해요. 타자로 답해 주세요.';
-    }
-  };
-  rec.onend = () => {
-    const heard = (recPrev + ' ' + (recText || recLive)).trim();
-    if (holding) { recPrev = heard; recText = recLive = ''; try { rec.start(); } catch (e) {} return; }   // 말이 끊겨도 버튼을 누르고 있으면 계속 듣기
-    $('#ptt').classList.remove('on'); setPttLabel();
-    if (wantSubmit) {
-      if (heard) submit(heard);
-      else if (!/마이크|인터넷/.test($('#interim').textContent)) $('#interim').textContent = '아무 말도 못 들었어요. 다시 눌러서 말해 주세요.';
-    }
-  };
-  try { rec.start(); } catch (e) {}
-}
-function stopListen() {
-  if (!holding) return;
-  holding = false; wantSubmit = true;
-  noise(.18, 110);
-  try { rec.stop(); } catch (e) {}
-}
-function setPttLabel() { $('#ptt').textContent = SR ? '● 누른 채로 말하기' : '이 브라우저는 음성인식을 지원하지 않아요'; }
-
-/* ───────────── 6. 진행 ───────────── */
-let sc = null, ti = 0, turnScores = [], busy = false, hintLv = 0, subs = true, tStart = 0, tTimer = null;
-const store = {
-  get() { try { return JSON.parse(localStorage.getItem('smcp.best') || '{}'); } catch (e) { return {}; } },
-  set(id, v) { try { const b = store.get(); if (!(b[id] >= v)) { b[id] = v; localStorage.setItem('smcp.best', JSON.stringify(b)); } } catch (e) {} }
-};
-
-function renderHome() {
-  const best = store.get();
-  $('#support').innerHTML = SR
-    ? '<b>Chrome · Edge 권장.</b> 처음 말할 때 마이크 권한을 물어보면 허용해 주세요. 음성인식은 인터넷 연결이 필요해요.'
-    : '<b>이 브라우저는 음성인식을 지원하지 않아요.</b> 타자로 답할 수 있어요. 말로 하려면 Chrome이나 Edge로 열어 주세요.';
-  $('#sectors').innerHTML = D.sectors.map(s => {
-    const list = D.scenarios.filter(x => x.sector === s.no);
-    return `<section class="sector">
-      <div class="sector-h"><span class="sector-no">${s.no}</span><h2>${esc(s.title)}</h2><span class="rank">${esc(s.rank || '')}</span></div>
-      <p>${esc(s.desc || '')}</p>
-      ${s.link ? `<a class="linkrow" href="${esc(s.link)}">Alfa to Zulu에서 연습하기 →</a>` : ''}
-      ${list.map(x => {
-        const b = best[x.id];
-        return `<button class="scen" data-id="${esc(x.id)}">
-          <span class="scen-t">${esc(x.title)}</span>
-          <span class="scen-m">${x.turns.length}턴${x.timeLimit ? ' · ' + x.timeLimit + '초' : ''}</span>
-          <span class="best ${b >= D.passScore ? 'pass' : ''}">${b != null ? b + '점' : '—'}</span></button>`;
-      }).join('')}
-    </section>`;
-  }).join('');
-  $('#home').hidden = false; $('#play').hidden = true; $('#homeBtn').hidden = true;
-  if (window.speechSynthesis) speechSynthesis.cancel();
-  clearInterval(tTimer);
-  window.scrollTo(0, 0);
-}
-
-function open(id) {
-  const base = D.scenarios.find(x => x.id === id); if (!base) return;
-  sc = Object.assign({}, base, { ship: Object.assign({}, D.ship, base.ship || {}) });
-  ti = 0; turnScores = [];
-  $('#home').hidden = true; $('#play').hidden = false; $('#homeBtn').hidden = false;
-  $('#chan').textContent = 'CH ' + String(sc.channel).padStart(2, '0') + ' · ' + sc.station.toUpperCase();
-  $('#ptitle').textContent = sc.title;
-  const sec = D.sectors.find(s => s.no === sc.sector);
-  $('#psub').textContent = `SECTOR ${sc.sector} · ${sec ? sec.title : ''} · ${sc.turns.length}턴`;
-  $('#brief').textContent = sc.brief;
-  $('#shipinfo').innerHTML = `<span>선명 <b>${esc(sc.ship.name)}</b></span><span>호출부호 <b>${esc(sc.ship.callsign)}</b> (${esc(sc.ship.callsignSpoken || '')})</span>`;
-  $('#log').innerHTML = '';
-  sysMsg('준비되면 아래 버튼을 눌러 교신을 시작하세요.');
-  $('#answerArea').hidden = true; $('#nextArea').hidden = false;
-  $('#retry').hidden = true; $('#next').textContent = '교신 시작 ▶';
-  $('#next').onclick = () => { audio(); runTurn(); };
-  $('#timer').textContent = sc.timeLimit ? `제한 ${sc.timeLimit}초` : '';
-  $('#timer').classList.remove('late');
-  updateHint();
-  window.scrollTo(0, 0);
-}
-
-function sysMsg(t) { const d = document.createElement('div'); d.className = 'msg sys'; d.textContent = t; $('#log').appendChild(d); scrollDown(); }
-function themMsg(t) {
-  const d = document.createElement('div'); d.className = 'msg them' + (subs ? '' : ' blur');
-  d.innerHTML = `<span class="who">${esc(sc.station.toUpperCase())} <button class="replay" title="다시 듣기">▶ 다시 듣기</button></span><span class="txt">${esc(t)}</span>`;
-  d.querySelector('.replay').onclick = () => speak(t);
-  $('#log').appendChild(d); scrollDown();
-}
-function meMsg(t) { const d = document.createElement('div'); d.className = 'msg me'; d.innerHTML = `<span class="who">나 · ${esc(sc.ship.name)}</span><span class="txt">${esc(t)}</span>`; $('#log').appendChild(d); scrollDown(); }
-function scrollDown() { requestAnimationFrame(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })); }
-
-async function runTurn(retryLine) {
-  const turn = sc.turns[ti];
-  $('#nextArea').hidden = true; $('#answerArea').hidden = false;
-  $('#interim').textContent = ''; $('#typed').value = '';
-  setBusy(true); updateHint();
-  const line = retryLine || turn.them;
-  if (line) { themMsg(line); await speak(line); }
-  else if (!retryLine) sysMsg('이번엔 내가 먼저 부를 차례예요.');
-  setBusy(false);
-  tStart = Date.now(); startTimer();
-  if (!SR) $('#typed').focus();
-}
-function startTimer() {
-  clearInterval(tTimer);
-  if (!sc.timeLimit) return;
-  const tick = () => {
-    const left = sc.timeLimit - Math.floor((Date.now() - tStart) / 1000);
-    $('#timer').textContent = left >= 0 ? `남은 시간 ${left}초` : `시간 초과 ${-left}초`;
-    $('#timer').classList.toggle('late', left < 0);
-  };
-  tick(); tTimer = setInterval(tick, 250);
-}
-function setBusy(b) {
-  busy = b;
-  $('#ptt').disabled = b || !SR;
-  $('#send').disabled = b;
-  if (b) $('#ptt').textContent = '수신 중…'; else setPttLabel();
-}
-
-function submit(text) {
-  text = text.trim(); if (!text || busy) return;
-  clearInterval(tTimer);
-  const late = sc.timeLimit && (Date.now() - tStart) / 1000 > sc.timeLimit;
-  const turn = sc.turns[ti];
-  meMsg(text);
-  const r = grade(text, turn, sc, late);
-  const pass = r.score >= D.passScore;
-  const box = document.createElement('div'); box.className = 'result';
-  box.innerHTML = `<div class="score"><b class="${pass ? 'pass' : 'fail'}">${r.score}점</b><span>${pass ? '통과' : '통과 기준 ' + D.passScore + '점'}</span></div>
-    <ul class="chk">${r.items.map(x => `<li class="${x.ok ? 'y' : 'n'}"><span class="ic">${x.ok ? '✓' : '✗'}</span><span>${esc(x.label)}${!x.ok && x.tip ? `<span class="tip">${esc(x.tip)}</span>` : ''}</span></li>`).join('')}</ul>
-    <div class="model">표준 예시<span class="mono">${esc(turn.model)}</span></div>`;
-  $('#log').appendChild(box); scrollDown();
-
-  $('#answerArea').hidden = true; $('#nextArea').hidden = false;
-  $('#retry').hidden = false;
-  const last = ti >= sc.turns.length - 1;
-  $('#retry').onclick = () => runTurn(pass ? null : (turn.retry || `${sc.ship.name}, ${sc.station}. Say again. Over.`));
-  if (pass) {
-    turnScores[ti] = Math.max(turnScores[ti] || 0, r.score);
-    $('#next').textContent = last ? '결과 보기' : '다음 턴 →';
-    $('#next').onclick = () => { if (last) finish(); else { ti++; runTurn(); } };
-  } else {
-    turnScores[ti] = Math.max(turnScores[ti] || 0, r.score);
-    $('#retry').textContent = '상대가 되묻기 → 다시 하기';
-    $('#next').textContent = last ? '그냥 끝내기' : '넘어가기 →';
-    $('#next').onclick = () => { if (last) finish(); else { ti++; runTurn(); } };
-    return;
-  }
-  $('#retry').textContent = '다시 하기';
-}
-
-function finish() {
-  const total = Math.round(sc.turns.reduce((s, _, i) => s + (turnScores[i] || 0), 0) / sc.turns.length);
-  store.set(sc.id, total);
-  const d = document.createElement('div'); d.className = 'result done';
-  d.innerHTML = `<span class="kick">교신 종료</span><b class="${total >= D.passScore ? 'pass' : 'fail'}" style="color:var(${total >= D.passScore ? '--ok' : '--ember'})">${total}점</b>
-    <span class="small">턴별 최고 점수의 평균 · ${total >= D.passScore ? '통과' : '다시 도전해 보세요'}</span>`;
-  $('#log').appendChild(d); scrollDown();
-  $('#retry').hidden = false; $('#retry').textContent = '처음부터 다시';
-  $('#retry').onclick = () => open(sc.id);
-  $('#next').textContent = '목록으로'; $('#next').onclick = renderHome;
-}
-
-function updateHint() {
-  const turn = sc && sc.turns[ti];
-  if (!turn || hintLv === 0) { $('#hint').hidden = true; return; }
-  $('#hint').hidden = false;
-  $('#hint').textContent = hintLv === 2 ? turn.model : (turn.hint || skeleton(turn.model, sc));
-}
-
-/* ───────────── 7. 이벤트 ───────────── */
-$('#sectors').addEventListener('click', e => { const b = e.target.closest('.scen'); if (b) open(b.dataset.id); });
-$('#homeBtn').onclick = renderHome;
-document.querySelectorAll('[data-hint]').forEach(b => b.onclick = () => {
-  hintLv = +b.dataset.hint;
-  document.querySelectorAll('[data-hint]').forEach(x => x.setAttribute('aria-pressed', x === b));
-  updateHint();
-});
-document.querySelectorAll('[data-sub]').forEach(b => b.onclick = () => {
-  subs = b.dataset.sub === '1';
-  document.querySelectorAll('[data-sub]').forEach(x => x.setAttribute('aria-pressed', x === b));
-  document.querySelectorAll('.msg.them').forEach(m => m.classList.toggle('blur', !subs));
-});
-const ptt = $('#ptt');
-ptt.addEventListener('pointerdown', e => { e.preventDefault(); try { ptt.setPointerCapture(e.pointerId); } catch (_) {} startListen(); });
-ptt.addEventListener('pointerup', stopListen);
-ptt.addEventListener('pointercancel', stopListen);
-ptt.addEventListener('contextmenu', e => e.preventDefault());
-document.addEventListener('keydown', e => {
-  if (e.code !== 'Space' || e.repeat || $('#play').hidden || $('#answerArea').hidden) return;
-  if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
-  e.preventDefault(); startListen();
-});
-document.addEventListener('keyup', e => {
-  if (e.code !== 'Space' || document.activeElement.tagName === 'INPUT') return;
-  e.preventDefault(); stopListen();
-});
-$('#send').onclick = () => submit($('#typed').value);
-$('#typed').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) submit($('#typed').value); });
-
-window.SMCP_ENGINE = { norm, grade, skeleton };   // 테스트용
-renderHome();
-})();
-</script>
 </body>
 </html>
