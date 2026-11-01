@@ -152,14 +152,74 @@ function ensureVoice() {
 }
 if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 /* 이 기기에 영어 목소리가 있는지 (안내 문구용) */
-function voiceInfo() { return ensureVoice().then(v => v ? { ok: true, name: v.name, lang: v.lang } : { ok: !window.speechSynthesis ? null : false }); }
+function voiceInfo() { if (window.SMCP_VOICE && Object.keys(window.SMCP_VOICE).length) return Promise.resolve({ ok: true, recorded: true }); return ensureVoice().then(v => v ? { ok: true, name: v.name, lang: v.lang } : { ok: !window.speechSynthesis ? null : false }); }
+
+/* ───────── 녹음 파일 (voice/build.py 가 만든 고품질 녹음) ─────────
+   window.SMCP_VOICE = { "fx|대사": "voice/audio/x.mp3", "slow|대사": ..., "model|대사": ... }
+   녹음이 있으면 녹음을, 없으면 브라우저 목소리로 읽음 */
+const BASE = ((document.currentScript && document.currentScript.src) || '').replace(/engine\.js(\?.*)?$/, '');
+const splitParts = text => String(text).split(/\s*\.\.\.\s*(?:\.\.\.\s*)?/).map(p => p.trim()).filter(Boolean);
+const bufCache = {};
+let playing = [];
+function clipUrl(role, part) { const m = window.SMCP_VOICE; return m && m[role + '|' + part] ? BASE + m[role + '|' + part] : null; }
+function loadBuf(url) {
+  if (!bufCache[url]) bufCache[url] = fetch(url).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+    .then(b => new Promise((res, rej) => audio().decodeAudioData(b, res, rej)))
+    .catch(e => { delete bufCache[url]; throw e; });
+  return bufCache[url];
+}
+function playBuf(buf) {
+  return new Promise(res => {
+    const c = audio(); const src = c.createBufferSource(); src.buffer = buf;
+    src.connect(c.destination); src.onended = () => { playing = playing.filter(x => x !== src); res(); };
+    playing.push(src); src.start();
+  });
+}
+/* 대사 녹음을 미리 받아 두기 (교신 시작 전에 불러 두면 끊김 없음) */
+function preload(texts, role) {
+  if (!audio()) return;
+  for (const t of texts) for (const p of splitParts(t || '')) { const u = clipUrl(role || 'fx', p); if (u) loadBuf(u).catch(() => {}); }
+}
 
 let speakToken = 0;
-function stopSpeaking() { speakToken++; if (window.speechSynthesis) speechSynthesis.cancel(); }
-/* 읽어 주기. "..." 는 잡음에 묻힌 부분. opts.rate 로 속도 조절 */
-function speak(text, opts) {
+function stopSpeaking() {
+  speakToken++;
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  for (const s of playing) { try { s.stop(); } catch (e) {} }
+  playing = [];
+}
+/* 읽어 주기. "..." 는 잡음에 묻힌 부분.
+   opts.rate < .85 이면 느린 녹음, opts.role = 'model' 이면 표준 예시 녹음(깨끗한 목소리), opts.bed = 0 이면 잡음 없음 */
+async function speak(text, opts) {
   opts = opts || {};
   const my = ++speakToken;
+  const role = opts.role === 'model' ? 'model' : (opts.rate && opts.rate < .85 ? 'slow' : 'fx');
+  const parts = splitParts(text);
+  const urls = parts.map(p => clipUrl(role, p));
+  if (audio() && parts.length && urls.every(Boolean)) {
+    let bufs = null;
+    try { bufs = await Promise.all(urls.map(loadBuf)); } catch (e) { bufs = null; }
+    if (bufs && my === speakToken) return playClips(bufs, text, opts, my);
+  }
+  if (my !== speakToken) return;
+  return speakTTS(text, opts, my);
+}
+async function playClips(bufs, text, opts, my) {
+  const radio = opts.role !== 'model';
+  if (radio) squelch();
+  const bed = radio ? noise(opts.bed ?? .03) : () => {};
+  await new Promise(r => setTimeout(r, radio ? 160 : 0));
+  const garbled = /\.\.\./.test(text) && /^\s*\.\.\./.test(text);
+  for (let i = 0; i < bufs.length; i++) {
+    if (my !== speakToken) break;
+    if (i > 0 || garbled) { noise(.25, 700); await new Promise(r => setTimeout(r, 700)); }
+    if (my !== speakToken) break;
+    await playBuf(bufs[i]);
+  }
+  bed();
+  if (radio && my === speakToken) { await new Promise(r => setTimeout(r, 120)); squelch(); }
+}
+function speakTTS(text, opts, my) {
   return ensureVoice().then(() => new Promise(res => {
     if (my !== speakToken) return res();
     squelch();
@@ -237,5 +297,5 @@ const best = {
 
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-window.SMCP_ENGINE = { D, norm, grade, skeleton, scenario, fill, audio, noise, squelch, beep, speak, stopSpeaking, voiceInfo, listener, SR: !!SR, best, esc };
+window.SMCP_ENGINE = { D, norm, grade, skeleton, scenario, fill, audio, noise, squelch, beep, speak, stopSpeaking, preload, voiceInfo, listener, SR: !!SR, best, esc };
 })();

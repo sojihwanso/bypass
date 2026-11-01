@@ -140,6 +140,7 @@ h1{font-size:30px;margin:0 0 6px;font-weight:600;letter-spacing:-.01em}
 </div>
 
 <script src="../scenarios.js"></script>
+<script src="../voice/manifest.js"></script>
 <script src="../engine.js"></script>
 <script>
 (() => {
@@ -220,6 +221,7 @@ function turn() {
       </div>
     </div>`;
   bindTurn(t);
+  E.preload([t.them]); E.preload([t.them], 'slow'); E.preload([t.model], 'model');
   if (t.them) setTimeout(() => E.speak(t.them), 250);
   scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -273,7 +275,7 @@ function check(text) {
   const row = document.createElement('div'); row.className = 'row';
   row.innerHTML = `<button class="btn line" id="again">이 문장 다시</button><button class="btn" id="go">${last ? '결과 보기' : '다음 문장'}</button>`;
   $('#stage').appendChild(row);
-  $('#hearModel').onclick = () => { E.audio(); E.speak(t.model, { bed: 0 }); };
+  $('#hearModel').onclick = () => { E.audio(); E.speak(t.model, { role: 'model' }); };
   $('#again').onclick = turn;
   $('#go').onclick = () => { if (last) finish(); else { ti++; turn(); } };
   res.scrollIntoView({ behavior: 'smooth', block: 'start' });
