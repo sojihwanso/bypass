@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>연습실 · SMCP 무전 교신 훈련소 | BYPASS</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0a1220">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* 연습실: 한 문장씩 보고·듣고·따라 말하기. 엔진은 ../engine.js, 문제는 ../scenarios.js */
+:root{
+  color-scheme:dark;
+  --night:#0a1220; --hull:#121c2c; --hull2:#17233a; --line:rgba(214,222,232,.12); --line2:rgba(214,222,232,.22);
+  --paper:#e6e1d4; --mist:#93a1b3; --dim:#647286;
+  --lamp:#f0a63a; --lamp-dim:rgba(240,166,58,.13); --sea:#8cbbe0; --sea-dim:rgba(140,187,224,.12);
+  --ok:#7fc79d; --ok-dim:rgba(127,199,157,.13); --tx:#e2493b; --tx-dim:rgba(226,73,59,.14);
+  --f-ui:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  --f-en:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--night);color:var(--paper)}
+body{font-family:var(--f-ui);font-size:15.5px;line-height:1.65;-webkit-font-smoothing:antialiased;min-height:100vh}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
+.en{font-family:var(--f-en)}
+.wrap{max-width:760px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) 16px max(40px,env(safe-area-inset-bottom))}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;color:var(--mist);padding-bottom:22px}
+.top a{text-decoration:none}
+.top .crumb b{color:var(--paper);font-weight:600}
+.pill{border:1px solid var(--line2);border-radius:999px;padding:6px 13px;background:none;cursor:pointer;color:var(--mist);text-decoration:none;font-size:13.5px}
+.pill:hover{color:var(--paper)}
+
+/* 목록 */
+h1{font-size:30px;margin:0 0 6px;font-weight:600;letter-spacing:-.01em}
+.lead{color:var(--mist);margin:0 0 22px}
+.warn{border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:13.5px;color:var(--mist);margin-bottom:20px}
+.warn b{color:var(--paper);font-weight:500}
+.sector{margin-bottom:26px}
+.sector h2{font-size:17px;margin:0 0 2px;font-weight:600}
+.sector .desc{font-size:13.5px;color:var(--mist);margin:0 0 8px}
+.scen{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--hull);border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:8px;cursor:pointer}
+.scen:hover{border-color:var(--line2)}
+.scen-t{flex:1}
+.scen-m{font-size:12.5px;color:var(--dim);white-space:nowrap}
+.best{font-family:var(--f-en);font-size:13px;min-width:44px;text-align:right;color:var(--dim)}
+.best.pass{color:var(--ok)}
+.a2z{display:block;border:1px dashed var(--line2);border-radius:12px;padding:12px 15px;text-decoration:none;color:var(--mist);font-size:14px;margin-bottom:8px}
+.a2z b{color:var(--paper);font-weight:500}
+
+/* 연습 */
+.head{margin-bottom:16px}
+.head .where{font-size:13px;color:var(--mist)}
+.head h2{font-size:24px;margin:2px 0 0;font-weight:600}
+.steps{display:flex;gap:5px;margin:12px 0 0}
+.steps i{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.steps i.done{background:var(--ok)} .steps i.now{background:var(--lamp)}
+.brief{background:var(--hull);border:1px solid var(--line);border-radius:12px;padding:12px 15px;margin:16px 0;font-size:14.5px}
+.brief .ship{display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;font-size:13px;color:var(--mist)}
+.brief .ship b{color:var(--paper);font-weight:500}
+
+.card{border:1px solid var(--line);border-radius:14px;background:var(--hull);margin-bottom:12px;overflow:hidden}
+.card .lab{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 15px 0;font-size:13px;color:var(--mist)}
+.card .body{padding:6px 15px 14px}
+.them .body .en{font-size:16px;line-height:1.6;color:var(--sea)}
+.first{font-size:14.5px;color:var(--mist)}
+.listen{display:flex;gap:6px}
+.listen button{background:var(--sea-dim);border:0;border-radius:999px;padding:5px 12px;font-size:13px;color:var(--sea);cursor:pointer}
+
+.you .seg{display:inline-flex;border:1px solid var(--line2);border-radius:999px;overflow:hidden}
+.seg button{background:none;border:0;padding:4px 11px;font-size:12.5px;color:var(--mist);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--lamp-dim);color:var(--lamp)}
+.hint{font-size:15.5px;line-height:1.7;color:var(--paper);background:var(--hull2);border-radius:10px;padding:10px 12px;margin-bottom:12px}
+.hint.off{color:var(--dim);font-family:var(--f-ui);font-size:14px}
+.heard{min-height:24px;font-size:14.5px;color:var(--lamp);margin:0 0 10px}
+.mic{width:100%;border:0;border-radius:12px;padding:15px;font-size:16px;font-weight:600;background:var(--tx);color:#fff;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+.mic.on{box-shadow:0 0 0 5px var(--tx-dim),0 0 30px rgba(226,73,59,.4)}
+.mic:disabled{background:#273246;color:var(--dim);cursor:default;box-shadow:none}
+.type{display:flex;gap:8px;margin-top:10px}
+.type input{flex:1;min-width:0;background:var(--night);border:1px solid var(--line2);border-radius:10px;padding:11px 12px;font-family:var(--f-en);font-size:14px}
+.btn{border:1px solid var(--lamp);background:var(--lamp);color:#1d1205;border-radius:10px;padding:10px 16px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn.line{background:none;color:var(--lamp)}
+.btn:disabled{opacity:.4;cursor:default}
+.note{font-size:12.5px;color:var(--dim);margin-top:8px}
+
+.result .score{display:flex;align-items:baseline;gap:10px;padding:12px 15px 4px}
+.result .score b{font-family:var(--f-en);font-size:30px;font-weight:500}
+.result .score b.pass{color:var(--ok)} .result .score b.fail{color:var(--tx)}
+.result .score span{color:var(--mist);font-size:13.5px}
+.mine{padding:0 15px 8px;font-size:14px;color:var(--mist)}
+.mine .en{color:var(--lamp)}
+.chk{list-style:none;margin:0;padding:0 15px}
+.chk li{display:flex;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:14.5px}
+.chk .ic{width:16px;flex:none;font-weight:600}
+.chk .y .ic{color:var(--ok)} .chk .n .ic{color:var(--tx)}
+.chk .tip{display:block;font-size:13px;color:var(--mist)}
+.model{margin:10px 15px 14px;padding:10px 12px;background:var(--ok-dim);border-radius:10px;font-size:13px;color:var(--mist)}
+.model .en{display:block;color:var(--paper);font-size:14.5px;margin:3px 0 6px}
+.model button{background:none;border:0;color:var(--ok);cursor:pointer;padding:0;font-size:13px}
+.row{display:flex;gap:8px;margin-top:4px}
+.row .btn{flex:1}
+.end{text-align:center;padding:22px 15px}
+.end b{font-family:var(--f-en);font-size:54px;font-weight:500;display:block;line-height:1.1}
+.end p{color:var(--mist);margin:6px 0 16px}
+.end .row{max-width:440px;margin:0 auto}
+@media (max-width:480px){h1{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="crumb" href="../"><b>SMCP 훈련소</b> · 연습실</a>
+    <button class="pill" id="toList" hidden>목록</button>
+    <a class="pill" id="toRadio" href="../radio/">실전 교신</a>
+  </header>
+
+  <!-- 목록 -->
+  <main id="list">
+    <h1>연습실</h1>
+    <p class="lead">상대의 말을 듣고, 힌트를 보며 따라 말해 보세요. 말하자마자 빠진 것을 알려 드려요.</p>
+    <div class="warn" id="support"></div>
+    <div id="sectors"></div>
+  </main>
+
+  <!-- 연습 -->
+  <main id="drill" hidden>
+    <div class="head">
+      <div class="where" id="where"></div>
+      <h2 id="title"></h2>
+      <div class="steps" id="steps"></div>
+    </div>
+    <div class="brief"><span id="brief"></span><div class="ship" id="ship"></div></div>
+    <div id="stage"></div>
+  </main>
+</div>
+
+<script src="../scenarios.js"></script>
+<script src="../engine.js"></script>
+<script>
+(() => {
+'use strict';
+const E = window.SMCP_ENGINE, D = E.D, esc = E.esc;
+const $ = s => document.querySelector(s);
+const KEY = 'smcp.practice';
+let sc = null, ti = 0, scores = [], hintLv = 1, listening = false;
+
+/* ── 목록 ── */
+function showList() {
+  E.stopSpeaking();
+  const best = E.best.all(KEY);
+  $('#support').innerHTML = E.SR
+    ? '<b>Chrome이나 Edge에서 가장 잘 돼요.</b> 처음 말할 때 마이크 권한을 물으면 허용해 주세요.'
+    : '<b>이 브라우저는 음성인식을 지원하지 않아요.</b> 타자로 연습할 수 있고, 말로 하려면 Chrome이나 Edge로 열어 주세요.';
+  $('#sectors').innerHTML = D.sectors.map(s => {
+    const list = D.scenarios.filter(x => x.sector === s.no);
+    return `<section class="sector"><h2>${s.no}. ${esc(s.title)}</h2><p class="desc">${esc(s.desc || '')}</p>
+      ${s.link ? `<a class="a2z" href="${esc(s.link)}"><b>Alfa to Zulu</b>에서 발음 알파벳과 숫자 연습하기</a>` : ''}
+      ${list.map(x => {
+        const b = best[x.id];
+        return `<button class="scen" data-id="${esc(x.id)}"><span class="scen-t">${esc(x.title)}</span>
+          <span class="scen-m">${x.turns.length}문장</span><span class="best ${b >= D.passScore ? 'pass' : ''}">${b != null ? b + '점' : ''}</span></button>`;
+      }).join('')}</section>`;
+  }).join('');
+  $('#list').hidden = false; $('#drill').hidden = true; $('#toList').hidden = true; $('#toRadio').hidden = false;
+  history.replaceState(null, '', location.pathname);
+  scrollTo(0, 0);
+}
+
+/* ── 연습 시작 ── */
+function open(id) {
+  sc = E.scenario(id); if (!sc) return showList();
+  ti = 0; scores = [];
+  const sec = D.sectors.find(s => s.no === sc.sector);
+  $('#where').textContent = `${sc.sector}. ${sec ? sec.title : ''} · ${sc.station} · CH ${sc.channel}`;
+  $('#title').textContent = sc.title;
+  $('#brief').textContent = sc.brief;
+  $('#ship').innerHTML = `<span>내 선명 <b>${esc(sc.ship.name)}</b></span><span>호출부호 <b>${esc(sc.ship.callsign)}</b> · ${esc(sc.ship.callsignSpoken || '')}</span>`;
+  $('#list').hidden = true; $('#drill').hidden = false; $('#toList').hidden = false; $('#toRadio').hidden = true;
+  history.replaceState(null, '', '?s=' + encodeURIComponent(id));
+  turn();
+}
+
+function steps() {
+  $('#steps').innerHTML = sc.turns.map((_, i) => `<i class="${i < ti ? 'done' : i === ti ? 'now' : ''}"></i>`).join('');
+}
+
+function hintHtml(t) {
+  if (hintLv === 0) return '<div class="hint off">힌트 없이 말해 보세요.</div>';
+  return `<div class="hint en">${esc(hintLv === 2 ? t.model : (t.hint || E.skeleton(t.model, sc)))}</div>`;
+}
+
+function turn() {
+  const t = sc.turns[ti];
+  steps();
+  $('#stage').innerHTML = `
+    <div class="card them">
+      <div class="lab"><span>${t.them ? esc(sc.station) + '의 말' : '내가 먼저 부를 차례'}</span>
+        ${t.them ? '<span class="listen"><button data-say="1">▶ 듣기</button><button data-say="0.7">천천히</button></span>' : ''}</div>
+      <div class="body">${t.them ? `<div class="en">${esc(t.them)}</div>` : `<div class="first">상대는 아직 아무 말도 하지 않았어요. 상황 설명을 보고 먼저 불러 보세요.</div>`}</div>
+    </div>
+    <div class="card you">
+      <div class="lab"><span>내 답</span>
+        <span class="seg" role="group" aria-label="힌트">
+          <button data-hint="0" aria-pressed="${hintLv === 0}">힌트 없음</button>
+          <button data-hint="1" aria-pressed="${hintLv === 1}">빈칸</button>
+          <button data-hint="2" aria-pressed="${hintLv === 2}">전체</button>
+        </span></div>
+      <div class="body">
+        <div id="hint">${hintHtml(t)}</div>
+        <p class="heard en" id="heard"></p>
+        <button class="mic" id="mic" ${E.SR ? '' : 'disabled'}>${E.SR ? '누르고 있는 동안 말하기' : '음성인식을 쓸 수 없는 브라우저예요'}</button>
+        <div class="type"><input id="typed" placeholder="타자로 답하기" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="btn line" id="send">채점</button></div>
+        ${E.SR ? '<p class="note">PC에서는 스페이스바를 누르고 있어도 돼요.</p>' : ''}
+      </div>
+    </div>`;
+  bindTurn(t);
+  if (t.them) setTimeout(() => E.speak(t.them), 250);
+  scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+const L = E.listener({
+  onText: t => { $('#heard') && ($('#heard').textContent = t); },
+  onDone: t => {
+    setMic(false);
+    if (t) check(t); else if ($('#heard')) $('#heard').textContent = '아무 말도 듣지 못했어요. 다시 눌러서 말해 주세요.';
+  },
+  onError: (m, fatal) => { if ($('#heard')) $('#heard').textContent = m; if (fatal && $('#mic')) $('#mic').disabled = true; }
+});
+function setMic(on) {
+  listening = on; const m = $('#mic'); if (!m) return;
+  m.classList.toggle('on', on); m.textContent = on ? '듣고 있어요. 다 말하면 손을 떼세요' : '누르고 있는 동안 말하기';
+}
+function micDown() { const m = $('#mic'); if (!m || m.disabled || listening) return; E.audio(); if (L.start()) { setMic(true); $('#heard').textContent = ''; } }
+function micUp() { if (listening) L.stop(); }
+
+function bindTurn(t) {
+  document.querySelectorAll('[data-say]').forEach(b => b.onclick = () => { E.audio(); E.speak(t.them, { rate: +b.dataset.say === 1 ? .92 : .7 }); });
+  document.querySelectorAll('[data-hint]').forEach(b => b.onclick = () => {
+    hintLv = +b.dataset.hint;
+    document.querySelectorAll('[data-hint]').forEach(x => x.setAttribute('aria-pressed', x === b));
+    $('#hint').innerHTML = hintHtml(t);
+  });
+  const m = $('#mic');
+  m.addEventListener('pointerdown', e => { e.preventDefault(); try { m.setPointerCapture(e.pointerId); } catch (_) {} micDown(); });
+  m.addEventListener('pointerup', micUp); m.addEventListener('pointercancel', micUp);
+  m.addEventListener('contextmenu', e => e.preventDefault());
+  $('#send').onclick = () => check($('#typed').value);
+  $('#typed').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) check($('#typed').value); });
+}
+
+/* ── 채점 ── */
+function check(text) {
+  text = String(text || '').trim(); if (!text) return;
+  E.stopSpeaking();
+  const t = sc.turns[ti];
+  const r = E.grade(text, t, sc);
+  scores[ti] = Math.max(scores[ti] || 0, r.score);
+  const last = ti >= sc.turns.length - 1;
+  const res = document.createElement('div'); res.className = 'card result';
+  res.innerHTML = `
+    <div class="score"><b class="${r.pass ? 'pass' : 'fail'}">${r.score}점</b><span>${r.pass ? '통과' : '통과하려면 ' + D.passScore + '점'}</span></div>
+    <div class="mine">내가 한 말 <span class="en">${esc(text)}</span></div>
+    <ul class="chk">${r.items.map(x => `<li class="${x.ok ? 'y' : 'n'}"><span class="ic">${x.ok ? '✓' : '✗'}</span><span>${esc(x.label)}${!x.ok && x.tip ? `<span class="tip">${esc(x.tip)}</span>` : ''}</span></li>`).join('')}</ul>
+    <div class="model">표준 예시<span class="en">${esc(t.model)}</span><button id="hearModel">▶ 표준 예시 듣기</button></div>`;
+  const you = document.querySelector('.card.you');
+  you.replaceWith(res);
+  const row = document.createElement('div'); row.className = 'row';
+  row.innerHTML = `<button class="btn line" id="again">이 문장 다시</button><button class="btn" id="go">${last ? '결과 보기' : '다음 문장'}</button>`;
+  $('#stage').appendChild(row);
+  $('#hearModel').onclick = () => { E.audio(); E.speak(t.model, { bed: 0 }); };
+  $('#again').onclick = turn;
+  $('#go').onclick = () => { if (last) finish(); else { ti++; turn(); } };
+  res.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function finish() {
+  ti = sc.turns.length; steps();
+  const total = Math.round(sc.turns.reduce((s, _, i) => s + (scores[i] || 0), 0) / sc.turns.length);
+  E.best.set(KEY, sc.id, total);
+  const pass = total >= D.passScore;
+  $('#stage').innerHTML = `<div class="card end">
+      <b style="color:var(${pass ? '--ok' : '--tx'})">${total}점</b>
+      <p>${pass ? '이 상황은 손에 익었어요. 이제 힌트 없이 무전기로 해 보세요.' : '문장마다 가장 잘한 점수의 평균이에요. 한 번 더 해 보세요.'}</p>
+      <div class="row"><button class="btn line" id="again">처음부터 다시</button>
+      <a class="btn" style="text-decoration:none;text-align:center" href="../radio/?s=${encodeURIComponent(sc.id)}">실전 교신에서 해 보기</a></div>
+    </div>`;
+  $('#again').onclick = () => open(sc.id);
+}
+
+/* ── 공통 이벤트 ── */
+$('#sectors').addEventListener('click', e => { const b = e.target.closest('.scen'); if (b) open(b.dataset.id); });
+$('#toList').onclick = showList;
+document.addEventListener('keydown', e => {
+  if (e.code !== 'Space' || e.repeat || !$('#mic') || $('#drill').hidden) return;
+  if (document.activeElement && /INPUT|BUTTON/.test(document.activeElement.tagName) && document.activeElement.id !== 'mic') return;
+  e.preventDefault(); micDown();
+});
+document.addEventListener('keyup', e => { if (e.code === 'Space' && listening) { e.preventDefault(); micUp(); } });
+
+const q = new URLSearchParams(location.search).get('s');
+if (q && E.scenario(q)) open(q); else showList();
+})();
+</script>
+</body>
+</html>

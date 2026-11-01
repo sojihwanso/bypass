@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>실전 교신 · SMCP 무전 교신 훈련소 | BYPASS</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#070d18">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* 실전 교신: 무전기를 직접 잡고 교신. 채점은 끝난 뒤 무선 일지로.
+   엔진은 ../engine.js, 문제는 ../scenarios.js, LCD 글꼴은 DSEG (OFL-1.1) */
+@font-face{font-family:'DSEG7';src:url(../fonts/DSEG7Classic-Bold.woff2) format('woff2');font-display:block}
+@font-face{font-family:'DSEG14';src:url(../fonts/DSEG14Classic-Bold.woff2) format('woff2');font-display:block}
+:root{
+  color-scheme:dark;
+  --night:#070d18; --deck:#0e1726; --line:rgba(214,222,232,.12); --line2:rgba(214,222,232,.24);
+  --mist:#93a1b3; --dim:#5f6d80; --ivory:#e6e1d4;
+  --body1:#2a3038; --body2:#181c22; --key:#2f363f; --key-hi:#3d4550;
+  --lcd:#f0a63a; --lcd-off:#2b2a24; --seg:#2a1806;
+  --tx:#ff4a3a; --rx:#47d17e;
+  --paper:#ebe6d8; --ink:#1d2836; --rule:rgba(40,70,120,.16); --margin:#c4523f; --pencil:#566274;
+  --f-ui:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  --f-en:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--night);color:var(--ivory)}
+body{font-family:var(--f-ui);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;
+  background:radial-gradient(ellipse 70% 50% at 30% 0%,rgba(240,166,58,.06),transparent 70%),var(--night)}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--lcd);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding:max(14px,env(safe-area-inset-top)) 16px 40px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;color:var(--mist);padding-bottom:20px}
+.top a{text-decoration:none}
+.top b{color:var(--ivory);font-weight:600}
+.pill{border:1px solid var(--line2);border-radius:999px;padding:6px 13px;background:none;cursor:pointer;color:var(--mist);text-decoration:none;font-size:13.5px}
+.pill:hover{color:var(--ivory)}
+
+/* ───── 지시서 고르기 ───── */
+#pick h1{font-size:30px;margin:0 0 6px;font-weight:600}
+#pick .lead{color:var(--mist);margin:0 0 24px;max-width:40em}
+.orders{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-bottom:28px}
+.orders h2{grid-column:1/-1;font-size:16px;font-weight:600;margin:6px 0 -2px;color:var(--mist)}
+.order{text-align:left;background:var(--paper);color:var(--ink);border:0;border-radius:4px;padding:14px 16px 12px;cursor:pointer;position:relative;
+  box-shadow:0 1px 0 rgba(0,0,0,.4),0 10px 24px -14px rgba(0,0,0,.7);
+  background-image:linear-gradient(90deg,transparent 7px,var(--margin) 7px 8px,transparent 8px)}
+.order:hover{transform:translateY(-1px)}
+.order .ch{position:absolute;top:12px;right:14px;font-family:'DSEG7',monospace;font-size:20px;color:var(--margin)}
+.order{padding-left:20px}
+.order .t{display:block;font-weight:600;font-size:16px;padding-right:44px;line-height:1.4}
+.order .s{display:block;font-size:13px;color:var(--pencil);margin-top:6px}
+.order .b{display:block;font-family:var(--f-en);font-size:12.5px;color:var(--pencil);margin-top:8px}
+.order .b.pass{color:#2d7a4f}
+
+/* ───── 교신 화면 ───── */
+.bridge{display:grid;grid-template-columns:minmax(330px,440px) 1fr;grid-template-areas:"radio brief" "radio log";gap:18px 28px;align-items:start}
+.left{grid-area:radio;position:sticky;top:12px}
+.brief{grid-area:brief}
+.logcol{grid-area:log}
+
+/* 무전기 */
+.radio{background:linear-gradient(170deg,var(--body1),var(--body2));border-radius:24px;padding:16px 16px 14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -2px 0 rgba(0,0,0,.5),0 30px 60px -30px rgba(0,0,0,.9),0 0 0 1px #0b0e12}
+.plate{display:flex;justify-content:space-between;align-items:baseline;padding:0 4px 10px;color:#8a929d;font-size:11px;letter-spacing:.08em}
+.plate b{color:#c9ced5;font-weight:600;letter-spacing:.18em;font-size:12px}
+.face{display:grid;grid-template-columns:1fr 84px;gap:12px}
+.lcd{background:var(--lcd-off);border-radius:10px;padding:9px 12px 8px;color:var(--seg);position:relative;min-height:170px;
+  box-shadow:inset 0 0 0 3px #12100b,inset 0 2px 14px rgba(0,0,0,.6);transition:background .25s}
+.lcd > *{opacity:0;transition:opacity .2s}
+.on .lcd{background:var(--lcd);box-shadow:inset 0 0 0 3px #1a1309,inset 0 0 26px rgba(90,45,0,.45),0 0 34px rgba(240,166,58,.16)}
+.on .lcd > *{opacity:1}
+.icons{display:flex;gap:9px;font-size:11px;font-weight:600;letter-spacing:.05em}
+.icons span{opacity:.1}
+.icons span.lit{opacity:1}
+.ghost{position:absolute;right:0;top:0;opacity:.08;pointer-events:none}
+.name{position:relative;font-family:'DSEG14',monospace;font-size:17px;letter-spacing:.04em;text-align:right;margin-top:6px;height:22px;white-space:pre}
+.chrow{display:flex;justify-content:space-between;align-items:flex-end;margin-top:4px}
+.chrow .lab{font-size:12px;font-weight:600;padding-bottom:10px}
+.big{position:relative;font-family:'DSEG7',monospace;font-size:76px;line-height:1;white-space:pre}
+.foot{display:flex;justify-content:space-between;align-items:flex-end;margin-top:6px}
+.meter{display:flex;gap:3px;align-items:flex-end;height:16px}
+.meter i{display:block;width:7px;background:var(--seg);opacity:.1}
+.meter i:nth-child(1){height:4px}.meter i:nth-child(2){height:7px}.meter i:nth-child(3){height:10px}.meter i:nth-child(4){height:13px}.meter i:nth-child(5){height:16px}
+.meter i.lit{opacity:1}
+.clock{position:relative;font-family:'DSEG7',monospace;font-size:19px;white-space:pre}
+.flash{animation:fl .5s steps(2,start) 3}
+@keyframes fl{to{visibility:hidden}}
+
+.keys{display:grid;grid-template-rows:repeat(4,1fr);gap:8px}
+.key{border:0;border-radius:12px;background:linear-gradient(180deg,var(--key-hi),var(--key));color:#d4d9df;font-size:13px;font-weight:600;cursor:pointer;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 3px 0 #0d1014,0 4px 8px rgba(0,0,0,.4);transition:transform .05s,box-shadow .05s}
+.key:active,.key.press{transform:translateY(2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 1px 0 #0d1014}
+.key.pwr{color:#f0a3a3}
+.key.k16{color:var(--lcd);font-size:16px}
+.lower{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding:0 4px}
+.grille{flex:1;height:30px;margin-right:16px;border-radius:8px;
+  background:radial-gradient(circle,#0a0c0f 1.6px,transparent 2px) 0 0/9px 9px;opacity:.9}
+.leds{display:flex;gap:12px;font-size:11px;color:#8a929d;font-weight:600;align-items:center}
+.led{display:inline-block;width:9px;height:9px;border-radius:50%;background:#3a1512;margin-right:4px;vertical-align:-1px;box-shadow:inset 0 1px 2px rgba(0,0,0,.6)}
+.led.rx{background:#123020}
+.led.tx.lit{background:var(--tx);box-shadow:0 0 10px var(--tx),0 0 2px #fff inset}
+.led.rx.lit{background:var(--rx);box-shadow:0 0 10px var(--rx)}
+
+/* 송화기 */
+.cord{height:26px;width:14px;margin:0 auto;background:repeating-linear-gradient(180deg,#14181d 0 3px,#2c323a 3px 6px);border-radius:4px}
+.handset{display:flex;align-items:center;gap:14px;width:100%;border:0;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;
+  background:linear-gradient(170deg,#262c34,#15191e);border-radius:22px;padding:14px 16px;color:#d4d9df;text-align:left;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 16px 34px -18px rgba(0,0,0,.9),0 0 0 1px #0b0e12}
+.handset .mesh{width:56px;height:56px;border-radius:50%;flex:none;background:radial-gradient(circle,#0a0c0f 1.4px,transparent 1.8px) 0 0/6px 6px,#1d2228;box-shadow:inset 0 2px 6px rgba(0,0,0,.6)}
+.handset .txt{flex:1;line-height:1.35}
+.handset .txt b{display:block;font-size:16px;font-weight:600}
+.handset .txt small{color:#8a929d;font-size:12.5px}
+.pttkey{flex:none;border-radius:12px;padding:12px 14px;background:#4a1d19;color:#ffd9d4;font-weight:600;font-size:13px;letter-spacing:.06em;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 3px 0 #1e0b09}
+.handset.on .pttkey{background:var(--tx);color:#fff;transform:translateY(2px);box-shadow:0 1px 0 #1e0b09,0 0 24px rgba(255,74,58,.55)}
+.handset:disabled{cursor:default;opacity:.55}
+.typebox{display:flex;gap:8px;margin-top:10px}
+.typebox input{flex:1;min-width:0;background:var(--deck);border:1px solid var(--line2);border-radius:10px;padding:10px 12px;font-family:var(--f-en);font-size:14px}
+.typebox button{border:1px solid var(--lcd);background:none;color:var(--lcd);border-radius:10px;padding:9px 14px;font-weight:600;cursor:pointer}
+.below{display:flex;justify-content:space-between;gap:10px;margin-top:10px;font-size:12.5px;color:var(--dim)}
+.below button{background:none;border:0;color:var(--mist);cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}
+
+/* 지시서 (교신 화면) */
+.memo{background:var(--paper);color:var(--ink);border-radius:4px;padding:14px 18px 14px 26px;position:relative;
+  box-shadow:0 12px 26px -16px rgba(0,0,0,.8);background-image:linear-gradient(90deg,transparent 14px,var(--margin) 14px 15px,transparent 15px)}
+.memo h2{margin:0 0 4px;font-size:18px;font-weight:600}
+.memo p{margin:0;font-size:14.5px}
+.memo dl{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:10px 0 0;font-size:13.5px}
+.memo dt{color:var(--pencil)}
+.memo dd{margin:0;font-weight:500}
+
+/* 무선 일지 */
+.logbook{background:var(--paper);color:var(--ink);border-radius:4px;box-shadow:0 14px 30px -18px rgba(0,0,0,.85);overflow:hidden}
+.lb-h{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 14px;padding:14px 18px 10px;border-bottom:2px solid var(--ink)}
+.lb-h h2{margin:0;font-size:18px;font-weight:600}
+.lb-h .meta{font-family:var(--f-en);font-size:12px;color:var(--pencil)}
+.lb-h label{font-size:13px;color:var(--pencil);display:flex;gap:6px;align-items:center;cursor:pointer;margin-left:auto}
+.cols,.ent{display:grid;grid-template-columns:52px 1fr;gap:0 12px}
+.cols{padding:6px 18px;font-size:11.5px;color:var(--pencil);border-bottom:1px solid var(--rule)}
+#entries{list-style:none;margin:0;padding:0 0 6px;min-height:160px}
+.ent{padding:7px 18px;border-bottom:1px solid var(--rule)}
+.ent time{font-family:var(--f-en);font-size:12.5px;color:var(--pencil);padding-top:2px}
+.ent .who{display:block;font-size:11.5px;color:var(--pencil);letter-spacing:.02em}
+.ent .en{font-family:var(--f-en);font-size:14px;line-height:1.55;margin:1px 0 0;word-break:break-word}
+.ent.rx .en{color:#1c4f7a}
+.ent.tx .en{color:var(--ink)}
+.ent.tx.live .en{color:var(--margin)}
+.ent.note{color:var(--pencil);font-size:13px;font-style:italic}
+.ent.note p{margin:0}
+.hidden-text .en{color:transparent!important;text-shadow:0 0 7px rgba(28,79,122,.55);user-select:none}
+.ent .score{float:right;font-family:var(--f-en);font-size:12.5px;margin-left:8px}
+.empty{padding:22px 18px;color:var(--pencil);font-size:14px}
+
+.eval{border-top:2px solid var(--ink);padding:14px 18px 18px}
+.stamp{display:inline-block;border:3px solid currentColor;border-radius:6px;padding:4px 14px;transform:rotate(-3deg);font-weight:600;font-size:15px}
+.stamp b{font-family:var(--f-en);font-size:30px;font-weight:500;margin-left:6px;vertical-align:-3px}
+.stamp.pass{color:#2d7a4f} .stamp.fail{color:var(--margin)}
+.eval h3{font-size:14.5px;margin:16px 0 4px}
+.tx-eval{border-top:1px solid var(--rule);padding:8px 0}
+.tx-eval .said{font-family:var(--f-en);font-size:13.5px}
+.tx-eval ul{margin:4px 0 4px;padding:0;list-style:none;font-size:13.5px}
+.tx-eval li{padding:1px 0}
+.tx-eval .y{color:#2d7a4f} .tx-eval .n{color:var(--margin)}
+.tx-eval .tip{color:var(--pencil)}
+.tx-eval .model{font-family:var(--f-en);font-size:12.5px;color:var(--pencil)}
+.eval .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.eval .acts a,.eval .acts button{border:1px solid var(--ink);background:none;color:var(--ink);border-radius:8px;padding:8px 14px;font-weight:600;text-decoration:none;cursor:pointer;font-size:14px}
+.eval .acts .main{background:var(--ink);color:var(--paper)}
+
+@media (max-width:880px){
+  .bridge{grid-template-columns:1fr;grid-template-areas:"brief" "radio" "log"}
+  .left{position:static;max-width:460px;width:100%;margin:0 auto}
+  .dock{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:10px 12px max(10px,env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--night) 30%)}
+  .dock .cord{display:none}
+  .wrap.playing{padding-bottom:150px}
+  .big{font-size:64px}
+}
+@media (prefers-reduced-motion:reduce){.flash{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+  <header class="top">
+    <a href="../"><b>SMCP 훈련소</b> · 실전 교신</a>
+    <span><button class="pill" id="toPick" hidden>다른 지시서</button> <a class="pill" href="../practice/">연습실</a></span>
+  </header>
+
+  <!-- 지시서 고르기 -->
+  <main id="pick">
+    <h1>실전 교신</h1>
+    <p class="lead">교신 지시서를 하나 고르세요. 힌트는 없어요. 무전기 전원을 켜고 지시서의 채널을 맞춘 뒤, 송화기를 누르고 교신하세요. 채점은 교신이 끝난 뒤 무선 일지에서 해요.</p>
+    <div class="orders" id="orders"></div>
+  </main>
+
+  <!-- 교신 -->
+  <main id="play" class="bridge" hidden>
+    <aside class="brief">
+      <div class="memo">
+        <h2 id="mTitle"></h2>
+        <p id="mBrief"></p>
+        <dl>
+          <dt>내 선명</dt><dd id="mShip"></dd>
+          <dt>교신 상대</dt><dd id="mStation"></dd>
+          <dt>제한 시간</dt><dd id="mLimit"></dd>
+        </dl>
+      </div>
+    </aside>
+
+    <div class="left">
+      <div class="radio" id="radio">
+        <div class="plate"><b>BYPASS</b><span>MARINE VHF · M-16</span></div>
+        <div class="face">
+          <div class="lcd" aria-live="polite">
+            <div class="icons"><span id="iTX">TX</span><span id="iRX">BUSY</span><span id="iHI">25W</span><span id="iDSC">DSC</span></div>
+            <div class="name"><span class="ghost">~~~~~~~~~~</span><span id="lName"></span></div>
+            <div class="chrow"><span class="lab">CH</span><div class="big"><span class="ghost">88</span><span id="lCh"></span></div></div>
+            <div class="foot"><div class="meter" id="meter"><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="clock"><span class="ghost">88:88</span><span id="lClock"></span></div></div>
+          </div>
+          <div class="keys">
+            <button class="key pwr" id="kPwr" aria-label="전원">PWR</button>
+            <button class="key" id="kUp" aria-label="채널 올리기">CH ▲</button>
+            <button class="key" id="kDn" aria-label="채널 내리기">CH ▼</button>
+            <button class="key k16" id="k16" aria-label="16번 채널">16</button>
+          </div>
+        </div>
+        <div class="lower"><div class="grille"></div><div class="leds"><span><span class="led tx" id="ledTx"></span>TX</span><span><span class="led rx" id="ledRx"></span>RX</span></div></div>
+      </div>
+      <div class="dock">
+        <div class="cord"></div>
+        <button class="handset" id="ptt" aria-label="송화기: 누르고 말하기">
+          <span class="mesh"></span>
+          <span class="txt"><b id="pttLabel">전원을 켜세요</b><small id="pttSub">PWR 버튼</small></span>
+          <span class="pttkey">PTT</span>
+        </button>
+        <div class="typebox" id="typebox" hidden><input id="typed" placeholder="송신할 말을 입력 (Enter)" autocomplete="off" autocapitalize="off" spellcheck="false"><button id="sendTyped">송신</button></div>
+        <div class="below"><span id="keysHelp">스페이스바 송신 · ↑↓ 채널</span><button id="toggleType">타자로 송신</button></div>
+      </div>
+    </div>
+
+    <section class="logcol">
+      <div class="logbook">
+        <div class="lb-h"><h2>무선 일지</h2><span class="meta" id="lbMeta"></span>
+          <label><input type="checkbox" id="subs"> 받은 말 글자로 보기</label></div>
+        <div class="cols"><span>UTC</span><span>송신 → 수신 · 내용</span></div>
+        <ol id="entries"></ol>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="../scenarios.js"></script>
+<script src="../engine.js"></script>
+<script>
+(() => {
+'use strict';
+const E = window.SMCP_ENGINE, D = E.D, esc = E.esc;
+const $ = s => document.querySelector(s);
+const KEY = 'smcp.radio';
+const MAX_TRIES = 3;
+
+let sc = null;
+const R = { power: false, ch: 16, phase: 'off', ti: 0, tries: 0, heard: [], best: [], txs: [], wrongCh: 0, turnStart: 0, tuneTimer: null, idleTimer: null };
+let meterTimer = null, clockTimer = null, typeMode = !E.SR;
+
+/* ───────── 지시서 고르기 ───────── */
+function showPick() {
+  stopAll();
+  const best = E.best.all(KEY);
+  $('#orders').innerHTML = D.sectors.filter(s => !s.link).map(s =>
+    `<h2>${esc(s.title)}</h2>` + D.scenarios.filter(x => x.sector === s.no).map(x => {
+      const b = best[x.id];
+      return `<button class="order" data-id="${esc(x.id)}"><span class="ch">${String(x.channel).padStart(2, '0')}</span>
+        <span class="t">${esc(x.title)}</span><span class="s">${esc(x.station)}${x.timeLimit ? ' · ' + x.timeLimit + '초 안에' : ''}</span>
+        <span class="b ${b >= D.passScore ? 'pass' : ''}">${b != null ? '최고 ' + b + '점' : '아직 기록 없음'}</span></button>`;
+    }).join('')).join('');
+  $('#pick').hidden = false; $('#play').hidden = true; $('#toPick').hidden = true;
+  $('#wrap').classList.remove('playing');
+  history.replaceState(null, '', location.pathname);
+  scrollTo(0, 0);
+}
+
+/* ───────── 교신 준비 ───────── */
+function open(id) {
+  sc = E.scenario(id); if (!sc) return showPick();
+  stopAll();
+  Object.assign(R, { power: false, ch: 16, phase: 'off', ti: 0, tries: 0, heard: [], best: [], txs: [], wrongCh: 0, turnStart: 0 });
+  $('#mTitle').textContent = sc.title;
+  $('#mBrief').textContent = sc.brief;
+  $('#mShip').textContent = `${sc.ship.name} · 호출부호 ${sc.ship.callsign} (${sc.ship.callsignSpoken || ''})`;
+  $('#mStation').textContent = `${sc.station} · VHF 채널 ${sc.channel}`;
+  $('#mLimit').textContent = sc.timeLimit ? `송신마다 ${sc.timeLimit}초` : '없음';
+  $('#lbMeta').textContent = `${sc.ship.name} · ${sc.ship.callsign}`;
+  $('#entries').innerHTML = `<li class="empty">아직 기록이 없어요. 무전기의 PWR을 눌러 전원을 켜세요.</li>`;
+  $('#subs').checked = false; applySubs();
+  $('#pick').hidden = true; $('#play').hidden = false; $('#toPick').hidden = false;
+  $('#wrap').classList.add('playing');
+  setType(typeMode);
+  history.replaceState(null, '', '?s=' + encodeURIComponent(id));
+  render(); scrollTo(0, 0);
+}
+
+function stopAll() {
+  E.stopSpeaking(); clearTimeout(R.tuneTimer); clearTimeout(R.idleTimer); clearInterval(clockTimer); meter(false);
+  if (L.on) L.stop();
+}
+
+/* ───────── 무전기 화면 ───────── */
+function chName(ch) {
+  if (ch === 16) return 'CALLING';
+  if (ch === 70) return 'DSC ONLY';
+  if (sc && ch === sc.channel) return sc.station.toUpperCase().replace(/\bSTATION\b/, '').trim().slice(0, 10);
+  if (ch === 13) return 'BRIDGE';
+  return 'INTL';
+}
+function render() {
+  const on = R.power;
+  $('#radio').classList.toggle('on', on);
+  $('#lCh').textContent = on ? String(R.ch).padStart(2, '0') : '';
+  $('#lName').textContent = on ? chName(R.ch).padStart(10, ' ') : '';
+  $('#iTX').classList.toggle('lit', R.phase === 'tx');
+  $('#iRX').classList.toggle('lit', R.phase === 'rx');
+  $('#iHI').classList.toggle('lit', on);
+  $('#iDSC').classList.toggle('lit', on && R.ch === 70);
+  $('#ledTx').classList.toggle('lit', R.phase === 'tx');
+  $('#ledRx').classList.toggle('lit', R.phase === 'rx');
+  $('#ptt').classList.toggle('on', R.phase === 'tx');
+  const [a, b] = !on ? ['전원을 켜세요', 'PWR 버튼']
+    : R.phase === 'boot' ? ['켜는 중', '']
+    : R.phase === 'rx' ? ['수신 중', '상대의 말을 잘 들으세요']
+    : R.phase === 'tx' ? ['송신 중', '다 말하면 손을 떼세요']
+    : R.phase === 'done' ? ['교신 종료', '무선 일지에서 평가를 확인하세요']
+    : R.ch === 70 ? ['음성 송신 불가', '70번은 DSC 전용 채널이에요']
+    : typeMode ? ['타자로 송신', '아래 칸에 입력하고 Enter'] : ['누르고 말하기', `CH ${String(R.ch).padStart(2, '0')}로 송신`];
+  $('#pttLabel').textContent = a; $('#pttSub').textContent = b;
+  $('#ptt').disabled = !on || R.phase === 'boot' || R.phase === 'done' || typeMode && R.phase !== 'tx';
+  tickClock();
+}
+function tickClock() {
+  if (!R.power || R.phase === 'boot') { $('#lClock').textContent = R.power ? '88:88' : ''; return; }
+  if (sc.timeLimit && (R.phase === 'standby' || R.phase === 'tx') && R.turnStart) {
+    const left = sc.timeLimit - Math.floor((Date.now() - R.turnStart) / 1000);
+    $('#lClock').textContent = ('  ' + Math.max(0, left)).slice(-2).padStart(5, ' ');
+    return;
+  }
+  const d = new Date();
+  $('#lClock').textContent = String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+}
+function meter(mode) {
+  clearInterval(meterTimer);
+  const bars = [...document.querySelectorAll('#meter i')];
+  const set = n => bars.forEach((b, i) => b.classList.toggle('lit', i < n));
+  if (!mode) return set(0);
+  if (mode === 'tx') return set(5);
+  meterTimer = setInterval(() => set(2 + Math.floor(Math.random() * 4)), 120);
+}
+function flashName(text) {
+  const n = $('#lName'); n.textContent = text.padStart(10, ' ');
+  n.classList.remove('flash'); void n.offsetWidth; n.classList.add('flash');
+  setTimeout(() => { n.classList.remove('flash'); render(); }, 1600);
+}
+function press(id) { const k = $(id); k.classList.add('press'); setTimeout(() => k.classList.remove('press'), 120); }
+
+/* ───────── 일지 ───────── */
+const utc = () => { const d = new Date(); return String(d.getUTCHours()).padStart(2, '0') + String(d.getUTCMinutes()).padStart(2, '0'); };
+function entry(kind, who, text) {
+  const ol = $('#entries'); const first = ol.querySelector('.empty'); if (first) first.remove();
+  const li = document.createElement('li'); li.className = 'ent ' + kind;
+  li.innerHTML = kind === 'note' ? `<time>${utc()}</time><p>${esc(text)}</p>`
+    : `<time>${utc()}</time><div><span class="who">${esc(who)}</span><p class="en">${esc(text)}</p></div>`;
+  ol.appendChild(li);
+  if (innerWidth > 880) li.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  return li;
+}
+function applySubs() { document.querySelectorAll('.ent.rx').forEach(e => e.classList.toggle('hidden-text', !$('#subs').checked && R.phase !== 'done')); }
+
+/* ───────── 전원 · 채널 ───────── */
+function power() {
+  press('#kPwr'); E.audio();
+  if (R.power) {
+    stopAll(); R.power = false; R.phase = 'off'; render(); entry('note', '', '무전기 전원을 껐어요.');
+    return;
+  }
+  R.power = true; R.phase = 'boot'; render();
+  ['#lCh', '#lName'].forEach(s => $(s).textContent = s === '#lCh' ? '88' : '~~~~~~~~~~');
+  document.querySelectorAll('.icons span').forEach(s => s.classList.add('lit'));
+  E.beep(1800, 70); setTimeout(() => E.beep(2400, 90), 110);
+  setTimeout(() => {
+    R.phase = R.phase === 'boot' ? 'standby' : R.phase;
+    render();
+    clearInterval(clockTimer); clockTimer = setInterval(tickClock, 500);
+    if (!R.heard.length && !R.txs.length) entry('note', '', `전원 켬. 지금 채널은 CH 16, 지시서의 채널은 CH ${sc.channel}.`);
+    armIncoming(); armIdle();
+  }, 900);
+}
+function setCh(n) {
+  if (!R.power || R.phase === 'boot' || R.phase === 'tx') return;
+  if (R.phase === 'rx') { E.stopSpeaking(); entry('note', '', '수신 중에 채널을 돌려서 상대의 말이 끊겼어요. 필요하면 Say again을 요청하세요.'); R.phase = 'standby'; meter(false); R.cut = true; }
+  R.ch = n < 1 ? 88 : n > 88 ? 1 : n;
+  E.beep(2600, 35, .02);
+  render(); armIncoming();
+}
+
+/* 상대가 먼저 말하는 턴: 채널이 맞으면 잠시 뒤 수신 */
+function armIncoming() {
+  clearTimeout(R.tuneTimer);
+  const t = sc.turns[R.ti];
+  if (!R.power || R.phase !== 'standby' || !t || !t.them || R.heard[R.ti]) return;
+  if (R.ch !== sc.channel) return;
+  R.tuneTimer = setTimeout(() => { if (R.ch === sc.channel && R.phase === 'standby') receive(t.them, true); }, 1500);
+}
+/* 오래 아무것도 안 하면 일지에 조용히 안내 */
+function armIdle() {
+  clearTimeout(R.idleTimer);
+  R.idleTimer = setTimeout(() => {
+    if (!R.power || R.phase !== 'standby') return;
+    const t = sc.turns[R.ti];
+    if (R.ch !== sc.channel) entry('note', '', `CH ${R.ch}에서는 아무도 응답하지 않아요. 지시서의 채널을 확인하세요.`);
+    else if (t && !t.them && !R.txs.length) entry('note', '', '이번에는 내가 먼저 부를 차례예요. 송화기를 누르고 말하세요.');
+  }, 9000);
+}
+
+/* ───────── 수신 ───────── */
+async function receive(text, isTurnLine) {
+  if (!R.power) return;
+  clearTimeout(R.idleTimer);
+  R.phase = 'rx'; R.cut = false; meter('rx'); render();
+  if (isTurnLine) R.heard[R.ti] = true;
+  R.lastRx = text;
+  const li = entry('rx', `${sc.station.toUpperCase()} → ${sc.ship.name}`, text);
+  if (!$('#subs').checked) li.classList.add('hidden-text');
+  await E.speak(text);
+  if (R.phase !== 'rx') return;              // 도중에 채널을 돌리거나 전원을 끈 경우
+  R.phase = 'standby'; meter(false); R.turnStart = Date.now(); render(); armIdle();
+}
+
+/* ───────── 송신 ───────── */
+let liveLi = null, txStart = 0;
+const L = E.listener({
+  onText: t => { if (liveLi) liveLi.querySelector('.en').textContent = t || '…'; },
+  onDone: t => endTx(t),
+  onError: (m, fatal) => { entry('note', '', m); if (fatal) setType(true); }
+});
+function canTx() { return R.power && R.phase !== 'boot' && R.phase !== 'done' && R.phase !== 'tx'; }
+function beginTx() {
+  if (!canTx()) { if (!R.power) flashName('POWER OFF'); return false; }
+  if (R.ch === 70) { flashName('DSC ONLY'); E.beep(900, 200, .04); return false; }
+  if (R.phase === 'rx') { E.stopSpeaking(); R.cut = true; }
+  clearTimeout(R.tuneTimer); clearTimeout(R.idleTimer);
+  E.audio(); E.noise(.1, 80);
+  R.phase = 'tx'; txStart = Date.now(); meter('tx'); render();
+  liveLi = entry('tx live', `${sc.ship.name} → ${sc.ch === sc.channel ? sc.station.toUpperCase() : 'CH ' + R.ch}`, '…');
+  liveLi.querySelector('.who').textContent = `${sc.ship.name} → CH ${String(R.ch).padStart(2, '0')}`;
+  return true;
+}
+function pttDown() { if (typeMode) return; if (beginTx() && !L.start()) endTx(''); }
+function pttUp() { if (R.phase === 'tx' && !typeMode) L.stop(); }
+function sendTyped() {
+  const v = $('#typed').value.trim(); if (!v) return;
+  if (!beginTx()) return;
+  $('#typed').value = '';
+  setTimeout(() => endTx(v), 250);
+}
+
+function endTx(text) {
+  if (R.phase !== 'tx') return;
+  text = String(text || '').trim();
+  E.squelch(); meter(false);
+  R.phase = 'standby'; render();
+  const li = liveLi; liveLi = null;
+  if (li) { li.classList.remove('live'); li.querySelector('.en').textContent = text || '(말소리가 들리지 않았어요)'; }
+  if (!text) { armIdle(); return; }
+
+  // 채널이 틀리면 아무도 듣지 못함
+  if (R.ch !== sc.channel) {
+    R.wrongCh++;
+    later(() => entry('note', '', `응답 없음. CH ${R.ch}에서 송신했어요. 상대(${sc.station})는 CH ${sc.channel}에서 듣고 있어요.`), 1800);
+    return;
+  }
+  const t = sc.turns[R.ti]; if (!t) return;
+  const said = E.norm(text);
+  const expectsSayAgain = JSON.stringify(t.check).includes('say again');
+
+  // 상대가 먼저 말하는 턴인데 아직 못 들었으면: 내 호출에 상대가 그 턴의 말로 답함
+  if (t.them && !R.heard[R.ti]) { later(() => receive(t.them, true), 1300); return; }
+
+  // Say again 요청: 감점 없이 다시 말해 줌
+  if (!expectsSayAgain && / say again /.test(said) && R.lastRx) {
+    later(() => receive(R.lastRx, false), 1200);
+    return;
+  }
+
+  const late = sc.timeLimit && R.turnStart && (Date.now() - R.turnStart) / 1000 > sc.timeLimit;
+  const extra = sc.timeLimit ? [{ label: `${sc.timeLimit}초 안에 송신`, tip: '비상 교신은 빠르고 정확해야 해요.', ok: !late }] : [];
+  const r = E.grade(text, t, sc, extra);
+  R.txs.push({ ti: R.ti, text, r, model: t.model });
+  R.best[R.ti] = Math.max(R.best[R.ti] || 0, r.score);
+  R.tries++;
+
+  const broadcast = /^all stations$/i.test(sc.station);
+  if (r.pass || R.tries >= MAX_TRIES || broadcast) return advance();
+  const again = t.retry || `${sc.ship.name}, ${sc.station}. Say again. Over.`;
+  later(() => receive(again, false), 1400);
+}
+
+function advance() {
+  R.ti++; R.tries = 0; R.turnStart = 0;
+  if (R.ti >= sc.turns.length) return later(finish, 1500);
+  const t = sc.turns[R.ti];
+  if (t.them) later(() => receive(t.them, true), 1500);
+  else { R.turnStart = Date.now(); armIdle(); }
+}
+function later(fn, ms) { setTimeout(() => { if (R.power && sc) fn(); }, ms); }
+
+/* ───────── 평가 ───────── */
+function finish() {
+  R.phase = 'done'; meter(false); render(); clearTimeout(R.idleTimer);
+  const raw = Math.round(sc.turns.reduce((s, _, i) => s + (R.best[i] || 0), 0) / sc.turns.length);
+  const penalty = Math.min(20, R.wrongCh * 5);
+  const total = Math.max(0, raw - penalty);
+  const pass = total >= D.passScore;
+  E.best.set(KEY, sc.id, total);
+  entry('note', '', '교신 종료.');
+  applySubs();
+  const ev = document.createElement('div'); ev.className = 'eval';
+  ev.innerHTML = `<span class="stamp ${pass ? 'pass' : 'fail'}">${pass ? '교신 합격' : '재교육 필요'}<b>${total}</b></span>
+    ${penalty ? `<p style="margin:10px 0 0;font-size:13.5px;color:var(--pencil)">다른 채널로 송신한 ${R.wrongCh}번 때문에 ${penalty}점을 뺐어요.</p>` : ''}
+    <h3>내 송신 평가</h3>
+    ${R.txs.map((x, i) => `<div class="tx-eval">
+      <span class="score" style="float:right;font-family:var(--f-en)">${x.r.score}점</span>
+      <div class="said">${esc(x.text)}</div>
+      <ul>${x.r.items.map(c => `<li class="${c.ok ? 'y' : 'n'}">${c.ok ? '✓' : '✗'} ${esc(c.label)}${!c.ok && c.tip ? ` <span class="tip">· ${esc(c.tip)}</span>` : ''}</li>`).join('')}</ul>
+      <div class="model">표준 예시 · ${esc(x.model)}</div></div>`).join('') || '<p class="tip">채점된 송신이 없어요.</p>'}
+    <div class="acts"><button class="main" id="again">다시 교신하기</button>
+      <a href="../practice/?s=${encodeURIComponent(sc.id)}">연습실에서 연습하기</a>
+      <button id="other">다른 지시서</button></div>`;
+  $('.logbook').appendChild(ev);
+  ev.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('#again').onclick = () => open(sc.id);
+  $('#other').onclick = showPick;
+}
+
+/* ───────── 입력 방식 ───────── */
+function setType(on) {
+  typeMode = on || !E.SR;
+  $('#typebox').hidden = !typeMode;
+  $('#toggleType').textContent = typeMode ? (E.SR ? '마이크로 송신' : '') : '타자로 송신';
+  $('#toggleType').hidden = !E.SR;
+  $('#keysHelp').textContent = typeMode ? '↑↓ 채널 · Enter 송신' : '스페이스바 송신 · ↑↓ 채널';
+  render();
+}
+
+/* ───────── 이벤트 ───────── */
+$('#orders').addEventListener('click', e => { const b = e.target.closest('.order'); if (b) open(b.dataset.id); });
+$('#toPick').onclick = showPick;
+$('#kPwr').onclick = power;
+$('#kUp').onclick = () => { press('#kUp'); setCh(R.ch + 1); };
+$('#kDn').onclick = () => { press('#kDn'); setCh(R.ch - 1); };
+$('#k16').onclick = () => { press('#k16'); setCh(16); };
+$('#subs').onchange = applySubs;
+$('#toggleType').onclick = () => setType(!typeMode);
+$('#sendTyped').onclick = sendTyped;
+$('#typed').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) sendTyped(); });
+const ptt = $('#ptt');
+ptt.addEventListener('pointerdown', e => { e.preventDefault(); try { ptt.setPointerCapture(e.pointerId); } catch (_) {} pttDown(); });
+ptt.addEventListener('pointerup', pttUp); ptt.addEventListener('pointercancel', pttUp);
+ptt.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if ($('#play').hidden || (document.activeElement && document.activeElement.tagName === 'INPUT')) return;
+  if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) pttDown(); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); press('#kUp'); setCh(R.ch + 1); }
+  else if (e.key === 'ArrowDown') { e.preventDefault(); press('#kDn'); setCh(R.ch - 1); }
+});
+document.addEventListener('keyup', e => { if (e.code === 'Space' && !$('#play').hidden) { e.preventDefault(); pttUp(); } });
+
+window.SMCP_RADIO = { R, open };   // 테스트용
+const q = new URLSearchParams(location.search).get('s');
+if (q && E.scenario(q)) open(q); else showPick();
+})();
+</script>
+</body>
+</html>
