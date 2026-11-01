@@ -140,6 +140,7 @@ h1{font-size:30px;margin:0 0 6px;font-weight:600;letter-spacing:-.01em}
 </div>
 
 <script src="../scenarios.js"></script>
+<script src="../voice/manifest.js"></script>
 <script src="../engine.js"></script>
 <script>
 (() => {
@@ -156,6 +157,7 @@ function showList() {
   $('#support').innerHTML = E.SR
     ? '<b>Chrome이나 Edge에서 가장 잘 돼요.</b> 처음 말할 때 마이크 권한을 물으면 허용해 주세요.'
     : '<b>이 브라우저는 음성인식을 지원하지 않아요.</b> 타자로 연습할 수 있고, 말로 하려면 Chrome이나 Edge로 열어 주세요.';
+  E.voiceInfo().then(i => { if (i.ok === false) $('#support').insertAdjacentHTML('beforeend', '<br><b>영어 목소리 없음.</b> 이 기기에는 영어 읽기 목소리가 없어서 상대 말이 한국어 발음으로 나올 수 있어요. 휴대폰 설정의 텍스트 음성 변환(TTS)에서 영어 음성 데이터를 내려받거나, PC의 Chrome으로 열어 주세요.'); });
   $('#sectors').innerHTML = D.sectors.map(s => {
     const list = D.scenarios.filter(x => x.sector === s.no);
     return `<section class="sector"><h2>${s.no}. ${esc(s.title)}</h2><p class="desc">${esc(s.desc || '')}</p>
@@ -219,6 +221,7 @@ function turn() {
       </div>
     </div>`;
   bindTurn(t);
+  E.preload([t.them]); E.preload([t.them], 'slow'); E.preload([t.model], 'model');
   if (t.them) setTimeout(() => E.speak(t.them), 250);
   scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -272,7 +275,7 @@ function check(text) {
   const row = document.createElement('div'); row.className = 'row';
   row.innerHTML = `<button class="btn line" id="again">이 문장 다시</button><button class="btn" id="go">${last ? '결과 보기' : '다음 문장'}</button>`;
   $('#stage').appendChild(row);
-  $('#hearModel').onclick = () => { E.audio(); E.speak(t.model, { bed: 0 }); };
+  $('#hearModel').onclick = () => { E.audio(); E.speak(t.model, { role: 'model' }); };
   $('#again').onclick = turn;
   $('#go').onclick = () => { if (last) finish(); else { ti++; turn(); } };
   res.scrollIntoView({ behavior: 'smooth', block: 'start' });

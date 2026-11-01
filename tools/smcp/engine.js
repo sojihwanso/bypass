@@ -120,20 +120,108 @@ function beep(freq, dur, vol) {
   o.connect(g).connect(c.destination); o.start(); o.stop(c.currentTime + (dur || 60) / 1000);
 }
 
+/* 영어 목소리 고르기
+   안드로이드 Chrome 등은 목소리를 직접 지정하지 않으면 lang 을 무시하고 기기 기본(한국어) 목소리로 읽음.
+   그래서 반드시 영어 목소리 객체를 찾아서 지정함. 목록은 늦게 도착할 수 있어서 기다렸다가 고름 */
 let voice = null;
+const isEn = v => /^en([-_]|$)/i.test(v.lang || '') && !/ko|kr|korea/i.test(v.lang + ' ' + v.name);
+function score(v) {
+  const l = (v.lang || '').replace('_', '-').toLowerCase(), n = (v.name || '').toLowerCase();
+  let s = 0;
+  if (l === 'en-gb') s += 30; else if (l === 'en-us') s += 25; else if (/en-(au|ie|in|za|nz|ca)/.test(l)) s += 18; else s += 10;
+  if (/google|natural|neural|premium|enhanced/.test(n)) s += 8;
+  if (/daniel|serena|kate|arthur|samantha|karen|moira|libby|ryan|sonia/.test(n)) s += 5;
+  if (v.localService) s += 2;
+  return s;
+}
 function pickVoice() {
-  const vs = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
-  voice = vs.find(v => /en-GB/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null;
+  const vs = ((window.speechSynthesis && speechSynthesis.getVoices()) || []).filter(isEn);
+  voice = vs.sort((a, b) => score(b) - score(a))[0] || null;
+  return voice;
+}
+let voicesReady = null;
+function ensureVoice() {
+  if (voice || !window.speechSynthesis) return Promise.resolve(voice);
+  if (pickVoice()) return Promise.resolve(voice);
+  if (!voicesReady) voicesReady = new Promise(res => {
+    const done = () => { pickVoice(); res(voice); };
+    speechSynthesis.addEventListener && speechSynthesis.addEventListener('voiceschanged', done, { once: true });
+    let n = 0; const poll = setInterval(() => { if (pickVoice() || ++n > 20) { clearInterval(poll); res(voice); } }, 100);
+  });
+  return voicesReady;
 }
 if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+/* 이 기기에 영어 목소리가 있는지 (안내 문구용) */
+function voiceInfo() { if (window.SMCP_VOICE && Object.keys(window.SMCP_VOICE).length) return Promise.resolve({ ok: true, recorded: true }); return ensureVoice().then(v => v ? { ok: true, name: v.name, lang: v.lang } : { ok: !window.speechSynthesis ? null : false }); }
+
+/* ───────── 녹음 파일 (voice/build.py 가 만든 고품질 녹음) ─────────
+   window.SMCP_VOICE = { "fx|대사": "voice/audio/x.mp3", "slow|대사": ..., "model|대사": ... }
+   녹음이 있으면 녹음을, 없으면 브라우저 목소리로 읽음 */
+const BASE = ((document.currentScript && document.currentScript.src) || '').replace(/engine\.js(\?.*)?$/, '');
+const splitParts = text => String(text).split(/\s*\.\.\.\s*(?:\.\.\.\s*)?/).map(p => p.trim()).filter(Boolean);
+const bufCache = {};
+let playing = [];
+function clipUrl(role, part) { const m = window.SMCP_VOICE; return m && m[role + '|' + part] ? BASE + m[role + '|' + part] : null; }
+function loadBuf(url) {
+  if (!bufCache[url]) bufCache[url] = fetch(url).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+    .then(b => new Promise((res, rej) => audio().decodeAudioData(b, res, rej)))
+    .catch(e => { delete bufCache[url]; throw e; });
+  return bufCache[url];
+}
+function playBuf(buf) {
+  return new Promise(res => {
+    const c = audio(); const src = c.createBufferSource(); src.buffer = buf;
+    src.connect(c.destination); src.onended = () => { playing = playing.filter(x => x !== src); res(); };
+    playing.push(src); src.start();
+  });
+}
+/* 대사 녹음을 미리 받아 두기 (교신 시작 전에 불러 두면 끊김 없음) */
+function preload(texts, role) {
+  if (!audio()) return;
+  for (const t of texts) for (const p of splitParts(t || '')) { const u = clipUrl(role || 'fx', p); if (u) loadBuf(u).catch(() => {}); }
+}
 
 let speakToken = 0;
-function stopSpeaking() { speakToken++; if (window.speechSynthesis) speechSynthesis.cancel(); }
-/* 읽어 주기. "..." 는 잡음에 묻힌 부분. opts.rate 로 속도 조절 */
-function speak(text, opts) {
+function stopSpeaking() {
+  speakToken++;
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  for (const s of playing) { try { s.stop(); } catch (e) {} }
+  playing = [];
+}
+/* 읽어 주기. "..." 는 잡음에 묻힌 부분.
+   opts.rate < .85 이면 느린 녹음, opts.role = 'model' 이면 표준 예시 녹음(깨끗한 목소리), opts.bed = 0 이면 잡음 없음 */
+async function speak(text, opts) {
   opts = opts || {};
   const my = ++speakToken;
-  return new Promise(res => {
+  const role = opts.role === 'model' ? 'model' : (opts.rate && opts.rate < .85 ? 'slow' : 'fx');
+  const parts = splitParts(text);
+  const urls = parts.map(p => clipUrl(role, p));
+  if (audio() && parts.length && urls.every(Boolean)) {
+    let bufs = null;
+    try { bufs = await Promise.all(urls.map(loadBuf)); } catch (e) { bufs = null; }
+    if (bufs && my === speakToken) return playClips(bufs, text, opts, my);
+  }
+  if (my !== speakToken) return;
+  return speakTTS(text, opts, my);
+}
+async function playClips(bufs, text, opts, my) {
+  const radio = opts.role !== 'model';
+  if (radio) squelch();
+  const bed = radio ? noise(opts.bed ?? .03) : () => {};
+  await new Promise(r => setTimeout(r, radio ? 160 : 0));
+  const garbled = /\.\.\./.test(text) && /^\s*\.\.\./.test(text);
+  for (let i = 0; i < bufs.length; i++) {
+    if (my !== speakToken) break;
+    if (i > 0 || garbled) { noise(.25, 700); await new Promise(r => setTimeout(r, 700)); }
+    if (my !== speakToken) break;
+    await playBuf(bufs[i]);
+  }
+  bed();
+  if (radio && my === speakToken) { await new Promise(r => setTimeout(r, 120)); squelch(); }
+}
+function speakTTS(text, opts, my) {
+  return ensureVoice().then(() => new Promise(res => {
+    if (my !== speakToken) return res();
     squelch();
     if (!window.speechSynthesis) return setTimeout(res, 600);
     speechSynthesis.cancel();
@@ -149,7 +237,7 @@ function speak(text, opts) {
       if (!p.trim()) return setTimeout(nextPart, i > 1 ? 700 : 0);
       const u = new SpeechSynthesisUtterance(p.replace(/-/g, ' '));
       if (voice) u.voice = voice;
-      u.lang = voice ? voice.lang : 'en-GB'; u.rate = opts.rate || .92;
+      u.lang = voice ? voice.lang.replace('_', '-') : 'en-US'; u.rate = opts.rate || .92;
       // 목소리가 없는 기기에서는 onend 가 안 올 수 있어서, 길이로 어림한 시간이 지나면 넘어감
       let fired = false;
       const after = () => { if (fired) return; fired = true; clearTimeout(guard); setTimeout(nextPart, i < parts.length ? 700 : 0); };
@@ -158,7 +246,7 @@ function speak(text, opts) {
       speechSynthesis.speak(u);
     };
     setTimeout(nextPart, 180);
-  });
+  }));
 }
 
 /* ───────── 음성인식 (누르고 말하기) ─────────
@@ -209,5 +297,5 @@ const best = {
 
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-window.SMCP_ENGINE = { D, norm, grade, skeleton, scenario, fill, audio, noise, squelch, beep, speak, stopSpeaking, listener, SR: !!SR, best, esc };
+window.SMCP_ENGINE = { D, norm, grade, skeleton, scenario, fill, audio, noise, squelch, beep, speak, stopSpeaking, preload, voiceInfo, listener, SR: !!SR, best, esc };
 })();

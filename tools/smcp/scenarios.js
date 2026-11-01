@@ -26,6 +26,17 @@ window.SMCP = {
   /* 기본 자선. 시나리오에서 ship: { ... } 으로 바꿀 수 있어요. */
   ship: { name: "BYPASS ONE", callsign: "D9EJ", callsignSpoken: "Delta Niner Echo Juliet", pob: 15 },
 
+  /* 상대 목소리 (녹음 파일을 만들 때 씀). 바꾸거나 대사를 고치면 voice/build.py 를 다시 돌려야 녹음에 반영돼요.
+     녹음이 없는 대사는 브라우저 기본 목소리로 읽어요.
+     목소리 이름: 영국 남성 bm_george · bm_lewis · bm_fable · bm_daniel / 영국 여성 bf_emma · bf_isabella
+                  미국 남성 am_michael · am_onyx · am_adam / 미국 여성 af_heart · af_bella */
+  voices: {
+    default: "bm_george",                 // 따로 정하지 않은 상대는 이 목소리
+    model: "bf_emma",                     // 연습실 '표준 예시 듣기'
+    "Mokpo Pilot Station": "am_michael",
+    "Ocean Star": "bm_lewis"
+  },
+
   /* 통과 점수 (100점 만점). 이보다 낮으면 상대가 되묻고 다시 하게 해요. */
   passScore: 70,
 
