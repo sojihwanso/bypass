@@ -11,11 +11,20 @@
       ]
     },
     {
-      "source": "/apps/(.*)",
+      "source": "/apps/((?!ecdis/).*)",
       "headers": [
         {
           "key": "Content-Security-Policy",
           "value": "sandbox allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms allow-modals allow-downloads allow-top-navigation-by-user-activation"
+        }
+      ]
+    },
+    {
+      "source": "/apps/ecdis/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "sandbox allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-modals allow-downloads allow-top-navigation-by-user-activation"
         }
       ]
     },
