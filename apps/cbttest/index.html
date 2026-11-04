@@ -1071,7 +1071,7 @@ function renderResult(){
   } else verdict = `<span class="verdict na">무작위 ${totalN}문항</span>`;
   if (!S.saved){
     S.saved = true;
-    if (S.mode === 2 || S.mode === 3) S.items.forEach((it, k) => noteResult(it, S.ans[k]));
+    if (S.mode === 2 || S.mode === 3) S.items.forEach((it, k) => noteResult(it, S.ans[k], true));
     const vm = verdict.match(/class="verdict [a-z]+">([^<]+)</);
     saveHist({ t: Date.now(), m: S.mode, title: S.title, meta: S.meta, n: totalN, ok: totalOk,
       sc: S.mode === 4 ? Math.round(totalOk / Math.max(1, totalN) * 100) : avg, v: vm ? vm[1] : '',
@@ -1115,8 +1115,8 @@ let storeOK = true;
 function lsGet(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e) { storeOK = false; return d; } }
 function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e) { storeOK = false; return false; } }
 function itKey(it){ return [it.y, it.r, it.g, it.p, it.sub, it.q.n].join('|'); }
-function noteResult(it, a){
-  if (a == null || !it.q.a) return;
+function noteResult(it, a, blankOK){
+  if (!it.q.a || (a == null && !blankOK)) return;
   const W = lsGet(WN_KEY, {}), k = itKey(it);
   if (isRight(it, a)){
     if (W[k] && !W[k].fx){ W[k].fx = Date.now(); lsSet(WN_KEY, W); updWnCnt(); }
@@ -1124,6 +1124,7 @@ function noteResult(it, a){
   }
   const e = W[k] || { y: it.y, r: it.r, g: it.g, p: it.p, s: it.sub, n: it.q.n, c: 0, t0: Date.now() };
   e.a = a; e.c++; e.t = Date.now(); delete e.fx;
+  if (a == null) e.u = (e.u || 0) + 1;
   W[k] = e; lsSet(WN_KEY, W); updWnCnt();
 }
 function savePartial(S){
@@ -1148,7 +1149,7 @@ function resolveNote(e){
   const q = qs && qs.find(x => x.n === e.n);
   return q ? mkItem(e.y, e.r, e.g, e.p, e.s, q) : null;
 }
-let wnTab = 'note', wnSub = '전체', wnHideFixed = false, wnShow = 30;
+let wnTab = 'note', wnSub = '전체', wnKind = '전체', wnHideFixed = false, wnShow = 30;
 async function wrongNote(){
   stopTimer(); session = null; closeLayer(); scrollTop();
   setRoute([{ t:'처음', go: home }, { t:'오답노트' }]);
@@ -1170,20 +1171,23 @@ function drawWn(){
 }
 function drawNoteBody(all){
   const body = document.getElementById('wnBody');
-  if (!all.length){ body.innerHTML = '<div class="wn-empty"><b>아직 틀린 문제가 없습니다</b>어떤 풀이 방식으로 풀든 틀린 문제는 여기에 과목별로 모입니다.</div>'; return; }
+  if (!all.length){ body.innerHTML = '<div class="wn-empty"><b>아직 틀린 문제가 없습니다</b>어떤 풀이 방식으로 풀든 틀린 문제와 모의고사에서 시간이 부족해 풀지 못한 문제가 여기에 과목별로 모입니다.</div>'; return; }
   const cnt = {}; for (const x of all) if (!x.e.fx) cnt[x.e.s] = (cnt[x.e.s] || 0) + 1;
   const subs = SUBS.filter(s => all.some(x => x.e.s === s));
   if (wnSub !== '전체' && !subs.includes(wnSub)) wnSub = '전체';
-  let list = all.filter(x => (wnSub === '전체' || x.e.s === wnSub) && !(wnHideFixed && x.e.fx));
+  const blankN = all.filter(x => x.e.a == null && !x.e.fx && (wnSub === '전체' || x.e.s === wnSub)).length;
+  let list = all.filter(x => (wnSub === '전체' || x.e.s === wnSub) && !(wnHideFixed && x.e.fx) && (wnKind === '전체' || (wnKind === '미응답') === (x.e.a == null)));
   const subCards = `<div class="wn-sub">${subs.map(s => `<div style="--c:var(--${SUBC[s]})"><b>${s}</b><p>남은 오답 ${cnt[s] || 0} · 전체 ${all.filter(x => x.e.s === s).length}</p></div>`).join('')}</div>`;
   const seg = `<div class="seg" style="margin:0">${['전체', ...subs].map(s => `<button type="button" data-s="${s}" class="${wnSub === s ? 'on' : ''}">${s}</button>`).join('')}</div>`;
   const retryN = list.filter(x => !x.e.fx).length;
-  const bar = `<div class="wn-bar">${seg}<span class="sp"></span><label><input type="checkbox" id="hideFx" ${wnHideFixed ? 'checked' : ''}> 다시 맞힌 문제 숨기기</label></div>
-    <div class="wn-bar"><button class="btn btn-pri" type="button" id="wnRetry" ${retryN ? '' : 'disabled'}>${wnSub === '전체' ? '' : esc(wnSub) + ' '}오답 ${retryN}문항 다시 풀기</button><span class="sp"></span><button class="btn btn-ghost" type="button" id="wnClear">${wnSub === '전체' ? '오답노트 전체 비우기' : esc(wnSub) + ' 오답 비우기'}</button></div>`;
+  const kseg = `<div class="seg" style="margin:0">${['전체','틀린 답','미응답'].map(s => `<button type="button" data-kd="${s}" class="${wnKind === s ? 'on' : ''}">${s === '미응답' ? '시간 부족·미응답 ' + blankN : s}</button>`).join('')}</div>`;
+  const bar = `<div class="wn-bar">${seg}</div><div class="wn-bar">${kseg}<span class="sp"></span><label><input type="checkbox" id="hideFx" ${wnHideFixed ? 'checked' : ''}> 다시 맞힌 문제 숨기기</label></div>
+    <div class="wn-bar"><button class="btn btn-pri" type="button" id="wnRetry" ${retryN ? '' : 'disabled'}>${wnSub === '전체' ? '' : esc(wnSub) + ' '}${wnKind === '미응답' ? '미응답 ' : wnKind === '틀린 답' ? '틀린 ' : '오답 '}${retryN}문항 다시 풀기</button><span class="sp"></span><button class="btn btn-ghost" type="button" id="wnClear">${wnSub === '전체' ? '오답노트 전체 비우기' : esc(wnSub) + ' 오답 비우기'}</button></div>`;
   const cards = list.slice(0, wnShow).map(x => noteCard(x)).join('');
   const more = list.length > wnShow ? `<button class="btn btn-ghost" type="button" id="wnMore" style="justify-self:center">더 보기 (${list.length - wnShow}문항 남음)</button>` : '';
   body.innerHTML = subCards + bar + `<div class="wn-list">${cards || '<div class="wn-empty">표시할 문제가 없습니다.</div>'}${more}</div>`;
   body.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { wnSub = b.dataset.s; wnShow = 30; drawWn(); });
+  body.querySelectorAll('[data-kd]').forEach(b => b.onclick = () => { wnKind = b.dataset.kd; wnShow = 30; drawWn(); });
   document.getElementById('hideFx').onchange = e => { wnHideFixed = e.target.checked; drawWn(); };
   const mo = document.getElementById('wnMore'); if (mo) mo.onclick = () => { wnShow += 30; drawWn(); };
   body.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { const W = lsGet(WN_KEY, {}); delete W[b.dataset.del]; lsSet(WN_KEY, W); updWnCnt(); drawWn(); });
@@ -1215,12 +1219,12 @@ function noteCard(x){
     return `<div class="${cls}"><span class="lt">${L}</span>${q.img ? '' : '<span>' + esc(q.o[j]) + '</span>'}</div>`;
   }).join('');
   return `<article class="sheet wn-card">
-    <div class="qhead"><span class="qno">${q.n}</span><span class="stag" style="--c:var(--${c});--cb:var(--${c}-bg)">${esc(it.sub)}</span><span class="qsrc">${esc(srcLabel(it))}</span>${e.fx ? '<span class="wn-fixed">다시 풀어 맞힘</span>' : ''}</div>
+    <div class="qhead"><span class="qno">${q.n}</span><span class="stag" style="--c:var(--${c});--cb:var(--${c}-bg)">${esc(it.sub)}</span><span class="qsrc">${esc(srcLabel(it))}</span>${e.a == null ? '<span class="pill" style="background:var(--warn-bg);color:var(--warn)">미응답</span>' : ''}${e.fx ? '<span class="wn-fixed">다시 풀어 맞힘</span>' : ''}</div>
     ${body}
     <div class="opts ${q.img ? 'compact' : ''}">${opts}</div>
-    <div class="ansline bad">고른 답: <b>${LET[e.a]}</b> · 정답: <b>${ansLetters(it)}</b></div>
+    ${e.a == null ? `<div class="ansline none">미응답 (시간 부족 등으로 풀지 못함) · 정답: <b>${ansLetters(it)}</b></div>` : `<div class="ansline bad">고른 답: <b>${LET[e.a]}</b> · 정답: <b>${ansLetters(it)}</b></div>`}
     ${explHTML(q)}
-    <div class="wn-meta"><span>틀린 횟수 <b class="mono">${e.c}</b></span><span>마지막으로 틀린 날 <span class="mono">${fmtDate(e.t)}</span></span><span class="sp"></span><button class="wn-del" type="button" data-del="${esc(k)}">노트에서 지우기</button></div>
+    <div class="wn-meta"><span>틀리거나 못 푼 횟수 <b class="mono">${e.c}</b>${e.u ? ` <small>(미응답 ${e.u})</small>` : ''}</span><span>마지막 기록 <span class="mono">${fmtDate(e.t)}</span></span><span class="sp"></span><button class="wn-del" type="button" data-del="${esc(k)}">노트에서 지우기</button></div>
   </article>`;
 }
 function drawHistBody(H){
@@ -1235,7 +1239,7 @@ function drawHistBody(H){
   <div class="stbl htbl"><table><thead><tr><th>일시</th><th>방식</th><th>시험</th><th style="text-align:right">정답</th><th style="text-align:right">점수</th><th>판정</th><th>소요</th></tr></thead><tbody>
   ${H.map(h => `<tr><td class="mono">${fmtDate(h.t)}</td><td>${MODE_NAME[h.m] || ''}</td><td title="${esc(h.meta || '')}">${esc(h.title)}<br><small style="color:var(--muted)">${esc(h.meta || '')}</small></td><td class="num">${h.ok}/${h.n}</td><td class="num">${h.sc}${h.m === 4 || h.pct ? '%' : '점'}</td><td>${h.v ? `<span class="pill ${/^(합격|과락 면함|과락 없음)$/.test(h.v) ? 'ok' : /무작위|중단/.test(h.v) ? '' : 'bad'}">${esc(h.v)}</span>` : ''}</td><td class="mono">${h.used != null ? fmtTime(h.used) : '–'}</td></tr>`).join('')}
   </tbody></table></div>
-  <p class="wn-note">최근 300회까지 저장됩니다. 중간에 그만둔 풀이는 '중단'으로, 푼 문항까지만 기록됩니다. 모의고사에서 답을 고르지 않은 문항은 오답노트에 넣지 않습니다.</p>
+  <p class="wn-note">최근 300회까지 저장됩니다. 중간에 그만둔 풀이는 '중단'으로, 푼 문항까지만 기록됩니다. 모의고사를 제출하거나 시간이 끝났을 때 답을 고르지 못한 문항은 오답노트에 '미응답'으로 들어갑니다.</p>
   <div class="res-acts"><button class="btn btn-ghost" type="button" id="hClear">응시 기록 비우기</button></div>`;
   document.getElementById('hClear').onclick = () => {
     modal(`<h3>응시 기록을 모두 비울까요?</h3><p class="sub">이 브라우저에 저장된 응시 기록이 지워지며 되돌릴 수 없습니다. 오답노트는 그대로 남습니다.</p><div class="acts"><button class="btn btn-ghost" data-close>취소</button><button class="btn btn-pri" id="hDo">비우기</button></div>`);
