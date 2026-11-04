@@ -251,6 +251,15 @@ footer.foot .ver{color:var(--muted)}
 .ansline.ok{background:var(--ok-bg);color:var(--ok)}
 .ansline.bad{background:var(--bad-bg);color:var(--bad)}
 .ansline.none{background:var(--soft);color:var(--muted)}
+.expl{margin-top:12px;background:var(--surface);border:1px solid var(--rule);border-left:4px solid var(--kr);border-radius:10px;padding:12px 14px}
+.expl .lb{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;color:var(--kr);font-weight:600}
+.expl p{margin-top:4px;font-size:14.5px;line-height:1.65}
+.expl small{display:block;margin-top:6px;font-size:11.5px;color:var(--muted)}
+.expl.none{border-left-color:var(--rule)}
+.expl.none .lb{color:var(--muted)}
+.expl.none p{color:var(--muted);font-size:13.5px}
+.jexp{margin-top:14px;text-align:left;background:var(--paper);border-radius:10px;padding:10px 12px;font-size:13.5px;line-height:1.6;max-height:9.5em;overflow:auto}
+.jexp b{display:block;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;color:var(--kr);margin-bottom:2px}
 .kbd{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);margin-top:10px}
 
 /* OMR card */
@@ -437,9 +446,11 @@ let dataPromise = null;
 function loadAll(){
   if (dataPromise) return dataPromise;
   dataPromise = (async () => {
-    const [rb, re] = await Promise.all([fetch('data/bank.json'), fetch('data/exams.json')]);
+    const [rb, re, rx] = await Promise.all([fetch('data/bank.json'), fetch('data/exams.json'), fetch('data/exp.json').catch(() => null)]);
     if (!rb.ok || !re.ok) throw new Error('data');
     const bank = await rb.json(), exams = await re.json();
+    let expl = {};
+    try { if (rx && rx.ok) expl = await rx.json(); } catch(e) {}
     const where = {};
     for (const e of exams) for (const ref of e.qs) (where[ref[1]] ||= new Set()).add(e.y + '-' + e.r + '-' + e.g);
     for (const e of exams){
@@ -450,6 +461,7 @@ function loadAll(){
         else { q.q = b.q; q.o = ord ? ord.map(j => b.o[j]) : b.o; if (b.fig) q.fig = b.fig; }
         const rep = [...where[k]].filter(x => x !== me).sort();
         if (rep.length) q.rep = rep;
+        if (expl[k]) q.e = expl[k];
         return q;
       });
       const m = (idx[e.y] ||= {}), key = e.r + '-' + e.g;
@@ -799,6 +811,10 @@ function repChip(it){
   const list = r.map(x => { const [y, rr, g] = x.split('-'); return `${y}년 ${rr}회(${g}급)`; }).join(', ');
   return `<span class="repc" title="${esc('같은 문제가 출제된 다른 시험: ' + list)}">다른 회차 ${r.length}번 출제</span>`;
 }
+function explHTML(q){
+  if (q.e) return `<div class="expl"><span class="lb">AI 요약 해설</span><p>${esc(q.e)}</p><small>정답은 공식 정답표 기준이며, 해설은 학습 참고용입니다.</small></div>`;
+  return `<div class="expl none"><span class="lb">해설</span><p>${q.img ? '이미지 문항은 해설 준비 중입니다.' : '이 문항은 해설 준비 중입니다.'}</p></div>`;
+}
 function isRight(it, a){ return a != null && it.q.a && it.q.a.includes(a); }
 function ansLetters(it){ return (it.q.a || []).map(i => LET[i]).join(', '); }
 
@@ -847,6 +863,7 @@ function drawQ(){
     else if (isRight(it, a)) line = `<div class="ansline ok">정답 · 고른 답: <b>${LET[a]}</b></div>`;
     else line = `<div class="ansline bad">오답 · 고른 답: <b>${LET[a]}</b> · 정답: <b>${ansLetters(it)}</b></div>`;
     if (q.a && q.a.length > 1) line += '<p class="kbd">복수 정답 문항입니다.</p>';
+    line += explHTML(q);
   }
   const sec = S.sections.find(s => i >= s.start && i < s.start + s.n);
   const c = SUBC[it.sub];
@@ -944,6 +961,7 @@ function judge(it, k){
     <div class="mark ${ok ? 'o' : 'x'}"></div>
     <h3 class="${ok ? 'o' : 'x'}">${ok ? '정답입니다' : '틀렸습니다'}</h3>
     <div class="jline"><span>고른 답: <span class="bub ${ok ? 'ok' : 'bad'}">${LET[k]}</span></span><span>정답: ${(it.q.a || []).map(j => '<span class="bub ok">' + LET[j] + '</span>').join('')}</span></div>
+    ${it.q.e ? `<div class="jexp"><b>AI 요약 해설</b>${esc(it.q.e)}</div>` : ''}
     <button class="btn btn-pri" type="button" id="jNext">${nextLabel}</button>
     <button class="btn btn-ghost" type="button" id="jStay" style="margin-top:8px">문제 다시 보기</button>
     <p class="hint">Enter: 다음 · Esc: 문제 보기</p></div></div>`;
