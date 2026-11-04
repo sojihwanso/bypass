@@ -11,7 +11,7 @@
       ]
     },
     {
-      "source": "/apps/((?!ecdis/|seamantest/).*)",
+      "source": "/apps/((?!ecdis/|cbttest/).*)",
       "headers": [
         {
           "key": "Content-Security-Policy",
@@ -29,7 +29,7 @@
       ]
     },
     {
-      "source": "/apps/seamantest/(.*)",
+      "source": "/apps/cbttest/(.*)",
       "headers": [
         {
           "key": "Content-Security-Policy",
