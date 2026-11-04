@@ -214,6 +214,7 @@ footer.foot .ver{color:var(--muted)}
 .qhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .qno{font-family:var(--f-mono);font-weight:600;font-size:15px;background:var(--ink);color:var(--surface);border-radius:7px;padding:2px 9px}
 .stag{font-size:12.5px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--cb);color:var(--c)}
+.repc{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--gar-bg);color:var(--gar);cursor:help;white-space:nowrap}
 .qsrc{font-family:var(--f-mono);font-size:11.5px;color:var(--muted)}
 .qtext{font-size:17px;line-height:1.75;white-space:pre-wrap}
 .qtext .box{display:block;margin:10px 0 2px;padding:10px 14px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);font-size:15.5px}
@@ -743,16 +744,20 @@ async function startRandom(g, el){
   st.grade = g; st.year = st.round = st.subject = null;
   app.innerHTML = '<p class="loading">전 회차 문제를 불러오는 중…</p>';
   try { await Promise.all(DATA_YEARS.map(loadYear)); } catch(e) { app.innerHTML = '<p class="loading">문제 파일을 불러오지 못했습니다.</p>'; return; }
-  const pool = [];
-  for (const y of DATA_YEARS) for (let r = 1; r <= 4; r++){
+  const all = [];
+  for (const y of DATA_YEARS.slice().reverse()) for (let r = 4; r >= 1; r--){
     for (const s of ['항해','운용','법규','영어', el]){
       const got = pick(y, r, g, s, el);
-      if (got) for (const q of got.qs) pool.push(mkItem(y, r, g, got.p, s, q));
+      if (got) for (const q of got.qs) all.push(mkItem(y, r, g, got.p, s, q));
     }
   }
+  /* 같은 문제가 여러 회차에 출제된 경우 가장 최근 회차 하나만 남김 */
+  const seen = new Set(), pool = [];
+  for (const it of all){ const k = it.q.k || (it.y + '-' + it.r + '-' + it.g + '-' + it.sub + '-' + it.q.n); if (seen.has(k)) continue; seen.add(k); pool.push(it); }
+  const dupN = all.length - pool.length;
   for (let i = pool.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
   session = { mode: 4, pool, items: [pool[0]], sections: [], cur: 0, ans: [null], tri: [false], done: false,
-    title: '전 회차 무작위', meta: `${g}급 항해사 · ${el} · ${pool.length}문항 중 무작위` };
+    title: '전 회차 무작위', meta: `${g}급 항해사 · ${el} · 중복 ${dupN}문항 제외 · ${pool.length}문항 중 무작위` };
   renderQuiz();
 }
 
@@ -769,6 +774,11 @@ function stemHTML(t){
   return esc(head) + '<span class="box"><b>&lt;보 기&gt;</b>\n' + esc(rest) + '</span>';
 }
 function srcLabel(it){ return `${it.y}년 제${it.r}회 · ${it.g}급 항해사${it.p !== 'x' ? '(' + paperName(it.p) + ')' : ''} · ${it.sub} ${it.q.n}번`; }
+function repChip(it){
+  const r = it.q.rep; if (!r || !r.length) return '';
+  const list = r.map(x => { const [y, rr, g] = x.split('-'); return `${y}년 ${rr}회(${g}급)`; }).join(', ');
+  return `<span class="repc" title="${esc('같은 문제가 출제된 다른 시험: ' + list)}">다른 회차 ${r.length}번 출제</span>`;
+}
 function isRight(it, a){ return a != null && it.q.a && it.q.a.includes(a); }
 function ansLetters(it){ return (it.q.a || []).map(i => LET[i]).join(', '); }
 
@@ -832,7 +842,7 @@ function drawQ(){
       <span class="meta">${S.mode === 4 ? (i + 1) + '번째 문제' : (i + 1) + ' / ' + total}</span></div>
     <div class="prog"><i style="width:${pct}%"></i></div>
     <article class="sheet">
-      <div class="qhead"><span class="qno">${numLabel}</span><span class="stag" style="--c:var(--${c});--cb:var(--${c}-bg)">${esc(it.sub)}</span><span class="qsrc">${esc(srcLabel(it))}</span></div>
+      <div class="qhead"><span class="qno">${numLabel}</span><span class="stag" style="--c:var(--${c});--cb:var(--${c}-bg)">${esc(it.sub)}</span><span class="qsrc">${esc(srcLabel(it))}</span>${repChip(it)}</div>
       ${body}
       <div class="opts ${compact ? 'compact' : ''}" id="opts">${opts}</div>
       ${line}
