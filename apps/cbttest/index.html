@@ -789,7 +789,8 @@ function tick(){
     stopTimer();
     S.done = true; S.timeUp = true; S.used = S.limit;
     renderResult();
-    modal(`<div class="soon"><div class="ic">${ICON_CLOCK}</div><div><h3>시간이 끝났습니다</h3><p class="sub">제한시간 ${S.limit / 60}분이 지나 답안을 자동으로 제출하고 채점했습니다. 미응답 문항은 오답으로 처리됩니다.</p></div></div><div class="acts"><button class="btn btn-pri" data-close>결과 보기</button></div>`);
+    modal(`<div class="soon"><div class="ic">${ICON_CLOCK}</div><div><h3>시간이 끝났습니다</h3><p class="sub">제한시간 ${S.limit / 60}분이 지나 답안을 자동으로 제출하고 채점했습니다. 미응답 문항은 오답으로 처리됩니다.</p></div></div><div class="acts"><button class="btn btn-pri" id="toRes2">결과 보기</button></div>`);
+    document.getElementById('toRes2').onclick = () => { closeLayer(); askBlank(S); };
   }
 }
 function startExam(mode, elective, subs){
@@ -1071,7 +1072,11 @@ function renderResult(){
   } else verdict = `<span class="verdict na">무작위 ${totalN}문항</span>`;
   if (!S.saved){
     S.saved = true;
-    if (S.mode === 2 || S.mode === 3) S.items.forEach((it, k) => noteResult(it, S.ans[k], true));
+    if (S.mode === 2 || S.mode === 3){
+      const blanks = S.items.filter((it, k) => S.ans[k] == null);
+      S.items.forEach((it, k) => noteResult(it, S.ans[k], blanks.length < BLANK_ASK));
+      if (blanks.length >= BLANK_ASK) S.pendBlank = blanks;
+    }
     const vm = verdict.match(/class="verdict [a-z]+">([^<]+)</);
     saveHist({ t: Date.now(), m: S.mode, title: S.title, meta: S.meta, n: totalN, ok: totalOk,
       sc: S.mode === 4 ? Math.round(totalOk / Math.max(1, totalN) * 100) : avg, v: vm ? vm[1] : '',
@@ -1098,6 +1103,17 @@ function renderResult(){
   const ag = document.getElementById('again'); if (ag) ag.onclick = () => { S.ans = S.items.map(() => null); S.tri = S.items.map(() => false); S.done = false; S.cur = 0; S.used = null; S.timeUp = false; S.saved = false; if (S.limit){ S.startAt = Date.now(); S.endAt = S.startAt + S.limit * 1000; stopTimer(); timerId = setInterval(tick, 1000); } renderQuiz(); };
   const mr = document.getElementById('moreR'); if (mr) mr.onclick = () => { S.done = false; S.items.push(S.pool[S.items.length] || S.pool[0]); S.ans.push(null); S.tri.push(false); S.cur = S.items.length - 1; renderQuiz(); };
   document.getElementById('toHome').onclick = home;
+  if (!S.timeUp) askBlank(S);
+}
+const BLANK_ASK = 20;
+function askBlank(S){
+  const L = S && S.pendBlank; if (!L || !L.length) return;
+  S.pendBlank = null;
+  const bySub = {}; for (const it of L) bySub[it.sub] = (bySub[it.sub] || 0) + 1;
+  modal(`<h3>미응답 ${L.length}문항을 오답노트에 넣을까요?</h3><p class="sub">답을 고르지 않은 문항이 ${BLANK_ASK}문항 이상입니다. 시간이 부족해 풀지 못한 문제로 오답노트에 등록할 수 있습니다.<br><span class="mono" style="font-size:13px">${Object.entries(bySub).map(([s, n]) => esc(s) + ' ' + n).join(' · ')}</span></p><p class="sub" style="margin-top:6px">틀린 답을 고른 문항은 이미 오답노트에 등록되었습니다.</p>
+    <div class="acts"><button class="btn btn-ghost" id="bNo">등록하지 않기</button><button class="btn btn-pri" id="bYes">오답노트에 등록</button></div>`);
+  document.getElementById('bNo').onclick = closeLayer;
+  document.getElementById('bYes').onclick = () => { for (const it of L) noteResult(it, null, true); closeLayer(); toast('미응답 ' + L.length + '문항을 오답노트에 등록했습니다'); };
 }
 function retryWrong(){
   const S = session;
@@ -1260,7 +1276,7 @@ function drawHistBody(H){
   <div class="stbl htbl"><table><thead><tr><th>일시</th><th>방식</th><th>시험</th><th style="text-align:right">정답</th><th style="text-align:right">점수</th><th>판정</th><th>소요</th></tr></thead><tbody>
   ${H.map(h => `<tr><td class="mono">${fmtDate(h.t)}</td><td>${MODE_NAME[h.m] || ''}</td><td title="${esc(h.meta || '')}">${esc(h.title)}<br><small style="color:var(--muted)">${esc(h.meta || '')}</small></td><td class="num">${h.ok}/${h.n}</td><td class="num">${h.sc}${h.m === 4 || h.pct ? '%' : '점'}</td><td>${h.v ? `<span class="pill ${/^(합격|과락 면함|과락 없음)$/.test(h.v) ? 'ok' : /무작위|중단/.test(h.v) ? '' : 'bad'}">${esc(h.v)}</span>` : ''}</td><td class="mono">${h.used != null ? fmtTime(h.used) : '–'}</td></tr>`).join('')}
   </tbody></table></div>
-  <p class="wn-note">최근 300회까지 저장됩니다. 중간에 그만둔 풀이는 '중단'으로, 푼 문항까지만 기록됩니다. 모의고사를 제출하거나 시간이 끝났을 때 답을 고르지 못한 문항은 오답노트에 '미응답'으로 들어갑니다.</p>
+  <p class="wn-note">최근 300회까지 저장됩니다. 중간에 그만둔 풀이는 '중단'으로, 푼 문항까지만 기록됩니다. 모의고사를 제출하거나 시간이 끝났을 때 답을 고르지 못한 문항은 오답노트에 '미응답'으로 들어갑니다(20문항 이상이면 등록할지 먼저 묻습니다).</p>
   <div class="res-acts"><button class="btn btn-ghost" type="button" id="hClear">응시 기록 비우기</button></div>`;
   document.getElementById('hClear').onclick = () => {
     modal(`<h3>응시 기록을 모두 비울까요?</h3><p class="sub">이 브라우저에 저장된 응시 기록이 지워지며 되돌릴 수 없습니다. 오답노트는 그대로 남습니다.</p><div class="acts"><button class="btn btn-ghost" data-close>취소</button><button class="btn btn-pri" id="hDo">비우기</button></div>`);
