@@ -84,11 +84,14 @@ main{padding-block:28px 64px}
 .btn{border:0;border-radius:10px;padding:12px 22px;font-weight:600;font-size:15.5px;display:inline-flex;align-items:center;gap:8px}
 .btn-pri{background:var(--pri);color:var(--pri-ink)}
 .btn-pri:hover{filter:brightness(1.08)}
-.btn-big{padding:15px 34px;font-size:17px;border-radius:12px}
+.btn-big{padding:19px 56px;font-size:21px;border-radius:14px;letter-spacing:.02em}
 .btn-ghost{background:var(--surface);border:1px solid var(--rule);color:var(--ink)}
 .btn-ghost:hover{border-color:var(--muted)}
 .btn[disabled]{opacity:.45;cursor:not-allowed}
 .hero .note{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.hero-art{display:flex;flex-direction:column;gap:14px;min-width:0}
+.hero-art .note{text-align:right}
+@media (max-width:900px){.hero-art .note{text-align:left}}
 .omr-art{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:18px 18px 14px;box-shadow:var(--shadow);transform:rotate(-1.2deg)}
 .omr-art .t{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:10px}
 .omr-art .t b{font-family:var(--f-disp);font-size:15px}
@@ -532,12 +535,14 @@ function home(){
       <p class="lede">한국해양수산연수원이 공개한 해기사 시험 기출문제를 직종·년도·회차·과목별로 골라 풉니다. 바로 채점, 과목 모의고사, 회차 전체 모의고사, 전 회차 무작위 풀이를 지원합니다.</p>
       <div class="cta">
         <button class="btn btn-pri btn-big" id="startBtn" type="button">시작 →</button>
-        <span class="note">현재 항해 필기 1~4급 · 2018·2020~2025년 · 25,185문항</span>
       </div>
     </div>
-    <div class="omr-art" aria-hidden="true">
-      <div class="t"><b>답안지 · 제1과목 항해</b><span>OMR</span></div>
-      <div class="art-rows">${rows}</div>
+    <div class="hero-art">
+      <p class="note">현재 항해 필기 1~4급 · 2018·2020~2025년 · 25,185문항</p>
+      <div class="omr-art" aria-hidden="true">
+        <div class="t"><b>답안지 · 제1과목 항해</b><span>OMR</span></div>
+        <div class="art-rows">${rows}</div>
+      </div>
     </div>
   </section>
 
