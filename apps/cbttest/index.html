@@ -1182,7 +1182,7 @@ function drawNoteBody(all){
   const retryN = list.filter(x => !x.e.fx).length;
   const kseg = `<div class="seg" style="margin:0">${['전체','틀린 답','미응답'].map(s => `<button type="button" data-kd="${s}" class="${wnKind === s ? 'on' : ''}">${s === '미응답' ? '시간 부족·미응답 ' + blankN : s}</button>`).join('')}</div>`;
   const bar = `<div class="wn-bar">${seg}</div><div class="wn-bar">${kseg}<span class="sp"></span><label><input type="checkbox" id="hideFx" ${wnHideFixed ? 'checked' : ''}> 다시 맞힌 문제 숨기기</label></div>
-    <div class="wn-bar"><button class="btn btn-pri" type="button" id="wnRetry" ${retryN ? '' : 'disabled'}>${wnSub === '전체' ? '' : esc(wnSub) + ' '}${wnKind === '미응답' ? '미응답 ' : wnKind === '틀린 답' ? '틀린 ' : '오답 '}${retryN}문항 다시 풀기</button><span class="sp"></span><button class="btn btn-ghost" type="button" id="wnClear">${wnSub === '전체' ? '오답노트 전체 비우기' : esc(wnSub) + ' 오답 비우기'}</button></div>`;
+    <div class="wn-bar"><button class="btn btn-pri" type="button" id="wnRetry" ${retryN ? '' : 'disabled'}>${wnSub === '전체' ? '' : esc(wnSub) + ' '}${wnKind === '미응답' ? '미응답 ' : wnKind === '틀린 답' ? '틀린 ' : '오답 '}${retryN}문항 다시 풀기</button><span class="sp"></span><button class="btn btn-ghost" type="button" id="wnClear">오답노트 초기화</button></div>`;
   const cards = list.slice(0, wnShow).map(x => noteCard(x)).join('');
   const more = list.length > wnShow ? `<button class="btn btn-ghost" type="button" id="wnMore" style="justify-self:center">더 보기 (${list.length - wnShow}문항 남음)</button>` : '';
   body.innerHTML = subCards + bar + `<div class="wn-list">${cards || '<div class="wn-empty">표시할 문제가 없습니다.</div>'}${more}</div>`;
@@ -1200,12 +1200,33 @@ function drawNoteBody(all){
     renderQuiz();
   };
   document.getElementById('wnClear').onclick = () => {
-    modal(`<h3>${wnSub === '전체' ? '오답노트를 모두 비울까요?' : esc(wnSub) + ' 오답을 비울까요?'}</h3><p class="sub">이 브라우저에 저장된 ${wnSub === '전체' ? '모든' : esc(wnSub)} 오답 기록이 지워지며 되돌릴 수 없습니다. 응시 기록은 그대로 남습니다.</p><div class="acts"><button class="btn btn-ghost" data-close>취소</button><button class="btn btn-pri" id="wnDo">비우기</button></div>`);
-    document.getElementById('wnDo').onclick = () => {
-      const W = lsGet(WN_KEY, {});
-      for (const k of Object.keys(W)) if (wnSub === '전체' || W[k].s === wnSub) delete W[k];
-      lsSet(WN_KEY, W); closeLayer(); updWnCnt(); drawWn();
-    };
+    const W0 = lsGet(WN_KEY, {}), E = Object.values(W0);
+    const c = { all: E.length, fx: E.filter(e => e.fx).length, blank: E.filter(e => e.a == null).length, sub: wnSub === '전체' ? 0 : E.filter(e => e.s === wnSub).length };
+    const H = lsGet(HIST_KEY, []).length;
+    const opts = [
+      ['fx', `다시 풀어 맞힌 문제만 지우기`, c.fx],
+      ['blank', `미응답(시간 부족) 문제만 지우기`, c.blank],
+      wnSub !== '전체' && ['sub', `${esc(wnSub)} 과목 오답만 지우기`, c.sub],
+      ['all', `오답노트 전체 초기화`, c.all],
+      ['both', `오답노트 + 응시 기록 모두 초기화`, c.all + H],
+    ].filter(Boolean);
+    let pick = opts.find(o => o[2])?.[0] || 'all';
+    const draw = () => modal(`<h3>오답노트 초기화</h3><p class="sub">지울 범위를 고르세요. 이 브라우저에 저장된 기록이 지워지며 되돌릴 수 없습니다.</p>
+      <div class="modes">${opts.map(([k, t, n]) => `<button class="mode ${pick === k ? 'on' : ''}" type="button" data-r="${k}" ${n ? '' : 'disabled'}><span class="no">${pick === k ? '●' : '○'}</span><span><b>${t}</b><span>${k === 'both' ? '오답 ' + c.all + '문항 · 응시 기록 ' + H + '건' : n + '문항'}</span></span></button>`).join('')}</div>
+      <div class="acts"><button class="btn btn-ghost" data-close>취소</button><button class="btn btn-pri" id="wnDo">초기화</button></div>`, m => {
+        m.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { pick = b.dataset.r; draw(); });
+        m.querySelector('#wnDo').onclick = () => {
+          const W = lsGet(WN_KEY, {});
+          for (const k of Object.keys(W)){
+            const e = W[k];
+            if (pick === 'all' || pick === 'both' || (pick === 'fx' && e.fx) || (pick === 'blank' && e.a == null) || (pick === 'sub' && e.s === wnSub)) delete W[k];
+          }
+          lsSet(WN_KEY, W);
+          if (pick === 'both') lsSet(HIST_KEY, []);
+          closeLayer(); updWnCnt(); wnShow = 30; drawWn(); toast('초기화했습니다');
+        };
+      });
+    draw();
   };
 }
 function noteCard(x){
