@@ -1,0 +1,1034 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>해기사 기출문제 풀이</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="한국해양수산연수원 공개 해기사 시험 기출문제(항해 필기)를 회차·과목별로 풀어보는 교육용 사이트">
+<link rel="canonical" href="https://teambypass.vercel.app/apps/seamantest/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://teambypass.vercel.app/apps/seamantest/">
+<meta property="og:title" content="해기사 기출문제 풀이">
+<meta property="og:description" content="해기사 항해 필기 기출(2018·2020~2025) · 바로 채점, 과목·회차 모의고사, 전 회차 무작위 풀이">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Nanum+Gothic:wght@700;800&display=swap">
+<style>
+/* Layout: navy masthead + route strip; wide 1120px sheet. Picking = tile grid. Solving = exam sheet (left) + sticky OMR answer card (right, bottom drawer on phones). */
+:root{
+  --paper:#F3F6F7; --surface:#FFFFFF; --ink:#12202A; --muted:#566571; --rule:#D3DBE0; --soft:#E8EEF1;
+  --navy:#173B57; --navy-ink:#FFFFFF; --pri:#173B57; --pri-ink:#FFFFFF;
+  --kr:#1F5E8C; --kr-bg:#E8F0F7;
+  --oil:#93530F; --oil-bg:#FBF1E4; --sew:#17705F; --sew-bg:#E3F3EF; --gar:#4752A0; --gar-bg:#EAECF8; --ov:#4A5864; --ov-bg:#EBEFF2;
+  --ok:#1E7A3C; --ok-bg:#E3F4E8; --bad:#B3261E; --bad-bg:#FBE7E5; --warn:#8A5A00; --warn-bg:#FBF0D9;
+  --scrim:rgba(243,246,247,.72); --shadow:0 1px 2px rgba(18,32,42,.06),0 8px 24px rgba(18,32,42,.08); --sheet:#FFFFFF;
+  --f-disp:"Nanum Gothic","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+:root[data-theme="dark"]{
+  --paper:#0D1419; --surface:#141E25; --ink:#E3EAEE; --muted:#93A2AD; --rule:#25333D; --soft:#1A262E;
+  --navy:#0F2A3F; --navy-ink:#E3EAEE; --pri:#86BCE6; --pri-ink:#0D1419;
+  --kr:#86BCE6; --kr-bg:#122230;
+  --oil:#E3A55C; --oil-bg:#2A1F12; --sew:#5BC4AE; --sew-bg:#10261F; --gar:#9EA8F2; --gar-bg:#1A1D33; --ov:#A9B6C0; --ov-bg:#1B252C;
+  --ok:#6BD18A; --ok-bg:#12291A; --bad:#F2867E; --bad-bg:#2E1513; --warn:#E8BC5E; --warn-bg:#2B2210;
+  --scrim:rgba(13,20,25,.74); --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35); --sheet:#F4F6F7;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15.5px;line-height:1.65;word-break:keep-all;overflow-wrap:anywhere}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--navy)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--kr);outline-offset:2px;border-radius:6px}
+h1,h2,h3{margin:0;text-wrap:balance}
+p{margin:0}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.disp{font-family:var(--f-disp);font-weight:800;letter-spacing:-.01em}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* masthead */
+.mast{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--navy);color:var(--navy-ink)}
+.mast .wrap{display:flex;align-items:center;gap:14px;padding-block:10px}
+.brand{display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;color:inherit;text-align:left;min-width:0}
+.brand .mk{width:30px;height:30px;border-radius:50%;border:2px solid currentColor;display:grid;place-items:center;font-family:var(--f-mono);font-size:12px;font-weight:600;flex:none}
+.brand b{font-family:var(--f-disp);font-size:18px;font-weight:800;white-space:nowrap}
+.brand span{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;opacity:.7;white-space:nowrap}
+.mast .sp{flex:1}
+.iconbtn{background:transparent;border:1px solid rgba(255,255,255,.28);color:inherit;border-radius:8px;height:34px;min-width:34px;padding:0 10px;display:inline-flex;align-items:center;gap:6px;font-size:13px}
+.iconbtn svg{width:16px;height:16px}
+.route{background:var(--surface);border-bottom:1px solid var(--rule)}
+.route .wrap{display:flex;align-items:center;gap:6px;padding-block:9px;overflow-x:auto;scrollbar-width:none}
+.route .wrap::-webkit-scrollbar{display:none}
+.crumb{font-family:var(--f-mono);font-size:12.5px;white-space:nowrap;padding:3px 9px;border-radius:999px;border:1px solid var(--rule);background:var(--paper);color:var(--ink)}
+button.crumb:hover{border-color:var(--kr);color:var(--kr)}
+.crumb.now{background:var(--kr-bg);border-color:transparent;color:var(--kr);font-weight:600}
+.route .arw{color:var(--muted);font-size:12px}
+
+main{padding-block:28px 64px}
+.view-h{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 20px;margin-bottom:20px}
+.view-h h2{font-family:var(--f-disp);font-weight:800;font-size:clamp(22px,3.2vw,30px);line-height:1.25}
+.view-h p{color:var(--muted);font-size:14px;margin-top:4px}
+.back{background:none;border:1px solid var(--rule);border-radius:8px;padding:6px 12px;font-size:13.5px;color:var(--muted)}
+.back:hover{color:var(--ink);border-color:var(--muted)}
+
+/* home */
+.hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:40px;align-items:center;padding-block:18px 34px}
+.hero h1{font-family:var(--f-disp);font-weight:800;font-size:clamp(34px,5.6vw,58px);line-height:1.12;letter-spacing:-.02em}
+.hero h1 em{font-style:normal;color:var(--kr)}
+.hero .lede{margin-top:16px;font-size:16.5px;color:var(--muted);max-width:34em}
+.hero .cta{margin-top:26px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.btn{border:0;border-radius:10px;padding:12px 22px;font-weight:600;font-size:15.5px;display:inline-flex;align-items:center;gap:8px}
+.btn-pri{background:var(--pri);color:var(--pri-ink)}
+.btn-pri:hover{filter:brightness(1.08)}
+.btn-big{padding:15px 34px;font-size:17px;border-radius:12px}
+.btn-ghost{background:var(--surface);border:1px solid var(--rule);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--muted)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.hero .note{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.omr-art{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:18px 18px 14px;box-shadow:var(--shadow);transform:rotate(-1.2deg)}
+.omr-art .t{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:10px}
+.omr-art .t b{font-family:var(--f-disp);font-size:15px}
+.omr-art .t span{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.art-rows{display:grid;grid-template-columns:1fr 1fr;gap:4px 22px}
+.art-row{display:flex;align-items:center;gap:7px;font-family:var(--f-mono);font-size:11.5px}
+.art-row i{font-style:normal;width:20px;color:var(--muted);text-align:right}
+.art-row s{text-decoration:none;width:19px;height:19px;border-radius:50%;border:1px solid var(--rule);display:grid;place-items:center;font-size:9.5px;color:var(--muted);font-family:var(--f-body)}
+.art-row s.on{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+
+.cover{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:6px}
+.cv{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:16px 18px}
+.cv .y{font-family:var(--f-mono);font-size:22px;font-weight:600}
+.cv .d{font-size:13.5px;color:var(--muted);margin-top:2px}
+.cv .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.chip{font-family:var(--f-mono);font-size:11.5px;padding:2px 8px;border-radius:5px;background:var(--soft);color:var(--muted);white-space:nowrap}
+.chip.k{background:var(--kr-bg);color:var(--kr)}
+.sec-t{display:flex;align-items:baseline;gap:12px;margin:40px 0 14px}
+.sec-t h3{font-family:var(--f-disp);font-size:19px;font-weight:800}
+.sec-t span{flex:1;border-top:1px solid var(--rule);transform:translateY(-4px)}
+
+.src{background:var(--surface);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+.src-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;padding:13px 18px;border-top:1px solid var(--rule);font-size:14px}
+.src-row:first-child{border-top:0}
+.src-row dt{font-family:var(--f-mono);font-size:12px;color:var(--muted);padding-top:2px}
+.src-row dd{margin:0}
+.src-row a{color:var(--kr);font-family:var(--f-mono);font-size:13.5px;text-underline-offset:3px}
+.src-row ul{margin:0;padding-left:18px}
+.caution{margin-top:22px;display:flex;gap:14px;align-items:flex-start;background:var(--warn-bg);color:var(--ink);border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);border-radius:12px;padding:16px 18px}
+.caution svg{flex:none;width:26px;height:26px;color:var(--warn);margin-top:1px}
+.caution b{color:var(--warn);font-weight:700}
+.caution p{font-size:14.5px}
+.caution small{display:block;color:var(--muted);font-size:12.5px;margin-top:4px}
+
+/* tiles */
+.tiles{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.tiles.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tile{position:relative;text-align:left;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:6px;min-height:118px;transition:border-color .15s,transform .15s,box-shadow .15s}
+.tile:hover{border-color:var(--kr);box-shadow:var(--shadow);transform:translateY(-1px)}
+.tile .tag{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.tile .nm{font-family:var(--f-disp);font-weight:800;font-size:22px;line-height:1.2}
+.tile .ds{font-size:13.5px;color:var(--muted)}
+.tile .ft{margin-top:auto;padding-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.tile.big{min-height:170px}
+.tile.big .nm{font-size:30px}
+.tile.dim{background:var(--soft);border-style:dashed}
+.tile.dim .nm{color:var(--muted)}
+.tile.dim:hover{border-color:var(--muted);transform:none;box-shadow:none}
+.tile .badge{position:absolute;top:14px;right:14px;font-family:var(--f-mono);font-size:11px;padding:2px 8px;border-radius:999px;background:var(--warn-bg);color:var(--warn);font-weight:600}
+.tile .badge.ok{background:var(--kr-bg);color:var(--kr)}
+.tile.subj{border-top:4px solid var(--c)}
+.tile.subj .nm{color:var(--c)}
+.tile[disabled]{cursor:not-allowed}
+.tiles.grades{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.tile.grade .ds{font-weight:600;color:var(--kr)}
+.duty{margin:6px 0 0;padding-top:10px;border-top:1px dashed var(--rule);display:grid;gap:7px}
+.duty div{display:grid;gap:1px}
+.duty dt{font-family:var(--f-mono);font-size:11px;letter-spacing:.04em;color:var(--muted)}
+.duty dd{margin:0;font-size:13px;line-height:1.5;color:var(--ink)}
+.lawnote{margin-top:16px;font-size:12.5px;color:var(--muted);line-height:1.6;max-width:62em}
+.lawnote b{color:var(--ink);margin-right:6px}
+.rule-box{margin-top:16px;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.6}
+.rule-box b{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;color:var(--muted);display:block;margin-bottom:4px}
+.rule-box ul{margin:0;padding-left:18px}
+.rule-box em{font-style:normal;color:var(--oil);font-weight:700}
+.reasons{margin:10px 0 0;padding-left:18px;font-size:13px;color:var(--bad)}
+.ver{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.04em;opacity:.8;white-space:nowrap;border:0;background:none;color:inherit;user-select:none;padding:4px 6px;border-radius:5px;cursor:default}
+.ver:hover{opacity:1}
+.mast .ver{background:rgba(255,255,255,.12);padding:3px 9px}
+.home-logo{display:inline-flex;flex:none;border-radius:6px;padding:2px}
+.home-logo img{display:block;width:30px;height:30px;transition:transform .15s}
+.home-logo:hover img{transform:scale(1.08)}
+footer.foot{padding-block:12px 28px;text-align:center}
+footer.foot p{margin:0 0 6px;font-size:12px;color:var(--muted)}
+footer.foot .ver{color:var(--muted)}
+.groupl{font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;color:var(--muted);margin:22px 0 10px;display:flex;align-items:center;gap:10px}
+.groupl::after{content:"";flex:1;border-top:1px dashed var(--rule)}
+.loading{color:var(--muted);font-family:var(--f-mono);font-size:13px;padding:30px 0}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:var(--scrim);backdrop-filter:blur(3px);animation:fade .18s ease}
+.dlg{width:min(520px,100%);max-height:100%;overflow:auto;background:var(--surface);border:1px solid var(--rule);border-radius:16px;box-shadow:var(--shadow);padding:24px 24px 20px;animation:rise .2s ease}
+.dlg h3{font-family:var(--f-disp);font-weight:800;font-size:22px}
+.dlg .sub{color:var(--muted);font-size:14px;margin-top:6px}
+.dlg .acts{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:22px}
+.dlg .soon{display:flex;gap:14px;align-items:center}
+.dlg .masc{display:block;width:min(100%,300px);height:auto;margin:0 auto 18px;border-radius:12px;border:2px solid var(--ink);box-shadow:var(--shadow)}
+.timer{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:13px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--kr-bg);color:var(--kr);display:inline-flex;gap:6px;align-items:center;white-space:nowrap}
+.timer svg{width:14px;height:14px}
+.timer.low{background:var(--warn-bg);color:var(--warn)}
+.timer.out{background:var(--bad-bg);color:var(--bad)}
+.picks{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.picks button{border:1px solid var(--rule);background:var(--surface);border-radius:8px;padding:7px 12px;font-size:14px;display:inline-flex;gap:6px;align-items:center}
+.picks button i{font-style:normal;width:16px;height:16px;border-radius:4px;border:1.5px solid var(--muted);display:grid;place-items:center;font-size:11px;line-height:1}
+.picks button.on{border-color:var(--kr);background:var(--kr-bg);color:var(--kr);font-weight:600}
+.picks button.on i{background:var(--kr);border-color:var(--kr);color:var(--surface)}
+.picks button[disabled]{opacity:.4;cursor:not-allowed}
+.fld .hint{font-size:12.5px;color:var(--muted);margin-top:6px}
+.dlg .soon .ic{width:48px;height:48px;border-radius:12px;background:var(--warn-bg);color:var(--warn);display:grid;place-items:center;flex:none}
+.dlg .soon .ic svg{width:26px;height:26px}
+.modes{display:grid;gap:10px;margin-top:18px}
+.mode{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;align-items:start;text-align:left;background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:14px}
+.mode:hover,.mode.on{border-color:var(--kr);background:var(--kr-bg)}
+.mode .no{width:44px;height:44px;border-radius:10px;background:var(--surface);border:1px solid var(--rule);display:grid;place-items:center;font-family:var(--f-mono);font-weight:600;font-size:17px;color:var(--kr)}
+.mode b{display:block;font-size:15.5px}
+.mode span{font-size:13px;color:var(--muted);line-height:1.5;display:block;margin-top:2px}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.seg button{border:1px solid var(--rule);background:var(--surface);border-radius:8px;padding:7px 13px;font-size:14px}
+.seg button.on{background:var(--pri);border-color:var(--pri);color:var(--pri-ink);font-weight:600}
+.seg button[disabled]{opacity:.4;cursor:not-allowed}
+.fld{margin-top:16px}
+.fld > .eyebrow{display:block}
+
+/* quiz */
+.quiz{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+.qbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-bottom:14px}
+.qbar .ttl{font-family:var(--f-disp);font-weight:800;font-size:20px}
+.qbar .meta{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.qbar .sp{flex:1}
+.prog{height:4px;background:var(--soft);border-radius:4px;overflow:hidden;margin-bottom:16px}
+.prog i{display:block;height:100%;background:var(--kr);transition:width .25s}
+.sheet{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:22px 24px 20px}
+.qhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.qno{font-family:var(--f-mono);font-weight:600;font-size:15px;background:var(--ink);color:var(--surface);border-radius:7px;padding:2px 9px}
+.stag{font-size:12.5px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--cb);color:var(--c)}
+.qsrc{font-family:var(--f-mono);font-size:11.5px;color:var(--muted)}
+.qtext{font-size:17px;line-height:1.75;white-space:pre-wrap}
+.qtext .box{display:block;margin:10px 0 2px;padding:10px 14px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);font-size:15.5px}
+.figs{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.spr{width:100%;background-repeat:no-repeat;background-color:#fff;border-radius:8px}
+.scan{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:10px 12px}
+.scan .spr{border-radius:0}
+.figs .spr{border:1px solid var(--rule)}
+.scan-note{font-family:var(--f-mono);font-size:11px;color:var(--muted);margin-top:6px}
+.opts{display:grid;gap:9px;margin-top:18px}
+.opts.compact{grid-template-columns:repeat(4,minmax(0,1fr))}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;background:var(--paper);border:1.5px solid var(--rule);border-radius:11px;padding:11px 14px;font-size:15.5px;line-height:1.55;transition:border-color .12s,background .12s}
+.opts.compact .opt{justify-content:center;align-items:center;padding:12px 6px}
+.opt:hover{border-color:var(--kr)}
+.opt .lt{flex:none;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--muted);display:grid;place-items:center;font-weight:700;font-size:14px;margin-top:-1px}
+.opt.sel{border-color:var(--kr);background:var(--kr-bg)}
+.opt.sel .lt{background:var(--kr);border-color:var(--kr);color:var(--surface)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}
+.opt.right .lt{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt.wrong .lt{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.opt[disabled]{cursor:default}
+.qfoot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:18px;padding-top:14px;border-top:1px dashed var(--rule)}
+.qfoot .sp{flex:1}
+.tri{border:1.5px solid var(--rule);background:var(--surface);border-radius:9px;padding:8px 13px;font-size:14px;display:inline-flex;gap:7px;align-items:center}
+.tri.on{border-color:var(--warn);background:var(--warn-bg);color:var(--warn);font-weight:600}
+.tri svg{width:15px;height:15px}
+.navb{border:1px solid var(--rule);background:var(--surface);border-radius:9px;padding:8px 14px;font-size:14px}
+.navb:hover{border-color:var(--muted)}
+.ansline{margin-top:14px;padding:10px 14px;border-radius:10px;font-size:14.5px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.ansline.ok{background:var(--ok-bg);color:var(--ok)}
+.ansline.bad{background:var(--bad-bg);color:var(--bad)}
+.ansline.none{background:var(--soft);color:var(--muted)}
+.kbd{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);margin-top:10px}
+
+/* OMR card */
+.omr{position:sticky;top:calc(env(safe-area-inset-top,0px) + 124px);background:var(--surface);border:1px solid var(--rule);border-radius:14px;display:flex;flex-direction:column;max-height:calc(100vh - 144px)}
+.omr-h{padding:14px 16px 10px;border-bottom:2px solid var(--ink)}
+.omr-h b{font-family:var(--f-disp);font-size:16px}
+.omr-h .st{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-top:2px}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.omr-b{overflow:auto;padding:6px 8px 10px;flex:1}
+.omr-sec{font-size:12px;font-weight:700;padding:10px 8px 4px;color:var(--c)}
+.orow{display:flex;align-items:center;gap:6px;width:100%;background:none;border:0;border-radius:7px;padding:3px 6px;font-family:var(--f-mono);font-size:12px}
+.orow:hover{background:var(--soft)}
+.orow.cur{background:var(--kr-bg);box-shadow:inset 3px 0 0 var(--kr)}
+.orow .n{width:24px;text-align:right;color:var(--muted)}
+.orow .tm{width:14px;color:var(--warn);font-size:12px;text-align:center}
+.bub{width:21px;height:21px;border-radius:50%;border:1px solid var(--rule);display:grid;place-items:center;font-family:var(--f-body);font-size:10px;color:var(--muted);flex:none}
+.bub.on{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.bub.ok{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.bub.bad{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.bub.ans{border:2px solid var(--ok);color:var(--ok);font-weight:700}
+.omr-f{padding:12px 14px;border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:8px}
+.omr-f .btn{justify-content:center}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:12px 14px}
+.stats div{background:var(--paper);border-radius:8px;padding:8px;text-align:center}
+.stats b{display:block;font-family:var(--f-mono);font-size:19px}
+.stats span{font-size:11.5px;color:var(--muted)}
+.omr-toggle{display:none}
+
+/* judge overlay */
+.judge{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-left,0px));background:var(--scrim);backdrop-filter:blur(2px);animation:fade .22s ease}
+.jcard{width:min(420px,100%);background:var(--surface);border:1px solid var(--rule);border-radius:18px;box-shadow:var(--shadow);padding:28px 24px 22px;text-align:center;animation:rise .25s ease}
+.mark{width:110px;height:110px;margin:0 auto 12px;position:relative}
+.mark.o::before{content:"";position:absolute;inset:8px;border-radius:50%;border:12px solid var(--ok);animation:pop .32s cubic-bezier(.3,1.5,.5,1)}
+.mark.x::before,.mark.x::after{content:"";position:absolute;left:50%;top:6px;width:13px;height:98px;margin-left:-6.5px;border-radius:7px;background:var(--bad);animation:pop .32s cubic-bezier(.3,1.5,.5,1)}
+.mark.x::before{transform:rotate(45deg)}
+.mark.x::after{transform:rotate(-45deg)}
+.jcard h3{font-family:var(--f-disp);font-size:26px;font-weight:800}
+.jcard h3.o{color:var(--ok)}
+.jcard h3.x{color:var(--bad)}
+.jline{display:flex;justify-content:center;gap:16px;margin-top:12px;font-size:15px}
+.jline > span{display:inline-flex;align-items:center;gap:6px}
+.jline .bub{display:inline-grid;place-items:center;width:28px;height:28px;font-size:13.5px;font-weight:700;line-height:1;padding:0}
+.jcard .btn{margin-top:20px;width:100%;justify-content:center}
+.jcard .hint{font-family:var(--f-mono);font-size:11px;color:var(--muted);margin-top:8px}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes rise{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{opacity:1}}
+.mark.x::before{animation-name:popx1}.mark.x::after{animation-name:popx2}
+@keyframes popx1{from{transform:rotate(45deg) scale(.3);opacity:0}to{transform:rotate(45deg);opacity:1}}
+@keyframes popx2{from{transform:rotate(-45deg) scale(.3);opacity:0}to{transform:rotate(-45deg);opacity:1}}
+
+/* results */
+.res-top{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:20px;align-items:stretch}
+.score{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:22px}
+.score .big{font-family:var(--f-mono);font-size:58px;font-weight:600;line-height:1}
+.score .big small{font-size:20px;color:var(--muted)}
+.verdict{display:inline-block;margin-top:12px;font-weight:700;padding:4px 12px;border-radius:999px}
+.verdict.ok{background:var(--ok-bg);color:var(--ok)}
+.verdict.bad{background:var(--bad-bg);color:var(--bad)}
+.verdict.na{background:var(--soft);color:var(--muted)}
+.score p{font-size:13px;color:var(--muted);margin-top:10px}
+.stbl{background:var(--surface);border:1px solid var(--rule);border-radius:14px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:10px 14px;border-bottom:1px solid var(--rule);text-align:left;white-space:nowrap}
+th{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;color:var(--muted);font-weight:500}
+td.num{font-family:var(--f-mono);text-align:right}
+tr:last-child td{border-bottom:0}
+.pill{font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.bad{background:var(--bad-bg);color:var(--bad)}
+.res-acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:10px;font-size:14px;z-index:60;animation:rise .2s ease}
+
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr;gap:28px}
+  .omr-art{transform:none}
+  .quiz{grid-template-columns:minmax(0,1fr)}
+  .omr{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:35;border-radius:16px 16px 0 0;max-height:72vh;transform:translateY(105%);transition:transform .25s;padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:var(--shadow)}
+  .omr.open{transform:none}
+  .omr-toggle{display:inline-flex;position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:34;background:var(--pri);color:var(--pri-ink);border:0;border-radius:999px;padding:11px 16px;font-weight:600;font-size:14px;box-shadow:var(--shadow);gap:6px;align-items:center}
+  .res-top{grid-template-columns:1fr}
+  .cover{grid-template-columns:1fr}
+  .src-row{grid-template-columns:1fr;gap:4px}
+}
+@media (max-width:520px){
+  .mast .wrap{gap:8px}
+  .iconbtn span{display:none}
+  .brand b{font-size:16px}
+  .mast .ver{padding:3px 6px;font-size:10.5px}
+  .tiles.two{grid-template-columns:1fr}
+  .sheet{padding:18px 16px}
+  .art-rows{grid-template-columns:1fr}
+  .art-row:nth-child(n+6){display:none}
+  .brand span{display:none}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<header class="mast">
+  <div class="wrap">
+    <button class="brand" id="brand" type="button" aria-label="처음 화면으로">
+      <span class="mk">海</span>
+      <b>해기사 기출문제 풀이</b>
+      <span>KIMFT · CBT</span>
+    </button>
+    <div class="sp"></div>
+    <button class="iconbtn" id="themeBtn" type="button" aria-label="화면 테마 바꾸기"></button>
+    <span class="ver" aria-label="버전 0.2.0">v. 0.2.0</span>
+    <a class="home-logo" href="https://teambypass.vercel.app/" target="_top" aria-label="Team Bypass 메인 페이지"><img src="data:image/webp;base64,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" alt="" width="30" height="30"></a>
+  </div>
+</header>
+<nav class="route" id="route" hidden><div class="wrap" id="routeIn"></div></nav>
+<main class="wrap" id="app"></main>
+<footer class="foot wrap"><p>해기사 기출문제 풀이 · 항해 필기 1~4급 · 교육용</p><span class="ver" aria-label="버전 0.2.0">v. 0.2.0</span></footer>
+<div id="layer"></div>
+
+<script>
+(() => {
+'use strict';
+const SUBS = ['항해','운용','법규','영어','상선전문','어선전문'];
+const SUBC = {항해:'kr',운용:'sew',법규:'oil',영어:'gar',상선전문:'ov',어선전문:'ov'};
+const LET = ['가','나','사','아'];
+const VERSION = '0.2.0';
+const COVER = [
+  { y:2025, d:'정기 제1~4회 · 1~4급 항해사 상선/어선', n:3875 },
+  { y:2024, d:'정기 제1~4회 · 1~4급 항해사 상선/어선', n:4000 },
+  { y:2023, d:'정기 제1~4회 · 1~4급 항해사 상선/어선', n:4000 },
+  { y:2022, d:'정기 제1~4회 · 1~4급 항해사 상선/어선', n:4000 },
+  { y:2021, d:'정기 제1~4회 · 1~4급 항해사 상선/어선', n:4000 },
+  { y:2020, d:'정기 제2~4회 · 1~4급 항해사 상선/어선', n:3000 },
+  { y:2018, d:'정기 제1~4회 · 1~4급 항해사', n:2310, scan:true },
+];
+const YEARS = [2025,2024,2023,2022,2021,2020,2018];
+const DATA_YEARS = [2018,2020,2021,2022,2023,2024,2025];
+/* 선박직원법 시행령 [별표 3] 갑판부 최저승무기준 — 급수별 대표 직무 */
+const GRADE = {
+  1: { sum:'대형선 선장급', rows:[
+    ['원양 · 여객선 외','총톤수 6천톤 이상 선장'],
+    ['여객선','연안 5천톤 이상 · 원양 1천600톤 이상 선장'],
+    ['어선','(1급이 최저인 직무 없음) 모든 직무 승무 가능'] ] },
+  2: { sum:'대형선 1등 항해사 · 중형선 선장급', rows:[
+    ['원양 · 여객선 외','1천600톤 이상 6천톤 미만 선장 · 6천톤 이상 1등 항해사'],
+    ['연안 · 여객선 외','5천톤 이상 선장'],
+    ['어선 · 무제한수역','길이 80미터 이상 선장'] ] },
+  3: { sum:'중형선 선장 · 대형선 2등 항해사급', rows:[
+    ['원양 · 여객선 외','500톤 이상 1천600톤 미만 선장 · 1천600톤 이상 6천톤 미만 1등 항해사 · 6천톤 이상 2등 항해사'],
+    ['연안 · 여객선 외','3천톤 이상 5천톤 미만 선장 · 5천톤 이상 1등 항해사'],
+    ['어선','무제한 60~80미터 · 제한 45미터 이상 선장 (총톤수 500톤 이상) · 무제한 80미터 이상 1등 항해사'] ] },
+  4: { sum:'소·중형선 선장 · 대형선 3등 항해사급', rows:[
+    ['원양 · 여객선 외','500톤 미만 선장 · 3천톤 이상 3등 항해사'],
+    ['연안 · 여객선 외','500톤 이상 3천톤 미만 선장 (평수구역은 1천600톤 이상)'],
+    ['어선 · 무제한수역','길이 45~60미터 선장 (총톤수 500톤 이상) · 80미터 이상 2등 항해사'] ] },
+};
+/* 채점 기준: 전 과목(5과목) 평균 60점 이상, 과목별 40점 이상, 법규는 60점 이상 */
+const CUT = s => s === '법규' ? 60 : 40;
+const RULE_HTML = '<div class="rule-box"><b>채점 기준 · 항해 필기</b><ul><li>전 과목(5과목) 평균 <em>60점 이상</em>이면 합격</li><li>과목별 점수가 <em>40점 미만</em>이면 과락(불합격)</li><li><em>법규</em>는 <em>60점 미만</em>이면 과락(불합격)</li><li>과목당 25문항 · 문항당 4점</li></ul></div>';
+const app = document.getElementById('app');
+const layer = document.getElementById('layer');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const st = { branch:null, kind:null, grade:null, year:null, round:null, subject:null };
+let session = null;
+const cache = {}, idx = {};
+
+/* ---------- theme ---------- */
+const themeBtn = document.getElementById('themeBtn');
+const ICON_SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const ICON_MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  themeBtn.innerHTML = (t === 'dark' ? ICON_SUN + '<span>라이트</span>' : ICON_MOON + '<span>다크</span>');
+}
+let theme = 'light';
+try { theme = localStorage.getItem('hgs-theme') || 'light'; } catch(e) {}
+applyTheme(theme);
+themeBtn.onclick = () => { theme = theme === 'dark' ? 'light' : 'dark'; applyTheme(theme); try { localStorage.setItem('hgs-theme', theme); } catch(e) {} };
+
+/* ---------- data ---------- */
+async function loadYear(y){
+  if (cache[y]) return cache[y];
+  const r = await fetch('data/' + y + '.json');
+  if (!r.ok) throw new Error('data ' + y);
+  const arr = await r.json();
+  const m = {};
+  for (const g of arr){
+    const k = g.r + '-' + g.g;
+    (m[k] ||= {});
+    (m[k][g.p] ||= {})[g.sub] = g.qs;
+  }
+  idx[y] = m; cache[y] = arr;
+  return arr;
+}
+function pick(y, r, g, sub, elective){
+  const e = idx[y] && idx[y][r + '-' + g];
+  if (!e) return null;
+  let order;
+  if (sub === '상선전문') order = ['m','x'];
+  else if (sub === '어선전문') order = ['f','x'];
+  else order = elective === '어선전문' ? ['f','x','m'] : ['m','x','f'];
+  for (const p of order) if (e[p] && e[p][sub] && e[p][sub].length) return { p, qs: e[p][sub] };
+  return null;
+}
+function paperName(p){ return p === 'f' ? '어선' : p === 'm' ? '상선' : '공통'; }
+
+/* ---------- UI helpers ---------- */
+function toast(msg){
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2200);
+}
+function closeLayer(){ layer.innerHTML = ''; }
+function modal(inner, onMount){
+  layer.innerHTML = '<div class="modal" id="mdl"><div class="dlg" role="dialog" aria-modal="true">' + inner + '</div></div>';
+  const m = document.getElementById('mdl');
+  m.addEventListener('click', e => { if (e.target === m) closeLayer(); });
+  m.querySelectorAll('[data-close]').forEach(b => b.onclick = closeLayer);
+  onMount && onMount(m);
+  const f = m.querySelector('button.btn-pri, button'); f && f.focus();
+}
+const ICON_WARN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5M12 18v.5"/></svg>';
+const ICON_TRI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M12 4 3 20h18z"/></svg>';
+function soon(what){
+  modal('<img class="masc" src="mascot.webp" alt="잠자는 Bypass 마스코트" width="640" height="381"><div class="soon"><div class="ic">' + ICON_WARN + '</div><div><h3>준비 중!</h3><p class="sub">' + esc(what) + ' 기출문제는 추후 업데이트 예정입니다. 지금은 항해 필기만 풀 수 있어요.</p></div></div><div class="acts"><button class="btn btn-pri" data-close>확인</button></div>');
+}
+
+/* ---------- route strip ---------- */
+const route = document.getElementById('route'), routeIn = document.getElementById('routeIn');
+function setRoute(items){
+  if (!items){ route.hidden = true; return; }
+  route.hidden = false;
+  routeIn.innerHTML = items.map((it, i) => (i ? '<span class="arw">›</span>' : '') +
+    (it.go ? '<button class="crumb" type="button" data-i="' + i + '">' + esc(it.t) + '</button>' : '<span class="crumb now">' + esc(it.t) + '</span>')).join('');
+  routeIn.querySelectorAll('button').forEach(b => b.onclick = () => items[+b.dataset.i].go());
+}
+function crumbs(upto){
+  const all = [
+    { t:'처음', go: home },
+    st.branch && { t:'항해', go: stepBranch },
+    st.kind && { t:'필기', go: stepKind },
+    st.grade && { t: st.grade + '급 항해사', go: stepGrade },
+    st.year && { t: st.year + '년', go: stepYear },
+    st.round && { t: '제' + st.round + '회', go: stepRound },
+  ].filter(Boolean);
+  const out = all.slice(0, upto + 1);
+  return out;
+}
+function viewHead(title, desc, backFn){
+  return '<div class="view-h"><div><h2>' + esc(title) + '</h2>' + (desc ? '<p>' + desc + '</p>' : '') + '</div>' +
+    (backFn ? '<button class="back" type="button" id="backBtn">← 이전 단계</button>' : '') + '</div>';
+}
+function bindBack(fn){ const b = document.getElementById('backBtn'); if (b) b.onclick = fn; }
+function scrollTop(){ window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' }); }
+
+/* ---------- home ---------- */
+function home(){
+  stopTimer();
+  session = null; closeLayer(); setRoute(null); scrollTop();
+  const fills = [2,0,3,1,2,0,1,3,0,2];
+  const rows = fills.map((f, i) => '<div class="art-row"><i>' + (i + 1) + '</i>' + LET.map((l, j) => '<s class="' + (j === f ? 'on' : '') + '">' + l + '</s>').join('') + '</div>').join('');
+  app.innerHTML = `
+  <section class="hero">
+    <div>
+      <p class="eyebrow">해기사 국가자격시험 · 필기 기출</p>
+      <h1>지난 시험지로<br><em>실전처럼</em> 풀어보기</h1>
+      <p class="lede">한국해양수산연수원이 공개한 해기사 시험 기출문제를 직종·년도·회차·과목별로 골라 풉니다. 바로 채점, 과목 모의고사, 회차 전체 모의고사, 전 회차 무작위 풀이를 지원합니다.</p>
+      <div class="cta">
+        <button class="btn btn-pri btn-big" id="startBtn" type="button">시작 →</button>
+        <span class="note">현재 항해 필기 1~4급 · 2018·2020~2025년 · 25,185문항</span>
+      </div>
+    </div>
+    <div class="omr-art" aria-hidden="true">
+      <div class="t"><b>답안지 · 제1과목 항해</b><span>OMR</span></div>
+      <div class="art-rows">${rows}</div>
+    </div>
+  </section>
+
+  <div class="sec-t"><h3>수록 범위</h3><span></span></div>
+  <div class="cover">${COVER.map(c => `<div class="cv"><div class="y">${c.y}</div><div class="d">${c.d}</div><div class="chips"><span class="chip ${c.scan ? '' : 'k'}">${c.scan ? '원본 스캔 이미지' : '문제지 텍스트'}</span><span class="chip">${c.n.toLocaleString()}문항</span></div></div>`).join('')}</div>
+
+  <div class="sec-t"><h3>사용한 자료와 출처</h3><span></span></div>
+  <dl class="src">
+    <div class="src-row"><dt>문제지</dt><dd><ul>
+      <li>2018년 해기사시험 기출문제 (1~4급 항해사, 정기 제1~4회)</li>
+      <li>2020년 정기 제2~4회 해기사 시험 문제지 (1~4급 항해사 상선·어선)</li>
+      <li>2021~2025년 정기 제1~4회 해기사 시험 문제지 (1~4급 항해사 상선·어선)</li></ul></dd></div>
+    <div class="src-row"><dt>정답</dt><dd>2018·2020~2025년 해기사 시험 공개 답안(정답표). 해설은 공개되지 않아 정답만 표시합니다.</dd></div>
+    <div class="src-row"><dt>관련 법령</dt><dd>해기사 시험 · 면허 관련 「선박직원법 시행규칙」 (법제처 국가법령정보센터)<br><a href="https://www.law.go.kr/lsSc.do?section=&amp;menuId=1&amp;subMenuId=15&amp;tabMenuId=81&amp;eventGubun=060101&amp;query=%EC%84%A0%EB%B0%95%EC%A7%81%EC%9B%90%EB%B2%95#searchId0" target="_blank" rel="noopener">https://www.law.go.kr · 선박직원법 검색</a></dd></div>
+    <div class="src-row"><dt>직종 설명</dt><dd>「선박직원법 시행령」 [별표 3] 선박직원의 최저승무기준 (2025. 10. 1. 개정)</dd></div>
+    <div class="src-row"><dt>발행</dt><dd>한국해양수산연수원 (KIMFT)</dd></div>
+    <div class="src-row"><dt>출처 사이트</dt><dd><a href="https://www.seaman.or.kr" target="_blank" rel="noopener">https://www.seaman.or.kr</a><br><a href="https://lems.seaman.or.kr" target="_blank" rel="noopener">https://lems.seaman.or.kr</a> <span class="chip">해기사 국가자격시험</span></dd></div>
+  </dl>
+
+  <div class="caution" role="note">
+    ${ICON_WARN}
+    <div><p><b>주의</b> 이 앱은 단순 교육 목적으로 제작되었으며, 수록된 자료의 저작권은 한국해양수산연수원에 있습니다.</p>
+    <small>기출문제는 출제 당시 기준이므로 법령 개정 등으로 현재 정답과 다를 수 있습니다. 무단 복제 및 영리 목적 이용을 금합니다.</small></div>
+  </div>`;
+  document.getElementById('startBtn').onclick = () => { stepBranch(); };
+}
+
+/* ---------- steps ---------- */
+function stepBranch(){
+  st.branch = null; st.kind = null; st.grade = st.year = st.round = st.subject = null;
+  setRoute(crumbs(0).concat([{ t:'계열 선택' }])); scrollTop();
+  app.innerHTML = viewHead('계열을 고르세요', '항해 또는 기관 중 응시 계열을 선택합니다.', home) + `
+  <div class="tiles two">
+    <button class="tile big" type="button" id="tNav"><span class="tag">Deck</span><span class="nm">항해</span><span class="ds">항해사 · 1~4급</span><span class="ft"><span class="chip k">이용 가능</span></span></button>
+    <button class="tile big dim" type="button" id="tEng"><span class="badge">준비 중</span><span class="tag">Engine</span><span class="nm">기관</span><span class="ds">기관사</span></button>
+  </div>`;
+  bindBack(home);
+  document.getElementById('tNav').onclick = () => { st.branch = '항해'; stepKind(); };
+  document.getElementById('tEng').onclick = () => soon('기관');
+}
+function stepKind(){
+  st.kind = null; st.grade = st.year = st.round = st.subject = null;
+  setRoute(crumbs(1).concat([{ t:'시험 선택' }])); scrollTop();
+  app.innerHTML = viewHead('시험 종류를 고르세요', '필기시험 기출만 수록되어 있습니다.', stepBranch) + `
+  <div class="tiles two">
+    <button class="tile big" type="button" id="tW"><span class="tag">Written</span><span class="nm">필기</span><span class="ds">사지선다 · 과목당 25문항</span><span class="ft"><span class="chip k">이용 가능</span></span></button>
+    <button class="tile big dim" type="button" id="tI"><span class="badge">준비 중</span><span class="tag">Interview</span><span class="nm">면접</span><span class="ds">구술 면접</span></button>
+  </div>`;
+  bindBack(stepBranch);
+  document.getElementById('tW').onclick = () => { st.kind = '필기'; howPopup(); };
+  document.getElementById('tI').onclick = () => soon('면접');
+}
+function howPopup(){
+  modal(`<h3>어떻게 풀까요?</h3><p class="sub">회차와 과목을 직접 고르거나, 전 회차·전 과목에서 무작위로 바로 풀 수 있습니다.</p>
+  <div class="modes">
+    <button class="mode" type="button" id="hPick"><span class="no">≡</span><span><b>회차·과목 골라 풀기</b><span>직종 → 년도 → 회차 → 과목을 고른 뒤 풀이 방식(바로 채점 / 과목 모의고사 / 회차 모의고사)을 선택합니다.</span></span></button>
+    <button class="mode" type="button" id="hRand"><span class="no">4</span><span><b>전 회차 무작위 풀이</b><span>모든 년도·회차·과목의 문제가 무작위로 나오고, 풀자마자 채점됩니다.</span></span></button>
+  </div><div class="acts"><button class="btn btn-ghost" data-close>닫기</button></div>`);
+  document.getElementById('hPick').onclick = () => { closeLayer(); stepGrade(); };
+  document.getElementById('hRand').onclick = randomSetup;
+}
+function randomSetup(){
+  let g = 1, el = '상선전문';
+  const draw = () => {
+    modal(`<h3>무작위 풀이 설정</h3><p class="sub">${DATA_YEARS.slice().reverse().join(' · ')}년 전 회차의 문제가 섞여 나옵니다.</p>
+    <div class="fld"><span class="eyebrow">직종</span><div class="seg" id="sg">${[1,2,3,4].map(n => '<button type="button" data-g="' + n + '" class="' + (n === g ? 'on' : '') + '">' + n + '급 항해사</button>').join('')}</div></div>
+    <div class="fld"><span class="eyebrow">선택과목</span><div class="seg" id="se">${['상선전문','어선전문'].map(n => '<button type="button" data-e="' + n + '" class="' + (n === el ? 'on' : '') + '">' + n + '</button>').join('')}</div></div>
+    <div class="acts"><button class="btn btn-ghost" data-close>취소</button><button class="btn btn-pri" id="rGo">무작위 풀이 시작</button></div>`, m => {
+      m.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { g = +b.dataset.g; draw(); });
+      m.querySelectorAll('[data-e]').forEach(b => b.onclick = () => { el = b.dataset.e; draw(); });
+      document.getElementById('rGo').onclick = () => startRandom(g, el);
+    });
+  };
+  draw();
+}
+function stepGrade(){
+  st.grade = st.year = st.round = st.subject = null;
+  setRoute(crumbs(2).concat([{ t:'직종 선택' }])); scrollTop();
+  app.innerHTML = viewHead('직종을 고르세요', '급수마다 과목 구성은 같고, 출제 범위와 난이도가 다릅니다. 승무 가능한 직무는 선박직원법 시행령 기준입니다.', stepKind) +
+    '<div class="tiles grades">' + [1,2,3,4].map(n => `<button class="tile grade" type="button" data-g="${n}"><span class="tag">Grade ${n}</span><span class="nm">${n}급 항해사</span><span class="ds">${GRADE[n].sum}</span>
+      <dl class="duty">${GRADE[n].rows.map(r => `<div><dt>${r[0]}</dt><dd>${r[1]}</dd></div>`).join('')}</dl></button>`).join('') + '</div>' +
+    `<p class="lawnote"><b>근거</b> 「선박직원법 시행령」 [별표 3] 선박직원의 최저승무기준(제22조제1항 관련, 2025. 10. 1. 개정) 중 1. 소형선박을 제외한 선박의 갑판부 승무기준. 여객선 외 선박은 가목, 어선은 나목 기준이며, 표에 적힌 직무는 해당 급수가 최저 자격으로 요구되는 가장 높은 직무입니다. 상위 급수 면허로 하위 직무에 승무할 수 있습니다.</p>`;
+  bindBack(stepKind);
+  app.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { st.grade = +b.dataset.g; stepYear(); });
+}
+function stepYear(){
+  st.year = st.round = st.subject = null;
+  setRoute(crumbs(3).concat([{ t:'년도 선택' }])); scrollTop();
+  const info = { 2025:'정기 제1~4회', 2024:'정기 제1~4회', 2023:'정기 제1~4회', 2022:'정기 제1~4회', 2021:'정기 제1~4회', 2020:'정기 제2~4회', 2018:'정기 제1~4회 · 스캔본' };
+  app.innerHTML = viewHead('년도를 고르세요', st.grade + '급 항해사 필기 기출', stepGrade) +
+    '<div class="tiles">' + YEARS.map(y => DATA_YEARS.includes(y)
+      ? `<button class="tile" type="button" data-y="${y}"><span class="tag">Year</span><span class="nm mono">${y}</span><span class="ds">${info[y]}</span></button>`
+      : `<button class="tile dim" type="button" data-soon="${y}"><span class="badge">준비 중</span><span class="tag">Year</span><span class="nm mono">${y}</span><span class="ds">자료 추가 예정</span></button>`).join('') + '</div>';
+  bindBack(stepGrade);
+  app.querySelectorAll('[data-y]').forEach(b => b.onclick = () => { st.year = +b.dataset.y; stepRound(); });
+  app.querySelectorAll('[data-soon]').forEach(b => b.onclick = () => soon(b.dataset.soon + '년'));
+}
+async function stepRound(){
+  st.round = st.subject = null;
+  setRoute(crumbs(4).concat([{ t:'회차 선택' }])); scrollTop();
+  app.innerHTML = viewHead('회차를 고르세요', st.year + '년 ' + st.grade + '급 항해사', stepYear) + '<p class="loading">문제를 불러오는 중…</p>';
+  bindBack(stepYear);
+  try { await loadYear(st.year); } catch(e) { app.querySelector('.loading').textContent = '문제 파일을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.'; return; }
+  const tiles = [1,2,3,4].map(r => {
+    const e = idx[st.year][r + '-' + st.grade];
+    if (!e) return `<button class="tile dim" type="button" disabled><span class="tag">Round</span><span class="nm">제${r}회</span><span class="ds">수록 자료 없음</span></button>`;
+    let n = 0; const subs = new Set();
+    for (const p in e) for (const s in e[p]) if (!subs.has(s)) { subs.add(s); n += e[p][s].length; }
+    return `<button class="tile" type="button" data-r="${r}"><span class="tag">Round</span><span class="nm">제${r}회</span><span class="ds">정기시험</span><span class="ft"><span class="chip">${subs.size}과목</span><span class="chip">${n}문항</span></span></button>`;
+  }).join('');
+  app.innerHTML = viewHead('회차를 고르세요', st.year + '년 ' + st.grade + '급 항해사', stepYear) + '<div class="tiles">' + tiles + '</div>';
+  bindBack(stepYear);
+  app.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { st.round = +b.dataset.r; stepSubject(); });
+}
+function stepSubject(){
+  st.subject = null;
+  setRoute(crumbs(5).concat([{ t:'과목 선택' }])); scrollTop();
+  const tile = (s, i) => {
+    const got = pick(st.year, st.round, st.grade, s, '상선전문');
+    const c = SUBC[s];
+    if (!got) return `<button class="tile subj dim" type="button" disabled style="--c:var(--muted)"><span class="tag">제${i}과목</span><span class="nm">${s}</span><span class="ds">이 회차 문제지에 없음</span></button>`;
+    const n = got.qs.length;
+    const note = n < 25 ? `<span class="chip" style="background:var(--warn-bg);color:var(--warn)">원본 ${25 - n}문항 누락</span>` : '';
+    return `<button class="tile subj" type="button" data-s="${s}" style="--c:var(--${c})"><span class="tag">제${i}과목${i === 5 ? ' · 선택' : ''}</span><span class="nm">${s}</span><span class="ft"><span class="chip">${n}문항</span>${note}</span></button>`;
+  };
+  app.innerHTML = viewHead('과목을 고르세요', st.year + '년 제' + st.round + '회 · ' + st.grade + '급 항해사 · 고른 뒤 풀이 방식을 선택합니다', stepRound) +
+    '<div class="groupl">공통과목</div><div class="tiles">' + SUBS.slice(0, 4).map((s, i) => tile(s, i + 1)).join('') + '</div>' +
+    '<div class="groupl">선택과목 · 둘 중 하나</div><div class="tiles">' + SUBS.slice(4).map(s => tile(s, 5)).join('') + '</div>';
+  bindBack(stepRound);
+  app.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { st.subject = b.dataset.s; modePopup(); });
+}
+function modePopup(){
+  const s = st.subject;
+  const avail = SUBS.filter(x => !!pick(st.year, st.round, st.grade, x, x === '어선전문' ? '어선전문' : '상선전문'));
+  const hasM = avail.includes('상선전문'), hasF = avail.includes('어선전문');
+  let el = s === '어선전문' ? '어선전문' : s === '상선전문' ? '상선전문' : (hasM ? '상선전문' : '어선전문');
+  let mode = 1;
+  const sel = new Set([s]);
+  const draw = () => {
+    const n = sel.size;
+    modal(`<h3>풀이 방식 선택</h3><p class="sub">${st.year}년 제${st.round}회 · ${st.grade}급 항해사 · <b>${s}</b></p>
+    <div class="modes">
+      <button class="mode ${mode === 1 ? 'on' : ''}" type="button" data-m="1"><span class="no">1</span><span><b>바로 채점</b><span>한 문제를 풀 때마다 O/X와 정답을 바로 보여줍니다. 제한시간 없음.</span></span></button>
+      <button class="mode ${mode === 2 ? 'on' : ''}" type="button" data-m="2"><span class="no">2</span><span><b>과목 모의고사</b><span>고른 과목을 끝까지 풀고 제출한 뒤 채점과 정답을 확인합니다. 여러 과목을 함께 고를 수 있고, 제한시간은 과목당 25분입니다.</span></span></button>
+      <button class="mode ${mode === 3 ? 'on' : ''}" type="button" data-m="3"><span class="no">3</span><span><b>회차 모의고사</b><span>이 회차 5과목을 이어서 풀고 제출한 뒤 과목별 점수와 합격 여부를 확인합니다. 제한시간 125분.</span></span></button>
+    </div>
+    ${mode === 2 ? `<div class="fld"><span class="eyebrow">풀 과목 · ${n}과목 · 제한시간 ${n * 25}분</span><div class="picks">${SUBS.map(x => `<button type="button" data-p="${x}" class="${sel.has(x) ? 'on' : ''}" ${avail.includes(x) ? '' : 'disabled'} aria-pressed="${sel.has(x)}"><i>${sel.has(x) ? '✓' : ''}</i>${x}</button>`).join('')}</div><p class="hint">상선전문과 어선전문은 선택과목이라 둘 중 하나만 고를 수 있습니다.</p></div>` : ''}
+    ${mode === 3 ? `<div class="fld"><span class="eyebrow">선택과목 · 제한시간 125분</span><div class="seg">
+      <button type="button" data-e="상선전문" class="${el === '상선전문' ? 'on' : ''}" ${hasM ? '' : 'disabled'}>상선전문</button>
+      <button type="button" data-e="어선전문" class="${el === '어선전문' ? 'on' : ''}" ${hasF ? '' : 'disabled'}>어선전문</button></div></div>` : ''}
+    ${mode !== 1 ? RULE_HTML : ''}
+    <div class="acts"><button class="btn btn-ghost" data-close>취소</button><button class="btn btn-pri" id="mGo" ${mode === 2 && !n ? 'disabled' : ''}>풀기 시작</button></div>`, m => {
+      m.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { mode = +b.dataset.m; draw(); });
+      m.querySelectorAll('[data-e]').forEach(b => b.onclick = () => { el = b.dataset.e; draw(); });
+      m.querySelectorAll('[data-p]').forEach(b => b.onclick = () => {
+        const x = b.dataset.p;
+        if (sel.has(x)) sel.delete(x);
+        else { sel.add(x); if (x === '상선전문') sel.delete('어선전문'); if (x === '어선전문') sel.delete('상선전문'); }
+        draw();
+      });
+      document.getElementById('mGo').onclick = () => {
+        closeLayer();
+        if (mode === 3) startExam(3, el, ['항해','운용','법규','영어', el]);
+        else if (mode === 2) startExam(2, sel.has('어선전문') ? '어선전문' : '상선전문', SUBS.filter(x => sel.has(x)));
+        else startExam(1, s === '어선전문' ? '어선전문' : '상선전문', [s]);
+      };
+    });
+  };
+  draw();
+}
+
+/* ---------- sessions ---------- */
+function mkItem(y, r, g, p, sub, q){ return { y, r, g, p, sub, q }; }
+let timerId = null;
+function stopTimer(){ if (timerId){ clearInterval(timerId); timerId = null; } }
+function fmtTime(sec){ sec = Math.max(0, Math.ceil(sec)); const m = Math.floor(sec / 60), x = sec % 60; return (m < 10 ? '0' : '') + m + ':' + (x < 10 ? '0' : '') + x; }
+const ICON_CLOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>';
+function timerHTML(){
+  const S = session;
+  if (!S || !S.limit || S.done) return '';
+  const left = (S.endAt - Date.now()) / 1000;
+  return `<span class="timer ${left <= 0 ? 'out' : left <= 300 ? 'low' : ''}" data-timer>${ICON_CLOCK}<span>${fmtTime(left)}</span><small style="font-weight:500;opacity:.75">/ ${S.limit / 60}분</small></span>`;
+}
+function tick(){
+  const S = session;
+  if (!S || !S.limit || S.done){ stopTimer(); return; }
+  const left = (S.endAt - Date.now()) / 1000;
+  document.querySelectorAll('[data-timer]').forEach(t => {
+    t.classList.toggle('low', left <= 300 && left > 0); t.classList.toggle('out', left <= 0);
+    t.querySelector('span').textContent = fmtTime(left);
+  });
+  if (left <= 0){
+    stopTimer();
+    S.done = true; S.timeUp = true; S.used = S.limit;
+    renderResult();
+    modal(`<div class="soon"><div class="ic">${ICON_CLOCK}</div><div><h3>시간이 끝났습니다</h3><p class="sub">제한시간 ${S.limit / 60}분이 지나 답안을 자동으로 제출하고 채점했습니다. 미응답 문항은 오답으로 처리됩니다.</p></div></div><div class="acts"><button class="btn btn-pri" data-close>결과 보기</button></div>`);
+  }
+}
+function startExam(mode, elective, subs){
+  const items = [], sections = [];
+  for (const s of subs){
+    const got = pick(st.year, st.round, st.grade, s, elective);
+    if (!got) continue;
+    sections.push({ sub: s, start: items.length, n: got.qs.length });
+    for (const q of got.qs) items.push(mkItem(st.year, st.round, st.grade, got.p, s, q));
+  }
+  const multi = sections.length > 1;
+  session = {
+    mode, items, sections, cur: 0, ans: items.map(() => null), tri: items.map(() => false), done: false,
+    title: mode === 3 ? `제${st.round}회 전 과목` : multi ? `${sections.length}과목 모의고사` : subs[0],
+    meta: `${st.year}년 제${st.round}회 · ${st.grade}급 항해사` + (mode === 3 || (multi && subs.some(x => x.endsWith('전문'))) ? ' · ' + elective : '') + (multi && mode === 2 ? ' · ' + sections.map(x => x.sub).join('·') : ''),
+    limit: mode === 2 || mode === 3 ? sections.length * 25 * 60 : 0,
+  };
+  if (session.limit){ session.startAt = Date.now(); session.endAt = session.startAt + session.limit * 1000; stopTimer(); timerId = setInterval(tick, 1000); }
+  renderQuiz();
+}
+async function startRandom(g, el){
+  closeLayer();
+  st.grade = g; st.year = st.round = st.subject = null;
+  app.innerHTML = '<p class="loading">전 회차 문제를 불러오는 중…</p>';
+  try { await Promise.all(DATA_YEARS.map(loadYear)); } catch(e) { app.innerHTML = '<p class="loading">문제 파일을 불러오지 못했습니다.</p>'; return; }
+  const pool = [];
+  for (const y of DATA_YEARS) for (let r = 1; r <= 4; r++){
+    for (const s of ['항해','운용','법규','영어', el]){
+      const got = pick(y, r, g, s, el);
+      if (got) for (const q of got.qs) pool.push(mkItem(y, r, g, got.p, s, q));
+    }
+  }
+  for (let i = pool.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  session = { mode: 4, pool, items: [pool[0]], sections: [], cur: 0, ans: [null], tri: [false], done: false,
+    title: '전 회차 무작위', meta: `${g}급 항해사 · ${el} · ${pool.length}문항 중 무작위` };
+  renderQuiz();
+}
+
+/* ---------- rendering a question ---------- */
+function spriteHTML(ref, kind){
+  const posY = ref.H === ref.h ? 0 : (ref.y / (ref.H - ref.h) * 100);
+  const maxw = kind === 'fig' ? Math.round(ref.w * 0.62) : ref.w;
+  return `<div class="spr" role="img" aria-label="문제 그림" style="max-width:min(100%,${maxw}px);aspect-ratio:${ref.w}/${ref.h};background-image:url('data/img/${ref.s}');background-size:${(ref.W / ref.w * 100).toFixed(3)}% auto;background-position:0 ${posY.toFixed(4)}%"></div>`;
+}
+function stemHTML(t){
+  const i = t.indexOf('\n<보기>\n');
+  if (i < 0) return esc(t);
+  const head = t.slice(0, i), rest = t.slice(i + 7);
+  return esc(head) + '<span class="box"><b>&lt;보 기&gt;</b>\n' + esc(rest) + '</span>';
+}
+function srcLabel(it){ return `${it.y}년 제${it.r}회 · ${it.g}급 항해사${it.p !== 'x' ? '(' + paperName(it.p) + ')' : ''} · ${it.sub} ${it.q.n}번`; }
+function isRight(it, a){ return a != null && it.q.a && it.q.a.includes(a); }
+function ansLetters(it){ return (it.q.a || []).map(i => LET[i]).join(', '); }
+
+function renderQuiz(){
+  const S = session; closeLayer(); scrollTop();
+  const r = [{ t:'처음', go: confirmLeave(home) }];
+  if (S.mode !== 4){ r.push({ t: st.grade + '급 항해사', go: confirmLeave(stepGrade) }, { t: st.year + '년', go: confirmLeave(stepYear) }, { t: '제' + st.round + '회', go: confirmLeave(stepRound) }); }
+  r.push({ t: S.title });
+  setRoute(r);
+  app.innerHTML = `<div class="quiz"><section id="qMain"></section><aside class="omr" id="omr"></aside></div>
+  <button class="omr-toggle" type="button" id="omrT"></button>`;
+  document.getElementById('omrT').onclick = () => document.getElementById('omr').classList.toggle('open');
+  drawQ(); drawOMR();
+}
+function confirmLeave(fn){
+  return () => {
+    if (!session || session.done || !session.ans.some(a => a != null)) { fn(); return; }
+    modal(`<h3>풀이를 그만둘까요?</h3><p class="sub">지금까지 고른 답은 저장되지 않습니다.</p><div class="acts"><button class="btn btn-ghost" data-close>계속 풀기</button><button class="btn btn-pri" id="lv">그만두기</button></div>`);
+    document.getElementById('lv').onclick = () => { closeLayer(); session = null; fn(); };
+  };
+}
+function drawQ(){
+  const S = session, i = S.cur, it = S.items[i], q = it.q;
+  const total = S.mode === 4 ? S.pool.length : S.items.length;
+  const answered = S.ans.filter(a => a != null).length;
+  const reveal = S.done || ((S.mode === 1 || S.mode === 4) && S.ans[i] != null);
+  const a = S.ans[i];
+  let body = '';
+  if (q.img){
+    body = '<div class="scan">' + q.img.map(rf => spriteHTML(rf, 'img')).join('') + '</div>' +
+      `<p class="scan-note">${it.y === 2018 ? '원본 스캔 이미지' : '원본 문제지 이미지 · 보기 ㉮㉯㉴㉵ = 가·나·사·아'}</p>`;
+  } else {
+    body = '<div class="qtext">' + stemHTML(q.q) + '</div>' + (q.fig ? '<div class="figs">' + q.fig.map(rf => spriteHTML(rf, 'fig')).join('') + '</div>' : '');
+  }
+  const compact = !!q.img;
+  const opts = LET.map((L, k) => {
+    let cls = 'opt';
+    if (reveal){ if (q.a && q.a.includes(k)) cls += ' right'; else if (a === k) cls += ' wrong'; }
+    else if (a === k) cls += ' sel';
+    const txt = compact ? '' : '<span>' + esc(q.o[k]) + '</span>';
+    return `<button class="${cls}" type="button" data-k="${k}" ${reveal ? 'disabled' : ''} aria-label="${L}"><span class="lt">${L}</span>${txt}</button>`;
+  }).join('');
+  let line = '';
+  if (reveal){
+    if (a == null) line = `<div class="ansline none">미응답 · 정답: <b>${ansLetters(it)}</b></div>`;
+    else if (isRight(it, a)) line = `<div class="ansline ok">정답 · 고른 답: <b>${LET[a]}</b></div>`;
+    else line = `<div class="ansline bad">오답 · 고른 답: <b>${LET[a]}</b> · 정답: <b>${ansLetters(it)}</b></div>`;
+    if (q.a && q.a.length > 1) line += '<p class="kbd">복수 정답 문항입니다.</p>';
+  }
+  const sec = S.sections.find(s => i >= s.start && i < s.start + s.n);
+  const c = SUBC[it.sub];
+  const numLabel = S.mode === 4 ? (i + 1) : (q.n);
+  const pct = S.mode === 4 ? Math.min(100, answered / Math.max(1, S.items.length) * 100) : answered / total * 100;
+  const isLast = S.mode !== 4 && i === S.items.length - 1;
+  let next = '';
+  if (S.mode === 4) next = `<button class="btn btn-pri" type="button" id="nx" ${a == null ? 'disabled' : ''}>다음 문제 →</button>`;
+  else next = `<button class="navb" type="button" id="pv" ${i === 0 ? 'disabled' : ''}>← 이전</button>` +
+    (isLast ? (S.done ? '' : `<button class="btn btn-pri" type="button" id="sb">${S.mode === 1 ? '결과 보기' : '제출하기'}</button>`) : `<button class="navb" type="button" id="nx">다음 →</button>`);
+  document.getElementById('qMain').innerHTML = `
+    <div class="qbar"><span class="ttl">${esc(S.title)}</span><span class="meta">${esc(S.meta)}</span><span class="sp"></span>${timerHTML()}
+      <span class="meta">${S.mode === 4 ? (i + 1) + '번째 문제' : (i + 1) + ' / ' + total}</span></div>
+    <div class="prog"><i style="width:${pct}%"></i></div>
+    <article class="sheet">
+      <div class="qhead"><span class="qno">${numLabel}</span><span class="stag" style="--c:var(--${c});--cb:var(--${c}-bg)">${esc(it.sub)}</span><span class="qsrc">${esc(srcLabel(it))}</span></div>
+      ${body}
+      <div class="opts ${compact ? 'compact' : ''}" id="opts">${opts}</div>
+      ${line}
+      <div class="qfoot">
+        <button class="tri ${S.tri[i] ? 'on' : ''}" type="button" id="triB" aria-pressed="${S.tri[i]}">${ICON_TRI}<span>${S.tri[i] ? '헷갈림 표시됨' : '헷갈림 △'}</span></button>
+        <span class="sp"></span>${next}
+      </div>
+      <p class="kbd">키보드: 1–4 보기 선택 · ← → 이동 · T 헷갈림 표시</p>
+    </article>`;
+  document.querySelectorAll('#opts .opt').forEach(b => b.onclick = () => choose(+b.dataset.k));
+  document.getElementById('triB').onclick = toggleTri;
+  const pv = document.getElementById('pv'); if (pv) pv.onclick = () => go(S.cur - 1);
+  const nx = document.getElementById('nx'); if (nx) nx.onclick = () => S.mode === 4 ? nextRandom() : go(S.cur + 1);
+  const sb = document.getElementById('sb'); if (sb) sb.onclick = submitAsk;
+}
+function drawOMR(){
+  const S = session, el = document.getElementById('omr'); if (!el) return;
+  const answered = S.ans.filter(a => a != null).length;
+  const triN = S.tri.filter(Boolean).length;
+  const rowHTML = (k) => {
+    const it = S.items[k], a = S.ans[k];
+    const reveal = S.done || ((S.mode === 1 || S.mode === 4) && a != null);
+    const bubs = LET.map((L, j) => {
+      let c = 'bub';
+      if (reveal){ if (a === j) c += isRight(it, a) ? ' ok' : ' bad'; else if (it.q.a && it.q.a.includes(j) && a !== j) c += (S.done || a != null) ? ' ans' : ''; }
+      else if (a === j) c += ' on';
+      return `<span class="${c}">${L}</span>`;
+    }).join('');
+    const n = S.mode === 4 ? k + 1 : it.q.n;
+    return `<button class="orow ${k === S.cur ? 'cur' : ''}" type="button" data-k="${k}"><span class="n">${n}</span><span class="tm">${S.tri[k] ? '△' : ''}</span>${bubs}</button>`;
+  };
+  let rows = '';
+  if (S.sections.length > 1){
+    for (const s of S.sections){
+      rows += `<div class="omr-sec" style="--c:var(--${SUBC[s.sub]})">${esc(s.sub)}</div>`;
+      for (let k = s.start; k < s.start + s.n; k++) rows += rowHTML(k);
+    }
+  } else for (let k = 0; k < S.items.length; k++) rows += rowHTML(k);
+  let foot = '';
+  let statsH = '';
+  if (S.mode === 4 || S.mode === 1){
+    const graded = S.items.map((it, k) => S.ans[k] == null ? null : isRight(it, S.ans[k]));
+    const ok = graded.filter(x => x === true).length, done = graded.filter(x => x != null).length;
+    statsH = `<div class="stats"><div><b>${done}</b><span>푼 문제</span></div><div><b>${ok}</b><span>정답</span></div><div><b>${done ? Math.round(ok / done * 100) : 0}<small>%</small></b><span>정답률</span></div></div>`;
+  }
+  if (S.mode === 4) foot = `<div class="omr-f"><button class="btn btn-ghost" type="button" id="stopR">그만 풀고 결과 보기</button></div>`;
+  else if (!S.done) foot = `<div class="omr-f"><button class="btn btn-pri" type="button" id="sbO">${S.mode === 1 ? '결과 보기' : '답안 제출'}</button></div>`;
+  else foot = `<div class="omr-f"><button class="btn btn-ghost" type="button" id="toRes">점수표로 돌아가기</button></div>`;
+  el.innerHTML = `<div class="omr-h"><b>답안 카드</b>${S.limit && !S.done ? '<div style="margin-top:6px">' + timerHTML() + '</div>' : ''}<div class="st mono">${answered} / ${S.mode === 4 ? S.items.length : S.items.length} 마킹 · △ ${triN}</div>
+    <div class="legend">${S.done || S.mode === 1 || S.mode === 4 ? '<span><i style="background:var(--ok)"></i>정답</span><span><i style="background:var(--bad)"></i>오답</span>' : '<span><i style="background:var(--ink)"></i>마킹</span>'}<span style="color:var(--warn)">△ 헷갈림</span></div></div>
+    ${statsH}<div class="omr-b" id="omrB">${rows}</div>${foot}`;
+  el.querySelectorAll('.orow').forEach(b => b.onclick = () => { go(+b.dataset.k); el.classList.remove('open'); });
+  const sbO = document.getElementById('sbO'); if (sbO) sbO.onclick = submitAsk;
+  const stopR = document.getElementById('stopR'); if (stopR) stopR.onclick = finishRandom;
+  const toRes = document.getElementById('toRes'); if (toRes) toRes.onclick = renderResult;
+  const cur = el.querySelector('.orow.cur'); if (cur) { const b = document.getElementById('omrB'); const top = cur.offsetTop - b.clientHeight / 2; if (cur.offsetTop < b.scrollTop || cur.offsetTop > b.scrollTop + b.clientHeight - 30) b.scrollTop = Math.max(0, top); }
+  const t = document.getElementById('omrT'); if (t) t.innerHTML = '답안 카드 <span class="mono">' + answered + '/' + S.items.length + '</span>';
+}
+function go(k){
+  const S = session; if (k < 0 || k >= S.items.length) return;
+  S.cur = k; drawQ(); drawOMR();
+  const m = document.getElementById('qMain'); if (m && m.getBoundingClientRect().top < 0) m.scrollIntoView({ block: 'start' });
+}
+function toggleTri(){ const S = session; S.tri[S.cur] = !S.tri[S.cur]; drawQ(); drawOMR(); }
+function choose(k){
+  const S = session, i = S.cur;
+  if (S.done) return;
+  if ((S.mode === 1 || S.mode === 4) && S.ans[i] != null) return;
+  S.ans[i] = (S.mode === 2 || S.mode === 3) && S.ans[i] === k ? null : k;
+  drawQ(); drawOMR();
+  if (S.mode === 1 || S.mode === 4) judge(S.items[i], k);
+}
+function judge(it, k){
+  const ok = isRight(it, k);
+  const S = session;
+  const last = S.mode === 1 && S.cur === S.items.length - 1;
+  const nextLabel = S.mode === 4 ? '다음 문제 →' : (last ? '결과 보기' : '다음 문제 →');
+  layer.innerHTML = `<div class="judge" id="jd"><div class="jcard" role="alertdialog" aria-live="assertive">
+    <div class="mark ${ok ? 'o' : 'x'}"></div>
+    <h3 class="${ok ? 'o' : 'x'}">${ok ? '정답입니다' : '틀렸습니다'}</h3>
+    <div class="jline"><span>고른 답: <span class="bub ${ok ? 'ok' : 'bad'}">${LET[k]}</span></span><span>정답: ${(it.q.a || []).map(j => '<span class="bub ok">' + LET[j] + '</span>').join('')}</span></div>
+    <button class="btn btn-pri" type="button" id="jNext">${nextLabel}</button>
+    <button class="btn btn-ghost" type="button" id="jStay" style="margin-top:8px">문제 다시 보기</button>
+    <p class="hint">Enter: 다음 · Esc: 문제 보기</p></div></div>`;
+  const nextFn = () => { closeLayer(); if (S.mode === 4) nextRandom(); else if (last) submitNow(); else go(S.cur + 1); };
+  document.getElementById('jNext').onclick = nextFn;
+  document.getElementById('jStay').onclick = closeLayer;
+  document.getElementById('jd').addEventListener('click', e => { if (e.target.id === 'jd') closeLayer(); });
+  document.getElementById('jNext').focus();
+}
+function nextRandom(){
+  const S = session;
+  if (S.ans[S.cur] == null){ toast('먼저 답을 고르세요'); return; }
+  if (S.cur < S.items.length - 1){ go(S.cur + 1); return; }
+  const n = S.items.length;
+  if (n >= S.pool.length){ finishRandom(); return; }
+  S.items.push(S.pool[n]); S.ans.push(null); S.tri.push(false);
+  go(n);
+}
+function finishRandom(){
+  const S = session;
+  // drop trailing unanswered
+  while (S.items.length && S.ans[S.items.length - 1] == null){ S.items.pop(); S.ans.pop(); S.tri.pop(); }
+  if (!S.items.length){ home(); return; }
+  S.done = true; S.cur = 0;
+  renderResult();
+}
+function submitAsk(){
+  const S = session;
+  const left = S.ans.filter(a => a == null).length;
+  modal(`<h3>${S.mode === 1 ? '결과를 볼까요?' : '답안을 제출할까요?'}</h3><p class="sub">${left ? '아직 마킹하지 않은 문항이 <b>' + left + '개</b> 있습니다. 미응답은 오답으로 처리됩니다.' : '모든 문항에 답을 표시했습니다.'}${S.tri.filter(Boolean).length ? '<br>△ 헷갈림 표시 ' + S.tri.filter(Boolean).length + '문항' : ''}</p>
+    <div class="acts"><button class="btn btn-ghost" data-close>계속 풀기</button><button class="btn btn-pri" id="doSub">${S.mode === 1 ? '결과 보기' : '제출하고 채점'}</button></div>`);
+  document.getElementById('doSub').onclick = () => { closeLayer(); submitNow(); };
+}
+function submitNow(){ const S = session; if (S.limit && S.used == null) S.used = Math.min(S.limit, (Date.now() - S.startAt) / 1000); S.done = true; stopTimer(); renderResult(); }
+
+/* ---------- results ---------- */
+function renderResult(){
+  const S = session; closeLayer(); scrollTop();
+  const groups = S.sections.length ? S.sections.map(s => ({ sub: s.sub, ks: Array.from({ length: s.n }, (_, j) => s.start + j) }))
+    : (() => { const m = {}; S.items.forEach((it, k) => (m[it.sub] ||= []).push(k)); return SUBS.filter(s => m[s]).map(s => ({ sub: s, ks: m[s] })); })();
+  const rowsData = groups.map(g => {
+    const ok = g.ks.filter(k => isRight(S.items[k], S.ans[k])).length;
+    const score = Math.round(ok / g.ks.length * 100);
+    return { sub: g.sub, n: g.ks.length, ok, wrong: g.ks.filter(k => S.ans[k] != null && !isRight(S.items[k], S.ans[k])).length, blank: g.ks.filter(k => S.ans[k] == null).length, tri: g.ks.filter(k => S.tri[k]).length, score };
+  });
+  const totalOk = rowsData.reduce((a, r) => a + r.ok, 0), totalN = rowsData.reduce((a, r) => a + r.n, 0);
+  const avg = rowsData.length ? Math.round(rowsData.reduce((a, r) => a + r.score, 0) / rowsData.length) : 0;
+  const fullExam = (S.mode === 3 || S.mode === 2) && rowsData.length >= 5;
+  let verdict = '';
+  const fails = rowsData.filter(r => r.score < CUT(r.sub));
+  if (S.mode === 3 || (S.mode === 2 && rowsData.length >= 5)){
+    const reasons = [];
+    if (!fullExam) reasons.push('5과목이 모두 수록되지 않은 회차라 합격 판정은 참고용입니다');
+    if (avg < 60) reasons.push(`평균 ${avg}점 (60점 미만)`);
+    for (const r of fails) reasons.push(`${r.sub} ${r.score}점 과락 (${CUT(r.sub)}점 미만)`);
+    const pass = fullExam && avg >= 60 && !fails.length;
+    verdict = `<span class="verdict ${pass ? 'ok' : 'bad'}">${pass ? '합격' : '불합격'}</span>` + (reasons.length ? '<ul class="reasons">' + reasons.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '') + RULE_HTML;
+  } else if (S.mode !== 4) {
+    const sub = rowsData.length === 1 ? rowsData[0].sub : null;
+    if (sub){
+      const cut = CUT(sub), sc = rowsData[0].score;
+      verdict = `<span class="verdict ${sc >= cut ? 'ok' : 'bad'}">${sc >= cut ? '과락 면함' : '과락'}</span><ul class="reasons" style="color:var(--muted)"><li>${esc(sub)} 과락 기준 ${cut}점 미만 · 이번 점수 ${sc}점</li><li>최종 합격은 5과목 평균 60점 이상이어야 합니다</li></ul>` + RULE_HTML;
+    } else {
+      const lines = rowsData.map(r => `<li style="color:var(--${r.score >= CUT(r.sub) ? 'ok' : 'bad'})">${esc(r.sub)} ${r.score}점 · ${r.score >= CUT(r.sub) ? '통과' : '과락 (' + CUT(r.sub) + '점 미만)'}</li>`).join('');
+      verdict = `<span class="verdict ${fails.length ? 'bad' : 'ok'}">${fails.length ? '과락 ' + fails.length + '과목' : '과락 없음'}</span><ul class="reasons">${lines}<li style="color:var(--muted)">최종 합격은 5과목 평균 60점 이상이어야 합니다</li></ul>` + RULE_HTML;
+    }
+  } else verdict = `<span class="verdict na">무작위 ${totalN}문항</span>`;
+  setRoute([{ t:'처음', go: home }, { t: S.title + ' 결과' }]);
+  app.innerHTML = viewHead('채점 결과', esc(S.meta)) + `
+  <div class="res-top">
+    <div class="score"><span class="eyebrow">${S.mode === 4 ? '정답률' : S.mode === 3 ? '평균 점수' : '점수'}</span>
+      <div class="big">${S.mode === 4 ? Math.round(totalOk / Math.max(1, totalN) * 100) : avg}<small>${S.mode === 4 ? '%' : '점'}</small></div>
+      <p class="mono" style="color:var(--ink);font-size:14px">${totalOk} / ${totalN} 정답${S.limit ? ' · 소요 ' + fmtTime(S.used ?? S.limit) + ' / ' + (S.limit / 60) + '분' + (S.timeUp ? ' (시간 종료)' : '') : ''}</p>${verdict}</div>
+    <div class="stbl"><table><thead><tr><th>과목</th><th style="text-align:right">정답</th><th style="text-align:right">오답</th><th style="text-align:right">미응답</th><th style="text-align:right">△</th><th style="text-align:right">점수</th><th></th></tr></thead><tbody>
+    ${rowsData.map(r => `<tr><td><b style="color:var(--${SUBC[r.sub]})">${r.sub}</b></td><td class="num">${r.ok}/${r.n}</td><td class="num">${r.wrong}</td><td class="num">${r.blank}</td><td class="num">${r.tri}</td><td class="num">${r.score}</td><td>${S.mode === 4 ? '' : `<span class="pill ${r.score >= CUT(r.sub) ? 'ok' : 'bad'}">${r.score >= CUT(r.sub) ? '통과' : '과락'}</span>`}</td></tr>`).join('')}
+    </tbody></table></div>
+  </div>
+  <div class="res-acts">
+    <button class="btn btn-pri" type="button" id="rvAll">정답 확인하며 다시 보기</button>
+    <button class="btn btn-ghost" type="button" id="rvBad" ${S.items.some((it, k) => !isRight(it, S.ans[k]) || S.tri[k]) ? '' : 'disabled'}>오답·△만 다시 풀기</button>
+    ${S.mode !== 4 ? '<button class="btn btn-ghost" type="button" id="again">같은 문제 처음부터</button>' : '<button class="btn btn-ghost" type="button" id="moreR">무작위 계속 풀기</button>'}
+    <button class="btn btn-ghost" type="button" id="toHome">처음으로</button>
+  </div>`;
+  document.getElementById('rvAll').onclick = () => { S.cur = 0; renderQuiz(); };
+  document.getElementById('rvBad').onclick = () => retryWrong();
+  const ag = document.getElementById('again'); if (ag) ag.onclick = () => { S.ans = S.items.map(() => null); S.tri = S.items.map(() => false); S.done = false; S.cur = 0; S.used = null; S.timeUp = false; if (S.limit){ S.startAt = Date.now(); S.endAt = S.startAt + S.limit * 1000; stopTimer(); timerId = setInterval(tick, 1000); } renderQuiz(); };
+  const mr = document.getElementById('moreR'); if (mr) mr.onclick = () => { S.done = false; S.items.push(S.pool[S.items.length] || S.pool[0]); S.ans.push(null); S.tri.push(false); S.cur = S.items.length - 1; renderQuiz(); };
+  document.getElementById('toHome').onclick = home;
+}
+function retryWrong(){
+  const S = session;
+  const ks = S.items.map((it, k) => k).filter(k => !isRight(S.items[k], S.ans[k]) || S.tri[k]);
+  if (!ks.length) return;
+  session = { mode: 1, items: ks.map(k => S.items[k]), sections: [], cur: 0, ans: ks.map(() => null), tri: ks.map(() => false), done: false,
+    title: '오답·△ 다시 풀기', meta: S.meta + ' · ' + ks.length + '문항' };
+  renderQuiz();
+}
+
+/* ---------- keyboard ---------- */
+document.addEventListener('keydown', e => {
+  if (e.target.closest && e.target.closest('input,textarea')) return;
+  const jd = document.getElementById('jd');
+  if (jd){ if (e.key === 'Enter'){ e.preventDefault(); document.getElementById('jNext').click(); } else if (e.key === 'Escape') closeLayer(); return; }
+  if (document.getElementById('mdl')){ if (e.key === 'Escape') closeLayer(); return; }
+  if (!session || !document.getElementById('qMain')) return;
+  if (['1','2','3','4'].includes(e.key)) { choose(+e.key - 1); }
+  else if (e.key === 'ArrowRight') { if (session.mode === 4) nextRandom(); else go(session.cur + 1); }
+  else if (e.key === 'ArrowLeft') go(session.cur - 1);
+  else if (e.key === 't' || e.key === 'T') toggleTri();
+});
+document.getElementById('brand').onclick = () => (session && !session.done ? confirmLeave(home)() : home());
+
+home();
+})();
+</script>
+
+</body>
+</html>
