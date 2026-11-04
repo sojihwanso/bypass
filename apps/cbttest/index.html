@@ -429,20 +429,35 @@ applyTheme(theme);
 themeBtn.onclick = () => { theme = theme === 'dark' ? 'light' : 'dark'; applyTheme(theme); try { localStorage.setItem('hgs-theme', theme); } catch(e) {} };
 
 /* ---------- data ---------- */
-async function loadYear(y){
-  if (cache[y]) return cache[y];
-  const r = await fetch('data/' + y + '.json');
-  if (!r.ok) throw new Error('data ' + y);
-  const arr = await r.json();
-  const m = {};
-  for (const g of arr){
-    const k = g.r + '-' + g.g;
-    (m[k] ||= {});
-    (m[k][g.p] ||= {})[g.sub] = g.qs;
-  }
-  idx[y] = m; cache[y] = arr;
-  return arr;
+/* 문제 데이터: bank.json(문제 원본, 중복 없이 한 번씩) + exams.json(회차별 시험지 = 문제 번호 목록과 그 회차 정답표) */
+let dataPromise = null;
+function loadAll(){
+  if (dataPromise) return dataPromise;
+  dataPromise = (async () => {
+    const [rb, re] = await Promise.all([fetch('data/bank.json'), fetch('data/exams.json')]);
+    if (!rb.ok || !re.ok) throw new Error('data');
+    const bank = await rb.json(), exams = await re.json();
+    const where = {};
+    for (const e of exams) for (const ref of e.qs) (where[ref[1]] ||= new Set()).add(e.y + '-' + e.r + '-' + e.g);
+    for (const e of exams){
+      const me = e.y + '-' + e.r + '-' + e.g;
+      const qs = e.qs.map(([n, k, a, ord]) => {
+        const b = bank[k], q = { n, k, a };
+        if (b.img) q.img = b.img;
+        else { q.q = b.q; q.o = ord ? ord.map(j => b.o[j]) : b.o; if (b.fig) q.fig = b.fig; }
+        const rep = [...where[k]].filter(x => x !== me).sort();
+        if (rep.length) q.rep = rep;
+        return q;
+      });
+      const m = (idx[e.y] ||= {}), key = e.r + '-' + e.g;
+      ((m[key] ||= {})[e.p] ||= {})[e.sub] = qs;
+    }
+    return true;
+  })();
+  dataPromise.catch(() => { dataPromise = null; });
+  return dataPromise;
 }
+async function loadYear(y){ await loadAll(); return idx[y]; }
 function pick(y, r, g, sub, elective){
   const e = idx[y] && idx[y][r + '-' + g];
   if (!e) return null;
