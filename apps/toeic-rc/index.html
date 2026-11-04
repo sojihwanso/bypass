@@ -1,0 +1,922 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RC 매일 10문제</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+/* 레이아웃: OMR 답안지 — 문제는 시험지 지면처럼, 보기는 마킹 버블로 */
+:root{
+  --paper:#fbfbf8; --sheet:#ffffff; --ink:#1d2433; --muted:#5f6878; --line:#e6e2dc;
+  --omr:#d2435c; --omr-soft:#fbe9ec; --good:#1f8a5b; --good-soft:#e3f4ec; --bad:#c2410c; --bad-soft:#fdeee4;
+  --clue:#fff1a8; --clue-ink:#5b4a00;
+  --f-ui:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-test:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --f-num:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#14171d; --sheet:#1c2028; --ink:#e8eaef; --muted:#9aa2b1; --line:#2d323d;
+  --omr:#f07289; --omr-soft:#3a2229; --good:#4cc38a; --good-soft:#1a3328; --bad:#f2925b; --bad-soft:#3a2619;
+  --clue:#5a4b10; --clue-ink:#ffe68a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#14171d; --sheet:#1c2028; --ink:#e8eaef; --muted:#9aa2b1; --line:#2d323d;
+  --omr:#f07289; --omr-soft:#3a2229; --good:#4cc38a; --good-soft:#1a3328; --bad:#f2925b; --bad-soft:#3a2619;
+  --clue:#5a4b10; --clue-ink:#ffe68a; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 var(--f-ui)}
+[hidden]{display:none!important}
+.wrap{max-width:680px;margin:0 auto;padding-block:20px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.view{display:flex;flex-direction:column;gap:16px}
+h1,h2{margin:0;text-wrap:balance}
+h1{font-size:1.5rem;font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.05rem;font-weight:700}
+.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:var(--omr);text-transform:uppercase}
+.muted{color:var(--muted)}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--omr);outline-offset:2px}
+
+/* 홈 */
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.today{display:flex;gap:18px}
+.today div{display:flex;flex-direction:column;align-items:flex-end}
+.today b{font-family:var(--f-num);font-size:1.4rem;line-height:1.1}
+.today span{font-size:.75rem;color:var(--muted)}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:2px;min-width:0}
+.mode:hover:not(:disabled){border-color:var(--omr)}
+.mode b{font-size:1rem}
+.mode span{font-size:.82rem;color:var(--muted)}
+.mode.main{grid-column:1/-1;background:var(--omr);border-color:var(--omr);color:#fff}
+.mode.main span{color:#ffffffd9}
+.mode:disabled{opacity:.45;cursor:not-allowed}
+.panel{background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.ph{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.grp{font-size:.75rem;font-weight:700;color:var(--muted);letter-spacing:.04em}
+.tmap{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:6px}
+.tc{border:1px solid var(--line);border-radius:8px;padding:7px 9px;display:flex;flex-direction:column;gap:1px;min-width:0}
+.tc b{font-size:.82rem;font-weight:500}
+.tc span{font-family:var(--f-num);font-size:.72rem;color:var(--muted)}
+.tc.new{border-style:dashed}
+.tc.good{background:var(--good-soft);border-color:transparent}
+.tc.low{background:var(--bad-soft);border-color:transparent}
+.tc.low span{color:var(--bad)}
+.rules{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:.88rem}
+
+/* 문제 */
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.prog{display:flex;gap:4px;flex-wrap:wrap}
+.prog i{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--omr);display:block}
+.prog i.on{background:var(--omr)}
+.prog i.ok{background:var(--good);border-color:var(--good)}
+.prog i.no{background:var(--bad);border-color:var(--bad)}
+.timer{font-family:var(--f-num);font-size:.9rem;padding:2px 8px;border-radius:6px;background:var(--line)}
+.timer.over{background:var(--bad-soft);color:var(--bad)}
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.tag{align-self:flex-start;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--omr-soft);color:var(--omr)}
+.stem{font-family:var(--f-test);font-size:1.12rem;line-height:1.7}
+.passage{font-family:var(--f-test);font-size:1rem;line-height:1.75;border-left:3px solid var(--line);padding-left:14px;max-height:46vh;overflow:auto}
+.passage .meta{font-family:var(--f-ui);font-size:.8rem;color:var(--muted);margin-bottom:8px;white-space:pre-line}
+.passage p{margin:0 0 .6em}
+.blank{display:inline-block;min-width:4.5em;border-bottom:2px solid var(--ink);text-align:center;font-family:var(--f-num);font-size:.85em;padding:0 4px}
+.blank.cur{border-color:var(--omr);background:var(--omr-soft);color:var(--omr)}
+.blank.filled{font-family:var(--f-test);font-size:1em;color:var(--good);border-color:var(--good)}
+.reveal .clue{background:var(--clue);color:var(--clue-ink);border-radius:3px;padding:0 2px}
+.choices{display:flex;flex-direction:column;gap:8px}
+.ch{display:flex;gap:12px;align-items:flex-start;background:none;border:1px solid var(--line);border-radius:8px;padding:10px 12px;text-align:left;font-family:var(--f-test);font-size:1.02rem;line-height:1.45}
+.ch:hover:not(:disabled){border-color:var(--omr)}
+.ch:disabled{cursor:default}
+.bub{flex:none;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--omr);color:var(--omr);display:grid;place-items:center;font:600 .78rem var(--f-num)}
+.ch.right{border-color:var(--good);background:var(--good-soft)}
+.ch.right .bub{background:var(--good);border-color:var(--good);color:#fff}
+.ch.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.ch.wrong .bub{background:var(--bad);border-color:var(--bad);color:#fff}
+.fb{border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;font-size:.92rem}
+.fb.ok{background:var(--good-soft)}
+.fb.no{background:var(--bad-soft)}
+.fb strong{font-size:1rem}
+.fb.ok strong{color:var(--good)}
+.fb.no strong{color:var(--bad)}
+.tip{font-size:.85rem;border-top:1px dashed var(--line);padding-top:8px;color:var(--muted)}
+.tip b{color:var(--ink)}
+.mean{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:.85rem;border-top:1px dashed var(--line);padding-top:8px}
+.mean dt{font-family:var(--f-test);font-weight:600}
+.mean dd{margin:0;color:var(--muted)}
+.btn{width:100%;border:0;border-radius:10px;padding:13px;font-weight:700;background:var(--ink);color:var(--paper)}
+.ghost{background:none;border:0;color:var(--muted);font-size:.85rem;padding:4px 0;align-self:flex-start}
+
+/* 결과 · 단어장 */
+.score{display:flex;align-items:baseline;gap:10px}
+.score b{font-family:var(--f-num);font-size:3rem;line-height:1}
+.wl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.wl li{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:.88rem;display:flex;flex-direction:column;gap:2px;min-width:0}
+.wl .s{font-family:var(--f-test);font-size:.95rem}
+.wl .w{font-family:var(--f-test);font-weight:600;font-size:1.02rem}
+.wl li.miss{border-color:var(--bad)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{border:1px solid var(--line);background:var(--sheet);border-radius:99px;padding:4px 12px;font-size:.82rem}
+.seg button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+@media (max-width:420px){.stem{font-size:1.05rem}.tmap{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (prefers-reduced-motion:no-preference){.fb{animation:up .2s ease-out}@keyframes up{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- 홈 -->
+<section id="home" class="view">
+  <div class="top">
+    <div>
+      <div class="eyebrow">TOEIC RC · Part 5 / 6</div>
+      <h1>RC 매일 10문제</h1>
+    </div>
+    <div class="today">
+      <div><b id="tdCount">0</b><span>오늘 푼 문제</span></div>
+      <div><b id="tdStreak">0</b><span>연속 일수</span></div>
+    </div>
+  </div>
+
+  <div class="modes">
+    <button class="mode main" id="mP5"><b>오늘의 10문제</b><span id="mainSub">문법 7 + 어휘 3, 아직 덜 풀어본 유형부터 골고루</span></button>
+    <button class="mode" id="mP6"><b>Part 6 · 지문 1개</b><span>빈칸 4개, 문장 삽입 포함</span></button>
+    <button class="mode" id="mWeak"><b>약한 유형 집중</b><span id="weakSub">기록이 쌓이면 열려요</span></button>
+    <button class="mode" id="mWrong"><b>오답노트</b><span id="wrongSub">틀린 문제 0개</span></button>
+    <button class="mode" id="mAll"><b>Part 5 실전 30문제</b><span>시험이랑 같은 개수, 11분 목표</span></button>
+    <button class="mode" id="mWords" style="grid-column:1/-1"><b>어휘 단어장</b><span id="wordsSub">토익 단골 어휘·숙어 모아보기</span></button>
+  </div>
+
+  <div class="panel">
+    <div class="ph"><h2>유형 지도</h2><span class="muted" id="mapSum" style="font-size:.85rem"></span></div>
+    <div class="grp">문법</div><div class="tmap" id="mapG"></div>
+    <div class="grp">어휘</div><div class="tmap" id="mapV"></div>
+    <div class="grp">Part 6 전용</div><div class="tmap" id="mapP"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Part 5 푸는 순서</h2>
+    <ol class="rules">
+      <li>보기 4개부터 본다. 모양이 같고 끝만 다르면 <b>품사 문제</b> → 빈칸 앞뒤만 보고 바로 고른다.</li>
+      <li>보기가 동사 변형이면 주어(수일치), 목적어 유무(태), 시간 단서(시제)를 찾는다.</li>
+      <li>보기에 전치사·접속사가 섞여 있으면 빈칸 뒤가 명사인지 절인지 본다.</li>
+      <li>뜻이 다 다른 단어면 그때만 해석한다. 모르면 찍고 넘어간다.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- 문제 -->
+<section id="quiz" class="view" hidden>
+  <div class="qhead">
+    <button class="ghost" id="quit">← 그만하기</button>
+    <span class="timer" id="timer">0s</span>
+  </div>
+  <div class="prog" id="prog"></div>
+  <div class="sheet" id="sheet"></div>
+  <div id="fbBox"></div>
+</section>
+
+<!-- 결과 -->
+<section id="result" class="view" hidden>
+  <div class="eyebrow">이번 세트 기록</div>
+  <div class="score"><b class="num" id="rScore">0/10</b><span class="muted" id="rTime"></span></div>
+  <p id="rMsg" style="margin:0"></p>
+  <div class="panel"><h2>이번에 만난 유형</h2><div class="tmap" id="rTypes"></div></div>
+  <div class="panel" id="rWrongPanel">
+    <h2>틀린 문제 (오답노트에 저장됨)</h2>
+    <ul class="wl" id="rWrong"></ul>
+  </div>
+  <button class="btn" id="again">한 세트 더</button>
+  <button class="ghost" id="toHome">처음으로</button>
+</section>
+
+<!-- 단어장 -->
+<section id="words" class="view" hidden>
+  <button class="ghost" id="wBack">← 처음으로</button>
+  <div><div class="eyebrow">Part 5 어휘</div><h1>어휘 단어장</h1></div>
+  <div class="seg" id="wSeg"></div>
+  <ul class="wl" id="wList"></ul>
+</section>
+
+</div>
+
+<script>
+/* ===== 유형 ===== */
+const T={
+ N:{l:"명사 자리",g:"G",tip:"관사·소유격 뒤, 타동사·전치사 뒤, 동사 앞 주어 자리는 명사."},
+ ADJ:{l:"형용사 자리",g:"G",tip:"명사 앞, be동사 뒤, keep·find·make + 목적어 뒤는 형용사."},
+ ADV:{l:"부사 자리",g:"G",tip:"동사·형용사 앞, be와 p.p. 사이, 완전한 문장 뒤는 부사."},
+ TEN:{l:"시제",g:"G",tip:"since, by the time, last ~, next ~ 같은 시간 단서를 먼저 찾는다. if·when 절은 미래 대신 현재."},
+ AGR:{l:"수일치",g:"G",tip:"진짜 주어를 찾고 of ~, 관계절 같은 꾸밈말은 지운다."},
+ VOI:{l:"능동·수동태",g:"G",tip:"빈칸 뒤에 목적어가 있으면 능동, 없으면 수동을 의심한다."},
+ VB:{l:"to부정사·동명사",g:"G",tip:"plan·decide·want는 to V, suggest·consider·avoid는 -ing. look forward to의 to는 전치사."},
+ PART:{l:"분사",g:"G",tip:"꾸미는 명사가 '하는' 쪽이면 -ing, '되는' 쪽이면 p.p. 감정은 사람이 느끼면 p.p."},
+ PRON:{l:"대명사",g:"G",tip:"명사 앞=소유격, 동사·전치사 뒤=목적격, 문장이 완전하면 재귀대명사."},
+ REL:{l:"관계사",g:"G",tip:"선행사가 사람/사물/장소/시간인지, 빈칸 뒤 문장에서 뭐가 빠졌는지 본다."},
+ PREP:{l:"전치사",g:"G",tip:"by(기한) vs until(지속), for(기간) vs since(시점), within(이내)."},
+ CONJ:{l:"접속사",g:"G",tip:"both-and, either-or, neither-nor 짝을 찾고, 앞뒤 문장 관계(조건·대조·목적)로 고른다."},
+ PC:{l:"전치사 vs 접속사",g:"G",tip:"빈칸 뒤가 명사(구)면 전치사, 주어+동사면 접속사."},
+ CMP:{l:"비교·최상급",g:"G",tip:"than이 보이면 비교급, the + in/of 범위면 최상급, as ~ as 사이는 원급."},
+ SUB:{l:"가정법·도치·당위",g:"G",tip:"주절의 would/could 모양으로 if절 시제를 맞춘다. ask·essential that 뒤는 동사원형."},
+ NCL:{l:"명사절 접속사",g:"G",tip:"뒤가 완전하면 that, 불완전하면 what, '~인지'면 whether."},
+ VPOS:{l:"동사 자리",g:"G",tip:"문장에 진짜 동사가 없으면 빈칸이 동사 자리. -ing나 to V는 동사 역할을 못 한다."},
+ QTY:{l:"수량 표현",g:"G",tip:"셀 수 있는 명사(복수): many, few, several / 셀 수 없는 명사: much, little / 단수: each, every."},
+ OTHER:{l:"another·other",g:"G",tip:"another+단수, other+복수, the other=둘 중 나머지 하나, others=다른 사람들, the others=나머지 전부."},
+ CAUS:{l:"사역·준사역동사",g:"G",tip:"make·have·let + 목적어 + 동사원형. 목적어가 '되는' 쪽이면 p.p. get은 to V, help는 (to) V."},
+ INTR:{l:"자동사·타동사",g:"G",tip:"respond to, comply with, participate in처럼 전치사가 필요한 동사와 discuss, attend, reach처럼 바로 목적어를 받는 동사를 구분한다."},
+ PAR:{l:"병렬 구조",g:"G",tip:"and, or, but 앞뒤는 같은 품사·같은 형태. 앞에 나온 단어 모양을 그대로 따라간다."},
+ NPER:{l:"사람명사 vs 사물명사",g:"G",tip:"applicant(사람) vs application(서류). 셀 수 있는 단수명사는 앞에 a/the/소유격이 꼭 필요하다."},
+ TADV:{l:"already·yet·still",g:"G",tip:"already는 긍정문(벌써), yet은 부정문·have yet to(아직), still은 계속되는 상태(여전히)."},
+ VV:{l:"동사 어휘",g:"V",tip:"목적어 자리에 뭐가 오는지(사람/사물, to V)까지 같이 외운다."},
+ VN:{l:"명사 어휘",g:"V",tip:"빈칸 앞뒤 단어와 붙는 덩어리(boarding pass, expiration date)로 외운다."},
+ VA:{l:"형용사 어휘",g:"V",tip:"뒤에 오는 전치사(eligible for, responsible for)까지 세트로 외운다."},
+ VAD:{l:"부사 어휘",g:"V",tip:"시제와의 궁합을 본다: recently는 과거·현재완료, shortly는 미래."},
+ COL:{l:"숙어·전치사 짝",g:"V",tip:"해석보다 덩어리 암기가 빠르다. 빈칸 앞뒤 전치사가 정답의 단서."},
+ COLO:{l:"콜로케이션",g:"V",tip:"뜻이 비슷한 보기 중 빈칸 옆 단어와 '원래 붙어 다니는' 짝을 고른다. conduct a survey, meet a deadline처럼 덩어리로 외운다."},
+ INS:{l:"문장 삽입",g:"P",tip:"앞 문장의 명사·지시어(this, these)를 이어받는 문장을 찾고, 지문과 모순되는 보기를 먼저 지운다."},
+ LINK:{l:"접속부사",g:"P",tip:"앞뒤 문장의 관계(대조·결과·대안·추가)를 먼저 정하고 보기를 본다."}
+};
+const VOCAB=["VV","VN","VA","VAD","COL","COLO"];
+
+/* ===== Part 5 문제 =====
+   [유형, 문장, "보기A|B|C|D", 정답번호(0~3), 해설, 보기 뜻(어휘), 표제어(숙어)]
+   ------- : 빈칸,  [[단어]] : 정답 단서(풀고 나면 노랗게 표시)  */
+const RAW=[
+["N","[[The]] ------- [[of]] the new branch is scheduled for next month.","open|opened|opening|opens",2,"관사 The와 of 사이는 명사 자리 → opening(개점)."],
+["N","We appreciate [[your]] ------- in this matter.","cooperate|cooperative|cooperation|cooperatively",2,"소유격 your 뒤는 명사 자리 → cooperation(협조)."],
+["N","Mr. Tanaka received an award for [[his]] ------- to the project.","contribute|contribution|contributed|contributing",1,"소유격 his 뒤 명사 → contribution(기여). contribution to 짝도 같이 기억."],
+["N","All employees must [[obtain]] ------- before using the company vehicle.","approve|approval|approved|approvingly",1,"타동사 obtain의 목적어 자리 → 명사 approval(승인)."],
+["N","The manager praised the team for [[its]] ------- during the busy season.","produce|productive|productivity|productively",2,"소유격 its 뒤 명사 → productivity(생산성)."],
+["N","All staff members are required to attend [[the safety]] ------- next Monday.","train|trained|training|trainer",2,"the safety ___ 는 명사 자리. 참석하는 대상이니 training(교육). trainer는 사람이라 뜻이 안 맞음."],
+["N","Customer ------- [[has increased]] since the new policy was introduced.","satisfy|satisfied|satisfaction|satisfactory",2,"동사 has increased의 주어 자리 → 명사. customer satisfaction(고객 만족)은 복합명사."],
+
+["ADJ","Applicants must have at least three years of ------- [[experience]].","relevance|relevant|relevantly|relevancy",1,"명사 experience 앞 → 형용사 relevant(관련 있는)."],
+["ADJ","The hotel offers ------- [[rates]] for groups of ten or more.","competition|competitive|compete|competitively",1,"명사 rates 앞 → 형용사 competitive(경쟁력 있는). competitive rates/prices는 단골."],
+["ADJ","The new design [[is more]] ------- than the previous one.","attract|attraction|attractive|attractively",2,"be동사 보어 + more 비교급 → 형용사 attractive."],
+["ADJ","Please [[keep]] this information -------.","confidence|confidential|confidentially|confide",1,"keep + 목적어 + 형용사 = ~을 …한 상태로 유지하다 → confidential(기밀의)."],
+["ADJ","Ms. Rivera [[found]] the training session extremely -------.","help|helpful|helpfully|helpfulness",1,"find + 목적어 + 형용사 = ~가 …하다고 느끼다 → helpful. extremely는 형용사를 꾸미는 부사."],
+["ADJ","The museum [[is]] ------- to visitors free of charge on Sundays.","access|accessible|accessibly|accessibility",1,"be동사 뒤 보어 → 형용사 accessible(이용 가능한)."],
+
+["ADV","The new software update is expected to ------- [[improve]] processing speed.","significant|significantly|significance|signify",1,"동사 improve 앞 → 동사를 꾸미는 부사 significantly."],
+["ADV","Ms. Lopez handled the client's complaint ------- [[and professionally]].","prompt|promptly|promptness|prompted",1,"and 뒤 professionally(부사)와 병렬 → promptly."],
+["ADV","The CEO's speech [[was]] ------- [[received]] by the audience.","warm|warmly|warmth|warmer",1,"be동사와 p.p. 사이 = 부사 자리 → warmly."],
+["ADV","The number of applicants [[has increased]] ------- this year.","substantial|substantially|substance|substantiate",1,"완전한 문장 뒤에서 동사 increased를 꾸미는 부사 → substantially(상당히)."],
+["ADV","The proposal [[was]] ------- [[reviewed]] by the legal team.","careful|carefully|care|caring",1,"be + 부사 + p.p. 구조 → carefully."],
+["ADV","Ms. Okafor is ------- [[responsible]] for the budget.","direct|directly|direction|director",1,"형용사 responsible을 꾸미는 건 부사 → directly(직접)."],
+["ADV","Our representatives ------- [[respond]] to customer emails within 24 hours.","usual|usually|usage|used",1,"주어와 동사 respond 사이 = 부사 자리 → usually."],
+
+["TEN","[[By the time]] the director arrives, the team ------- the presentation.","finishes|will have finished|has finished|finished",1,"By the time + 현재시제(미래 의미) → 주절은 미래완료 will have finished."],
+["TEN","The marketing team ------- a new campaign [[since]] last March.","develops|developed|has been developing|will develop",2,"since + 과거 시점 → 현재완료(진행)."],
+["TEN","Mr. Lee ------- to the Tokyo office [[last year]].","transfers|transferred|has transferred|will transfer",1,"last year(분명한 과거) → 단순과거. 현재완료는 last year와 못 씀."],
+["TEN","The board ------- the merger proposal at [[next week's]] meeting.","discussed|has discussed|will discuss|discussing",2,"next week → 미래 will discuss."],
+["TEN","Ms. Hart ------- in the accounting department for five years [[before she was promoted]].","works|has worked|had worked|will work",2,"과거(was promoted)보다 더 앞서 이어진 일 → 과거완료 had worked."],
+["TEN","[[If]] it ------- tomorrow, the outdoor concert [[will be moved]] indoors.","rains|will rain|rained|raining",0,"조건·시간 부사절(if, when, as soon as)은 미래 대신 현재시제 → rains."],
+["TEN","[[At the moment]], the IT team ------- the company's servers.","is upgrading|upgraded|has upgraded|will have upgraded",0,"At the moment(지금 이 순간) → 현재진행 is upgrading."],
+
+["AGR","Neither the manager nor [[the employees]] ------- aware of the schedule change.","was|were|is|being",1,"neither A nor B는 B(the employees, 복수)에 수일치 → were."],
+["AGR","[[Each of]] the participants ------- a certificate upon completion.","receive|receives|receiving|have received",1,"Each of + 복수명사라도 주어는 Each(단수) → receives."],
+["AGR","------- [[employees]] who completed the survey will receive a gift card.","All|Every|Each|Much",0,"뒤에 복수명사 employees → All. Every·Each는 단수명사, Much는 셀 수 없는 명사."],
+["AGR","[[The results]] of the survey ------- that most customers prefer online ordering.","show|shows|showing|has shown",0,"진짜 주어는 The results(복수). of the survey는 꾸밈말 → show."],
+["AGR","[[One of]] our top priorities ------- improving customer service.","are|is|be|were",1,"One of + 복수명사 → 주어는 One(단수) → is."],
+["AGR","[[The number of]] visitors to the museum ------- risen steadily.","have|has|having|are",1,"The number of(~의 수)는 단수 → has. A number of(많은)는 복수."],
+["AGR","[[A number of]] employees ------- volunteered for the charity event.","has|have|is|was",1,"A number of + 복수명사 = 많은 ~ → 복수동사 have."],
+
+["VOI","The annual report ------- to all shareholders [[last week]].","sent|was sent|sending|has sent",1,"보고서는 '보내지는' 것 + 뒤에 목적어 없음 → 수동태 과거 was sent."],
+["VOI","The conference room [[must]] ------- in advance.","reserve|reserved|be reserved|reserving",2,"회의실은 '예약되는' 대상, 조동사 뒤 → be reserved."],
+["VOI","Ms. Diaz ------- [[the sales team]] since 2020.","has been led|has led|leading|was led",1,"뒤에 목적어(the sales team)가 있으면 능동태 → has led."],
+["VOI","All luggage ------- [[by security]] before boarding.","inspects|must inspect|must be inspected|inspecting",2,"짐은 '검사되는' 대상 + by security → 수동태 must be inspected."],
+["VOI","The new store ------- [[many customers]] on its first day.","attracted|was attracted|attracting|has been attracted",0,"목적어 many customers가 있으니 능동태 attracted."],
+["VOI","Participants ------- [[to arrive]] 15 minutes early.","ask|are asked|asking|have asked",1,"참가자가 '요청받는' 입장, 뒤에 목적어 없이 to부정사 → are asked."],
+
+["VB","The company [[plans]] ------- a new branch in Busan.","open|to open|opening|opened",1,"plan은 to부정사를 목적어로 → to open. want, hope, decide, agree도 to부정사."],
+["VB","Mr. Park [[suggested]] ------- the meeting until Friday.","postpone|to postpone|postponing|postponed",2,"suggest는 동명사를 목적어로 → postponing. consider, avoid, recommend, finish도 -ing."],
+["VB","We [[look forward to]] ------- with you again.","work|working|worked|works",1,"look forward to의 to는 전치사 → 뒤에 동명사 working."],
+["VB","Please [[remember]] ------- the door when you leave.","lock|to lock|locking|locked",1,"remember to V = (앞으로) ~할 것을 기억하다. remember -ing는 (예전에) ~한 것을 기억하다."],
+["VB","The manager [[decided]] ------- additional staff for the holiday season.","hire|to hire|hiring|hired",1,"decide + to부정사 → to hire."],
+["VB","Ms. Yoon is [[considering]] ------- to a larger office.","move|to move|moving|moved",2,"consider + 동명사 → moving."],
+["VB","[[In order]] ------- costs, the company switched suppliers.","reduce|to reduce|reducing|reduced",1,"in order to V = ~하기 위해서."],
+
+["PART","Please read the ------- [[instructions]] carefully.","enclose|enclosed|enclosing|encloses",1,"설명서는 '동봉된' 것(수동) → 과거분사 enclosed. enclosed/attached document는 단골."],
+["PART","The sales results were very ------- [[to the investors]].","disappoint|disappointed|disappointing|disappointment",2,"결과가 투자자를 실망'시키는' 쪽 → disappointing. 사람이 실망하면 disappointed."],
+["PART","[[Employees]] ------- in the workshop should sign up by Friday.","interest|interested|interesting|interests",1,"관심을 '갖게 된' 사람 → interested (in)."],
+["PART","The ------- [[deadline]] for the project is May 10.","revise|revised|revising|revision",1,"마감일은 '수정된' 것 → 과거분사 revised."],
+["PART","[[Customers]] ------- [[online]] will receive a 10% discount.","order|ordered|ordering|orders",2,"고객이 직접 '주문하는' 능동 → 현재분사 ordering. 동사 will receive가 이미 있어서 order는 불가."],
+["PART","The CEO gave an ------- [[speech]] at the conference.","inspire|inspired|inspiring|inspiration",2,"연설이 영감을 '주는' 쪽 → 현재분사 inspiring."],
+["PART","Attached is a list of ------- [[candidates]] for the position.","quality|qualify|qualified|qualifying",2,"자격을 '갖춘' 후보자 → qualified. qualified candidate는 통째로 외우기."],
+
+["PRON","Ms. Chen and her assistant [[prepared the slides]] -------.","them|their|themselves|theirs",2,"문장이 이미 완전함 → 강조 용법 재귀대명사 themselves(직접)."],
+["PRON","Mr. Gomez asked ------- [[assistant]] to book a flight.","he|his|him|himself",1,"명사 assistant 앞 → 소유격 his."],
+["PRON","Ms. Kato prefers to complete reports [[by]] -------.","her|hers|herself|she",2,"by oneself = 혼자서 → by herself."],
+["PRON","Our [[prices]] are lower than ------- of our competitors.","that|those|these|this",1,"앞의 복수명사 prices를 다시 가리킴 → those. 단수면 that."],
+["PRON","If you have any questions, please [[contact]] ------- at the front desk.","we|our|us|ourselves",2,"동사 contact의 목적어 → 목적격 us."],
+["PRON","The client liked [[both]] proposals, but ------- was within budget.","neither|nobody|each other|anyone",0,"둘(both) 중 어느 쪽도 아님 → neither. 단수동사 was와도 맞음."],
+["PRON","------- [[who wish to attend]] must register by Monday.","Those|They|Them|These",0,"Those who ~ = ~하는 사람들. They who는 쓰지 않음."],
+
+["REL","The company has offered free training to [[employees]] ------- [[want]] to improve their skills.","who|which|whose|whom",0,"선행사 employees(사람) + 빈칸 뒤 주어가 없음 → 주격 who."],
+["REL","[[Employees]] ------- wish to attend the seminar should register online.","whoever|who|they|those",1,"선행사 Employees를 꾸미는 주격 관계대명사 who. whoever는 선행사 없이 씀."],
+["REL","The candidate ------- [[résumé]] we reviewed yesterday has accepted the offer.","who|whose|whom|which",1,"빈칸 뒤에 관사 없는 명사(résumé) → '그 사람의' 소유격 whose."],
+["REL","This is [[the hotel]] ------- [[we stayed]] during the conference.","which|where|what|whose",1,"장소 선행사 + 뒤 문장이 완전함(we stayed) → 관계부사 where."],
+["REL","[[The product]] ------- [[was launched]] last month has sold well.","who|which|whose|what",1,"사물 선행사 + 주어 빠짐 → which."],
+["REL","We will provide ------- you [[need]] for the presentation.","what|that|which|who",0,"앞에 선행사가 없음 + need의 목적어가 빠짐 → what(~하는 것)."],
+["REL","[[The day]] ------- [[the store opened]] was very busy.","when|where|which|whose",0,"시간 선행사 + 뒤 문장 완전 → 관계부사 when."],
+
+["PREP","Ms. Patel will [[review]] all applications ------- the end of the week.","by|until|since|among",0,"'주말까지 끝낸다'는 기한(완료) → by. until은 '그때까지 계속'이라 지속 동사와 씀."],
+["PREP","The new policy will take effect ------- [[January 1]].","on|in|at|to",0,"날짜 앞은 on. 월·연도만 있으면 in."],
+["PREP","Visitors must show identification ------- [[entering]] the building.","before|during|between|within",0,"before는 전치사로 -ing를 받음. during 뒤에는 -ing가 아니라 명사."],
+["PREP","Customers are advised to keep their receipts ------- [[proof]] of purchase.","as|for to|like|so",0,"as + 명사 = ~로서. 영수증을 구매 증거'로서' 보관."],
+["PREP","Mr. Shah has worked here ------- [[over ten years]].","for|since|during|within",0,"기간의 길이(ten years) → for. since 뒤에는 시작 시점."],
+["PREP","The package should arrive ------- [[three business days]].","within|among|along|beside",0,"기간 앞 '~이내에' → within."],
+["PREP","The meeting was rescheduled ------- [[the manager's request]].","at|on|in|by",0,"at one's request = ~의 요청으로. 덩어리로 외우기."],
+["PREP","Copies of the report are available ------- [[request]].","upon|among|within|across",0,"(up)on request = 요청 시. 토익 단골 표현."],
+["PREP","The office will be closed ------- [[the holiday weekend]].","during|among|between|onto",0,"기간 명사 앞 '~동안' → during."],
+
+["CONJ","The report was [[so]] detailed ------- the board approved it immediately.","that|which|as|what",0,"so + 형용사 + that 절 = 너무 ~해서 …하다."],
+["CONJ","The price [[includes]] breakfast, ------- parking [[is charged separately]].","but|or|so|because",0,"포함 ↔ 따로 청구 = 대조 → but."],
+["CONJ","Please contact the front desk ------- you [[need additional towels]].","if|unless|whether|despite",0,"'필요하면 연락' 조건 → if. unless는 '~하지 않으면'."],
+["CONJ","Applicants must submit ------- a résumé [[and]] a cover letter.","both|either|neither|whether",0,"both A and B. 짝: either A or B, neither A nor B."],
+["CONJ","You can pay ------- by credit card [[or]] by bank transfer.","both|either|neither|not",1,"or와 짝 → either A or B."],
+["CONJ","------- you [[have completed]] the form, please return it to the reception desk.","Once|Unless|Although|So",0,"'작성을 마치면' → Once(일단 ~하면). 뜻으로 고르는 접속사 문제."],
+["CONJ","The store will remain open late ------- [[customers can shop]] after work.","so that|in order to|because of|such as",0,"뒤에 주어+동사이고 '~하도록' 목적 → so that. in order to 뒤엔 동사원형."],
+
+["PC","------- [[the weather was poor]], the outdoor event proceeded as planned.","Despite|Although|Because of|However",1,"빈칸 뒤가 절 → 접속사 Although. Despite·Because of는 전치사."],
+["PC","The shipment was delayed ------- [[a shortage]] of drivers.","because|due to|although|so that",1,"빈칸 뒤가 명사구 → 전치사 due to. because는 접속사."],
+["PC","The museum will [[remain closed]] ------- [[renovations are completed]].","until|by|during|for",0,"계속 닫혀 있음(지속) + 뒤에 절 → 접속사 until."],
+["PC","------- [[the heavy traffic]], the shuttle bus arrived on time.","Although|Despite|Even though|Because",1,"뒤가 명사구 + 의미는 양보 → 전치사 Despite."],
+["PC","------- [[the meeting]], phones should be turned off.","While|During|When|As",1,"뒤가 명사(the meeting) → 전치사 During. While은 접속사라 절이 필요."],
+["PC","------- [[she joined]] the firm, Ms. Wu [[has won]] three awards.","Since|From|Due to|Despite",0,"뒤가 절 + 주절이 현재완료 → 접속사 Since(~한 이래로)."],
+
+["CMP","Profits rose ------- in the third quarter [[than]] analysts had predicted.","sharp|more sharply|most sharply|sharpest",1,"than → 비교급. 동사 rose를 꾸미니 부사 more sharply."],
+["CMP","Ms. Grant is ------- qualified for the position [[than any other]] candidate.","much|more|most|very",1,"than any other = 비교급 → more."],
+["CMP","This is [[the]] ------- product [[in our entire line]].","popular|more popular|most popular|popularly",2,"the + 범위(in our entire line) → 최상급 most popular."],
+["CMP","The new model is ------- [[lighter than]] the old one.","very|much|most|many",1,"비교급 강조는 much, even, far, still. very는 비교급을 꾸미지 못함."],
+["CMP","Please respond [[as]] ------- [[as possible]].","quick|quickly|quicker|quickest",1,"as ~ as 사이는 원급. respond를 꾸미니 부사 quickly."],
+["CMP","[[Of all the applicants]], Ms. Novak has [[the]] ------- experience.","more|most|much|many",1,"Of all ~ + the → 최상급 most."],
+["CMP","The second quarter was ------- profitable [[than]] the first.","less|least|little|fewer",0,"than → 비교급. 형용사 profitable 앞이라 less. fewer는 셀 수 있는 명사 앞."],
+
+["SUB","Mr. Kim [[asked that]] all reports ------- before the meeting.","are submitted|be submitted|submitting|to submit",1,"ask/request/require/suggest that 주어 + (should) 동사원형 → be submitted."],
+["SUB","[[If]] we ------- more staff, we [[could finish]] the project sooner.","have|had|will have|having",1,"주절에 could + 동사원형 → 가정법 과거. if절은 과거형 had."],
+["SUB","------- you [[need]] further assistance, please call our help line.","Should|Would|Could|Had",0,"If you should need에서 if를 생략하고 도치 → Should you need."],
+["SUB","If the report [[had been submitted]] earlier, the board ------- it last week.","would approve|would have approved|approves|had approved",1,"if절 had p.p. → 주절 would have p.p. (가정법 과거완료)."],
+["SUB","It is [[essential that]] every employee ------- the safety guidelines.","follow|follows|followed|following",0,"essential/important/necessary that + 주어 + (should) 동사원형 → follow."],
+["SUB","[[Not only]] ------- the company increase sales, but it also [[reduced]] costs.","does|did|was|has",1,"Not only가 문장 앞 → 도치. 뒤 문장이 과거(reduced) → did."],
+["SUB","------- the weather been better, the event [[would have been held]] outdoors.","If|Had|Were|Should",1,"If the weather had been에서 if 생략 + 도치 → Had the weather been."],
+
+["NCL","Ms. Grant [[has not decided]] ------- she will attend the conference.","that|whether|what|which",1,"'참석할지 말지' 아직 결정 안 함 → whether(~인지 아닌지)."],
+["NCL","The manager [[announced]] ------- [[the office would close early]] on Friday.","that|what|which|whether",0,"announce의 목적어 + 뒤 문장이 완전함 → that."],
+["NCL","------- the company [[needs]] most is experienced engineers.","That|What|Which|Whether",1,"주어 자리 + needs의 목적어가 빠짐 → What(~하는 것)."],
+["NCL","Please let us know ------- you would like the documents by mail [[or]] by email.","whether|that|what|which",0,"A or B 중 어느 쪽인지 → whether ~ or."],
+["NCL","It is not clear ------- [[will replace]] Mr. Dunn as director.","who|whom|whose|what",0,"주어가 빠진 의문사절 + 사람(director) → who."],
+["NCL","The survey [[shows]] ------- [[many customers prefer]] shopping online.","that|what|which|who",0,"동사 shows의 목적어 + 뒤 문장 완전 → that."],
+
+["VV","The hotel's conference room can ------- [[up to 200 guests]].","accommodate|attend|participate|arrive",0,"'~명을 수용하다' = accommodate. participate는 in이 필요, arrive는 자동사.","수용하다|참석하다|참여하다(in)|도착하다"],
+["VV","The training session has been ------- [[until next Tuesday]].","postponed|attended|reminded|occurred",0,"until next Tuesday와 어울리는 건 '연기되다'. occur는 수동태 불가.","연기하다|참석하다|상기시키다|발생하다"],
+["VV","Please ------- [[the attached form]] and return it by Friday.","complete|achieve|remain|occur",0,"서식을 '작성하다'는 complete. complete a form은 단골.","완료하다·작성하다|달성하다|남아 있다|발생하다"],
+["VV","The company will ------- [[its new product]] at the trade fair.","launch|consist|belong|respond",0,"신제품을 '출시하다' = launch. 나머지는 자동사라 목적어 불가.","출시하다|구성되다(of)|속하다(to)|응답하다(to)"],
+["VV","Employees should ------- [[any problems]] to their supervisor immediately.","report|inform|arrive|proceed",0,"report 사물 to 사람 = ~을 …에게 보고하다. inform은 사람이 목적어(inform 사람 of 사물).","보고하다|알리다(사람 of)|도착하다|진행하다"],
+["VV","The new system will ------- staff [[to process]] orders faster.","enable|make|let|have",0,"enable + 목적어 + to V. make·let·have는 to 없이 동사원형.","가능하게 하다|~하게 만들다|허락하다|시키다"],
+["VV","Please ------- [[that]] all doors are locked before leaving.","ensure|assure|insure|ensue",0,"ensure that ~ = 반드시 ~하도록 하다. assure는 사람이 목적어.","확실히 하다|(사람을) 안심시키다|보험에 들다|뒤따르다"],
+["VV","Mr. Ito has been ------- [[to regional manager]].","promoted|proceeded|occurred|departed",0,"be promoted to 직급 = ~로 승진하다.","승진시키다|진행하다|발생하다|출발하다"],
+["VV","Please ------- [[to]] the attached file for more details.","refer|look|see|check",0,"refer to = 참고하다. see·check는 to 없이 바로 목적어, look은 at.","참고하다(to)|보다(at)|보다|확인하다"],
+
+["VN","Please present your [[boarding]] ------- at the gate.","pass|permit|entry|admission",0,"boarding pass = 탑승권.","통행증·탑승권|허가증|입장·출입|입장(료)"],
+["VN","A copy of the ------- must be attached to your [[reimbursement]] request.","receipt|recipe|reception|receiver",0,"비용 환급 신청엔 영수증 → receipt.","영수증|요리법|접수처·환영회|수령인"],
+["VN","The ------- for submitting proposals [[is March 15]].","deadline|schedule|duration|period",0,"날짜 하나를 가리키는 '마감일' → deadline.","마감일|일정|지속 기간|기간"],
+["VN","[[Due to high]] -------, the product is currently [[out of stock]].","demand|supply|request|order",0,"수요가 많아서 품절 → high demand.","수요|공급|요청|주문"],
+["VN","All [[new employees]] must attend an ------- session on their first day.","orientation|occasion|operation|opinion",0,"신입사원 첫날 → orientation.","오리엔테이션|경우·행사|운영·수술|의견"],
+["VN","Please check the ------- [[date]] on your membership card.","expiration|expectation|exception|explanation",0,"expiration date = 만료일.","만료|기대|예외|설명"],
+["VN","The company offers a wide ------- [[of products]].","range|rate|rank|ratio",0,"a wide range of = 폭넓은, 다양한.","범위|비율·요금|순위|비율"],
+["VN","Thank you for your ------- [[in]] our job opening.","interest|interview|intention|interaction",0,"interest in ~ = ~에 대한 관심. 지원자에게 보내는 단골 문장.","관심|면접|의도|상호작용"],
+
+["VA","Tickets are ------- [[at the box office or online]].","available|possible|capable|eligible",0,"표나 물건을 '구할 수 있는' = available.","이용·구입 가능한|가능한|능력 있는(of)|자격 있는(for)"],
+["VA","Only full-time employees are ------- [[for the bonus]].","eligible|available|capable|possible",0,"be eligible for = ~의 자격이 있다.","자격 있는|이용 가능한|능력 있는|가능한"],
+["VA","Please make sure your passport is ------- [[for at least six months]].","valid|vacant|vital|various",0,"여권이 '유효한' = valid.","유효한|비어 있는|필수적인|다양한"],
+["VA","The manager gave a ------- [[explanation]] of the new procedures.","detailed|delayed|devoted|deposited",0,"상세한 설명 = detailed explanation.","상세한|지연된|헌신적인|예치된"],
+["VA","We received a ------- [[number of complaints]].","considerable|considerate|considered|considering",0,"considerable(상당한) vs considerate(사려 깊은) 구분이 핵심.","상당한|사려 깊은|숙고된|~을 고려하면"],
+["VA","Ms. Liu is ------- [[for organizing]] the event.","responsible|reliable|respective|reasonable",0,"be responsible for = ~을 책임지다.","책임 있는|믿을 만한|각각의|합리적인"],
+["VA","The restaurant is known for its ------- [[prices]].","reasonable|responsible|reluctant|redundant",0,"reasonable price = 적당한(합리적인) 가격.","합리적인|책임 있는|꺼리는|불필요한"],
+
+["VAD","The hotel is ------- [[located]] near the airport.","conveniently|consequently|considerably|consistently",0,"conveniently located = 편리한 곳에 위치한. 통째로 외우기.","편리하게|결과적으로|상당히|일관되게"],
+["VAD","The meeting [[will begin]] -------.","shortly|lately|nearly|barely",0,"shortly = 곧. lately(최근에)는 현재완료와, nearly(거의)·barely(간신히)는 뜻이 안 맞음.","곧|최근에|거의|간신히"],
+["VAD","Ms. Han [[has]] ------- [[completed]] the training program.","recently|soon|shortly|later",0,"현재완료 + 막 끝낸 일 → recently. soon·shortly·later는 미래 의미.","최근에|곧|곧|나중에"],
+["VAD","The software [[is updated]] ------- to fix security issues.","regularly|narrowly|briefly|barely",0,"정기적으로 업데이트 → regularly.","정기적으로|간신히·좁게|간단히|거의 ~않게"],
+["VAD","The proposal was ------- approved [[by all board members]].","unanimously|separately|partially|temporarily",0,"모든 이사가 찬성 → unanimously(만장일치로).","만장일치로|따로|부분적으로|일시적으로"],
+["VAD","The store is ------- closed for renovations [[and will reopen next week]].","temporarily|previously|formerly|permanently",0,"다음 주 재개장 → 일시적으로 temporarily. permanently(영구히)와 반대.","일시적으로|이전에|예전에|영구히"],
+
+["COL","Please submit your expense report ------- [[than]] Friday.","no later|not late|no latest|later",0,"no later than ~ = 늦어도 ~까지.","늦어도 ~까지","no later than"],
+["COL","Mr. Ross is [[responsible]] ------- coordinating the annual conference.","for|to|with|of",0,"be responsible for ~ = ~을 책임지다.","~을 책임지다","be responsible for"],
+["COL","Please ------- [[in mind]] that the office closes at 5 p.m.","keep|hold|take|put",0,"keep in mind = 명심하다.","명심하다","keep in mind"],
+["COL","The new policy will [[take]] ------- next month.","effect|affect|effort|effective",0,"take effect = 시행되다. affect는 동사(영향을 주다).","시행되다, 효력이 생기다","take effect"],
+["COL","Mr. Green is [[in]] ------- [[of]] the marketing department.","charge|order|case|time",0,"in charge of = ~을 담당하는.","~을 담당하는","in charge of"],
+["COL","Employees are ------- [[to a]] 15-minute break every four hours.","entitled|eligible|able|capable",0,"be entitled to + 명사 = ~을 받을 권리가 있다. eligible은 for, able은 to V.","~을 받을 권리가 있다","be entitled to"],
+["COL","The price is [[subject]] ------- [[change]] without notice.","to|for|of|on",0,"be subject to change = 변경될 수 있다.","~될 수 있다, ~의 대상이다","be subject to"],
+["COL","Thank you for taking the time to ------- [[in]] our survey.","participate|attend|join|enter",0,"participate in = ~에 참여하다. attend·join은 in 없이 바로 목적어.","~에 참여하다","participate in"],
+
+/* ---- 추가 유형 ---- */
+["VPOS","[[The marketing director]] ------- the budget proposal [[every quarter]].","reviews|reviewing|to review|review",0,"문장에 동사가 없음 + 주어 단수 + 반복되는 일 → 현재시제 reviews. -ing·to V는 동사가 될 수 없음."],
+["VPOS","Visitors to the factory ------- [[protective glasses]] at all times.","must wear|wearing|to wear|worn",0,"주어 Visitors 뒤에 동사가 없음 → 동사 must wear."],
+["VPOS","The newly hired assistant ------- the files [[yesterday]].","organized|organizing|to organize|organize",0,"동사 자리 + yesterday → 과거형 organized."],
+["VPOS","Mr. Choi, [[who joined the company last year]], ------- the new project.","leading|to lead|will lead|lead",2,"콤마 사이 관계절은 꾸밈말. 주어 Mr. Choi의 동사가 없음 → will lead. lead는 3인칭 단수와 안 맞음."],
+["VPOS","The survey results ------- [[next week]].","will be announced|announcing|to announce|announce",0,"동사 자리 + 결과는 '발표되는' 대상 + next week → will be announced."],
+["VPOS","Before the event begins, the organizers ------- [[all the equipment]].","will check|checking|to check|having checked",0,"주절에 동사가 없음 → will check. 나머지는 준동사라 동사 역할 불가."],
+
+["QTY","There are ------- [[seats]] left for tonight's performance.","few|little|much|a little",0,"seats는 셀 수 있는 복수명사 → few. little·much·a little은 셀 수 없는 명사."],
+["QTY","We have received ------- [[information]] about the new policy.","many|few|little|a number of",2,"information은 셀 수 없는 명사 → little."],
+["QTY","------- [[employee]] must complete the safety course.","Every|All|Many|Several",0,"단수명사 employee 앞 → Every. All·Many·Several은 복수명사."],
+["QTY","The company hired ------- new [[engineers]] last month.","several|much|a little|every",0,"복수명사 engineers 앞 → several."],
+["QTY","------- [[of the applicants]] had experience in sales.","Most|Almost|Much|Every",0,"Most of the + 복수명사 = 대부분의 ~. Almost는 부사라 혼자 주어가 못 됨."],
+["QTY","Please allow ------- extra [[time]] for traffic.","a little|a few|many|several",0,"time(시간 여유)은 셀 수 없는 명사 → a little."],
+["QTY","The workshop drew ------- [[participants]] [[than]] expected.","fewer|less|little|few",0,"than → 비교급 + 셀 수 있는 복수명사 → fewer. less는 셀 수 없는 명사."],
+
+["OTHER","If this room is not available, we will book ------- [[one]].","another|other|others|the others",0,"또 다른 하나(단수) → another."],
+["OTHER","[[Some]] employees prefer to work from home, while ------- prefer the office.","others|another|the other|other",0,"Some ~, others ~ = 일부는 ~, 다른 사람들은 ~."],
+["OTHER","The company has [[two offices]]: one is in Seoul, and ------- is in Busan.","the other|another|other|others",0,"둘 중 하나는 one, 나머지 하나는 the other."],
+["OTHER","Please inform ------- [[staff members]] of the change.","other|another|others|the other one",0,"other + 복수명사. another는 단수명사, others는 뒤에 명사 없이 씀."],
+["OTHER","The two managers respect [[each]] -------.","other|another|others|one",0,"each other = 서로."],
+["OTHER","Of [[the three candidates]], one was hired, and ------- [[were]] placed on a waiting list.","the others|another|other|the other",0,"셋 중 하나를 빼고 나머지 전부(복수) → the others. 복수동사 were가 단서."],
+
+["CAUS","The manager [[had]] the technician ------- the printer.","repair|to repair|repaired|repairing",0,"have + 사람 + 동사원형 = ~에게 …하게 하다."],
+["CAUS","Please [[let]] us ------- if you have any questions.","know|to know|knowing|known",0,"let + 목적어 + 동사원형 → let us know. 단골 문장."],
+["CAUS","The new software will [[help]] employees ------- their time more efficiently.","manage|managed|managing|management",0,"help + 목적어 + (to) 동사원형 → manage."],
+["CAUS","Ms. Park [[had]] [[her presentation slides]] ------- by a designer.","create|created|creating|to create",1,"목적어(슬라이드)가 '만들어지는' 쪽 → have + 사물 + p.p. → created."],
+["CAUS","The supervisor [[made]] the team ------- the report again.","revise|to revise|revised|revising",0,"make + 사람 + 동사원형 → revise."],
+["CAUS","The director [[got]] the staff ------- the deadline.","to meet|meet|meeting|met",0,"get은 사역 의미여도 + 목적어 + to V → to meet."],
+
+["INTR","Please ------- [[to]] all customer inquiries within one day.","respond|answer|address|handle",0,"respond to = ~에 응답하다. answer·address·handle은 to 없이 바로 목적어."],
+["INTR","All employees must ------- [[with]] the new safety regulations.","comply|follow|obey|observe",0,"comply with = ~을 준수하다. follow·obey·observe는 with 없이 바로 목적어."],
+["INTR","The committee will ------- [[the budget]] at the next meeting.","discuss|talk|speak|agree",0,"discuss는 타동사 → 바로 목적어. talk about, speak about, agree on처럼 나머지는 전치사 필요."],
+["INTR","Our sales team ------- [[its annual target]] in October.","reached|arrived|got|came",0,"reach는 타동사 → 바로 목적어. arrive at, come to처럼 나머지는 전치사 필요."],
+["INTR","More than 300 people ------- [[the conference]] last year.","attended|participated|went|arrived",0,"attend는 바로 목적어. participate in, go to, arrive at."],
+["INTR","Several factors ------- [[to]] the increase in sales.","contributed|caused|resulted|brought",0,"contribute to = ~에 기여하다. result는 in, cause·bring은 바로 목적어."],
+["INTR","Mr. Davis will ------- [[the staff of]] the schedule change.","inform|announce|explain|say",0,"inform + 사람 + of 사물. announce·explain·say는 사람을 바로 목적어로 못 받음."],
+
+["PAR","The job requires [[creativity, patience, and]] -------.","flexible|flexibility|flexibly|flex",1,"앞이 명사 나열(creativity, patience) → 명사 flexibility."],
+["PAR","Applicants should be [[organized]], -------, [[and able]] to work independently.","reliable|reliably|reliability|rely",0,"be 뒤 형용사 나열 → 형용사 reliable."],
+["PAR","The program teaches participants how to [[plan, organize, and]] ------- projects.","manage|managing|managed|management",0,"to 뒤 동사원형 나열(plan, organize) → manage."],
+["PAR","Ms. Kwon enjoys [[meeting]] new clients [[and]] ------- new markets.","explore|exploring|explored|to explore",1,"enjoy -ing의 병렬 → exploring."],
+["PAR","The new process is both [[faster and]] ------- than the old one.","accurate|more accurate|most accurate|accurately",1,"faster(비교급)와 병렬 + than → more accurate."],
+["PAR","Please [[read]] the contract carefully [[and]] ------- it by Friday.","sign|signing|signed|to sign",0,"명령문 동사원형 read와 병렬 → sign."],
+
+["NPER","[[Each]] ------- [[must submit]] two letters of recommendation.","applicant|application|apply|applied",0,"추천서를 제출하는 건 사람 → applicant. Each + 단수 가산명사."],
+["NPER","[[The]] ------- [[of]] the new equipment took three days.","install|installer|installation|installed",2,"'설치'라는 행위 → installation. installer는 설치 기사(사람)."],
+["NPER","We are looking for [[an experienced]] ------- to join our team.","account|accountant|accounting|accounted",1,"팀에 합류할 사람 → accountant(회계사). accounting은 회계 업무."],
+["NPER","Please [[send your]] ------- to the human resources department.","apply|applicant|application|applying",2,"보내는 건 서류 → application(지원서). 사람을 보낼 수는 없음."],
+["NPER","The company [[provides]] ------- for all new employees.","train|trainer|training|trained",2,"관사 없이 쓸 수 있는 불가산명사 → training. trainer는 셀 수 있어서 a가 필요."],
+["NPER","Ms. Ford is [[a]] ------- [[of the board]] of directors.","member|membership|memorize|memorial",0,"이사회의 '구성원'인 사람 → member."],
+["NPER","------- [[is required]] for all visitors.","Registration|Registrant|Register|Registered",0,"관사가 없는 주어 → 불가산 행위명사 Registration(등록). Registrant는 셀 수 있는 사람명사라 a가 필요."],
+
+["TADV","The shipment [[has not]] arrived -------.","yet|already|still|ever",0,"부정문 끝 → yet(아직)."],
+["TADV","Ms. Moon [[has]] ------- [[submitted]] her report.","already|yet|still|ever",0,"긍정문 현재완료 중간 → already(벌써)."],
+["TADV","[[Although the deadline has passed]], the position is ------- open.","still|yet|already|ever",0,"마감은 지났지만 '여전히' 열려 있음 → still."],
+["TADV","The project is ------- behind schedule, [[even after]] the team worked overtime.","still|yet|already|ever",0,"초과근무를 했는데도 '여전히' 늦음 → still."],
+["TADV","We [[have]] ------- [[to receive]] a response from the supplier.","yet|still|already|ever",0,"have yet to V = 아직 ~하지 않았다. 토익 단골."],
+["TADV","By the time we arrived, the meeting [[had]] ------- [[started]].","already|yet|still|ever",0,"도착했을 땐 '이미' 시작됨 → already."],
+
+/* ---- 기존 유형 추가 ---- */
+["N","Please read the terms of [[the]] ------- carefully before signing.","agree|agreement|agreeable|agreeably",1,"관사 the 뒤 명사 → agreement(계약서)."],
+["N","There has been [[a significant]] ------- in sales this year.","increase|increasing|increased|increasingly",0,"a + 형용사 뒤 명사 자리 → increase(증가). increase는 명사로도 씀."],
+["N","Mr. Ali was recognized for [[his]] ------- to customer service.","dedicate|dedicated|dedication|dedicatedly",2,"소유격 his 뒤 명사 → dedication(헌신)."],
+
+["ADJ","Our goal is to provide ------- [[service]] to every customer.","excel|excellent|excellence|excellently",1,"명사 service 앞 → 형용사 excellent."],
+["ADJ","The instructions [[were not]] ------- [[enough]] for new users.","clear|clearly|clarity|clarify",0,"be동사 보어 + enough 앞 → 형용사 clear."],
+["ADJ","Mr. Ford made several ------- [[suggestions]] during the meeting.","use|useful|usefully|usefulness",1,"명사 suggestions 앞 → 형용사 useful."],
+
+["ADV","The team [[worked]] ------- to meet the deadline.","diligent|diligently|diligence|more diligent",1,"자동사 worked 뒤 → 부사 diligently."],
+["ADV","The store has been ------- [[busy]] since the sale began.","except|exceptional|exceptionally|exception",2,"형용사 busy 앞 → 부사 exceptionally."],
+["ADV","-------[[,]] the flight was delayed due to bad weather.","Unfortunate|Unfortunately|Fortune|Unfortunateness",1,"문장 맨 앞 콤마 앞 → 문장 전체를 꾸미는 부사 Unfortunately."],
+
+["TEN","Ms. Choi ------- the company [[in 2015]].","joined|has joined|joins|will join",0,"in 2015(과거 시점) → 단순과거 joined."],
+["TEN","The new branch ------- [[next spring]].","opened|has opened|will open|opening",2,"next spring → 미래 will open."],
+["TEN","We ------- your application and [[will contact]] you soon.","have received|will receive|receiving|had received",0,"이미 받아서 지금 갖고 있음 → 현재완료 have received."],
+
+["AGR","[[Every room]] in the hotel ------- free Wi-Fi.","offer|offers|offering|have offered",1,"Every + 단수명사 → 단수동사 offers."],
+["AGR","[[Information]] about the new benefits ------- available on the website.","is|are|were|be",0,"information은 셀 수 없는 명사 = 단수 → is."],
+["AGR","[[The manager]], along with her assistants, ------- attending the conference.","is|are|were|be",0,"along with ~ 는 꾸밈말. 주어는 The manager(단수) → is."],
+
+["VOI","The meeting [[has]] ------- until next week.","been postponed|postponed|postponing|postpone",0,"회의는 '연기되는' 대상 + 목적어 없음 → has been postponed."],
+["VOI","Mr. Ray ------- [[the award]] for his excellent work.","was given|gave|giving|give",0,"상을 '받은' 것 → give 사람 사물의 수동 was given the award. gave면 그가 상을 준 것."],
+["VOI","The products ------- [[in our factory]] in Ulsan.","are manufactured|manufacture|manufacturing|have manufactured",0,"제품은 '제조되는' 대상 + 목적어 없음 → are manufactured."],
+
+["VB","The company has decided to [[stop]] ------- printed catalogs.","produce|producing|to produce|produced",1,"stop -ing = ~하는 것을 그만두다. stop to V는 '~하려고 멈추다'."],
+["VB","Mr. Jung [[agreed]] ------- the contract by Friday.","review|reviewing|to review|reviewed",2,"agree + to V → to review."],
+["VB","Thank you [[for]] ------- our survey.","complete|completing|to complete|completed",1,"전치사 for 뒤 + 목적어(our survey) → 동명사 completing."],
+
+["PART","Please fill out the ------- [[form]].","attach|attached|attaching|attaches",1,"서식은 '첨부된' 것 → attached."],
+["PART","[[Employees]] ------- [[to attend]] the training must register in advance.","wish|wishing|wished|wishes",1,"직원이 '원하는' 능동 + 동사 must register가 따로 있음 → 현재분사 wishing."],
+["PART","[[The audience]] was ------- by the new product demonstration.","impress|impressed|impressive|impressing",1,"청중이 감동을 '받은' 쪽(사람이 느낌) → impressed."],
+
+["PRON","Ms. Lim and ------- [[will present]] the results tomorrow.","I|me|my|mine",0,"동사 will present의 주어 자리 → 주격 I."],
+["PRON","The decision is ------- to make, [[not mine]].","your|yours|you|yourself",1,"not mine과 대응 → 소유대명사 yours(당신의 것)."],
+["PRON","The company updates ------- [[website]] every month.","it|its|it's|itself",1,"명사 website 앞 소유격 → its. it's는 it is."],
+
+["REL","The report[[,]] ------- was published last week, received positive reviews.","which|that|what|who",0,"콤마 뒤(계속적 용법)에는 that을 못 씀 → which."],
+["REL","This is [[the reason]] ------- we changed suppliers.","why|where|which|whose",0,"the reason + 완전한 문장 → 관계부사 why."],
+["REL","[[Anyone]] ------- [[is interested]] in volunteering should contact Ms. Bell.","who|whom|which|whose",0,"사람(Anyone) + 주어 빠짐 → 주격 who."],
+
+["PREP","Please place your order ------- [[the online form]].","through|among|beside|until",0,"~을 통해서 → through."],
+["PREP","The museum is located ------- [[the bank and the post office]].","between|among|through|during",0,"둘 사이 between A and B. 셋 이상이면 among."],
+["PREP","Prices will rise ------- [[5 percent]] next year.","by|at|on|with",0,"증감의 차이(5% 만큼)는 by."],
+
+["CONJ","------- the store is popular, [[it is always crowded]] on weekends.","Because|Although|Unless|Whereas",0,"인기가 많아서 붐빔 = 이유 → Because."],
+["CONJ","We will start the meeting ------- [[everyone arrives]].","as soon as|despite|during|so that",0,"모두 도착하자마자 시작 → as soon as."],
+["CONJ","Ms. Han is [[not only]] talented ------- hardworking.","but also|and also|or|nor",0,"not only A but also B."],
+
+["PC","------- [[his experience]], Mr. Ito was not hired.","Despite|Although|Even though|Unless",0,"뒤가 명사구 + 양보 → 전치사 Despite."],
+["PC","The event was canceled ------- [[of]] the storm.","because|due|since|as",0,"because of = ~ 때문에. due는 to와 짝(due to)."],
+["PC","------- [[the project was finished]] early, the team received a bonus.","Because|Because of|Due to|Owing to",0,"뒤가 절 → 접속사 Because. 나머지는 전치사."],
+
+["CMP","This year's sales were [[the]] ------- [[in the company's history]].","high|higher|highest|highly",2,"the + 범위 → 최상급 highest."],
+["CMP","The new laptop is twice [[as]] ------- [[as]] the old model.","fast|faster|fastest|fastly",0,"배수 + as 원급 as → fast. fastly라는 단어는 없음."],
+["CMP","[[The]] ------- you book, [[the cheaper]] the ticket will be.","early|earlier|earliest|more early",1,"The 비교급, the 비교급 = ~할수록 더 …하다 → earlier."],
+
+["SUB","[[If]] I ------- you, [[I would]] accept the offer.","am|were|be|had",1,"가정법 과거에서 be동사는 주어와 상관없이 were."],
+["SUB","------- I known about the sale, [[I would have bought]] more.","Had|If|Have|Should",0,"If I had known에서 if 생략 + 도치 → Had I known."],
+["SUB","The manager [[recommended that]] Mr. Lee ------- the training.","attend|attends|attended|attending",0,"recommend that 주어 + (should) 동사원형 → attend."],
+
+["NCL","Please tell me ------- [[the meeting will start]].","when|what|that|which",0,"'언제' 시작하는지 알려 달라 → 의문사 when. 뒤 문장이 완전함."],
+["NCL","------- the new product will succeed [[depends on]] marketing.","Whether|If|That|What",0,"주어 자리 '~인지 아닌지' → Whether. if는 주어 자리에 못 씀."],
+["NCL","We are not sure ------- [[caused]] the delay.","what|that|whether|which",0,"caused의 주어가 빠짐 + 선행사 없음 → what."],
+
+["VV","The firm plans to ------- [[its operations]] to Asia.","expand|expire|explain|expose",0,"사업을 확장하다 = expand.","확장하다|만료되다|설명하다|노출시키다"],
+["VV","Please ------- [[us of]] any changes to your address.","notify|announce|explain|report",0,"notify 사람 of 사물 = ~에게 …을 알리다.","통지하다(사람 of)|발표하다|설명하다|보고하다"],
+["VV","The museum will ------- [[a special exhibit]] on local history.","host|attend|reside|consist",0,"행사를 '주최하다' = host.","주최하다|참석하다|거주하다|구성되다(of)"],
+["VV","Please ------- [[your reservation]] at least 24 hours in advance.","confirm|conform|consent|consult",0,"예약을 확인하다 = confirm a reservation.","확인하다|따르다(to)|동의하다(to)|상담하다"],
+
+["VN","Please make a ------- if you plan to [[dine with us]] on Friday.","reservation|registration|recommendation|representation",0,"식당 예약 = make a reservation.","예약|등록|추천|대표·묘사"],
+["VN","The company will cover all [[travel]] ------- for the trip.","expenses|experiences|experiments|exports",0,"travel expenses = 출장 경비.","비용|경험|실험|수출"],
+["VN","Please fill out the ------- form [[to help us improve]] our service.","feedback|feature|factor|facility",0,"서비스 개선용 의견 → feedback form.","의견|특징|요인|시설"],
+["VN","The hotel's ------- [[include a pool and a fitness center]].","facilities|faculties|factors|fees",0,"수영장·헬스장 = 시설 facilities.","시설|교수진·능력|요인|요금"],
+
+["VA","The position requires ------- [[knowledge]] of accounting software.","extensive|expensive|extended|exclusive",0,"폭넓은 지식 = extensive knowledge.","폭넓은|비싼|연장된|독점적인"],
+["VA","The new policy is ------- [[to all employees]].","applicable|appreciative|affordable|accurate",0,"be applicable to = ~에 적용되는.","적용되는|감사하는|저렴한|정확한"],
+["VA","The museum offers ------- [[admission for students]].","discounted|discouraged|disclosed|discontinued",0,"학생 할인 입장 → discounted.","할인된|낙담한|공개된|단종된"],
+
+["VAD","Please [[arrive]] ------- [[for your appointment]].","promptly|fluently|hardly|nearly",0,"약속 시간에 '제때' 도착 → promptly.","제시간에·즉시|유창하게|거의 ~않게|거의"],
+["VAD","The two companies have [[worked]] ------- on several projects.","closely|barely|rarely|highly",0,"긴밀하게 협력하다 = work closely.","긴밀하게|간신히|드물게|매우"],
+["VAD","The new model is ------- [[recommended]] by experts.","highly|heavily|deeply|greatly",0,"highly recommended = 강력 추천되는. 덩어리로 외우기.","매우·높이|무겁게·심하게|깊이|크게"],
+
+["COL","Please [[fill]] ------- the form and return it.","out|off|on|over",0,"fill out = (서식을) 작성하다.","작성하다","fill out"],
+["COL","The meeting has been [[called]] ------- due to the storm.","off|out|up|over",0,"call off = 취소하다.","취소하다","call off"],
+["COL","Please ------- [[with]] your manager before making changes.","check|look|see|watch",0,"check with ~ = ~에게 확인하다.","~에게 확인하다","check with"],
+["COL","The store offers free delivery on orders ------- [[excess of]] $50.","in|on|at|by",0,"in excess of = ~을 초과하는.","~을 초과하는","in excess of"],
+["COL","Applicants must be [[familiar]] ------- spreadsheet software.","with|to|for|at",0,"be familiar with = ~에 익숙하다.","~에 익숙하다","be familiar with"],
+["COL","The hotel is ------- [[walking distance]] of the beach.","within|among|on|at",0,"within walking distance of = ~에서 걸어갈 수 있는 거리에.","~에서 걸어갈 거리에","within walking distance of"],
+/* ---- 콜로케이션 ---- */
+["COLO","The company plans to ------- [[a survey]] of customer satisfaction.","conduct|proceed|attend|inquire",0,"conduct a survey = 설문조사를 실시하다. proceed·inquire는 자동사.","설문조사를 실시하다","conduct a survey"],
+["COLO","Please ------- [[attention]] to the safety instructions.","pay|take|make|do",0,"pay attention to = ~에 주의를 기울이다.","주의를 기울이다","pay attention to"],
+["COLO","The two firms hope to ------- [[an agreement]] by Friday.","reach|arrive|come|succeed",0,"reach an agreement = 합의에 이르다. arrive at, come to처럼 나머지는 전치사가 필요.","합의에 이르다","reach an agreement"],
+["COLO","Mr. Han will ------- [[a speech]] at the opening ceremony.","deliver|say|talk|tell",0,"deliver a speech = 연설하다. say·tell은 speech와 안 붙음.","연설하다","deliver a speech"],
+["COLO","Ms. Yoo was asked to ------- [[a decision]] by the end of the day.","make|do|have|get",0,"make a decision = 결정하다.","결정하다","make a decision"],
+["COLO","The hotel has ------- [[a high standard]] of service for years.","maintained|remained|stayed|lasted",0,"maintain a standard = 수준을 유지하다. 나머지는 자동사라 목적어 불가.","수준을 유지하다","maintain a standard"],
+["COLO","Please ------- [[a copy]] of your receipt for your records.","retain|remain|refrain|reside",0,"retain a copy = 사본을 보관하다. remain·refrain·reside는 자동사.","사본을 보관하다","retain a copy"],
+["COLO","Our team will ------- [[the deadline]] for the project.","meet|fit|match|reach",0,"meet a deadline = 마감을 지키다. 토익 최다 출제 짝꿍.","마감을 지키다","meet a deadline"],
+["COLO","The company will ------- [[a press conference]] tomorrow.","hold|make|set|run",0,"hold a conference/meeting = 회의를 열다.","회의·행사를 열다","hold a press conference"],
+["COLO","We ------- [[a high priority]] on customer safety.","place|take|make|do",0,"place a priority on ~ = ~을 우선시하다.","~을 우선시하다","place a priority on"],
+["COLO","We will ------- [[every effort]] to meet your needs.","make|do|take|give",0,"make every effort = 최선을 다하다.","최선을 다하다","make every effort"],
+["COLO","The product has been in ------- [[demand]] since its launch.","high|tall|deep|large",0,"high demand = 높은 수요. in high demand = 수요가 많은.","수요가 많은","in high demand"],
+["COLO","A ------- [[majority]] of employees voted for the new plan.","vast|wide|far|long",0,"a vast majority = 압도적 다수.","압도적 다수","a vast majority"],
+["COLO","Please reply [[at your earliest]] -------.","convenience|comfort|ease|leisure",0,"at your earliest convenience = 편하실 때 가능한 빨리. 이메일 단골 문장.","가능한 한 빨리","at your earliest convenience"],
+["COLO","The factory follows ------- [[safety standards]].","strict|narrow|hard|sharp",0,"strict standards/rules = 엄격한 기준·규칙.","엄격한 기준","strict standards"],
+["COLO","The restaurant received ------- [[reviews]] from critics.","favorable|favorite|favored|favoring",0,"favorable reviews = 호평. favorite은 '가장 좋아하는'.","호평","favorable reviews"],
+["COLO","The new product has been ------- [[received]] by customers.","well|good|fine|nice",0,"well received = 좋은 반응을 얻은. p.p.를 꾸미니 부사 well.","좋은 반응을 얻은","well received"],
+["COLO","This software is ------- [[used]] in the industry.","widely|highly|deeply|greatly",0,"widely used = 널리 쓰이는. highly는 recommended·qualified와 짝.","널리 쓰이는","widely used"],
+["COLO","The two departments [[work]] ------- [[together]] on most projects.","closely|nearly|shortly|tightly",0,"work closely together = 긴밀히 협력하다. nearly(거의)·shortly(곧)와 혼동 주의.","긴밀히 협력하다","work closely together"],
+["COLO","Ms. Ortiz has ------- [[a strong reputation]] in the industry.","built|made|grown|raised",0,"build a reputation = 명성을 쌓다.","명성을 쌓다","build a reputation"]
+];
+const cnt={};
+const P5=RAW.map(r=>{cnt[r[0]]=(cnt[r[0]]||0)+1;return {id:r[0]+"-"+cnt[r[0]],t:r[0],q:r[1],c:r[2].split("|"),a:r[3],ex:r[4],m:r[5]?r[5].split("|"):null,w:r[6]||null}});
+
+/* ===== Part 6 지문 ===== */
+const P6=[
+ {id:"6-1",kind:"이메일",meta:"To: All Staff\nFrom: Facilities Department\nSubject: North parking lot repairs",
+  text:["Please be advised that the north parking lot will be closed for repairs from May 3 to May 7. During this period, employees {1} [[to use]] the south lot or the parking garage on Elm Street. {2} The garage offers a discounted daily rate of $5 for our staff.",
+        "To receive the discount, please show your employee ID card to the attendant {3} [[you park]]. We apologize for [[any]] {4} this may cause."],
+  qs:[
+   {t:"VOI",c:["encourage","are encouraged","encouraging","have encouraged"],a:1,ex:"직원들이 '권장받는' 입장, 목적어 없이 to부정사가 바로 옴 → 수동태 are encouraged."},
+   {t:"INS",c:["The repairs were completed ahead of schedule.","Spaces in the south lot are limited, so please arrive early.","The cafeteria will also be closed next week.","Thank you for attending the meeting."],a:1,ex:"앞 문장의 the south lot을 이어받아 주차 이야기를 계속하는 문장. 공사는 아직 시작 전이라 (A)는 모순."},
+   {t:"PC",c:["before","during","despite","prior"],a:0,ex:"뒤에 주어+동사(you park) → 접속사 before. during·despite는 전치사, prior는 to가 필요."},
+   {t:"N",c:["inconvenience","inconvenient","inconveniently","convenience"],a:0,ex:"any 뒤는 명사. 사과하는 대상이니 inconvenience(불편)."}
+  ]},
+ {id:"6-2",kind:"공지",meta:"Riverside Public Library — Notice",
+  text:["Riverside Public Library is pleased to announce a free workshop series on résumé writing. The sessions, {1} [[by career counselor Dana Moore]], will take place every Thursday evening in March. Participants will [[learn how to highlight their skills]] {2}. {3}",
+        "Space is limited to 20 people per session. To reserve a seat, please register at the front desk or on our website. Registration {4} on February 25 [[and closes]] when all seats are filled."],
+  qs:[
+   {t:"PART",c:["lead","led","leading","leads"],a:1,ex:"세션이 '진행되는' 것이고 뒤에 by ~ → 과거분사 led."},
+   {t:"ADV",c:["effective","effectively","effect","effectiveness"],a:1,ex:"완전한 문장 뒤에서 highlight를 꾸미는 부사 → effectively."},
+   {t:"INS",c:["Each session will also include time for individual feedback.","The library was built in 1952.","Please return all books by the due date.","The workshop was canceled due to low attendance."],a:0,ex:"워크숍 내용 설명을 이어가는 문장. (D)는 뒤의 등록 안내와 모순."},
+   {t:"TEN",c:["opens","opened","has opened","was opening"],a:0,ex:"and closes와 병렬 → 같은 현재시제 opens. 정해진 일정은 현재시제로 씀."}
+  ]},
+ {id:"6-3",kind:"편지",meta:"Dear Mr. Alvarez,",
+  text:["Thank you for your recent order from Greenleaf Office Supplies. Unfortunately, the ergonomic chair you selected is currently out of stock. We expect to receive a new shipment {1} [[two weeks]].",
+        "{2}, we would be happy to offer you [[a similar model]] at the same price. {3} If you would prefer to wait, no further action is needed on your part. We will ship your chair [[as soon as]] it {4}."],
+  qs:[
+   {t:"PREP",c:["within","since","along","beside"],a:0,ex:"기간(two weeks) 앞 '~이내에' → within."},
+   {t:"LINK",c:["Alternatively","Therefore","Similarly","Consequently"],a:0,ex:"기다리는 대신 '다른 선택지로' 비슷한 모델 제안 → Alternatively."},
+   {t:"INS",c:["Details about this model are included in the attached brochure.","Our store hours have recently changed.","We have received your payment for the desk.","Your chair was delivered yesterday."],a:0,ex:"앞의 a similar model을 this model로 받는 문장. 지시어 this가 단서."},
+   {t:"TEN",c:["arrives","will arrive","arrived","arriving"],a:0,ex:"as soon as(시간 부사절) 안에서는 미래 대신 현재시제 → arrives."}
+  ]},
+ {id:"6-4",kind:"기사",meta:"Harbor City News — Local",
+  text:["Harbor City's popular weekend farmers market will move to a new location [[next month]]. The market, which has operated in the Central Plaza parking lot for over ten years, {1} to Waterfront Park [[beginning June 6]].",
+        "City officials said the change was necessary because of the plaza's {2} renovation project. The new site offers more space and shade for vendors and shoppers. {3} Market organizer Tom Reyes said he [[is]] {4} that the move will attract even more visitors."],
+  qs:[
+   {t:"TEN",c:["relocates","will relocate","relocated","has relocated"],a:1,ex:"next month, beginning June 6 = 앞으로의 일 → will relocate."},
+   {t:"VA",c:["upcoming","previous","former","past"],a:0,ex:"앞으로 있을 공사 때문에 옮기는 것 → upcoming(다가오는)."},
+   {t:"INS",c:["Free parking will also be available nearby.","The plaza renovation was completed last year.","Vendors have complained about the lack of customers at the park.","The market will remain in Central Plaza."],a:0,ex:"새 장소의 장점(공간, 그늘)을 나열하는 흐름에 하나 더 추가. 나머지는 지문과 모순."},
+   {t:"ADJ",c:["confident","confidence","confidently","confide"],a:0,ex:"be동사 is 뒤 보어 → 형용사 confident (be confident that ~)."}
+  ]},
+ {id:"6-5",kind:"메모",meta:"To: Sales Team\nFrom: Laura Kim\nRe: Quarterly meeting",
+  text:["The quarterly sales meeting {1} on Thursday, July 10, at 2 p.m. in Conference Room B. Please bring a summary of your [[sales figures]] for the past three months. {2}",
+        "We will also discuss strategies [[for]] {3} customer retention in the coming quarter. If you are unable to attend, please let me know by Tuesday {4} [[I can arrange]] for someone to take notes."],
+  qs:[
+   {t:"VOI",c:["will be held","was held","holds","has held"],a:0,ex:"회의는 '열리는' 대상 + 7월 10일 예정 → 미래 수동 will be held."},
+   {t:"INS",c:["The figures will be used to set next quarter's targets.","The meeting room was renovated last year.","Thank you for your recent purchase.","Our sales declined because the meeting was canceled."],a:0,ex:"앞의 sales figures를 The figures로 받아 왜 가져오는지 설명."},
+   {t:"VB",c:["improve","improving","improved","improvement"],a:1,ex:"전치사 for 뒤 + 목적어(customer retention)를 받아야 함 → 동명사 improving."},
+   {t:"CONJ",c:["so that","because of","in order to","such as"],a:0,ex:"뒤에 주어+동사 + '~할 수 있도록' → so that."}
+  ]},
+ {id:"6-6",kind:"광고",meta:"Brightway Cleaning Services",
+  text:["Looking for a reliable cleaning service? Brightway has served local businesses for over 15 years. Our trained staff use only [[environmentally]] {1} [[products]]. We offer daily, weekly, and monthly cleaning [[plans]] {2} [[fit]] your schedule and budget. {3}",
+        "For a limited time, new customers will receive 20 percent off their first month of service. Call us today to schedule a [[free]] {4}."],
+  qs:[
+   {t:"ADJ",c:["friend","friendly","friendship","friendliness"],a:1,ex:"명사 products 앞 형용사 자리. friendly는 -ly지만 형용사. environmentally friendly = 친환경적인."},
+   {t:"REL",c:["that","what","whose","who"],a:0,ex:"사물 선행사 plans + 주어 빠짐(fit) → that."},
+   {t:"INS",c:["All of our cleaners undergo background checks before they are hired.","Our office will be closed next Monday.","The cleaning products were recalled last year.","Please submit your résumé by email."],a:0,ex:"믿을 만한 서비스라는 광고 흐름에 맞는 장점 추가. (C)는 광고에 불리하고 모순."},
+   {t:"VN",c:["estimate","receipt","refund","deposit"],a:0,ex:"서비스 전에 받는 '무료 견적' = free estimate."}
+  ]},
+ {id:"6-7",kind:"고객 이메일",meta:"Dear Ms. Bennett,",
+  text:["We have received your request to change the delivery address for order #4821. Unfortunately, your order {1} our warehouse [[before your request was processed]]. {2}, it will be delivered to [[the original address]] on Friday. {3}",
+        "We are sorry for this situation and have added a $10 credit to your account. We appreciate [[your]] {4} and look forward to serving you again."],
+  qs:[
+   {t:"TEN",c:["had already left","leaves","will leave","is leaving"],a:0,ex:"요청이 처리된 과거 시점보다 먼저 떠남 → 과거완료 had already left."},
+   {t:"LINK",c:["As a result","In contrast","For instance","Nevertheless"],a:0,ex:"이미 출고됨 → 그 결과 원래 주소로 배송 = As a result."},
+   {t:"INS",c:["If you will not be home, you may ask a neighbor to accept the package.","Your order has been canceled as requested.","We are pleased to announce our new store.","The package was returned to us yesterday."],a:0,ex:"원래 주소로 배송된다는 내용에 이어 대처법 안내. (B)(D)는 지문과 모순."},
+   {t:"N",c:["patient","patience","patiently","patients"],a:1,ex:"소유격 your 뒤 명사 + '양해에 감사' → patience. patients는 환자들."}
+  ]},
+ {id:"6-8",kind:"기사",meta:"Business News — Lakeside Hotel to Expand",
+  text:["The Lakeside Hotel announced yesterday that it will add 50 new rooms by the end of next year. The expansion [[is expected]] {1} $12 million. According to general manager Paul Hughes, demand for rooms [[has grown]] {2} since the city opened its new convention center. {3}",
+        "Construction will begin in March, and the hotel will remain open {4} [[the project]]."],
+  qs:[
+   {t:"VB",c:["costing","to cost","cost","costs"],a:1,ex:"be expected to V = ~할 것으로 예상되다 → to cost."},
+   {t:"ADV",c:["steady","steadily","steadiness","steadied"],a:1,ex:"동사 has grown을 꾸미는 부사 → steadily."},
+   {t:"INS",c:["The new rooms will help the hotel accommodate more guests during busy periods.","The convention center closed last year.","The hotel has decided to reduce the number of rooms.","Mr. Hughes will retire next month."],a:0,ex:"수요 증가 → 객실 추가 이유로 자연스럽게 연결. (C)는 확장 기사와 모순."},
+   {t:"PREP",c:["throughout","among","beneath","beside"],a:0,ex:"공사 기간 '내내' 영업 → throughout."}
+  ]},
+ {id:"6-9",kind:"채용 공고",meta:"Assistant Office Manager — Hanbit Logistics",
+  text:["Hanbit Logistics is seeking an assistant office manager to join our growing team. [[The successful]] {1} [[will oversee]] daily office operations and support the management team. {2}",
+        "Candidates must have at least two years of office experience and strong communication skills. Familiarity with accounting software is a plus. To apply, please send your résumé and cover letter to our HR department by March 31. Only [[those]] {3} [[for an interview]] will be contacted. Interviews {4} in early April."],
+  qs:[
+   {t:"NPER",c:["candidate","application","position","document"],a:0,ex:"업무를 감독할 '사람' → candidate. The successful candidate = 최종 합격자."},
+   {t:"INS",c:["Responsibilities include ordering supplies and scheduling meetings.","Our company was founded in Busan.","The office will be closed in April.","Thank you for your application."],a:0,ex:"앞 문장의 업무 설명을 구체적으로 이어감. (D)는 공고문에 안 맞음."},
+   {t:"PART",c:["selected","selecting","select","selection"],a:0,ex:"those(사람들)가 '선발된' 쪽 → those selected. 동사 will be contacted가 따로 있음."},
+   {t:"VOI",c:["will be held","were held","holding","hold"],a:0,ex:"면접은 '열리는' 대상 + 4월 초(미래) → will be held."}
+  ]},
+ {id:"6-10",kind:"사내 이메일",meta:"To: All Employees\nFrom: Human Resources\nSubject: New travel reimbursement policy",
+  text:["[[Starting on September 1]], all requests for travel reimbursement must be submitted through our new online system. Paper forms {1} no longer be accepted. {2}",
+        "Employees must attach a scanned copy of every receipt. Requests submitted without receipts will be returned [[for]] {3}. If you have any questions about the new system, please contact Mr. Seo in the finance department. He will be happy to [[assist]] {4}."],
+  qs:[
+   {t:"TEN",c:["will","would","did","had"],a:0,ex:"9월 1일부터(앞으로) → will no longer be accepted."},
+   {t:"INS",c:["Instructions for using the system are available on the company intranet.","The old system was introduced last September.","Travel to overseas branches has been suspended.","All receipts must be printed on paper."],a:0,ex:"새 온라인 시스템 이야기를 이어가는 안내. (D)는 '스캔본 첨부'와 모순."},
+   {t:"N",c:["correct","correction","correctly","corrected"],a:1,ex:"전치사 for 뒤 명사 → correction(수정)."},
+   {t:"PRON",c:["you","your","yours","yourself"],a:0,ex:"assist의 목적어 → 목적격 you."}
+  ]},
+ {id:"6-11",kind:"주민 공지",meta:"Notice to Residents of Maple Apartments",
+  text:["Please be informed that the water supply will be temporarily shut off on Wednesday, October 8, from 9 a.m. to 3 p.m. The building's main pipes {1} [[during this time]].",
+        "We [[recommend that]] residents {2} enough water for drinking and cooking beforehand. {3} We understand that this may be inconvenient and appreciate [[your]] {4}."],
+  qs:[
+   {t:"VOI",c:["will be replaced","replaced","replace","replacing"],a:0,ex:"배관은 '교체되는' 대상 + 목적어 없음 + 수요일(미래) → will be replaced."},
+   {t:"SUB",c:["store","stores","stored","storing"],a:0,ex:"recommend that 주어 + (should) 동사원형 → store."},
+   {t:"INS",c:["Bottled water will also be available in the lobby.","The pipes were replaced last year.","Residents may use the water as usual on Wednesday.","The building is for sale."],a:0,ex:"물을 미리 받아두라는 안내에 이어 추가 대책. (C)는 단수 공지와 모순."},
+   {t:"N",c:["understand","understanding","understood","understandable"],a:1,ex:"소유격 your 뒤 명사 → understanding(양해)."}
+  ]},
+ {id:"6-12",kind:"보도 자료",meta:"Novatech Releases New Laptop",
+  text:["Novatech today released the Aero 15, its lightest laptop to date. Weighing just 1.1 kilograms, the Aero 15 is designed for [[professionals]] {1} [[travel]] frequently. The laptop's battery lasts up to 18 hours, {2} [[longer than]] that of most competing models. {3}",
+        "The Aero 15 is available in stores and online starting today. {4}, customers who order before May 31 [[will also]] receive a free carrying case."],
+  qs:[
+   {t:"REL",c:["who","which","whose","what"],a:0,ex:"사람 선행사 professionals + 주어 빠짐 → who."},
+   {t:"CMP",c:["much","very","more","most"],a:0,ex:"비교급 longer를 강조 → much. very는 비교급을 꾸미지 못함."},
+   {t:"INS",c:["It also features a high-resolution display and a fast processor.","The laptop weighs more than 3 kilograms.","Novatech has stopped selling laptops.","The battery must be replaced every week."],a:0,ex:"제품 장점(무게, 배터리)을 이어서 추가. 나머지는 지문과 모순."},
+   {t:"LINK",c:["In addition","However","Otherwise","Instead"],a:0,ex:"출시 소식에 혜택을 덧붙임(also가 단서) → In addition."}
+  ]}
+];
+
+/* ===== 저장 (방문자 브라우저에만) ===== */
+const KEY="toeic-rc-trainer-v2";
+function fresh(){return {stats:{},wrong:[],seen:[],day:"",count:0,streak:0,p6seen:[]}}
+let S; try{S=Object.assign(fresh(),JSON.parse(localStorage.getItem(KEY))||{})}catch(e){S=fresh()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const ds=d=>d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
+function tickDay(){
+  const t=ds(new Date()); if(S.day===t) return;
+  const y=new Date(); y.setDate(y.getDate()-1);
+  S.streak=S.day===ds(y)?S.streak+1:1; S.day=t; S.count=0;
+}
+
+/* ===== 유틸 ===== */
+const $=id=>document.getElementById(id);
+const L="ABCD";
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const fmt=s=>esc(s).replace(/\[\[(.+?)\]\]/g,'<span class="clue">$1</span>');
+const plain=s=>s.replace(/\[\[|\]\]/g,"");
+function show(v){["home","quiz","result","words"].forEach(x=>$(x).hidden=x!==v);window.scrollTo(0,0)}
+const acc=k=>{const s=S.stats[k];return s&&s.n?s.c/s.n:null};
+const tried=k=>(S.stats[k]||{n:0}).n;
+
+/* ===== 홈 ===== */
+function chip(k){
+  const s=S.stats[k], a=acc(k);
+  const cls=!s?"new":a<.6?"low":a>=.8?"good":"";
+  return `<div class="tc ${cls}"><b>${T[k].l}</b><span>${s?Math.round(a*100)+"% · "+s.n+"문제":"아직 안 풀어봄"}</span></div>`;
+}
+function renderHome(){
+  const t=ds(new Date());
+  $("tdCount").textContent=S.day===t?S.count:0;
+  $("tdStreak").textContent=S.streak;
+  $("wrongSub").textContent="틀린 문제 "+S.wrong.length+"개";
+  $("mWrong").disabled=!S.wrong.length;
+  const keys=Object.keys(T);
+  $("mapG").innerHTML=keys.filter(k=>T[k].g==="G").map(chip).join("");
+  $("mapV").innerHTML=keys.filter(k=>T[k].g==="V").map(chip).join("");
+  $("mapP").innerHTML=keys.filter(k=>T[k].g==="P").map(chip).join("");
+  const done=keys.filter(k=>S.stats[k]).length;
+  const seenN=P5.filter(q=>S.seen.includes(q.id)).length;
+  $("mapSum").textContent=`경험한 유형 ${done}/${keys.length} · 본 문제 ${seenN}/${P5.length+P6.length*4}`;
+  const weak=weakTypes();
+  $("mWeak").disabled=!weak.length;
+  $("weakSub").textContent=weak.length?"지금 제일 약한 유형: "+T[weak[0]].l:"유형당 2문제 이상 풀면 열려요";
+  const left=Object.keys(T).filter(k=>T[k].g!=="P"&&!S.stats[k]).length;
+  $("mainSub").textContent=left?`문법 7 + 어휘 3 · 아직 안 풀어본 유형 ${left}개부터 나와요`:"문법 7 + 어휘 3 · 덜 풀어본 유형부터 골고루";
+  $("wordsSub").textContent=`토익 단골 어휘·숙어 ${P5.filter(q=>VOCAB.includes(q.t)).length}개`;
+  show("home");
+}
+function weakTypes(){
+  return Object.keys(T).filter(k=>T[k].g!=="P"&&tried(k)>=2).sort((a,b)=>acc(a)-acc(b)).filter(k=>acc(k)<1);
+}
+
+/* ===== 문제 고르기 ===== */
+function pickFromType(k,n,used){
+  const pool=P5.filter(q=>q.t===k&&!used.has(q.id));
+  const fresh=shuffle(pool.filter(q=>!S.seen.includes(q.id)));
+  const old=shuffle(pool.filter(q=>S.seen.includes(q.id)));
+  return fresh.concat(old).slice(0,n);
+}
+function orderTypes(group){
+  // 적게 풀어본 유형 먼저, 비슷하면 정답률 낮은 유형 먼저
+  return Object.keys(T).filter(k=>T[k].g===group)
+    .map(k=>({k,s:tried(k)+(acc(k)===null?0:acc(k)*1.5)+Math.random()*1.2}))
+    .sort((a,b)=>a.s-b.s).map(x=>x.k);
+}
+function dailySet(nG,nV){
+  const used=new Set(), out=[];
+  for(const k of orderTypes("G").slice(0,nG)) pickFromType(k,1,used).forEach(q=>{used.add(q.id);out.push(q)});
+  for(const k of orderTypes("V").slice(0,nV)) pickFromType(k,1,used).forEach(q=>{used.add(q.id);out.push(q)});
+  return shuffle(out);
+}
+
+/* ===== 세션 ===== */
+let Q=null, timerId=null, t0=0;
+const p5=q=>({k:5,q});
+function p6Items(pi){return P6[pi].qs.map((q,i)=>({k:6,pi,qi:i,q}))}
+function findById(id){
+  if(!id.startsWith("6-")){const q=P5.find(x=>x.id===id);return q?[p5(q)]:[]}
+  const [pid,qi]=id.split("#");const pi=P6.findIndex(p=>p.id===pid);
+  return pi<0?[]:[{k:6,pi,qi:+qi,q:P6[pi].qs[+qi]}];
+}
+function start(mode){
+  let items=[];
+  if(mode==="p5") items=dailySet(7,3).map(p5);
+  if(mode==="all"){ // 실전처럼: 문법 21 + 어휘 9, 유형 고르게
+    const used=new Set();let out=[];
+    for(let r=0;r<2;r++){
+      for(const k of orderTypes("G")) if(out.filter(q=>T[q.t].g==="G").length<21) pickFromType(k,1,used).forEach(q=>{used.add(q.id);out.push(q)});
+      for(const k of orderTypes("V")) if(out.filter(q=>T[q.t].g==="V").length<9) pickFromType(k,1,used).forEach(q=>{used.add(q.id);out.push(q)});
+    }
+    items=shuffle(out).slice(0,30).map(p5);
+  }
+  if(mode==="p6"){
+    let order=P6.map((_,i)=>i).filter(i=>!S.p6seen.includes(i));
+    if(!order.length){S.p6seen=[];order=P6.map((_,i)=>i)}
+    const pi=order[Math.random()*order.length|0]; S.p6seen.push(pi); save();
+    items=p6Items(pi);
+  }
+  if(mode==="wrong") items=S.wrong.flatMap(findById);
+  if(mode==="weak"){
+    const used=new Set();let out=[];
+    for(const k of weakTypes().slice(0,3)) pickFromType(k,4,used).forEach(q=>{used.add(q.id);out.push(q)});
+    if(out.length<10) out=out.concat(dailySet(10,0).filter(q=>!used.has(q.id)).slice(0,10-out.length));
+    items=shuffle(out).slice(0,10).map(p5);
+  }
+  if(!items.length) return;
+  Q={mode,items,i:0,res:[]};
+  show("quiz"); renderQ();
+}
+const idOf=it=>it.k===5?it.q.id:P6[it.pi].id+"#"+it.qi;
+const goalOf=it=>it.k===5?22:35;
+
+function renderQ(){
+  const it=Q.items[Q.i];
+  $("prog").innerHTML=Q.items.map((_,i)=>{const r=Q.res[i];return `<i class="${r?(r.ok?"ok":"no"):(i===Q.i?"on":"")}"></i>`}).join("");
+  let h=`<span class="tag">${it.k===5?"Part 5":"Part 6 · "+P6[it.pi].kind} · ${Q.i+1}/${Q.items.length}</span>`;
+  if(it.k===5){
+    h+=`<div class="stem">${fmt(it.q.q).replace("-------",'<span class="blank cur">(　　)</span>')}</div>`;
+  }else{
+    const p=P6[it.pi];
+    const body=p.text.map(par=>"<p>"+fmt(par).replace(/\{(\d)\}/g,(m,n)=>{
+      const qi=n-1, prev=Q.items.findIndex(x=>x.k===6&&x.pi===it.pi&&x.qi===qi);
+      if(prev>-1&&prev<Q.i&&Q.res[prev]){const q=p.qs[qi];return `<span class="blank filled">${q.t==="INS"?"["+n+"] ✓":esc(q.c[q.a])}</span>`}
+      return `<span class="blank${qi===it.qi?" cur":""}">${n}</span>`;
+    })+"</p>").join("");
+    h+=`<div class="passage"><div class="meta">${esc(p.meta)}</div>${body}</div>
+        <div style="font-size:.88rem;font-weight:700">빈칸 ${it.qi+1}${it.q.t==="INS"?" — 들어갈 문장을 고르세요":""}</div>`;
+  }
+  h+=`<div class="choices">${it.q.c.map((c,i)=>`<button class="ch" data-i="${i}"><span class="bub">${L[i]}</span><span>${esc(c)}</span></button>`).join("")}</div>`;
+  $("sheet").innerHTML=h; $("sheet").classList.remove("reveal"); $("fbBox").innerHTML="";
+  $("sheet").querySelectorAll(".ch").forEach(b=>b.onclick=()=>answer(+b.dataset.i));
+  const cur=$("sheet").querySelector(".passage .blank.cur"); if(cur) cur.scrollIntoView({block:"nearest"});
+  const goal=goalOf(it); t0=Date.now(); clearInterval(timerId);
+  const tick=()=>{const s=Math.round((Date.now()-t0)/1000);$("timer").textContent=s+"s / "+goal+"s";$("timer").classList.toggle("over",s>goal)};
+  tick(); timerId=setInterval(tick,1000);
+}
+
+function answer(pick){
+  clearInterval(timerId);
+  const it=Q.items[Q.i], q=it.q, ok=pick===q.a, sec=Math.round((Date.now()-t0)/1000), id=idOf(it);
+  Q.res[Q.i]={ok,sec};
+  tickDay(); S.count++;
+  const st=S.stats[q.t]||(S.stats[q.t]={n:0,c:0}); st.n++; if(ok) st.c++;
+  if(!S.seen.includes(id)) S.seen.push(id);
+  S.wrong=S.wrong.filter(x=>x!==id); if(!ok) S.wrong.push(id);
+  save();
+  $("sheet").classList.add("reveal");
+  $("sheet").querySelectorAll(".ch").forEach((b,i)=>{b.disabled=true;if(i===q.a)b.classList.add("right");else if(i===pick)b.classList.add("wrong")});
+  let mean="";
+  if(q.m&&q.m.length===4) mean=`<dl class="mean">${q.c.map((c,i)=>`<dt>${esc(c)}</dt><dd>${esc(q.m[i])}</dd>`).join("")}</dl>`;
+  else if(q.m) mean=`<dl class="mean"><dt>${esc(q.w)}</dt><dd>${esc(q.m[0])}</dd></dl>`;
+  const last=Q.i===Q.items.length-1;
+  $("fbBox").innerHTML=`<div class="fb ${ok?"ok":"no"}">
+     <strong>${ok?"정답":"오답 — 정답은 ("+L[q.a]+") "+esc(q.c[q.a])}</strong>
+     <span><b>[${T[q.t].l}]</b> ${esc(q.ex)}</span>
+     ${mean}
+     <span class="tip"><b>이 유형 푸는 법</b> · ${esc(T[q.t].tip)}</span>
+     ${sec>goalOf(it)?'<span class="tip">시간 초과. 실전에선 모르면 찍고 넘어가야 Part 7 시간이 남아요.</span>':""}
+   </div>
+   <button class="btn" id="next" style="margin-top:12px">${last?"결과 보기":"다음 문제 →"}</button>`;
+  $("next").onclick=()=>{if(last)finish();else{Q.i++;renderQ()}};
+  $("next").focus({preventScroll:true});
+}
+
+function finish(){
+  const n=Q.res.length, c=Q.res.filter(r=>r.ok).length;
+  const avg=n?Math.round(Q.res.reduce((s,r)=>s+r.sec,0)/n):0;
+  $("rScore").textContent=c+"/"+n;
+  $("rTime").textContent="평균 "+avg+"초";
+  const r=n?c/n:0;
+  $("rMsg").textContent= r===1?"전부 맞았어요. 시간까지 줄이면 실전 준비 끝.":
+    r>=.7?"좋아요. 틀린 건 오답노트에 들어갔으니 내일 한 번 더 보면 됩니다.":
+    "괜찮아요, 처음엔 다 이래요. 틀린 문제의 노란 단서만 다시 보고 오늘은 끝내도 충분해요.";
+  const met={};Q.items.slice(0,n).forEach((it,i)=>{const k=it.q.t;met[k]=met[k]||{n:0,c:0};met[k].n++;if(Q.res[i].ok)met[k].c++});
+  $("rTypes").innerHTML=Object.entries(met).map(([k,v])=>`<div class="tc ${v.c===v.n?"good":v.c===0?"low":""}"><b>${T[k].l}</b><span>${v.c}/${v.n}</span></div>`).join("");
+  const wrong=Q.items.map((it,i)=>({it,r:Q.res[i]})).filter(x=>x.r&&!x.r.ok);
+  $("rWrongPanel").hidden=!wrong.length;
+  $("rWrong").innerHTML=wrong.map(({it})=>{
+    const s=it.k===5?esc(plain(it.q.q)):esc(P6[it.pi].kind)+" 지문 빈칸 "+(it.qi+1);
+    return `<li><span class="s">${s}</span><span class="muted">[${T[it.q.t].l}] 정답 (${L[it.q.a]}) ${esc(it.q.c[it.q.a])}</span></li>`}).join("");
+  $("again").textContent=Q.mode==="wrong"?"오답노트 다시":"한 세트 더";
+  show("result");
+}
+
+/* ===== 단어장 ===== */
+let wFilter="all";
+function renderWords(){
+  const segs=[["all","전체"],["miss","틀린 것"]].concat(VOCAB.map(k=>[k,T[k].l]));
+  $("wSeg").innerHTML=segs.map(([k,l])=>`<button data-k="${k}" class="${wFilter===k?"on":""}">${l}</button>`).join("");
+  $("wSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{wFilter=b.dataset.k;renderWords()});
+  let list=P5.filter(q=>VOCAB.includes(q.t));
+  if(wFilter==="miss") list=list.filter(q=>S.wrong.includes(q.id));
+  else if(wFilter!=="all") list=list.filter(q=>q.t===wFilter);
+  $("wList").innerHTML=list.length?list.map(q=>{
+    const head=q.w||q.c[q.a], m=q.w?q.m[0]:q.m[q.a];
+    const sent=esc(plain(q.q)).replace("-------","<b>"+esc(q.c[q.a])+"</b>");
+    return `<li class="${S.wrong.includes(q.id)?"miss":""}"><span class="w">${esc(head)}</span><span>${esc(m)}</span><span class="s muted">${sent}</span></li>`}).join("")
+    :'<li class="muted">아직 틀린 어휘 문제가 없어요.</li>';
+  show("words");
+}
+
+/* ===== 연결 ===== */
+$("mP5").onclick=()=>start("p5");
+$("mP6").onclick=()=>start("p6");
+$("mWeak").onclick=()=>start("weak");
+$("mWrong").onclick=()=>start("wrong");
+$("mAll").onclick=()=>start("all");
+$("mWords").onclick=()=>{wFilter="all";renderWords()};
+$("wBack").onclick=renderHome;
+$("quit").onclick=()=>{clearInterval(timerId);Q&&Q.res.length?finish():renderHome()};
+$("again").onclick=()=>start(Q.mode==="wrong"&&!S.wrong.length?"p5":Q.mode);
+$("toHome").onclick=renderHome;
+renderHome();
+</script>
+</body>
+</html>
