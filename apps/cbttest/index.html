@@ -415,6 +415,23 @@ tr:last-child td{border-bottom:0}
 .pr-grid span{display:block;font-size:12px;line-height:1.45;color:var(--muted)}
 .pr-note{margin-top:16px;font-size:12px;color:var(--muted)}
 @media (max-width:520px){.hero .cta{flex-direction:column-reverse;align-items:flex-start}.pr-grid div{padding:9px 9px}.pr-grid b{font-size:16px}}
+.sy-box{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;margin:0 0 18px;display:grid;gap:10px}
+.sy-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sy-h b{font-family:var(--f-disp);font-weight:800;font-size:16px}
+.sy-st{font-family:var(--f-mono);font-size:11.5px;padding:2px 8px;border-radius:999px}
+.sy-st.on{background:var(--ok-bg);color:var(--ok)}.sy-st.off{background:var(--soft);color:var(--muted)}.sy-st.bad{background:var(--bad-bg);color:var(--bad)}
+.sy-p{margin:0;font-size:13px;color:var(--muted);line-height:1.6}
+.sy-p a{color:var(--kr)}
+.sy-acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sy-acts .sp{flex:1}
+.btn-sm{padding:8px 14px;font-size:13.5px;border-radius:8px}
+.sy-code{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sy-code span{font-size:12px;color:var(--muted)}
+.sy-code code{font-size:19px;font-weight:600;letter-spacing:.08em;background:var(--paper);border:1px solid var(--rule);border-radius:8px;padding:4px 12px;color:var(--ink);user-select:all}
+.sy-big{margin:18px 0 4px;text-align:center;font-size:clamp(22px,7vw,30px);font-weight:700;letter-spacing:.1em;background:var(--paper);border:1px dashed var(--rule);border-radius:12px;padding:14px 8px;user-select:all;color:var(--ink)}
+.sy-in{margin-top:16px;width:100%;box-sizing:border-box;font-size:20px;letter-spacing:.1em;text-transform:uppercase;padding:12px 14px;border-radius:10px;border:1px solid var(--rule);background:var(--paper);color:var(--ink)}
+.sy-msg{min-height:1.4em;margin:8px 0 0;font-size:13px;color:var(--bad)}
+@media (max-width:520px){.sy-acts .sp{display:none}}
 </style>
 </head>
 <body>
@@ -1181,7 +1198,202 @@ const WN_KEY = 'hgs-wrongnote-v1', HIST_KEY = 'hgs-history-v1';
 const MODE_NAME = { 1:'바로 채점', 2:'과목 모의고사', 3:'회차 모의고사', 4:'전 회차 무작위' };
 let storeOK = true;
 function lsGet(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e) { storeOK = false; return d; } }
-function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e) { storeOK = false; return false; } }
+function lsSet(k, v){ try { trackDel(k, v); localStorage.setItem(k, JSON.stringify(v)); if (k === WN_KEY || k === HIST_KEY) syncSoon(); return true; } catch(e) { storeOK = false; return false; } }
+/* ---------- 서버 백업 (로그인 없이 복구 코드로) ----------
+   - 복구 코드 하나에 오답노트·응시 기록을 묶어 Supabase(cbt_sync)에 저장합니다. 표: supabase/024_cbt_sync.sql
+   - 기록이 바뀌면 몇 초 뒤, 그리고 페이지를 열 때 서버와 합칩니다(지운 기록은 삭제 표시로 전달).
+   - Claude 아티팩트 화면에서는 외부 서버에 연결할 수 없어 꺼집니다. */
+const SB_URL = 'https://itzdjdgjqcpmxdfssfel.supabase.co', SB_KEY = 'sb_publishable_L2FP31VpA_dZfwqH4u6H0Q_UWJlCS6G';
+const SYNC_KEY = 'hgs-sync-v1', DEL_KEY = 'hgs-sync-del-v1';
+const SYNC_AVAIL = /(^|\.)vercel\.app$|^localhost$|^127\./.test(location.hostname);
+const CODE_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+let syncT = null, syncBusy = false, syncAgain = false, syncDirty = false;
+function rawGet(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e) { return d; } }
+function rawSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+function syncCfg(){ return rawGet(SYNC_KEY, {}); }
+function syncCfgSet(p){ const c = Object.assign(syncCfg(), p); rawSet(SYNC_KEY, c); return c; }
+function newCode(){
+  const b = new Uint8Array(12); crypto.getRandomValues(b);
+  const s = Array.from(b, x => CODE_ABC[x & 31]).join('');
+  return s.slice(0, 4) + '-' + s.slice(4, 8) + '-' + s.slice(8);
+}
+function normCode(s){
+  const t = String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return t.length === 12 ? t.slice(0, 4) + '-' + t.slice(4, 8) + '-' + t.slice(8) : null;
+}
+/* 지운 기록 표시 (다른 기기에서 되살아나지 않게) */
+function trackDel(k, next){
+  if (k !== WN_KEY && k !== HIST_KEY) return;
+  const D = rawGet(DEL_KEY, { w: {}, hc: 0 }), now = Date.now();
+  if (k === WN_KEY){ const prev = rawGet(WN_KEY, {}); for (const key of Object.keys(prev)) if (!(key in next)) D.w[key] = now; }
+  else if (Array.isArray(next) && !next.length && rawGet(HIST_KEY, []).length) D.hc = now;
+  const old = now - 400 * 864e5; for (const key of Object.keys(D.w)) if (D.w[key] < old) delete D.w[key];
+  rawSet(DEL_KEY, D);
+}
+function lastT(e){ return Math.max(e.t || 0, e.fx || 0, e.t0 || 0); }
+function syncState(){ return { v: 1, w: rawGet(WN_KEY, {}), h: rawGet(HIST_KEY, []), d: rawGet(DEL_KEY, { w: {}, hc: 0 }) }; }
+function mergeState(a, b){
+  if (!b || typeof b !== 'object') return a;
+  const d = { w: Object.assign({}, a.d && a.d.w), hc: Math.max(a.d && a.d.hc || 0, b.d && b.d.hc || 0) };
+  for (const [k, t] of Object.entries(b.d && b.d.w || {})) d.w[k] = Math.max(d.w[k] || 0, t);
+  const w = {}, A = a.w || {}, B = b.w || {};
+  for (const k of new Set([...Object.keys(A), ...Object.keys(B)])){
+    const e = !A[k] ? B[k] : !B[k] ? A[k] : (lastT(B[k]) > lastT(A[k]) ? B[k] : A[k]);
+    if (e && !(d.w[k] >= lastT(e))) w[k] = e;
+  }
+  const seen = new Set(), h = [];
+  for (const x of [...(a.h || []), ...(b.h || [])]){
+    if (!x || x.t <= d.hc) continue;
+    const key = x.t + '|' + x.title; if (seen.has(key)) continue; seen.add(key); h.push(x);
+  }
+  h.sort((x, y) => y.t - x.t); if (h.length > 300) h.length = 300;
+  return { v: 1, w, h, d };
+}
+async function rpc(fn, body, keepalive){
+  const r = await fetch(SB_URL + '/rest/v1/rpc/' + fn, { method: 'POST', keepalive: !!keepalive,
+    headers: { apikey: SB_KEY, ...(SB_KEY.startsWith('sb_') ? {} : { Authorization: 'Bearer ' + SB_KEY }), 'Content-Type': 'application/json' },
+    body: JSON.stringify(body) });
+  if (!r.ok) throw new Error('server ' + r.status);
+  const t = await r.text(); return t ? JSON.parse(t) : null;
+}
+function syncSoon(){
+  syncDirty = true;
+  if (!SYNC_AVAIL || !syncCfg().code) return;
+  clearTimeout(syncT); syncT = setTimeout(() => syncNow(), 4000);
+}
+async function syncNow(opts = {}){
+  const cfg = syncCfg();
+  if (!SYNC_AVAIL || !cfg.code) return false;
+  if (syncBusy){ syncAgain = true; return false; }
+  syncBusy = true; clearTimeout(syncT);
+  try {
+    const got = await rpc('cbt_sync_get', { p_code: cfg.code });
+    if (!got && opts.mustExist) throw new Error('notfound');
+    const remote = got && got.data, local = syncState();
+    const merged = mergeState(local, remote);
+    const mj = JSON.stringify(merged);
+    if (mj !== JSON.stringify(mergeState(local, { v: 1 }))){
+      rawSet(WN_KEY, merged.w); rawSet(HIST_KEY, merged.h); rawSet(DEL_KEY, merged.d);
+      updWnCnt(); if (document.getElementById('wnBody') && !document.querySelector('.modal')) drawWn();
+    }
+    if (!remote || mj !== JSON.stringify(mergeState(remote, { v: 1 }))) await rpc('cbt_sync_put', { p_code: cfg.code, p_data: merged });
+    syncDirty = false;
+    syncCfgSet({ at: Date.now(), err: null }); drawSyncBox();
+    return true;
+  } catch(e) {
+    syncCfgSet({ err: e.message === 'notfound' ? 'notfound' : 'net' }); drawSyncBox();
+    if (opts.mustExist) throw e;
+    return false;
+  } finally {
+    syncBusy = false;
+    if (syncAgain){ syncAgain = false; syncSoon(); }
+  }
+}
+document.addEventListener('visibilitychange', () => {
+  const c = syncCfg();
+  if (document.hidden && syncDirty && SYNC_AVAIL && c.code && !syncBusy){
+    clearTimeout(syncT); syncDirty = false;
+    rpc('cbt_sync_put', { p_code: c.code, p_data: mergeState(syncState(), { v: 1 }) }, true).catch(() => {});
+  }
+});
+/* 파일로 내보내기 · 가져오기 (서버 없이 백업) */
+function exportFile(){
+  const s = syncState(), d = new Date(), z = x => (x < 10 ? '0' : '') + x;
+  const blob = new Blob([JSON.stringify({ app: 'hgs-cbttest', ...s })], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `해기사기출_학습기록_${d.getFullYear()}${z(d.getMonth() + 1)}${z(d.getDate())}.json`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+function importFile(){
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json';
+  inp.onchange = async () => {
+    const f = inp.files && inp.files[0]; if (!f) return;
+    try {
+      const o = JSON.parse(await f.text());
+      if (!o || o.app !== 'hgs-cbttest' || typeof o.w !== 'object' || !Array.isArray(o.h)) throw 0;
+      const m = mergeState(syncState(), o);
+      rawSet(WN_KEY, m.w); rawSet(HIST_KEY, m.h); rawSet(DEL_KEY, m.d);
+      updWnCnt(); drawWn(); syncSoon(); toast('기록 파일을 합쳤습니다');
+    } catch(e) { toast('이 사이트에서 내보낸 기록 파일이 아닙니다'); }
+  };
+  inp.click();
+}
+function drawSyncBox(){
+  const box = document.getElementById('syncBox'); if (!box) return;
+  const c = syncCfg();
+  const fileBtns = `<button class="btn btn-ghost btn-sm" type="button" data-sy="exp">파일로 내보내기</button><button class="btn btn-ghost btn-sm" type="button" data-sy="imp">파일 가져오기</button>`;
+  let html;
+  if (!SYNC_AVAIL){
+    html = `<div class="sy-h"><b>기록 백업</b><span class="sy-st off">서버 백업 사용 불가</span></div>
+      <p class="sy-p">서버 백업은 <a href="https://teambypass.vercel.app/apps/cbttest/" target="_blank" rel="noopener">teambypass.vercel.app/apps/cbttest</a>에서 쓸 수 있습니다. 여기서는 파일 가져오기만 됩니다.</p>
+      <div class="sy-acts"><button class="btn btn-ghost btn-sm" type="button" data-sy="imp">파일 가져오기</button></div>`;
+  } else if (!c.code){
+    html = `<div class="sy-h"><b>기록 백업</b><span class="sy-st off">서버 백업 꺼짐</span></div>
+      <p class="sy-p">로그인 없이 <b>복구 코드</b>로 서버에 기록을 저장합니다. 브라우저 데이터가 지워지거나 다른 기기에서도 코드만 입력하면 기록을 불러올 수 있어요.</p>
+      <div class="sy-acts"><button class="btn btn-pri btn-sm" type="button" data-sy="on">서버 백업 켜기</button><button class="btn btn-ghost btn-sm" type="button" data-sy="in">복구 코드로 불러오기</button><span class="sp"></span>${fileBtns}</div>`;
+  } else {
+    const st = c.err === 'net' ? '<span class="sy-st bad">연결 실패 · 잠시 후 다시 시도</span>' : c.err === 'notfound' ? '<span class="sy-st bad">서버에 기록 없음</span>' : `<span class="sy-st on">서버 백업 켜짐${c.at ? ' · ' + fmtDate(c.at) : ''}</span>`;
+    html = `<div class="sy-h"><b>기록 백업</b>${st}</div>
+      <div class="sy-code"><span>복구 코드</span><code class="mono">${esc(c.code)}</code><button class="btn btn-ghost btn-sm" type="button" data-sy="copy">복사</button></div>
+      <p class="sy-p">이 코드를 메모해 두세요. 코드를 잃어버리면 기록을 되찾을 수 없고, 코드를 아는 사람은 누구나 이 기록을 볼 수 있습니다.</p>
+      <div class="sy-acts"><button class="btn btn-ghost btn-sm" type="button" data-sy="now">지금 동기화</button><button class="btn btn-ghost btn-sm" type="button" data-sy="off">연결 해제</button><span class="sp"></span>${fileBtns}</div>`;
+  }
+  box.innerHTML = html;
+  box.querySelectorAll('[data-sy]').forEach(b => b.onclick = () => syncAct(b.dataset.sy, b));
+}
+async function syncAct(a, btn){
+  if (a === 'exp') return exportFile();
+  if (a === 'imp') return importFile();
+  if (a === 'now'){ btn.disabled = true; const ok = await syncNow(); toast(ok ? '동기화했습니다' : '서버에 연결하지 못했습니다'); return; }
+  if (a === 'copy'){
+    const code = syncCfg().code;
+    try { await navigator.clipboard.writeText(code); toast('복구 코드를 복사했습니다'); }
+    catch(e) { const r = document.createRange(), el = document.querySelector('.sy-code code'); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('코드를 선택했습니다. 복사해 두세요'); }
+    return;
+  }
+  if (a === 'on'){
+    const code = newCode(); syncCfgSet({ code, at: 0, err: null });
+    btn.disabled = true;
+    const ok = await syncNow();
+    if (!ok){ syncCfgSet({ code: null }); drawSyncBox(); toast('서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요'); return; }
+    modal(`<h3>서버 백업을 켰습니다</h3><p class="sub">아래 복구 코드를 꼭 메모해 두세요. 다른 기기나 기록이 지워진 브라우저에서 이 코드를 입력하면 기록을 불러옵니다.</p>
+      <div class="sy-big mono">${code}</div><div class="acts"><button class="btn btn-pri" data-close>확인</button></div>`);
+    return;
+  }
+  if (a === 'in'){
+    modal(`<h3>복구 코드로 불러오기</h3><p class="sub">서버에 저장된 기록을 불러와 이 브라우저의 기록과 합칩니다. 이후 이 기기도 같은 코드로 자동 백업됩니다.</p>
+      <input class="sy-in mono" id="syIn" type="text" inputmode="latin" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX" maxlength="20">
+      <p class="sy-msg" id="syMsg"></p>
+      <div class="acts"><button class="btn btn-ghost" data-close>취소</button><button class="btn btn-pri" id="syGo">불러오기</button></div>`, m => {
+        const inp = m.querySelector('#syIn'), msg = m.querySelector('#syMsg'), go = m.querySelector('#syGo');
+        setTimeout(() => inp.focus(), 50);
+        inp.onkeydown = e => { if (e.key === 'Enter') go.click(); };
+        go.onclick = async () => {
+          const code = normCode(inp.value);
+          if (!code){ msg.textContent = '코드는 영문·숫자 12자리입니다 (예: K7QM-29XD-4PRT)'; return; }
+          go.disabled = true; msg.textContent = '불러오는 중…';
+          const prev = syncCfg().code;
+          syncCfgSet({ code, at: 0, err: null });
+          try { await syncNow({ mustExist: true }); closeLayer(); drawWn(); toast('기록을 불러왔습니다'); }
+          catch(e) { syncCfgSet({ code: prev || null, err: null }); drawSyncBox(); go.disabled = false;
+            msg.textContent = e.message === 'notfound' ? '이 코드로 저장된 기록이 없습니다. 코드를 다시 확인해 주세요.' : '서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.'; }
+        };
+      });
+    return;
+  }
+  if (a === 'off'){
+    modal(`<h3>서버 백업 연결 해제</h3><p class="sub">이 브라우저의 기록은 그대로 남습니다. 서버에 저장된 기록까지 지우면 복구 코드로 더 이상 불러올 수 없습니다.</p>
+      <div class="acts"><button class="btn btn-ghost" data-close>취소</button><button class="btn btn-ghost" id="syDel">서버 기록까지 삭제</button><button class="btn btn-pri" id="syOff">이 기기에서만 해제</button></div>`, m => {
+        m.querySelector('#syOff').onclick = () => { syncCfgSet({ code: null, at: 0, err: null }); closeLayer(); drawWn(); toast('연결을 해제했습니다'); };
+        m.querySelector('#syDel').onclick = async () => {
+          try { await rpc('cbt_sync_delete', { p_code: syncCfg().code }); syncCfgSet({ code: null, at: 0, err: null }); closeLayer(); drawWn(); toast('서버 기록을 삭제했습니다'); }
+          catch(e) { toast('서버에 연결하지 못했습니다'); }
+        };
+      });
+  }
+}
+if (SYNC_AVAIL && syncCfg().code) setTimeout(() => syncNow(), 600);
+
 function itKey(it){ return [it.y, it.r, it.g, it.p, it.sub, it.q.n].join('|'); }
 function noteResult(it, a, blankOK){
   if (!it.q.a || (a == null && !blankOK)) return;
@@ -1230,10 +1442,11 @@ function drawWn(){
   const W = lsGet(WN_KEY, {}), H = lsGet(HIST_KEY, []);
   const all = Object.entries(W).map(([k, e]) => ({ k, e, it: resolveNote(e) })).filter(x => x.it).sort((a, b) => b.e.t - a.e.t);
   const open = all.filter(x => !x.e.fx);
-  const head = viewHead('오답노트', '틀린 문제와 응시 기록은 <b>이 브라우저에만</b> 저장됩니다. 다른 기기·브라우저와 공유되지 않고, 브라우저 사이트 데이터를 지우면 함께 지워집니다.');
+  const head = viewHead('오답노트', '틀린 문제와 응시 기록은 이 브라우저에 저장됩니다. <b>서버 백업</b>을 켜면 복구 코드로 다른 기기나 기록이 지워진 브라우저에서도 불러올 수 있습니다.');
   const tabs = `<div class="wn-tabs" role="tablist"><button type="button" data-t="note" class="${wnTab === 'note' ? 'on' : ''}">오답노트<b>${open.length}</b></button><button type="button" data-t="hist" class="${wnTab === 'hist' ? 'on' : ''}">응시 기록<b>${H.length}</b></button></div>`;
   const warn = storeOK ? '' : '<div class="caution" role="note">' + ICON_WARN + '<div><p><b>저장 불가</b> 이 브라우저에서는 기록을 저장할 수 없습니다(사생활 보호 모드 등).</p></div></div>';
-  app.innerHTML = head + warn + tabs + '<div id="wnBody"></div>';
+  app.innerHTML = head + warn + '<section class="sy-box" id="syncBox"></section>' + tabs + '<div id="wnBody"></div>';
+  drawSyncBox();
   app.querySelectorAll('.wn-tabs button').forEach(b => b.onclick = () => { wnTab = b.dataset.t; drawWn(); });
   if (wnTab === 'note') drawNoteBody(all); else drawHistBody(H);
 }
