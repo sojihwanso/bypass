@@ -412,7 +412,7 @@ tr:last-child td{border-bottom:0}
 .pr-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .pr-grid div{background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:10px 12px}
 .pr-grid b{display:block;font-family:var(--f-disp);font-size:20px;font-weight:800;color:var(--ink)}
-.pr-grid span{font-size:12px;color:var(--muted)}
+.pr-grid span{display:block;font-size:12px;line-height:1.45;color:var(--muted)}
 .pr-note{margin-top:16px;font-size:12px;color:var(--muted)}
 @media (max-width:520px){.hero .cta{flex-direction:column-reverse;align-items:flex-start}.pr-grid div{padding:9px 9px}.pr-grid b{font-size:16px}}
 </style>
@@ -489,7 +489,7 @@ const GRADE = {
 };
 /* 채점 기준: 전 과목(5과목) 평균 60점 이상, 과목별 40점 이상, 법규는 60점 이상 */
 const CUT = s => s === '법규' ? 60 : 40;
-const RULE_HTML = '<div class="rule-box"><b>채점 기준 · 항해 필기</b><ul><li>전 과목(5과목) 평균 <em>60점 이상</em>이면 합격</li><li>과목별 점수가 <em>40점 미만</em>이면 과락(불합격)</li><li><em>법규</em>는 <em>60점 미만</em>이면 과락(불합격)</li><li>과목당 25문항 · 문항당 4점</li></ul></div>';
+const RULE_HTML = '<div class="rule-box"><b>채점 기준 · 항해 필기</b><ul><li>전 과목(5과목) 평균 <em>60점 이상</em>이면 합격</li><li>과목별 점수가 <em>40점 미만</em>이면 과락(불합격)</li><li><em>법규</em>는 <em>60점 미만</em>이면 과락(불합격)</li><li>과목당 25문항 · 문항당 4점 (40점 = 10문항, 60점 = 15문항)</li></ul></div>';
 const app = document.getElementById('app');
 const layer = document.getElementById('layer');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -575,9 +575,9 @@ function passRule(){
   modal(`<h3>해기사 시험 합격 기준</h3>
   <p class="sub">「선박직원법 시행령」 제18조 · 한국해양수산연수원 안내 기준</p>
   <div class="pr-sec"><h4>필기시험 합격</h4>
-    <div class="pr-grid"><div><b>40점</b><span>과목별 과락 기준</span></div><div><b>60점</b><span>항해사 법규 과락 기준</span></div><div><b>평균 60점</b><span>전 과목 평균</span></div></div>
-    <ul style="margin-top:10px"><li>과목당 100점 만점. 한 과목이라도 <em>40점 미만</em>이면 과락</li><li>항해사는 <em>법규</em> 과목만 <em>60점 미만</em>이면 과락</li><li>과락 없이 전 과목 평균 <em>60점 이상</em>이면 합격</li><li>일부 과목을 면제받아도, 응시한 과목에는 같은 기준 적용</li></ul></div>
-  <div class="pr-sec"><h4>면접 · 실기</h4><ul><li>면접: 위원별 100점 만점, 평균 60점 이상</li><li>실기: 과목당 100점 만점, 60점 이상</li></ul></div>
+    <div class="pr-grid"><div><b>40점</b><span>과목별 과락 기준<br>25문항 중 10문항 이상</span></div><div><b>60점</b><span>항해사 법규 과락 기준<br>25문항 중 15문항 이상</span></div><div><b>평균 60점</b><span>전 과목 평균<br>평균 15문항 이상</span></div></div>
+    <ul style="margin-top:10px"><li>과목당 100점 만점. 한 과목이라도 <em>40점 미만</em>이면 과락</li><li>항해사는 <em>법규</em> 과목만 <em>60점 미만</em>이면 과락</li><li>과락 없이 전 과목 평균 <em>60점 이상</em>이면 합격</li><li>과목당 25문항 · 문항당 4점이므로 <em>40점 = 10문항</em>, <em>60점 = 15문항</em> 이상 맞혀야 함</li><li>일부 과목을 면제받아도, 응시한 과목에는 같은 기준 적용</li></ul></div>
+  <div class="pr-sec"><h4>면접 · 실기</h4><ul><li>면접: 위원별 100점 만점, 평균 60점 이상. 총 <em>5문제</em>가 출제되므로 <em>3문제 이상</em> 맞히면 합격 안정권</li><li>실기: 과목당 100점 만점, 60점 이상</li></ul></div>
   <div class="pr-sec"><h4>과목합격</h4><ul>
     <li>필기 불합격자 중 <em>60점 이상</em> 받은 과목이 <em>2과목 이상</em>이면 해당 과목 과목합격</li>
     <li>유효기간 <em>2년</em> (시험일 기준). 참고로 1~2급 필기합격은 4년, 최종합격은 3년</li>
@@ -1095,28 +1095,30 @@ function renderResult(){
     : (() => { const m = {}; S.items.forEach((it, k) => (m[it.sub] ||= []).push(k)); return SUBS.filter(s => m[s]).map(s => ({ sub: s, ks: m[s] })); })();
   const rowsData = groups.map(g => {
     const ok = g.ks.filter(k => isRight(S.items[k], S.ans[k])).length;
-    const score = Math.round(ok / g.ks.length * 100);
-    return { sub: g.sub, n: g.ks.length, ok, wrong: g.ks.filter(k => S.ans[k] != null && !isRight(S.items[k], S.ans[k])).length, blank: g.ks.filter(k => S.ans[k] == null).length, tri: g.ks.filter(k => S.tri[k]).length, score };
+    const raw = ok / g.ks.length * 100, score = Math.round(raw);
+    return { sub: g.sub, n: g.ks.length, ok, wrong: g.ks.filter(k => S.ans[k] != null && !isRight(S.items[k], S.ans[k])).length, blank: g.ks.filter(k => S.ans[k] == null).length, tri: g.ks.filter(k => S.tri[k]).length, score, raw };
   });
   const totalOk = rowsData.reduce((a, r) => a + r.ok, 0), totalN = rowsData.reduce((a, r) => a + r.n, 0);
-  const avg = rowsData.length ? Math.round(rowsData.reduce((a, r) => a + r.score, 0) / rowsData.length) : 0;
+  /* 법령(시행령 제18조) 비교는 반올림 전 점수로 함: 평균 59.6점이 60점으로 반올림되어 합격 처리되지 않도록 */
+  const avgRaw = rowsData.length ? rowsData.reduce((a, r) => a + r.raw, 0) / rowsData.length : 0;
+  const avg = Math.round(avgRaw * 10) / 10;
   const fullExam = (S.mode === 3 || S.mode === 2) && rowsData.length >= 5;
   let verdict = '';
-  const fails = rowsData.filter(r => r.score < CUT(r.sub));
+  const fails = rowsData.filter(r => r.raw < CUT(r.sub) - 1e-9);
   if (S.mode === 3 || (S.mode === 2 && rowsData.length >= 5)){
     const reasons = [];
     if (!fullExam) reasons.push('5과목이 모두 수록되지 않은 회차라 합격 판정은 참고용입니다');
-    if (avg < 60) reasons.push(`평균 ${avg}점 (60점 미만)`);
+    if (avgRaw < 60 - 1e-9) reasons.push(`평균 ${avg}점 (60점 미만)`);
     for (const r of fails) reasons.push(`${r.sub} ${r.score}점 과락 (${CUT(r.sub)}점 미만)`);
-    const pass = fullExam && avg >= 60 && !fails.length;
+    const pass = fullExam && avgRaw >= 60 - 1e-9 && !fails.length;
     verdict = `<span class="verdict ${pass ? 'ok' : 'bad'}">${pass ? '합격' : '불합격'}</span>` + (reasons.length ? '<ul class="reasons">' + reasons.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '') + RULE_HTML;
   } else if (S.mode !== 4) {
     const sub = rowsData.length === 1 ? rowsData[0].sub : null;
     if (sub){
-      const cut = CUT(sub), sc = rowsData[0].score;
-      verdict = `<span class="verdict ${sc >= cut ? 'ok' : 'bad'}">${sc >= cut ? '과락 면함' : '과락'}</span><ul class="reasons" style="color:var(--muted)"><li>${esc(sub)} 과락 기준 ${cut}점 미만 · 이번 점수 ${sc}점</li><li>최종 합격은 5과목 평균 60점 이상이어야 합니다</li></ul>` + RULE_HTML;
+      const cut = CUT(sub), sc = rowsData[0].score, scOk = rowsData[0].raw >= cut - 1e-9;
+      verdict = `<span class="verdict ${scOk ? 'ok' : 'bad'}">${scOk ? '과락 면함' : '과락'}</span><ul class="reasons" style="color:var(--muted)"><li>${esc(sub)} 과락 기준 ${cut}점 미만 · 이번 점수 ${sc}점</li><li>최종 합격은 5과목 평균 60점 이상이어야 합니다</li></ul>` + RULE_HTML;
     } else {
-      const lines = rowsData.map(r => `<li style="color:var(--${r.score >= CUT(r.sub) ? 'ok' : 'bad'})">${esc(r.sub)} ${r.score}점 · ${r.score >= CUT(r.sub) ? '통과' : '과락 (' + CUT(r.sub) + '점 미만)'}</li>`).join('');
+      const lines = rowsData.map(r => `<li style="color:var(--${r.raw >= CUT(r.sub) - 1e-9 ? 'ok' : 'bad'})">${esc(r.sub)} ${r.score}점 · ${r.raw >= CUT(r.sub) - 1e-9 ? '통과' : '과락 (' + CUT(r.sub) + '점 미만)'}</li>`).join('');
       verdict = `<span class="verdict ${fails.length ? 'bad' : 'ok'}">${fails.length ? '과락 ' + fails.length + '과목' : '과락 없음'}</span><ul class="reasons">${lines}<li style="color:var(--muted)">최종 합격은 5과목 평균 60점 이상이어야 합니다</li></ul>` + RULE_HTML;
     }
   } else verdict = `<span class="verdict na">무작위 ${totalN}문항</span>`;
@@ -1139,7 +1141,7 @@ function renderResult(){
       <div class="big">${S.mode === 4 ? Math.round(totalOk / Math.max(1, totalN) * 100) : avg}<small>${S.mode === 4 ? '%' : '점'}</small></div>
       <p class="mono" style="color:var(--ink);font-size:14px">${totalOk} / ${totalN} 정답${S.limit ? ' · 소요 ' + fmtTime(S.used ?? S.limit) + ' / ' + (S.limit / 60) + '분' + (S.timeUp ? ' (시간 종료)' : '') : ''}</p>${verdict}</div>
     <div class="stbl"><table><thead><tr><th>과목</th><th style="text-align:right">정답</th><th style="text-align:right">오답</th><th style="text-align:right">미응답</th><th style="text-align:right">△</th><th style="text-align:right">점수</th><th></th></tr></thead><tbody>
-    ${rowsData.map(r => `<tr><td><b style="color:var(--${SUBC[r.sub]})">${r.sub}</b></td><td class="num">${r.ok}/${r.n}</td><td class="num">${r.wrong}</td><td class="num">${r.blank}</td><td class="num">${r.tri}</td><td class="num">${r.score}</td><td>${S.mode === 4 ? '' : `<span class="pill ${r.score >= CUT(r.sub) ? 'ok' : 'bad'}">${r.score >= CUT(r.sub) ? '통과' : '과락'}</span>`}</td></tr>`).join('')}
+    ${rowsData.map(r => `<tr><td><b style="color:var(--${SUBC[r.sub]})">${r.sub}</b></td><td class="num">${r.ok}/${r.n}</td><td class="num">${r.wrong}</td><td class="num">${r.blank}</td><td class="num">${r.tri}</td><td class="num">${r.score}</td><td>${S.mode === 4 ? '' : `<span class="pill ${r.raw >= CUT(r.sub) - 1e-9 ? 'ok' : 'bad'}">${r.raw >= CUT(r.sub) - 1e-9 ? '통과' : '과락'}</span>`}</td></tr>`).join('')}
     </tbody></table></div>
   </div>
   <div class="res-acts">
