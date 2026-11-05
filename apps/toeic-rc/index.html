@@ -6,202 +6,286 @@
 <title>RC 매일 10문제</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Gothic+A1:wght@400;600;800&display=swap">
 <style>
-/* 레이아웃: OMR 답안지 — 문제는 시험지 지면처럼, 보기는 마킹 버블로 */
+/* 레이아웃: 묶음 목록(설정 화면처럼) — 관련 메뉴는 한 덩어리, 덩어리 사이는 넓게. 형광펜은 정답 단서에만. */
 :root{
-  --paper:#fbfbf8; --sheet:#ffffff; --ink:#1d2433; --muted:#5f6878; --line:#e6e2dc;
-  --omr:#d2435c; --omr-soft:#fbe9ec; --good:#1f8a5b; --good-soft:#e3f4ec; --bad:#c2410c; --bad-soft:#fdeee4;
-  --clue:#fff1a8; --clue-ink:#5b4a00;
-  --f-ui:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
-  --f-test:"Source Serif 4",Georgia,"Times New Roman",serif;
-  --f-num:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --bg:#f3f4f6; --surface:#ffffff; --ink:#14161b; --sub:#5b6270; --hair:#e2e4e9;
+  --accent:#2449d8; --accent-soft:#e7ecff;
+  --good:#11805b; --good-soft:#e1f3eb; --bad:#c23b22; --bad-soft:#fce8e3;
+  --mark:#ffe76a; --mark-ink:#3a3000;
+  --f-ko:"Gothic A1","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-en:"Atkinson Hyperlegible","Gothic A1",system-ui,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --paper:#14171d; --sheet:#1c2028; --ink:#e8eaef; --muted:#9aa2b1; --line:#2d323d;
-  --omr:#f07289; --omr-soft:#3a2229; --good:#4cc38a; --good-soft:#1a3328; --bad:#f2925b; --bad-soft:#3a2619;
-  --clue:#5a4b10; --clue-ink:#ffe68a; color-scheme:dark}}
+  --bg:#0f1115; --surface:#181b21; --ink:#eceef2; --sub:#9aa1ad; --hair:#2a2e36;
+  --accent:#8099ff; --accent-soft:#1d2441;
+  --good:#46c08e; --good-soft:#132e25; --bad:#ff8b72; --bad-soft:#3a1e18;
+  --mark:#6a5a08; --mark-ink:#fff3a8; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --paper:#14171d; --sheet:#1c2028; --ink:#e8eaef; --muted:#9aa2b1; --line:#2d323d;
-  --omr:#f07289; --omr-soft:#3a2229; --good:#4cc38a; --good-soft:#1a3328; --bad:#f2925b; --bad-soft:#3a2619;
-  --clue:#5a4b10; --clue-ink:#ffe68a; color-scheme:dark}
+  --bg:#0f1115; --surface:#181b21; --ink:#eceef2; --sub:#9aa1ad; --hair:#2a2e36;
+  --accent:#8099ff; --accent-soft:#1d2441;
+  --good:#46c08e; --good-soft:#132e25; --bad:#ff8b72; --bad-soft:#3a1e18;
+  --mark:#6a5a08; --mark-ink:#fff3a8; color-scheme:dark}
 
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 var(--f-ui)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 var(--f-ko);word-break:keep-all;overflow-wrap:break-word}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
 [hidden]{display:none!important}
-.wrap{max-width:680px;margin:0 auto;padding-block:20px 48px;
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0;text-align:left}
+button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.wrap{max-width:620px;margin:0 auto;padding-block:8px 40px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.view{display:flex;flex-direction:column;gap:16px}
-h1,h2{margin:0;text-wrap:balance}
-h1{font-size:1.5rem;font-weight:700;letter-spacing:-.01em}
-h2{font-size:1.05rem;font-weight:700}
-.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:var(--omr);text-transform:uppercase}
-.muted{color:var(--muted)}
-.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
-button{font:inherit;color:inherit;cursor:pointer}
-button:focus-visible{outline:2px solid var(--omr);outline-offset:2px}
+.view{display:flex;flex-direction:column;gap:36px}
+h1,h2,h3{margin:0;text-wrap:balance}
+p{margin:0}
 
-/* 홈 */
-.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
-.today{display:flex;gap:18px}
-.today div{display:flex;flex-direction:column;align-items:flex-end}
-.today b{font-family:var(--f-num);font-size:1.4rem;line-height:1.1}
-.today span{font-size:.75rem;color:var(--muted)}
-.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.mode{background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:2px;min-width:0}
-.mode:hover:not(:disabled){border-color:var(--omr)}
-.mode b{font-size:1rem}
-.mode span{font-size:.82rem;color:var(--muted)}
-.mode.main{grid-column:1/-1;background:var(--omr);border-color:var(--omr);color:#fff}
-.mode.main span{color:#ffffffd9}
-.mode:disabled{opacity:.45;cursor:not-allowed}
-.panel{background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
-.ph{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
-.grp{font-size:.75rem;font-weight:700;color:var(--muted);letter-spacing:.04em}
-.tmap{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:6px}
-.tc{border:1px solid var(--line);border-radius:8px;padding:7px 9px;display:flex;flex-direction:column;gap:1px;min-width:0}
-.tc b{font-size:.82rem;font-weight:500}
-.tc span{font-family:var(--f-num);font-size:.72rem;color:var(--muted)}
-.tc.new{border-style:dashed}
-.tc.good{background:var(--good-soft);border-color:transparent}
-.tc.low{background:var(--bad-soft);border-color:transparent}
-.tc.low span{color:var(--bad)}
-.rules{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:.88rem}
+/* 머리글 */
+.hero{display:flex;flex-direction:column;gap:6px;padding-top:24px}
+.kicker{font-size:.8rem;font-weight:600;color:var(--accent)}
+.hero h1{font-size:1.75rem;font-weight:800;letter-spacing:-.02em;line-height:1.3}
+.stats{display:flex;margin-top:14px;background:var(--surface);border-radius:14px}
+.stats div{flex:1;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stats div+div{border-left:1px solid var(--hair)}
+.stats b{font:700 1.45rem/1.1 var(--f-en);font-variant-numeric:tabular-nums}
+.stats span{font-size:.78rem;color:var(--sub)}
 
-/* 문제 */
-.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.prog{display:flex;gap:4px;flex-wrap:wrap}
-.prog i{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--omr);display:block}
-.prog i.on{background:var(--omr)}
-.prog i.ok{background:var(--good);border-color:var(--good)}
-.prog i.no{background:var(--bad);border-color:var(--bad)}
-.timer{font-family:var(--f-num);font-size:.9rem;padding:2px 8px;border-radius:6px;background:var(--line)}
+/* 구획 */
+.sec{display:flex;flex-direction:column;gap:10px}
+.label{font-size:.82rem;font-weight:600;color:var(--sub);padding-left:4px}
+.note{font-size:.85rem;color:var(--sub);padding-left:4px;margin-top:-4px}
+.group{background:var(--surface);border-radius:14px;overflow:hidden}
+.row{width:100%;display:flex;align-items:center;gap:12px;padding:15px 16px;min-height:60px}
+.group > *+*{border-top:1px solid var(--hair)}
+.row:hover:not(:disabled){background:var(--accent-soft)}
+.row:disabled{opacity:.45;cursor:not-allowed}
+.r-main{flex:1;display:flex;flex-direction:column;gap:1px;min-width:0}
+.r-main b{font-weight:600;font-size:1rem}
+.r-main small{font-size:.84rem;color:var(--sub)}
+.chev{color:var(--sub);font-size:1.3rem;line-height:1}
+.badge{font:700 .8rem var(--f-en);background:var(--bad-soft);color:var(--bad);padding:2px 9px;border-radius:99px}
+.badge.zero{background:var(--hair);color:var(--sub)}
+
+.primary{width:100%;background:var(--accent);color:#fff;border-radius:16px;padding:20px 20px 18px;display:flex;flex-direction:column;gap:4px}
+.primary b{font-size:1.2rem;font-weight:800}
+.primary span{font-size:.88rem;opacity:.88}
+.primary:hover{filter:brightness(1.07)}
+
+details > summary{list-style:none;display:flex;align-items:center;gap:10px;padding:15px 16px;cursor:pointer;font-weight:600}
+details > summary::-webkit-details-marker{display:none}
+details > summary::after{content:"›";margin-left:auto;color:var(--sub);font-size:1.3rem;line-height:1;transition:transform .15s}
+details[open] > summary::after{transform:rotate(90deg)}
+summary small{font-weight:400;font-size:.84rem;color:var(--sub)}
+.tlist{padding:0 16px 10px;display:flex;flex-direction:column}
+.trow{display:grid;grid-template-columns:minmax(0,1fr) 72px 40px;gap:12px;align-items:center;padding:9px 0}
+.trow+.trow{border-top:1px solid var(--hair)}
+.tname{display:flex;flex-direction:column;min-width:0;font-size:.92rem}
+.tname small{font-size:.76rem;color:var(--sub)}
+.tbar{height:6px;border-radius:3px;background:var(--hair);overflow:hidden}
+.tbar i{display:block;height:100%;background:var(--good);border-radius:3px}
+.trow.low .tbar i{background:var(--bad)}
+.trow.mid .tbar i{background:var(--accent)}
+.tval{font:700 .85rem var(--f-en);text-align:right;font-variant-numeric:tabular-nums}
+.trow.low .tval{color:var(--bad)}
+.trow.new .tname{color:var(--sub)}
+.rules{margin:0;padding:0 16px 16px 36px;display:flex;flex-direction:column;gap:10px;font-size:.92rem}
+
+/* 문제 화면 */
+.qbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;align-items:center;gap:14px;padding-block:12px}
+.quit{font-size:.9rem;color:var(--sub);padding:6px 0}
+.qprog{flex:1;display:flex;flex-direction:column;gap:5px;min-width:0}
+.qcount{font:700 .85rem var(--f-en);font-variant-numeric:tabular-nums}
+.segs{display:flex;gap:3px}
+.segs i{flex:1;height:5px;border-radius:3px;background:var(--hair)}
+.segs i.on{background:var(--accent)}
+.segs i.ok{background:var(--good)}
+.segs i.no{background:var(--bad)}
+.timer{font:700 .85rem var(--f-en);font-variant-numeric:tabular-nums;padding:4px 10px;border-radius:8px;background:var(--surface)}
 .timer.over{background:var(--bad-soft);color:var(--bad)}
-.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px}
-.tag{align-self:flex-start;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--omr-soft);color:var(--omr)}
-.stem{font-family:var(--f-test);font-size:1.12rem;line-height:1.7}
-.passage{font-family:var(--f-test);font-size:1rem;line-height:1.75;border-left:3px solid var(--line);padding-left:14px;max-height:46vh;overflow:auto}
-.passage .meta{font-family:var(--f-ui);font-size:.8rem;color:var(--muted);margin-bottom:8px;white-space:pre-line}
-.passage p{margin:0 0 .6em}
-.blank{display:inline-block;min-width:4.5em;border-bottom:2px solid var(--ink);text-align:center;font-family:var(--f-num);font-size:.85em;padding:0 4px}
-.blank.cur{border-color:var(--omr);background:var(--omr-soft);color:var(--omr)}
-.blank.filled{font-family:var(--f-test);font-size:1em;color:var(--good);border-color:var(--good)}
-.reveal .clue{background:var(--clue);color:var(--clue-ink);border-radius:3px;padding:0 2px}
+#quiz{gap:22px}
+.qmeta{font-size:.84rem;font-weight:600;color:var(--sub)}
+.stem{font:400 1.3rem/1.85 var(--f-en);letter-spacing:.005em}
+.passage{background:var(--surface);border-radius:14px;padding:18px;font:400 1.06rem/1.8 var(--f-en);max-height:48vh;overflow:auto}
+.passage .meta{font:600 .85rem/1.5 var(--f-ko);color:var(--sub);white-space:pre-line;padding-bottom:12px;margin-bottom:14px;border-bottom:1px solid var(--hair)}
+.passage p+p{margin-top:1em}
+.pq{font-weight:600;font-size:.95rem;margin-bottom:-8px}
+.blank{display:inline-block;min-width:4.6em;border-bottom:2.5px solid var(--ink);text-align:center;font:700 .82em var(--f-en);padding:0 6px;line-height:1.5}
+.blank.cur{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:4px 4px 0 0}
+.blank.filled{font-weight:400;font-size:1em;color:var(--good);border-color:var(--good)}
+.reveal .clue{background:linear-gradient(transparent 12%,var(--mark) 12%,var(--mark) 92%,transparent 92%);color:var(--mark-ink);padding:0 2px}
 .choices{display:flex;flex-direction:column;gap:8px}
-.ch{display:flex;gap:12px;align-items:flex-start;background:none;border:1px solid var(--line);border-radius:8px;padding:10px 12px;text-align:left;font-family:var(--f-test);font-size:1.02rem;line-height:1.45}
-.ch:hover:not(:disabled){border-color:var(--omr)}
+.ch{width:100%;display:flex;gap:14px;align-items:center;background:var(--surface);border:1.5px solid transparent;border-radius:12px;padding:13px 14px;font:400 1.08rem/1.45 var(--f-en);min-height:54px}
+.ch:hover:not(:disabled){border-color:var(--accent)}
 .ch:disabled{cursor:default}
-.bub{flex:none;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--omr);color:var(--omr);display:grid;place-items:center;font:600 .78rem var(--f-num)}
+.ch .k{flex:none;width:28px;height:28px;border-radius:8px;background:var(--bg);display:grid;place-items:center;font:700 .85rem var(--f-en);color:var(--sub)}
 .ch.right{border-color:var(--good);background:var(--good-soft)}
-.ch.right .bub{background:var(--good);border-color:var(--good);color:#fff}
+.ch.right .k{background:var(--good);color:#fff}
 .ch.wrong{border-color:var(--bad);background:var(--bad-soft)}
-.ch.wrong .bub{background:var(--bad);border-color:var(--bad);color:#fff}
-.fb{border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;font-size:.92rem}
-.fb.ok{background:var(--good-soft)}
-.fb.no{background:var(--bad-soft)}
-.fb strong{font-size:1rem}
-.fb.ok strong{color:var(--good)}
-.fb.no strong{color:var(--bad)}
-.tip{font-size:.85rem;border-top:1px dashed var(--line);padding-top:8px;color:var(--muted)}
-.tip b{color:var(--ink)}
-.mean{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:.85rem;border-top:1px dashed var(--line);padding-top:8px}
-.mean dt{font-family:var(--f-test);font-weight:600}
-.mean dd{margin:0;color:var(--muted)}
-.btn{width:100%;border:0;border-radius:10px;padding:13px;font-weight:700;background:var(--ink);color:var(--paper)}
-.ghost{background:none;border:0;color:var(--muted);font-size:.85rem;padding:4px 0;align-self:flex-start}
+.ch.wrong .k{background:var(--bad);color:#fff}
+.ch.dim{opacity:.5}
 
-/* 결과 · 단어장 */
-.score{display:flex;align-items:baseline;gap:10px}
-.score b{font-family:var(--f-num);font-size:3rem;line-height:1}
-.wl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
-.wl li{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:.88rem;display:flex;flex-direction:column;gap:2px;min-width:0}
-.wl .s{font-family:var(--f-test);font-size:.95rem}
-.wl .w{font-family:var(--f-test);font-weight:600;font-size:1.02rem}
-.wl li.miss{border-color:var(--bad)}
-.seg{display:flex;gap:6px;flex-wrap:wrap}
-.seg button{border:1px solid var(--line);background:var(--sheet);border-radius:99px;padding:4px 12px;font-size:.82rem}
-.seg button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-@media (max-width:420px){.stem{font-size:1.05rem}.tmap{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (prefers-reduced-motion:no-preference){.fb{animation:up .2s ease-out}@keyframes up{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}}
+.verdict{display:flex;gap:12px;align-items:center;padding:14px 16px;border-radius:14px}
+.verdict.ok{background:var(--good-soft)}
+.verdict.no{background:var(--bad-soft)}
+.vicon{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff}
+.verdict.ok .vicon{background:var(--good)}
+.verdict.no .vicon{background:var(--bad)}
+.verdict b{display:block;font-size:1.05rem}
+.verdict span{font:400 .95rem var(--f-en)}
+.explain{background:var(--surface);border-radius:14px;padding:4px 16px}
+.exb{padding:14px 0;display:flex;flex-direction:column;gap:6px}
+.exb+.exb{border-top:1px solid var(--hair)}
+.exb h3{font-size:.8rem;font-weight:600;color:var(--sub)}
+.exb p{font-size:.98rem;line-height:1.7}
+.pill{display:inline-block;font-size:.78rem;font-weight:600;padding:1px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent);margin-right:6px;vertical-align:1px}
+.mean{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin:0;font-size:.95rem}
+.mean dt{font:700 1rem var(--f-en)}
+.mean dt.ans{color:var(--good)}
+.mean dd{margin:0;color:var(--sub)}
+.warn{color:var(--bad)}
+.nextbar{position:sticky;bottom:0;padding-block:14px calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,transparent,var(--bg) 35%)}
+.btn{width:100%;border-radius:14px;padding:16px;font-weight:800;font-size:1.02rem;background:var(--ink);color:var(--bg);text-align:center}
+.btn.sub{background:var(--surface);color:var(--ink);font-weight:600}
+
+/* 결과 */
+.big{font:700 3.6rem/1 var(--f-en);letter-spacing:-.02em;margin-top:6px}
+.big span{font-size:1.6rem;color:var(--sub)}
+.rline{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 16px}
+.rline .rv{font:700 .92rem var(--f-en)}
+.rline .rv.ok{color:var(--good)}
+.rline .rv.no{color:var(--bad)}
+.witem{padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.witem .s{font:400 1rem/1.6 var(--f-en)}
+.witem .a{font-size:.88rem;color:var(--sub)}
+.witem .a b{font-family:var(--f-en);color:var(--good)}
+.btns{display:flex;flex-direction:column;gap:10px}
+
+/* 단어장 */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.tabs button{flex:none;padding:7px 14px;border-radius:99px;background:var(--surface);font-size:.88rem;font-weight:600;color:var(--sub)}
+.tabs button.on{background:var(--ink);color:var(--bg)}
+.wrow{padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.whead{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.whead b{font:700 1.1rem var(--f-en)}
+.whead span{font-size:.92rem}
+.wrow .ex{font:400 .95rem/1.6 var(--f-en);color:var(--sub)}
+.wrow .ex b{color:var(--ink)}
+.wrow.miss .whead b{color:var(--bad)}
+.empty{padding:22px 16px;color:var(--sub);font-size:.92rem}
+
+@media (max-width:420px){.stem{font-size:1.18rem}.hero h1{font-size:1.55rem}.stats b{font-size:1.25rem}}
+@media (prefers-reduced-motion:no-preference){.verdict,.explain{animation:rise .22s ease-out}@keyframes rise{from{opacity:.3;transform:translateY(6px)}to{opacity:1;transform:none}}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
 <!-- 홈 -->
-<section id="home" class="view">
-  <div class="top">
-    <div>
-      <div class="eyebrow">TOEIC RC · Part 5 / 6</div>
-      <h1>RC 매일 10문제</h1>
-    </div>
-    <div class="today">
+<main id="home" class="view">
+  <header class="hero">
+    <p class="kicker">TOEIC RC · Part 5·6</p>
+    <h1>RC 매일 10문제</h1>
+    <div class="stats">
       <div><b id="tdCount">0</b><span>오늘 푼 문제</span></div>
       <div><b id="tdStreak">0</b><span>연속 일수</span></div>
+      <div><b id="tdProg">0%</b><span>전체 진도</span></div>
     </div>
-  </div>
+  </header>
 
-  <div class="modes">
-    <button class="mode main" id="mP5"><b>오늘의 10문제</b><span id="mainSub">문법 7 + 어휘 3, 아직 덜 풀어본 유형부터 골고루</span></button>
-    <button class="mode" id="mP6"><b>Part 6 · 지문 1개</b><span>빈칸 4개, 문장 삽입 포함</span></button>
-    <button class="mode" id="mWeak"><b>약한 유형 집중</b><span id="weakSub">기록이 쌓이면 열려요</span></button>
-    <button class="mode" id="mWrong"><b>오답노트</b><span id="wrongSub">틀린 문제 0개</span></button>
-    <button class="mode" id="mAll"><b>Part 5 실전 30문제</b><span>시험이랑 같은 개수, 11분 목표</span></button>
-    <button class="mode" id="mWords" style="grid-column:1/-1"><b>어휘 단어장</b><span id="wordsSub">토익 단골 어휘·숙어 모아보기</span></button>
-  </div>
+  <section class="sec">
+    <button class="primary" id="mP5"><b>오늘의 10문제 시작</b><span id="mainSub">문법 7 + 어휘 3</span></button>
+  </section>
 
-  <div class="panel">
-    <div class="ph"><h2>유형 지도</h2><span class="muted" id="mapSum" style="font-size:.85rem"></span></div>
-    <div class="grp">문법</div><div class="tmap" id="mapG"></div>
-    <div class="grp">어휘</div><div class="tmap" id="mapV"></div>
-    <div class="grp">Part 6 전용</div><div class="tmap" id="mapP"></div>
-  </div>
+  <section class="sec">
+    <h2 class="label">골라서 풀기</h2>
+    <div class="group">
+      <button class="row" id="mP6"><span class="r-main"><b>Part 6 지문 1개</b><small>빈칸 4개 · 문장 삽입 포함</small></span><span class="chev">›</span></button>
+      <button class="row" id="mAll"><span class="r-main"><b>Part 5 실전 30문제</b><small>시험과 같은 개수 · 11분 안에 풀기</small></span><span class="chev">›</span></button>
+      <button class="row" id="mWeak"><span class="r-main"><b>약한 유형 집중</b><small id="weakSub">유형당 2문제 이상 풀면 열려요</small></span><span class="chev">›</span></button>
+    </div>
+  </section>
 
-  <div class="panel">
-    <h2>Part 5 푸는 순서</h2>
-    <ol class="rules">
-      <li>보기 4개부터 본다. 모양이 같고 끝만 다르면 <b>품사 문제</b> → 빈칸 앞뒤만 보고 바로 고른다.</li>
-      <li>보기가 동사 변형이면 주어(수일치), 목적어 유무(태), 시간 단서(시제)를 찾는다.</li>
-      <li>보기에 전치사·접속사가 섞여 있으면 빈칸 뒤가 명사인지 절인지 본다.</li>
-      <li>뜻이 다 다른 단어면 그때만 해석한다. 모르면 찍고 넘어간다.</li>
-    </ol>
-  </div>
-</section>
+  <section class="sec">
+    <h2 class="label">복습</h2>
+    <div class="group">
+      <button class="row" id="mWrong"><span class="r-main"><b>오답노트</b><small>틀린 문제를 다시 풀어요 · 맞히면 빠져요</small></span><span class="badge" id="wrongBadge">0</span></button>
+      <button class="row" id="mWords"><span class="r-main"><b>어휘 단어장</b><small id="wordsSub">단골 어휘·숙어·콜로케이션</small></span><span class="chev">›</span></button>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2 class="label">내 유형 지도</h2>
+    <p class="note" id="mapSum"></p>
+    <div class="group">
+      <details id="dG"><summary>문법 <small id="sumG"></small></summary><div class="tlist" id="mapG"></div></details>
+      <details id="dV"><summary>어휘 <small id="sumV"></small></summary><div class="tlist" id="mapV"></div></details>
+      <details id="dP"><summary>Part 6 전용 <small id="sumP"></small></summary><div class="tlist" id="mapP"></div></details>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2 class="label">공략법</h2>
+    <div class="group">
+      <details><summary>Part 5 푸는 순서</summary>
+        <ol class="rules">
+          <li>보기 4개부터 본다. 모양이 같고 끝만 다르면 <b>품사 문제</b> → 빈칸 앞뒤만 보고 바로 고른다.</li>
+          <li>보기가 동사 변형이면 주어(수일치), 목적어 유무(태), 시간 단서(시제)를 찾는다.</li>
+          <li>보기에 전치사·접속사가 섞여 있으면 빈칸 뒤가 명사인지 절인지 본다.</li>
+          <li>뜻이 다 다른 단어면 그때만 해석한다. 빈칸 옆 단어와 짝(콜로케이션)이 맞는지부터 본다.</li>
+          <li>20초 넘게 걸리면 찍고 넘어간다. Part 7 시간이 더 중요하다.</li>
+        </ol>
+      </details>
+    </div>
+  </section>
+</main>
 
 <!-- 문제 -->
-<section id="quiz" class="view" hidden>
-  <div class="qhead">
-    <button class="ghost" id="quit">← 그만하기</button>
+<main id="quiz" class="view" hidden>
+  <div class="qbar">
+    <button class="quit" id="quit">✕ 그만</button>
+    <div class="qprog"><span class="qcount" id="qcount">1 / 10</span><div class="segs" id="segs"></div></div>
     <span class="timer" id="timer">0s</span>
   </div>
-  <div class="prog" id="prog"></div>
-  <div class="sheet" id="sheet"></div>
-  <div id="fbBox"></div>
-</section>
+  <div id="sheet" style="display:flex;flex-direction:column;gap:22px"></div>
+  <div id="fbBox" style="display:flex;flex-direction:column;gap:12px"></div>
+</main>
 
 <!-- 결과 -->
-<section id="result" class="view" hidden>
-  <div class="eyebrow">이번 세트 기록</div>
-  <div class="score"><b class="num" id="rScore">0/10</b><span class="muted" id="rTime"></span></div>
-  <p id="rMsg" style="margin:0"></p>
-  <div class="panel"><h2>이번에 만난 유형</h2><div class="tmap" id="rTypes"></div></div>
-  <div class="panel" id="rWrongPanel">
-    <h2>틀린 문제 (오답노트에 저장됨)</h2>
-    <ul class="wl" id="rWrong"></ul>
+<main id="result" class="view" hidden>
+  <header class="hero">
+    <p class="kicker">이번 세트 결과</p>
+    <div class="big" id="rScore">0<span>/10</span></div>
+    <p id="rTime" style="color:var(--sub)"></p>
+    <p id="rMsg" style="margin-top:8px"></p>
+  </header>
+  <section class="sec">
+    <h2 class="label">유형별 결과</h2>
+    <div class="group" id="rTypes"></div>
+  </section>
+  <section class="sec" id="rWrongSec">
+    <h2 class="label">틀린 문제 · 오답노트에 저장됨</h2>
+    <div class="group" id="rWrong"></div>
+  </section>
+  <div class="btns">
+    <button class="btn" id="again">한 세트 더</button>
+    <button class="btn sub" id="toHome">처음 화면으로</button>
   </div>
-  <button class="btn" id="again">한 세트 더</button>
-  <button class="ghost" id="toHome">처음으로</button>
-</section>
+</main>
 
 <!-- 단어장 -->
-<section id="words" class="view" hidden>
-  <button class="ghost" id="wBack">← 처음으로</button>
-  <div><div class="eyebrow">Part 5 어휘</div><h1>어휘 단어장</h1></div>
-  <div class="seg" id="wSeg"></div>
-  <ul class="wl" id="wList"></ul>
-</section>
+<main id="words" class="view" hidden>
+  <div class="qbar"><button class="quit" id="wBack">← 처음 화면</button></div>
+  <header class="hero" style="padding-top:0">
+    <p class="kicker">Part 5 어휘</p>
+    <h1>어휘 단어장</h1>
+  </header>
+  <section class="sec">
+    <div class="tabs" id="wTabs"></div>
+    <div class="group" id="wList"></div>
+  </section>
+</main>
 
 </div>
 
@@ -585,7 +669,30 @@ const RAW=[
 ["COLO","The new product has been ------- [[received]] by customers.","well|good|fine|nice",0,"well received = 좋은 반응을 얻은. p.p.를 꾸미니 부사 well.","좋은 반응을 얻은","well received"],
 ["COLO","This software is ------- [[used]] in the industry.","widely|highly|deeply|greatly",0,"widely used = 널리 쓰이는. highly는 recommended·qualified와 짝.","널리 쓰이는","widely used"],
 ["COLO","The two departments [[work]] ------- [[together]] on most projects.","closely|nearly|shortly|tightly",0,"work closely together = 긴밀히 협력하다. nearly(거의)·shortly(곧)와 혼동 주의.","긴밀히 협력하다","work closely together"],
-["COLO","Ms. Ortiz has ------- [[a strong reputation]] in the industry.","built|made|grown|raised",0,"build a reputation = 명성을 쌓다.","명성을 쌓다","build a reputation"]
+["COLO","Ms. Ortiz has ------- [[a strong reputation]] in the industry.","built|made|grown|raised",0,"build a reputation = 명성을 쌓다.","명성을 쌓다","build a reputation"],
+["COLO","Please ------- [[a seat]] in the waiting area.","take|sit|stay|rest",0,"take a seat = 자리에 앉다. sit은 자동사라 a seat를 못 받음.","자리에 앉다","take a seat"],
+["COLO","The company ------- [[a profit]] for the first time last year.","made|did|took|gave",0,"make a profit = 이익을 내다.","이익을 내다","make a profit"],
+["COLO","Ms. Lee ------- [[a presentation]] on the new product.","gave|said|told|spoke",0,"give a presentation = 발표하다. say·tell·speak는 presentation과 안 붙음.","발표하다","give a presentation"],
+["COLO","Employees can ------- [[advantage of]] the free fitness center.","take|make|have|get",0,"take advantage of = ~을 이용하다. 토익 최다 출제.","~을 이용하다","take advantage of"],
+["COLO","The board will ------- [[a vote]] on the proposal.","take|do|give|pass",0,"take a vote = 표결하다.","표결하다","take a vote"],
+["COLO","We ------- [[an order]] for 500 units yesterday.","placed|put|set|laid",0,"place an order = 주문하다.","주문하다","place an order"],
+["COLO","The company ------- [[a new policy]] on remote work.","implemented|occurred|proceeded|consisted",0,"implement a policy = 정책을 시행하다. 나머지는 자동사.","정책을 시행하다","implement a policy"],
+["COLO","The manager ------- [[an important role]] in the merger.","played|did|made|acted",0,"play a role = 역할을 하다.","역할을 하다","play a role"],
+["COLO","Customers can ------- [[a complaint]] online.","file|fill|fail|feel",0,"file a complaint = 불만을 제기하다. fill(채우다)과 헷갈리게 출제됨.","불만을 제기하다","file a complaint"],
+["COLO","The new CEO has ------- [[a goal]] of doubling sales.","set|put|laid|placed",0,"set a goal = 목표를 세우다.","목표를 세우다","set a goal"],
+["COLO","The two companies ------- [[a contract]] last week.","signed|wrote|drew|marked",0,"sign a contract = 계약을 체결하다.","계약을 체결하다","sign a contract"],
+["COLO","We ------- [[our apologies]] for the delay in shipping.","offer|receive|accept|apply",0,"offer an apology = 사과하다. 회사 이메일 단골.","사과를 전하다","offer our apologies"],
+["COLO","Our company ------- [[great importance on]] teamwork.","places|makes|takes|gives",0,"place importance on ~ = ~을 중요시하다.","~을 중요시하다","place importance on"],
+["COLO","Mr. Lee has a ------- [[understanding]] of the local market.","thorough|through|throughout|though",0,"thorough understanding = 철저한 이해. 철자가 비슷한 단어로 헷갈리게 출제.","철저한 이해","thorough understanding"],
+["COLO","The bookstore offers a ------- [[selection]] of magazines.","wide|tall|deep|high",0,"a wide selection/range of = 다양한 ~.","다양한 종류","a wide selection of"],
+["COLO","Our sales showed ------- [[improvement]] this quarter.","significant|signified|signing|signal",0,"significant improvement = 상당한 개선.","상당한 개선","significant improvement"],
+["COLO","The company is in ------- [[need]] of experienced engineers.","urgent|urging|urge|urgently",0,"in urgent need of = ~이 급히 필요한.","~이 급히 필요한","in urgent need of"],
+["COLO","The concert hall is ------- [[equipped]] with modern sound systems.","fully|full|fullness|filled",0,"fully equipped = 완벽히 갖춘.","설비를 완벽히 갖춘","fully equipped"],
+["COLO","This position is ------- [[suited]] for someone with sales experience.","ideally|ideal|idea|ideals",0,"ideally suited = ~에 딱 맞는.","~에 딱 맞는","ideally suited"],
+["COLO","All applications will be kept ------- [[confidential]].","strictly|strict|strictness|stricter",0,"strictly confidential = 극비의.","철저히 기밀인","strictly confidential"],
+["COLO","Ms. Grant is ------- [[qualified]] for the role.","highly|high|height|higher",0,"highly qualified = 충분한 자격을 갖춘. high는 '높이'라는 물리적 의미.","자격이 충분한","highly qualified"],
+["COLO","Our representatives are ------- [[available]] to help you.","readily|ready|readiness|reader",0,"readily available = 쉽게 이용할 수 있는.","쉽게 이용할 수 있는","readily available"],
+["COLO","The company offers a generous ------- [[package]].","benefits|beneficial|benefited|beneficiary",0,"benefits package = 복리후생 제도. 복합명사.","복리후생 제도","benefits package"]
 ];
 const cnt={};
 const P5=RAW.map(r=>{cnt[r[0]]=(cnt[r[0]]||0)+1;return {id:r[0]+"-"+cnt[r[0]],t:r[0],q:r[1],c:r[2].split("|"),a:r[3],ex:r[4],m:r[5]?r[5].split("|"):null,w:r[6]||null}});
@@ -724,32 +831,42 @@ const plain=s=>s.replace(/\[\[|\]\]/g,"");
 function show(v){["home","quiz","result","words"].forEach(x=>$(x).hidden=x!==v);window.scrollTo(0,0)}
 const acc=k=>{const s=S.stats[k];return s&&s.n?s.c/s.n:null};
 const tried=k=>(S.stats[k]||{n:0}).n;
+const TOTAL=()=>P5.length+P6.length*4;
 
 /* ===== 홈 ===== */
-function chip(k){
-  const s=S.stats[k], a=acc(k);
-  const cls=!s?"new":a<.6?"low":a>=.8?"good":"";
-  return `<div class="tc ${cls}"><b>${T[k].l}</b><span>${s?Math.round(a*100)+"% · "+s.n+"문제":"아직 안 풀어봄"}</span></div>`;
+function typeRow(k){
+  const s=S.stats[k], a=acc(k), p=s?Math.round(a*100):0;
+  const cls=!s?"new":a<.6?"low":a>=.8?"good":"mid";
+  return `<div class="trow ${cls}"><span class="tname">${T[k].l}<small>${s?s.n+"문제 풀어봄":"아직 안 풀어봄"}</small></span><span class="tbar"><i style="width:${p}%"></i></span><span class="tval">${s?p+"%":"–"}</span></div>`;
+}
+function groupSum(g){
+  const ks=Object.keys(T).filter(k=>T[k].g===g), done=ks.filter(k=>S.stats[k]);
+  let n=0,c=0; done.forEach(k=>{n+=S.stats[k].n;c+=S.stats[k].c});
+  return `${done.length}/${ks.length}개 유형${n?" · 정답률 "+Math.round(c/n*100)+"%":""}`;
 }
 function renderHome(){
   const t=ds(new Date());
   $("tdCount").textContent=S.day===t?S.count:0;
   $("tdStreak").textContent=S.streak;
-  $("wrongSub").textContent="틀린 문제 "+S.wrong.length+"개";
+  const seenN=S.seen.length;
+  $("tdProg").textContent=Math.min(100,Math.round(seenN/TOTAL()*100))+"%";
+  $("wrongBadge").textContent=S.wrong.length;
+  $("wrongBadge").classList.toggle("zero",!S.wrong.length);
   $("mWrong").disabled=!S.wrong.length;
   const keys=Object.keys(T);
-  $("mapG").innerHTML=keys.filter(k=>T[k].g==="G").map(chip).join("");
-  $("mapV").innerHTML=keys.filter(k=>T[k].g==="V").map(chip).join("");
-  $("mapP").innerHTML=keys.filter(k=>T[k].g==="P").map(chip).join("");
-  const done=keys.filter(k=>S.stats[k]).length;
-  const seenN=P5.filter(q=>S.seen.includes(q.id)).length;
-  $("mapSum").textContent=`경험한 유형 ${done}/${keys.length} · 본 문제 ${seenN}/${P5.length+P6.length*4}`;
+  // 약한 유형은 위로
+  const sortT=g=>keys.filter(k=>T[k].g===g).sort((a,b)=>(acc(a)??2)-(acc(b)??2));
+  $("mapG").innerHTML=sortT("G").map(typeRow).join("");
+  $("mapV").innerHTML=sortT("V").map(typeRow).join("");
+  $("mapP").innerHTML=sortT("P").map(typeRow).join("");
+  $("sumG").textContent=groupSum("G"); $("sumV").textContent=groupSum("V"); $("sumP").textContent=groupSum("P");
+  $("mapSum").textContent=`문제 ${TOTAL()}개 중 ${seenN}개를 풀어봤어요. 정답률 낮은 유형이 위에 와요.`;
   const weak=weakTypes();
   $("mWeak").disabled=!weak.length;
-  $("weakSub").textContent=weak.length?"지금 제일 약한 유형: "+T[weak[0]].l:"유형당 2문제 이상 풀면 열려요";
-  const left=Object.keys(T).filter(k=>T[k].g!=="P"&&!S.stats[k]).length;
+  $("weakSub").textContent=weak.length?"지금 제일 약한 유형: "+weak.slice(0,2).map(k=>T[k].l).join(", "):"유형당 2문제 이상 풀면 열려요";
+  const left=keys.filter(k=>T[k].g!=="P"&&!S.stats[k]).length;
   $("mainSub").textContent=left?`문법 7 + 어휘 3 · 아직 안 풀어본 유형 ${left}개부터 나와요`:"문법 7 + 어휘 3 · 덜 풀어본 유형부터 골고루";
-  $("wordsSub").textContent=`토익 단골 어휘·숙어 ${P5.filter(q=>VOCAB.includes(q.t)).length}개`;
+  $("wordsSub").textContent=`단골 어휘·숙어·콜로케이션 ${P5.filter(q=>VOCAB.includes(q.t)).length}개`;
   show("home");
 }
 function weakTypes(){
@@ -759,9 +876,9 @@ function weakTypes(){
 /* ===== 문제 고르기 ===== */
 function pickFromType(k,n,used){
   const pool=P5.filter(q=>q.t===k&&!used.has(q.id));
-  const fresh=shuffle(pool.filter(q=>!S.seen.includes(q.id)));
+  const nw=shuffle(pool.filter(q=>!S.seen.includes(q.id)));
   const old=shuffle(pool.filter(q=>S.seen.includes(q.id)));
-  return fresh.concat(old).slice(0,n);
+  return nw.concat(old).slice(0,n);
 }
 function orderTypes(group){
   // 적게 풀어본 유형 먼저, 비슷하면 정답률 낮은 유형 먼저
@@ -818,24 +935,28 @@ const goalOf=it=>it.k===5?22:35;
 
 function renderQ(){
   const it=Q.items[Q.i];
-  $("prog").innerHTML=Q.items.map((_,i)=>{const r=Q.res[i];return `<i class="${r?(r.ok?"ok":"no"):(i===Q.i?"on":"")}"></i>`}).join("");
-  let h=`<span class="tag">${it.k===5?"Part 5":"Part 6 · "+P6[it.pi].kind} · ${Q.i+1}/${Q.items.length}</span>`;
+  $("qcount").textContent=(Q.i+1)+" / "+Q.items.length;
+  $("segs").innerHTML=Q.items.map((_,i)=>{const r=Q.res[i];return `<i class="${r?(r.ok?"ok":"no"):(i===Q.i?"on":"")}"></i>`}).join("");
+  let h="";
   if(it.k===5){
-    h+=`<div class="stem">${fmt(it.q.q).replace("-------",'<span class="blank cur">(　　)</span>')}</div>`;
+    h+=`<p class="qmeta">Part 5 · 빈칸에 알맞은 것을 고르세요</p>`;
+    h+=`<p class="stem">${fmt(it.q.q).replace("-------",'<span class="blank cur">?</span>')}</p>`;
   }else{
     const p=P6[it.pi];
     const body=p.text.map(par=>"<p>"+fmt(par).replace(/\{(\d)\}/g,(m,n)=>{
       const qi=n-1, prev=Q.items.findIndex(x=>x.k===6&&x.pi===it.pi&&x.qi===qi);
-      if(prev>-1&&prev<Q.i&&Q.res[prev]){const q=p.qs[qi];return `<span class="blank filled">${q.t==="INS"?"["+n+"] ✓":esc(q.c[q.a])}</span>`}
+      if(prev>-1&&prev<Q.i&&Q.res[prev]){const q=p.qs[qi];return `<span class="blank filled">${q.t==="INS"?"("+n+") ✓":esc(q.c[q.a])}</span>`}
       return `<span class="blank${qi===it.qi?" cur":""}">${n}</span>`;
     })+"</p>").join("");
-    h+=`<div class="passage"><div class="meta">${esc(p.meta)}</div>${body}</div>
-        <div style="font-size:.88rem;font-weight:700">빈칸 ${it.qi+1}${it.q.t==="INS"?" — 들어갈 문장을 고르세요":""}</div>`;
+    h+=`<p class="qmeta">Part 6 · ${esc(p.kind)}</p>`;
+    h+=`<div class="passage"><div class="meta">${esc(p.meta)}</div>${body}</div>`;
+    h+=`<p class="pq">빈칸 ${it.qi+1}${it.q.t==="INS"?" · 들어갈 문장을 고르세요":" · 알맞은 것을 고르세요"}</p>`;
   }
-  h+=`<div class="choices">${it.q.c.map((c,i)=>`<button class="ch" data-i="${i}"><span class="bub">${L[i]}</span><span>${esc(c)}</span></button>`).join("")}</div>`;
+  h+=`<div class="choices">${it.q.c.map((c,i)=>`<button class="ch" data-i="${i}"><span class="k">${L[i]}</span><span>${esc(c)}</span></button>`).join("")}</div>`;
   $("sheet").innerHTML=h; $("sheet").classList.remove("reveal"); $("fbBox").innerHTML="";
   $("sheet").querySelectorAll(".ch").forEach(b=>b.onclick=()=>answer(+b.dataset.i));
   const cur=$("sheet").querySelector(".passage .blank.cur"); if(cur) cur.scrollIntoView({block:"nearest"});
+  window.scrollTo(0,0);
   const goal=goalOf(it); t0=Date.now(); clearInterval(timerId);
   const tick=()=>{const s=Math.round((Date.now()-t0)/1000);$("timer").textContent=s+"s / "+goal+"s";$("timer").classList.toggle("over",s>goal)};
   tick(); timerId=setInterval(tick,1000);
@@ -851,19 +972,22 @@ function answer(pick){
   S.wrong=S.wrong.filter(x=>x!==id); if(!ok) S.wrong.push(id);
   save();
   $("sheet").classList.add("reveal");
-  $("sheet").querySelectorAll(".ch").forEach((b,i)=>{b.disabled=true;if(i===q.a)b.classList.add("right");else if(i===pick)b.classList.add("wrong")});
+  $("sheet").querySelectorAll(".ch").forEach((b,i)=>{b.disabled=true;if(i===q.a)b.classList.add("right");else if(i===pick)b.classList.add("wrong");else b.classList.add("dim")});
+  $("segs").children[Q.i].className=ok?"ok":"no";
   let mean="";
-  if(q.m&&q.m.length===4) mean=`<dl class="mean">${q.c.map((c,i)=>`<dt>${esc(c)}</dt><dd>${esc(q.m[i])}</dd>`).join("")}</dl>`;
-  else if(q.m) mean=`<dl class="mean"><dt>${esc(q.w)}</dt><dd>${esc(q.m[0])}</dd></dl>`;
+  if(q.m&&q.m.length===4) mean=`<div class="exb"><h3>보기 뜻</h3><dl class="mean">${q.c.map((c,i)=>`<dt class="${i===q.a?"ans":""}">${esc(c)}</dt><dd>${esc(q.m[i])}</dd>`).join("")}</dl></div>`;
+  else if(q.m) mean=`<div class="exb"><h3>외울 표현</h3><dl class="mean"><dt class="ans">${esc(q.w)}</dt><dd>${esc(q.m[0])}</dd></dl></div>`;
   const last=Q.i===Q.items.length-1;
-  $("fbBox").innerHTML=`<div class="fb ${ok?"ok":"no"}">
-     <strong>${ok?"정답":"오답 — 정답은 ("+L[q.a]+") "+esc(q.c[q.a])}</strong>
-     <span><b>[${T[q.t].l}]</b> ${esc(q.ex)}</span>
+  $("fbBox").innerHTML=`
+   <div class="verdict ${ok?"ok":"no"}"><span class="vicon">${ok?"✓":"✕"}</span>
+     <div><b>${ok?"정답이에요":"아쉽게 틀렸어요"}</b><span>정답 (${L[q.a]}) ${esc(q.c[q.a])}</span></div></div>
+   <div class="explain">
+     <div class="exb"><h3>왜 이게 답일까</h3><p><span class="pill">${T[q.t].l}</span>${esc(q.ex)}</p></div>
      ${mean}
-     <span class="tip"><b>이 유형 푸는 법</b> · ${esc(T[q.t].tip)}</span>
-     ${sec>goalOf(it)?'<span class="tip">시간 초과. 실전에선 모르면 찍고 넘어가야 Part 7 시간이 남아요.</span>':""}
+     <div class="exb"><h3>이 유형 공략</h3><p>${esc(T[q.t].tip)}</p></div>
+     ${sec>goalOf(it)?`<div class="exb"><h3>시간</h3><p class="warn">${sec}초 걸렸어요. 실전에선 모르면 찍고 넘어가야 Part 7 시간이 남아요.</p></div>`:""}
    </div>
-   <button class="btn" id="next" style="margin-top:12px">${last?"결과 보기":"다음 문제 →"}</button>`;
+   <div class="nextbar"><button class="btn" id="next">${last?"결과 보기":"다음 문제"}</button></div>`;
   $("next").onclick=()=>{if(last)finish();else{Q.i++;renderQ()}};
   $("next").focus({preventScroll:true});
 }
@@ -871,37 +995,39 @@ function answer(pick){
 function finish(){
   const n=Q.res.length, c=Q.res.filter(r=>r.ok).length;
   const avg=n?Math.round(Q.res.reduce((s,r)=>s+r.sec,0)/n):0;
-  $("rScore").textContent=c+"/"+n;
-  $("rTime").textContent="평균 "+avg+"초";
+  $("rScore").innerHTML=c+"<span>/"+n+"</span>";
+  $("rTime").textContent="한 문제 평균 "+avg+"초";
   const r=n?c/n:0;
   $("rMsg").textContent= r===1?"전부 맞았어요. 시간까지 줄이면 실전 준비 끝.":
     r>=.7?"좋아요. 틀린 건 오답노트에 들어갔으니 내일 한 번 더 보면 됩니다.":
-    "괜찮아요, 처음엔 다 이래요. 틀린 문제의 노란 단서만 다시 보고 오늘은 끝내도 충분해요.";
+    "괜찮아요, 처음엔 다 이래요. 틀린 문제의 형광펜 단서만 다시 보고 오늘은 끝내도 충분해요.";
   const met={};Q.items.slice(0,n).forEach((it,i)=>{const k=it.q.t;met[k]=met[k]||{n:0,c:0};met[k].n++;if(Q.res[i].ok)met[k].c++});
-  $("rTypes").innerHTML=Object.entries(met).map(([k,v])=>`<div class="tc ${v.c===v.n?"good":v.c===0?"low":""}"><b>${T[k].l}</b><span>${v.c}/${v.n}</span></div>`).join("");
+  $("rTypes").innerHTML=Object.entries(met).sort((a,b)=>a[1].c/a[1].n-b[1].c/b[1].n)
+    .map(([k,v])=>`<div class="rline"><span>${T[k].l}</span><span class="rv ${v.c===v.n?"ok":"no"}">${v.c} / ${v.n}</span></div>`).join("");
   const wrong=Q.items.map((it,i)=>({it,r:Q.res[i]})).filter(x=>x.r&&!x.r.ok);
-  $("rWrongPanel").hidden=!wrong.length;
+  $("rWrongSec").hidden=!wrong.length;
   $("rWrong").innerHTML=wrong.map(({it})=>{
-    const s=it.k===5?esc(plain(it.q.q)):esc(P6[it.pi].kind)+" 지문 빈칸 "+(it.qi+1);
-    return `<li><span class="s">${s}</span><span class="muted">[${T[it.q.t].l}] 정답 (${L[it.q.a]}) ${esc(it.q.c[it.q.a])}</span></li>`}).join("");
-  $("again").textContent=Q.mode==="wrong"?"오답노트 다시":"한 세트 더";
+    const s=it.k===5?esc(plain(it.q.q)).replace("-------","_____"):esc(P6[it.pi].kind)+" 지문 · 빈칸 "+(it.qi+1);
+    return `<div class="witem"><span class="s">${s}</span><span class="a">${T[it.q.t].l} · 정답 (${L[it.q.a]}) <b>${esc(it.q.c[it.q.a])}</b></span></div>`}).join("");
+  $("again").textContent=Q.mode==="wrong"?"오답노트 다시 풀기":"한 세트 더";
   show("result");
 }
 
 /* ===== 단어장 ===== */
 let wFilter="all";
 function renderWords(){
-  const segs=[["all","전체"],["miss","틀린 것"]].concat(VOCAB.map(k=>[k,T[k].l]));
-  $("wSeg").innerHTML=segs.map(([k,l])=>`<button data-k="${k}" class="${wFilter===k?"on":""}">${l}</button>`).join("");
-  $("wSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{wFilter=b.dataset.k;renderWords()});
+  const tabs=[["all","전체"],["miss","틀린 것"]].concat(VOCAB.map(k=>[k,T[k].l]));
+  $("wTabs").innerHTML=tabs.map(([k,l])=>`<button data-k="${k}" class="${wFilter===k?"on":""}">${l}</button>`).join("");
+  $("wTabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{wFilter=b.dataset.k;renderWords()});
   let list=P5.filter(q=>VOCAB.includes(q.t));
   if(wFilter==="miss") list=list.filter(q=>S.wrong.includes(q.id));
   else if(wFilter!=="all") list=list.filter(q=>q.t===wFilter);
   $("wList").innerHTML=list.length?list.map(q=>{
     const head=q.w||q.c[q.a], m=q.w?q.m[0]:q.m[q.a];
     const sent=esc(plain(q.q)).replace("-------","<b>"+esc(q.c[q.a])+"</b>");
-    return `<li class="${S.wrong.includes(q.id)?"miss":""}"><span class="w">${esc(head)}</span><span>${esc(m)}</span><span class="s muted">${sent}</span></li>`}).join("")
-    :'<li class="muted">아직 틀린 어휘 문제가 없어요.</li>';
+    return `<div class="wrow ${S.wrong.includes(q.id)?"miss":""}"><div class="whead"><b>${esc(head)}</b><span>${esc(m)}</span></div><p class="ex">${sent}</p></div>`}).join("")
+    :'<p class="empty">아직 틀린 어휘 문제가 없어요.</p>';
+  if(!$("words").hidden) return;
   show("words");
 }
 
