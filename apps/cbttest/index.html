@@ -115,12 +115,12 @@ main{padding-block:28px 64px}
 .sec-t span{flex:1;border-top:1px solid var(--rule);transform:translateY(-4px)}
 
 .src{background:var(--surface);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
-.src-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;padding:13px 18px;border-top:1px solid var(--rule);font-size:14px}
+.src-row{display:grid;grid-template-columns:150px minmax(0,1fr);align-items:baseline;gap:14px;padding:13px 18px;border-top:1px solid var(--rule);font-size:14px}
 .src-row:first-child{border-top:0}
-.src-row dt{font-family:var(--f-mono);font-size:12px;color:var(--muted);padding-top:2px}
+.src-row dt{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
 .src-row dd{margin:0}
 .src-row a{color:var(--kr);font-family:var(--f-mono);font-size:13.5px;text-underline-offset:3px}
-.src-row ul{margin:0;padding-left:18px}
+.src-row ul{margin:0;padding:0;list-style:none}.src-row li::before{content:"·";margin-right:6px;color:var(--muted)}
 .caution{margin-top:22px;display:flex;gap:14px;align-items:flex-start;background:var(--warn-bg);color:var(--ink);border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);border-radius:12px;padding:16px 18px}
 .caution svg{flex:none;width:26px;height:26px;color:var(--warn);margin-top:1px}
 .caution b{color:var(--warn);font-weight:700}
@@ -414,7 +414,8 @@ tr:last-child td{border-bottom:0}
 .pr-grid b{display:block;font-family:var(--f-disp);font-size:20px;font-weight:800;color:var(--ink)}
 .pr-grid span{display:block;font-size:12px;line-height:1.45;color:var(--muted)}
 .pr-note{margin-top:16px;font-size:12px;color:var(--muted)}
-@media (max-width:520px){.hero .cta{flex-direction:column-reverse;align-items:flex-start}.pr-grid div{padding:9px 9px}.pr-grid b{font-size:16px}}
+.hero .cta{align-items:stretch}.hero .cta .btn{justify-content:center}
+@media (max-width:520px){.hero .cta{display:grid;grid-auto-rows:1fr;justify-content:start}.hero .cta #passBtn{order:-1}.pr-grid div{padding:9px 9px}.pr-grid b{font-size:16px}}
 .sy-box{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;margin:0 0 18px;display:grid;gap:10px}
 .sy-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .sy-h b{font-family:var(--f-disp);font-weight:800;font-size:16px}
