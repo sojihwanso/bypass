@@ -404,6 +404,17 @@ tr:last-child td{border-bottom:0}
 .egg-card small{display:block;margin-top:14px;font-size:12px;color:#6B7A86}
 @keyframes eggpop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.egg-card{animation:none}}
+.pr-sec{margin-top:18px}
+.pr-sec h4{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.12em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.pr-sec ul{margin:0;padding-left:18px;font-size:14px;line-height:1.65}
+.pr-sec li+li{margin-top:3px}
+.pr-sec em{font-style:normal;color:var(--oil);font-weight:700}
+.pr-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pr-grid div{background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:10px 12px}
+.pr-grid b{display:block;font-family:var(--f-disp);font-size:20px;font-weight:800;color:var(--ink)}
+.pr-grid span{font-size:12px;color:var(--muted)}
+.pr-note{margin-top:16px;font-size:12px;color:var(--muted)}
+@media (max-width:520px){.hero .cta{flex-direction:column-reverse;align-items:flex-start}.pr-grid div{padding:9px 9px}.pr-grid b{font-size:16px}}
 </style>
 </head>
 <body>
@@ -560,6 +571,22 @@ function modal(inner, onMount){
 }
 const ICON_WARN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5M12 18v.5"/></svg>';
 const ICON_TRI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M12 4 3 20h18z"/></svg>';
+function passRule(){
+  modal(`<h3>해기사 시험 합격 기준</h3>
+  <p class="sub">「선박직원법 시행령」 제18조 · 한국해양수산연수원 안내 기준</p>
+  <div class="pr-sec"><h4>필기시험 합격</h4>
+    <div class="pr-grid"><div><b>40점</b><span>과목별 과락 기준</span></div><div><b>60점</b><span>항해사 법규 과락 기준</span></div><div><b>평균 60점</b><span>전 과목 평균</span></div></div>
+    <ul style="margin-top:10px"><li>과목당 100점 만점. 한 과목이라도 <em>40점 미만</em>이면 과락</li><li>항해사는 <em>법규</em> 과목만 <em>60점 미만</em>이면 과락</li><li>과락 없이 전 과목 평균 <em>60점 이상</em>이면 합격</li><li>일부 과목을 면제받아도, 응시한 과목에는 같은 기준 적용</li></ul></div>
+  <div class="pr-sec"><h4>면접 · 실기</h4><ul><li>면접: 위원별 100점 만점, 평균 60점 이상</li><li>실기: 과목당 100점 만점, 60점 이상</li></ul></div>
+  <div class="pr-sec"><h4>과목합격</h4><ul>
+    <li>필기 불합격자 중 <em>60점 이상</em> 받은 과목이 <em>2과목 이상</em>이면 해당 과목 과목합격</li>
+    <li>유효기간 <em>2년</em> (시험일 기준). 참고로 1~2급 필기합격은 4년, 최종합격은 3년</li>
+    <li>다음 회차에 '과목합격 적용'을 고르면 나머지 과목만 응시</li>
+    <li>'과목합격 무시'로 전 과목을 응시하면 이전 과목합격은 소멸하고 다시 적용할 수 없음 (새로 생긴 과목합격은 인정)</li>
+    <li>과목합격은 중복·추가 적용되지 않음. 예: 항해·운용 과목합격 후 나머지 3과목 응시에서 법규·영어가 60점 이상이어도 새 과목합격은 생기지 않음</li></ul></div>
+  <p class="pr-note">과목합격은 연수원 안내에 따른 것으로, 시행령 제18조 조문에는 없는 내용입니다. 정확한 기준은 공고를 확인하세요.</p>
+  <div class="acts"><button class="btn btn-pri" data-close>확인</button></div>`);
+}
 function soon(what){
   modal('<img class="masc" src="mascot.webp" alt="잠자는 Bypass 마스코트" width="640" height="381"><div class="soon"><div class="ic">' + ICON_WARN + '</div><div><h3>준비 중!</h3><p class="sub">' + esc(what) + ' 기출문제는 추후 업데이트 예정입니다. 지금은 항해 필기만 풀 수 있어요.</p></div></div><div class="acts"><button class="btn btn-pri" data-close>확인</button></div>');
 }
@@ -606,6 +633,7 @@ function home(){
       <p class="lede">한국해양수산연수원이 공개한 해기사 시험 기출문제를 직종·년도·회차·과목별로 골라 풉니다. 바로 채점, 과목 모의고사, 회차 전체 모의고사, 전 회차 무작위 풀이를 지원합니다.</p>
       <div class="cta">
         <button class="btn btn-pri btn-big" id="startBtn" type="button">시작 →</button>
+        <button class="btn btn-ghost" id="passBtn" type="button">해기사 시험 합격 기준</button>
       </div>
     </div>
     <div class="hero-art">
@@ -628,6 +656,7 @@ function home(){
       <li>2021~2025년 정기 제1~4회 해기사 시험 문제지 (1~4급 항해사 상선·어선)</li></ul></dd></div>
     <div class="src-row"><dt>정답</dt><dd>2018·2020~2025년 해기사 시험 공개 답안(정답표). 해설은 공개되지 않아 정답만 표시합니다.</dd></div>
     <div class="src-row"><dt>관련 법령</dt><dd>해기사 시험 · 면허 관련 「선박직원법 시행규칙」 (법제처 국가법령정보센터)<br><a href="https://www.law.go.kr/lsSc.do?section=&amp;menuId=1&amp;subMenuId=15&amp;tabMenuId=81&amp;eventGubun=060101&amp;query=%EC%84%A0%EB%B0%95%EC%A7%81%EC%9B%90%EB%B2%95#searchId0" target="_blank" rel="noopener">https://www.law.go.kr · 선박직원법 검색</a></dd></div>
+    <div class="src-row"><dt>합격 기준</dt><dd>「선박직원법 시행령」 제18조(시험의 합격기준) [시행 2025. 10. 1.] [대통령령 제35811호]<br><a href="https://www.law.go.kr/LSW//lsSideInfoP.do?lsiSeq=278015&amp;joNo=0018&amp;joBrNo=00&amp;docCls=jo&amp;urlMode=lsScJoRltInfoR" target="_blank" rel="noopener">https://www.law.go.kr · 시행령 제18조</a><br>과목합격 · 유효기간 · 적용 방식: 한국해양수산연수원 안내<br><a href="https://www.alime.or.kr/member/recommand/seamanExam_myContentsList.do" target="_blank" rel="noopener">선원포털 · 해기사 시험 안내</a><br><a href="https://lems.seaman.or.kr/SInformation/EPSearch/selectIPassList.do" target="_blank" rel="noopener">국가자격시험 · 합격정보</a><br><a href="https://lems.seaman.or.kr/CInformation/Faq/selectFaqList.do" target="_blank" rel="noopener">국가자격시험 · FAQ</a></dd></div>
     <div class="src-row"><dt>직종 설명</dt><dd>「선박직원법 시행령」 [별표 3] 선박직원의 최저승무기준 (2025. 10. 1. 개정)</dd></div>
     <div class="src-row"><dt>발행</dt><dd>한국해양수산연수원 (KIMFT)</dd></div>
     <div class="src-row"><dt>출처 사이트</dt><dd><a href="https://www.seaman.or.kr" target="_blank" rel="noopener">https://www.seaman.or.kr</a><br><a href="https://lems.seaman.or.kr" target="_blank" rel="noopener">https://lems.seaman.or.kr</a> <span class="chip">해기사 국가자격시험</span></dd></div>
@@ -639,6 +668,7 @@ function home(){
     <small>기출문제는 출제 당시 기준이므로 법령 개정 등으로 현재 정답과 다를 수 있습니다. 무단 복제 및 영리 목적 이용을 금합니다.</small></div>
   </div>`;
   document.getElementById('startBtn').onclick = () => { stepBranch(); };
+  document.getElementById('passBtn').onclick = passRule;
 }
 
 /* ---------- steps ---------- */
