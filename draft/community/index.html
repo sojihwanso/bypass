@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>BYPASS 커뮤니티 새 디자인 초안</title>
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css" rel="stylesheet">
+<style>
+  /* ===== 커뮤니티 새 디자인 초안 (메인 초안 v2와 같은 규칙) ===== */
+  :root {
+    --ground: #141413; --ground-2: #1A1A18; --ground-3: #202020; --chrome: #0F0F0E;
+    --line: #2A2A26; --line-soft: #20201D;
+    --ink-100: #F2F1EC; --ink-200: #C3C3BC; --ink-300: #A9A9A1; --ink-400: #8A8A82;
+    --orange: #EE6A1F; --orange-hot: #FF7A2E; --green: #8FD14F; --red: #FF6B5B; --sky: #6FC3FF; --amber: #FFB13B;
+    --pixel: 'Galmuri11', 'Noto Sans KR', monospace;
+    --mono: 'GalmuriMono11', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    --voice: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { background: var(--ground); }
+  body { margin: 0; background: var(--ground); color: var(--ink-200); font-family: var(--voice); font-size: 17px; line-height: 1.7; letter-spacing: -0.015em; word-break: keep-all; overflow-wrap: break-word; -webkit-font-smoothing: antialiased; padding-bottom: 72px; }
+  a { color: var(--ink-100); text-decoration: underline; text-decoration-color: var(--orange); text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  a:hover { color: var(--orange); }
+  :focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
+  b { color: var(--ink-100); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+  @media (max-width: 600px) { .wrap { padding: 0 18px; } body { font-size: 16.5px; } }
+  .draft-flag { position: fixed; left: 10px; bottom: 70px; z-index: 50; font-family: var(--mono); font-size: 11px; color: #111; background: var(--amber); padding: 3px 7px; }
+
+  /* 머리글 */
+  .top { position: sticky; top: 0; z-index: 30; background: var(--chrome); border-bottom: 1px solid var(--line); }
+  .top-in { max-width: 1240px; margin: 0 auto; padding: 0 28px; height: 64px; display: flex; align-items: center; gap: 28px; }
+  .mark { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink-100); font-family: var(--pixel); font-weight: 700; font-size: 17px; letter-spacing: 0.14em; flex: none; }
+  .mark .px-dodo { width: 22px; height: auto; color: var(--ink-100); }
+  .tabs { display: flex; gap: 22px; }
+  .tabs a { font-family: var(--pixel); font-size: 13px; letter-spacing: 0.05em; color: var(--ink-300); text-decoration: none; padding: 21px 0 19px; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .tabs a:hover { color: var(--ink-100); }
+  .tabs a[aria-current] { color: var(--ink-100); border-color: var(--orange); }
+  .tabs .badge { font-family: var(--mono); font-size: 10.5px; color: #141413; background: var(--orange); padding: 1px 5px; margin-left: 6px; vertical-align: 1px; }
+  .top-r { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .search { display: flex; align-items: center; gap: 8px; height: 38px; width: 240px; padding: 0 10px; border: 1px solid var(--line); background: var(--ground); }
+  .search input { flex: 1; min-width: 0; background: none; border: 0; color: var(--ink-100); font: 14px var(--voice); outline: none; }
+  .search input::placeholder { color: var(--ink-400); }
+  .search kbd { font-family: var(--mono); font-size: 11px; color: var(--ink-400); border: 1px solid var(--line); padding: 0 5px; }
+  .ico { width: 16px; height: 16px; fill: none; stroke: var(--ink-400); stroke-width: 2; flex: none; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 38px; padding: 0 14px; font-family: var(--pixel); font-weight: 700; font-size: 12.5px; letter-spacing: 0.06em; text-decoration: none; border: 1px solid var(--orange); background: var(--orange); color: #141413; cursor: pointer; white-space: nowrap; }
+  .btn:hover { background: var(--orange-hot); color: #141413; }
+  .btn-line { background: transparent; color: var(--orange); }
+  .btn-line:hover { background: rgba(238,106,31,.1); color: var(--orange); }
+  .btn-ghost { background: transparent; border-color: var(--line); color: var(--ink-300); }
+  .btn-ghost:hover { background: var(--ground-2); color: var(--ink-100); }
+  .avatar { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid var(--line); background: var(--ground-3); font-family: var(--pixel); font-weight: 700; color: var(--orange); text-decoration: none; font-size: 15px; }
+  .find { display: none; }
+  @media (max-width: 960px) { .search { display: none; } .find { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid var(--line); } }
+  .tabs-sm { display: none !important; }
+  @media (max-width: 760px) {
+    .top-in { height: 56px; padding: 0 16px; gap: 12px; }
+    .top .tabs { display: none; }
+    .tabs-sm { display: flex !important; gap: 22px; overflow-x: auto; padding: 0 18px; border-top: 1px solid var(--line-soft); scrollbar-width: none; }
+    .tabs-sm a { padding: 12px 0 10px; }
+    .hq { display: none; }
+    .up .lab { display: none; }
+  }
+
+  /* 고정 공지 띠 */
+  .ticker { border-bottom: 1px solid var(--line); background: var(--chrome); }
+  .ticker a.in { display: flex; gap: 12px; align-items: baseline; max-width: 1240px; margin: 0 auto; padding: 11px 28px 12px; font-size: 14.5px; color: var(--ink-100); text-decoration: none; }
+  .ticker .lab { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--orange); flex: none; }
+  .ticker .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ticker .d { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--ink-400); flex: none; }
+  .ticker a.in:hover .t { text-decoration: underline; text-decoration-color: var(--orange); text-underline-offset: 4px; }
+  @media (max-width: 600px) { .ticker a.in { padding: 10px 18px; } .ticker .d { display: none; } }
+
+  /* 인사 */
+  .hi { padding: 64px 0 8px; }
+  .kicker { margin: 0 0 14px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: var(--orange); }
+  h1 { margin: 0; font-family: var(--pixel); font-weight: 700; font-size: clamp(30px, 4.6vw, 44px); line-height: 1.25; color: var(--ink-100); }
+  .lede { margin: 18px 0 0; font-size: clamp(17px, 2vw, 19px); color: var(--ink-200); max-width: 60ch; }
+  .lede b { color: var(--orange); font-weight: 700; }
+  .figs { display: grid; grid-template-columns: repeat(4, 1fr); margin: 32px 0 0; border: 1px solid var(--line); }
+  .figs a { display: block; padding: 14px 16px 16px; border-left: 1px solid var(--line); text-decoration: none; }
+  .figs a:first-child { border-left: 0; }
+  .figs a:hover { background: var(--ground-2); }
+  .figs dt { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--ink-400); }
+  .figs dd { margin: 10px 0 0; font-family: var(--pixel); font-weight: 700; font-size: 30px; line-height: 1; color: var(--ink-100); }
+  .figs dd small { font-size: 12px; color: var(--ink-400); margin-left: 4px; font-weight: 400; }
+  .figs .hot dd { color: var(--orange); }
+  @media (max-width: 600px) { .figs { grid-template-columns: 1fr 1fr; } .figs a:nth-child(3) { border-left: 0; } .figs a:nth-child(n+3) { border-top: 1px solid var(--line); } }
+
+  /* 구역 머리 */
+  .sec { padding: 64px 0 0; }
+  .sec-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+  h2 { margin: 0; font-family: var(--pixel); font-weight: 700; font-size: 22px; letter-spacing: 0.02em; color: var(--ink-100); }
+  h2 small { font-family: var(--mono); font-size: 12px; color: var(--ink-400); font-weight: 400; margin-left: 6px; }
+  .more { margin-left: auto; font-family: var(--pixel); font-size: 12.5px; letter-spacing: 0.05em; color: var(--orange); text-decoration: none; }
+  .more:hover { color: var(--orange-hot); text-decoration: underline; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chips button { font-family: var(--pixel); font-size: 12px; letter-spacing: 0.04em; color: var(--ink-300); background: none; border: 1px solid var(--line); padding: 5px 10px; cursor: pointer; }
+  .chips button[aria-pressed="true"] { color: #141413; background: var(--ink-100); border-color: var(--ink-100); }
+  @media (max-width: 600px) { .sec-head .chips { order: 3; width: 100%; } }
+
+  /* 결과물 카드 */
+  .shows { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .show { display: flex; flex-direction: column; border: 1px solid var(--line); background: var(--ground-2); text-decoration: none; color: inherit; }
+  .show:hover { border-color: var(--orange); }
+  .show:hover h3 { color: var(--orange); }
+  .thumb { aspect-ratio: 16 / 9; border-bottom: 1px solid var(--line); display: grid; place-items: center; position: relative; overflow: hidden;
+    background: linear-gradient(var(--line-soft) 1px, transparent 1px) 0 0 / 16px 16px, linear-gradient(90deg, var(--line-soft) 1px, transparent 1px) 0 0 / 16px 16px, var(--ground); }
+  .thumb span { font-family: var(--pixel); font-weight: 700; font-size: 30px; letter-spacing: 0.04em; color: var(--ink-100); }
+  .thumb.o span { color: var(--orange); } .thumb.g span { color: var(--green); } .thumb.s span { color: var(--sky); }
+  .show-b { padding: 14px 16px 16px; flex: 1; display: flex; flex-direction: column; }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 10px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; color: var(--ink-400); }
+  .k-wiki { color: var(--sky); } .k-app { color: var(--orange); } .k-tool { color: var(--green); }
+  .show h3 { margin: 8px 0 4px; font-size: 17.5px; font-weight: 700; color: var(--ink-100); line-height: 1.45; }
+  .show p { margin: 0; font-size: 14.5px; color: var(--ink-300); line-height: 1.6; }
+  @media (max-width: 860px) { .shows { grid-template-columns: 1fr 1fr; } .shows .show:nth-child(3) { display: none; } }
+  @media (max-width: 560px) { .shows { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; margin-right: -18px; padding-right: 18px; } .shows .show { flex: 0 0 78%; scroll-snap-align: start; } .shows .show:nth-child(3) { display: flex; } }
+
+  /* 새 글: 기록 목록 */
+  .log { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .log li { border-bottom: 1px solid var(--line-soft); }
+  .log a { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; padding: 16px 4px; text-decoration: none; color: inherit; }
+  .log a:hover { background: var(--ground-2); }
+  .log a:hover .t { color: var(--orange); }
+  .log .t { font-size: 17px; font-weight: 500; color: var(--ink-100); line-height: 1.5; }
+  .log .c { grid-row: span 2; align-self: center; font-family: var(--mono); font-size: 12px; color: var(--ink-400); border: 1px solid var(--line); padding: 2px 8px; }
+  .log .c b { color: var(--ink-100); font-weight: 400; }
+  .cat-q { color: var(--sky); } .cat-tip { color: var(--green); } .cat-show { color: var(--orange); } .cat-chat { color: var(--ink-300); }
+
+  /* 회의실 안내 상자 */
+  .callout { margin: 0; padding: 20px 24px; background: var(--ground-2); border: 1px solid var(--line-soft); border-left: 6px solid var(--orange); display: grid; grid-template-columns: 1fr auto; gap: 8px 24px; align-items: center; }
+  .callout .lab { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--orange); margin-bottom: 4px; }
+  .callout p { margin: 0; color: var(--ink-100); }
+  .callout ul { grid-column: 1 / -1; list-style: none; margin: 8px 0 0; padding: 0; }
+  .callout li { display: flex; gap: 12px; padding: 9px 0; border-top: 1px dashed var(--line); font-size: 15.5px; }
+  .callout li .n { font-family: var(--mono); font-size: 11.5px; color: var(--ink-400); flex: none; padding-top: 3px; }
+  @media (max-width: 600px) { .callout { grid-template-columns: 1fr; } }
+
+  /* 바닥글 */
+  .foot { margin-top: 90px; border-top: 1px solid var(--line); padding: 34px 0 30px; font-size: 14px; color: var(--ink-400); }
+  .foot p { margin: 0 0 10px; }
+  .foot .links { font-family: var(--mono); font-size: 11.5px; }
+  .foot .links a { color: var(--ink-300); margin-right: 4px; }
+
+  /* 아래 고정 띠 */
+  .dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: var(--chrome); border-top: 1px solid var(--orange); }
+  .dock-in { max-width: 1240px; margin: 0 auto; padding: 10px 28px; padding-bottom: max(10px, env(safe-area-inset-bottom)); display: flex; align-items: center; justify-content: center; gap: 24px; }
+  .dock p { margin: 0; font-family: var(--pixel); font-size: 12.5px; letter-spacing: 0.05em; color: var(--ink-100); }
+  @media (max-width: 600px) { .dock-in { justify-content: space-between; padding-left: 18px; padding-right: 12px; gap: 12px; } .dock p { font-size: 11.5px; } }
+</style>
+</head>
+<body>
+<p class="draft-flag">커뮤니티 디자인 초안 · 글은 예시</p>
+
+<header class="top">
+  <div class="top-in">
+    <a class="mark" href="#"><svg class="px-dodo" viewBox="0 0 22 18" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M12 0h4v1h-4zM12 1h2v1h-2zM15 1h4v1h-4zM11 2h9v1h-9zM12 3h9v1h-9zM11 4h4v1h-4zM19 4h2v1h-2zM0 5h1v1h-1zM6 5h8v1h-8zM0 6h2v1h-2zM4 6h10v1h-10zM1 7h13v1h-13zM2 8h6v1h-6zM10 8h5v1h-5zM2 9h8v1h-8zM12 9h3v1h-3zM2 10h13v1h-13zM3 11h12v1h-12zM3 12h11v1h-11zM4 13h9v1h-9zM6 14h5v1h-5zM7 15h2v1h-2zM11 15h2v1h-2zM6 16h3v1h-3zM11 16h2v1h-2zM6 17h2v1h-2zM10 17h3v1h-3z"/><path fill="var(--orange)" d="M14 1h1v1h-1zM8 8h2v1h-2zM10 9h2v1h-2z"/></svg><span>BYPASS</span></a>
+    <nav class="tabs" aria-label="회원 메뉴">
+      <a href="#" aria-current="page">홈</a><a href="#">결과물</a><a href="#">게시판</a><a href="#">회의실<span class="badge">2</span></a>
+    </nav>
+    <div class="top-r">
+      <form class="search" role="search"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><label class="sr" for="q">결과물·글 찾기</label><input id="q" type="search" placeholder="결과물·글 찾기"><kbd>/</kbd></form>
+      <a class="find" href="#" aria-label="찾기"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></a>
+      <a class="btn btn-ghost hq" href="/hq/">HQ</a>
+      <a class="btn up" href="#">＋<span class="lab">글쓰기</span></a>
+      <a class="avatar" href="#" aria-label="내 정보">케</a>
+    </div>
+  </div>
+  <nav class="tabs tabs-sm" aria-label="회원 메뉴 (작은 화면)"><a href="#" aria-current="page">홈</a><a href="#">결과물</a><a href="#">게시판</a><a href="#">회의실<span class="badge">2</span></a><a href="/hq/">HQ</a></nav>
+</header>
+
+<div class="ticker"><a class="in" href="#"><span class="lab">고정 공지</span><span class="t">11월 정기 심의는 매주 목요일 저녁에 합니다. 안건은 회의실에 미리 올려 주세요.</span><span class="d">11. 3.</span></a></div>
+
+<main class="wrap">
+  <section class="hi">
+    <p class="kicker">2026. 11. 8. 일요일 · 국원</p>
+    <h1>케비프님, 안녕하세요.</h1>
+    <p class="lede">지난번 들어오신 뒤로 <b>새 결과물 3개</b>와 <b>새 글 5개</b>가 올라왔습니다. 회의실에 처리할 안건이 2건 있습니다.</p>
+    <dl class="figs">
+      <a href="#"><dt>새 결과물</dt><dd>3</dd></a>
+      <a href="#"><dt>새 글</dt><dd>5</dd></a>
+      <a href="#" class="hot"><dt>회의 안건</dt><dd>2<small>남음</small></dd></a>
+      <a href="#"><dt>내 제보</dt><dd>1<small>처리 중</small></dd></a>
+    </dl>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><h2>새 결과물</h2><a class="more" href="#">전체 보기 →</a></div>
+    <div class="shows">
+      <a class="show" href="/tools/smcp/"><div class="thumb o"><span>SMCP</span></div><div class="show-b"><div class="meta"><span class="k-tool">도구</span><span>·</span><span>국원</span></div><h3>SMCP 무전 교신 훈련소</h3><p>표준 해사 영어 교신을 듣고 말로 답하며 연습합니다.</p></div></a>
+      <a class="show" href="/apps/ecdis/"><div class="thumb s"><span>ECDIS</span></div><div class="show-b"><div class="meta"><span class="k-app">앱</span><span>·</span><span>국원</span></div><h3>ECDIS 시뮬레이터</h3><p>전자해도 화면을 직접 만지며 기능을 익힙니다.</p></div></a>
+      <a class="show" href="/wiki/tanker/"><div class="thumb g"><span>TANKER</span></div><div class="show-b"><div class="meta"><span class="k-wiki">위키</span><span>·</span><span>국원</span></div><h3>탱커선 위키</h3><p>탱커선 구조와 화물 작업을 과목별로 정리했습니다.</p></div></a>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <h2>새 글</h2>
+      <div class="chips" role="group" aria-label="말머리로 거르기"><button type="button" aria-pressed="true">전체</button><button type="button" aria-pressed="false">질문</button><button type="button" aria-pressed="false">팁</button><button type="button" aria-pressed="false">자랑</button><button type="button" aria-pressed="false">잡담</button></div>
+      <a class="more" href="#">전체 보기 →</a>
+    </div>
+    <ol class="log">
+      <li><a href="#"><span class="meta"><span class="cat-q">질문</span><span>국원 A</span><span>12분 전</span></span><span class="c">댓글 <b>3</b></span><span class="t">HTML 위키 올릴 때 그림은 어디에 넣어야 하나요?</span></a></li>
+      <li><a href="#"><span class="meta"><span class="cat-show">자랑</span><span>국원 B</span><span>2시간 전</span></span><span class="c">댓글 <b>7</b></span><span class="t">해기사 문제 풀이에 오답 노트 PDF로 뽑기 넣었습니다</span></a></li>
+      <li><a href="#"><span class="meta"><span class="cat-tip">팁</span><span>국원 C</span><span>어제</span></span><span class="c">댓글 <b>1</b></span><span class="t">AI한테 화면 고쳐 달라고 할 때 캡처를 같이 주면 훨씬 정확합니다</span></a></li>
+      <li><a href="#"><span class="meta"><span class="cat-chat">잡담</span><span>국원 D</span><span>어제</span></span><span class="c">댓글 <b>0</b></span><span class="t">이번 주 학식 꿀꿀이 알림 진짜 편하네요</span></a></li>
+    </ol>
+  </section>
+
+  <section class="sec">
+    <div class="callout">
+      <div><span class="lab">회의실 · 국원 전용</span><p><b>이번 주 심의할 안건이 2건 있습니다.</b></p></div>
+      <a class="btn btn-line" href="#">회의실 가기 →</a>
+      <ul>
+        <li><span class="n">안건 1</span><span>신청서마다 학번·계좌번호 다시 쓰는 문제, 자동 채우기로 갈지</span></li>
+        <li><span class="n">안건 2</span><span>시험 기간 빈 강의실 찾기 만들지</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>BYPASS 커뮤니티는 국원과 회원만 볼 수 있습니다.</p>
+    <p class="links"><a href="/">메인</a> · <a href="/routes/">준공 현황</a> · <a href="/dockets/">처리 현황</a> · <a href="#">내 정보</a> · <a href="#">로그아웃</a></p>
+  </div>
+</footer>
+
+<div class="dock"><div class="dock-in"><p>만든 것이 있으면 바로 올려 주세요.</p><a class="btn" href="#">올리기</a></div></div>
+</body>
+</html>
