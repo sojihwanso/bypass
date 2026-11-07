@@ -8,298 +8,228 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <!-- 픽셀 글꼴: 갈무리 (OFL, 무료) -->
 <link href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css" rel="stylesheet">
 <style>
-  /* ===== 새 디자인 초안: 어두운 바탕 + 픽셀 제목 + BYPASS 주황 ===== */
+  /* ===== 새 디자인 초안 v2 — 가운데 한 줄 기사형 · 어두운 바탕 · 픽셀 제목 · BYPASS 주황 ===== */
   :root {
-    --ground: #0E0F0D;      /* 밤 도로 */
-    --ground-2: #151613;    /* 한 단계 밝은 면 */
-    --ground-3: #1C1D19;
-    --line: #2A2B26;
-    --line-soft: #1F201C;
-    --ink-100: #F2F1EC;     /* 제목 */
-    --ink-200: #C9C8C0;     /* 본문 */
-    --ink-300: #9C9B93;
-    --ink-400: #74736B;     /* 보조 */
-    --orange: #EE6A1F;      /* BYPASS 대표 주황 (그대로) */
+    --ground: #141413;
+    --ground-2: #1A1A18;    /* 안내 상자 */
+    --chrome: #0F0F0E;      /* 머리글·아래 띠 */
+    --line: #2A2A26;
+    --line-soft: #20201D;
+    --ink-100: #F2F1EC;
+    --ink-200: #C3C3BC;
+    --ink-300: #A9A9A1;
+    --ink-400: #8A8A82;
+    --orange: #EE6A1F;      /* BYPASS 대표 주황 */
     --orange-hot: #FF7A2E;
-    --orange-ink: #FF8A47;  /* 어두운 바탕 위 주황 글자 */
-    --green: #3DDC84;       /* 준공 (밤에 보이는 표지 녹색) */
-    --amber: #FFB13B;       /* 전광판 */
-    --red: #FF5D5D;
+    --green: #8FD14F;       /* 준공 */
+    --red: #FF6B5B;         /* 반려 */
     --pixel: 'Galmuri11', 'Noto Sans KR', monospace;
-    --mono: 'GalmuriMono11', ui-monospace, 'SF Mono', Menlo, monospace;
-    --sans: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-    --wrap: 1180px;
+    --mono: 'GalmuriMono11', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    --voice: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    --measure: 680px;
   }
   *, *::before, *::after { box-sizing: border-box; }
-  html { scroll-behavior: smooth; background: var(--ground); }
-  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  html { background: var(--ground); scroll-padding-top: 90px; }
   body {
     margin: 0; background: var(--ground); color: var(--ink-200);
-    font-family: var(--sans); font-size: 17px; line-height: 1.7; letter-spacing: -0.01em;
+    font-family: var(--voice); font-size: 18px; line-height: 1.75; letter-spacing: -0.015em;
     word-break: keep-all; overflow-wrap: break-word; -webkit-font-smoothing: antialiased;
+    padding-bottom: 72px;
   }
-  a { color: var(--ink-100); text-underline-offset: 4px; text-decoration-color: var(--orange); }
-  a:hover { color: var(--orange-ink); }
+  a { color: var(--ink-100); text-decoration: underline; text-decoration-color: var(--orange); text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  a:hover { color: var(--orange); }
   :focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
-  .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 28px; }
-  @media (max-width: 600px) { .wrap { padding: 0 16px; } }
+  b, strong { color: var(--ink-100); font-weight: 700; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .px { font-family: var(--pixel); font-weight: 700; letter-spacing: 0.02em; }
-
-  /* 초안 표시 */
-  .draft-flag { position: fixed; right: 12px; bottom: 12px; z-index: 50; font-family: var(--pixel); font-size: 11px; color: var(--ground); background: var(--amber); padding: 4px 8px; }
-
-  /* 전광판 */
-  .vms { border-bottom: 1px solid var(--line); background: #0A0B09; color: var(--amber); font-family: var(--mono); font-size: 13px; }
-  .vms .wrap { display: flex; gap: 14px; align-items: center; height: 36px; overflow: hidden; white-space: nowrap; }
-  .vms .dot { width: 8px; height: 8px; background: var(--green); flex: none; box-shadow: 0 0 8px var(--green); animation: blink 1.6s steps(2) infinite; }
-  .vms b { color: var(--ink-100); font-weight: 400; }
-  @keyframes blink { 50% { opacity: .25; } }
+  .col { max-width: calc(var(--measure) + 48px); margin: 0 auto; padding: 0 24px; }
+  .draft-flag { position: fixed; left: 10px; bottom: 70px; z-index: 50; font-family: var(--mono); font-size: 11px; color: #111; background: #FFB13B; padding: 3px 7px; }
 
   /* 머리글 */
-  .head { position: sticky; top: 0; z-index: 20; background: rgba(14, 15, 13, .92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
-  .head .wrap { display: flex; align-items: center; gap: 28px; height: 68px; }
-  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--ink-100); flex: none; }
-  .brand .px-dodo { width: 34px; height: auto; color: var(--ink-100); }
-  .brand-name { font-family: var(--pixel); font-weight: 700; font-size: 22px; letter-spacing: 0.08em; line-height: 1; }
-  .brand-sub { display: block; font-size: 11.5px; color: var(--ink-400); letter-spacing: 0; margin-top: 5px; font-family: var(--sans); font-weight: 500; }
+  .top { position: sticky; top: 0; z-index: 30; background: var(--chrome); border-bottom: 1px solid var(--line); }
+  .top-in { max-width: 1240px; margin: 0 auto; padding: 0 28px; height: 64px; display: flex; align-items: center; gap: 24px; }
+  .mark { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink-100); font-family: var(--pixel); font-weight: 700; font-size: 17px; letter-spacing: 0.14em; }
+  .mark .px-dodo { width: 22px; height: auto; color: var(--ink-100); }
   .nav { display: flex; gap: 22px; margin-left: auto; }
-  .nav a { font-family: var(--pixel); font-size: 13px; color: var(--ink-300); text-decoration: none; letter-spacing: 0.04em; }
+  .nav a { font-family: var(--pixel); font-size: 12.5px; letter-spacing: 0.05em; color: var(--ink-300); text-decoration: none; padding: 6px 0; border-bottom: 2px solid transparent; }
   .nav a:hover { color: var(--ink-100); }
-  .head-btns { display: flex; gap: 8px; flex: none; }
-  @media (max-width: 1020px) { .nav { display: none; } .head-btns { margin-left: auto; } }
-  @media (max-width: 520px) { .brand-sub { display: none; } .head .wrap { height: 60px; gap: 12px; } }
+  .nav a[aria-current] { color: var(--ink-100); border-color: var(--orange); }
+  .menu { display: none; margin-left: auto; font-family: var(--pixel); font-size: 13px; color: var(--ink-100); background: none; border: 1px solid var(--line); padding: 9px 14px; letter-spacing: 0.08em; }
+  .menu span { color: var(--orange); margin-left: 8px; }
+  @media (max-width: 900px) { .nav { display: none; } .menu { display: block; } .top-in { padding: 0 20px; } }
 
-  /* 버튼: 각진 모서리 */
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-    font-family: var(--pixel); font-weight: 700; font-size: 15px; letter-spacing: 0.04em; line-height: 1;
-    padding: 18px 26px; border: 1px solid var(--orange); background: var(--orange); color: #120F0C;
-    text-decoration: none; cursor: pointer; border-radius: 0; transition: background .15s, color .15s;
-  }
-  .btn:hover { background: var(--orange-hot); color: #120F0C; }
-  .btn-line { background: transparent; color: var(--orange-ink); }
-  .btn-line:hover { background: rgba(238, 106, 31, .12); color: var(--orange-ink); }
-  .btn-sm { padding: 10px 14px; font-size: 12.5px; }
-  .btn .arr { font-family: var(--mono); }
+  /* 최근 처리 띠 */
+  .ticker { border-bottom: 1px solid var(--line); background: var(--chrome); }
+  .ticker-in { max-width: 1240px; margin: 0 auto; padding: 12px 28px 13px; font-size: 14.5px; line-height: 1.6; color: var(--ink-100); }
+  .ticker .lab { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--orange); margin-right: 12px; }
+  .ticker a { margin-left: 8px; }
+  @media (max-width: 900px) { .ticker-in { padding: 12px 20px; } }
 
-  /* 섹션 공통 */
-  section { border-bottom: 1px solid var(--line-soft); }
-  .sec { padding: 120px 0; }
-  @media (max-width: 700px) { .sec { padding: 72px 0; } }
-  .label { display: flex; align-items: center; gap: 12px; margin: 0 0 28px; font-family: var(--pixel); font-weight: 700; font-size: 13px; letter-spacing: 0.1em; color: var(--orange-ink); }
-  .label .no { color: var(--ink-400); font-family: var(--mono); font-weight: 400; }
-  .label::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-  h1, h2, h3 { color: var(--ink-100); margin: 0; }
-  .h2 { font-family: var(--pixel); font-weight: 700; font-size: clamp(30px, 4.6vw, 52px); line-height: 1.22; letter-spacing: 0.01em; }
-  .lead { font-size: clamp(17px, 2vw, 20px); line-height: 1.65; color: var(--ink-200); max-width: 56ch; margin: 22px 0 0; }
-  .note { font-size: 14px; color: var(--ink-400); margin: 28px 0 0; line-height: 1.7; }
+  /* 글 */
+  .kicker { margin: 0 0 18px; font-family: var(--pixel); font-size: 12.5px; letter-spacing: 0.08em; color: var(--orange); }
+  h1 { margin: 0; font-family: var(--pixel); font-weight: 700; font-size: clamp(34px, 5.4vw, 52px); line-height: 1.24; letter-spacing: 0.01em; color: var(--ink-100); }
+  h2 { margin: 0 0 22px; font-family: var(--pixel); font-weight: 700; font-size: clamp(23px, 3vw, 28px); line-height: 1.35; letter-spacing: 0.02em; color: var(--ink-100); }
+  h3 { margin: 0; font-size: 19px; font-weight: 700; line-height: 1.5; color: var(--ink-100); letter-spacing: -0.02em; }
+  .lede { font-size: clamp(18px, 2.2vw, 20px); line-height: 1.75; margin: 28px 0 0; }
+  p { margin: 0 0 18px; }
+  .small { font-size: 14.5px; color: var(--ink-400); line-height: 1.7; }
+  section { padding: 76px 0 8px; }
+  .hero { padding-top: 92px; }
+  @media (max-width: 600px) { section { padding-top: 60px; } .hero { padding-top: 56px; } .col { padding: 0 20px; } body { font-size: 17px; } }
 
-  /* ① 첫 화면 */
-  .hero { padding: 110px 0 120px; position: relative; overflow: hidden; }
-  .hero .wrap { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 56px; align-items: center; }
-  .code { font-family: var(--mono); font-size: 13px; color: var(--ink-400); margin: 0 0 26px; }
-  .code b { color: var(--orange-ink); font-weight: 400; }
-  .hero h1 { font-family: var(--pixel); font-weight: 700; font-size: clamp(36px, 5.6vw, 70px); line-height: 1.16; letter-spacing: 0.005em; }
-  .hero h1 .hl { color: var(--orange); }
-  .cursor { display: inline-block; width: .5em; height: .9em; margin-left: .08em; background: var(--orange); vertical-align: -0.06em; animation: blink 1.1s steps(2) infinite; }
-  @media (prefers-reduced-motion: reduce) { .cursor, .vms .dot { animation: none; } }
-  .hero .lead { margin-top: 30px; }
-  .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 40px; }
-  .hero-meta { margin-top: 22px; font-size: 13.5px; color: var(--ink-400); }
-  .hero-meta a { color: var(--ink-300); }
-  /* 오른쪽: 픽셀 표지판 */
-  .panel { border: 1px solid var(--line); background: var(--ground-2); position: relative; }
-  .panel-top { display: flex; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 11.5px; color: var(--ink-400); }
-  .panel-top .live { color: var(--green); }
-  .panel-art { display: grid; place-items: center; padding: 34px 20px 10px; background:
-      linear-gradient(var(--line-soft) 1px, transparent 1px) 0 0 / 22px 22px,
-      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px) 0 0 / 22px 22px; }
-  .panel-art .px-dodo { width: min(260px, 70%); height: auto; color: var(--ink-100); image-rendering: pixelated; }
-  .route { padding: 14px 16px 18px; font-family: var(--mono); font-size: 13px; }
-  .route-row { display: grid; grid-template-columns: 74px 1fr auto; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px dashed var(--line); }
-  .route-row:first-child { border-top: 0; }
-  .route-row .k { color: var(--ink-400); }
-  .route-row .bar { height: 8px; background: repeating-linear-gradient(90deg, var(--ink-400) 0 6px, transparent 6px 10px); }
-  .route-row .t { color: var(--ink-300); }
-  .route-row.fast .bar { background: var(--orange); width: 22%; }
-  .route-row.fast .k, .route-row.fast .t { color: var(--orange-ink); }
-  @media (max-width: 900px) { .hero .wrap { grid-template-columns: 1fr; gap: 48px; } .hero { padding: 64px 0 80px; } }
+  /* 버튼 */
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 34px 0 16px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 50px; padding: 0 22px; font-family: var(--pixel); font-weight: 700; font-size: 13.5px; letter-spacing: 0.06em; text-decoration: none; border: 1px solid var(--orange); background: var(--orange); color: #141413; cursor: pointer; }
+  .btn:hover { background: var(--orange-hot); border-color: var(--orange-hot); color: #141413; }
+  .btn-line { background: transparent; color: var(--orange); }
+  .btn-line:hover { background: rgba(238, 106, 31, .1); color: var(--orange); }
+
+  /* 안내 상자: 주황 왼쪽 띠 */
+  .callout { margin: 30px 0; padding: 22px 26px; background: var(--ground-2); border: 1px solid var(--line-soft); border-left: 6px solid var(--orange); }
+  .callout .lab { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--orange); margin-bottom: 6px; }
+  .callout .big { font-family: var(--pixel); font-weight: 700; font-size: 22px; color: var(--ink-100); line-height: 1.4; margin: 0 0 10px; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* 숫자 칸 */
+  .figs { display: grid; grid-template-columns: repeat(4, 1fr); margin: 34px 0 14px; border: 1px solid var(--line); }
+  .figs div { padding: 16px 16px 18px; border-left: 1px solid var(--line); }
+  .figs div:first-child { border-left: 0; }
+  .figs dt { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--ink-400); }
+  .figs dd { margin: 12px 0 0; font-family: var(--pixel); font-weight: 700; font-size: 34px; line-height: 1; color: var(--ink-100); }
+  .figs dd small { font-size: 14px; color: var(--ink-400); margin-left: 4px; }
+  @media (max-width: 600px) { .figs { grid-template-columns: 1fr 1fr; } .figs div:nth-child(3) { border-left: 0; } .figs div:nth-child(n+3) { border-top: 1px solid var(--line); } }
+
+  /* 굵은 머리 + 설명 목록 */
+  .lead-list { list-style: none; margin: 0; padding: 0; }
+  .lead-list li { padding: 18px 0; border-top: 1px solid var(--line-soft); }
+  .lead-list li:last-child { border-bottom: 1px solid var(--line-soft); }
+  .lead-list .ex { display: block; font-size: 14.5px; color: var(--ink-400); margin-top: 4px; }
 
   /* 명칭 */
-  .acro { list-style: none; margin: 44px 0 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); border: 1px solid var(--line); }
-  .acro li { padding: 22px 18px 20px; border-left: 1px solid var(--line); }
-  .acro li:first-child { border-left: 0; }
-  .acro .L { display: block; font-family: var(--pixel); font-weight: 700; font-size: clamp(40px, 6vw, 72px); line-height: 1; color: var(--orange); }
-  .acro .w { display: block; margin-top: 18px; font-size: 15px; color: var(--ink-100); font-weight: 700; }
-  .acro .w i { font-style: normal; color: var(--ink-400); font-weight: 400; margin-right: 4px; }
-  .acro .g { display: block; font-size: 13px; color: var(--ink-400); }
-  .name-full { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 6px 24px; align-items: baseline; }
-  .name-full .en { font-family: var(--mono); font-size: 14px; color: var(--ink-300); }
-  .name-full .ko { font-weight: 700; color: var(--ink-100); }
-  @media (max-width: 760px) { .acro { grid-template-columns: repeat(3, 1fr); } .acro li:nth-child(4) { border-left: 0; } .acro li:nth-child(n+4) { border-top: 1px solid var(--line); } }
+  .acro { list-style: none; margin: 8px 0 22px; padding: 0; }
+  .acro li { display: grid; grid-template-columns: 54px 1fr auto; align-items: baseline; gap: 12px; padding: 9px 0; border-top: 1px solid var(--line-soft); }
+  .acro li:last-child { border-bottom: 1px solid var(--line-soft); }
+  .acro .L { font-family: var(--pixel); font-weight: 700; font-size: 30px; color: var(--orange); line-height: 1; }
+  .acro .w { color: var(--ink-100); font-size: 17px; }
+  .acro .w i { font-style: normal; color: var(--ink-400); margin-right: 6px; }
+  .acro .g { font-size: 14.5px; color: var(--ink-400); }
 
-  /* 설치 규정 */
-  .statute { display: grid; grid-template-columns: 280px 1fr; gap: 48px; }
-  .statute .date { font-family: var(--mono); font-size: 13px; color: var(--ink-400); margin-top: 14px; }
-  .art { display: grid; grid-template-columns: 120px 1fr; gap: 20px; padding: 22px 0; border-top: 1px solid var(--line); }
-  .art:last-child { border-bottom: 1px solid var(--line); }
-  .art .no { font-family: var(--pixel); font-size: 13px; color: var(--orange-ink); padding-top: 4px; }
-  .art p { margin: 0; color: var(--ink-100); }
-  .items { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 12px; }
-  .items li { position: relative; padding-left: 22px; }
-  .items li::before { content: ""; position: absolute; left: 0; top: .62em; width: 8px; height: 8px; background: var(--orange); }
-  .items b { color: var(--ink-100); }
-  .items .ex { display: block; font-size: 14px; color: var(--ink-400); }
-  @media (max-width: 860px) { .statute { grid-template-columns: 1fr; gap: 28px; } .art { grid-template-columns: 1fr; gap: 6px; } }
+  /* 처리 절차: 번호 */
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+  .steps li { position: relative; padding: 18px 0 18px 64px; border-top: 1px solid var(--line-soft); counter-increment: s; }
+  .steps li:last-child { border-bottom: 1px solid var(--line-soft); }
+  .steps li::before { content: "0" counter(s); position: absolute; left: 0; top: 19px; font-family: var(--pixel); font-weight: 700; font-size: 22px; color: var(--ink-400); }
+  .steps li.hot::before { color: var(--orange); }
+  .steps h3 { margin-bottom: 2px; }
+  .steps p { margin: 0; }
+  .steps .due { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.04em; color: var(--ink-400); margin-top: 6px; }
 
-  /* 처리 절차 */
-  .steps { list-style: none; margin: 48px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); }
-  .steps li { padding: 26px 24px 30px 0; border-right: 1px solid var(--line); }
-  .steps li + li { padding-left: 24px; }
-  .steps li:last-child { border-right: 0; }
-  .steps .n { font-family: var(--mono); font-size: 12.5px; color: var(--ink-400); }
-  .steps h3 { font-family: var(--pixel); font-weight: 700; font-size: 26px; margin: 18px 0 12px; }
-  .steps p { margin: 0; font-size: 15.5px; }
-  .steps .due { margin-top: 18px; font-family: var(--mono); font-size: 12.5px; color: var(--ink-400); }
-  .steps .due b { color: var(--ink-100); font-weight: 400; }
-  .steps .hot { background: linear-gradient(var(--orange), var(--orange)) top / 100% 3px no-repeat; }
-  .steps .hot h3 { color: var(--orange); }
-  @media (max-width: 860px) {
-    .steps { grid-template-columns: 1fr 1fr; }
-    .steps li { padding: 24px 16px 26px 0; }
-    .steps li:nth-child(2) { border-right: 0; }
-    .steps li:nth-child(3) { padding-left: 0; }
-    .steps li:nth-child(n+3) { border-top: 1px solid var(--line); }
-  }
+  /* 처리 기록 (안건) */
+  .log { list-style: none; margin: 8px 0 0; padding: 0; }
+  .log li { padding: 22px 0 20px; border-top: 1px solid var(--line-soft); }
+  .log li:last-child { border-bottom: 1px solid var(--line-soft); }
+  .log .meta { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.06em; }
+  .log .no { color: var(--ink-100); text-decoration: underline; text-decoration-color: var(--orange); text-underline-offset: 3px; }
+  .tag { color: var(--ink-400); }
+  .tag-done { color: var(--green); }
+  .tag-no { color: var(--red); }
+  .log h3 { margin: 8px 0 6px; font-size: 20px; font-weight: 500; }
+  .log h3 a { color: var(--ink-100); text-decoration: none; }
+  .log h3 a:hover { color: var(--orange); }
+  .log .det { font-size: 15px; color: var(--ink-300); margin: 0; line-height: 1.7; }
+  .log .det span { color: var(--ink-400); }
+  .log .stamp { margin: 6px 0 0; font-size: 14px; color: var(--ink-400); }
 
-  /* 안건 처리 현황 */
-  .dk-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; flex-wrap: wrap; }
-  .boards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 44px; }
-  .board { border: 1px solid var(--line); background: var(--ground-2); display: flex; flex-direction: column; min-height: 100%; }
-  .board-top { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 12px; color: var(--ink-400); }
-  .chip { font-family: var(--pixel); font-weight: 700; font-size: 11.5px; letter-spacing: 0.06em; padding: 3px 8px 2px; border: 1px solid currentColor; }
-  .chip-done { color: var(--green); }
-  .chip-no { color: var(--red); }
-  .chip-wip { color: var(--amber); }
-  .board h3 { font-size: 20px; font-weight: 900; padding: 18px 16px 4px; line-height: 1.35; }
-  .board dl { margin: 0; padding: 8px 16px 18px; flex: 1; }
-  .board dt { font-family: var(--pixel); font-size: 11.5px; color: var(--ink-400); margin-top: 12px; letter-spacing: 0.04em; }
-  .board dd { margin: 3px 0 0; font-size: 14.5px; line-height: 1.6; }
-  .board dd.after { color: var(--ink-100); }
-  .board-go { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-top: 1px solid var(--line); font-family: var(--pixel); font-weight: 700; font-size: 13px; color: var(--orange-ink); text-decoration: none; letter-spacing: 0.04em; }
-  .board-go:hover { background: var(--orange); color: #120F0C; }
-  .board-x { padding: 14px 16px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 12px; color: var(--ink-400); }
-  .board.rejected h3 { color: var(--ink-300); text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 2px; }
-  @media (max-width: 1000px) { .boards { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 560px) {
-    .boards { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; margin-right: -16px; padding-right: 16px; }
-    .board { flex: 0 0 82%; scroll-snap-align: start; }
-  }
+  /* 모집 요강 */
+  .req { margin: 8px 0 0; }
+  .req div { display: grid; grid-template-columns: 120px 1fr; gap: 16px; padding: 14px 0; border-top: 1px solid var(--line-soft); }
+  .req div:last-child { border-bottom: 1px solid var(--line-soft); }
+  .req dt { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.06em; color: var(--ink-400); padding-top: 5px; }
+  .req dd { margin: 0; color: var(--ink-100); font-size: 16.5px; }
+  @media (max-width: 600px) { .req div { grid-template-columns: 1fr; gap: 2px; } }
 
-  /* 모집 */
-  .recruit { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--orange); }
-  .recruit-l { padding: 48px 44px; background: var(--orange); color: #120F0C; }
-  .recruit-l h2 { font-family: var(--pixel); font-weight: 700; font-size: clamp(28px, 3.6vw, 44px); line-height: 1.25; color: #120F0C; }
-  .recruit-l p { font-size: 18px; margin: 20px 0 0; font-weight: 500; }
-  .recruit-l .btn { background: #120F0C; border-color: #120F0C; color: var(--ink-100); }
-  .recruit-l .btn:hover { background: #000; }
-  .recruit-l .btn-line { background: transparent; color: #120F0C; }
-  .recruit-l .btn-line:hover { background: rgba(0,0,0,.08); color: #120F0C; }
-  .req { margin: 0; padding: 26px 32px; }
-  .req div { display: grid; grid-template-columns: 110px 1fr; gap: 16px; padding: 14px 0; border-top: 1px dashed var(--line); }
-  .req div:first-child { border-top: 0; }
-  .req dt { font-family: var(--pixel); font-size: 12.5px; color: var(--orange-ink); padding-top: 3px; }
-  .req dd { margin: 0; font-size: 15px; color: var(--ink-100); }
-  @media (max-width: 860px) { .recruit { grid-template-columns: 1fr; } .recruit-l { padding: 36px 24px; } .req { padding: 18px 20px; } .req div { grid-template-columns: 1fr; gap: 2px; } }
+  /* 금지 */
+  .callout.no { border-left-color: var(--red); }
+  .callout.no .lab { color: var(--red); }
+  .no-list { list-style: none; margin: 10px 0 0; padding: 0; }
+  .no-list li { padding-left: 24px; position: relative; margin-top: 8px; font-size: 16.5px; }
+  .no-list li::before { content: "×"; position: absolute; left: 0; font-family: var(--mono); color: var(--red); }
 
-  /* 업무 범위 · FAQ */
-  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; }
-  .ban { border: 1px solid var(--line); padding: 26px; }
-  .ban .art-line { font-size: 15px; color: var(--ink-100); margin: 0 0 18px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
-  .ban .art-line b { display: block; font-family: var(--pixel); font-size: 12.5px; color: var(--red); margin-bottom: 6px; }
-  .ban ul { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 12px; }
-  .ban li { display: flex; gap: 12px; font-size: 15.5px; }
-  .ban li::before { content: "✕"; font-family: var(--mono); color: var(--red); flex: none; }
-  .faq details { border-top: 1px solid var(--line); }
-  .faq details:last-child { border-bottom: 1px solid var(--line); }
-  .faq summary { list-style: none; cursor: pointer; display: flex; gap: 14px; align-items: baseline; padding: 20px 0; color: var(--ink-100); font-weight: 700; }
-  .faq summary::-webkit-details-marker { display: none; }
-  .faq summary .q { font-family: var(--pixel); color: var(--orange-ink); flex: none; }
-  .faq summary::after { content: "+"; margin-left: auto; font-family: var(--mono); color: var(--ink-400); font-size: 20px; line-height: 1; }
-  .faq details[open] summary::after { content: "−"; color: var(--orange); }
-  .faq details p { margin: -4px 0 22px 34px; font-size: 15.5px; }
-  @media (max-width: 860px) { .two { grid-template-columns: 1fr; gap: 72px; } }
+  /* 묻고 답하기 */
+  .qa { padding: 20px 0; border-top: 1px solid var(--line-soft); }
+  .qa:last-of-type { border-bottom: 1px solid var(--line-soft); }
+  .qa p { margin: 8px 0 0; }
 
   /* 바닥글 */
-  .foot { padding: 64px 0 90px; font-size: 13.5px; color: var(--ink-400); }
-  .foot .wrap { display: flex; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
-  .foot .px-dodo { width: 26px; color: var(--ink-300); vertical-align: -4px; margin-right: 10px; }
-  .foot strong { font-family: var(--pixel); color: var(--ink-100); letter-spacing: 0.08em; font-size: 15px; }
-  .foot p { margin: 0 0 6px; }
-  .foot nav { display: flex; gap: 18px; flex-wrap: wrap; }
-  .foot nav a { color: var(--ink-300); font-family: var(--pixel); font-size: 12.5px; text-decoration: none; }
-  .foot nav a:hover { color: var(--orange-ink); }
+  .foot { margin-top: 100px; border-top: 1px solid var(--line); padding: 44px 0 40px; font-size: 14.5px; color: var(--ink-400); }
+  .foot p { margin: 0 0 14px; }
+  .foot a { color: var(--ink-300); }
+  .foot .links { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.03em; }
+  .foot .links a { margin-right: 6px; }
+
+  /* 아래 고정 띠 */
+  .dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: var(--chrome); border-top: 1px solid var(--orange); }
+  .dock-in { max-width: 1240px; margin: 0 auto; padding: 10px 28px; padding-bottom: max(10px, env(safe-area-inset-bottom)); display: flex; align-items: center; justify-content: center; gap: 24px; }
+  .dock p { margin: 0; font-family: var(--pixel); font-size: 12.5px; letter-spacing: 0.05em; color: var(--ink-100); }
+  .dock .btn { min-height: 40px; padding: 0 16px; font-size: 12.5px; }
+  @media (max-width: 600px) { .dock-in { justify-content: space-between; padding-left: 20px; padding-right: 12px; gap: 12px; } .dock p { font-size: 11.5px; } }
 </style>
 </head>
 <body>
+<p class="draft-flag">디자인 초안 v2</p>
 
-<p class="draft-flag">디자인 초안 · 실제 사이트 아님</p>
-
-<div class="vms" role="status">
-  <div class="wrap"><span class="dot" aria-hidden="true"></span><span>운영 중</span><span>│</span><span>접수 <b>상시</b></span><span>│</span><span>정기 심의 <b>매주</b></span><span>│</span><span>최근 준공 <b>Alfa to Zulu</b></span></div>
-</div>
-
-<header class="head">
-  <div class="wrap">
-    <a class="brand" href="#top" aria-label="BYPASS 처음으로">
-      <svg class="px-dodo" viewBox="0 0 22 18" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M12 0h4v1h-4zM12 1h2v1h-2zM15 1h4v1h-4zM11 2h9v1h-9zM12 3h9v1h-9zM11 4h4v1h-4zM19 4h2v1h-2zM0 5h1v1h-1zM6 5h8v1h-8zM0 6h2v1h-2zM4 6h10v1h-10zM1 7h13v1h-13zM2 8h6v1h-6zM10 8h5v1h-5zM2 9h8v1h-8zM12 9h3v1h-3zM2 10h13v1h-13zM3 11h12v1h-12zM3 12h11v1h-11zM4 13h9v1h-9zM6 14h5v1h-5zM7 15h2v1h-2zM11 15h2v1h-2zM6 16h3v1h-3zM11 16h2v1h-2zM6 17h2v1h-2zM10 17h3v1h-3z"/><path fill="var(--orange)" d="M14 1h1v1h-1zM8 8h2v1h-2zM10 9h2v1h-2z"/></svg>
-      <span><span class="brand-name">BYPASS</span><span class="brand-sub">느린 시스템의 실용적 대안 마련국</span></span>
-    </a>
+<header class="top">
+  <div class="top-in">
+    <a class="mark" href="#"><svg class="px-dodo" viewBox="0 0 22 18" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M12 0h4v1h-4zM12 1h2v1h-2zM15 1h4v1h-4zM11 2h9v1h-9zM12 3h9v1h-9zM11 4h4v1h-4zM19 4h2v1h-2zM0 5h1v1h-1zM6 5h8v1h-8zM0 6h2v1h-2zM4 6h10v1h-10zM1 7h13v1h-13zM2 8h6v1h-6zM10 8h5v1h-5zM2 9h8v1h-8zM12 9h3v1h-3zM2 10h13v1h-13zM3 11h12v1h-12zM3 12h11v1h-11zM4 13h9v1h-9zM6 14h5v1h-5zM7 15h2v1h-2zM11 15h2v1h-2zM6 16h3v1h-3zM11 16h2v1h-2zM6 17h2v1h-2zM10 17h3v1h-3z"/><path fill="var(--orange)" d="M14 1h1v1h-1zM8 8h2v1h-2zM10 9h2v1h-2z"/></svg><span>BYPASS</span></a>
     <nav class="nav" aria-label="주 메뉴">
-      <a href="#statute">설치 규정</a><a href="#process">처리 절차</a><a href="#dockets">처리 현황</a><a href="#recruit">국원 모집</a><a href="#faq">자주 묻는 질문</a>
+      <a href="#statute">설치 규정</a>
+      <a href="#process">처리 절차</a>
+      <a href="#dockets" aria-current="page">처리 현황</a>
+      <a href="/routes/">준공 현황</a>
+      <a href="#recruit">국원 모집</a>
+      <a href="/login/">로그인</a>
     </nav>
-    <div class="head-btns">
-      <a class="btn btn-sm" href="/routes/">준공 현황</a>
-      <a class="btn btn-sm btn-line" href="/login/">로그인</a>
-    </div>
+    <button class="menu" type="button">메뉴<span>+</span></button>
   </div>
 </header>
+<div class="ticker">
+  <p class="ticker-in"><span class="lab">BYPASS 최근 처리 · 제0-3호</span>카톡에서 오늘 학식을 바로 확인하는 ‘꿀꿀이’가 준공되었습니다.<a href="#dockets">처리 기록 보기</a></p>
+</div>
 
 <main>
-  <!-- ① 첫 화면 -->
-  <section class="hero" id="top">
-    <div class="wrap">
-      <div>
-        <p class="code">BYPASS 안내 <b>제2026-001호</b></p>
-        <h1>귀하의 반복 업무는<br><span class="hl">단축 대상</span>으로<br>지정되었습니다.<span class="cursor" aria-hidden="true"></span></h1>
-        <p class="lead">BYPASS는 국립목포해양대학교 바이브 코딩 크루입니다. 학교생활의 불필요한 절차를 AI와 코드로 건너뜁니다.</p>
-        <div class="actions">
-          <a class="btn" href="#">불편 제보하기 <span class="arr">→</span></a>
-          <a class="btn btn-line" href="#">BYPASS 합류하기</a>
-        </div>
-        <p class="hero-meta">제보는 즉시 접수되고, 결과는 7일 안에 <a href="#dockets">처리 현황</a>에 공개됩니다.</p>
+  <section class="hero">
+    <div class="col">
+      <p class="kicker">BYPASS 안내 제2026-001호</p>
+      <h1>귀하의 반복 업무는 단축 대상으로 지정되었습니다.</h1>
+      <p class="lede">BYPASS는 국립목포해양대학교 바이브 코딩 크루입니다. 학교생활에서 사람이 손으로 반복하는 일을 찾아, AI와 코드로 건너뛰는 길을 만듭니다.</p>
+      <div class="actions">
+        <a class="btn" href="#">불편 제보하기</a>
+        <a class="btn btn-line" href="#">BYPASS 합류하기</a>
       </div>
-      <div class="panel" aria-hidden="true">
-        <div class="panel-top"><span>현장 감독관 · 도도</span><span class="live">● 근무 중</span></div>
-        <div class="panel-art"><svg class="px-dodo" viewBox="0 0 22 18" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M12 0h4v1h-4zM12 1h2v1h-2zM15 1h4v1h-4zM11 2h9v1h-9zM12 3h9v1h-9zM11 4h4v1h-4zM19 4h2v1h-2zM0 5h1v1h-1zM6 5h8v1h-8zM0 6h2v1h-2zM4 6h10v1h-10zM1 7h13v1h-13zM2 8h6v1h-6zM10 8h5v1h-5zM2 9h8v1h-8zM12 9h3v1h-3zM2 10h13v1h-13zM3 11h12v1h-12zM3 12h11v1h-11zM4 13h9v1h-9zM6 14h5v1h-5zM7 15h2v1h-2zM11 15h2v1h-2zM6 16h3v1h-3zM11 16h2v1h-2zM6 17h2v1h-2zM10 17h3v1h-3z"/><path fill="var(--orange)" d="M14 1h1v1h-1zM8 8h2v1h-2zM10 9h2v1h-2z"/></svg></div>
-        <div class="route">
-          <div class="route-row"><span class="k">기존 절차</span><span class="bar"></span><span class="t">7단계</span></div>
-          <div class="route-row fast"><span class="k">BYPASS</span><span class="bar"></span><span class="t">1단계</span></div>
-        </div>
+      <p class="small">제보는 즉시 접수되고, 주 1회 심의 결과는 7일 안에 <a href="#dockets">처리 현황</a>에 공개됩니다. 로그인 없이 제보할 수 있습니다.</p>
+
+      <div class="callout">
+        <span class="lab">처리 결과는 숨기지 않습니다</span>
+        <p><b>준공한 안건과 반려한 안건을 모두 공개합니다.</b> 반려 사유까지 적습니다. <a href="#dockets">처리 기록 보기</a></p>
       </div>
+
+      <dl class="figs">
+        <div><dt>준공 안건</dt><dd>3</dd></div>
+        <div><dt>반려 (견본)</dt><dd>1</dd></div>
+        <div><dt>정기 심의</dt><dd>1<small>회/주</small></dd></div>
+        <div><dt>결과 공개</dt><dd>7<small>일 안</small></dd></div>
+      </dl>
+      <p class="small">처리 현황 표에서 읽은 값입니다. 견본으로 올린 반려 1건이 함께 세어집니다.</p>
     </div>
   </section>
 
-  <!-- 명칭 -->
-  <section class="sec">
-    <div class="wrap">
-      <p class="label"><span class="no">01</span>명칭 안내</p>
-      <h2 class="h2">BYPASS는 영문 명칭의<br>머리글자입니다.</h2>
+  <section id="name">
+    <div class="col">
+      <h2>BYPASS라는 이름</h2>
+      <p>영문 명칭의 머리글자를 딴 약칭입니다.</p>
       <ol class="acro">
         <li><span class="L">B</span><span class="w" lang="en">Bureau</span><span class="g">국(局)</span></li>
         <li><span class="L">Y</span><span class="w" lang="en"><i>for</i>Yielding</span><span class="g">마련하는</span></li>
@@ -308,142 +238,130 @@
         <li><span class="L">S</span><span class="w" lang="en"><i>to</i>Slow</span><span class="g">느린</span></li>
         <li><span class="L">S</span><span class="w" lang="en">Systems</span><span class="g">시스템</span></li>
       </ol>
-      <div class="name-full"><span class="en" lang="en">Bureau for Yielding Practical Alternatives to Slow Systems</span><span class="ko">느린 시스템의 실용적 대안 마련국</span></div>
-      <p class="note">※ 영어 bypass는 돌아가는 길이 아니라, 막힌 구간을 건너뛰어 곧장 가는 길을 뜻합니다. 의도한 것입니다.</p>
+      <p class="small">영어 bypass는 돌아가는 길이 아니라, 막힌 구간을 건너뛰어 곧장 가는 길을 뜻합니다. 의도한 것입니다.</p>
     </div>
   </section>
 
-  <!-- 설치 규정 -->
-  <section class="sec" id="statute">
-    <div class="wrap">
-      <p class="label"><span class="no">02</span>설치 규정</p>
-      <div class="statute">
-        <div><h2 class="h2">BYPASS<br>설치 규정</h2><p class="date">[제정 2026. 10. 19.]</p></div>
-        <div>
-          <div class="art"><span class="no">제1조(목적)</span><p>이 국은 불필요한 절차를 불필요한 절차 없이 단축함을 목적으로 한다.</p></div>
-          <div class="art"><span class="no">제2조(정의)</span><p>“불필요한 절차”란 더 나은 방법이 이미 존재함에도 사람이 손으로 반복하는 일을 말한다.</p></div>
-          <div class="art"><span class="no">제3조(단축 대상)</span><div><p>다음 각 호의 업무를 1차 단축 대상으로 지정한다.</p>
-            <ul class="items">
-              <li><b>중복 입력</b>: 이미 제출한 정보를 재차 요구하는 행위<span class="ex">예: 신청서마다 학번과 계좌번호를 다시 쓰는 일</span></li>
-              <li><b>과다 이동</b>: 업무 하나를 위해 여러 화면을 거치게 하는 행위<span class="ex">예: 공지 하나를 찾으려고 게시판 여러 곳을 확인하는 일</span></li>
-              <li><b>정보 은닉</b>: 존재하나 찾을 수 없도록 배치된 정보<span class="ex">예: 분명히 공지됐다는데 아무도 위치를 모르는 일정</span></li>
-              <li><b>수기 계산</b>: 컴퓨터가 할 일을 사람이 하는 행위<span class="ex">예: 졸업까지 남은 학점을 손으로 세는 일</span></li>
-            </ul></div></div>
-          <div class="art"><span class="no">제4조(추가 지정)</span><p>단축 대상은 제보에 따라 수시로 추가 지정한다.</p></div>
-        </div>
-      </div>
+  <section id="statute">
+    <div class="col">
+      <h2>설치 규정</h2>
+      <p><b>제1조(목적)</b> 이 국은 불필요한 절차를 불필요한 절차 없이 단축함을 목적으로 한다.</p>
+      <p><b>제2조(정의)</b> “불필요한 절차”란 더 나은 방법이 이미 존재함에도 사람이 손으로 반복하는 일을 말한다.</p>
+      <p><b>제3조(단축 대상)</b> 다음 각 호의 업무를 1차 단축 대상으로 지정한다.</p>
+      <ul class="lead-list">
+        <li><b>중복 입력.</b> 이미 제출한 정보를 재차 요구하는 행위.<span class="ex">예: 신청서마다 학번과 계좌번호를 다시 쓰는 일</span></li>
+        <li><b>과다 이동.</b> 업무 하나를 위해 여러 화면을 거치게 하는 행위.<span class="ex">예: 공지 하나를 찾으려고 게시판 여러 곳을 확인하는 일</span></li>
+        <li><b>정보 은닉.</b> 존재하나 찾을 수 없도록 배치된 정보.<span class="ex">예: 분명히 공지됐다는데 아무도 위치를 모르는 일정</span></li>
+        <li><b>수기 계산.</b> 컴퓨터가 할 일을 사람이 하는 행위.<span class="ex">예: 졸업까지 남은 학점을 손으로 세는 일</span></li>
+      </ul>
+      <p style="margin-top:18px"><b>제4조(추가 지정)</b> 단축 대상은 제보에 따라 수시로 추가 지정한다.</p>
+      <p class="small">[제정 2026. 10. 19.]</p>
     </div>
   </section>
 
-  <!-- 처리 절차 -->
-  <section class="sec" id="process">
-    <div class="wrap">
-      <p class="label"><span class="no">03</span>처리 절차</p>
-      <h2 class="h2">민원 대신,<br>지름길을 만듭니다.</h2>
+  <section id="process">
+    <div class="col">
+      <h2>민원 대신, 지름길을 만듭니다</h2>
       <ol class="steps">
-        <li><span class="n">STEP 01</span><h3>접수</h3><p>제보를 받으면 접수번호를 발급합니다.</p><p class="due">처리 기한 <b>즉시</b></p></li>
-        <li><span class="n">STEP 02</span><h3>심의</h3><p>주 1회 정기 회의에서 처리 여부를 결정합니다.</p><p class="due">처리 기한 <b>7일 이내 공개</b></p></li>
-        <li class="hot"><span class="n">STEP 03</span><h3>단축</h3><p>AI와 코드로 더 빠른 길을 만듭니다.</p></li>
-        <li><span class="n">STEP 04</span><h3>배포</h3><p>실제로 써 보고, 불편이 남아 있으면 재접수합니다.</p></li>
+        <li><h3>접수</h3><p>제보를 받으면 접수번호를 발급합니다.</p><p class="due">처리 기한 · 즉시</p></li>
+        <li><h3>심의</h3><p>주 1회 정기 회의에서 처리 여부를 결정합니다.</p><p class="due">처리 기한 · 7일 이내 결과 공개</p></li>
+        <li class="hot"><h3>단축</h3><p>AI와 코드로 더 빠른 길을 만듭니다.</p></li>
+        <li><h3>배포</h3><p>실제로 써 보고, 불편이 남아 있으면 재접수합니다.</p></li>
       </ol>
     </div>
   </section>
 
-  <!-- 안건 처리 현황 -->
-  <section class="sec" id="dockets">
-    <div class="wrap">
-      <p class="label"><span class="no">04</span>안건 처리 현황</p>
-      <div class="dk-head">
-        <h2 class="h2">처리한 안건은<br>전부 공개합니다.</h2>
-        <a class="btn btn-line" href="/routes/">준공 현황 전체 보기 <span class="arr">→</span></a>
-      </div>
-      <div class="boards">
-        <article class="board">
-          <div class="board-top"><span>제0-1호</span><span class="chip chip-done">준공</span></div>
-          <h3>수강플래너</h3>
-          <dl><dt>기존 절차</dt><dd>강의 목록을 하나씩 열어 시간이 겹치는지 맞춰 봄</dd><dt>개선 후</dt><dd class="after">과목을 담으면 시간표로 바로 보이고, 계획을 여러 개 비교·공유</dd></dl>
-          <a class="board-go" href="https://mymmu.my/" target="_blank" rel="noopener">바로가기 <span>→</span></a>
-        </article>
-        <article class="board">
-          <div class="board-top"><span>제0-2호</span><span class="chip chip-done">준공</span></div>
-          <h3>졸업이수학점 계산기</h3>
-          <dl><dt>기존 절차</dt><dd>졸업이수학점 직접 계산</dd><dt>개선 후</dt><dd class="after">들은 과목을 체크하면 남은 졸업 요건을 한 화면에 표시</dd></dl>
-          <a class="board-go" href="https://eesuu.mymmu.my/" target="_blank" rel="noopener">바로가기 <span>→</span></a>
-        </article>
-        <article class="board">
-          <div class="board-top"><span>제0-3호</span><span class="chip chip-done">준공</span></div>
-          <h3>학식 알리미 ‘꿀꿀이’</h3>
-          <dl><dt>기존 절차</dt><dd>오늘 학식이 뭔지 보려고 식단 게시판을 찾아 들어감</dd><dt>개선 후</dt><dd class="after">카톡에서 식단을 바로 확인</dd></dl>
-          <a class="board-go" href="https://pf.kakao.com/_uuxfmX" target="_blank" rel="noopener">바로가기 <span>→</span></a>
-        </article>
-        <article class="board rejected">
-          <div class="board-top"><span>제0-4호 · 견본</span><span class="chip chip-no">반려</span></div>
-          <h3>강의동 이동 불편</h3>
-          <dl><dt>접수 내용</dt><dd>비 오는 날 강의동까지 걸어가야 함</dd><dt>반려 사유</dt><dd class="after">해당 불편은 절차가 아닌 날씨에 기인함.</dd></dl>
-          <p class="board-x">날인 없음</p>
-        </article>
-      </div>
-      <p class="note">※ 기존 업무 방식을 대체한 안건에는 도도새 직인을, 새로 만든 안건에는 신설 준공 인장을 찍습니다.</p>
-    </div>
-  </section>
+  <section id="dockets">
+    <div class="col">
+      <h2>안건 처리 기록, 최근 것부터</h2>
+      <p class="small">호수를 누르면 그 안건으로 갑니다. 준공한 안건에는 도도새 직인을, 새로 만든 안건에는 신설 준공 인장을 찍습니다.</p>
+      <ol class="log">
+        <li>
+          <div class="meta"><a class="no" href="#">제0-4호</a><span class="tag tag-no">반려</span><span class="tag">견본</span></div>
+          <h3>비 오는 날 강의동까지 걸어가야 한다는 제보는 반려되었습니다.</h3>
+          <p class="det"><span>반려 사유</span> 해당 불편은 절차가 아닌 날씨에 기인함.</p>
+        </li>
+        <li>
+          <div class="meta"><a class="no" href="#">제0-3호</a><span class="tag tag-done">준공</span><span class="tag">창립 전</span></div>
+          <h3><a href="https://pf.kakao.com/_uuxfmX">학식 알리미 ‘꿀꿀이’: 오늘 학식을 카톡에서 바로 확인합니다.</a></h3>
+          <p class="det"><span>기존 절차</span> 식단이 궁금하면 식단 게시판을 찾아 들어감.</p>
+          <p class="stamp">도도새 직인 날인</p>
+        </li>
+        <li>
+          <div class="meta"><a class="no" href="#">제0-2호</a><span class="tag tag-done">준공</span><span class="tag">창립 전</span></div>
+          <h3><a href="https://eesuu.mymmu.my/">졸업이수학점 계산기: 들은 과목을 체크하면 남은 졸업 요건이 한 화면에 나옵니다.</a></h3>
+          <p class="det"><span>기존 절차</span> 졸업이수학점을 손으로 계산.</p>
+          <p class="stamp">도도새 직인 날인</p>
+        </li>
+        <li>
+          <div class="meta"><a class="no" href="#">제0-1호</a><span class="tag tag-done">준공</span><span class="tag">창립 전</span></div>
+          <h3><a href="https://mymmu.my/">수강플래너: 과목을 담으면 시간표로 바로 보이고, 계획을 여러 개 비교합니다.</a></h3>
+          <p class="det"><span>기존 절차</span> 강의 목록을 하나씩 열어 시간이 겹치는지 맞춰 봄.</p>
+          <p class="stamp">도도새 직인 날인</p>
+        </li>
+      </ol>
+      <div class="actions"><a class="btn btn-line" href="/routes/">준공 현황 전체 보기</a></div>
 
-  <!-- 국원 모집 -->
-  <section class="sec" id="recruit">
-    <div class="wrap">
-      <p class="label"><span class="no">05</span>국원 공개 모집</p>
-      <div class="recruit">
-        <div class="recruit-l">
-          <h2>비효율에 유난히<br>예민한 분을 모십니다.</h2>
-          <p>코딩 경험이 없어도 직접 만들 수 있습니다.<br>그게 바이브 코딩입니다.</p>
-          <div class="actions"><a class="btn" href="#">합류 신청하기 <span class="arr">→</span></a><a class="btn btn-line" href="#">불편 제보하기</a></div>
-        </div>
-        <dl class="req">
-          <div><dt>지원 자격</dt><dd>국립목포해양대학교 재학생. 전공, 학년, 코딩 경험 무관</dd></div>
-          <div><dt>우대 사항</dt><dd>같은 일을 세 번 반복하면 참을 수 없는 분<br>이미 엑셀 매크로를 몰래 만들어 본 분</dd></div>
-          <div><dt>주요 업무</dt><dd>정기 심의 회의 참석, 안건별 소규모 제작</dd></div>
-          <div><dt>모집 기간</dt><dd>언제나</dd></div>
-          <div><dt>제출 서류</dt><dd>없음. 본 국은 불필요한 서류를 요구하지 않습니다.</dd></div>
-          <div><dt>문의</dt><dd><a href="https://open.kakao.com/o/snJ3HuTi" target="_blank" rel="noopener">카카오톡 오픈채팅 1:1 문의 →</a></dd></div>
-        </dl>
+      <div class="callout">
+        <span class="lab">도도새 직인 안내</span>
+        <p class="big">이 업무 방식은 도도새와 함께 멸종했어야 합니다.</p>
+        <p>처리를 마친 안건에 찍는 직인의 문구입니다. 도도새는 17세기 말에 멸종했고, ‘as dead as a dodo’는 다시 볼 수 없는 것을 뜻합니다. 반려 안건에는 찍지 않습니다.</p>
       </div>
     </div>
   </section>
 
-  <!-- 업무 범위 · FAQ -->
-  <section class="sec">
-    <div class="wrap two">
-      <div id="scope">
-        <p class="label"><span class="no">06</span>업무 범위</p>
-        <div class="ban">
-          <p class="art-line"><b>설치 규정 제5조(금지)</b>이 국은 절차를 건너뛰며, 규칙을 건너뛰지 아니한다.</p>
-          <p style="margin:0;font-size:14px;color:var(--ink-400)">다음 안건은 접수하지 않습니다.</p>
-          <ul>
-            <li>학교 시스템의 보안이나 인증을 우회하는 일 (예: 수강신청 매크로)</li>
-            <li>출석, 평가 등 공정성을 해치는 자동화</li>
-            <li>타인의 개인정보를 수집하거나 이용하는 도구</li>
-          </ul>
-        </div>
+  <section id="recruit">
+    <div class="col">
+      <h2>비효율에 유난히 예민한 분을 모십니다</h2>
+      <p>코딩 경험이 없어도 직접 만들 수 있습니다. 그게 바이브 코딩입니다.</p>
+      <dl class="req">
+        <div><dt>지원 자격</dt><dd>국립목포해양대학교 재학생. 전공, 학년, 코딩 경험 무관</dd></div>
+        <div><dt>우대 사항</dt><dd>같은 일을 세 번 반복하면 참을 수 없는 분. 이미 엑셀 매크로를 몰래 만들어 본 분</dd></div>
+        <div><dt>주요 업무</dt><dd>정기 심의 회의 참석, 안건별 소규모 제작</dd></div>
+        <div><dt>모집 기간</dt><dd>언제나</dd></div>
+        <div><dt>제출 서류</dt><dd>없음. 본 국은 불필요한 서류를 요구하지 않습니다.</dd></div>
+        <div><dt>문의</dt><dd><a href="https://open.kakao.com/o/snJ3HuTi">카카오톡 오픈채팅 1:1 문의</a></dd></div>
+      </dl>
+      <div class="actions"><a class="btn" href="#">합류 신청하기</a><a class="btn btn-line" href="#">불편 제보하기</a></div>
+    </div>
+  </section>
+
+  <section id="scope">
+    <div class="col">
+      <h2>접수하지 않는 안건</h2>
+      <div class="callout no">
+        <span class="lab">설치 규정 제5조(금지)</span>
+        <p class="big">이 국은 절차를 건너뛰며, 규칙을 건너뛰지 아니한다.</p>
+        <ul class="no-list">
+          <li>학교 시스템의 보안이나 인증을 우회하는 일 (예: 수강신청 매크로)</li>
+          <li>출석, 평가 등 공정성을 해치는 자동화</li>
+          <li>타인의 개인정보를 수집하거나 이용하는 도구</li>
+        </ul>
       </div>
-      <div class="faq" id="faq">
-        <p class="label"><span class="no">07</span>자주 묻는 질문</p>
-        <details open><summary><span class="q">Q.</span><span>코딩을 전혀 몰라도 됩니까?</span></summary><p>됩니다. AI와 함께 만드는 방법은 활동하며 함께 익힙니다.</p></details>
-        <details><summary><span class="q">Q.</span><span>공식 행정기관입니까?</span></summary><p>아닙니다. 행정기관도, 정식 동아리도 아닌 그냥 크루입니다. 진지한 것은 말투뿐입니다.</p></details>
-        <details><summary><span class="q">Q.</span><span>어떤 불편을 제보할 수 있습니까?</span></summary><p>학교생활에서 손으로 반복하는 일이라면 무엇이든 가능합니다. 단, 제5조에 해당하는 안건은 제외합니다.</p></details>
-        <details><summary><span class="q">Q.</span><span>제보하면 반드시 처리됩니까?</span></summary><p>모든 안건은 심의하나, 모두 처리하지는 않습니다. 결과는 처리 현황에 공개합니다.</p></details>
-      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="col">
+      <h2>자주 묻는 질문</h2>
+      <div class="qa"><h3>코딩을 전혀 몰라도 됩니까?</h3><p>됩니다. AI와 함께 만드는 방법은 활동하며 함께 익힙니다.</p></div>
+      <div class="qa"><h3>공식 행정기관입니까?</h3><p>아닙니다. 행정기관도, 정식 동아리도 아닌 그냥 크루입니다. 진지한 것은 말투뿐입니다.</p></div>
+      <div class="qa"><h3>어떤 불편을 제보할 수 있습니까?</h3><p>학교생활에서 손으로 반복하는 일이라면 무엇이든 가능합니다. 단, 제5조에 해당하는 안건은 제외합니다.</p></div>
+      <div class="qa"><h3>제보하면 반드시 처리됩니까?</h3><p>모든 안건은 심의하나, 모두 처리하지는 않습니다. 결과는 처리 현황에 공개합니다.</p></div>
+      <div class="actions"><a class="btn" href="#">불편 제보하기</a><a class="btn btn-line" href="#">BYPASS 합류하기</a></div>
     </div>
   </section>
 </main>
 
 <footer class="foot">
-  <div class="wrap">
-    <div>
-      <p><svg class="px-dodo" viewBox="0 0 22 18" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M12 0h4v1h-4zM12 1h2v1h-2zM15 1h4v1h-4zM11 2h9v1h-9zM12 3h9v1h-9zM11 4h4v1h-4zM19 4h2v1h-2zM0 5h1v1h-1zM6 5h8v1h-8zM0 6h2v1h-2zM4 6h10v1h-10zM1 7h13v1h-13zM2 8h6v1h-6zM10 8h5v1h-5zM2 9h8v1h-8zM12 9h3v1h-3zM2 10h13v1h-13zM3 11h12v1h-12zM3 12h11v1h-11zM4 13h9v1h-9zM6 14h5v1h-5zM7 15h2v1h-2zM11 15h2v1h-2zM6 16h3v1h-3zM11 16h2v1h-2zM6 17h2v1h-2zM10 17h3v1h-3z"/><path fill="var(--orange)" d="M14 1h1v1h-1zM8 8h2v1h-2zM10 9h2v1h-2z"/></svg><strong>BYPASS</strong></p>
-      <p>느린 시스템의 실용적 대안 마련국</p>
-      <p>본 사이트는 BYPASS 크루가 운영하며, 국립목포해양대학교 행정 부서 및 정부 기관과 무관합니다.</p>
-    </div>
-    <nav aria-label="바닥 메뉴"><a href="/routes/">준공 현황</a><a href="/dockets/">처리 현황</a><a href="/login/">로그인</a><a href="https://open.kakao.com/o/snJ3HuTi">문의</a></nav>
+  <div class="col">
+    <p>BYPASS는 국립목포해양대학교 바이브 코딩 크루입니다. 본 사이트는 BYPASS 크루가 운영하며, 국립목포해양대학교 행정 부서 및 정부 기관과 무관합니다.</p>
+    <p class="links">© 2026 BYPASS · <a href="/routes/">준공 현황</a> · <a href="/dockets/">처리 현황</a> · <a href="/login/">로그인</a> · <a href="https://open.kakao.com/o/snJ3HuTi">문의</a></p>
   </div>
 </footer>
+
+<div class="dock">
+  <div class="dock-in"><p>귀찮은 절차가 있다면, 그냥 넘기지 말고 제보하십시오.</p><a class="btn" href="#">제보하기</a></div>
+</div>
 </body>
 </html>
