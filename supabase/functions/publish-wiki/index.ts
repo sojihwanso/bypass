@@ -1,6 +1,6 @@
 // BYPASS 위키·페이지 올리기 (Supabase Edge Function: publish-wiki)
 //
-// HTML 파일을 GitHub 저장소의 wiki/<주소이름>/index.html (위키) 또는 apps/<주소이름>/index.html (앱 등) 로
+// HTML 파일을 GitHub 저장소의 wiki/<주소이름>/index.html (위키) 또는 apps/<주소이름>/app.html (앱 등, 진도 저장 껍데기 포함) 로
 // 대신 저장(커밋)합니다. 저장되면 Vercel 이 자동으로 배포합니다.
 //
 // 누가 올리나
@@ -78,6 +78,55 @@ export function stampOwner(html: string, uid: string): string {
   if (root && root.index !== undefined) { const at = root.index + root[0].length; return clean.slice(0, at) + '\n' + tag + clean.slice(at); }
   return tag + '\n' + clean;
 }
+// ===== /apps/ 껍데기 =====
+// /apps/<이름>/ 은 껍데기(index.html)가 열리고, 올린 HTML 은 같은 폴더 app.html 에 둔다.
+// 껍데기(/assets/app-shell.js)가 app.html 을 칸막이 iframe 에 띄우고, 앱의 localStorage 를 받아
+// 로그인한 사람은 계정(app_progress 표)에, 아니면 그 브라우저에 진도를 저장한다. (supabase/025_app_progress.sql)
+// 여러 파일로 된 예전 앱은 예전 방식(index.html 에 그대로)으로 둔다.
+const RAW_APPS = ['ecdis', 'cbttest'];
+const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const unesc = (t: string) => t.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
+export const isShell = (html: string) => html.includes('/assets/app-shell.js');
+export function makeShell(slug: string, html: string): string {
+  const headEnd = html.search(/<\/head>/i);
+  const head = headEnd >= 0 ? html.slice(0, headEnd) : html.slice(0, 20000);
+  const t = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+  const title = esc(unesc(t ? t[1] : slug).trim().slice(0, 100) || slug);
+  // 링크 미리보기용 설명·og 태그만 옮겨 담는다 (새로 만들어서 — 다른 속성은 버린다)
+  const metas: string[] = [];
+  for (const m of head.matchAll(/<meta\s+[^>]*>/gi)) {
+    const k = m[0].match(/\b(name|property)\s*=\s*["']([^"']+)["']/i);
+    const c = m[0].match(/\bcontent\s*=\s*["']([^"']*)["']/i);
+    if (!k || !c) continue;
+    const key = k[2].toLowerCase();
+    if (!(key === 'description' || key.startsWith('og:') || key.startsWith('twitter:')) || !/^[a-z:_-]{1,40}$/.test(key)) continue;
+    metas.push(`<meta ${k[1].toLowerCase()}="${key}" content="${esc(unesc(c[1]).slice(0, 300))}">`);
+    if (metas.length >= 12) break;
+  }
+  return `<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>${title}</title>
+${metas.length ? metas.join('\n') + '\n' : ''}<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<style>
+html,body{margin:0;height:100%;background:#fff}
+iframe{position:fixed;inset:0;width:100%;height:100%;border:0;display:block}
+.bp-chip{position:fixed;left:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:2;max-width:calc(100% - 24px);padding:7px 12px;border-radius:99px;background:rgba(30,26,22,.88);color:#fff;font:600 12.5px/1.3 -apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.18);transition:opacity .5s,transform .5s}
+.bp-chip.bp-out{opacity:0;transform:translateY(8px);pointer-events:none}
+</style>
+</head>
+<body>
+<!-- BYPASS 앱 껍데기: 실제 앱은 같은 폴더의 app.html 입니다. 진도 저장은 /assets/app-shell.js 가 맡습니다. -->
+<script src="/assets/vendor/supabase-js-2.117.2.js"></script>
+<script src="/assets/auth.js"></script>
+<script src="/assets/app-shell.js" data-app="${slug}"></script>
+</body>
+</html>
+`;
+}
+
 const NOTE_ERRORS: Record<string, [number, string]> = {
   'upload not allowed': [403, '아직 올리기 권한이 없습니다. 커뮤니티 › 내 정보에서 요건을 확인해 주세요.'],
   'too many publishes': [429, '한 시간에 10번까지 올릴 수 있습니다. 잠시 후 다시 올려 주세요.'],
@@ -117,8 +166,11 @@ export async function handle(req: Request, env: (k: string) => string | undefine
   if (!token) return reply(req, 500, { error: '위키 올리기 설정이 아직 끝나지 않았습니다. (GITHUB_TOKEN 없음)' });
   const repo = env('GITHUB_REPO') || 'sojihwanso/bypass';
   const branch = env('GITHUB_BRANCH') || 'main';
-  const path = `${folder}/${slug}/index.html`;
-  const gh = (url: string, init: RequestInit = {}) => http(`https://api.github.com/repos/${repo}/contents/${path}${url}`, {
+  // 앱(/apps/)은 올린 HTML 을 app.html 에, 껍데기를 index.html 에 둔다 (위 makeShell 참고)
+  const shelled = folder === 'apps' && !RAW_APPS.includes(slug);
+  const dir = `${folder}/${slug}`;
+  const path = shelled ? `${dir}/app.html` : `${dir}/index.html`;
+  const gh = (file: string, url: string, init: RequestInit = {}) => http(`https://api.github.com/repos/${repo}/contents/${file}${url}`, {
     ...init,
     headers: {
       Authorization: `Bearer ${token}`,
@@ -128,25 +180,40 @@ export async function handle(req: Request, env: (k: string) => string | undefine
       ...(init.headers ?? {}),
     },
   });
+  const look = async (file: string): Promise<{ sha?: string; text?: string; fail?: number }> => {
+    const r = await gh(file, `?ref=${encodeURIComponent(branch)}`);
+    if (r.status === 404) return {};
+    if (!r.ok) return { fail: r.status };
+    const meta = await r.json();
+    let text: string | undefined;
+    try { text = fromBase64(meta.content ?? ''); } catch { text = undefined; }
+    return { sha: meta.sha, text };
+  };
 
   let sha: string | undefined;
   let owner: string | null = null;
-  const existing = await gh(`?ref=${encodeURIComponent(branch)}`);
-  if (existing.ok) {
-    const meta = await existing.json();
-    sha = meta.sha;
-    try { owner = ownerOf(fromBase64(meta.content ?? '')); } catch { owner = null; }
-  } else if (existing.status !== 404) return reply(req, 502, { error: `GitHub 에 접속하지 못했습니다. (${existing.status}) 토큰 권한을 확인해 주세요.` });
+  const existing = await look(path);
+  if (existing.fail) return reply(req, 502, { error: `GitHub 에 접속하지 못했습니다. (${existing.fail}) 토큰 권한을 확인해 주세요.` });
+  sha = existing.sha;
+  if (existing.text) owner = ownerOf(existing.text);
+  // 껍데기를 쓰기 전에 올라간 예전 페이지: index.html 에 앱이 그대로 있다 → 그 주인을 이어받는다
+  let index: { sha?: string; text?: string; fail?: number } = {};
+  if (shelled) {
+    index = await look(`${dir}/index.html`);
+    if (index.fail) return reply(req, 502, { error: `GitHub 에 접속하지 못했습니다. (${index.fail}) 토큰 권한을 확인해 주세요.` });
+    if (!sha && index.sha && index.text && !isShell(index.text)) owner = ownerOf(index.text);
+  }
+  const taken = Boolean(sha || (shelled && index.sha));   // 이미 누가 쓰는 주소인가
 
   let content = html;
   if (!staff) {
     // 회원: 남의 페이지(운영진이 올린 것 포함)는 덮어쓰지 않는다
-    if (sha && owner !== user.id) return reply(req, 409, { error: '이미 다른 사람이 쓰는 주소입니다. 다른 주소 이름을 정해 주세요.' });
+    if (taken && owner !== user.id) return reply(req, 409, { error: '이미 다른 사람이 쓰는 주소입니다. 다른 주소 이름을 정해 주세요.' });
     // 권한·횟수·페이지 수 확인과 기록 (회원 본인의 로그인으로)
     const note = await http(`${env('SUPABASE_URL')}/rest/v1/rpc/note_page_publish`, {
       method: 'POST',
       headers: { apikey: req.headers.get('apikey') || env('SUPABASE_ANON_KEY') || '', Authorization: auth, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ p_slug: slug, p_title: title, p_new: !sha }),
+      body: JSON.stringify({ p_slug: slug, p_title: title, p_new: !taken }),
     });
     if (!note.ok) {
       let msg = '';
@@ -161,11 +228,11 @@ export async function handle(req: Request, env: (k: string) => string | undefine
   }
 
   const name = user?.user_metadata?.display_name || user?.user_metadata?.username || (staff ? '운영진' : '회원');
-  const put = await gh('', {
+  const put = await gh(path, '', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      message: `${folder === 'wiki' ? '위키' : '페이지'} ${sha ? '고침' : '올림'}: ${title} (/${folder}/${slug}/, ${name})`,
+      message: `${folder === 'wiki' ? '위키' : '페이지'} ${taken ? '고침' : '올림'}: ${title} (/${folder}/${slug}/, ${name})`,
       content: toBase64(content),
       branch,
       ...(sha ? { sha } : {}),
@@ -176,9 +243,29 @@ export async function handle(req: Request, env: (k: string) => string | undefine
     return reply(req, 502, { error: `GitHub 에 저장하지 못했습니다. (${put.status})`, detail: detail.slice(0, 300) });
   }
   const saved = await put.json();
+  // 껍데기(index.html): 없거나, 제목·설명이 바뀌었거나, 예전 방식 페이지면 새로 쓴다
+  if (shelled) {
+    const shell = makeShell(slug, content);
+    if (index.text !== shell) {
+      const sp = await gh(`${dir}/index.html`, '', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: `페이지 껍데기: ${title} (/${folder}/${slug}/, 진도 저장)`,
+          content: toBase64(shell),
+          branch,
+          ...(index.sha ? { sha: index.sha } : {}),
+        }),
+      });
+      if (!sp.ok) {
+        const detail = await sp.text();
+        return reply(req, 502, { error: `파일은 올렸지만 페이지 껍데기를 저장하지 못했습니다. 다시 올려 주세요. (${sp.status})`, detail: detail.slice(0, 300) });
+      }
+    }
+  }
   return reply(req, 200, {
     ok: true,
-    updated: Boolean(sha),
+    updated: taken,
     url: `/${folder}/${slug}/`,
     commit: saved?.commit?.html_url ?? null,
   });

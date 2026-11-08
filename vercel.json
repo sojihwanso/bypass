@@ -11,7 +11,7 @@
       ]
     },
     {
-      "source": "/apps/((?!ecdis/|cbttest/).*)",
+      "source": "/apps/((?!ecdis/|cbttest/)[^/]+/(?!index\\.html$).+)",
       "headers": [
         {
           "key": "Content-Security-Policy",
