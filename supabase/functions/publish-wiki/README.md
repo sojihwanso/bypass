@@ -57,3 +57,14 @@ SQL Editor에서 `supabase/005_routes.sql` 전체를 붙여 넣고 **Run**.
 - `/wiki/`·`/apps/` 아래 페이지는 `vercel.json`의 보안 설정(sandbox)으로 열려서, 위키 HTML 안에 어떤 코드가 있어도
   사이트 로그인 정보에 접근할 수 없습니다. 대신 그 페이지 안에서는 브라우저 저장소(localStorage)를 쓸 수 없습니다.
 - 주소 이름은 영문 소문자·숫자·하이픈만, 폴더는 `wiki`·`apps` 만 받아서 그 바깥 파일은 건드릴 수 없습니다.
+
+## /apps/ 진도 저장 (껍데기)
+
+`/apps/<주소이름>/` 은 이제 **껍데기**(`index.html`)가 열리고, 올린 HTML 은 같은 폴더 `app.html` 에 저장됩니다.
+껍데기(`/assets/app-shell.js`)가 앱을 칸막이 안에 띄운 채로 앱의 `localStorage` 를 받아 대신 보관합니다.
+
+- 로그인한 사람: 내 계정(`app_progress` 표) → 다른 기기에서도 이어서
+- 로그인 안 한 사람: 그 브라우저에만
+- 앱 만드는 사람은 평소처럼 `localStorage` 를 쓰면 됩니다. 고칠 것 없음.
+- 필요한 것: `supabase/025_app_progress.sql` 실행, 이 함수 다시 Deploy
+- 예외: 여러 파일로 된 `ecdis`, `cbttest` 는 예전 방식 그대로
