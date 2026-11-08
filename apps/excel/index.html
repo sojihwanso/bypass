@@ -105,7 +105,7 @@ kbd{font:600 12px/1 var(--mono);background:var(--surface);border:1px solid var(-
 .rtabs button{background:none;border:0;border-bottom:3px solid transparent;padding:4px 11px;font:500 13px/1.3 var(--body);white-space:nowrap}
 .rtabs button:hover{background:var(--sunken)}
 .rtabs button.on{border-bottom-color:var(--accent);font-weight:700}
-.rbody{display:flex;align-items:stretch;padding:5px 4px 2px;overflow-x:auto;border-top:1px solid var(--line);min-height:76px}
+.rbody{display:flex;align-items:stretch;padding:5px 4px 2px;overflow-x:auto;scrollbar-width:thin;border-top:1px solid var(--line);min-height:76px}
 .rg{display:flex;flex-direction:column;justify-content:space-between;padding:0 7px;border-right:1px solid var(--line);flex:none}
 .rg-b{display:grid;grid-auto-flow:column;grid-template-rows:repeat(2,auto);gap:2px;align-items:center;justify-content:start}
 .rg-l{text-align:center;font-size:11px;line-height:1.3;color:var(--muted);padding-top:3px}
@@ -191,6 +191,18 @@ table.grid{border-collapse:separate;border-spacing:0;table-layout:fixed;font:400
 .grid.fzr tbody tr:first-child td{position:sticky;top:21px;z-index:1;background:var(--surface);border-bottom:2px solid var(--muted)}
 .grid.fzc tbody td:nth-child(2){position:sticky;left:44px;z-index:1;background:var(--surface);border-right:2px solid var(--muted)}
 .grid.nogrid td{border-color:transparent}
+.grid td.wr{white-space:pre-wrap;line-height:1.3;padding-block:2px}
+.grid td.bd{box-shadow:inset 0 0 0 1px var(--ink)}
+.mgc{position:absolute;z-index:1;display:flex;align-items:center;justify-content:center;background:var(--surface);pointer-events:none;overflow:hidden;font:400 13.5px/1.2 "Malgun Gothic","맑은 고딕",var(--body);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.mgc.b{font-weight:600}.mgc.it{font-style:italic}
+.xbar .sv{width:auto;padding:0 8px;font-size:12px;font-weight:700}
+.rb.armed{background:var(--accent);color:var(--on-accent)}
+.dtabs{display:flex;gap:1px;border-bottom:1px solid var(--line)}
+.dtabs button{background:none;border:0;border-bottom:3px solid transparent;padding:3px 10px;font-size:12.5px}
+.dtabs button.on{border-bottom-color:var(--accent);font-weight:700}
+.hits{display:grid;max-height:130px;overflow:auto;border:1px solid var(--line)}
+.hits button{background:none;border:0;border-bottom:1px solid var(--line);text-align:left;padding:3px 7px;font-size:12.5px}
+.hits button:hover{background:var(--mark-cell)}
 .grid td.it{font-style:italic}.grid td.un{text-decoration:underline}.grid td.all{text-align:left}.grid td.alc{text-align:center}.grid td.alr{text-align:right}
 .grid thead th{top:0}
 .grid tbody th{left:0;width:44px;z-index:3}
@@ -209,7 +221,7 @@ table.grid{border-collapse:separate;border-spacing:0;table-layout:fixed;font:400
 .handle{position:absolute;width:10px;height:10px;background:var(--accent);border:1px solid var(--surface);cursor:crosshair;z-index:2;touch-action:none}
 .fillbox{position:absolute;border:2px dashed var(--muted);pointer-events:none;z-index:2}
 .clipbox{position:absolute;border:2px dashed var(--good);pointer-events:none;z-index:2}
-.editor{position:absolute;z-index:3;height:23px;border:2px solid var(--accent);background:var(--surface);color:var(--ink);font:400 14px/1 var(--body);padding:0 4px;opacity:0;pointer-events:none;outline:0;user-select:text;-webkit-user-select:text}
+.editor{position:absolute;z-index:3;height:23px;resize:none;overflow:hidden;white-space:pre;border:2px solid var(--accent);background:var(--surface);color:var(--ink);font:400 14px/1 var(--body);padding:0 4px;opacity:0;pointer-events:none;outline:0;user-select:text;-webkit-user-select:text}
 .editor.on{opacity:1;pointer-events:auto}
 .status{display:flex;align-items:center;justify-content:flex-end;padding:2px 10px;border-top:1px solid var(--line);font:400 12px/1.5 var(--body);color:var(--muted);background:var(--paper);font-variant-numeric:tabular-nums;min-height:24px;flex:none}
 #status{display:flex;gap:16px}
@@ -611,18 +623,18 @@ function createSheet(el,cfg,hooks){
   const stats={undo:0,rejected:0,blocked:0,traced:0,refreshed:0};
   let spill={},hidden=new Set(),cfs=[],filt=null,tbl=null,pr={orient:'세로',fit:'없음',repeat:false},pv=null,pvD=null,pvKeys=[],ch=null,q=null,rec={on:false,steps:[]},macro=null,prot=false,multi=null,traceMsg='';
   const FMT_NAME={general:'일반',comma:'숫자',won:'통화',date:'날짜',time:'시간',pct:'백분율',dec:'소수 1자리'};
-  const STY=x=>{const o={};for(const p of['fmt','bold','ital','und','al','bg','fg'])if(x[p])o[p]=x[p];return o};
+  const STY=x=>{const o={};for(const p of['fmt','bold','ital','und','al','bg','fg','wr','bd','fs'])if(x[p])o[p]=x[p];return o};
   const I=(a,l,c='',t='')=>({a,l,c,t}),MN=(l,items,c='',id='')=>({l,items,c,id});
   const COL=p=>[[p+':','색 없음'],[p+':#FFF2CC','노랑'],[p+':#FCE4D6','주황'],[p+':#E2EFDA','초록'],[p+':#DDEBF7','파랑']];
   const FN=(l,names)=>MN(l,names.map(n=>['fn:'+n,n]));
   const RIBBON=[
-   ['홈',[['클립보드',[MN('붙여넣기',[['paste','붙여넣기'],['pv','값만 붙여넣기']],'big'),I('cut','잘라내기'),I('copy','복사')]],
-     ['글꼴',[I('bold','<b>B</b>','','굵게 (Ctrl+B)'),I('ital','<i>I</i>','','기울임꼴'),I('und','<u>U</u>','','밑줄'),MN('채우기 색',COL('bg')),MN('글꼴 색',[['fg:','자동'],['fg:#C00000','빨강'],['fg:#0070C0','파랑']])]],
-     ['맞춤',[I('al:l','왼쪽'),I('al:c','가운데'),I('al:r','오른쪽')]],
+   ['홈',[['클립보드',[MN('붙여넣기',[['paste','붙여넣기'],['pv','값만 붙여넣기']],'big'),I('cut','잘라내기'),I('copy','복사'),I('fp','서식 복사')]],
+     ['글꼴',[MN('글꼴 크기',[['fs:','기본'],['fs:12','12'],['fs:14','14'],['fs:18','18'],['fs:24','24']]),I('bold','<b>B</b>','','굵게 (Ctrl+B)'),I('ital','<i>I</i>','','기울임꼴 (Ctrl+I)'),I('und','<u>U</u>','','밑줄 (Ctrl+U)'),MN('테두리',[['bd:1','모든 테두리'],['bd:','테두리 없음']]),MN('채우기 색',COL('bg')),MN('글꼴 색',[['fg:','자동'],['fg:#C00000','빨강'],['fg:#0070C0','파랑']])]],
+     ['맞춤',[I('al:l','왼쪽'),I('al:c','가운데'),I('al:r','오른쪽'),I('wrap','자동 줄 바꿈'),I('merge','병합하고 가운데 맞춤','big')]],
      ['표시 형식',[MN('일반',[['fmt:general','일반'],['fmt:comma','숫자'],['fmt:won','통화'],['fmt:date','날짜'],['fmt:time','시간'],['fmt:pct','백분율'],['fmt:dec','소수 1자리']],'wide','fmtLabel'),I('fmt:won','통화'),I('fmt:pct','%'),I('fmt:comma','쉼표')]],
      ['스타일',[I('cf','조건부 서식','big'),I('table','표 서식','big')]],
-     ['셀',[MN('삽입',[['insRow','시트 행 삽입'],['insCol','시트 열 삽입']]),MN('삭제',[['delRow','시트 행 삭제'],['delCol','시트 열 삭제']]),MN('서식',[['unlock','셀 잠금 해제']])]],
-     ['편집',[I('autosum','Σ 자동 합계'),MN('정렬 및 필터',[['az','오름차순'],['za','내림차순'],['filter','필터']]),MN('찾기 및 선택',[['replace','바꾸기'],['blank','이동 옵션 (빈 셀)']])]]]],
+     ['셀',[MN('삽입',[['insRow','시트 행 삽입'],['insCol','시트 열 삽입']]),MN('삭제',[['delRow','시트 행 삭제'],['delCol','시트 열 삭제']]),MN('서식',[['autofit','열 너비 자동 맞춤'],['hideR','행 숨기기'],['hideC','열 숨기기'],['unhide','숨기기 취소'],['fmtdlg','셀 서식'],['unlock','셀 잠금 해제']])]],
+     ['편집',[I('autosum','Σ 자동 합계'),MN('정렬 및 필터',[['az','오름차순'],['za','내림차순'],['filter','필터']]),MN('찾기 및 선택',[['find','찾기'],['replace','바꾸기'],['goto','이동'],['blank','이동 옵션 (빈 셀)']])]]]],
    ['삽입',[['표',[I('pivot','피벗 테이블','big'),I('table','표','big')]],['차트',[I('chart','차트','big'),I('ch:col','세로 막대'),I('ch:bar','가로 막대'),I('ch:line','꺾은선'),I('ch:pie','원형')]]]],
    ['페이지 레이아웃',[['페이지 설정',[I('print','페이지 설정','big'),I('print','용지 방향'),I('print','크기 조정'),I('print','인쇄 제목')]],['시트 옵션',[I('grid','눈금선')]]]],
    ['수식',[['함수 라이브러리',[I('autosum','Σ 자동 합계','big'),FN('논리',['IF','IFS','AND','OR','NOT','IFERROR']),FN('텍스트',['LEFT','MID','RIGHT','LEN','TRIM','SUBSTITUTE','TEXT','VALUE']),FN('날짜 및 시간',['TODAY','DATE','EDATE','EOMONTH','WEEKDAY','NETWORKDAYS','TIME']),FN('찾기/참조',['XLOOKUP','VLOOKUP','INDEX','MATCH','FILTER','SORT','UNIQUE']),FN('수학/삼각',['SUM','SUMIFS','ROUND','ROUNDUP','ROUNDDOWN','SUBTOTAL']),FN('통계',['AVERAGE','AVERAGEIFS','COUNT','COUNTA','COUNTIFS','MAX','MIN','RANK'])]],['수식 분석',[I('pre','참조되는 셀 추적'),I('dep','참조하는 셀 추적'),I('clrtrace','연결선 제거')]],['참조',[I('f4','절대 참조 (F4)')]]]],
@@ -633,7 +645,7 @@ function createSheet(el,cfg,hooks){
   const MENUS=[];
   const rbtn=x=>{if(x.items){MENUS.push(x.items);return `<button type="button" class="rb ${x.c}" data-m="${MENUS.length-1}"${x.id?` id="${x.id}"`:''}>${x.l}</button>`}const off=x.a==='query'&&!cfg.query;return `<button type="button" class="rb ${x.c}" data-a="${x.a}"${x.t?` title="${x.t}"`:''}${off?' disabled title="이 레슨에는 가져올 파일이 없어요"':''}>${x.l}</button>`};
   el.innerHTML=`
-  <div class="xbar"><button type="button" data-a="undo" title="실행 취소 (Ctrl+Z)">↶</button><button type="button" data-a="redo" title="다시 실행 (Ctrl+Y)">↷</button><span>실습 통합 문서</span></div>
+  <div class="xbar"><button type="button" data-a="save" title="저장 (Ctrl+S)" class="sv">저장</button><button type="button" data-a="undo" title="실행 취소 (Ctrl+Z)">↶</button><button type="button" data-a="redo" title="다시 실행 (Ctrl+Y)">↷</button><span>실습 통합 문서</span></div>
   <div class="rib" id="rib">
     <div class="rtabs" role="tablist">${RIBBON.map((t,i)=>`<button type="button" role="tab" class="${i?'':'on'}" data-tab="${i}">${t[0]}</button>`).join('')}</div>
     ${RIBBON.map((t,i)=>`<div class="rbody" data-p="${i}"${i?' hidden':''}>${t[1].map(g=>`<div class="rg"><div class="rg-b">${g[1].map(rbtn).join('')}</div><div class="rg-l">${g[0]}</div></div>`).join('')}</div>`).join('')}
@@ -643,8 +655,8 @@ function createSheet(el,cfg,hooks){
   <div class="stabs" id="stabs"></div>
   <div class="status"><span class="ready">준비</span><div id="status"></div><div class="zoom"><button type="button" id="zout" aria-label="축소">−</button><span id="zv">100%</span><button type="button" id="zin" aria-label="확대">+</button></div></div>`;
   const $=s=>el.querySelector(s),wrap=$('#wrap'),fbar=$('#fbar'),namebox=$('#namebox'),sigEl=$('#sig'),statusEl=$('#status'),area=$('#area'),stabs=$('#stabs'),fmtLabel=$('#fmtLabel');
-  const newSheet=n=>({name:n,cells:{},cfs:[],filt:null,tbl:null,hidden:new Set(),sel:{ac:0,ar:0,ec:0,er:0}});
-  let sheets=[newSheet('Sheet1')],ai=0,editHome=null,zoom=1,freeze='';cells=sheets[0].cells;
+  const newSheet=n=>({name:n,cells:{},cfs:[],filt:null,tbl:null,hidden:new Set(),rowsH:new Set(),colsH:new Set(),sel:{ac:0,ar:0,ec:0,er:0}});
+  let sheets=[newSheet('Sheet1')],ai=0,editHome=null,zoom=1,freeze='',rowsH=new Set(),colsH=new Set(),anyMg=false,fp=null,fTab='find',fQ='',fHits=null;cells=sheets[0].cells;
   const sheetBy=n=>n?sheets.find(s=>s.name.toLowerCase()===n.toLowerCase()):sheets[ai];
   const qname=n=>/^[A-Za-z0-9_가-힣]+$/.test(n)?n:"'"+n+"'";
   const fixNames=f=>{sheets.forEach(s=>{f=f.replace(new RegExp(qname(s.name).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'!','gi'),qname(s.name)+'!')});return f};
@@ -654,7 +666,7 @@ function createSheet(el,cfg,hooks){
   for(let c=0;c<nC;c++)h+=`<th data-c="${c}">${colName(c)}<span class="rz"></span></th>`;
   h+='</tr></thead><tbody>';
   for(let r=0;r<nR;r++){h+=`<tr><th data-r="${r}">${r+1}</th>`;for(let c=0;c<nC;c++)h+=`<td data-c="${c}" data-r="${r}"></td>`;h+='</tr>'}
-  h+='</tbody></table><div class="selbox" id="sb"></div><div class="handle" id="hd"></div><div class="fillbox" id="fb" hidden></div><div class="clipbox" id="cb" hidden></div><input class="editor" id="ed" aria-label="셀 입력" autocomplete="off" spellcheck="false"><button class="ddbtn" id="dd" type="button" hidden aria-label="목록 열기">▾</button><div class="ddl" id="ddl" hidden></div>';
+  h+='</tbody></table><div class="selbox" id="sb"></div><div class="handle" id="hd"></div><div class="fillbox" id="fb" hidden></div><div class="clipbox" id="cb" hidden></div><div id="mgl"></div><textarea class="editor" id="ed" rows="1" aria-label="셀 입력" autocomplete="off" spellcheck="false"></textarea><button class="ddbtn" id="dd" type="button" hidden aria-label="목록 열기">▾</button><div class="ddl" id="ddl" hidden></div>';
   wrap.innerHTML=h;
   const table=wrap.querySelector('table'),sb=$('#sb'),hd=$('#hd'),fb=$('#fb'),cb=$('#cb'),ed=$('#ed'),dock=$('#dock'),ddBtn=$('#dd'),ddl=$('#ddl');
   input=ed;
@@ -717,9 +729,9 @@ function createSheet(el,cfg,hooks){
       if(td.textContent!==txt)td.textContent=txt;
       let cn=v instanceof XErr?'e':typeof v==='number'?'n':typeof v==='boolean'?'m':'';
       if(cell&&cell.al)cn=cn.replace(/\b[nm]\b/,'')+' al'+cell.al;
-      if(cell&&cell.bold)cn+=' b';if(cell&&cell.ital)cn+=' it';if(cell&&cell.und)cn+=' un';if(cell&&cell.head)cn+=' h';if(mk&&!(cell&&cell.head))cn+=' mk';
+      if(cell&&cell.bold)cn+=' b';if(cell&&cell.ital)cn+=' it';if(cell&&cell.und)cn+=' un';if(cell&&cell.head)cn+=' h';if(mk&&!(cell&&cell.head))cn+=' mk';if(cell&&cell.wr)cn+=' wr';if(cell&&cell.bd)cn+=' bd';
       td.className=cn+extra;
-      const css=(cell&&cell.bg?`background:${cell.bg};color:${cell.fg||'#1A1B1C'};`:cell&&cell.fg?`color:${cell.fg};`:'');
+      const css=(cell&&cell.bg?`background:${cell.bg};color:${cell.fg||'#1A1B1C'};`:cell&&cell.fg?`color:${cell.fg};`:'')+(cell&&cell.fs?`font-size:${cell.fs}px;`:'');
       if(td.style.cssText.replace(/\s/g,'')!==css.replace(/\s/g,''))td.style.cssText=css;
     }
     drawClip();drawChart();
@@ -730,6 +742,7 @@ function createSheet(el,cfg,hooks){
   function drawSel(){
     const g=range(),q=rectOf(g.c1,g.r1,g.c2,g.r2);place(sb,q);sb.className='selbox'+(g.c1===g.c2&&g.r1===g.r2?' one':'');
     hd.style.left=(q.left+q.width-6)+'px';hd.style.top=(q.top+q.height-6)+'px';
+    drawMerges();
     const a=rectOf(sel.ac,sel.ar,sel.ac,sel.ar);ed.style.left=(a.left-1)+'px';ed.style.top=(a.top-1)+'px';ed.style.height=(a.height+2)+'px';if(!editing)ed.style.width=Math.max(40,a.width+2)+'px';
     if(fmtLabel){const c0=cells[key(sel.ac,sel.ar)];fmtLabel.textContent=FMT_NAME[c0&&c0.fmt?c0.fmt:'general']+' ▾'}
     table.querySelectorAll('th.on').forEach(t=>t.classList.remove('on'));
@@ -764,14 +777,14 @@ function createSheet(el,cfg,hooks){
   function undo(){if(!undoS.length)return;redoS.push(bookJ());bookSet(undoS.pop());stats.undo++;after()}
   function redo(){if(!redoS.length)return;undoS.push(bookJ());bookSet(redoS.pop());after()}
   const focusEd=()=>{(editing&&input===fbar?fbar:ed).focus({preventScroll:true})};
-  function select(ac,ar,ec=ac,er=ar){const had=!!multi;multi=null;sel={ac,ar,ec,er};ddl.hidden=true;if(had)paint();ensure(ec,er);changedSel()}
+  function select(ac,ar,ec=ac,er=ar){const had=!!multi;multi=null;if(anyMg&&ac===ec&&ar===er){const m=mergeAt(ac,ar);if(m){ac=m.c;ar=m.r;ec=m.c+m.w-1;er=m.r+m.h-1}}sel={ac,ar,ec,er};ddl.hidden=true;if(had)paint();ensure(ec,er);changedSel()}
   function selectRef(s){const g=parseRange(s);select(g.c1,g.r1,g.c2,g.r2)}
   function beginEdit(mode,withRaw,target){
     editing=true;editMode=mode;input=target||ed;refInsert=null;editHome={i:ai};ed.classList.add('on');
     if(withRaw!==undefined){ed.value=withRaw;fbar.value=withRaw}
     sizeEd();syncHelp();
   }
-  function sizeEd(){let w=0;for(const ch of ed.value)w+=ch.charCodeAt(0)>255?15:8.6;const a=tdAt(sel.ac,sel.ar).getBoundingClientRect().width;ed.style.width=Math.max(a+2,w+18)+'px'}
+  function sizeEd(){let w=0;const lines=ed.value.split('\n');for(const ln of lines){let x=0;for(const ch of ln)x+=ch.charCodeAt(0)>255?15:8.6;w=Math.max(w,x)}const a=tdAt(sel.ac,sel.ar).getBoundingClientRect();ed.style.width=Math.max(a.width+2,w+18)+'px';ed.style.height=Math.max(a.height+2,lines.length*18+6)+'px'}
   function endEdit(){editing=false;input=ed;ed.value='';ed.classList.remove('on');ed.style.width='';sigEl.textContent='';clearRefs();refInsert=null;if(editHome&&editHome.i!==ai)switchSheet(editHome.i);editHome=null}
   function commit(){
     const val=input.value;let raw=val;
@@ -785,7 +798,7 @@ function createSheet(el,cfg,hooks){
     const dvErr=raw!==old?checkDv(k,raw):null;
     if(dvErr){stats.rejected++;hooks.msg&&hooks.msg(dvErr);hooks.change&&hooks.change();return false}
     endEdit();
-    if(raw!==old&&!(raw===''&&!old)){snap();writeRaw(k,raw,true);extendTable(sel.ac,sel.ar);paint()}
+    if(raw!==old&&!(raw===''&&!old)){snap();writeRaw(k,raw,true);if(raw.includes('\n')&&cells[k])cells[k].wr=true;extendTable(sel.ac,sel.ar);paint()}
     return true;
   }
   function commitAll(){
@@ -845,14 +858,14 @@ function createSheet(el,cfg,hooks){
     }
     return Array.from({length:count},(_,i)=>src[i%L].raw);
   }
-  function fillBy(g,dir,count){ // dir: down/up/right/left
+  function fillBy(g,dir,count,exact){ // dir: down/up/right/left
     const vert=dir==='down'||dir==='up',rev=dir==='up'||dir==='left';
     const lines=vert?g.c2-g.c1+1:g.r2-g.r1+1,len=vert?g.r2-g.r1+1:g.c2-g.c1+1;
     snap();
     for(let l=0;l<lines;l++){
       const posOf=i=>vert?[g.c1+l,rev?g.r2-i:g.r1+i]:[rev?g.c2-i:g.c1+i,g.r1+l];
       const src=[];for(let i=0;i<len;i++){const[c,r]=posOf(i),x=cells[key(c,r)];src.push({raw:x?x.raw||'':'',fmt:x&&x.fmt,sty:x?STY(x):{},c,r})}
-      const hasF=src.some(s=>s.raw[0]==='='),gen=hasF?null:series(src,count);
+      const hasF=src.some(s=>s.raw[0]==='='),gen=hasF||exact?null:series(src,count);
       for(let i=0;i<count;i++){
         const[c,r]=posOf(len+i);if(c<0||r<0||c>=nC||r>=nR)continue;const s=src[i%len],k=key(c,r);
         const prev=cells[k];let raw=gen?gen[i]:s.raw;
@@ -922,6 +935,7 @@ function createSheet(el,cfg,hooks){
       return;
     }
     if(editing){
+      if(k==='Enter'&&e.altKey&&target===ed){e.preventDefault();const p=ed.selectionStart;ed.value=ed.value.slice(0,p)+'\n'+ed.value.slice(ed.selectionEnd);ed.setSelectionRange(p+1,p+1);sizeEd();return}
       if(k==='Enter'&&mod){e.preventDefault();pending=null;commitAll();return}
       if(k==='Enter'||k==='Tab'){e.preventDefault();if(Date.now()<ignoreUntil)return;pending=null;if(k==='Tab')commitMove(e.shiftKey?-1:1,0);else commitMove(0,e.shiftKey?-1:1);return}
       if(k==='Escape'){e.preventDefault();pending=null;endEdit();drawSel();focusEd();return}
@@ -943,6 +957,21 @@ function createSheet(el,cfg,hooks){
     if(k==='F2'){e.preventDefault();const x=cells[key(sel.ac,sel.ar)];beginEdit('edit',x&&x.raw?x.raw:'');const n=ed.value.length;ed.setSelectionRange(n,n);return}
     if(k==='Escape'){clip=null;drawClip();return}
     if(k==='='&&e.altKey){e.preventDefault();autoSum();return}
+    if(k==='F5'){e.preventDefault();openTool('goto');return}
+    if(k==='F3'){e.preventDefault();if(fQ)findNext(fQ);return}
+    if(k==='PageDown'||k==='PageUp'){e.preventDefault();moveBy(0,k==='PageDown'?20:-20);return}
+    if(k===' '&&mod){e.preventDefault();select(sel.ac,0,sel.ec,nR-1);return}
+    if(k===' '&&e.shiftKey){e.preventDefault();select(0,sel.ar,nC-1,sel.er);return}
+    if(mod){
+      const sd=e.shiftKey?{Digit1:'comma',Digit3:'date',Digit4:'won',Digit5:'pct',Digit2:'time'}[e.code]:null;
+      if(sd){e.preventDefault();setFmt(sd);return}
+      if(!e.shiftKey&&e.code==='Digit1'){e.preventDefault();openTool('fmtdlg');return}
+      if(!e.shiftKey&&e.code==='Digit9'){e.preventDefault();hideRows();return}
+      if(!e.shiftKey&&e.code==='Digit0'){e.preventDefault();hideCols();return}
+      if(e.code==='Semicolon'&&!e.shiftKey){e.preventDefault();const d=new Date(),x=iso(toSerial(d.getFullYear(),d.getMonth()+1,d.getDate()));snap();writeRaw(key(sel.ac,sel.ar),x,true);after();return}
+      if(k==='-'){e.preventDefault();const g=range();structure(g.c1===g.c2&&g.r1===0&&g.r2===nR-1?'c':'r',g.c1===g.c2&&g.r1===0&&g.r2===nR-1?g.c1:g.r1,-1);return}
+      if(k==='+'||(k==='='&&e.shiftKey)){e.preventDefault();const g=range();structure(g.c1===g.c2&&g.r1===0&&g.r2===nR-1?'c':'r',g.c1===g.c2&&g.r1===0&&g.r2===nR-1?g.c1:g.r1,1);return}
+    }
     if(k==='Home'){e.preventDefault();if(mod)select(0,0);else select(0,sel.ar);return}
     if(k==='End'&&mod){e.preventDefault();const[c,r]=lastUsed();select(c,r);return}
     if(mod){
@@ -956,10 +985,14 @@ function createSheet(el,cfg,hooks){
       if(l==='h'){e.preventDefault();openTool('replace');return}
       if(l==='i'){e.preventDefault();setStyle('ital',!(cells[key(sel.ac,sel.ar)]||{}).ital);return}
       if(l==='u'){e.preventDefault();setStyle('und',!(cells[key(sel.ac,sel.ar)]||{}).und);return}
-      if(l==='f'){e.preventDefault();openTool('replace');return}
-      if(l==='a'){e.preventDefault();const[c,r]=lastUsed();select(0,0,c,r);return}
-      if(l==='d'){e.preventDefault();const g=range();if(g.r2>g.r1){fillBy({...g,r2:g.r1},'down',g.r2-g.r1);after()}return}
-      if(l==='r'){e.preventDefault();const g=range();if(g.c2>g.c1){fillBy({...g,c2:g.c1},'right',g.c2-g.c1);after()}return}
+      if(l==='f'){e.preventDefault();openTool('find');return}
+      if(l==='g'){e.preventDefault();openTool('goto');return}
+      if(l==='p'){e.preventDefault();openPrint();return}
+      if(l==='s'){e.preventDefault();saveWb();return}
+      if(l==='l'&&e.shiftKey){e.preventDefault();openTool('filter');return}
+      if(l==='a'){e.preventDefault();const g=region();select(g.c1,g.r1,g.c2,g.r2);return}
+      if(l==='d'){e.preventDefault();fillExact('d');return}
+      if(l==='r'){e.preventDefault();fillExact('r');return}
     }
   }
   function startFromInput(target){
@@ -977,6 +1010,32 @@ function createSheet(el,cfg,hooks){
   fbar.addEventListener('pointerdown',()=>{if(!editing){const x=cells[key(sel.ac,sel.ar)];beginEdit('edit',x&&x.raw?x.raw:'',fbar)}else input=fbar});
   namebox.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const t=namebox.value.trim().toUpperCase();if(/^[A-Z]+\d+(:[A-Z]+\d+)?$/.test(t)){const g=parseRange(t);if(g.c2<nC&&g.r2<nR)selectRef(t)}focusEd();drawSel()}else if(e.key==='Escape'){focusEd();drawSel()}});
   namebox.addEventListener('focus',()=>namebox.select());
+  function fillExact(d){const g=range();if(!guard(g))return;if(d==='d'&&g.r2>g.r1){fillBy({...g,r2:g.r1},'down',g.r2-g.r1,true);after()}if(d==='r'&&g.c2>g.c1){fillBy({...g,c2:g.c1},'right',g.c2-g.c1,true);after()}}
+  function mergeAt(c,r){for(const k in cells){const x=cells[k];if(x.mg){const p=parseRef(k);if(c>=p.c&&c<p.c+x.mg[0]&&r>=p.r&&r<p.r+x.mg[1])return{c:p.c,r:p.r,w:x.mg[0],h:x.mg[1]}}}return null}
+  function toggleMerge(){
+    const g=range(),m=mergeAt(g.c1,g.r1);if(!guard(g))return;snap();
+    if(m&&m.w===g.c2-g.c1+1&&m.h===g.r2-g.r1+1){delete cells[key(m.c,m.r)].mg}
+    else if(g.c1!==g.c2||g.r1!==g.r2){for(let r=g.r1;r<=g.r2;r++)for(let c=g.c1;c<=g.c2;c++)if(c!==g.c1||r!==g.r1)writeRaw(key(c,r),'');const k=key(g.c1,g.r1),x=cells[k]||(cells[k]={raw:''});x.mg=[g.c2-g.c1+1,g.r2-g.r1+1];x.al='c';anyMg=true}
+    after();
+  }
+  function drawMerges(){
+    const L0=$('#mgl');if(!anyMg){if(L0.firstChild)L0.innerHTML='';return}let h2='';
+    for(const k in cells){const x=cells[k];if(!x.mg)continue;const p=parseRef(k),q=rectOf(p.c,p.r,p.c+x.mg[0]-1,p.r+x.mg[1]-1);h2+=`<div class="mgc${x.bold?' b':''}${x.ital?' it':''}" style="left:${q.left}px;top:${q.top}px;width:${q.width-1}px;height:${q.height-1}px;${x.bg?`background:${x.bg};color:${x.fg||'#1A1B1C'};`:x.fg?`color:${x.fg};`:''}${x.fs?`font-size:${x.fs}px;`:''}">${esc(dispAt(p.c,p.r))}</div>`}
+    L0.innerHTML=h2;
+  }
+  function applyAxis(){
+    const cols=table.querySelectorAll('col');
+    for(let c=0;c<nC;c++){const h=colsH.has(c);if(cols[c+1].hidden!==h){cols[c+1].hidden=h;colTh(c).hidden=h;for(let r=0;r<nR;r++)tdAt(c,r).hidden=h}}
+  }
+  function hideRows(){const g=range();for(let r=g.r1;r<=g.r2;r++)rowsH.add(r);select(sel.ac,Math.min(nR-1,g.r2+1));paint();drawSel()}
+  function hideCols(){const g=range();for(let c=g.c1;c<=g.c2;c++)colsH.add(c);applyAxis();select(Math.min(nC-1,g.c2+1),sel.ar);drawSel()}
+  function unhide(){const g=range(),single=g.c1===g.c2&&g.r1===g.r2;[...rowsH].forEach(r=>{if(single||(r>=g.r1&&r<=g.r2))rowsH.delete(r)});[...colsH].forEach(c=>{if(single||(c>=g.c1&&c<=g.c2))colsH.delete(c)});applyAxis();paint();changedSel()}
+  function autofit(c){let w=30;for(let r=0;r<nR;r++){const t=tdAt(c,r).textContent;if(!t)continue;let x=0;for(const ch of t)x+=ch.charCodeAt(0)>255?14:7.6;w=Math.max(w,x+14)}table.querySelectorAll('col')[c+1].style.width=Math.min(420,Math.ceil(w))+'px';drawSel();drawClip()}
+  function applyFp(){if(!fp)return;const g=range();snap();for(let r=g.r1;r<=g.r2;r++)for(let c=g.c1;c<=g.c2;c++){const k=key(c,r),x=cells[k]||(cells[k]={raw:''});for(const p of['fmt','bold','ital','und','al','bg','fg','wr','bd','fs'])delete x[p];Object.assign(x,fp)}fp=null;el.querySelector('[data-a="fp"]').classList.remove('armed');after()}
+  function saveWb(){stats.saved=(stats.saved||0)+1;const n=el.querySelector('.ready');n.textContent='저장했어요 (연습 기능)';clearTimeout(saveWb.t);saveWb.t=setTimeout(()=>{n.textContent='준비'},1600);hooks.change&&hooks.change()}
+  function openPrint(){openTool('print');stats.printed=(stats.printed||0)+1;hooks.change&&hooks.change()}
+  function findHits(q){const o=[],t=q.toLowerCase();if(!t)return o;for(let r=0;r<nR;r++){if(hidden.has(r)||rowsH.has(r))continue;for(let c=0;c<nC;c++){if(colsH.has(c))continue;const k=key(c,r);if(!cells[k]&&!spillHas(k))continue;if(dispAt(c,r).toLowerCase().includes(t))o.push({c,r})}}return o}
+  function findNext(q){fQ=q;const a=findHits(q);if(!a.length){hooks.msg&&hooks.msg(`'${q}'을(를) 찾을 수 없어요.`);return null}const hit=a.find(p=>p.r>sel.ar||(p.r===sel.ar&&p.c>sel.ac))||a[0];select(hit.c,hit.r);stats.found=(stats.found||0)+1;return addr(hit.c,hit.r)}
   function setStyle(p,v){const g=range();snap();for(let r=g.r1;r<=g.r2;r++)for(let c=g.c1;c<=g.c2;c++){const k=key(c,r),x=cells[k]||(cells[k]={raw:''});if(v)x[p]=v;else delete x[p]}after()}
   function autoSum(){
     if(editing)return;const c=sel.ac,r=sel.ar,isN=(x,y)=>typeof model.value(x,y)==='number';let f='=SUM()';
@@ -1008,8 +1067,8 @@ function createSheet(el,cfg,hooks){
   function renderTabs(){
     stabs.innerHTML=sheets.map((s,i)=>`<button type="button" class="stab ${i===ai?'on':''}" data-i="${i}">${esc(s.name)}</button>`).join('')+'<button type="button" class="sadd" aria-label="새 시트" title="새 시트">+</button>';
   }
-  function saveV(){const S=sheets[ai];S.cfs=cfs;S.filt=filt;S.tbl=tbl;S.hidden=hidden;S.sel={...sel}}
-  function switchSheet(i){if(i===ai||!sheets[i])return;saveV();multi=null;ai=i;const S=sheets[i];cells=S.cells;cfs=S.cfs;filt=S.filt;tbl=S.tbl;hidden=S.hidden;sel={...S.sel};wrap.scrollTop=0;renderTabs();paint();drawSel()}
+  function saveV(){const S=sheets[ai];S.cfs=cfs;S.filt=filt;S.tbl=tbl;S.hidden=hidden;S.rowsH=rowsH;S.colsH=colsH;S.sel={...sel}}
+  function switchSheet(i){if(i===ai||!sheets[i])return;saveV();multi=null;ai=i;const S=sheets[i];cells=S.cells;cfs=S.cfs;filt=S.filt;tbl=S.tbl;hidden=S.hidden;rowsH=S.rowsH;colsH=S.colsH;sel={...S.sel};wrap.scrollTop=0;renderTabs();applyAxis();paint();drawSel()}
   function addSheet(){saveV();let n=2;while(sheetBy('Sheet'+n))n++;sheets.push(newSheet('Sheet'+n));switchSheet(sheets.length-1);renderTabs()}
   function renameSheet(i,nm){nm=nm.trim();if(!nm||/[!'\[\]:*?\/\\]/.test(nm)||(sheetBy(nm)&&sheetBy(nm)!==sheets[i]))return;const old=sheets[i].name;for(const T of sheets)for(const k in T.cells){const x=T.cells[k];if(x.raw&&x.raw[0]==='=')x.raw=x.raw.split(qname(old)+'!').join(qname(nm)+'!')}sheets[i].name=nm;renderTabs();paint();drawSel()}
   function delSheet(i){if(i===0||sheets.length<2)return;if(ai===i)switchSheet(0);sheets.splice(i,1);if(ai>i)ai--;renderTabs();paint();drawSel()}
@@ -1029,6 +1088,18 @@ function createSheet(el,cfg,hooks){
     if(a==='autosum'&&editing)return;
     if(editing&&!commit())return;
     if(a.startsWith('sdel:')){delSheet(+a.slice(5));focusEd();return}
+    if(a.startsWith('fs:')){setStyle('fs',a.slice(3));focusEd();return}
+    if(a.startsWith('bd:')){setStyle('bd',a.slice(3));focusEd();return}
+    if(a==='find'||a==='goto'||a==='fmtdlg'){openTool(a);return}
+    if(a==='print'){openPrint();return}
+    if(a==='fp'){const x=cells[key(sel.ac,sel.ar)];fp=x?STY(x):{};el.querySelector('[data-a="fp"]').classList.add('armed');focusEd();return}
+    if(a==='merge'){toggleMerge();focusEd();return}
+    if(a==='wrap'){setStyle('wr',!(cells[key(sel.ac,sel.ar)]||{}).wr);focusEd();return}
+    if(a==='hideR'){hideRows();focusEd();return}
+    if(a==='hideC'){hideCols();focusEd();return}
+    if(a==='unhide'){unhide();focusEd();return}
+    if(a==='autofit'){const g=range();for(let c=g.c1;c<=g.c2;c++)autofit(c);focusEd();return}
+    if(a==='save'){saveWb();focusEd();return}
     if(a.startsWith('fmt:'))setFmt(a.slice(4));
     else if(a.startsWith('al:'))setStyle('al',a.slice(3));
     else if(a.startsWith('bg:'))setStyle('bg',a.slice(3));
@@ -1064,7 +1135,7 @@ function createSheet(el,cfg,hooks){
   stabs.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.classList.contains('sadd')){if(editing&&!commit())return;addSheet();focusEd();return}const i=+b.dataset.i;if(editing){if(!canInsertRef()){if(!commit())return}else{switchSheet(i);input.focus({preventScroll:true});return}}switchSheet(i);hooks.change&&hooks.change();focusEd()});
   stabs.addEventListener('dblclick',e=>{const b=e.target.closest('.stab');if(!b)return;const i=+b.dataset.i,inp=document.createElement('input');inp.className='srn';inp.value=sheets[i].name;b.replaceWith(inp);inp.addEventListener('pointerdown',x=>x.stopPropagation());inp.focus();inp.select();let done2=false;const fin=ok=>{if(done2)return;done2=true;if(ok)renameSheet(i,inp.value);renderTabs();focusEd()};inp.onkeydown=x=>{if(x.key==='Enter')fin(true);if(x.key==='Escape')fin(false)};inp.onblur=()=>fin(true)});
   stabs.addEventListener('contextmenu',e=>{e.preventDefault();const b=e.target.closest('.stab');if(!b)return;const i=+b.dataset.i;if(i===0)return;openMenu([['sdel:'+i,'시트 삭제']],e.clientX,e.clientY)});
-  wrap.addEventListener('contextmenu',e=>{e.preventDefault();if(e.target===ed&&editing)return;const td=e.target.closest('td'),g=range();if(td){const c=+td.dataset.c,r=+td.dataset.r;if(c<g.c1||c>g.c2||r<g.r1||r>g.r2)select(c,r)}openMenu([['cut','잘라내기'],['copy','복사'],['paste','붙여넣기'],['pv','값만 붙여넣기'],null,['insRow','행 삽입'],['insCol','열 삽입'],['delRow','행 삭제'],['delCol','열 삭제'],['clear','내용 지우기']],e.clientX,e.clientY)});
+  wrap.addEventListener('contextmenu',e=>{e.preventDefault();if(e.target===ed&&editing)return;const td=e.target.closest('td'),g=range();if(td){const c=+td.dataset.c,r=+td.dataset.r;if(c<g.c1||c>g.c2||r<g.r1||r>g.r2)select(c,r)}openMenu([['cut','잘라내기'],['copy','복사'],['paste','붙여넣기'],['pv','값만 붙여넣기'],null,['insRow','행 삽입'],['insCol','열 삽입'],['delRow','행 삭제'],['delCol','열 삭제'],['clear','내용 지우기'],null,['hideR','행 숨기기'],['hideC','열 숨기기'],['unhide','숨기기 취소'],['fmtdlg','셀 서식']],e.clientX,e.clientY)});
   const setZoom=z=>{zoom=Math.max(.5,Math.min(2,Math.round(z*100)/100));table.style.zoom=zoom;$('#zv').textContent=Math.round(zoom*100)+'%';drawSel();drawClip()};
   $('#zin').onclick=()=>{setZoom(zoom+.1);focusEd()};$('#zout').onclick=()=>{setZoom(zoom-.1);focusEd()};
   ddBtn.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();const x=cells[key(sel.ac,sel.ar)];if(!x||!x.dv)return;ddl.innerHTML=x.dv.items.map(i=>`<button type="button">${esc(i)}</button>`).join('');ddl.hidden=!ddl.hidden});
@@ -1097,7 +1168,7 @@ function createSheet(el,cfg,hooks){
       if(editing&&!commit())return;
       if(e.shiftKey){select(sel.ac,sel.ar,c,r);focusEd();return}
       select(c,r);focusEd();
-      if(mouse)drag(ev=>{const p=cellFromPoint(ev.clientX,ev.clientY);if(p&&(p.c!==sel.ec||p.r!==sel.er))select(sel.ac,sel.ar,p.c,p.r)});
+      if(mouse)drag(ev=>{const p=cellFromPoint(ev.clientX,ev.clientY);if(p&&(p.c!==sel.ec||p.r!==sel.er))select(sel.ac,sel.ar,p.c,p.r)},()=>{if(fp)applyFp()});else if(fp)applyFp();
       return;
     }
     if(editing&&!commit())return;
@@ -1106,7 +1177,7 @@ function createSheet(el,cfg,hooks){
     else if(th.dataset.r!==undefined){const r=+th.dataset.r;select(0,r,nC-1,r)}
     focusEd();
   });
-  wrap.addEventListener('dblclick',e=>{if(e.target===hd||e.target===ed)return;const td=e.target.closest('td');if(!td||editing)return;const x=cells[key(sel.ac,sel.ar)];beginEdit('edit',x&&x.raw?x.raw:'');ed.focus({preventScroll:true});const n=ed.value.length;ed.setSelectionRange(n,n)});
+  wrap.addEventListener('dblclick',e=>{if(e.target.classList.contains('rz')){autofit(+e.target.parentNode.dataset.c);return}if(e.target===hd||e.target===ed)return;const td=e.target.closest('td');if(!td||editing)return;const x=cells[key(sel.ac,sel.ar)];beginEdit('edit',x&&x.raw?x.raw:'');ed.focus({preventScroll:true});const n=ed.value.length;ed.setSelectionRange(n,n)});
   /* ---- 확장 도구 ---- */
   function isLocked(k){return prot&&!(cells[k]&&cells[k].unlocked)}
   function guard(g){if(!prot)return true;for(let r=g.r1;r<=g.r2;r++)for(let c=g.c1;c<=g.c2;c++)if(isLocked(key(c,r))){stats.blocked++;hooks.msg&&hooks.msg('보호된 셀이라 수정할 수 없어요.');return false}return true}
@@ -1152,6 +1223,7 @@ function createSheet(el,cfg,hooks){
   function applyHidden(){
     const next=new Set();
     if(filt)for(let r=filt.g.r1+1;r<=filt.g.r2;r++)for(const c in filt.by)if(!filt.by[c].includes(dispAt(+c,r))){next.add(r);break}
+    rowsH.forEach(r=>next.add(r));
     hidden=next;
     for(let r=0;r<nR;r++){const tr=table.tBodies[0].rows[r],h=hidden.has(r);if(tr.hidden!==h)tr.hidden=h}
   }
@@ -1321,7 +1393,7 @@ function createSheet(el,cfg,hooks){
   }
   function mapMatches(raw,re){const o=[];mapOutsideStrings(raw,p=>{for(const m of p.matchAll(re))o.push(m[0].replace(/\$/g,''));return p});return o}
   const cards={};
-  function card(id,title,render){let c=cards[id];if(!c){const n=document.createElement('section');n.className='card';n.innerHTML=`<header><b>${title}</b><button type="button" aria-label="닫기">×</button></header><div class="cb"></div>`;n.style.width=({pivot:430,chart:440,query:600}[id]||350)+'px';n.style.top=(8+dock.children.length*22)+'px';n.style.right=(8+dock.children.length*14)+'px';dock.append(n);n.querySelector('header button').onclick=()=>{n.remove();delete cards[id];dock.hidden=!dock.children.length;focusEd()};
+  function card(id,title,render){let c=cards[id];if(!c){const n=document.createElement('section');n.className='card';n.innerHTML=`<header><b>${title}</b><button type="button" aria-label="닫기">×</button></header><div class="cb"></div>`;n.style.width=({pivot:430,chart:440,query:600}[id]||350)+'px';n.style.top=(8+dock.children.length*22)+'px';n.style.right=(8+dock.children.length*14)+'px';dock.append(n);const closeC=()=>{n.remove();delete cards[id];dock.hidden=!dock.children.length;focusEd()};n.querySelector('header button').onclick=closeC;n.addEventListener('keydown',ev=>{if(ev.key==='Escape'){ev.preventDefault();closeC()}});
     n.querySelector('header').addEventListener('pointerdown',ev=>{if(ev.target.closest('button'))return;ev.preventDefault();const a=area.getBoundingClientRect(),r0=n.getBoundingClientRect(),dx=ev.clientX-r0.left,dy=ev.clientY-r0.top;drag(mv=>{n.style.right='auto';n.style.left=Math.max(0,Math.min(a.width-60,mv.clientX-a.left-dx))+'px';n.style.top=Math.max(0,Math.min(a.height-30,mv.clientY-a.top-dy))+'px'})});
     c=cards[id]={el:n,body:n.querySelector('.cb'),render};dock.hidden=false}c.render(c.body);if(id==='chart')drawChart();}
   const opts=(a,v)=>a.map(x=>{const[val,lab]=Array.isArray(x)?x:[x,x];return `<option value="${esc(val)}"${val===v?' selected':''}>${esc(lab)}</option>`}).join('');
@@ -1356,10 +1428,40 @@ function createSheet(el,cfg,hooks){
         b.querySelector('[data-a=go]').onclick=()=>{const n=dedupe([...b.querySelectorAll('input:checked')].map(i=>+i.value));b.querySelector('[data-k=r]').textContent=`중복 ${n}행을 제거했어요.`};
         b.querySelector('[data-a=re]').onclick=()=>cards.dedupe.render(cards.dedupe.body);
       });
-      case'replace':return card('replace','찾아 바꾸기',b=>{
-        b.innerHTML=`<p class="hint">범위를 선택하면 그 안에서, 한 칸만 선택하면 시트 전체에서 바꿉니다.</p><div class="row">${lbl('찾을 내용',`<input data-k="a">`)}${lbl('바꿀 내용',`<input data-k="b">`)}<button class="btn main" type="button" data-a="go">모두 바꾸기</button></div><p class="hint" data-k="r"></p>`;
-        b.querySelector('[data-a=go]').onclick=()=>{const n=replaceIn(b.querySelector('[data-k=a]').value,b.querySelector('[data-k=b]').value);b.querySelector('[data-k=r]').textContent=`${n}개를 바꿨어요.`};
-      });
+      case'find':case'replace':{
+        fTab=t;fHits=null;
+        card('replace','찾기 및 바꾸기',b=>{
+          b.innerHTML=`<div class="dtabs"><button type="button" class="${fTab==='find'?'on':''}" data-tb="find">찾기</button><button type="button" class="${fTab==='replace'?'on':''}" data-tb="replace">바꾸기</button></div>
+          <div class="row">${lbl('찾을 내용',`<input data-k="a" value="${esc(fQ).replace(/"/g,'&quot;')}">`)}${fTab==='replace'?lbl('바꿀 내용',`<input data-k="b">`):''}</div>
+          <div class="row"><button class="btn" type="button" data-a="all">모두 찾기</button><button class="btn main" type="button" data-a="nx">다음 찾기</button>${fTab==='replace'?'<button class="btn" type="button" data-a="go">모두 바꾸기</button>':''}</div>
+          <p class="hint" data-k="r">${fTab==='replace'?'범위를 선택하면 그 안에서, 한 칸만 선택하면 시트 전체에서 바꿉니다.':''}</p>
+          ${fHits?`<div class="hits">${fHits.slice(0,40).map(p=>`<button type="button" data-go="${addr(p.c,p.r)}">${addr(p.c,p.r)} · ${esc(dispAt(p.c,p.r))}</button>`).join('')}</div>`:''}`;
+          const qi=b.querySelector('[data-k=a]');
+          b.querySelectorAll('[data-tb]').forEach(x=>x.onclick=()=>{fTab=x.dataset.tb;fQ=qi.value;cards.replace.render(cards.replace.body)});
+          qi.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();findNext(qi.value)}});
+          b.querySelector('[data-a=nx]').onclick=()=>findNext(qi.value);
+          b.querySelector('[data-a=all]').onclick=()=>{fQ=qi.value;fHits=findHits(fQ);stats.found=(stats.found||0)+1;cards.replace.render(cards.replace.body);cards.replace.body.querySelector('[data-k=r]').textContent=`${fHits.length}개를 찾았어요.`;hooks.change&&hooks.change()};
+          b.querySelectorAll('[data-go]').forEach(x=>x.onclick=()=>selectRef(x.dataset.go));
+          const go=b.querySelector('[data-a=go]');if(go)go.onclick=()=>{const n=replaceIn(qi.value,b.querySelector('[data-k=b]').value);b.querySelector('[data-k=r]').textContent=`${n}개를 바꿨어요.`};
+        });
+        const qf=cards.replace.body.querySelector('[data-k=a]');qf.focus();qf.select();return;
+      }
+      case'goto':{card('goto','이동',b=>{
+        b.innerHTML=`<div class="row">${lbl('참조',`<input data-k="r" placeholder="예: D1000 또는 B2:B20">`)}<button class="btn main" type="button" data-a="go">이동</button><button class="btn" type="button" data-a="bl">옵션: 빈 셀</button></div><p class="hint" data-k="m"></p>`;
+        const i2=b.querySelector('[data-k=r]'),go2=()=>{const v=i2.value.trim().toUpperCase();if(/^[A-Z]+\d+(:[A-Z]+\d+)?$/.test(v)){const g=parseRange(v);if(g.c2<nC&&g.r2<nR){selectRef(v);focusEd();return}}b.querySelector('[data-k=m]').textContent='올바른 셀 주소를 입력해 주세요.'};
+        i2.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go2()}});b.querySelector('[data-a=go]').onclick=go2;b.querySelector('[data-a=bl]').onclick=()=>{selectBlanks();focusEd()};
+      });cards.goto.body.querySelector('[data-k=r]').focus();return}
+      case'fmtdlg':{let dt='num';card('fmtdlg','셀 서식',function rd(b){
+        const tb=[['num','표시 형식'],['al','맞춤'],['font','글꼴'],['bd','테두리'],['bg','채우기']],x=cells[key(sel.ac,sel.ar)]||{};
+        const body={num:Object.entries(FMT_NAME).map(([f,n])=>`<button type="button" class="btn ${(x.fmt||'general')===f?'main':''}" data-do="fmt:${f}">${n}</button>`).join(''),
+          al:[['al:l','왼쪽'],['al:c','가운데'],['al:r','오른쪽'],['wrap','자동 줄 바꿈'],['merge','셀 병합']].map(([a,n])=>`<button type="button" class="btn" data-do="${a}">${n}</button>`).join(''),
+          font:[['bold','굵게'],['ital','기울임꼴'],['und','밑줄'],['fs:12','12'],['fs:14','14'],['fs:18','18'],['fs:','기본 크기']].map(([a,n])=>`<button type="button" class="btn" data-do="${a}">${n}</button>`).join(''),
+          bd:[['bd:1','모든 테두리'],['bd:','테두리 없음']].map(([a,n])=>`<button type="button" class="btn" data-do="${a}">${n}</button>`).join(''),
+          bg:COL('bg').map(([a,n])=>`<button type="button" class="btn" data-do="${a}">${n}</button>`).join('')}[dt];
+        b.innerHTML=`<div class="dtabs">${tb.map(([k,n])=>`<button type="button" class="${k===dt?'on':''}" data-d="${k}">${n}</button>`).join('')}</div><div class="row">${body}</div><p class="hint">선택 범위에 바로 적용됩니다.</p>`;
+        b.querySelectorAll('[data-d]').forEach(n=>n.onclick=()=>{dt=n.dataset.d;rd(b)});
+        b.querySelectorAll('[data-do]').forEach(n=>n.onclick=()=>{doAct(n.dataset.do);rd(b)});
+      });return}
       case'dv':return card('dv','데이터 유효성 검사',b=>{
         b.innerHTML=`<div class="row">${lbl('허용',`<select data-k="t">${opts([['list','목록'],['int','정수 범위']])}</select>`)}${lbl('목록 또는 최솟값',`<input data-k="a" placeholder="강남,종로,부산">`)}${lbl('최댓값',`<input data-k="b" placeholder="정수 범위일 때">`)}<button class="btn main" type="button" data-a="go">선택 범위에 적용</button></div>`;
         b.querySelector('[data-a=go]').onclick=()=>{const t=b.querySelector('[data-k=t]').value,a=b.querySelector('[data-k=a]').value;addDv(t==='list'?{t,items:a.split(',').map(x=>x.trim()).filter(Boolean)}:{t,min:+a,max:+b.querySelector('[data-k=b]').value});focusEd()};
@@ -1407,7 +1509,7 @@ function createSheet(el,cfg,hooks){
     }
   }
   function seed(){
-    sheets=[newSheet('Sheet1')];ai=0;cells=sheets[0].cells;editHome=null;pvHome=null;closeMenu();renderTabs();undoS=[];redoS=[];clip=null;Object.assign(stats,{undo:0,rejected:0,blocked:0,traced:0,refreshed:0,macroRuns:0});
+    sheets=[newSheet('Sheet1')];ai=0;cells=sheets[0].cells;editHome=null;pvHome=null;closeMenu();rowsH=new Set();colsH=new Set();anyMg=false;fp=null;fQ='';fHits=null;applyAxis();renderTabs();undoS=[];redoS=[];clip=null;Object.assign(stats,{undo:0,rejected:0,blocked:0,traced:0,refreshed:0,macroRuns:0});
     spill={};hidden=new Set();cfs=[];filt=null;tbl=null;pr={orient:'세로',fit:'없음',repeat:false};pv=null;pvD=null;pvKeys=[];ch=null;q=null;rec={on:false,steps:[]};macro=null;prot=false;multi=null;traceMsg='';
     for(const id in cards)delete cards[id];dock.innerHTML='';dock.hidden=true;
     cfg.data.trim().split('\n').forEach((ln,r)=>ln.split('|').forEach((v,c)=>{if(v!=='')writeRaw(key(c,r),v,true)}));
@@ -1424,6 +1526,7 @@ function createSheet(el,cfg,hooks){
     fmtOf:ref=>{const c=sheets[0].cells[ref];return c&&c.fmt?c.fmt:'general'},
     sel:()=>{const g=range(),a=key(g.c1,g.r1),b=key(g.c2,g.r2);return a===b?a:a+':'+b},
     calc:f=>{const ps=model.sheet;model.sheet=sheets[0];const v=evalAst(parseFormula(f.slice(1)),model);model.sheet=ps;return v},
+    find:findNext,hits:q=>findHits(q).length,region:()=>{const g=region();select(g.c1,g.r1,g.c2,g.r2)},selCol:()=>select(sel.ac,0,sel.ec,nR-1),selRow:()=>select(0,sel.ar,nC-1,sel.er),colHidden:l=>colsH.has(colIdx(l)),sty:ref=>sheets[0].cells[ref]||{},fillExact,save:saveWb,print:openPrint,hideCols,unhide,fpFrom:(a,b)=>{selectRef(a);doAct('fp');selectRef(b);applyFp()},lastRow:()=>nR,lastCol:()=>colName(nC-1),
     doAct,switchSheet,addSheet,sheetNames:()=>sheets.map(s=>s.name),act:()=>ai,
     stats,select:selectRef,seed,
     setMark:(rs)=>{markSet=new Set();if(rs){const g=parseRange(rs);for(let r=g.r1;r<=g.r2;r++)for(let c=g.c1;c<=g.c2;c++)markSet.add(key(c,r))}paint()},
@@ -1483,7 +1586,7 @@ const M=(text,spec,hint)=>({text,spec,hint});
 
 /* ===== 지도 ===== */
 const WEEKS=[
- ['엑셀 기본기',['셀과 주소','데이터의 종류','자동 채우기','복사와 값 붙여넣기','이동 단축키']],
+ ['엑셀 기본기',['셀과 주소','데이터의 종류','자동 채우기','복사와 값 붙여넣기','이동 단축키','찾기와 이동','선택과 행·열','빠른 입력','글자와 칸 꾸미기','단축키 종합 훈련']],
  ['표 다루기',['표시 형식','조건부 서식','정렬과 필터','표 기능과 좋은 구조','인쇄 설정']],
  ['수식과 기초 함수',['수식 첫걸음','상대·절대 참조','기본 집계 함수','반올림과 오류 값','IF 함수']],
  ['실무 함수',['조건 조합하기','SUMIFS·COUNTIFS','XLOOKUP·VLOOKUP','텍스트 함수','날짜 함수']],
@@ -1492,7 +1595,8 @@ const WEEKS=[
  ['자동화와 협업',['동적 배열 함수','파워 쿼리 기초','여러 파일 합치기','매크로 기록','보호와 수식 추적']],
  ['실전 프로젝트',['영업 실적 보고서','근태·수당 계산','예산 대비 집행','재고 관리','수료 시험']],
 ];
-const codeOf=id=>String(+id.slice(1)).padStart(2,'0')+'-'+String('ABCDE'.indexOf(id[0])+1).padStart(2,'0');
+const LT='ABCDEFGHIJ',TOTAL=WEEKS.reduce((a,w)=>a+w[1].length,0);
+const codeOf=id=>String(+id.slice(1)).padStart(2,'0')+'-'+String(LT.indexOf(id[0])+1).padStart(2,'0');
 
 /* ===== 레슨 ===== */
 let bigRows='번호|지점|금액';
@@ -1877,7 +1981,52 @@ const qHas=(t,col,ans)=>st(s=>s.q().steps.some(x=>x.t===t&&(!col||x.col===col)),
 const chartIs=(rs,type,wrong,ans)=>custom(s=>{const c=s.ch();if(!c)return'';if(c.rs!==rs)return`선택 범위가 ${c.rs}예요. 머리글까지 ${rs}를 선택해 주세요.`;if(c.type!==type)return wrong;return null},s=>{s.select(rs);s.chart(rs,type)},ans,rs);
 let printData='사번|이름|부서|직급|입사일|1분기|2분기|3분기|4분기';
 {const d=['영업','인사','재무','구매'],g=['사원','대리','과장','차장'];let x=11;for(let i=1;i<=45;i++){x=(x*137+29)%1009;printData+=`\n${1000+i}|직원${i}|${d[x%4]}|${g[(x>>2)%4]}|20${String(15+x%10)}-0${1+x%9}-1${x%9}|${x%40+60}|${(x*3)%40+60}|${(x*7)%40+60}|${(x*11)%40+60}`}}
+let bigTx='번호|거래처|담당|금액';
+{const n=['대한상사','미래유통','서울물산','동방기업','한강무역'],m=['김민수','이서연','박지훈','최유진','한도윤'];let x=23;for(let i=1;i<=1000;i++){x=(x*137+29)%1009;const name=i===637?'한빛상사':i===844?'새벽유통':[52,318,640,777,901].includes(i)?'바다물류':n[x%5];bigTx+=`\n${i}|${name}|${m[(x>>1)%5]}|${(x%90+10)*1000}`}}
+const todaySerial=()=>{const d=new Date();return toSerial(d.getFullYear(),d.getMonth()+1,d.getDate())};
 Object.assign(L,{
+F1:{topic:'1,000행에서 1초 만에 찾기',goal:'찾기, 이동, 바꾸기 단축키로 긴 데이터에서 원하는 칸을 바로 찾아갑니다.',why:'"한빛상사 거래 금액 좀 고쳐 주세요." 1,000행을 스크롤로 찾으면 몇 분이 걸리지만, 단축키면 3초 안에 끝납니다.',
+how:B('찾기',mini([['키','기능'],[K('Ctrl','F'),'찾기 창 열기'],[K('Enter'),'다음 결과로 이동'],[K('F3'),'창을 닫고 다음 결과로 이동']])+`<p><b>모두 찾기</b>를 누르면 결과 목록과 개수가 나옵니다. 목록을 누르면 그 칸으로 이동해요.</p>`)+B('이동',mini([['키','기능'],[K('Ctrl','G')+' 또는 '+K('F5'),'이동 창 열기']])+`<p>주소를 입력하면 그 칸으로, ${C('B2:B20')}처럼 입력하면 범위가 바로 선택됩니다. 왼쪽 위의 이름 상자에 입력해도 같아요.</p>`)+B('바꾸기',`<p>${K('Ctrl','H')}는 찾은 내용을 다른 값으로 바꿉니다. 한 칸만 선택한 상태면 <b>시트 전체</b>가, 범위를 선택하면 <b>그 범위만</b> 바뀌어요.</p>`),
+traps:['찾기가 실패하면 시트 안에 있는 값인지, 필터로 숨겨져 있지 않은지 확인하세요.','모두 바꾸기는 되돌리기 전까지 전체에 적용됩니다. 바꾸기 전에 모두 찾기로 개수를 먼저 보세요.'],
+sheet:{data:bigTx,w:[60,104,76,92,18,90,70],heads:['A1:D1','F1:F1'],fmt:{'D2:D1001':'comma'},cols:7,rows:1004,extra:{F1:'찾은 개수'}},
+tasks:[M('<b>Ctrl+F</b>를 눌러 <b>한빛상사</b>를 찾으세요.',pickSel('B638'),'시트의 칸을 한 번 누른 뒤 Ctrl+F, 한빛상사 입력, Enter입니다.'),M('그 거래의 금액을 <b>900000</b>으로 고치세요. 같은 행의 D열입니다.',st(s=>s.v('D638')===900000,s=>s.put('D638','900000'),'D638에 900000 입력','D638'),'Esc로 찾기 창을 닫고 방향키로 D열까지 이동해 입력하세요.'),M('<b>Ctrl+G</b>를 눌러 <b>D1000</b>으로 이동하세요.',pickSel('D1000'),'Ctrl+G, D1000 입력, Enter입니다.'),M('<b>Ctrl+G</b>로 범위 <b>B2:B20</b>을 한 번에 선택하세요.',pickSel('B2:B20'),'참조 칸에 B2:B20을 입력합니다.'),M('찾기 창의 <b>모두 찾기</b>로 <b>바다물류</b>의 개수를 확인하고, <b>F2</b>에 숫자로 입력하세요.',st(s=>s.v('F2')===5,s=>s.put('F2','5'),'모두 찾기 결과의 개수를 F2에 입력','F2'),'Ctrl+F, 바다물류 입력, [모두 찾기]를 누르면 개수가 표시됩니다.'),M('<b>Ctrl+H</b>로 <b>바다물류</b>를 시트 전체에서 <b>바다로지스</b>로 바꾸세요.',st(s=>s.calc('=COUNTIF(B2:B1001,"바다물류")')===0&&s.calc('=COUNTIF(B2:B1001,"바다로지스")')===5,s=>s.replace('A1','바다물류','바다로지스'),'한 칸만 선택 → Ctrl+H → 모두 바꾸기'),'한 칸만 선택한 상태에서 Ctrl+H를 누르고 [모두 바꾸기]를 누르세요.')],recap:['Ctrl+F로 찾고 Enter로 다음 결과로 간다','Ctrl+G는 주소나 범위로 바로 이동한다','Ctrl+H는 선택 범위에 따라 적용 범위가 달라진다']},
+G1:{topic:'마우스 없이 행과 열 다루기',goal:'표, 열, 행을 단축키로 선택하고 행과 열을 넣고 지우고 숨깁니다.',why:'중간에 행을 넣고, 퇴사자를 지우고, 비고 열을 가리는 일은 매일 있습니다. 행 번호를 찾아 마우스로 누르지 않아도 됩니다.',
+how:B('선택',mini([['키','선택되는 것'],[K('Ctrl','A'),'현재 표 전체'],[K('Ctrl','Space'),'열 전체'],[K('Shift','Space'),'행 전체']])+`<p>한글 입력 상태에서 ${K('Shift','Space')}가 동작하지 않으면 한/영 키로 영문 상태로 바꿔 보세요.</p>`)+B('넣고 지우기',mini([['키','기능'],[K('Ctrl','Shift','=')+' 또는 '+K('Ctrl','+'),'선택한 행 위에 삽입'],[K('Ctrl','-'),'선택한 행 또는 열 삭제']])+`<p>행을 넣거나 지우면 ${C('=SUM(B2:B6)')} 같은 수식의 범위도 함께 바뀝니다.</p>`)+B('숨기기',mini([['키','기능'],[K('Ctrl','9'),'행 숨기기'],[K('Ctrl','0'),'열 숨기기']])+`<p>다시 보이게 하려면 양옆 열을 함께 선택하고 <b>홈 › 서식 › 숨기기 취소</b>를 누르거나 마우스 오른쪽 버튼을 쓰세요.</p>`),
+traps:['Delete 키는 내용만 지웁니다. 행 자체를 없애려면 Ctrl+-입니다.','숨긴 행은 사라진 것이 아니라서 합계에 그대로 포함됩니다.'],
+sheet:{data:`이름|실적|부서|비고|평가
+김민수|320|영업|신규|A
+이서연|410|인사||B
+퇴사자|0|영업|삭제 예정|C
+최유진|275|재무||B
+한도윤|505|구매|우수|A
+합계|=SUM(B2:B6)`,w:[76,70,70,90,60],heads:['A1:E1'],cols:7,rows:18},
+tasks:[M('표 안의 칸을 누르고 <b>Ctrl+A</b>로 표 전체를 선택하세요.',st(s=>s.sel()==='A1:E7',s=>{s.select('B3');s.region()},'표 안의 셀 선택 → Ctrl+A'),'표 안이면 어느 칸이든 괜찮습니다.'),M('<b>C2</b>를 누르고 <b>Ctrl+Space</b>로 C열 전체를 선택하세요.',pickSel('C1:C18'),'Ctrl을 누른 채 스페이스바를 누르세요.'),M('<b>A4</b>를 누르고 <b>Shift+Space</b>로 4행 전체를 선택하세요.',pickSel('A4:G4'),'한글 상태에서 안 되면 한/영 키를 누르고 다시 해 보세요.'),M('4행이 선택된 채로 <b>Ctrl+-</b>를 눌러 퇴사자 행을 삭제하세요.',st(s=>s.v('A4')==='최유진'&&s.f('B6')==='=SUM(B2:B5)',s=>{s.select('A4:G4');s.doAct('delRow')},'4행 선택 → Ctrl+-'),'합계 수식의 범위도 함께 줄어듭니다.'),M('<b>A3</b>을 누르고 <b>Shift+Space</b>, <b>Ctrl+Shift+=</b>로 3행 위에 새 행을 넣으세요.',st(s=>!s.f('A3')&&s.v('A4')==='이서연'&&s.f('B7')==='=SUM(B2:B6)',s=>{s.select('A3:G3');s.doAct('insRow')},'3행 선택 → Ctrl+Shift+='),'Ctrl과 Shift를 누른 채 = 키를 누르세요.'),M('<b>D2</b>를 누르고 <b>Ctrl+0</b>으로 비고 열을 숨기세요.',st(s=>s.colHidden('D'),s=>{s.select('D2');s.hideCols()},'D열 셀 선택 → Ctrl+0'),'D열이 사라지고 C 다음에 E가 보입니다.'),M('<b>C1:E1</b>을 끌어서 선택하고 마우스 오른쪽 버튼의 <b>숨기기 취소</b>로 D열을 되살리세요.',st(s=>!s.colHidden('D'),s=>{s.select('C1:E1');s.unhide()},'C:E 선택 → 우클릭 → 숨기기 취소'),'또는 홈 › 서식 › 숨기기 취소를 누르세요.')],recap:['Ctrl+Space는 열, Shift+Space는 행 선택','Ctrl+-와 Ctrl+Shift+=로 지우고 넣는다','행을 바꾸면 수식 범위도 따라온다']},
+H1:{topic:'같은 값을 다시 치지 않기',goal:'아래·오른쪽 복사, 오늘 날짜, 동시 입력, 셀 안 줄 바꿈을 단축키로 처리합니다.',why:'같은 값을 여러 칸에 입력하거나 날짜를 매번 치는 일을 키 하나로 줄일 수 있습니다.',
+how:B('채우기 키',mini([['키','기능'],[K('Ctrl','D'),'맨 위 칸을 아래로 복사'],[K('Ctrl','R'),'맨 왼쪽 칸을 오른쪽으로 복사']])+`<p>먼저 복사할 칸과 채울 칸을 <b>함께 선택</b>한 다음 누릅니다. 채우기 핸들과 달리 숫자가 늘어나지 않아요.</p>`)+B('입력 키',mini([['키','기능'],[K('Ctrl',';'),'오늘 날짜 입력'],[K('Ctrl','Enter'),'선택한 모든 칸에 같은 값 입력'],[K('Alt','Enter'),'칸 안에서 줄 바꿈']]))+B('셀 편집',`<p>${K('F2')}로 편집을 시작하고, ${K('Esc')}로 취소합니다. ${K('Enter')}는 아래로, ${K('Tab')}은 오른쪽으로 이동해요.</p>`),
+traps:['Ctrl+D는 복사할 칸까지 함께 선택해야 합니다.','Ctrl+;로 넣은 날짜는 다음 날이 되어도 바뀌지 않습니다. 늘 오늘로 바꾸려면 =TODAY()를 씁니다.'],
+sheet:{data:`일자|담당|지점|상태|위치
+|김민수
+|
+|
+|
+|`,w:[104,76,70,70,100],heads:['A1:E1'],cols:7,rows:14,extra:{C2:'강남',D2:'접수',E2:'1층'}},
+tasks:[M('<b>A2</b>를 누르고 <b>Ctrl+;</b>로 오늘 날짜를 넣으세요.',st(s=>s.v('A2')===todaySerial(),s=>s.put('A2',iso(todaySerial())),'A2 선택 → Ctrl+;','A2'),'Ctrl을 누른 채 세미콜론 키를 누르세요.'),M('<b>B2:B6</b>을 선택하고 <b>Ctrl+D</b>로 담당을 아래로 복사하세요.',st(s=>[3,4,5,6].every(r=>s.v('B'+r)==='김민수'),s=>{s.select('B2:B6');s.fillExact('d')},'B2:B6 선택 → Ctrl+D','B2:B6'),'복사할 B2까지 함께 선택해야 합니다.'),M('<b>C2:E2</b>를 선택하고 <b>Ctrl+R</b>을 눌러 보세요. C2의 값이 오른쪽으로 복사됩니다.',st(s=>s.v('D2')==='강남'&&s.v('E2')==='강남',s=>{s.select('C2:E2');s.fillExact('r')},'C2:E2 선택 → Ctrl+R','C2:E2'),'D2와 E2가 강남으로 덮어씌워집니다.'),M('<b>D3:D6</b>을 선택하고 <b>접수</b>를 입력한 다음 <b>Ctrl+Enter</b>를 누르세요.',st(s=>[3,4,5,6].every(r=>s.v('D'+r)==='접수'),s=>{s.select('D3:D6');s.commitMulti('접수')},'D3:D6 선택 → 접수 → Ctrl+Enter','D3:D6'),'입력을 마칠 때 Enter 대신 Ctrl+Enter를 누릅니다.'),M('<b>E3</b>에 <b>1층</b>, <b>Alt+Enter</b>, <b>창고</b>를 입력해 두 줄로 만드세요.',st(s=>s.v('E3')==='1층\n창고',s=>s.put('E3','1층\n창고'),'1층 → Alt+Enter → 창고 → Enter','E3'),'Alt를 누른 채 Enter를 누르면 칸 안에서 줄이 바뀝니다.')],recap:['Ctrl+D, Ctrl+R은 그대로 복사한다','Ctrl+Enter는 선택 칸 전체에 입력한다','Alt+Enter는 칸 안 줄 바꿈이다']},
+I1:{topic:'제목, 테두리, 줄 바꿈까지',goal:'글꼴, 병합, 테두리, 줄 바꿈, 셀 서식, 서식 복사로 표를 깔끔하게 다듬습니다.',why:'숫자가 맞아도 표가 읽기 어려우면 다시 만들어 오라는 말을 듣습니다. 기본 서식 몇 가지면 충분합니다.',
+how:B('자주 쓰는 키',mini([['키','기능'],[K('Ctrl','B'),'굵게'],[K('Ctrl','I'),'기울임꼴'],[K('Ctrl','U'),'밑줄'],[K('Ctrl','1'),'셀 서식 창'],[K('Ctrl','Shift','1'),'쉼표 형식'],[K('Ctrl','Shift','5'),'% 형식']]))+B('병합은 제목에만',`<p><b>병합하고 가운데 맞춤</b>은 왼쪽 위 칸의 값만 남기고 나머지를 지웁니다. 데이터 표 안에서 병합하면 정렬과 피벗이 막히니 보고서 제목에만 쓰세요.</p>`)+B('서식 복사',`<p><b>홈 › 서식 복사</b>를 누르고 다른 칸을 선택하면 값은 그대로 두고 모양만 옮겨집니다.</p>`)+B('열 너비',`<p>열 머리글 오른쪽 경계를 <b>더블클릭</b>하면 내용에 맞게 너비가 조절됩니다. 끌어서 직접 맞춰도 돼요.</p>`),
+traps:['병합한 칸은 복사, 정렬, 필터를 방해합니다.','테두리와 색은 적을수록 숫자가 잘 보입니다.'],
+sheet:{data:`11월 지점 실적 보고
+||
+지점|매출|목표|메모
+강남|825000|700000|신규 거래처가 늘어 목표를 초과했습니다
+종로|354000|350000|
+부산|367000|400000|
+대전|365000|350000|`,w:[70,92,92,130],cols:7,rows:14},
+tasks:[M('<b>A1:D1</b>을 선택하고 <b>홈 › 병합하고 가운데 맞춤</b>을 누르세요.',st(s=>{const m=s.sty('A1').mg;return m&&m[0]===4},s=>{s.select('A1:D1');s.doAct('merge')},'A1:D1 선택 → 병합하고 가운데 맞춤','A1:D1'),'맞춤 그룹에 있습니다.'),M('제목의 글꼴 크기를 <b>홈 › 글꼴 크기 › 14</b>로 바꾸세요.',st(s=>s.sty('A1').fs==='14',s=>{s.select('A1');s.doAct('fs:14')},'A1 선택 → 글꼴 크기 14'),'글꼴 그룹의 글꼴 크기 메뉴입니다.'),M('<b>A3:D3</b>을 선택하고 <b>Ctrl+B</b>로 머리글을 굵게 하세요.',st(s=>s.sty('A3').bold&&s.sty('D3').bold,s=>{s.select('A3:D3');s.bold()},'A3:D3 선택 → Ctrl+B','A3:D3'),'범위를 선택하고 Ctrl+B를 누르세요.'),M('<b>A3:D7</b>에 <b>홈 › 테두리 › 모든 테두리</b>를 적용하세요.',st(s=>s.sty('A3').bd&&s.sty('D7').bd,s=>{s.select('A3:D7');s.doAct('bd:1')},'A3:D7 선택 → 모든 테두리','A3:D7'),'글꼴 그룹의 테두리 메뉴입니다.'),M('<b>D4</b>의 긴 메모에 <b>홈 › 자동 줄 바꿈</b>을 적용하세요.',st(s=>s.sty('D4').wr,s=>{s.select('D4');s.doAct('wrap')},'D4 선택 → 자동 줄 바꿈','D4'),'칸 너비 안에서 글이 여러 줄로 나뉩니다.'),M('<b>B4:B7</b>을 선택하고 <b>Ctrl+1</b>을 눌러 <b>표시 형식 › 숫자</b>를 고르세요.',hasFmt('B4:B7','comma','숫자'),'셀 서식 창의 표시 형식 탭에서 숫자를 누르세요.'),M('<b>B4</b>를 선택하고 <b>홈 › 서식 복사</b>를 누른 뒤 <b>C4:C7</b>을 끌어서 선택하세요.',st(s=>s.fmtOf('C4')==='comma'&&s.fmtOf('C7')==='comma',s=>s.fpFrom('B4','C4:C7'),'B4 → 서식 복사 → C4:C7 드래그','C4:C7'),'값은 그대로이고 쉼표 형식만 옮겨집니다.')],recap:['병합은 제목에만 쓴다','Ctrl+1로 서식을 한곳에서 정한다','서식 복사로 모양만 옮긴다']},
+J1:{timer:5,topic:'5분 안에 끝내는 실전 연습',goal:'1주차 단축키를 이어서 쓰며 마우스 없이 작업을 끝내는 연습을 합니다.',why:'단축키는 아는 것과 손에 붙는 것이 다릅니다. 시간을 재면서 실제 업무 순서로 한 번에 해 보세요.',
+how:B('오늘 쓸 키',mini([['작업','키'],['찾기',K('Ctrl','F')],['처음으로',K('Ctrl','Home')],['끝까지 선택',K('Ctrl','Shift','↓')],['굵게',K('Ctrl','B')],['저장',K('Ctrl','S')],['인쇄',K('Ctrl','P')]]))+B('규칙',`<ul><li>5분을 목표로 하되, 시간이 지나도 계속할 수 있어요</li><li>되도록 마우스를 쓰지 마세요</li><li>막히면 왼쪽 표를 보세요</li></ul>`)+B('저장 습관',`<p>실제 엑셀에서는 ${K('Ctrl','S')}를 자주 눌러야 합니다. 이 화면의 저장은 연습용이라 파일이 만들어지지는 않아요.</p>`),
+traps:['Ctrl+Shift+↓는 빈칸에서 멈춥니다.','실제 엑셀에서 저장하지 않고 닫으면 작업이 사라질 수 있습니다.'],
+sheet:{data:bigTx,w:[60,104,76,92,18,90,70],heads:['A1:D1'],fmt:{'D2:D1001':'comma','F2:F2':'comma'},cols:7,rows:1004,extra:{F1:'금액 합계'}},
+tasks:[M('<b>Ctrl+F</b>로 <b>새벽유통</b>을 찾으세요.',pickSel('B845'),'찾은 뒤 Esc로 창을 닫으면 그 칸에서 바로 이어서 작업할 수 있어요.'),M('그 거래의 금액을 <b>1250000</b>으로 고치세요.',st(s=>s.v('D845')===1250000,s=>s.put('D845','1250000'),'D845에 1250000 입력'),'같은 행의 D열입니다.'),M('<b>Ctrl+Home</b>으로 맨 위로 돌아오세요.',pickSel('A1'),'Ctrl과 Home을 함께 누르세요.'),M('<b>D2</b>에서 <b>Ctrl+Shift+↓</b>로 금액 전체를 선택하세요.',pickSel('D2:D1001'),'상태 표시줄에 합계가 나타납니다.'),M('<b>F2</b>에 금액 합계 수식을 쓰세요.',fx('F2','=SUM(D2:D1001)',{fn:'SUM'}),'=SUM(D2:D1001)'),M('<b>F1</b>을 <b>Ctrl+B</b>로 굵게 하세요.',st(s=>s.sty('F1').bold,s=>{s.select('F1');s.bold()},'F1 선택 → Ctrl+B','F1'),'F1을 선택하고 Ctrl+B를 누르세요.'),M('<b>Ctrl+S</b>로 저장하세요.',st(s=>s.stats.saved>0,s=>s.save(),'Ctrl+S'),'상태 표시줄에 저장 표시가 나타납니다.'),M('<b>Ctrl+P</b>로 인쇄 설정을 열고 마치세요.',st(s=>s.stats.printed>0,s=>s.print(),'Ctrl+P'),'인쇄 설정 창이 열리면 완료입니다.')],recap:['찾기, 이동, 선택, 입력을 키보드로 잇는다','시간을 재면 손에 붙는다','Ctrl+S를 습관으로 만든다']},
 A2:{topic:'값은 그대로, 보이는 모양만 바꿔요',goal:'천 단위, 원, %, 날짜 표시 형식을 구분해 숫자를 읽기 쉽게 만듭니다.',why:'1234500이라고 적힌 보고서는 한눈에 금액을 읽을 수 없습니다. 값은 건드리지 않고 표시만 바꾸면 계산도 유지되고 읽기도 쉬워집니다.',
 how:B('값과 표시는 별개입니다',`<p>셀 안의 진짜 값과 화면에 보이는 모양은 따로 저장됩니다. 수식 입력줄에 보이는 것이 진짜 값이에요.</p>`+mini([['진짜 값','표시 형식','보이는 모양'],['1234500','천 단위','1,234,500'],['1234500','원','1,234,500원'],['0.125','%','13%'],['46328','날짜','2026-11-02']]))+B('원을 직접 입력하지 않는 이유',`<p>원을 글자로 입력하면 문자가 되어 계산에서 빠집니다. 표시 형식의 <b>원</b>은 숫자를 그대로 두고 글자만 붙여 보여 줘요.</p>`)+B('실제 엑셀에서는',`<p>${K('Ctrl','1')}을 누르면 셀 서식 창이 열립니다. 표시 형식 탭에서 같은 설정을 할 수 있어요.</p>`),
 traps:['% 형식을 쓴 뒤 25를 입력하면 25%가 되지만, 이미 있는 25에 %를 누르면 2500%가 됩니다.','#####가 보이면 오류가 아니라 칸이 좁다는 뜻입니다.'],
@@ -2125,14 +2274,14 @@ sheet:{data:`일자|지점|담당|품목|금액||지점|매출|비중
 2026.11.13|종로|강태오|파일|'92,000`,w:[100,56,70,56,84,18,60,92,66],heads:['A1:E1','G1:I1','G5:G5'],fmt:{'H2:H5':'comma','I2:I5':'pct'},cols:11,rows:18,tools:['tonum','replace','dedupe','cf','chart']},
 tasks:[M('<b>A2:A13</b>의 날짜를 진짜 날짜로 고치세요.',st(s=>[...Array(12).keys()].every(i=>typeof s.v('A'+(i+2))==='number'),s=>s.replace('A2:A13','.','-'),'A2:A13 선택 → 찾아 바꾸기 . → -','A2:A13'),'찾아 바꾸기를 사용합니다.'),M('<b>E2:E13</b>의 금액을 진짜 숫자로 고치세요.',st(s=>[...Array(12).keys()].every(i=>typeof s.v('E'+(i+2))==='number'),s=>s.toNum('E2:E13'),'E2:E13 선택 → [숫자로 변환]','E2:E13'),'왼쪽에 붙어 있는 금액을 숫자로 변환합니다.'),M('A:E 표의 <b>중복 거래</b>를 제거하세요. 모든 열이 같은 행이 중복입니다.',st(s=>!s.v('A12')&&!!s.v('A11'),s=>{s.select('A2');s.dedupe(['A','B','C','D','E'])},'A2 선택 → [중복 제거] → 제거'),'표 안의 셀을 선택하고 [중복 제거]를 누르세요.'),M('<b>H2:H4</b>에 지점별 매출을 구하세요.',fx('H2:H4','=SUMIFS($E$2:$E$13,$B$2:$B$13,G2)',{fn:'SUMIFS'}),'=SUMIFS($E$2:$E$13,$B$2:$B$13,G2)'),M('<b>H5</b>에 합계를 구하세요.',fx('H5','=SUM(H2:H4)',{fn:'SUM'}),'=SUM(H2:H4)'),M('<b>I2:I5</b>에 전체 대비 비중을 구하세요.',fx('I2:I5','=H2/$H$5'),'=H2/$H$5'),M('<b>H2:H4</b>에서 <b>상위 1개</b>를 초록으로 강조하세요.',hasCf('H2:H4','top','1','g','규칙: 상위 N개, 값: 1'),'[조건부 서식]을 사용합니다.'),M('<b>G1:H4</b>로 <b>세로 막대</b> 차트를 만들고 마치세요.',chartIs('G1:H4','col','지점 간 크기 비교입니다.','G1:H4 선택 → 세로 막대'),'[차트]를 열고 범위를 선택한 뒤 종류를 누르세요.')],recap:['정리, 집계, 표현 순서로 일한다','중복 제거 후 집계한다','수료를 축하합니다']},
 });
-const ORDER=[];WEEKS.forEach((w,r)=>w[1].forEach((t,c)=>{const id='ABCDE'[c]+(r+1);if(L[id]){L[id].week=r+1;L[id].day=c;L[id].title=t;ORDER.push(id)}}));
+const ORDER=[];WEEKS.forEach((w,r)=>w[1].forEach((t,c)=>{const id=LT[c]+(r+1);if(L[id]){L[id].week=r+1;L[id].day=c;L[id].title=t;ORDER.push(id)}}));
 
 /* ===== 화면 ===== */
 const app=document.getElementById('app');
 const store={get(){try{return JSON.parse(localStorage.getItem('xl8w.done')||'[]')}catch(e){return[]}},set(a){try{localStorage.setItem('xl8w.done',JSON.stringify(a))}catch(e){}}};
 let done=new Set(store.get());
 let LAB=null;
-function updateMeter(){document.getElementById('count').textContent=`${done.size} / 40`;document.getElementById('bar').style.width=(done.size/40*100)+'%'}
+function updateMeter(){document.getElementById('count').textContent=`${done.size} / ${TOTAL}`;document.getElementById('bar').style.width=(done.size/TOTAL*100)+'%'}
 const nextId=()=>ORDER.find(id=>!done.has(id))||ORDER[0];
 function route(id){try{if(location.hash.slice(1)!==id)history.replaceState(null,'','#'+id)}catch(e){}}
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
@@ -2143,12 +2292,12 @@ function renderHome(toCourse){
   const pv=`<table class="pv"><thead><tr><th></th>${'ABCD'.split('').map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.map((r,i)=>`<tr><th>${i+1}</th>${r.map(x=>`<td>${esc(x.replace(/^'/,''))}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
   const words='SUM / AVERAGE / IF / IFS / SUMIFS / COUNTIFS / XLOOKUP / VLOOKUP / INDEX+MATCH / TEXT / EDATE / 피벗테이블 / 파워 쿼리 / 대시보드 / 실무 보고서 / ';
   const stages=WEEKS.map((w,r)=>{
-    const ids=w[1].map((_,c)=>'ABCDE'[c]+(r+1)),avail=ids.filter(id=>L[id]).length,dn=ids.filter(id=>done.has(id)).length;
-    const st=dn===5?'완료':avail===0?'준비 중':'훈련 가능';
-    return `<details class="stage"${r===n.week-1?' open':''}><summary class="gut"><span class="s-no">${String(r+1).padStart(2,'0')}</span><span class="s-name">${w[0]}</span><span class="s-meta">${r+1}주차 · 레슨 5개</span><span class="s-bar"><b style="width:${dn/5*100}%"></b></span><span class="s-st ${avail?'':'off'}">${st}</span><span class="s-x" aria-hidden="true">+</span></summary>
+    const ids=w[1].map((_,c)=>LT[c]+(r+1)),avail=ids.filter(id=>L[id]).length,dn=ids.filter(id=>done.has(id)).length;
+    const st=dn===ids.length?'완료':avail===0?'준비 중':'훈련 가능';
+    return `<details class="stage"${r===n.week-1?' open':''}><summary class="gut"><span class="s-no">${String(r+1).padStart(2,'0')}</span><span class="s-name">${w[0]}</span><span class="s-meta">${r+1}주차 · 레슨 ${ids.length}개</span><span class="s-bar"><b style="width:${dn/ids.length*100}%"></b></span><span class="s-st ${avail?'':'off'}">${st}</span><span class="s-x" aria-hidden="true">+</span></summary>
     <div class="lessons gut">${w[1].map((t,c)=>{const id=ids[c],les=L[id],d=done.has(id),up=id===nx&&!d;return `<button type="button" class="ls ${d?'done':''} ${up?'up':''}" data-id="${id}" ${les?'':'disabled'}><span class="c">${codeOf(id)}</span><span class="t">${t}</span><span class="d">${les?les.topic:''}</span><span class="s">${d?'완료':up?'다음':les?'시작':'준비 중'}</span><span class="a" aria-hidden="true">${les?'→':''}</span></button>`}).join('')}</div></details>`}).join('');
   app.innerHTML=`<section class="hero gut">
-    <div class="h-meta"><span>실무 엑셀 훈련 과정</span><span>8주 · 레슨 40개</span><span>기초부터 실무 보고서까지</span></div>
+    <div class="h-meta"><span>실무 엑셀 훈련 과정</span><span>8주 · 레슨 ${TOTAL}개</span><span>기초부터 실무 보고서까지</span></div>
     <div class="h-mid">
       <div class="badge"><b>${ORDER.length}</b><span>지금 훈련할 수<br>있는 레슨</span></div>
       <div class="h-flow">원리 → 실습 → 자동 채점<span>설명을 읽고 같은 화면의 시트에 직접 입력합니다.</span></div>
@@ -2163,8 +2312,8 @@ function renderHome(toCourse){
       <div><div class="pv-cap">오늘 다룰 데이터</div><div class="pv-wrap">${pv}</div></div>
     </div></div>
     <div class="stat gut"><h2>훈련 현황</h2><dl>
-      <div><dt>완료한 레슨</dt><dd>${done.size} / 40</dd></div>
-      <div><dt>전체 진행률</dt><dd>${Math.round(done.size/40*100)}%</dd></div>
+      <div><dt>완료한 레슨</dt><dd>${done.size} / ${TOTAL}</dd></div>
+      <div><dt>전체 진행률</dt><dd>${Math.round(done.size/TOTAL*100)}%</dd></div>
       <div><dt>현재 단계</dt><dd>${n.week}주차</dd></div>
       <div><dt>남은 실습 가능 레슨</dt><dd>${ORDER.filter(id=>!done.has(id)).length}개</dd></div>
     </dl></div>
