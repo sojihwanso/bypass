@@ -8,8 +8,9 @@ B = os.environ['CBT_BUILD']
 D = os.path.normpath(H + '/../../../apps/cbttest/data')
 AMAP = {'가': 0, '나': 1, '사': 2, '아': 3}
 A = json.load(open(H + '/answers_engine.json'))
+if os.path.exists(H + '/answers18e.json'): A.update(json.load(open(H + '/answers18e.json')))
 SUBS_E = ['기관1', '기관2', '기관3', '직무일반', '영어']
-MAXW_FULL, MAXW_FIG = 860, 640
+MAXW_FULL, MAXW_FIG = 860, 640  # 2018 스캔 문항도 860px 폭으로 줄임
 
 def norm(t): return re.sub(r'[\s\W_]+', '', t or '').lower()
 def dhash(path):
@@ -39,6 +40,9 @@ for f in glob.glob(f'{D}/img/E*.webp'): os.remove(f)
 groups = collections.defaultdict(list)
 for x in json.load(open(f'{B}/text_qs_engine.json')):
     groups[(x['y'], x['r'], x['g'], SUBS_E[x['s'] - 1])].append(x)
+if os.path.exists(f'{B}/qs18e.json'):  # 2018 스캔본 (seg18e.py 결과, 문항 이미지만)
+    for x in json.load(open(f'{B}/qs18e.json')):
+        groups[(x['y'], x['r'], x['g'], SUBS_E[x['s'] - 1])].append({k: v for k, v in x.items() if k != 'ocr'})
 
 sprite = collections.defaultdict(list)
 eng = []  # (y, r, g, sub, [(rec, rawq)])
@@ -77,7 +81,7 @@ for (y, g, r), imgs in sorted(sprite.items()):
         sp = Image.new('RGB', (W, Ht), 'white'); yy = 0; name = f'E{y}-{g}-{r}-{ci}.webp'
         for im, ref in ch:
             sp.paste(im, (0, yy)); ref.append({'s': name, 'y': yy, 'w': im.width, 'h': im.height, 'W': W, 'H': Ht}); yy += im.height + 4
-        sp.save(f'{D}/img/{name}', 'WEBP', quality=75, method=6); nsp += 1
+        sp.save(f'{D}/img/{name}', 'WEBP', quality=62 if y == 2018 else 75, method=6); nsp += 1
 
 # canonical copy for new keys: most recent engine occurrence
 occ = {}
