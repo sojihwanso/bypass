@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from lines import page_lines
 
 S = __import__('os').path.dirname(__import__('os').path.dirname(__import__('os').path.abspath(__file__)))
-OUT = f'{S}/build'
+OUT = os.environ.get('CBT_BUILD', f'{S}/build')
 IMG = f'{OUT}/img'
 os.makedirs(IMG, exist_ok=True)
 
@@ -14,6 +14,7 @@ MKRE = re.compile('[㉮㉯㉴㉵]')
 SUBRE = re.compile(r'\[\s*제\s*(\d)\s*과목\s*[:：]\s*(.+?)\s*\]')
 QRE = re.compile(r'^\s*(\d{1,2})\s*\.\s*(.*)$')
 SCALE = 3.0  # render scale (216 dpi)
+SUBNAMES = None  # 기관: ['기관1','기관2','기관3','직무일반','영어']
 
 
 def norm_join(a, b):
@@ -70,9 +71,11 @@ def parse_file(path, default_round=None):
                     continue
                 m = SUBRE.search(t)
                 if t == '[[SUBJ]]':
+                    if subj is not None and 0 < len(subj['qs']) < 25:
+                        continue  # 과목 중간의 머리글 모양 이미지(중복 머리글)는 무시
                     ni = len(ex['subjects']) + 1
                     m = re.match(r'(.*)', str(ni))
-                    nm = ['항해', '운용', '법규', '영어', KIND5][ni - 1]
+                    nm = (SUBNAMES or ['항해', '운용', '법규', '영어', KIND5])[ni - 1]
                     subj = {'idx': ni, 'name': nm, 'qs': []}
                     ex['subjects'][ni] = subj
                     expect = 1
