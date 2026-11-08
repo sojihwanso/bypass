@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>BYPASS 새 디자인 초안 v4</title>
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" rel="stylesheet">
+<style>
+  /* ===== 초안 v4: 대유쾌마운틴 — 진지한 말투 × 신나는 화면 ===== */
+  :root {
+    --cream: #FFF6E9;
+    --paper: #FFFDF8;
+    --ink: #1E1A16;
+    --ink-2: #5A5148;
+    --orange: #EE6A1F;     /* BYPASS 대표 주황 */
+    --yellow: #FFD23F;
+    --sky: #7CC8FF;
+    --mint: #6EDBB0;
+    --pink: #FF9EC0;
+    --lilac: #B9A4FF;
+    --line: 3px solid var(--ink);
+    --shadow: 6px 6px 0 var(--ink);
+    --round: 22px;
+    --pop: 'Black Han Sans', 'Pretendard Variable', sans-serif;
+    --body: 'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    --spring: cubic-bezier(.34, 1.56, .64, 1);
+    --ease: cubic-bezier(.2, .7, .1, 1);
+    --wrap: 1180px;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { background: var(--cream); scroll-behavior: smooth; overflow-x: clip; }
+  body {
+    margin: 0; color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.65; letter-spacing: -0.01em;
+    word-break: keep-all; overflow-wrap: break-word; -webkit-font-smoothing: antialiased; overflow-x: clip;
+    background: var(--cream) radial-gradient(rgba(30, 26, 22, .13) 1.3px, transparent 1.5px) 0 0 / 22px 22px;
+  }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; border-radius: 6px; }
+  .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 24px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .draft-flag { position: fixed; left: 12px; bottom: 12px; z-index: 90; font-size: 12px; font-weight: 700; background: var(--ink); color: var(--yellow); padding: 4px 10px; border-radius: 99px; }
+  @media (max-width: 600px) { .wrap { padding: 0 18px; } body { font-size: 16px; } }
+
+  /* 버튼: 누르면 꾹 눌림 */
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px; height: 56px; padding: 0 26px;
+    font: 800 17px var(--body); letter-spacing: -0.02em; color: var(--ink); text-decoration: none;
+    background: var(--orange); border: var(--line); border-radius: 99px; box-shadow: 4px 4px 0 var(--ink);
+    cursor: pointer; transition: transform .15s var(--ease), box-shadow .15s var(--ease);
+  }
+  .btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+  .btn:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--ink); }
+  .btn.y { background: var(--yellow); }
+  .btn.w { background: var(--paper); }
+  .btn.sm { height: 44px; padding: 0 18px; font-size: 15px; }
+  .btn .e { display: inline-block; transition: transform .3s var(--spring); }
+  .btn:hover .e { transform: rotate(-12deg) scale(1.25); }
+
+  /* 나타나기: 통통 튀며 */
+  .pop { opacity: 0; transform: translateY(40px) scale(.94); transition: opacity .6s var(--ease), transform .8s var(--spring); }
+  .pop.on { opacity: 1; transform: none; }
+  .pop.d1 { transition-delay: .08s; } .pop.d2 { transition-delay: .16s; } .pop.d3 { transition-delay: .24s; } .pop.d4 { transition-delay: .32s; }
+
+  /* ===== 머리글: 떠 있는 알약 ===== */
+  .head { position: sticky; top: 12px; z-index: 50; margin: 12px auto 0; max-width: calc(var(--wrap) - 24px); padding: 0 12px; }
+  .head-in { display: flex; align-items: center; gap: 16px; height: 64px; padding: 0 10px 0 16px; background: var(--paper); border: var(--line); border-radius: 99px; box-shadow: var(--shadow); }
+  .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; font: 400 24px var(--pop); letter-spacing: 0.01em; }
+  .logo .dodo { width: 44px; height: auto; transition: transform .4s var(--spring); }
+  .logo:hover .dodo { transform: rotate(-14deg) scale(1.15); }
+  .nav { display: flex; gap: 4px; margin-left: auto; }
+  .nav a { padding: 8px 14px; border-radius: 99px; font-weight: 700; font-size: 15px; text-decoration: none; transition: background .2s, transform .3s var(--spring); }
+  .nav a:hover { background: var(--yellow); transform: rotate(-3deg); }
+  @media (max-width: 960px) { .nav { display: none; } .head-in > .btn { margin-left: auto; } }
+  @media (max-width: 420px) { .head-in > .btn .t { display: none; } .head-in > .btn { padding: 0 16px; } }
+
+  /* ===== ① 첫 화면 ===== */
+  .hero { position: relative; padding-top: clamp(46px, 7vw, 90px); padding-bottom: 30px; }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 30px; align-items: center; }
+  .notice { display: inline-flex; align-items: center; gap: 10px; padding: 7px 16px 7px 8px; background: var(--paper); border: var(--line); border-radius: 99px; font-weight: 700; font-size: 14.5px; transform: rotate(-2deg); }
+  .notice b { background: var(--ink); color: var(--yellow); padding: 2px 10px; border-radius: 99px; font-size: 13px; }
+  h1 { margin: 26px 0 0; font: 400 clamp(40px, 6.2vw, 84px) / 1.1 var(--pop); letter-spacing: -0.01em; }
+  h1 .nw { white-space: nowrap; }
+  h1 .hl { position: relative; display: inline-block; padding: 0 .12em; z-index: 0; }
+  h1 .hl::before { content: ""; position: absolute; inset: .1em -.02em .02em; background: var(--yellow); border: var(--line); border-radius: 14px; transform: rotate(-2.5deg) scaleX(0); transform-origin: left; z-index: -1; transition: transform .7s var(--spring) .7s; }
+  h1 .hl.o::before { background: var(--orange); transform: rotate(1.5deg) scaleX(0); transition-delay: .95s; }
+  .hero.on h1 .hl::before { transform: rotate(-2.5deg) scaleX(1); }
+  .hero.on h1 .hl.o::before { transform: rotate(1.5deg) scaleX(1); }
+  .hero .lede { margin: 26px 0 0; font-size: clamp(18px, 1.9vw, 21px); font-weight: 500; color: var(--ink-2); max-width: 32em; }
+  .hero .acts { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; }
+  /* 도도 무대 */
+  .stage { position: relative; aspect-ratio: 1 / 1; max-width: 520px; justify-self: center; width: 100%; }
+  .sun { position: absolute; left: 7%; top: 9%; width: 86%; aspect-ratio: 1; background: var(--sky); border: var(--line); border-radius: 50%; box-shadow: var(--shadow); overflow: hidden; }
+  .sun::after { content: ""; position: absolute; left: -10%; right: -10%; bottom: -2%; height: 34%; background: var(--mint); border-top: var(--line); border-radius: 50% 50% 0 0 / 30% 30% 0 0; }
+  .cloud { position: absolute; height: 26px; background: #fff; border: var(--line); border-radius: 99px; animation: drift 9s ease-in-out infinite alternate; }
+  .cloud.c1 { width: 90px; top: 22%; left: 12%; } .cloud.c2 { width: 60px; top: 34%; right: 14%; animation-duration: 7s; animation-direction: alternate-reverse; }
+  @keyframes drift { to { transform: translateX(26px); } }
+  .stage .dodo { position: absolute; width: 64%; left: 17%; bottom: 13%; animation: bob 1.8s ease-in-out infinite; transform-origin: 50% 100%; cursor: pointer; }
+  @keyframes bob { 50% { transform: translateY(-10px) rotate(-2deg); } }
+  .stage .dodo.jump { animation: jump .7s var(--spring); }
+  @keyframes jump { 30% { transform: translateY(-60px) rotate(-14deg) scale(1.05); } 60% { transform: translateY(0) scaleY(.9); } }
+  .dodo-eye { transform-box: fill-box; transform-origin: center; animation: blink 4.2s infinite; }
+  @keyframes blink { 0%, 94%, 100% { transform: scaleY(1); } 97% { transform: scaleY(.1); } }
+  .say { position: absolute; top: 2%; right: -2%; max-width: 60%; padding: 12px 16px; background: var(--paper); border: var(--line); border-radius: 20px 20px 20px 4px; box-shadow: 4px 4px 0 var(--ink); font-weight: 800; font-size: clamp(14px, 1.5vw, 16.5px); line-height: 1.4; transform-origin: 0 100%; animation: say 5s var(--spring) infinite; }
+  @keyframes say { 0%, 4% { transform: scale(0); } 10%, 90% { transform: scale(1); } 96%, 100% { transform: scale(0); } }
+  .sticker { position: absolute; z-index: 2; padding: 8px 14px; border: var(--line); border-radius: 12px; font-weight: 800; font-size: 14px; box-shadow: 3px 3px 0 var(--ink); cursor: pointer; user-select: none; transition: transform .5s var(--spring); white-space: nowrap; }
+  .sticker:hover { transform: rotate(0) scale(1.12) !important; }
+  .sticker.spin { animation: spin .7s var(--spring); }
+  @keyframes spin { to { transform: rotate(360deg) scale(1); } }
+  .s1 { background: var(--yellow); left: -4%; top: 30%; transform: rotate(-12deg); }
+  .s2 { background: var(--pink); right: -3%; top: 52%; transform: rotate(9deg); }
+  .s3 { background: var(--lilac); left: 4%; bottom: 6%; transform: rotate(6deg); }
+  @media (max-width: 860px) { .hero-grid { grid-template-columns: 1fr; } .stage { max-width: 380px; margin-top: 10px; } .s1 { left: 0; } .s2 { right: 0; } }
+
+  /* 흐르는 띠 (기울어짐) */
+  .tapes { overflow: hidden; padding: 26px 0 30px; margin-top: 14px; }
+  .tape { margin: 0; transform: rotate(-2deg); background: var(--yellow); border-block: var(--line); overflow: hidden; }
+  .tape.b { transform: rotate(1.5deg); background: var(--ink); color: var(--paper); margin-top: -14px; }
+  .tape-track { display: flex; width: max-content; animation: slide 30s linear infinite; }
+  .tape.b .tape-track { animation-direction: reverse; animation-duration: 36s; }
+  .tape span { padding: 14px 0; font: 400 22px var(--pop); white-space: nowrap; }
+  .tape span::after { content: "✦"; margin: 0 22px; color: var(--orange); }
+  @keyframes slide { to { transform: translateX(-50%); } }
+
+  /* 구역 제목 */
+  .sec { padding-top: clamp(80px, 11vw, 140px); }
+  .kick { display: inline-block; padding: 6px 14px; border: var(--line); border-radius: 99px; background: var(--paper); font-weight: 800; font-size: 14px; transform: rotate(-3deg); box-shadow: 3px 3px 0 var(--ink); }
+  .h2 { margin: 18px 0 0; font: 400 clamp(36px, 5vw, 64px) / 1.12 var(--pop); }
+  .h2 .mark { background: linear-gradient(transparent 58%, var(--yellow) 58%, var(--yellow) 92%, transparent 92%); padding: 0 .08em; }
+  .sub { margin: 16px 0 0; font-size: 18px; color: var(--ink-2); font-weight: 500; max-width: 36em; }
+
+  /* ===== 경주: 달팽이 vs 도도 ===== */
+  .race { margin-top: 40px; position: relative; background: var(--paper); border: var(--line); border-radius: var(--round); box-shadow: var(--shadow); overflow: hidden; }
+  .race svg { display: block; width: 100%; height: auto; }
+  .race .slowroad { fill: none; stroke: #CFC6BA; stroke-width: 26; stroke-linecap: round; stroke-linejoin: round; }
+  .race .slowline { fill: none; stroke: #fff; stroke-width: 3; stroke-dasharray: 10 12; }
+  .race .fastroad { fill: none; stroke: var(--orange); stroke-width: 26; stroke-linecap: round; }
+  .race .fastline { fill: none; stroke: var(--yellow); stroke-width: 3; stroke-dasharray: 10 12; animation: dash .8s linear infinite; }
+  @keyframes dash { to { stroke-dashoffset: -44; } }
+  .race-lab { position: absolute; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border: var(--line); border-radius: 99px; background: var(--paper); font-weight: 800; font-size: 14px; box-shadow: 3px 3px 0 var(--ink); }
+  .race-lab.o { background: var(--orange); }
+  .race-lab small { font-weight: 600; opacity: .7; }
+  .race-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 20px; border-top: var(--line); background: var(--yellow); font-weight: 800; }
+  .race-foot .score { display: flex; gap: 16px; }
+  .race-foot .legend { display: none; font-weight: 700; margin-left: 6px; }
+  @media (max-width: 600px) { .race-lab { font-size: 12px; padding: 4px 9px; } .race-lab.hide-sm { display: none; } .race-foot { font-size: 14px; flex-direction: column; align-items: flex-start; gap: 4px; } .race-foot .legend { display: inline; } }
+
+  /* ===== 명칭: 통통 타일 ===== */
+  .tiles { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+  .tile { position: relative; padding: 18px 14px 16px; border: var(--line); border-radius: var(--round); box-shadow: var(--shadow); text-align: center; transition: transform .4s var(--spring); cursor: default; }
+  .tile:nth-child(1) { background: var(--orange); transform: rotate(-3deg); }
+  .tile:nth-child(2) { background: var(--yellow); transform: rotate(2deg); }
+  .tile:nth-child(3) { background: var(--sky); transform: rotate(-1deg); }
+  .tile:nth-child(4) { background: var(--mint); transform: rotate(3deg); }
+  .tile:nth-child(5) { background: var(--pink); transform: rotate(-2deg); }
+  .tile:nth-child(6) { background: var(--lilac); transform: rotate(1deg); }
+  .tile:hover { transform: translateY(-14px) rotate(0) scale(1.05); }
+  .tile .L { display: block; font: 400 clamp(54px, 7vw, 92px) / 1 var(--pop); }
+  .tile .en { display: block; margin-top: 8px; font-weight: 800; font-size: 14px; }
+  .tile .en i { font-style: normal; font-weight: 500; opacity: .7; }
+  .tile .ko { display: inline-block; margin-top: 6px; padding: 2px 10px; background: var(--paper); border: 2px solid var(--ink); border-radius: 99px; font-weight: 700; font-size: 13.5px; }
+  .fullname { margin: 26px 0 0; font-weight: 700; font-size: 17px; }
+  .fullname span { color: var(--ink-2); font-weight: 500; }
+  @media (max-width: 760px) { .tiles { grid-template-columns: repeat(3, 1fr); } }
+
+  /* ===== 단축 대상: 귀찮음 몬스터 카드 (뒤집기) ===== */
+  .monsters { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 44px; }
+  .mon { perspective: 1200px; height: 400px; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; font: inherit; color: inherit; }
+  .mon-in { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .8s var(--spring); }
+  .mon.flip .mon-in { transform: rotateY(180deg); }
+  .face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: var(--line); border-radius: var(--round); box-shadow: var(--shadow); padding: 16px; display: flex; flex-direction: column; overflow: hidden; }
+  .front { background: var(--paper); }
+  .back { background: var(--ink); color: var(--paper); transform: rotateY(180deg); }
+  .mon .no { display: flex; justify-content: space-between; font-weight: 800; font-size: 13px; }
+  .mon .no b { background: var(--ink); color: var(--paper); padding: 2px 9px; border-radius: 99px; font-weight: 700; }
+  .mon .pic { flex: 1; display: grid; place-items: center; margin: 8px -4px; border: 2.5px solid var(--ink); border-radius: 16px; position: relative; overflow: hidden; }
+  .mon:nth-child(1) .pic { background: var(--pink); } .mon:nth-child(2) .pic { background: var(--sky); } .mon:nth-child(3) .pic { background: var(--lilac); } .mon:nth-child(4) .pic { background: var(--mint); }
+  .mon .pic svg { width: 62%; height: auto; animation: wobble 2.4s ease-in-out infinite; }
+  .mon:nth-child(2) .pic svg { animation-delay: -.6s; } .mon:nth-child(3) .pic svg { animation-delay: -1.2s; } .mon:nth-child(4) .pic svg { animation-delay: -1.8s; }
+  @keyframes wobble { 25% { transform: rotate(-6deg) translateY(-4px); } 75% { transform: rotate(6deg) translateY(2px); } }
+  .mon h3 { margin: 4px 0 2px; font: 400 26px/1.2 var(--pop); }
+  .mon .skill { margin: 0; font-size: 14.5px; color: var(--ink-2); line-height: 1.5; }
+  .hp { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-weight: 800; font-size: 12px; }
+  .hp i { flex: 1; height: 12px; border: 2px solid var(--ink); border-radius: 99px; background: linear-gradient(90deg, #FF5B5B var(--hp), transparent var(--hp)); }
+  .flip-hint { margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--orange); }
+  .back .tag { align-self: flex-start; padding: 3px 10px; border-radius: 99px; background: var(--orange); color: var(--ink); font-weight: 800; font-size: 13px; }
+  .back h3 { margin-top: 14px; color: var(--yellow); }
+  .back p { margin: 6px 0 0; font-size: 15px; color: #E9E1D6; }
+  .back ol { list-style: none; margin: 14px 0 0; padding: 0; counter-reset: k; }
+  .back li { counter-increment: k; display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-top: 2px dashed rgba(255,255,255,.18); font-weight: 600; font-size: 15px; }
+  .back li::before { content: counter(k); flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--yellow); color: var(--ink); font-size: 12px; font-weight: 800; }
+  .back .ko-stamp { margin-top: auto; align-self: flex-end; padding: 6px 12px; border: 3px solid var(--orange); border-radius: 10px; color: var(--orange); font: 400 20px var(--pop); transform: rotate(-10deg); }
+  @media (max-width: 1000px) { .monsters { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .monsters { grid-template-columns: 1fr; } .mon { height: 360px; } }
+
+  /* ===== 처리 현황: 스티커 카드 ===== */
+  .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; margin-top: 44px; }
+  .card { position: relative; display: flex; gap: 18px; padding: 20px; background: var(--paper); border: var(--line); border-radius: var(--round); box-shadow: var(--shadow); text-decoration: none; color: inherit; transition: transform .35s var(--spring), box-shadow .35s var(--spring); }
+  .card:nth-child(odd) { transform: rotate(-1deg); } .card:nth-child(even) { transform: rotate(1deg); }
+  a.card:hover { transform: translate(-3px, -5px) rotate(0); box-shadow: 10px 10px 0 var(--ink); }
+  .card .ic { flex: none; width: 92px; height: 92px; border: var(--line); border-radius: 18px; display: grid; place-items: center; font-size: 44px; }
+  .card h3 { margin: 4px 0 4px; font: 400 26px/1.2 var(--pop); }
+  .card p { margin: 0; color: var(--ink-2); font-size: 15.5px; }
+  .card .meta { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { display: inline-block; padding: 2px 10px; border: 2px solid var(--ink); border-radius: 99px; font-size: 12.5px; font-weight: 800; background: var(--paper); }
+  .chip.ok { background: var(--mint); } .chip.no { background: #FF8A80; }
+  .card .go { display: inline-block; margin-top: 10px; font-weight: 800; color: var(--orange); }
+  .stamp { position: absolute; right: -14px; top: -18px; width: 88px; height: 88px; display: grid; place-items: center; text-align: center; border: 4px solid var(--orange); border-radius: 50%; background: rgba(255,246,233,.92); color: var(--orange); font: 400 16px/1.15 var(--pop); transform: rotate(-16deg) scale(2.4); opacity: 0; }
+  .card.on .stamp { animation: thud .5s var(--ease) forwards; }
+  @keyframes thud { 70% { transform: rotate(-16deg) scale(.9); opacity: 1; } 100% { transform: rotate(-16deg) scale(1); opacity: 1; } }
+  .card.on.shake { animation: shake .35s .35s; }
+  @keyframes shake { 25% { translate: -4px 2px; } 50% { translate: 4px -2px; } 75% { translate: -2px 1px; } }
+  .card.rej { background: #EFE9E1; }
+  .card.rej h3 { text-decoration: line-through 3px #E04B3C; }
+  .card.rej .ic { position: relative; overflow: hidden; background: #C9D3DE; }
+  .drop { position: absolute; top: -10px; width: 3px; height: 12px; background: #4B8BD6; border-radius: 3px; animation: fall 1s linear infinite; }
+  @keyframes fall { to { transform: translateY(110px); } }
+  @media (max-width: 760px) { .cards { grid-template-columns: 1fr; } .card .ic { width: 70px; height: 70px; font-size: 34px; } }
+
+  /* ===== 처리 절차: 보드게임 ===== */
+  .board { position: relative; margin-top: 44px; padding: 34px 26px; background: var(--mint); border: var(--line); border-radius: var(--round); box-shadow: var(--shadow); }
+  .path { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .path::before { content: ""; position: absolute; left: 10%; right: 10%; top: 54px; border-top: 4px dashed var(--ink); }
+  .stop { position: relative; text-align: center; }
+  .stop .dot { position: relative; z-index: 1; margin: 0 auto; width: 108px; height: 108px; display: grid; place-items: center; border: var(--line); border-radius: 50%; background: var(--paper); box-shadow: 4px 4px 0 var(--ink); font: 400 36px var(--pop); transition: background .3s, transform .5s var(--spring); }
+  .stop.here .dot { background: var(--yellow); transform: scale(1.1) rotate(-6deg); }
+  .stop.done .dot { background: var(--orange); }
+  .stop h3 { margin: 16px 0 4px; font: 400 28px var(--pop); }
+  .stop p { margin: 0 auto; max-width: 15em; font-size: 15px; font-weight: 600; }
+  .stop .due { display: inline-block; margin-top: 10px; padding: 2px 10px; border: 2px solid var(--ink); border-radius: 99px; background: var(--paper); font-size: 12.5px; font-weight: 800; }
+  .token { position: absolute; z-index: 3; width: 74px; left: 0; top: 0; transition: left .8s var(--spring), top .8s var(--spring); pointer-events: none; }
+  .token .dodo { width: 100%; height: auto; animation: bob 1s ease-in-out infinite; }
+  @media (max-width: 760px) {
+    .path { grid-template-columns: 1fr; gap: 26px; }
+    .path::before { left: 54px; right: auto; top: 20px; bottom: 20px; border-top: 0; border-left: 4px dashed var(--ink); }
+    .stop { display: grid; grid-template-columns: 108px 1fr; gap: 0 18px; text-align: left; align-items: center; }
+    .stop .dot { grid-row: span 3; margin: 0; }
+    .stop h3 { margin: 0; } .stop p { margin: 0; } .stop .due { justify-self: start; }
+  }
+
+  /* ===== 국원 모집: 벽보 ===== */
+  .poster-wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: center; margin-top: 10px; }
+  .poster { position: relative; padding: 40px 34px 34px; background: var(--yellow); border: var(--line); border-radius: 8px; box-shadow: var(--shadow); transform: rotate(-2deg); }
+  .poster::before, .poster::after { content: ""; position: absolute; top: -16px; width: 96px; height: 30px; background: rgba(255,255,255,.72); border: 2px solid rgba(30,26,22,.25); }
+  .poster::before { left: 22px; transform: rotate(-8deg); } .poster::after { right: 22px; transform: rotate(7deg); }
+  .poster .big { margin: 0; font: 400 clamp(34px, 4.6vw, 56px) / 1.1 var(--pop); }
+  .poster .big em { font-style: normal; color: var(--orange); -webkit-text-stroke: 2px var(--ink); }
+  .poster p { margin: 14px 0 0; font-weight: 600; font-size: 18px; }
+  .checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .checks li { display: flex; gap: 14px; align-items: flex-start; padding: 14px 18px; background: var(--paper); border: var(--line); border-radius: 16px; box-shadow: 4px 4px 0 var(--ink); }
+  .checks .box { flex: none; position: relative; width: 28px; height: 28px; border: var(--line); border-radius: 8px; background: var(--paper); margin-top: 2px; }
+  .checks .box::after { content: ""; position: absolute; left: 6px; top: 1px; width: 9px; height: 16px; border: solid var(--ink); border-width: 0 4px 4px 0; transform: rotate(45deg) scale(0); transition: transform .4s var(--spring); }
+  .checks li.on .box { background: var(--mint); }
+  .checks li.on .box::after { transform: rotate(45deg) scale(1); }
+  .checks b { display: block; font-size: 13px; color: var(--ink-2); font-weight: 800; }
+  .checks span { font-weight: 700; font-size: 16.5px; }
+  @media (max-width: 860px) { .poster-wrap { grid-template-columns: 1fr; } }
+
+  /* ===== 질문: 채팅 ===== */
+  .chat { margin-top: 40px; max-width: 760px; display: grid; gap: 14px; }
+  .msg { display: flex; gap: 10px; align-items: flex-end; opacity: 0; transform: translateY(16px) scale(.96); transition: opacity .4s, transform .5s var(--spring); }
+  .msg.on { opacity: 1; transform: none; }
+  .msg.q { justify-content: flex-end; }
+  .msg .bub { max-width: 78%; padding: 12px 18px; border: var(--line); font-weight: 600; font-size: 16.5px; line-height: 1.5; box-shadow: 3px 3px 0 var(--ink); }
+  .msg.q .bub { background: var(--orange); border-radius: 22px 22px 6px 22px; font-weight: 800; }
+  .msg.a .bub { background: var(--paper); border-radius: 22px 22px 22px 6px; }
+  .msg .av { flex: none; width: 46px; height: 46px; border: var(--line); border-radius: 50%; background: var(--sky); overflow: hidden; }
+  .msg .av .dodo { width: 150%; margin: -2px 0 0 -38%; }
+  .typing { display: inline-flex; gap: 4px; }
+  .typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-2); animation: tp 1s infinite; }
+  .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+  @keyframes tp { 50% { transform: translateY(-5px); opacity: .4; } }
+
+  /* 하지 않는 일 */
+  .nope { margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .nope div { position: relative; padding: 20px 20px 20px 62px; background: var(--paper); border: var(--line); border-radius: 18px; box-shadow: 4px 4px 0 var(--ink); font-weight: 700; }
+  .nope div::before { content: "✕"; position: absolute; left: 16px; top: 16px; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #FF8A80; border: 2.5px solid var(--ink); font-weight: 800; }
+  .nope small { display: block; font-weight: 500; color: var(--ink-2); font-size: 14px; }
+  @media (max-width: 860px) { .nope { grid-template-columns: 1fr; } }
+
+  /* ===== 마무리 ===== */
+  .end { margin-top: clamp(90px, 12vw, 150px); background: var(--orange); border-top: var(--line); padding: clamp(60px, 9vw, 110px) 0 40px; position: relative; overflow: hidden; }
+  .end-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 30px; align-items: center; }
+  .end h2 { margin: 0; font: 400 clamp(44px, 7vw, 100px) / 1.04 var(--pop); }
+  .end p { margin: 20px 0 30px; font-size: 19px; font-weight: 600; max-width: 30em; }
+  .end .stage-mini { position: relative; justify-self: center; width: min(320px, 80%); }
+  .end .stage-mini .dodo { width: 100%; height: auto; animation: bob 1.4s ease-in-out infinite; }
+  .end .stage-mini .say { animation: none; top: -16%; right: 10%; transform: none; }
+  .foot { margin-top: 70px; padding-top: 24px; border-top: var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; font-weight: 600; font-size: 14.5px; }
+  .foot nav { display: flex; flex-wrap: wrap; gap: 8px; }
+  .foot nav a { white-space: nowrap; padding: 6px 14px; border: 2.5px solid var(--ink); border-radius: 99px; background: var(--paper); text-decoration: none; font-weight: 800; }
+  .foot nav a:hover { background: var(--yellow); }
+  .foot p { margin: 0; }
+  @media (max-width: 760px) { .end-grid { grid-template-columns: 1fr; } }
+
+  /* 꽃가루 */
+  .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 100; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; }
+    .pop, .msg { opacity: 1; transform: none; transition: none; }
+    h1 .hl::before, h1 .hl.o::before { transition: none; }
+    .hero h1 .hl::before { transform: rotate(-2.5deg) scaleX(1); } .hero h1 .hl.o::before { transform: rotate(1.5deg) scaleX(1); }
+    .stamp { opacity: 1; transform: rotate(-16deg); }
+    .checks .box::after { transition: none; }
+  }
+</style>
+</head>
+<body>
+<p class="draft-flag">디자인 초안 v4 · 대유쾌마운틴</p>
+
+<header class="head">
+  <div class="head-in">
+    <a class="logo" href="#top" aria-label="BYPASS 처음으로"><svg class="dodo" viewBox="0 0 210 200" aria-hidden="true">
+  <g class="dodo-legs" stroke="#1E1A16" stroke-width="5" stroke-linecap="round" fill="none">
+    <path class="leg-a" d="M78 160 L74 186 L62 190 M74 186 L84 190"/>
+    <path class="leg-b" d="M108 160 L110 186 L98 190 M110 186 L120 190"/>
+  </g>
+  <g class="dodo-body">
+    <path d="M30 112 C 14 104 12 90 22 84 C 24 96 32 100 40 100 Z" fill="#F4E6D2" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M26 118 C 10 116 6 104 12 96 C 18 106 28 108 36 108 Z" fill="#F4E6D2" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M112 110 C 116 88 122 74 130 64 L 162 74 C 154 84 150 98 150 116 Z" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <ellipse cx="92" cy="124" rx="62" ry="50" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5"/>
+    <ellipse cx="104" cy="138" rx="36" ry="28" fill="#DCE3EC"/>
+    <path d="M60 112 C 74 102 96 108 100 126 C 86 134 66 130 60 112 Z" fill="#7C8A9E" stroke="#1E1A16" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M124 100 C 126 88 130 78 136 70 L 156 78 C 150 86 148 96 147 108 Z" fill="#9AA7B8"/>
+    <circle cx="146" cy="58" r="30" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5"/>
+    <path d="M131 76 C 136 84 148 86 156 80" fill="#9AA7B8"/>
+    <path d="M168 50 C 196 44 206 66 196 80 C 190 88 182 84 184 76 C 176 74 170 72 164 70 Z" fill="#FFB547" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M184 76 C 186 70 192 70 196 74" fill="none" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/>
+    <g class="dodo-eye"><circle cx="152" cy="52" r="9" fill="#fff" stroke="#1E1A16" stroke-width="3.5"/><circle cx="155" cy="53" r="4.5" fill="#1E1A16"/><circle cx="156.5" cy="51" r="1.5" fill="#fff"/></g>
+    <ellipse cx="140" cy="68" rx="7" ry="4.5" fill="#FF8FB1" opacity=".85"/>
+    <path d="M112 40 C 114 18 176 14 180 38 L 184 44 L 108 46 Z" fill="#FFD23F" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M144 18 L 146 40" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg><span>BYPASS</span></a>
+    <nav class="nav" aria-label="주 메뉴">
+      <a href="#race">뭐 하는 곳?</a><a href="#monsters">단축 대상</a><a href="#work">처리 현황</a><a href="#recruit">국원 모집</a><a href="/routes/">준공 현황</a><a href="/login/">로그인</a>
+    </nav>
+    <a class="btn sm" href="#" data-confetti><span class="e">📮</span><span class="t">불편 제보</span></a>
+  </div>
+</header>
+
+<main id="top">
+  <!-- ① 첫 화면 -->
+  <section class="hero wrap" data-hero>
+    <div class="hero-grid">
+      <div>
+        <span class="notice pop"><b>공고</b>BYPASS 안내 제2026-001호</span>
+        <h1 class="pop d1">귀하의 <span class="nw"><span class="hl">반복 업무</span>는</span><br><span class="hl o">단축 대상</span>으로<br>지정되었습니다.</h1>
+        <p class="lede pop d2">BYPASS는 국립목포해양대학교 바이브 코딩 크루예요. 학교생활에서 손으로 반복하는 귀찮은 일을 찾아, AI와 코드로 휙 건너뛰는 길을 만들어요.</p>
+        <div class="acts pop d3">
+          <a class="btn" href="#" data-confetti><span class="e">📮</span>불편 제보하기</a>
+          <a class="btn y" href="#recruit"><span class="e">🙋</span>BYPASS 합류하기</a>
+        </div>
+      </div>
+      <div class="stage pop d2" aria-hidden="true">
+        <div class="sun"><span class="cloud c1"></span><span class="cloud c2"></span></div>
+        <svg class="dodo" viewBox="0 0 210 200" aria-hidden="true">
+  <g class="dodo-legs" stroke="#1E1A16" stroke-width="5" stroke-linecap="round" fill="none">
+    <path class="leg-a" d="M78 160 L74 186 L62 190 M74 186 L84 190"/>
+    <path class="leg-b" d="M108 160 L110 186 L98 190 M110 186 L120 190"/>
+  </g>
+  <g class="dodo-body">
+    <path d="M30 112 C 14 104 12 90 22 84 C 24 96 32 100 40 100 Z" fill="#F4E6D2" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M26 118 C 10 116 6 104 12 96 C 18 106 28 108 36 108 Z" fill="#F4E6D2" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M112 110 C 116 88 122 74 130 64 L 162 74 C 154 84 150 98 150 116 Z" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <ellipse cx="92" cy="124" rx="62" ry="50" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5"/>
+    <ellipse cx="104" cy="138" rx="36" ry="28" fill="#DCE3EC"/>
+    <path d="M60 112 C 74 102 96 108 100 126 C 86 134 66 130 60 112 Z" fill="#7C8A9E" stroke="#1E1A16" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M124 100 C 126 88 130 78 136 70 L 156 78 C 150 86 148 96 147 108 Z" fill="#9AA7B8"/>
+    <circle cx="146" cy="58" r="30" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5"/>
+    <path d="M131 76 C 136 84 148 86 156 80" fill="#9AA7B8"/>
+    <path d="M168 50 C 196 44 206 66 196 80 C 190 88 182 84 184 76 C 176 74 170 72 164 70 Z" fill="#FFB547" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M184 76 C 186 70 192 70 196 74" fill="none" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/>
+    <g class="dodo-eye"><circle cx="152" cy="52" r="9" fill="#fff" stroke="#1E1A16" stroke-width="3.5"/><circle cx="155" cy="53" r="4.5" fill="#1E1A16"/><circle cx="156.5" cy="51" r="1.5" fill="#fff"/></g>
+    <ellipse cx="140" cy="68" rx="7" ry="4.5" fill="#FF8FB1" opacity=".85"/>
+    <path d="M112 40 C 114 18 176 14 180 38 L 184 44 L 108 46 Z" fill="#FFD23F" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M144 18 L 146 40" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>
+        <span class="say">그 절차, 제가 건너뛰어 드리겠습니다.</span>
+        <span class="sticker s1" data-spin>서류 필요 없음!</span>
+        <span class="sticker s2" data-spin>7일 안에 답장</span>
+        <span class="sticker s3" data-spin>코딩 몰라도 OK</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="tapes"><div class="tape" aria-hidden="true"><div class="tape-track">
+    <span>중복 입력 퇴치</span><span>과다 이동 퇴치</span><span>정보 은닉 퇴치</span><span>수기 계산 퇴치</span><span>수강플래너</span><span>학점 계산기</span><span>꿀꿀이</span><span>Alfa to Zulu</span>
+    <span>중복 입력 퇴치</span><span>과다 이동 퇴치</span><span>정보 은닉 퇴치</span><span>수기 계산 퇴치</span><span>수강플래너</span><span>학점 계산기</span><span>꿀꿀이</span><span>Alfa to Zulu</span>
+  </div></div>
+  <div class="tape b" aria-hidden="true"><div class="tape-track">
+    <span>절차는 건너뛰고 규칙은 지킵니다</span><span>제출 서류 없음</span><span>모집 기간 언제나</span><span>절차는 건너뛰고 규칙은 지킵니다</span><span>제출 서류 없음</span><span>모집 기간 언제나</span>
+    <span>절차는 건너뛰고 규칙은 지킵니다</span><span>제출 서류 없음</span><span>모집 기간 언제나</span><span>절차는 건너뛰고 규칙은 지킵니다</span><span>제출 서류 없음</span><span>모집 기간 언제나</span>
+  </div></div></div>
+
+  <!-- 경주 -->
+  <section class="sec wrap" id="race">
+    <span class="kick pop">뭐 하는 곳이냐면요</span>
+    <h2 class="h2 pop d1">달팽이가 7단계 도는 동안,<br>도도는 <span class="mark">한 번에</span> 도착합니다.</h2>
+    <p class="sub pop d2">구불구불한 기존 절차 옆에 곧게 뚫린 지름길을 만드는 게 BYPASS의 일이에요.</p>
+    <div class="race pop d2" data-race>
+      <svg viewBox="0 0 1000 400" aria-hidden="true">
+        <path class="slowroad" d="M80 330 C 160 330, 160 110, 260 110 S 360 300, 450 300 S 540 90, 640 90 S 740 290, 830 290 S 930 170, 920 70"/>
+        <path class="slowline" id="slow" d="M80 330 C 160 330, 160 110, 260 110 S 360 300, 450 300 S 540 90, 640 90 S 740 290, 830 290 S 930 170, 920 70"/>
+        <path class="fastroad" d="M80 330 L 920 70"/>
+        <path class="fastline" id="fast" d="M80 330 L 920 70"/>
+        <g transform="translate(905 22)"><rect x="0" y="0" width="4" height="54" fill="#1E1A16"/><path d="M4 2 h34 l-8 10 l8 10 h-34 z" fill="#FFD23F" stroke="#1E1A16" stroke-width="3"/></g>
+        <g class="snail">
+          <g transform="translate(-26 -36)">
+            <path d="M4 34 C 4 28 14 26 22 26 L 50 26 C 58 26 60 34 52 36 L 8 38 Z" fill="#FFB8A0" stroke="#1E1A16" stroke-width="3"/>
+            <circle cx="28" cy="18" r="15" fill="#FFD23F" stroke="#1E1A16" stroke-width="3"/>
+            <path d="M28 18 m-7 0 a 7 7 0 1 1 7 7 a 4 4 0 1 1 -4 -4" fill="none" stroke="#1E1A16" stroke-width="2.5"/>
+            <path d="M50 26 L 56 12 M 46 26 L 50 14" stroke="#1E1A16" stroke-width="2.5"/>
+            <circle cx="56" cy="11" r="2.5" fill="#1E1A16"/><circle cx="50" cy="13" r="2.5" fill="#1E1A16"/>
+          </g>
+          <animateMotion dur="16s" repeatCount="indefinite" rotate="auto"><mpath href="#slow"/></animateMotion>
+        </g>
+        <g class="runner">
+          <g transform="translate(-40 -72) scale(.4)"><g class="dodo-legs" stroke="#1E1A16" stroke-width="5" stroke-linecap="round" fill="none">
+    <path class="leg-a" d="M78 160 L74 186 L62 190 M74 186 L84 190"/>
+    <path class="leg-b" d="M108 160 L110 186 L98 190 M110 186 L120 190"/>
+  </g>
+  <g class="dodo-body">
+    <path d="M30 112 C 14 104 12 90 22 84 C 24 96 32 100 40 100 Z" fill="#F4E6D2" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M26 118 C 10 116 6 104 12 96 C 18 106 28 108 36 108 Z" fill="#F4E6D2" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M112 110 C 116 88 122 74 130 64 L 162 74 C 154 84 150 98 150 116 Z" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <ellipse cx="92" cy="124" rx="62" ry="50" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5"/>
+    <ellipse cx="104" cy="138" rx="36" ry="28" fill="#DCE3EC"/>
+    <path d="M60 112 C 74 102 96 108 100 126 C 86 134 66 130 60 112 Z" fill="#7C8A9E" stroke="#1E1A16" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M124 100 C 126 88 130 78 136 70 L 156 78 C 150 86 148 96 147 108 Z" fill="#9AA7B8"/>
+    <circle cx="146" cy="58" r="30" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5"/>
+    <path d="M131 76 C 136 84 148 86 156 80" fill="#9AA7B8"/>
+    <path d="M168 50 C 196 44 206 66 196 80 C 190 88 182 84 184 76 C 176 74 170 72 164 70 Z" fill="#FFB547" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M184 76 C 186 70 192 70 196 74" fill="none" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/>
+    <g class="dodo-eye"><circle cx="152" cy="52" r="9" fill="#fff" stroke="#1E1A16" stroke-width="3.5"/><circle cx="155" cy="53" r="4.5" fill="#1E1A16"/><circle cx="156.5" cy="51" r="1.5" fill="#fff"/></g>
+    <ellipse cx="140" cy="68" rx="7" ry="4.5" fill="#FF8FB1" opacity=".85"/>
+    <path d="M112 40 C 114 18 176 14 180 38 L 184 44 L 108 46 Z" fill="#FFD23F" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M144 18 L 146 40" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/>
+  </g></g>
+          <animateMotion dur="16s" repeatCount="indefinite" keyPoints="0;1;1" keyTimes="0;0.16;1" calcMode="linear"><mpath href="#fast"/></animateMotion>
+        </g>
+      </svg>
+      <span class="race-lab" style="left:4%;top:58%">출발 <small>불편 발생</small></span>
+      <span class="race-lab hide-sm" style="left:52%;top:6%">🐌 기존 절차 <small>7단계 · 상습 정체</small></span>
+      <span class="race-lab o hide-sm" style="left:30%;top:30%">BYPASS <small>1단계</small></span>
+      <div class="race-foot"><span>오늘의 경기 결과 <small class="legend">🐌 기존 절차 · <b style="color:#C2410C">━</b> BYPASS</small></span><span class="score"><span>도도 <b data-count="1">0</b>초</span><span>달팽이 <b data-count="7">0</b>일째 이동 중</span></span></div>
+    </div>
+  </section>
+
+  <!-- 명칭 -->
+  <section class="sec wrap" id="name">
+    <span class="kick pop">이름 풀이</span>
+    <h2 class="h2 pop d1">BYPASS는 <span class="mark">머리글자</span>예요.</h2>
+    <ol class="tiles">
+      <li class="tile pop"><span class="L">B</span><span class="en">Bureau</span><span class="ko">국(局)</span></li>
+      <li class="tile pop d1"><span class="L">Y</span><span class="en"><i>for</i> Yielding</span><span class="ko">마련하는</span></li>
+      <li class="tile pop d2"><span class="L">P</span><span class="en">Practical</span><span class="ko">실용적</span></li>
+      <li class="tile pop d3"><span class="L">A</span><span class="en">Alternatives</span><span class="ko">대안</span></li>
+      <li class="tile pop d4"><span class="L">S</span><span class="en"><i>to</i> Slow</span><span class="ko">느린</span></li>
+      <li class="tile pop d4"><span class="L">S</span><span class="en">Systems</span><span class="ko">시스템</span></li>
+    </ol>
+    <p class="fullname pop">느린 시스템의 실용적 대안 마련국. <span>영어 bypass는 막힌 구간을 건너뛰어 곧장 가는 길이라는 뜻이에요. 의도했습니다.</span></p>
+  </section>
+
+  <!-- 단축 대상 몬스터 -->
+  <section class="sec wrap" id="monsters">
+    <span class="kick pop">설치 규정 제3조</span>
+    <h2 class="h2 pop d1">이번 학기 <span class="mark">퇴치 대상</span> 몬스터</h2>
+    <p class="sub pop d2">카드를 눌러 뒤집으면 BYPASS의 퇴치법이 나와요.</p>
+    <div class="monsters">
+      <button class="mon pop" type="button" aria-pressed="false">
+        <div class="mon-in">
+          <div class="face front">
+            <div class="no"><span>No.1</span><b>중복 입력</b></div>
+            <div class="pic"><svg viewBox="0 0 120 110"><path d="M20 90 C 6 60 18 18 60 16 C 102 18 114 60 100 90 C 94 100 84 92 78 100 C 70 106 66 96 60 100 C 54 106 48 96 42 100 C 34 106 26 100 20 90 Z" fill="#fff" stroke="#1E1A16" stroke-width="4"/><circle cx="46" cy="50" r="9" fill="#1E1A16"/><circle cx="76" cy="50" r="9" fill="#1E1A16"/><circle cx="49" cy="47" r="3" fill="#fff"/><circle cx="79" cy="47" r="3" fill="#fff"/><path d="M48 72 q 13 -8 26 0" fill="none" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/><rect x="34" y="78" width="54" height="12" rx="3" fill="#FFD23F" stroke="#1E1A16" stroke-width="3"/><text x="61" y="88" font-size="9" font-weight="800" text-anchor="middle" fill="#1E1A16">학번 또 써</text></svg></div>
+            <h3>또써몬</h3>
+            <p class="skill">특기: 신청서마다 학번과 계좌번호를 처음부터 다시 쓰게 하기</p>
+            <div class="hp">HP<i style="--hp:90%"></i></div>
+            <span class="flip-hint">눌러서 퇴치법 보기 ↻</span>
+          </div>
+          <div class="face back">
+            <span class="tag">퇴치법</span>
+            <h3>한 번 쓰면 끝</h3>
+            <p>이미 낸 정보를 또 요구하는 절차를 없애요.</p>
+            <ol><li>한 번 적은 정보를 저장</li><li>양식을 고르면 자동으로 채움</li><li>확인만 하고 제출</li></ol>
+            <span class="ko-stamp">퇴치!</span>
+          </div>
+        </div>
+      </button>
+      <button class="mon pop d1" type="button" aria-pressed="false">
+        <div class="mon-in">
+          <div class="face front">
+            <div class="no"><span>No.2</span><b>과다 이동</b></div>
+            <div class="pic"><svg viewBox="0 0 120 110"><ellipse cx="60" cy="58" rx="40" ry="36" fill="#fff" stroke="#1E1A16" stroke-width="4"/><path d="M28 92 l-8 12 M 92 92 l 8 12 M 48 94 l-2 12 M 72 94 l 2 12" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/><circle cx="46" cy="52" r="8" fill="#1E1A16"/><circle cx="74" cy="52" r="8" fill="#1E1A16"/><path d="M38 40 l 14 6 M 82 40 l -14 6" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/><path d="M50 74 q 10 6 20 0" fill="none" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/><path d="M8 30 h 14 M 98 30 h 14 M 4 44 h 10 M 106 44 h 10" stroke="#1E1A16" stroke-width="3" stroke-linecap="round"/></svg></div>
+            <h3>뺑뺑이몬</h3>
+            <p class="skill">특기: 공지 하나 찾으려고 게시판 여러 곳을 돌게 하기</p>
+            <div class="hp">HP<i style="--hp:75%"></i></div>
+            <span class="flip-hint">눌러서 퇴치법 보기 ↻</span>
+          </div>
+          <div class="face back">
+            <span class="tag">퇴치법</span>
+            <h3>한 곳에 다 모으기</h3>
+            <p>화면 여러 개를 돌게 하는 절차를 없애요.</p>
+            <ol><li>흩어진 곳을 한 번에 모음</li><li>필요한 것만 골라 보여 줌</li><li>새 소식은 알림으로</li></ol>
+            <span class="ko-stamp">퇴치!</span>
+          </div>
+        </div>
+      </button>
+      <button class="mon pop d2" type="button" aria-pressed="false">
+        <div class="mon-in">
+          <div class="face front">
+            <div class="no"><span>No.3</span><b>정보 은닉</b></div>
+            <div class="pic"><svg viewBox="0 0 120 110"><path d="M24 96 C 18 50 30 16 60 16 C 90 16 102 50 96 96 L 84 86 L 72 96 L 60 86 L 48 96 L 36 86 Z" fill="#fff" stroke="#1E1A16" stroke-width="4" stroke-linejoin="round" opacity=".92"/><path d="M38 50 q 8 -8 16 0 M 66 50 q 8 -8 16 0" fill="none" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/><ellipse cx="60" cy="70" rx="7" ry="9" fill="#1E1A16"/><text x="100" y="26" font-size="18" font-weight="800" fill="#1E1A16">?</text><text x="10" y="40" font-size="14" font-weight="800" fill="#1E1A16">?</text></svg></div>
+            <h3>숨김몬</h3>
+            <p class="skill">특기: 분명히 공지했다는데 아무도 위치를 모르게 하기</p>
+            <div class="hp">HP<i style="--hp:82%"></i></div>
+            <span class="flip-hint">눌러서 퇴치법 보기 ↻</span>
+          </div>
+          <div class="face back">
+            <span class="tag">퇴치법</span>
+            <h3>찾은 사람이 공개</h3>
+            <p>있는데 못 찾는 정보를 꺼내 놓아요.</p>
+            <ol><li>찾은 사람이 위키에 정리</li><li>누구나 찾을 수 있게 공개</li><li>틀리면 같이 고침</li></ol>
+            <span class="ko-stamp">퇴치!</span>
+          </div>
+        </div>
+      </button>
+      <button class="mon pop d3" type="button" aria-pressed="false">
+        <div class="mon-in">
+          <div class="face front">
+            <div class="no"><span>No.4</span><b>수기 계산</b></div>
+            <div class="pic"><svg viewBox="0 0 120 110"><rect x="26" y="14" width="68" height="86" rx="12" fill="#fff" stroke="#1E1A16" stroke-width="4"/><rect x="36" y="24" width="48" height="18" rx="4" fill="#FFD23F" stroke="#1E1A16" stroke-width="3"/><text x="80" y="38" font-size="12" font-weight="800" text-anchor="end" fill="#1E1A16">132?</text><circle cx="48" cy="58" r="6" fill="#1E1A16"/><circle cx="72" cy="58" r="6" fill="#1E1A16"/><path d="M46 80 q 14 -10 28 0" fill="none" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/><path d="M14 60 l 12 4 M 106 60 l -12 4" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/></svg></div>
+            <h3>손계산몬</h3>
+            <p class="skill">특기: 졸업까지 남은 학점을 손가락으로 세게 하기</p>
+            <div class="hp">HP<i style="--hp:40%"></i></div>
+            <span class="flip-hint">눌러서 퇴치법 보기 ↻</span>
+          </div>
+          <div class="face back">
+            <span class="tag">퇴치법</span>
+            <h3>계산은 컴퓨터가</h3>
+            <p>컴퓨터가 할 일을 사람이 하지 않게 해요.</p>
+            <ol><li>규칙을 코드로 옮김</li><li>체크만 하면 계산</li><li>결과를 한 화면에</li></ol>
+            <span class="ko-stamp">퇴치!</span>
+          </div>
+        </div>
+      </button>
+    </div>
+  </section>
+
+  <!-- 처리 현황 -->
+  <section class="sec wrap" id="work">
+    <span class="kick pop">안건 처리 현황</span>
+    <h2 class="h2 pop d1">이만큼 <span class="mark">건너뛰었어요</span></h2>
+    <p class="sub pop d2">준공한 안건엔 도도새 직인을 쾅! 반려한 안건도 사유까지 숨기지 않아요.</p>
+    <div class="cards">
+      <a class="card pop" href="https://mymmu.my/" target="_blank" rel="noopener"><span class="ic" style="background:var(--sky)">🗓️</span><div><div class="meta"><span class="chip ok">준공</span><span class="chip">제0-1호</span></div><h3>수강플래너</h3><p>과목을 담으면 시간표로 바로 보이고, 계획을 여러 개 비교해요.</p><span class="go">바로가기 →</span></div><span class="stamp">도도<br>직인</span></a>
+      <a class="card pop d1" href="https://eesuu.mymmu.my/" target="_blank" rel="noopener"><span class="ic" style="background:var(--yellow)">🎓</span><div><div class="meta"><span class="chip ok">준공</span><span class="chip">제0-2호</span></div><h3>졸업이수학점 계산기</h3><p>들은 과목을 체크하면 남은 졸업 요건이 한 화면에 나와요.</p><span class="go">바로가기 →</span></div><span class="stamp">도도<br>직인</span></a>
+      <a class="card pop" href="https://pf.kakao.com/_uuxfmX" target="_blank" rel="noopener"><span class="ic" style="background:var(--pink)">🐷</span><div><div class="meta"><span class="chip ok">준공</span><span class="chip">제0-3호</span></div><h3>학식 알리미 ‘꿀꿀이’</h3><p>식단 게시판 안 찾아가도, 카톡에서 오늘 학식을 바로 봐요.</p><span class="go">바로가기 →</span></div><span class="stamp">도도<br>직인</span></a>
+      <div class="card rej pop d1"><span class="ic"><span class="drop" style="left:18%"></span><span class="drop" style="left:42%;animation-delay:.3s"></span><span class="drop" style="left:66%;animation-delay:.6s"></span><span class="drop" style="left:84%;animation-delay:.15s"></span>☔</span><div><div class="meta"><span class="chip no">반려</span><span class="chip">견본</span></div><h3>강의동 이동 불편</h3><p>“비 오는 날 강의동까지 걸어가야 함” → 반려 사유: 절차가 아니라 날씨 탓이에요.</p></div></div>
+    </div>
+  </section>
+
+  <!-- 처리 절차 -->
+  <section class="sec wrap" id="process">
+    <span class="kick pop">처리 절차</span>
+    <h2 class="h2 pop d1">민원 대신, <span class="mark">지름길</span>을 만듭니다</h2>
+    <div class="board pop d2" data-board>
+      <div class="path">
+        <div class="stop" data-stop><div class="dot">1</div><h3>접수</h3><p>제보하면 그 자리에서 접수번호 발급!</p><span class="due">즉시</span></div>
+        <div class="stop" data-stop><div class="dot">2</div><h3>심의</h3><p>주 1회 정기 회의에서 할지 말지 결정</p><span class="due">7일 안에 공개</span></div>
+        <div class="stop" data-stop><div class="dot">3</div><h3>단축</h3><p>AI와 코드로 더 빠른 길을 뚫어요</p><span class="due">바이브 코딩</span></div>
+        <div class="stop" data-stop><div class="dot">4</div><h3>배포</h3><p>써 보고 불편이 남으면 다시 접수</p><span class="due">도도 직인</span></div>
+      </div>
+      <div class="token" data-token aria-hidden="true"><svg class="dodo" viewBox="0 0 210 200" aria-hidden="true">
+  <g class="dodo-legs" stroke="#1E1A16" stroke-width="5" stroke-linecap="round" fill="none">
+    <path class="leg-a" d="M78 160 L74 186 L62 190 M74 186 L84 190"/>
+    <path class="leg-b" d="M108 160 L110 186 L98 190 M110 186 L120 190"/>
+  </g>
+  <g class="dodo-body">
+    <path d="M30 112 C 14 104 12 90 22 84 C 24 96 32 100 40 100 Z" fill="#F4E6D2" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M26 118 C 10 116 6 104 12 96 C 18 106 28 108 36 108 Z" fill="#F4E6D2" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M112 110 C 116 88 122 74 130 64 L 162 74 C 154 84 150 98 150 116 Z" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <ellipse cx="92" cy="124" rx="62" ry="50" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5"/>
+    <ellipse cx="104" cy="138" rx="36" ry="28" fill="#DCE3EC"/>
+    <path d="M60 112 C 74 102 96 108 100 126 C 86 134 66 130 60 112 Z" fill="#7C8A9E" stroke="#1E1A16" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M124 100 C 126 88 130 78 136 70 L 156 78 C 150 86 148 96 147 108 Z" fill="#9AA7B8"/>
+    <circle cx="146" cy="58" r="30" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5"/>
+    <path d="M131 76 C 136 84 148 86 156 80" fill="#9AA7B8"/>
+    <path d="M168 50 C 196 44 206 66 196 80 C 190 88 182 84 184 76 C 176 74 170 72 164 70 Z" fill="#FFB547" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M184 76 C 186 70 192 70 196 74" fill="none" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/>
+    <g class="dodo-eye"><circle cx="152" cy="52" r="9" fill="#fff" stroke="#1E1A16" stroke-width="3.5"/><circle cx="155" cy="53" r="4.5" fill="#1E1A16"/><circle cx="156.5" cy="51" r="1.5" fill="#fff"/></g>
+    <ellipse cx="140" cy="68" rx="7" ry="4.5" fill="#FF8FB1" opacity=".85"/>
+    <path d="M112 40 C 114 18 176 14 180 38 L 184 44 L 108 46 Z" fill="#FFD23F" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M144 18 L 146 40" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg></div>
+    </div>
+  </section>
+
+  <!-- 국원 모집 -->
+  <section class="sec wrap" id="recruit">
+    <div class="poster-wrap">
+      <div class="poster pop">
+        <p class="big">비효율에<br>유난히 예민한 분<br><em>구합니다!</em></p>
+        <p>코딩 경험이 없어도 직접 만들 수 있어요. 그게 바이브 코딩이니까요.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px"><a class="btn" href="#" data-confetti><span class="e">🙋</span>합류 신청하기</a><a class="btn w" href="https://open.kakao.com/o/snJ3HuTi">1:1 문의</a></div>
+      </div>
+      <ul class="checks" data-checks>
+        <li><span class="box"></span><div><b>지원 자격</b><span>국립목포해양대학교 재학생이면 끝. 전공·학년·코딩 경험 무관</span></div></li>
+        <li><span class="box"></span><div><b>우대 사항</b><span>같은 일을 세 번 반복하면 참을 수 없는 분</span></div></li>
+        <li><span class="box"></span><div><b>우대 사항 2</b><span>이미 엑셀 매크로를 몰래 만들어 본 분</span></div></li>
+        <li><span class="box"></span><div><b>모집 기간</b><span>언제나</span></div></li>
+        <li><span class="box"></span><div><b>제출 서류</b><span>없음. 본 국은 불필요한 서류를 요구하지 않습니다.</span></div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 하지 않는 일 -->
+  <section class="sec wrap" id="scope">
+    <span class="kick pop">설치 규정 제5조</span>
+    <h2 class="h2 pop d1">절차는 건너뛰어도, <span class="mark">규칙은 안 건너뛰어요</span></h2>
+    <div class="nope">
+      <div class="pop">보안·인증 우회<small>예: 수강신청 매크로</small></div>
+      <div class="pop d1">공정성을 해치는 자동화<small>출석, 평가 등</small></div>
+      <div class="pop d2">남의 개인정보 다루는 도구<small>수집도, 이용도 안 해요</small></div>
+    </div>
+  </section>
+
+  <!-- 질문 -->
+  <section class="sec wrap" id="faq">
+    <span class="kick pop">자주 묻는 질문</span>
+    <h2 class="h2 pop d1">도도한테 <span class="mark">물어봤어요</span></h2>
+    <div class="chat" data-chat>
+      <div class="msg q"><div class="bub">코딩 하나도 모르는데 괜찮아요?</div></div>
+      <div class="msg a"><span class="av"><svg class="dodo" viewBox="0 0 210 200" aria-hidden="true">
+  <g class="dodo-legs" stroke="#1E1A16" stroke-width="5" stroke-linecap="round" fill="none">
+    <path class="leg-a" d="M78 160 L74 186 L62 190 M74 186 L84 190"/>
+    <path class="leg-b" d="M108 160 L110 186 L98 190 M110 186 L120 190"/>
+  </g>
+  <g class="dodo-body">
+    <path d="M30 112 C 14 104 12 90 22 84 C 24 96 32 100 40 100 Z" fill="#F4E6D2" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M26 118 C 10 116 6 104 12 96 C 18 106 28 108 36 108 Z" fill="#F4E6D2" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M112 110 C 116 88 122 74 130 64 L 162 74 C 154 84 150 98 150 116 Z" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <ellipse cx="92" cy="124" rx="62" ry="50" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5"/>
+    <ellipse cx="104" cy="138" rx="36" ry="28" fill="#DCE3EC"/>
+    <path d="M60 112 C 74 102 96 108 100 126 C 86 134 66 130 60 112 Z" fill="#7C8A9E" stroke="#1E1A16" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M124 100 C 126 88 130 78 136 70 L 156 78 C 150 86 148 96 147 108 Z" fill="#9AA7B8"/>
+    <circle cx="146" cy="58" r="30" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5"/>
+    <path d="M131 76 C 136 84 148 86 156 80" fill="#9AA7B8"/>
+    <path d="M168 50 C 196 44 206 66 196 80 C 190 88 182 84 184 76 C 176 74 170 72 164 70 Z" fill="#FFB547" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M184 76 C 186 70 192 70 196 74" fill="none" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/>
+    <g class="dodo-eye"><circle cx="152" cy="52" r="9" fill="#fff" stroke="#1E1A16" stroke-width="3.5"/><circle cx="155" cy="53" r="4.5" fill="#1E1A16"/><circle cx="156.5" cy="51" r="1.5" fill="#fff"/></g>
+    <ellipse cx="140" cy="68" rx="7" ry="4.5" fill="#FF8FB1" opacity=".85"/>
+    <path d="M112 40 C 114 18 176 14 180 38 L 184 44 L 108 46 Z" fill="#FFD23F" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M144 18 L 146 40" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg></span><div class="bub">됩니다. AI랑 같이 만드는 방법은 활동하면서 같이 익혀요.</div></div>
+      <div class="msg q"><div class="bub">혹시 학교 공식 기관이에요?</div></div>
+      <div class="msg a"><span class="av"><svg class="dodo" viewBox="0 0 210 200" aria-hidden="true">
+  <g class="dodo-legs" stroke="#1E1A16" stroke-width="5" stroke-linecap="round" fill="none">
+    <path class="leg-a" d="M78 160 L74 186 L62 190 M74 186 L84 190"/>
+    <path class="leg-b" d="M108 160 L110 186 L98 190 M110 186 L120 190"/>
+  </g>
+  <g class="dodo-body">
+    <path d="M30 112 C 14 104 12 90 22 84 C 24 96 32 100 40 100 Z" fill="#F4E6D2" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M26 118 C 10 116 6 104 12 96 C 18 106 28 108 36 108 Z" fill="#F4E6D2" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M112 110 C 116 88 122 74 130 64 L 162 74 C 154 84 150 98 150 116 Z" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <ellipse cx="92" cy="124" rx="62" ry="50" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5"/>
+    <ellipse cx="104" cy="138" rx="36" ry="28" fill="#DCE3EC"/>
+    <path d="M60 112 C 74 102 96 108 100 126 C 86 134 66 130 60 112 Z" fill="#7C8A9E" stroke="#1E1A16" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M124 100 C 126 88 130 78 136 70 L 156 78 C 150 86 148 96 147 108 Z" fill="#9AA7B8"/>
+    <circle cx="146" cy="58" r="30" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5"/>
+    <path d="M131 76 C 136 84 148 86 156 80" fill="#9AA7B8"/>
+    <path d="M168 50 C 196 44 206 66 196 80 C 190 88 182 84 184 76 C 176 74 170 72 164 70 Z" fill="#FFB547" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M184 76 C 186 70 192 70 196 74" fill="none" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/>
+    <g class="dodo-eye"><circle cx="152" cy="52" r="9" fill="#fff" stroke="#1E1A16" stroke-width="3.5"/><circle cx="155" cy="53" r="4.5" fill="#1E1A16"/><circle cx="156.5" cy="51" r="1.5" fill="#fff"/></g>
+    <ellipse cx="140" cy="68" rx="7" ry="4.5" fill="#FF8FB1" opacity=".85"/>
+    <path d="M112 40 C 114 18 176 14 180 38 L 184 44 L 108 46 Z" fill="#FFD23F" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M144 18 L 146 40" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg></span><div class="bub">아닙니다. 행정기관도, 정식 동아리도 아닌 그냥 크루예요. 진지한 건 말투뿐입니다.</div></div>
+      <div class="msg q"><div class="bub">제보하면 무조건 만들어 줘요?</div></div>
+      <div class="msg a"><span class="av"><svg class="dodo" viewBox="0 0 210 200" aria-hidden="true">
+  <g class="dodo-legs" stroke="#1E1A16" stroke-width="5" stroke-linecap="round" fill="none">
+    <path class="leg-a" d="M78 160 L74 186 L62 190 M74 186 L84 190"/>
+    <path class="leg-b" d="M108 160 L110 186 L98 190 M110 186 L120 190"/>
+  </g>
+  <g class="dodo-body">
+    <path d="M30 112 C 14 104 12 90 22 84 C 24 96 32 100 40 100 Z" fill="#F4E6D2" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M26 118 C 10 116 6 104 12 96 C 18 106 28 108 36 108 Z" fill="#F4E6D2" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M112 110 C 116 88 122 74 130 64 L 162 74 C 154 84 150 98 150 116 Z" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <ellipse cx="92" cy="124" rx="62" ry="50" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5"/>
+    <ellipse cx="104" cy="138" rx="36" ry="28" fill="#DCE3EC"/>
+    <path d="M60 112 C 74 102 96 108 100 126 C 86 134 66 130 60 112 Z" fill="#7C8A9E" stroke="#1E1A16" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M124 100 C 126 88 130 78 136 70 L 156 78 C 150 86 148 96 147 108 Z" fill="#9AA7B8"/>
+    <circle cx="146" cy="58" r="30" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5"/>
+    <path d="M131 76 C 136 84 148 86 156 80" fill="#9AA7B8"/>
+    <path d="M168 50 C 196 44 206 66 196 80 C 190 88 182 84 184 76 C 176 74 170 72 164 70 Z" fill="#FFB547" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M184 76 C 186 70 192 70 196 74" fill="none" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/>
+    <g class="dodo-eye"><circle cx="152" cy="52" r="9" fill="#fff" stroke="#1E1A16" stroke-width="3.5"/><circle cx="155" cy="53" r="4.5" fill="#1E1A16"/><circle cx="156.5" cy="51" r="1.5" fill="#fff"/></g>
+    <ellipse cx="140" cy="68" rx="7" ry="4.5" fill="#FF8FB1" opacity=".85"/>
+    <path d="M112 40 C 114 18 176 14 180 38 L 184 44 L 108 46 Z" fill="#FFD23F" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M144 18 L 146 40" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg></span><div class="bub">전부 심의하지만 전부 만들지는 않아요. 결과는 처리 현황에 다 공개해요.</div></div>
+    </div>
+  </section>
+</main>
+
+<footer class="end">
+  <div class="wrap">
+    <div class="end-grid">
+      <div>
+        <h2 class="pop">귀찮은 절차,<br>같이 없애요!</h2>
+        <p class="pop d1">손으로 반복하는 일이 있으면 알려 주세요. 어떻게 건너뛸지는 본 국이 심의합니다.</p>
+        <div class="pop d2" style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn y" href="#" data-confetti><span class="e">📮</span>불편 제보하기</a><a class="btn w" href="#recruit"><span class="e">🙋</span>BYPASS 합류하기</a></div>
+      </div>
+      <div class="stage-mini pop d2" aria-hidden="true"><svg class="dodo" viewBox="0 0 210 200" aria-hidden="true">
+  <g class="dodo-legs" stroke="#1E1A16" stroke-width="5" stroke-linecap="round" fill="none">
+    <path class="leg-a" d="M78 160 L74 186 L62 190 M74 186 L84 190"/>
+    <path class="leg-b" d="M108 160 L110 186 L98 190 M110 186 L120 190"/>
+  </g>
+  <g class="dodo-body">
+    <path d="M30 112 C 14 104 12 90 22 84 C 24 96 32 100 40 100 Z" fill="#F4E6D2" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M26 118 C 10 116 6 104 12 96 C 18 106 28 108 36 108 Z" fill="#F4E6D2" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M112 110 C 116 88 122 74 130 64 L 162 74 C 154 84 150 98 150 116 Z" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <ellipse cx="92" cy="124" rx="62" ry="50" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5"/>
+    <ellipse cx="104" cy="138" rx="36" ry="28" fill="#DCE3EC"/>
+    <path d="M60 112 C 74 102 96 108 100 126 C 86 134 66 130 60 112 Z" fill="#7C8A9E" stroke="#1E1A16" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M124 100 C 126 88 130 78 136 70 L 156 78 C 150 86 148 96 147 108 Z" fill="#9AA7B8"/>
+    <circle cx="146" cy="58" r="30" fill="#9AA7B8" stroke="#1E1A16" stroke-width="5"/>
+    <path d="M131 76 C 136 84 148 86 156 80" fill="#9AA7B8"/>
+    <path d="M168 50 C 196 44 206 66 196 80 C 190 88 182 84 184 76 C 176 74 170 72 164 70 Z" fill="#FFB547" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M184 76 C 186 70 192 70 196 74" fill="none" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/>
+    <g class="dodo-eye"><circle cx="152" cy="52" r="9" fill="#fff" stroke="#1E1A16" stroke-width="3.5"/><circle cx="155" cy="53" r="4.5" fill="#1E1A16"/><circle cx="156.5" cy="51" r="1.5" fill="#fff"/></g>
+    <ellipse cx="140" cy="68" rx="7" ry="4.5" fill="#FF8FB1" opacity=".85"/>
+    <path d="M112 40 C 114 18 176 14 180 38 L 184 44 L 108 46 Z" fill="#FFD23F" stroke="#1E1A16" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M144 18 L 146 40" stroke="#1E1A16" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg><span class="say">기다리고 있겠습니다.</span></div>
+    </div>
+    <div class="foot">
+      <nav aria-label="바닥 메뉴"><a href="/routes/">준공 현황</a><a href="/dockets/">처리 현황</a><a href="/login/">로그인</a><a href="https://open.kakao.com/o/snJ3HuTi">문의</a></nav>
+      <p>본 사이트는 BYPASS 크루가 운영하며, 국립목포해양대학교 행정 부서 및 정부 기관과 무관합니다.</p>
+    </div>
+  </div>
+</footer>
+
+<canvas class="confetti" data-confetti-canvas></canvas>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+  // 나타나기
+  const io = new IntersectionObserver((es) => es.forEach((e) => {
+    if (!e.isIntersecting) return;
+    const t = e.target; t.classList.add('on'); io.unobserve(t);
+    if (t.matches('.card')) setTimeout(() => t.classList.add('shake'), 10);
+    $$('[data-count]', t).forEach(countUp);
+  }), { threshold: 0.18 });
+  $$('.pop, [data-hero]').forEach((el) => io.observe(el));
+  if (reduce) $$('.pop, [data-hero]').forEach((el) => el.classList.add('on'));
+
+  function countUp(el) {
+    const to = +el.dataset.count;
+    if (reduce) { el.textContent = to; return; }
+    const t0 = performance.now();
+    const f = (t) => { const p = Math.min(1, (t - t0) / 1200); el.textContent = Math.round(to * p); if (p < 1) requestAnimationFrame(f); };
+    requestAnimationFrame(f);
+  }
+
+  // 도도 누르면 점프, 스티커 누르면 빙글
+  const d = document.querySelector('.stage .dodo');
+  d.addEventListener('click', () => { d.classList.remove('jump'); void d.offsetWidth; d.classList.add('jump'); });
+  d.addEventListener('animationend', (e) => { if (e.animationName === 'jump') d.classList.remove('jump'); });
+  $$('[data-spin]').forEach((s) => s.addEventListener('click', () => { s.classList.remove('spin'); void s.offsetWidth; s.classList.add('spin'); }));
+
+  // 몬스터 카드 뒤집기
+  $$('.mon').forEach((m) => m.addEventListener('click', () => { const on = m.classList.toggle('flip'); m.setAttribute('aria-pressed', String(on)); }));
+
+  // 보드게임: 스크롤에 따라 도도 말이 칸을 이동
+  const board = document.querySelector('[data-board]'), token = document.querySelector('[data-token]'), stops = $$('[data-stop]');
+  let cur = -1;
+  function moveTo(i) {
+    if (i === cur) return; cur = i;
+    stops.forEach((s, j) => { s.classList.toggle('here', j === i); s.classList.toggle('done', j < i); });
+    const dot = stops[i].querySelector('.dot'), b = board.getBoundingClientRect(), r = dot.getBoundingClientRect();
+    token.style.left = (r.left - b.left + r.width / 2 - token.offsetWidth / 2) + 'px';
+    token.style.top = (r.top - b.top - token.offsetHeight * 0.72) + 'px';
+  }
+  function onScroll() {
+    const r = board.getBoundingClientRect(), vh = innerHeight;
+    const p = Math.min(1, Math.max(0, (vh * 0.85 - r.top) / (r.height + vh * 0.35)));
+    moveTo(Math.min(3, Math.floor(p * 4)));
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', () => { const i = cur; cur = -1; moveTo(Math.max(0, i)); });
+  onScroll();
+
+  // 체크리스트: 보이면 하나씩 체크
+  const checks = document.querySelector('[data-checks]');
+  new IntersectionObserver((es, o) => es.forEach((e) => { if (!e.isIntersecting) return; o.disconnect(); $$('li', checks).forEach((li, i) => setTimeout(() => li.classList.add('on'), reduce ? 0 : 250 + i * 280)); }), { threshold: 0.4 }).observe(checks);
+
+  // 채팅: 하나씩 (답은 ... 입력 중 뒤에)
+  const chat = document.querySelector('[data-chat]');
+  new IntersectionObserver((es, o) => es.forEach((e) => {
+    if (!e.isIntersecting) return; o.disconnect();
+    const msgs = $$('.msg', chat); let t = 0;
+    msgs.forEach((m) => {
+      if (reduce) { m.classList.add('on'); return; }
+      if (m.classList.contains('a')) {
+        const bub = m.querySelector('.bub'), txt = bub.innerHTML;
+        setTimeout(() => { bub.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>'; m.classList.add('on'); }, t);
+        t += 900; setTimeout(() => { bub.innerHTML = txt; }, t);
+      } else { setTimeout(() => m.classList.add('on'), t); }
+      t += 650;
+    });
+  }), { threshold: 0.3 }).observe(chat);
+
+  // 꽃가루 (제보·합류 버튼)
+  const cv = document.querySelector('[data-confetti-canvas]'), cx = cv.getContext('2d');
+  let parts = [], raf = 0;
+  const COLORS = ['#EE6A1F', '#FFD23F', '#7CC8FF', '#6EDBB0', '#FF9EC0', '#B9A4FF'];
+  function burst(x, y) {
+    if (reduce) return;
+    cv.width = innerWidth * devicePixelRatio; cv.height = innerHeight * devicePixelRatio; cx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    for (let i = 0; i < 90; i++) { const a = Math.random() * Math.PI * 2, s = 4 + Math.random() * 9; parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 6, r: 4 + Math.random() * 5, c: COLORS[i % 6], rot: Math.random() * 6, vr: (Math.random() - .5) * .4, life: 90 + Math.random() * 40 }); }
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+  function tick() {
+    cx.clearRect(0, 0, innerWidth, innerHeight);
+    parts = parts.filter((p) => p.life-- > 0);
+    parts.forEach((p) => { p.vy += .32; p.vx *= .985; p.x += p.vx; p.y += p.vy; p.rot += p.vr; cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot); cx.fillStyle = p.c; cx.strokeStyle = '#1E1A16'; cx.lineWidth = 1.5; cx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r); cx.strokeRect(-p.r, -p.r / 2, p.r * 2, p.r); cx.restore(); });
+    raf = parts.length ? requestAnimationFrame(tick) : 0;
+  }
+  $$('[data-confetti]').forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); const r = b.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2); }));
+})();
+</script>
+</body>
+</html>
