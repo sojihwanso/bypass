@@ -7,9 +7,10 @@
 /* Layout: 굵은 프레임으로 나눈 계기판형 화면. 홈은 대형 제목과 과정 목록, 레슨은 읽는 칸과 고정 실습 시트. */
 :root{
   --brand:#EE6A1F; /* 대표색 */
-  --paper:#E3E7EB; --surface:#FFFFFF; --sunken:#D5DAE0; --ink:#1A1B1C; --muted:#50575F; --line:#C3C9D0; --frame:#1A1B1C;
-  --accent:var(--brand); --accent-text:#A33B06; --accent-soft:rgba(238,106,31,.14); --on-accent:#1A1B1C; --mark-cell:#FBE0CF;
-  --inv-bg:#1A1B1C; --inv-ink:#E3E7EB; --inv-muted:#A6ADB5; --inv-line:#3C4045;
+  --paper:#F7F7F5; --surface:#FFFFFF; --sunken:#EFEEEB; --ink:#201F1D; --muted:#66635E; --line:#E3E1DC; --frame:#D2CFC9;
+  --accent:var(--brand); --accent-text:#B4470E; --accent-soft:rgba(238,106,31,.10); --on-accent:#1A1B1C; --mark-cell:#FEF0E6;
+  --inv-bg:#FFFFFF; --inv-ink:#201F1D; --inv-muted:#66635E; --inv-line:#E3E1DC;
+  --badge-bg:var(--brand); --badge-ink:#1A1B1C; --badge-sub:#1A1B1C; --tick-bg:#EFEEEB; --tick-ink:#201F1D; --card-head:#EFEEEB; --code-bg:#201F1D; --code-ink:#F7F7F5;
   --good:#0B7A53; --good-soft:#D2EDE2; --bad:#BE2B37; --bad-soft:#FBE4E6;
   --r0:rgba(238,106,31,.26); --r1:rgba(36,88,214,.2); --r2:rgba(11,122,83,.22); --r3:rgba(148,84,200,.22);
   --s1:#EE6A1F; --s2:#1F62B0; --s3:#1E9E88; --s4:#7B5CC4; --s5:#B08A1E; --s6:#C2416C;
@@ -21,6 +22,7 @@
   --s2:#4A8FE6; --s3:#1FA982; --s4:#9C7FE6; --s5:#AE8C2A; --s6:#D65E88;
   --accent-text:#FF9A66; --accent-soft:rgba(238,106,31,.2); --on-accent:#1A1B1C; --mark-cell:#4D2B18;
   --inv-bg:#0E0F10; --inv-ink:#E3E7EB; --inv-muted:#A6ADB5; --inv-line:#33363A;
+  --badge-bg:#0E0F10; --badge-ink:#E3E7EB; --badge-sub:#A6ADB5; --tick-bg:#0E0F10; --tick-ink:#E3E7EB; --card-head:#0E0F10; --code-bg:#0E0F10; --code-ink:#E3E7EB;
   --good:#58D2A5; --good-soft:#143A2E; --bad:#FF8F98; --bad-soft:#47202A;
   --r0:rgba(238,106,31,.36); --r1:rgba(120,160,255,.28); --r2:rgba(88,210,165,.25); --r3:rgba(200,160,255,.28); color-scheme:dark}}
 :root[data-theme="dark"]{
@@ -28,6 +30,7 @@
   --s2:#4A8FE6; --s3:#1FA982; --s4:#9C7FE6; --s5:#AE8C2A; --s6:#D65E88;
   --accent-text:#FF9A66; --accent-soft:rgba(238,106,31,.2); --on-accent:#1A1B1C; --mark-cell:#4D2B18;
   --inv-bg:#0E0F10; --inv-ink:#E3E7EB; --inv-muted:#A6ADB5; --inv-line:#33363A;
+  --badge-bg:#0E0F10; --badge-ink:#E3E7EB; --badge-sub:#A6ADB5; --tick-bg:#0E0F10; --tick-ink:#E3E7EB; --card-head:#0E0F10; --code-bg:#0E0F10; --code-ink:#E3E7EB;
   --good:#58D2A5; --good-soft:#143A2E; --bad:#FF8F98; --bad-soft:#47202A;
   --r0:rgba(238,106,31,.36); --r1:rgba(120,160,255,.28); --r2:rgba(88,210,165,.25); --r3:rgba(200,160,255,.28); color-scheme:dark}
 *{box-sizing:border-box}
@@ -133,7 +136,7 @@ kbd{font:600 12px/1 var(--mono);background:var(--surface);border:1px solid var(-
 .zoom button{background:none;border:0;width:20px;font-size:14px;line-height:1;color:inherit}
 .dock{position:absolute;inset:0;pointer-events:none;z-index:6}
 .card{position:absolute;pointer-events:auto;max-width:calc(100% - 16px);max-height:calc(100% - 16px);overflow:auto;background:var(--surface);border:1px solid var(--frame);box-shadow:0 4px 14px rgba(0,0,0,.28)}
-.card>header{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;padding:5px 10px;background:var(--inv-bg);color:var(--inv-ink);font:700 13px/1.3 var(--display);cursor:move;touch-action:none}
+.card>header{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;padding:5px 10px;background:var(--card-head);color:var(--ink);font:700 13px/1.3 var(--display);cursor:move;touch-action:none}
 .card>header button{background:none;border:0;color:inherit;font-size:17px;line-height:1;padding:0 3px}
 .cb{padding:10px;display:grid;gap:8px;font-size:13px;min-width:0}
 .cb label{display:grid;gap:2px;font-size:12px;color:var(--muted)}
@@ -165,7 +168,7 @@ kbd{font:600 12px/1 var(--mono);background:var(--surface);border:1px solid var(-
 .pv2 th{padding:0;background:var(--sunken)}
 .pv2 th button{background:none;border:0;padding:4px 7px;font:600 12.5px/1.2 var(--body)}
 .pv2 th button.on{background:var(--accent);color:var(--on-accent)}
-.vba{margin:0;padding:7px 9px;background:var(--inv-bg);color:var(--inv-ink);font:400 12px/1.5 var(--mono);overflow-x:auto}
+.vba{margin:0;padding:7px 9px;background:var(--code-bg);color:var(--code-ink);font:400 12px/1.5 var(--mono);overflow-x:auto}
 .ddbtn{position:absolute;z-index:3;width:18px;height:21px;padding:0;background:var(--surface);border:1px solid var(--frame);font-size:11px;line-height:1}
 .ddl{position:absolute;z-index:6;display:grid;background:var(--surface);border:1px solid var(--frame);min-width:90px}
 .ddl button{background:none;border:0;padding:4px 9px;text-align:left;font-size:13px}
@@ -230,9 +233,9 @@ table.grid{border-collapse:separate;border-spacing:0;table-layout:fixed;font:400
 .hero{padding-block:26px 30px;display:grid;gap:30px;background-image:linear-gradient(to right,var(--line) 1px,transparent 1px);background-size:calc(100% / 6) 100%}
 .h-meta{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font:700 12.5px/1.3 var(--display)}
 .h-mid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:20px;align-items:start}
-.badge{grid-column:1 / 3;width:136px;height:136px;border-radius:50%;background:var(--inv-bg);color:var(--inv-ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center}
+.badge{grid-column:1 / 3;width:136px;height:136px;border-radius:50%;background:var(--badge-bg);color:var(--badge-ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center}
 .badge b{font:700 40px/1 var(--display);font-variant-numeric:tabular-nums}
-.badge span{font-size:12.5px;line-height:1.3;color:var(--inv-muted)}
+.badge span{font-size:12.5px;line-height:1.3;color:var(--badge-sub)}
 .h-flow{grid-column:3 / 5;font:700 13.5px/1.5 var(--display)}
 .h-flow span{display:block;font:400 13.5px/1.5 var(--body);color:var(--muted)}
 .h-pitch{grid-column:5 / 7;display:grid;gap:16px;justify-items:start;max-width:44ch}
@@ -240,7 +243,7 @@ table.grid{border-collapse:separate;border-spacing:0;table-layout:fixed;font:400
 .cta:hover{filter:brightness(1.07)}
 .cta i{font-style:normal}
 .mega{font:800 clamp(52px,16.2vw,300px)/1.04 var(--display);letter-spacing:-.045em;white-space:nowrap}
-.tick{overflow:hidden;background:var(--inv-bg);color:var(--inv-ink);font:500 13px/1 var(--mono);white-space:nowrap;padding-block:12px;border-block:2px solid var(--frame)}
+.tick{overflow:hidden;background:var(--tick-bg);color:var(--tick-ink);font:500 13px/1 var(--mono);white-space:nowrap;padding-block:12px;border-block:2px solid var(--frame)}
 .tick div{display:inline-block;padding-right:28px}
 @media (prefers-reduced-motion:no-preference){.tick div{animation:slide 42s linear infinite}@keyframes slide{to{transform:translateX(-100%)}}}
 .board{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);border-bottom:2px solid var(--frame)}
@@ -255,7 +258,7 @@ table.grid{border-collapse:separate;border-spacing:0;table-layout:fixed;font:400
 .pv{border-collapse:collapse;width:100%;font:400 12.5px/1.2 var(--body);font-variant-numeric:tabular-nums}
 .pv td,.pv th{border:1px solid var(--inv-line);padding:7px 8px;text-align:left;white-space:nowrap;font-weight:400}
 .pv th{color:var(--inv-muted);font:400 11.5px/1 var(--mono);text-align:center}
-.pv tbody tr:first-child td{color:var(--accent);font-weight:600}
+.pv tbody tr:first-child td{color:var(--accent-text);font-weight:600}
 .pv-cap{font:400 12px/1 var(--mono);color:var(--inv-muted);margin-bottom:8px}
 .stat{display:grid;align-content:space-between;gap:18px;padding-block:24px;border-left:2px solid var(--frame)}
 .stat h2{font:800 22px/1.2 var(--display);letter-spacing:-.02em;margin:0}
