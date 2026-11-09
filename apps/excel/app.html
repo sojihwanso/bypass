@@ -48,6 +48,13 @@ h1,h2,p,ul,ol{margin:0}
 .seg:hover{background:var(--sunken)}
 .seg.go{background:var(--accent);color:var(--on-accent)}
 .seg.go:hover{background:var(--accent);filter:brightness(1.07)}
+.os{display:flex;align-items:center;gap:0;padding:0 12px;border-left:2px solid var(--frame)}
+.os button{background:none;border:1px solid var(--line);padding:6px 9px;font:700 12px/1 var(--display);color:inherit;white-space:nowrap}
+.os button+button{border-left:0}
+.os button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.only-mac,.mac-note{display:none}
+html[data-os="mac"] .only-mac{display:inline}
+html[data-os="mac"] .mac-note{display:block;margin:0 0 16px;font-size:13.5px;line-height:1.55}
 .meter{display:flex;align-items:center;gap:10px;padding:0 20px;border-left:2px solid var(--frame);font:500 13px/1 var(--mono);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 .meter i{display:block;width:92px;height:6px;background:var(--sunken)}
 .meter b{display:block;height:100%;background:var(--accent)}
@@ -316,6 +323,8 @@ table.grid{border-collapse:separate;border-spacing:0;table-layout:fixed;font:400
   :root{--bar:52px}
   .gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
   .seg{padding:0 12px}
+  .os{padding:0 6px}
+  .os button{padding:6px}
   .seg.hide-s{display:none}
   .next{grid-template-columns:minmax(0,1fr)}
   .next-tag{writing-mode:horizontal-tb;height:36px}
@@ -326,6 +335,7 @@ table.grid{border-collapse:separate;border-spacing:0;table-layout:fixed;font:400
 <header class="top">
   <button class="brand" id="brand" type="button">엑셀 훈련소</button>
   <div class="meter"><i><b id="bar" style="width:0"></b></i><span id="count"></span></div>
+  <div class="os" id="osPick" role="group" aria-label="키보드 종류"><button type="button" data-os="win" aria-pressed="false">Win</button><button type="button" data-os="mac" aria-pressed="false">Mac</button></div>
   <button class="seg hide-s" id="tohome" type="button">홈</button>
   <button class="seg" id="tocourse" type="button">과정</button>
   <button class="seg go" id="resume" type="button">이어서 훈련 →</button>
@@ -333,6 +343,27 @@ table.grid{border-collapse:separate;border-spacing:0;table-layout:fixed;font:400
 <main id="app"></main>
 
 <script>
+/* ===== 윈도우/맥 키 표기 ===== */
+let OS=(()=>{try{const s=localStorage.getItem('xl8w.os');if(s==='mac'||s==='win')return s}catch(e){}const p=(navigator.userAgentData&&navigator.userAgentData.platform)||navigator.platform||'';return/mac|iphone|ipad/i.test(p)?'mac':'win'})();
+const MAC_KEY={'Ctrl+Shift+=':'Control+Shift+=','Ctrl+Shift+1':'Control+Shift+1','Ctrl+Shift+5':'Control+Shift+5','Ctrl+Enter':'Control+Return','Alt+Enter':'Option+Return','Ctrl+Home':'Control+fn+←','Ctrl+Space':'Control+Space','Ctrl+G':'Control+G','Ctrl+H':'Control+H','Ctrl+T':'Control+T','Ctrl+E':'Control+E','Ctrl+D':'Control+D','Ctrl+R':'Control+R','Ctrl+;':'Control+;','Ctrl+9':'Control+9','Ctrl+0':'Control+0','Ctrl++':'Control++'};
+const MAC_CHIP={F2:'Control+U',F3:'fn+F3',F4:'fn+F4',F5:'fn+F5',Enter:'Return',Ctrl:'Cmd'};
+const MAC_PHRASE=[['Ctrl을 누른 채 아래 방향키','Cmd를 누른 채 아래 방향키'],['Ctrl을 누른 채 Home 키를','Control과 fn을 누른 채 ← 키를'],['Ctrl과 Home을 함께','Control, fn, ←를 함께'],['Ctrl과 Shift를 함께 누른 채','Cmd와 Shift를 함께 누른 채'],['Ctrl과 Shift를 누른 채 = 키','Control과 Shift를 누른 채 = 키'],['Ctrl을 누른 채 스페이스바를 누르세요.','Control을 누른 채 스페이스바를 누르세요. 입력 소스가 바뀌면 C열 머리글을 클릭해도 됩니다.'],['Ctrl을 누른 채 세미콜론','Control을 누른 채 세미콜론'],['Alt를 누른 채 Enter를','Option을 누른 채 Return을'],['Enter 대신 Ctrl+Enter를','Return 대신 Control+Return을'],['Ctrl+Enter를','Control+Return을'],['Ctrl+Enter는','Control+Return은'],['Ctrl+Enter로','Control+Return으로'],['Alt+Enter는','Option+Return은'],['F2 키를','Control+U를'],['F2 키로','Control+U로'],['(F4)','(fn+F4)'],['F4와 혼합','fn+F4와 혼합'],['한/영 키로','Caps Lock으로'],['한/영 키를','Caps Lock을']];
+const MAC_RE=new RegExp(Object.keys(MAC_KEY).sort((a,b)=>b.length-a.length).map(s=>s.replace(/[+;]/g,'\\$&')).join('|'),'g');
+const KEY_TEXT=/Ctrl|Alt[+를]|한\/영 키|F2 키|\(F4\)|F4와 혼합/;
+const macText=s=>MAC_PHRASE.reduce((t,[a,b])=>t.split(a).join(b),s).replace(MAC_RE,m=>MAC_KEY[m]).replace(/\bCtrl\b/g,'Cmd');
+const macCombo=k=>MAC_KEY[k]||MAC_CHIP[k]||macText(k);
+const KEY_ORIG=new WeakMap();
+function applyKeys(root){
+  if(!root)return;
+  root.querySelectorAll('.kk').forEach(n=>{const k=n.dataset.k;n.innerHTML=(OS==='mac'?macCombo(k):k).split(/\+(?=.)/).map(x=>`<kbd>${x}</kbd>`).join('+')});
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+  for(let n=w.nextNode();n;n=w.nextNode()){
+    if(n.parentElement.closest('.kk'))continue;
+    if(!KEY_ORIG.has(n)){if(!KEY_TEXT.test(n.data))continue;KEY_ORIG.set(n,n.data)}
+    const o=KEY_ORIG.get(n),v=OS==='mac'?macText(o):o;if(n.data!==v)n.data=v;
+  }
+  root.querySelectorAll('[title]').forEach(n=>{if(n.dataset.kt===undefined){if(!KEY_TEXT.test(n.title))return;n.dataset.kt=n.title}n.title=OS==='mac'?macText(n.dataset.kt):n.dataset.kt});
+}
 /* ===== 계산 엔진 ===== */
 const colName=i=>{let s='';i++;while(i>0){const m=(i-1)%26;s=String.fromCharCode(65+m)+s;i=(i-m-1)/26}return s};
 const colIdx=s=>{let n=0;for(const ch of s)n=n*26+ch.charCodeAt(0)-64;return n-1};
@@ -930,15 +961,16 @@ function createSheet(el,cfg,hooks){
     const out=v.slice(0,s)+text+v.slice(e);setBoth(out);refInsert={start:s,end:s+text.length};input.setSelectionRange(refInsert.end,refInsert.end);syncHelp();
   }
   function commitMove(dc,dr){if(commit()){moveBy(dc,dr);focusEd()}}
-  function flushPending(){if(!pending)return;const p=pending;pending=null;ignoreUntil=Date.now()+80;if(p.tab)commitMove(p.shift?-1:1,0);else commitMove(0,p.shift?-1:1)}
+  function insertNewline(){const p=ed.selectionStart;ed.value=ed.value.slice(0,p)+'\n'+ed.value.slice(ed.selectionEnd);ed.setSelectionRange(p+1,p+1);sizeEd()}
+  function flushPending(){if(!pending)return;const p=pending;pending=null;ignoreUntil=Date.now()+80;if(p.alt){insertNewline();return}if(p.mod){commitAll();return}if(p.tab)commitMove(p.shift?-1:1,0);else commitMove(0,p.shift?-1:1)}
   function onKey(e){
     const k=e.key,mod=e.ctrlKey||e.metaKey,target=e.target;
     if(e.isComposing||e.keyCode===229){
-      if(['Enter','NumpadEnter','Tab'].includes(e.code)&&editing){pending={tab:e.code==='Tab',shift:e.shiftKey};if(e.code==='Tab')e.preventDefault();setTimeout(flushPending,15)}
+      if(['Enter','NumpadEnter','Tab'].includes(e.code)&&editing){pending={tab:e.code==='Tab',shift:e.shiftKey,alt:e.code!=='Tab'&&e.altKey&&target===ed,mod:e.code!=='Tab'&&mod};if(e.code==='Tab'||pending.alt||pending.mod)e.preventDefault();setTimeout(flushPending,15)}
       return;
     }
     if(editing){
-      if(k==='Enter'&&e.altKey&&target===ed){e.preventDefault();const p=ed.selectionStart;ed.value=ed.value.slice(0,p)+'\n'+ed.value.slice(ed.selectionEnd);ed.setSelectionRange(p+1,p+1);sizeEd();return}
+      if(k==='Enter'&&e.altKey&&target===ed){e.preventDefault();insertNewline();return}
       if(k==='Enter'&&mod){e.preventDefault();pending=null;commitAll();return}
       if(k==='Enter'||k==='Tab'){e.preventDefault();if(Date.now()<ignoreUntil)return;pending=null;if(k==='Tab')commitMove(e.shiftKey?-1:1,0);else commitMove(0,e.shiftKey?-1:1);return}
       if(k==='Escape'){e.preventDefault();pending=null;endEdit();drawSel();focusEd();return}
@@ -957,9 +989,9 @@ function createSheet(el,cfg,hooks){
     if(k==='Enter'){e.preventDefault();moveBy(0,e.shiftKey?-1:1);return}
     if(k==='Tab'){e.preventDefault();moveBy(e.shiftKey?-1:1,0);return}
     if(k==='Delete'||k==='Backspace'){e.preventDefault();clearSel();return}
-    if(k==='F2'){e.preventDefault();const x=cells[key(sel.ac,sel.ar)];beginEdit('edit',x&&x.raw?x.raw:'');const n=ed.value.length;ed.setSelectionRange(n,n);return}
+    if(k==='F2'||(OS==='mac'&&e.ctrlKey&&!e.metaKey&&e.code==='KeyU')){e.preventDefault();const x=cells[key(sel.ac,sel.ar)];beginEdit('edit',x&&x.raw?x.raw:'');const n=ed.value.length;ed.setSelectionRange(n,n);return}
     if(k==='Escape'){clip=null;drawClip();return}
-    if(k==='='&&e.altKey){e.preventDefault();autoSum();return}
+    if(e.code==='Equal'&&e.altKey){e.preventDefault();autoSum();return}
     if(k==='F5'){e.preventDefault();openTool('goto');return}
     if(k==='F3'){e.preventDefault();if(fQ)findNext(fQ);return}
     if(k==='PageDown'||k==='PageUp'){e.preventDefault();moveBy(0,k==='PageDown'?20:-20);return}
@@ -978,8 +1010,9 @@ function createSheet(el,cfg,hooks){
     if(k==='Home'){e.preventDefault();if(mod)select(0,0);else select(0,sel.ar);return}
     if(k==='End'&&mod){e.preventDefault();const[c,r]=lastUsed();select(c,r);return}
     if(mod){
-      const l=k.toLowerCase();
-      if(l==='z'){e.preventDefault();undo();return}if(l==='y'){e.preventDefault();redo();return}
+      const l=e.code.startsWith('Key')?e.code.slice(3).toLowerCase():k.toLowerCase();
+      if(l==='f'&&e.shiftKey){e.preventDefault();openTool('filter');return}
+      if(l==='z'){e.preventDefault();if(e.shiftKey)redo();else undo();return}if(l==='y'){e.preventDefault();redo();return}
       if(l==='c'){e.preventDefault();copy(false);return}if(l==='x'){e.preventDefault();copy(true);return}
       if(l==='v'){if(clip){e.preventDefault();paste(e.shiftKey)}return}
       if(l==='b'){e.preventDefault();toggleBold();return}
@@ -1582,7 +1615,7 @@ const hasFmt=(rs,f,label)=>({mark:rs,ans:`${rs} 선택 후 도구 줄의 [${labe
 const seq=(rs,fn,src,how)=>({mark:null,ans:how,bad(s){let m=null;eachRef(rs,(ref,c,r)=>{if(!same(s.v(ref),fn(r,s))){m='';return false}});return m},sol(s){s.fill(src,rs.split(':')[1])}});
 const valuesOf=(rs,canon,how,sol)=>({mark:rs,ans:how,bad(s){let m=null;eachRef(rs,(ref,c,r)=>{if(!s.f(ref)){m='';return false}if(s.f(ref)[0]==='='){m=`${ref}에 아직 수식이 들어 있어요. 값만 붙여넣기를 써 보세요.`;return false}if(!same(s.v(ref),s.calc(shiftFormula(canon,c,r)))){m=`${ref}의 값이 달라요.`;return false}});return m},sol});
 const custom=(bad,sol,ans,mark)=>({bad,sol,ans,mark:mark||null});
-const K=(...k)=>k.map(x=>`<kbd>${x}</kbd>`).join('+');
+const K=(...k)=>`<span class="kk" data-k="${k.join('+')}">${k.map(x=>`<kbd>${x}</kbd>`).join('+')}</span>`;
 const C=s=>`<code>${s}</code>`;
 const mini=(rows,hl=[])=>`<div class="mini-wrap"><table class="mini"><thead><tr>${rows[0].map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.slice(1).map((r,y)=>`<tr>${r.map((x,c)=>`<td${hl.includes(y+'-'+c)?' class="hl"':''}>${x}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 const M=(text,spec,hint)=>({text,spec,hint});
@@ -1612,7 +1645,7 @@ A1:{topic:'모든 칸에는 주소가 있어요',
  ${mini([['','A','B','C'],['1','A1','B1','C1'],['2','A2','B2','C2'],['3','A3','B3','<b>C3</b>']],['2-3'])}
  <p>주소는 <b>열 다음 행</b> 순서로 읽습니다. C열 3행은 ${C('C3')}이에요.</p>
  <p>여러 칸을 묶은 <b>범위</b>는 시작과 끝을 콜론으로 잇습니다. ${C('A1:D1')}은 A1부터 D1까지예요.</p>
- <ul><li>입력을 마칠 때 ${K('Enter')}는 아래로, ${K('Tab')}은 오른쪽으로 이동해요.</li><li>셀을 고르고 바로 타자를 치면 기존 내용을 덮어씁니다.</li><li>내용 일부만 고치려면 더블클릭하거나 ${K('F2')}를 누르세요.</li></ul>`,
+ <ul><li>입력을 마칠 때 ${K('Enter')} 키는 아래로, ${K('Tab')}은 오른쪽으로 이동해요.</li><li>셀을 고르고 바로 타자를 치면 기존 내용을 덮어씁니다.</li><li>내용 일부만 고치려면 더블클릭하거나 ${K('F2')}를 누르세요.</li></ul>`,
  traps:['행과 열을 헷갈려요. 알파벳이 세로줄, 숫자가 가로줄입니다.','입력 중에 Esc를 누르면 입력이 취소되고 이전 내용으로 돌아갑니다.'],
  sheet:{data:`주문번호|상품|수량|담당자
 1001|볼펜|30|김민수
@@ -1668,7 +1701,7 @@ D1:{topic:'수식이 아니라 결과만 옮기기',
  why:'보고서를 보냈는데 받는 사람 화면에서 숫자가 깨졌습니다. 수식이 참조하던 값이 없어졌기 때문이에요. 다른 사람에게 넘길 숫자는 값으로 고정해야 합니다.',
  how:`<p>${K('Ctrl','C')}로 복사하고 ${K('Ctrl','V')}로 붙여넣습니다. 그런데 수식을 복사하면 <b>수식 자체가 옮겨 가면서 참조 위치도 함께 이동</b>해요.</p>
  ${mini([['붙여넣기 방식','옮겨 가는 것','쓰는 때'],['일반','수식, 서식, 값','같은 계산을 다른 곳에 재사용'],['값만','계산 결과 숫자','결과를 고정하거나 외부로 전달']])}
- <p>값만 붙여넣기는 ${K('Ctrl','Shift','V')}입니다. 여기서는 도구 줄의 <b>[값만 붙여넣기]</b> 버튼도 쓸 수 있어요. 실제 엑셀에서는 마우스 오른쪽 버튼의 붙여넣기 옵션에도 있습니다.</p>
+ <p>값만 붙여넣기는 ${K('Ctrl','Shift','V')}입니다.<span class="only-mac"> 실제 맥 엑셀에서 동작하지 않으면 Control+Cmd+V로 선택하여 붙여넣기 창을 여세요.</span> 여기서는 도구 줄의 <b>[값만 붙여넣기]</b> 버튼도 쓸 수 있어요. 실제 엑셀에서는 마우스 오른쪽 버튼의 붙여넣기 옵션에도 있습니다.</p>
  <p>잘못했다면 언제든 ${K('Ctrl','Z')}로 되돌리세요.</p>`,
  traps:['값만 붙여넣으면 서식은 따라오지 않아서 % 표시가 사라집니다.','값으로 고정한 칸은 원본이 바뀌어도 변하지 않습니다.'],
  sheet:{data:`지점|매출|목표|달성률|보고용
@@ -1692,7 +1725,7 @@ E1:{topic:'300행을 1초에 건너기',
  <li>${K('Ctrl','Shift','↓')} 끝까지 범위 선택</li>
  <li>${K('Ctrl','Home')} 맨 처음 A1로 이동</li>
  <li>${K('Ctrl','Z')} 되돌리기, ${K('Ctrl','Y')} 다시 실행</li></ul>
- <p>핵심 원리는 <b>${K('Ctrl')}은 빈칸을 만날 때까지 달린다</b>는 것입니다. 중간에 빈 행이 있으면 거기서 멈춰요. 데이터 끝이 예상과 다르다면 빈 행이 끼어 있다는 신호입니다.</p>
+ <p>핵심 원리는 <b>${K('Ctrl')} 키는 빈칸을 만날 때까지 달린다</b>는 것입니다. 중간에 빈 행이 있으면 거기서 멈춰요. 데이터 끝이 예상과 다르다면 빈 행이 끼어 있다는 신호입니다.</p>
  <p>범위를 선택하면 <b>화면 맨 아래 상태 표시줄</b>에 평균, 개수, 합계가 나타납니다. 수식을 쓰지 않고 숫자를 확인하는 가장 빠른 방법이에요.</p>`,
  traps:['노트북은 ↑↓ 대신 Fn 조합이 필요한 경우가 있어요.','Ctrl+↓가 중간에 멈추면 빈칸이 있는지 확인하세요.'],
  sheet:{data:bigRows,w:[64,70,92,20,120],heads:['A1:C1'],fmt:{'C2:C301':'comma'},cols:7,rows:306,extra:{}},
@@ -1731,7 +1764,7 @@ B3:{topic:'$는 주소를 고정하는 핀이에요',
  ${mini([['C2에 쓴 수식','C3으로 채우면','결과'],[C('=B2*F1'),C('=B3*F2'),'F2는 빈칸이라 0'],[C('=B2*$F$1'),C('=B3*$F$1'),'정상']],['0-2'])}
  <p><b>$</b>는 바로 뒤에 오는 것을 고정합니다.</p>
  ${mini([['표기','열','행'],[C('F1'),'움직임','움직임'],[C('$F$1'),'고정','고정'],[C('$F1'),'고정','움직임'],[C('F$1'),'움직임','고정']])}
- <p>수식 입력 중 주소에 커서를 두고 ${K('F4')}를 누르면 $가 순서대로 바뀝니다. 오른쪽과 아래로 모두 복사해야 하는 표에서는 ${C('$A10')}처럼 <b>한쪽만 고정</b>합니다.</p>`,
+ <p>수식 입력 중 주소에 커서를 두고 ${K('F4')}를 누르면 $가 순서대로 바뀝니다.<span class="only-mac"> 실제 맥 엑셀에서는 Cmd+T도 됩니다. 브라우저에서는 Cmd+T가 새 탭을 열기 때문에 이 화면에서는 fn+F4로 연습합니다.</span> 오른쪽과 아래로 모두 복사해야 하는 표에서는 ${C('$A10')}처럼 <b>한쪽만 고정</b>합니다.</p>`,
  traps:['$는 값이 아니라 복사될 때의 주소만 고정합니다.','채운 뒤에는 맨 아래 칸의 수식을 눌러 참조가 맞는지 확인하는 습관을 들이세요.'],
  sheet:{data:`상품|금액|수수료||수수료율|5%
 볼펜|120000
@@ -1803,7 +1836,7 @@ D3:{topic:'끝자리 처리와 오류 읽기',
   M('<b>F2:F5</b>에 할인가를 <b>10원 미만 버림</b>으로 처리하세요.',fx('F2:F5','=ROUNDDOWN(D2,-1)',{fn:'ROUNDDOWN'}),'버림은 ROUNDDOWN, 십 원 단위는 자릿수 -1입니다.'),
   M('<b>D9</b>는 #DIV/0!입니다. 강남의 실제 수량은 <b>30</b>이에요. 원인 칸을 고치세요.',val('C9','30',{orig:'0'}),'0으로 나누어서 난 오류입니다. 분모인 C9를 고치세요.'),
   M('<b>D10</b>은 #VALUE!입니다. 종로의 매출은 <b>90000</b>으로 확정됐어요. 원인 칸을 고치세요.',val('B10','90000',{orig:'미정'}),'문자 미정은 나눗셈에 쓸 수 없어요. B10을 고칩니다.'),
-  M('<b>B11</b>은 #NAME?입니다. 함수 이름의 오타를 고치세요.',fx('B11','=SUM(B9:B10)',{fn:'SUM'}),'B11을 선택하고 F2를 눌러 SUMM을 SUM으로 고치세요.'),
+  M('<b>B11</b>은 #NAME?입니다. 함수 이름의 오타를 고치세요.',fx('B11','=SUM(B9:B10)',{fn:'SUM'}),'B11을 선택하고 F2 키를 눌러 SUMM을 SUM으로 고치세요.'),
  ],recap:['ROUND는 값을 바꾸고, 서식은 보이는 모양만 바꾼다','오류 코드는 원인을 알려 준다','번진 오류는 맨 처음 칸부터 고친다']},
 E3:{topic:'조건에 따라 다른 답 내기',
  goal:'IF 함수로 조건에 따른 판정과 계산을 만듭니다.',
@@ -2005,7 +2038,7 @@ sheet:{data:`이름|실적|부서|비고|평가
 합계|=SUM(B2:B6)`,w:[76,70,70,90,60],heads:['A1:E1'],cols:7,rows:18},
 tasks:[M('표 안의 칸을 누르고 <b>Ctrl+A</b>로 표 전체를 선택하세요.',st(s=>s.sel()==='A1:E7',s=>{s.select('B3');s.region()},'표 안의 셀 선택 → Ctrl+A'),'표 안이면 어느 칸이든 괜찮습니다.'),M('<b>C2</b>를 누르고 <b>Ctrl+Space</b>로 C열 전체를 선택하세요.',pickSel('C1:C18'),'Ctrl을 누른 채 스페이스바를 누르세요.'),M('<b>A4</b>를 누르고 <b>Shift+Space</b>로 4행 전체를 선택하세요.',pickSel('A4:G4'),'한글 상태에서 안 되면 한/영 키를 누르고 다시 해 보세요.'),M('4행이 선택된 채로 <b>Ctrl+-</b>를 눌러 퇴사자 행을 삭제하세요.',st(s=>s.v('A4')==='최유진'&&s.f('B6')==='=SUM(B2:B5)',s=>{s.select('A4:G4');s.doAct('delRow')},'4행 선택 → Ctrl+-'),'합계 수식의 범위도 함께 줄어듭니다.'),M('<b>A3</b>을 누르고 <b>Shift+Space</b>, <b>Ctrl+Shift+=</b>로 3행 위에 새 행을 넣으세요.',st(s=>!s.f('A3')&&s.v('A4')==='이서연'&&s.f('B7')==='=SUM(B2:B6)',s=>{s.select('A3:G3');s.doAct('insRow')},'3행 선택 → Ctrl+Shift+='),'Ctrl과 Shift를 누른 채 = 키를 누르세요.'),M('<b>D2</b>를 누르고 <b>Ctrl+0</b>으로 비고 열을 숨기세요.',st(s=>s.colHidden('D'),s=>{s.select('D2');s.hideCols()},'D열 셀 선택 → Ctrl+0'),'D열이 사라지고 C 다음에 E가 보입니다.'),M('<b>C1:E1</b>을 끌어서 선택하고 마우스 오른쪽 버튼의 <b>숨기기 취소</b>로 D열을 되살리세요.',st(s=>!s.colHidden('D'),s=>{s.select('C1:E1');s.unhide()},'C:E 선택 → 우클릭 → 숨기기 취소'),'또는 홈 › 서식 › 숨기기 취소를 누르세요.')],recap:['Ctrl+Space는 열, Shift+Space는 행 선택','Ctrl+-와 Ctrl+Shift+=로 지우고 넣는다','행을 바꾸면 수식 범위도 따라온다']},
 H1:{topic:'같은 값을 다시 치지 않기',goal:'아래·오른쪽 복사, 오늘 날짜, 동시 입력, 셀 안 줄 바꿈을 단축키로 처리합니다.',why:'같은 값을 여러 칸에 입력하거나 날짜를 매번 치는 일을 키 하나로 줄일 수 있습니다.',
-how:B('채우기 키',mini([['키','기능'],[K('Ctrl','D'),'맨 위 칸을 아래로 복사'],[K('Ctrl','R'),'맨 왼쪽 칸을 오른쪽으로 복사']])+`<p>먼저 복사할 칸과 채울 칸을 <b>함께 선택</b>한 다음 누릅니다. 채우기 핸들과 달리 숫자가 늘어나지 않아요.</p>`)+B('입력 키',mini([['키','기능'],[K('Ctrl',';'),'오늘 날짜 입력'],[K('Ctrl','Enter'),'선택한 모든 칸에 같은 값 입력'],[K('Alt','Enter'),'칸 안에서 줄 바꿈']]))+B('셀 편집',`<p>${K('F2')}로 편집을 시작하고, ${K('Esc')}로 취소합니다. ${K('Enter')}는 아래로, ${K('Tab')}은 오른쪽으로 이동해요.</p>`),
+how:B('채우기 키',mini([['키','기능'],[K('Ctrl','D'),'맨 위 칸을 아래로 복사'],[K('Ctrl','R'),'맨 왼쪽 칸을 오른쪽으로 복사']])+`<p>먼저 복사할 칸과 채울 칸을 <b>함께 선택</b>한 다음 누릅니다. 채우기 핸들과 달리 숫자가 늘어나지 않아요.</p>`)+B('입력 키',mini([['키','기능'],[K('Ctrl',';'),'오늘 날짜 입력'],[K('Ctrl','Enter'),'선택한 모든 칸에 같은 값 입력'],[K('Alt','Enter'),'칸 안에서 줄 바꿈']]))+B('셀 편집',`<p>${K('F2')}로 편집을 시작하고, ${K('Esc')}로 취소합니다. ${K('Enter')} 키는 아래로, ${K('Tab')}은 오른쪽으로 이동해요.</p>`),
 traps:['Ctrl+D는 복사할 칸까지 함께 선택해야 합니다.','Ctrl+;로 넣은 날짜는 다음 날이 되어도 바뀌지 않습니다. 늘 오늘로 바꾸려면 =TODAY()를 씁니다.'],
 sheet:{data:`일자|담당|지점|상태|위치
 |김민수
@@ -2119,7 +2152,7 @@ sheet:{data:`거래일|금액|지점||금액 합계|지점 정리
 2026.11.06|7,200원| 대전 `,w:[100,84,70,18,92,84],heads:['A1:C1','E1:F1'],fmt:{'E2:E2':'comma'},cols:8,rows:14,tools:['tonum','replace']},
 tasks:[M('합계가 0이에요. <b>B2:B6</b>를 선택하고 <b>[숫자로 변환]</b>을 누르세요.',st(s=>[2,3,4,5,6].every(r=>typeof s.v('B'+r)==='number')&&s.v('E2')===52000,s=>s.toNum('B2:B6'),'B2:B6 선택 → [숫자로 변환]','B2:B6'),'오른쪽 정렬로 바뀌고 합계가 계산됩니다.'),M('<b>A2:A6</b>를 선택하고 <b>[찾아 바꾸기]</b>로 <b>.</b>을 <b>-</b>로 바꾸세요.',st(s=>[2,3,4,5,6].every(r=>typeof s.v('A'+r)==='number'),s=>s.replace('A2:A6','.','-'),'찾을 내용 . / 바꿀 내용 -','A2:A6'),'찾을 내용에 점, 바꿀 내용에 하이픈을 입력합니다.'),M('<b>F2:F6</b>에 지점 이름의 공백을 없애세요.',fx('F2:F6','=TRIM(C2)',{fn:'TRIM'}),'=TRIM(C2)')],recap:['왼쪽 정렬과 합계로 문자를 진단한다','찾아 바꾸기는 값을 다시 읽게 한다','표시 형식으로는 고쳐지지 않는다']},
 D5:{topic:'비어 있는 칸을 위의 값으로',goal:'빈 셀만 골라 한 번에 채우고 값으로 고정합니다.',why:'병합을 풀었더니 지점 이름이 첫 행에만 남고 나머지는 비었습니다. 이 상태로는 필터도 SUMIFS도 제대로 동작하지 않아요.',
-how:B('세 단계로 끝납니다',`<ul><li>범위를 잡고 빈 셀만 선택</li><li>${C('=')}를 치고 바로 위 칸을 클릭</li><li>${K('Ctrl','Enter')}로 모든 빈 칸에 동시 입력</li></ul>`)+B('왜 한 번에 되는가',`<p>${K('Ctrl','Enter')}는 선택된 모든 칸에 같은 수식을 넣습니다. 참조는 상대 참조이므로 칸마다 <b>자기 바로 위 칸</b>을 가리켜요.</p>`)+B('마지막에 값으로 고정',`<p>수식으로 둔 채 정렬하면 값이 뒤섞입니다. 범위를 복사해 값만 붙여넣으세요.</p><p>실제 엑셀에서는 ${K('Ctrl','G')} → 옵션 → 빈 셀입니다.</p>`),
+how:B('세 단계로 끝납니다',`<ul><li>범위를 잡고 빈 셀만 선택</li><li>${C('=')}를 치고 바로 위 칸을 클릭</li><li>${K('Ctrl','Enter')} 키로 모든 빈 칸에 동시 입력</li></ul>`)+B('왜 한 번에 되는가',`<p>${K('Ctrl','Enter')} 키는 선택된 모든 칸에 같은 수식을 넣습니다. 참조는 상대 참조이므로 칸마다 <b>자기 바로 위 칸</b>을 가리켜요.</p>`)+B('마지막에 값으로 고정',`<p>수식으로 둔 채 정렬하면 값이 뒤섞입니다. 범위를 복사해 값만 붙여넣으세요.</p><p>실제 엑셀에서는 ${K('Ctrl','G')} → 옵션 → 빈 셀입니다.</p>`),
 traps:['수식 입력 뒤 Enter만 누르면 한 칸만 입력됩니다.','값으로 고정하기 전에 정렬하면 안 됩니다.'],
 sheet:{data:`지점|담당|금액
 강남|김민수|85000
@@ -2154,7 +2187,7 @@ traps:['날짜 열에 문자가 섞이면 그룹이 되지 않습니다.','계�
 sheet:{data:SALES_Q,w:SW,heads:['A1:E1'],fmt:{'E2:E21':'comma'},cols:13,rows:26,tools:['pivot'],pivotAt:'G1'},
 tasks:[M('행에 <b>일자</b>, 값에 <b>금액</b>을 넣으세요.',pvIs({rows:'일자',val:'금액'},'행: 일자 / 값: 금액'),'[피벗]을 눌러 설정 창을 여세요.'),M('날짜 그룹을 <b>월</b>로 바꾸세요.',pvIs({group:'월'},'날짜 그룹: 월'),'9월, 10월, 11월로 묶입니다.'),M('계산 필드 이름 <b>수수료</b>, 수식 <b>금액*0.05</b>를 추가하세요.',pvIs({calc:{name:'수수료',expr:'금액*0.05'}},'이름: 수수료 / 수식: 금액*0.05'),'입력 후 [계산 필드 추가]를 누릅니다.'),M('원본 <b>E2</b>를 <b>185000</b>으로 바꾸세요. 피벗은 그대로입니다.',val('E2','185000',{orig:'85000'}),'E2를 고쳐도 G열의 합계가 변하지 않는 것을 확인하세요.'),M('피벗 창의 <b>[새로 고침]</b>을 눌러 반영하세요.',st(s=>s.stats.refreshed>0,s=>s.pvRefresh(),'[새로 고침]'),'이제 총합계가 10만 원 늘어납니다.')],recap:['날짜는 월이나 분기로 묶는다','계산 필드는 합계에 적용된다','원본을 고치면 새로 고침한다']},
 C6:{topic:'버튼으로 거르는 피벗',goal:'슬라이서로 피벗 결과를 클릭만으로 필터링합니다.',why:'회의 중에 "강남만 볼까요?" 하는 순간, 필터 창을 뒤지지 않고 버튼 하나로 화면을 바꿀 수 있습니다.',
-how:B('슬라이서란',`<p>피벗의 필터를 버튼으로 꺼내 놓은 것입니다. 지금 무엇이 걸려 있는지 눈에 바로 보여요.</p>`)+B('여러 개 고르기',`<p>이 화면에서는 버튼을 누를 때마다 선택이 추가되거나 빠집니다. 실제 엑셀에서는 ${K('Ctrl')}을 누른 채 클릭하거나 다중 선택 버튼을 켜요.</p>`)+B('언제 쓰나',`<p>다른 사람이 조작할 보고서에 좋습니다. 한 슬라이서를 피벗 여러 개에 연결하면 대시보드가 됩니다.</p>`),
+how:B('슬라이서란',`<p>피벗의 필터를 버튼으로 꺼내 놓은 것입니다. 지금 무엇이 걸려 있는지 눈에 바로 보여요.</p>`)+B('여러 개 고르기',`<p>이 화면에서는 버튼을 누를 때마다 선택이 추가되거나 빠집니다. 실제 엑셀에서는 ${K('Ctrl')} 키를 누른 채 클릭하거나 다중 선택 버튼을 켜요.</p>`)+B('언제 쓰나',`<p>다른 사람이 조작할 보고서에 좋습니다. 한 슬라이서를 피벗 여러 개에 연결하면 대시보드가 됩니다.</p>`),
 traps:['필터를 걸어 둔 줄 모르고 숫자를 읽는 실수가 많아요. 전체 상태를 먼저 확인하세요.','슬라이서가 없는 구버전 파일 형식(.xls)에서는 쓸 수 없습니다.'],
 sheet:{data:SALES,w:SW,heads:['A1:E1'],fmt:{'E2:E21':'comma'},cols:13,rows:26,tools:['pivot'],pivotAt:'G1'},
 tasks:[M('행에 <b>품목</b>, 값에 <b>금액</b>을 넣으세요.',pvIs({rows:'품목',val:'금액'},'행: 품목 / 값: 금액'),'[피벗]을 눌러 설정 창을 여세요.'),M('슬라이서 항목을 <b>지점</b>으로 고르세요.',pvIs({slF:'지점'},'슬라이서: 지점'),'지점 버튼들이 나타납니다.'),M('<b>강남</b> 버튼을 누르세요.',pvIs({slSel:['강남']},'강남 버튼 클릭'),'강남의 품목별 금액만 남습니다.'),M('<b>부산</b> 버튼을 눌러 함께 보세요.',st(s=>{const a=s.pv()&&s.pv().slSel;return a&&a.length===2&&a.includes('강남')&&a.includes('부산')},s=>s.pivot({slSel:['강남','부산']}),'부산 버튼 클릭'),'두 지점의 합이 표시됩니다.'),M('<b>[전체]</b>를 눌러 필터를 해제하세요.',pvIs({slSel:[]},'[전체] 버튼'),'전체 상태로 돌아옵니다.')],recap:['슬라이서는 눈에 보이는 필터다','여러 개를 함께 고를 수 있다','숫자를 읽기 전 필터 상태를 확인한다']},
@@ -2208,7 +2241,7 @@ sheet:{data:`항목|금액
 소모품|400
 통신비|250
 합계|=SUM(B2:B4)`,w:[80,84],heads:['A1:B1'],fmt:{'B2:B6':'comma'},cols:6,rows:12,tools:['trace','protect']},
-tasks:[M('<b>B6</b>을 선택하고 <b>[수식 추적]</b>에서 <b>[참조되는 셀]</b>을 누르세요.',st(s=>s.stats.traced>0&&s.sel()==='B6',s=>{s.select('B6');s.trace('pre')},'B6 선택 → [참조되는 셀]','B6'),'색칠된 범위가 어디까지인지 보세요. 통신비가 빠져 있습니다.'),M('<b>B6</b>의 합계 범위를 <b>B5</b>까지 넓히세요.',st(s=>s.f('B6')==='=SUM(B2:B5)',s=>s.put('B6','=SUM(B2:B5)'),'=SUM(B2:B5)','B6'),'B6을 선택하고 F2로 범위를 고칩니다.'),M('입력 칸 <b>B2:B5</b>를 선택하고 <b>[시트 보호]</b>에서 <b>[선택 범위 잠금 해제]</b>를 누르세요.',st(s=>s.isUnlocked('B2')&&s.isUnlocked('B5'),s=>s.unlock('B2:B5'),'B2:B5 선택 → [선택 범위 잠금 해제]','B2:B5'),'보호를 켜기 전에 입력 칸부터 엽니다.'),M('<b>[시트 보호]</b>를 켜세요.',st(s=>s.prot(),s=>s.setProt(true),'[시트 보호]'),'창의 [시트 보호] 버튼을 누릅니다.'),M('합계 칸 <b>B6</b>에 아무 숫자나 입력해 보세요.',st(s=>s.stats.blocked>0,s=>s.tryPut('B6','1'),'B6에 숫자 입력 후 Enter','B6'),'보호된 칸이라 입력이 막힙니다.'),M('입력 칸 <b>B3</b>은 고칠 수 있어요. <b>3600</b>으로 바꾸세요.',val('B3','3600',{orig:'3500'}),'잠금 해제한 칸은 그대로 입력할 수 있습니다.')],recap:['합계 오류는 참조 범위부터 본다','잠금 해제 후 보호를 켠다','보호는 실수 방지용이다']},
+tasks:[M('<b>B6</b>을 선택하고 <b>[수식 추적]</b>에서 <b>[참조되는 셀]</b>을 누르세요.',st(s=>s.stats.traced>0&&s.sel()==='B6',s=>{s.select('B6');s.trace('pre')},'B6 선택 → [참조되는 셀]','B6'),'색칠된 범위가 어디까지인지 보세요. 통신비가 빠져 있습니다.'),M('<b>B6</b>의 합계 범위를 <b>B5</b>까지 넓히세요.',st(s=>s.f('B6')==='=SUM(B2:B5)',s=>s.put('B6','=SUM(B2:B5)'),'=SUM(B2:B5)','B6'),'B6을 선택하고 F2 키로 범위를 고칩니다.'),M('입력 칸 <b>B2:B5</b>를 선택하고 <b>[시트 보호]</b>에서 <b>[선택 범위 잠금 해제]</b>를 누르세요.',st(s=>s.isUnlocked('B2')&&s.isUnlocked('B5'),s=>s.unlock('B2:B5'),'B2:B5 선택 → [선택 범위 잠금 해제]','B2:B5'),'보호를 켜기 전에 입력 칸부터 엽니다.'),M('<b>[시트 보호]</b>를 켜세요.',st(s=>s.prot(),s=>s.setProt(true),'[시트 보호]'),'창의 [시트 보호] 버튼을 누릅니다.'),M('합계 칸 <b>B6</b>에 아무 숫자나 입력해 보세요.',st(s=>s.stats.blocked>0,s=>s.tryPut('B6','1'),'B6에 숫자 입력 후 Enter','B6'),'보호된 칸이라 입력이 막힙니다.'),M('입력 칸 <b>B3</b>은 고칠 수 있어요. <b>3600</b>으로 바꾸세요.',val('B3','3600',{orig:'3500'}),'잠금 해제한 칸은 그대로 입력할 수 있습니다.')],recap:['합계 오류는 참조 범위부터 본다','잠금 해제 후 보호를 켠다','보호는 실수 방지용이다']},
 A8:{topic:'월간 영업 실적 보고서',goal:'거래 내역에서 목표 대비 실적 보고서를 처음부터 끝까지 만듭니다.',why:'팀장님 요청입니다. "지점별 11월 실적을 목표와 비교해서 순위까지 정리해 주세요. 미달은 눈에 띄게, 차트도 하나요."',
 how:B('프로젝트 순서',`<ul><li>지점별 매출 집계</li><li>달성률과 판정</li><li>순위와 합계</li><li>강조와 차트</li></ul>`)+B('이번에 쓰는 기술',mini([['단계','기술','배운 곳'],['집계','SUMIFS, 절대 참조','4주차'],['판정','IF','3주차'],['강조','조건부 서식','2주차'],['시각화','세로 막대','6주차']]))+B('새 함수 RANK',`<p>${C('=RANK(I2,$I$2:$I$5)')}는 범위 안에서 몇 등인지 알려 줍니다. 범위를 고정하지 않으면 아래로 채울 때 어긋나요.</p>`),
 traps:['합계 행을 순위 범위에 넣지 마세요.','달성률의 합계는 더하지 말고 전체 매출 ÷ 전체 목표로 계산합니다.'],
@@ -2325,6 +2358,7 @@ function renderHome(toCourse){
     <div class="c-head gut"><h2>훈련 과정</h2><p>단계를 눌러 레슨을 펼치세요. 순서대로 진행하는 것을 권장하지만, 원하는 레슨부터 바로 열 수도 있습니다.</p></div>
     <div class="stages">${stages}</div>
   </section>`;
+  applyKeys(app);
   if(toCourse)document.getElementById('course').scrollIntoView();else window.scrollTo(0,0);
   document.getElementById('heroGo').onclick=()=>open(nx);document.getElementById('nextGo').onclick=()=>open(nx);
   app.querySelectorAll('.ls:not(:disabled)').forEach(b=>b.onclick=()=>open(b.dataset.id));
@@ -2346,6 +2380,7 @@ function open(id){
   app.innerHTML=`<div class="lesson">
    <article class="read">
     <div class="head"><div class="coord">${codeOf(id)}</div><div><p class="eyebrow">${les.week}주차 ${WEEKS[les.week-1][0]} · ${les.title}</p><h1>${les.topic}</h1></div></div>
+    ${/class="kk"|Ctrl/.test(les.how+les.tasks.map(t=>t.text+t.hint).join(''))?'<p class="mac-note">맥 키보드 기준으로 표시합니다. Enter는 return 키이고, 맥북의 F키는 fn과 함께 누르세요.</p>':''}
     ${secBox('1','오늘 배울 것',`<p>${les.goal}</p>`)}
     ${secBox('2','이런 상황에서 씁니다',`<p>${les.why}</p>`,'scene')}
     <section class="sec how"><header><span>3</span><h2>원리</h2></header><div class="sec-b">${rz(howBlocks(id,les.how))}</div></section>
@@ -2368,6 +2403,7 @@ function open(id){
       taskEl.innerHTML=`<div class="task donebox"><h2>오늘 레슨 완료</h2><ul>${les.recap.map(x=>`<li>${x}</li>`).join('')}</ul><div class="task-act">${nx?`<button class="btn main" id="go" type="button">다음: ${L[nx].title}</button>`:`<button class="btn main" id="go" type="button">훈련 과정으로</button>`}<button class="btn" id="again" type="button">처음부터 다시</button></div></div>`;
       document.getElementById('go').onclick=()=>nx?open(nx):renderHome(true);
       document.getElementById('again').onclick=reset;
+      applyKeys(taskEl);
       return;
     }
     const t=cur();
@@ -2378,6 +2414,7 @@ function open(id){
      ${lab.answer?`<div class="reveal">정답: <code>${rz(t.spec.ans).replace(/</g,'&lt;')}</code></div>`:''}
      <div class="task-act"><button class="btn" id="h" type="button">힌트</button><button class="btn" id="a" type="button">정답 보기</button><button class="btn" id="rs" type="button">시트 초기화</button></div></div>`;
     for(const[b,fn]of[['h',()=>{lab.hint=true;draw()}],['a',()=>{lab.answer=true;draw()}],['rs',reset]]){const n=document.getElementById(b);n.addEventListener('pointerdown',e=>e.preventDefault());n.onclick=fn}
+    applyKeys(taskEl);
   }
   function mark(){if(lab.sheet)lab.sheet.setMark(lab.finished?null:cur().spec.mark)}
   let checking=false;
@@ -2399,7 +2436,17 @@ function open(id){
   lab.sheet=createSheet(document.getElementById('sheet'),les.sheet,{change:check,msg:m=>{lab.fb=m;lab.fbOk=false;lab.stick=true;draw()}});
   mark();
   LAB.check=check;
+  applyCurrentKeys();
 }
+function applyCurrentKeys(){for(const r of LAB?[...document.querySelectorAll('.read,#task,.xbar,#rib')]:[document.getElementById('app')])applyKeys(r)}
+function setOS(o,save){
+  OS=o;document.documentElement.dataset.os=o;
+  document.querySelectorAll('#osPick button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.os===o)));
+  if(save)try{localStorage.setItem('xl8w.os',o)}catch(e){}
+  applyCurrentKeys();
+}
+document.querySelectorAll('#osPick button').forEach(b=>{b.addEventListener('pointerdown',e=>e.preventDefault());b.onclick=()=>{setOS(b.dataset.os,true);if(LAB&&LAB.sheet)LAB.sheet.focus()}});
+setOS(OS);
 document.getElementById('brand').onclick=()=>renderHome();
 document.getElementById('tohome').onclick=()=>renderHome();
 document.getElementById('tocourse').onclick=()=>renderHome(true);
