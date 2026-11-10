@@ -37,7 +37,7 @@ a{color:inherit}
 
 .top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}
 .top-in{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:12px 24px}
-.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:700;font-size:17px;letter-spacing:-.02em}
+.logo{appearance:none;border:0;background:none;padding:0;cursor:pointer;color:inherit;display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:700;font-size:17px;letter-spacing:-.02em}
 .logo i{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--bg)}
 .logo i svg{width:16px;height:16px}
 .top .lock{margin-left:auto;font-size:13px;color:var(--sub);display:flex;align-items:center;gap:7px}
@@ -65,7 +65,7 @@ main{max-width:1120px;margin:0 auto;padding:8px 24px 80px}
 .sect-head h2{margin:0;font-size:20px;letter-spacing:-.025em}
 .sect-head p{margin:0;color:var(--sub);font-size:14px}
 .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-.card{position:relative;display:flex;flex-direction:column;gap:6px;min-height:168px;padding:20px;border-radius:var(--radius);background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);text-decoration:none;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
+.card{appearance:none;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;position:relative;display:flex;flex-direction:column;gap:6px;min-height:168px;padding:20px;border-radius:var(--radius);background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);text-decoration:none;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
 .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift);border-color:color-mix(in srgb,var(--gc) 40%,var(--line))}
 .card:focus-visible{outline:2px solid var(--gc);outline-offset:2px}
 .card .ico{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:var(--gs);color:var(--gc);margin-bottom:12px}
@@ -220,7 +220,7 @@ main{max-width:1120px;margin:0 auto;padding:8px 24px 80px}
 </head>
 <body>
 <header class="top"><div class="top-in">
-  <a class="logo" href="#"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></i>PDF 작업실</a>
+  <button type="button" class="logo" data-go=""><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></i>PDF 작업실</button>
   <div class="lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>파일은 업로드되지 않고 이 브라우저 안에서만 처리돼요</span></div>
 </div></header>
 <div id="inapp" hidden></div>
@@ -1815,7 +1815,7 @@ function showHome() {
       </div>
     </section>` +
     GROUPS.map((g, gi) => `<section class="sect" style="${tint(g)}"><div class="sect-head"><span class="no">0${gi + 1}</span><h2>${g.name}</h2><p>${g.desc}</p></div><div class="grid">` +
-      g.ids.map(tool).map((t) => `<a class="card" href="#${t.id}"><div class="ico">${ICONS[t.id]}</div>${ARROW}<b>${esc(t.name)}${t.beta ? '<span class="beta">베타</span>' : ''}</b><span>${esc(t.desc)}</span></a>`).join('') +
+      g.ids.map(tool).map((t) => `<button type="button" class="card" data-go="${t.id}"><div class="ico">${ICONS[t.id]}</div>${ARROW}<b>${esc(t.name)}${t.beta ? '<span class="beta">베타</span>' : ''}</b><span>${esc(t.desc)}</span></button>`).join('') +
       `</div></section>`).join('') +
     `<div class="foot"><p><b>컴퓨터에 저장해 두고 쓰기</b><br>이 HTML 파일 하나에 모든 기능이 들어 있어요. 저장한 뒤 더블클릭하면 인터넷 없이도 열려요.</p><p><b>아이패드·아이폰에서는</b><br>Safari로 열어 주세요. 결과 파일은 '저장하기' → '파일에 저장'으로 보관할 수 있어요.</p></div>`;
   window.scrollTo(0, 0);
@@ -1825,10 +1825,11 @@ function showTool(t) {
   T = t; S = { files: [], opts: JSON.parse(JSON.stringify(t.defaults || {})) };
   document.title = t.name + ' · PDF 작업실';
   app.style.cssText = tint(groupOf(t.id));
-  app.innerHTML = `<div class="tool-head"><a class="back" href="#" title="처음으로">${IC.back}</a><div class="ico">${ICONS[t.id]}</div><div><h1>${esc(t.name)}${t.beta ? '<span class="beta">베타</span>' : ''}</h1><p>${esc(t.desc)}</p></div></div>
+  app.innerHTML = `<div class="tool-head"><button type="button" class="back" id="backBtn" title="처음으로">${IC.back}</button><div class="ico">${ICONS[t.id]}</div><div><h1>${esc(t.name)}${t.beta ? '<span class="beta">베타</span>' : ''}</h1><p>${esc(t.desc)}</p></div></div>
     <input type="file" id="fileIn" accept="${t.accept}" ${t.multiple ? 'multiple' : ''} hidden>
     <div class="drop" id="drop">${IC.up}<h2>${t.multiple ? '파일을 여기로 끌어다 놓으세요' : '파일을 여기로 끌어다 놓으세요'}</h2><p>또는</p><p style="margin-top:12px"><button class="btn primary big" id="pick">${t.multiple ? '파일 선택 (여러 개 가능)' : '파일 선택'}</button></p><p style="margin-top:14px;font-size:13px">${esc(t.accept.replace(/application\/pdf|image\/\*/g, '').split(',').filter(Boolean).join(', ') || '이미지 파일 (JPG, PNG, GIF, WEBP, BMP)')}</p></div>
     <div class="work" id="work" hidden><div id="main"></div><aside class="side"><h3>설정</h3><div id="opts" style="display:flex;flex-direction:column;gap:16px"></div><button class="btn primary big wide" id="run">${esc(t.runLabel)}</button><div id="result"></div></aside></div>`;
+  $('#backBtn').onclick = () => go('');
   $('#pick').onclick = () => $('#fileIn').click();
   $('#fileIn').onchange = (e) => { addFiles(e.target.files); e.target.value = ''; };
   $('#run').onclick = runTool;
@@ -1886,25 +1887,25 @@ async function runTool() {
   finally { idle(); btn.disabled = T && T.ready ? !T.ready() : false; }
 }
 
-function route() {
-  const id = decodeURIComponent(location.hash.slice(1));
+// Navigation works by plain clicks; the URL hash is only a bonus (it may be unavailable when the page is embedded).
+function render(id) {
   const t = TOOLS.find((x) => x.id === id);
   t ? showTool(t) : showHome();
 }
-window.addEventListener('hashchange', route);
-
-/* page-wide drag & drop */
-let dragDepth = 0;
-const hasFiles = (e) => e.dataTransfer && [...(e.dataTransfer.types || [])].includes('Files');
-window.addEventListener('dragenter', (e) => { if (!hasFiles(e)) return; dragDepth++; if (T) document.body.classList.add('dragging'); });
-window.addEventListener('dragleave', (e) => { if (!hasFiles(e)) return; dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) document.body.classList.remove('dragging'); });
-window.addEventListener('dragover', (e) => { if (hasFiles(e)) e.preventDefault(); });
-window.addEventListener('drop', (e) => {
-  if (!hasFiles(e)) return;
-  e.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging');
-  if (T) addFiles(e.dataTransfer.files);
-  else toast('먼저 사용할 도구를 골라 주세요.');
+function go(id) {
+  render(id);
+  try { history.pushState({ id }, '', id ? '#' + id : location.pathname + location.search); } catch (e) { /* embedded: no history */ }
+}
+function route() { let h = ''; try { h = decodeURIComponent(location.hash.slice(1)); } catch (e) { /* ignore */ } render(h); }
+window.addEventListener('popstate', route);
+document.addEventListener('click', (e) => {
+  const el = e.target.closest && e.target.closest('[data-go]');
+  if (!el) return;
+  e.preventDefault();
+  go(el.dataset.go);
 });
+window.addEventListener('error', (e) => { if (e && e.message) toast('오류가 났어요: ' + e.message, 8000); });
+window.addEventListener('unhandledrejection', (e) => { const m = e && e.reason && (e.reason.message || String(e.reason)); if (m) toast('오류가 났어요: ' + m, 8000); });
 
 if (IN_APP) {
   const b = $('#inapp'); b.hidden = false;
