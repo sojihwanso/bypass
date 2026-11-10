@@ -1,9 +1,9 @@
 /* BYPASS 회원 메뉴 (고정)
-   로그인한 회원이 준공 현황·처리 현황 같은 공개 페이지에 와도, 커뮤니티와 같은 메뉴를 화면 위에 붙여 둔다.
+   로그인한 회원이 처리 현황 같은 공개 페이지에 와도, 커뮤니티와 같은 메뉴를 화면 위에 붙여 둔다.
    - 로그인하지 않았으면 아무것도 하지 않는다 (공개 페이지 그대로)
    - Supabase 라이브러리를 불러오지 않고 브라우저에 저장된 로그인 기록만 읽는다 (표시용. 권한은 서버가 따로 확인)
    - 페이지의 다른 sticky 요소(예: .finder)는 메뉴 높이만큼 아래에 붙도록 --mnav-h 를 쓴다
-   쓰는 법: <script src="/assets/member-nav.js" data-current="routes" defer></script> */
+   쓰는 법: <script src="/assets/member-nav.js" data-current="dockets" defer></script> */
 (function () {
   let s = null;
   try { s = JSON.parse(localStorage.getItem('sb-itzdjdgjqcpmxdfssfel-auth-token') || 'null'); } catch (e) { return; }
@@ -37,7 +37,7 @@
   const tabs = [
     ['home', '/community/', '홈'], ['showcase', '/community/#showcase', '결과물'], ['board', '/community/#board', '게시판'],
     crew ? ['meeting', '/community/#meeting', '회의실'] : null, ['me', '/community/#me', '내 정보'],
-    'sep', ['routes', '/routes/', '준공 현황'], ['dockets', '/dockets/', '처리 현황'],
+    'sep', ['dockets', '/dockets/', '처리 현황'],
   ].filter(Boolean);
   const nav = document.createElement('nav');
   nav.className = 'mnav'; nav.setAttribute('aria-label', '회원 메뉴');

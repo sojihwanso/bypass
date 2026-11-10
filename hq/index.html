@@ -511,9 +511,13 @@
           <div>
             <a class="view-back" href="#g-content">‹ 콘텐츠</a>
             <p class="view-kicker">콘텐츠</p>
-            <h1 tabindex="-1">준공 현황</h1>
+            <h1 tabindex="-1">준공 현황 <small style="font-size:.55em;font-weight:600;opacity:.6">보관</small></h1>
           </div>
-          <a class="mini-btn" href="/routes/" target="_blank" rel="noopener">준공 현황 열기 ↗</a>
+          <a class="mini-btn" href="/archive/routes/" target="_blank" rel="noopener">보관 페이지 열기 ↗</a>
+        </div>
+        <div class="banner banner-warn" role="note">
+          <p><b>준공 현황은 커뮤니티 ‘결과물’로 옮겼습니다 (2026. 11. 10.).</b> 여기 목록은 보관용이라 고쳐도 <code>/archive/routes/</code> 보관 페이지에만 보입니다. 새 앱·위키는 커뮤니티에서 올리세요. 운영진이 종류를 ‘위키’로 고르고 HTML 파일을 올리면 예전처럼 <code>/wiki/이름/</code> 에 올라갑니다.</p>
+          <a class="btn btn-primary btn-small" href="/community/#write/showcase" target="_blank" rel="noopener">커뮤니티에서 결과물 올리기 ↗</a>
         </div>
         <div class="subtabs" role="tablist" aria-label="준공 현황">
           <button type="button" class="subtab" role="tab" id="tab-routes" aria-controls="pane-routes" aria-selected="true" data-subtab="routes">지름길</button>
@@ -522,13 +526,13 @@
 
         <div id="pane-routes" role="tabpanel" aria-labelledby="tab-routes" data-pane="routes">
           <div class="toolbar">
-            <button type="button" class="btn btn-primary btn-small" data-new-route>+ 지름길 추가</button>
-            <button type="button" class="btn btn-secondary btn-small" data-new-wiki>위키 올리기</button>
+            <button type="button" class="btn btn-secondary btn-small" data-new-route hidden>+ 지름길 추가</button>
+            <button type="button" class="btn btn-secondary btn-small" data-new-wiki hidden>위키 올리기</button>
             <label class="sr-only" for="route-find">지름길 찾기</label>
             <input class="input" id="route-find" type="search" placeholder="이름·과목·주소로 찾기" autocomplete="off">
           </div>
           <div data-route-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
-          <p class="list-hint">왼쪽 손잡이를 끌거나, 손잡이를 고른 뒤 ↑↓ 키로 순서를 바꿉니다. 순서는 바로 저장되고 준공 현황에도 그대로 보입니다.</p>
+          <p class="list-hint">왼쪽 손잡이를 끌거나, 손잡이를 고른 뒤 ↑↓ 키로 순서를 바꿉니다. 순서는 바로 저장되고 보관 페이지에 그대로 보입니다.</p>
         </div>
 
         <div id="pane-lines" role="tabpanel" aria-labelledby="tab-lines" data-pane="lines" hidden>
@@ -1321,7 +1325,7 @@
     { id: 'reports', group: 'inbox', name: '불편 제보', ready: true },
     { id: 'applications', group: 'inbox', name: '합류 신청', ready: true },
     { id: 'dockets', group: 'content', name: '처리 현황', ready: true },
-    { id: 'routes', group: 'content', name: '준공 현황', ready: true },
+    { id: 'routes', group: 'content', name: '준공 현황 (보관)', ready: true },
     { id: 'notices', group: 'content', name: '공지', ready: true },
     { id: 'faq', group: 'content', name: '자주 묻는 질문', ready: true },
     { id: 'texts', group: 'content', name: '페이지 문구', ready: true },
@@ -1359,7 +1363,8 @@
   let wantWiki = false;       // 예전 주소 #wiki: 준공 현황에서 위키 올리기 서랍을 연다
   function route() {
     let h = decodeURIComponent(location.hash.slice(1));
-    if (h === 'wiki') { history.replaceState(null, '', '#routes'); h = 'routes'; if (firstRoute) wantWiki = true; else setTimeout(openWikiForm); }
+    // 예전 주소 #wiki: 위키는 이제 커뮤니티에서 올린다
+    if (h === 'wiki') { location.replace('/community/#write/showcase'); return; }
     if (h.startsWith('g-') && groupName[h.slice(2)]) {
       const g = h.slice(2);
       $('[data-group-title]').textContent = groupName[g];
@@ -2665,7 +2670,6 @@
      지금 값은 페이지를 직접 읽어 오고, 저장은 Edge Function publish-meta 가 GitHub 의 HTML 을 고친다. */
   const SHARE_PAGES = [
     { path: '/', name: '메인', slug: 'home' },
-    { path: '/routes/', name: '준공 현황', slug: 'routes' },
     { path: '/dockets/', name: '처리 현황 전체 보기', slug: 'dockets' },
     { path: '/tools/alfa-to-zulu/', name: 'Alfa to Zulu', slug: 'alfa-to-zulu' }
   ];
@@ -3260,7 +3264,7 @@
   /* ===== 통계 ===== (016: hq_stats_daily · hq_stats_pages · hq_stats_routes) */
   let stDays = 30, stSeq = 0, stLoaded = false;
   const C_VIEW = '#0F5A3A', C_GO = '#C2541A';   // 녹색 = 방문, 짙은 주황 = 이용하기 (흰 바탕 대비 확보)
-  const PAGE_NAMES = { '/': '메인', '/routes/': '준공 현황', '/dockets/': '처리 현황 전체 보기', '/tools/alfa-to-zulu/': 'Alfa to Zulu', '/login/': '로그인', '/join/': '회원가입', '/site/': '공사장(예전)', '/community/': '커뮤니티' };
+  const PAGE_NAMES = { '/': '메인', '/routes/': '준공 현황', '/archive/routes/': '준공 현황 (보관)', '/dockets/': '처리 현황 전체 보기', '/tools/alfa-to-zulu/': 'Alfa to Zulu', '/login/': '로그인', '/join/': '회원가입', '/site/': '공사장(예전)', '/community/': '커뮤니티' };
   const pageName = path => PAGE_NAMES[path] || (routes.find(r => r.url === path) || {}).title || path;
   const fmtN = n => Number(n || 0).toLocaleString('ko-KR');
   const md = d => `${d.getMonth() + 1}. ${d.getDate()}.`;
