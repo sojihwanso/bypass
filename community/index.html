@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <script>
   /* 로그인 기록이 없으면 그리기 전에 로그인으로 */
-  try { const s = JSON.parse(localStorage.getItem('sb-itzdjdgjqcpmxdfssfel-auth-token') || 'null'); if (!s || !s.refresh_token) location.replace('/login/?next=' + encodeURIComponent('/community/' + location.hash)); } catch (e) { /* 저장소를 못 쓰면 아래에서 다시 확인 */ }
+  try { const s = JSON.parse(localStorage.getItem('sb-itzdjdgjqcpmxdfssfel-auth-token') || 'null'); if (!s || !s.refresh_token) location.replace('/login/?next=' + encodeURIComponent('/community/' + location.search + location.hash)); } catch (e) { /* 저장소를 못 쓰면 아래에서 다시 확인 */ }
 </script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <!-- Pretendard (SIL OFL): 화면에 쓰인 글자만 받아 오는 가변 글꼴 -->
@@ -745,13 +745,13 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     </div>
     <div class="field" data-w-html hidden>
       <label for="w-slug">주소 이름 <small>(영문 소문자·숫자·하이픈 2~49자)</small></label>
-      <div class="slug-row"><span class="pre">/apps/</span><input class="in" id="w-slug" maxlength="49" autocapitalize="none" spellcheck="false" placeholder="예: exam-planner"><span class="pre">/</span></div>
+      <div class="slug-row"><span class="pre" data-w-slug-pre>/apps/</span><input class="in" id="w-slug" maxlength="49" autocapitalize="none" spellcheck="false" placeholder="예: exam-planner"><span class="pre">/</span></div>
       <label class="drop" for="w-file" data-w-drop>
         <span class="ico" aria-hidden="true">&lt;/&gt;</span>
         <span><b data-w-file-name>HTML 파일을 끌어다 놓거나 눌러서 고르기</b><small>그림·스크립트를 한 파일에 담은 .html · 5MB 이하</small></span>
       </label>
       <input class="sr" id="w-file" type="file" accept=".html,.htm,text/html">
-      <p class="hint">올리면 1~몇 분 뒤 teambypass.vercel.app/apps/주소이름/ 에서 열립니다. 내가 올린 페이지는 같은 주소로 다시 올려 고칠 수 있고, 남의 주소는 쓸 수 없습니다. 보안상 올린 페이지는 사이트 로그인 정보와 브라우저 저장소를 쓸 수 없습니다.</p>
+      <p class="hint">올리면 1~몇 분 뒤 teambypass.vercel.app<span data-w-slug-pre2>/apps/</span>주소이름/ 에서 열립니다. 내가 올린 페이지는 같은 주소로 다시 올려 고칠 수 있고, 남의 주소는 쓸 수 없습니다. 보안상 올린 페이지는 사이트 로그인 정보와 브라우저 저장소를 쓸 수 없습니다.</p>
     </div>
     <div class="field" data-w-thumb-field hidden>
       <span class="lbl">썸네일 <small style="font-weight: 400; color: var(--sub)">(선택)</small></span>
@@ -794,7 +794,6 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
 <footer>
   <div class="wrap">
     <nav class="foot-links" aria-label="그 밖의 페이지">
-      <a href="/routes/">준공 현황</a>
       <a href="/dockets/">처리 현황</a>
       <a href="/?report=1&amp;intro">불편 제보</a>
       <a href="/?join=1&amp;intro" data-joinus hidden>국원 합류 신청</a>
@@ -815,7 +814,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   const $ = (s, r) => (r || document).querySelector(s);
   const $$ = (s, r) => [...(r || document).querySelectorAll(s)];
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
-  const toLogin = () => location.replace('/login/?next=' + encodeURIComponent('/community/' + location.hash));
+  const toLogin = () => location.replace('/login/?next=' + encodeURIComponent('/community/' + location.search + location.hash));
   function setup(text) { const s = $('[data-setup]'); s.textContent = text; s.hidden = false; }
 
   if (!B || !B.sb) { setup(B ? B.unavailableText : '회원 기능을 불러오지 못했습니다. 새로고침해 주세요.'); return; }
@@ -1217,7 +1216,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   /* ===== 쓰기 · 고치기 ===== */
   const wForm = $('[data-write-form]');
   const SLUG_RULE = /^[a-z0-9][a-z0-9-]{1,48}$/, HTML_MAX = 5_000_000, IMG_MAX = 2_097_152;
-  let wKind = 'showcase', wCat = '앱', wBusy = false, wEdit = null, wSrc = 'link', wHtml = null, wOwnSlug = null;
+  let wKind = 'showcase', wCat = '앱', wBusy = false, wEdit = null, wSrc = 'link', wHtml = null, wOwnSlug = null, wOwnFolder = null;
   let wThumb = { url: null, blob: null, preview: null, type: null };
   let wDirty = false, wHash = '';
   function setThumbPreview() {
@@ -1238,8 +1237,12 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     wSwitching = true;
     location.replace(k === 'showcase' ? '#write/showcase' : '#write/board');
   }));
+  // 올릴 폴더: 회원은 /apps/, 운영진이 '위키'로 올리면 /wiki/ (예전 HQ › 위키 올리기를 여기로 옮김)
+  const upFolder = () => (isStaff && wKind === 'showcase' && wCat === '위키' ? 'wiki' : 'apps');
   function syncSrc() {
     const s = wKind === 'showcase';
+    const fd = wOwnFolder || upFolder();
+    $('[data-w-slug-pre]').textContent = `/${fd}/`; $('[data-w-slug-pre2]').textContent = `/${fd}/`;
     $$('[data-src]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.src === wSrc)));
     $('[data-w-src-field]').hidden = !s;
     $('[data-src="html"]').disabled = !canUp();
@@ -1276,9 +1279,11 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     wCat = post ? post.category : f.cat !== '전체' ? f.cat : wKind === 'showcase' ? '앱' : '질문';
     wForm.reset(); $('[data-w-err]').hidden = true; $$('[aria-invalid]', wForm).forEach((x) => x.removeAttribute('aria-invalid'));
     const s = wKind === 'showcase';
-    // 내가 올린 /apps/ 페이지면 같은 주소로 다시 올려 고칠 수 있다
-    const own = post && post.url && post.url.match(/^\/apps\/([a-z0-9][a-z0-9-]{1,48})\/?$/);
-    wOwnSlug = own ? own[1] : null;
+    // 내가 올린 /apps/ 페이지(운영진은 /wiki/ 도)면 같은 주소로 다시 올려 고칠 수 있다
+    const own = post && post.url && post.url.match(/^\/(apps|wiki)\/([a-z0-9][a-z0-9-]{1,48})\/?$/);
+    const ownOk = own && (own[1] === 'apps' || isStaff);
+    wOwnSlug = ownOk ? own[2] : null;
+    wOwnFolder = ownOk ? own[1] : null;
     wSrc = 'link'; wHtml = null;
     $('[data-w-file-name]').textContent = 'HTML 파일을 끌어다 놓거나 눌러서 고르기';
     $('#w-slug').value = wOwnSlug || '';
@@ -1345,14 +1350,14 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     const list = wKind === 'showcase' ? SHOW_KINDS : POST_CATS;
     $('[data-w-cats]').replaceChildren(...list.map((c) => {
       const b = el('button', null, c); b.type = 'button'; b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(c === wCat));
-      b.addEventListener('click', () => { if (wCat !== c) wDirty = true; wCat = c; paintCats(); paintPreview(); });
+      b.addEventListener('click', () => { if (wCat !== c) wDirty = true; wCat = c; paintCats(); paintPreview(); syncSrc(); });
       return b;
     }));
   }
   $$('[data-src]').forEach((b) => b.addEventListener('click', () => {
     if (b.disabled) return;
     wSrc = b.dataset.src;
-    if (wSrc === 'html' && !$('#w-slug').value) { const m = $('#w-url').value.trim().match(/^\/apps\/([a-z0-9-]+)\/?$/); if (m) $('#w-slug').value = m[1]; }
+    if (wSrc === 'html' && !$('#w-slug').value) { const m = $('#w-url').value.trim().match(/^\/(?:apps|wiki)\/([a-z0-9-]+)\/?$/); if (m) $('#w-slug').value = m[1]; }
     syncSrc();
   }));
   $$('[data-write]').forEach((b) => b.addEventListener('click', () => { location.hash = b.dataset.write === 'showcase' ? '#write/showcase' : '#write/board'; }));
@@ -1411,8 +1416,8 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   $('[data-w-thumb-clear]').addEventListener('click', () => { if (wThumb.preview) URL.revokeObjectURL(wThumb.preview); wThumb = { url: null, blob: null, preview: null, type: null }; wDirty = true; setThumbPreview(); });
   const myThumbPath = (u) => { const m = String(u || '').match(/\/post-thumbs\/(.+)$/); return m && m[1].startsWith(user.id + '/') ? m[1] : null; };
 
-  async function publishHtml(slug, title) {
-    const { data, error } = await sb.functions.invoke('publish-wiki', { body: { slug, folder: 'apps', title, html: wHtml } });
+  async function publishHtml(slug, title, folder) {
+    const { data, error } = await sb.functions.invoke('publish-wiki', { body: { slug, folder, title, html: wHtml } });
     if (!error) return data;
     let text = 'HTML 파일을 올리지 못했습니다. 잠시 후 다시 해 주세요.';
     try { const j = await error.context.json(); if (j && j.error) text = j.error; } catch (x) { if (error.context && error.context.status === 404) text = '파일 올리기 설정이 아직 끝나지 않았습니다. (publish-wiki 함수)'; }
@@ -1430,14 +1435,14 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       slug = $('#w-slug').value.trim().toLowerCase();
       if (!SLUG_RULE.test(slug)) return wFail('주소 이름은 영문 소문자·숫자·하이픈(-)으로 2~49자로 정해 주세요. 예: exam-planner', 'w-slug');
       if (!wHtml) { if (wOwnSlug && slug === wOwnSlug) slug = null; else return wFail('올릴 HTML 파일을 골라 주세요.'); }
-      url = `/apps/${slug || wOwnSlug}/`;
+      url = `/${wOwnFolder || upFolder()}/${slug || wOwnSlug}/`;
     } else if (s) {
       if (!url) return wFail('결과물을 열어 볼 주소를 넣거나, HTML 파일을 올려 주세요.', 'w-url');
       if (!/^https:\/\/[^\s<>"]+$/i.test(url) && !/^\/[A-Za-z0-9/_.~%-]*$/.test(url)) return wFail('주소는 https:// 로 시작하거나 /apps/이름/ 처럼 사이트 안의 주소여야 합니다.', 'w-url');
     } else if (!body) return wFail('내용을 넣어 주세요.', 'w-b');
     wBusy = true; const go = $('[data-w-go]'); B.setBusy(go, true, slug ? '올리는 중…' : '저장하는 중…');
     try {
-      if (slug) await publishHtml(slug, title);
+      if (slug) await publishHtml(slug, title, wOwnFolder || upFolder());
       let thumbUrl = wThumb.url;
       if (wThumb.blob) {
         const path = `${user.id}/${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.${wThumb.ext}`;
@@ -1846,9 +1851,13 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     $('[data-welcome-close]').addEventListener('click', () => { $('[data-welcome]').hidden = true; });
     history.replaceState(null, '', location.pathname + location.hash);
   }
+  // 예전 준공 현황 주소(/routes/?q=…)로 들어오면 그 말로 바로 찾는다
+  const q0 = (params.get('q') || '').slice(0, 60);
+  if (q0) { history.replaceState(null, '', location.pathname + '#search'); $('#q-top').value = q0; }
 
   /* ===== 시작 ===== */
   route(true);
+  if (q0) runSearch(q0);
   await Promise.all([loadHome(), loadNotices(), loadCrewCount(), loadUpload()]);
 })();
 </script>
