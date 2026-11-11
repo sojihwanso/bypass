@@ -74,6 +74,18 @@ main{max-width:1120px;margin:0 auto;padding:8px 24px 80px}
 .card .go{position:absolute;top:20px;right:18px;width:18px;height:18px;color:var(--faint);opacity:0;transform:translateX(-4px);transition:all .16s}
 .card:hover .go{opacity:1;transform:none;color:var(--gc)}
 .beta{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;padding:1px 6px;border-radius:6px;background:var(--warn-soft);color:var(--warn);vertical-align:2px;letter-spacing:0}
+.strip{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px}
+.strip-t{flex-basis:100%;font-size:13px;color:var(--sub)}
+.strip-t b{color:var(--ink)}
+.chip{display:inline-flex;align-items:center;gap:4px;max-width:260px;padding:6px 6px 6px 12px;border-radius:99px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-size:13px;font-weight:600;color:var(--ink)}
+.chip>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip.on{border-color:var(--gc,var(--acc));background:var(--gs,var(--acc-soft));color:var(--gc,var(--acc))}
+.chip .x{display:grid;place-items:center;width:22px;height:22px;border:0;border-radius:50%;background:transparent;color:inherit;cursor:pointer;opacity:.6}
+.chip .x:hover{opacity:1;background:var(--soft)}
+.chip .x svg{width:12px;height:12px}
+.chip.add{padding:6px 14px;border-style:dashed;color:var(--sub)}
+.chip.add:hover{color:var(--gc,var(--acc));border-color:var(--gc,var(--acc))}
+.chip:focus-visible{outline:2px solid var(--gc,var(--acc));outline-offset:2px}
 .xwrap{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:auto;max-height:68vh}
 .xtable{border-collapse:collapse;font-size:13px;min-width:100%}
 .xtable th,.xtable td{border:1px solid var(--line);padding:5px 9px;white-space:nowrap;text-align:left}
@@ -1135,7 +1147,10 @@ const IC = {
 
 /* ---------- busy / toast ---------- */
 const busyEl = $('#busy'), busyMsg = $('#busyMsg'), busyBar = $('#busyBar');
-function busy(msg, pct) { busyEl.hidden = false; busyMsg.textContent = msg; busyBar.parentElement.hidden = pct == null; if (pct != null) busyBar.style.width = Math.round(pct * 100) + '%'; }
+let BATCH = '';
+let COLLECT = null; // batch mode: outputs are gathered here instead of downloaded one by one
+const CUR = () => (S && (S.files[S.cur] || S.files[0]));
+function busy(msg, pct) { busyEl.hidden = false; busyMsg.textContent = BATCH + msg; busyBar.parentElement.hidden = pct == null; if (pct != null) busyBar.style.width = Math.round(pct * 100) + '%'; }
 function idle() { busyEl.hidden = true; }
 let toastT;
 function toast(msg, ms = 4200) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms); }
@@ -1204,7 +1219,7 @@ async function blobBytes(b) { return new Uint8Array(await b.arrayBuffer()); }
 
 /* ---------- download ---------- */
 function makeBlob(bytes, name) {
-  const t = /\.xlsx$/i.test(name) ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : /\.txt$/i.test(name) ? 'text/plain;charset=utf-8' : /\.zip$/i.test(name) ? 'application/zip' : /\.png$/i.test(name) ? 'image/png' : /\.jpe?g$/i.test(name) ? 'image/jpeg' : 'application/pdf';
+  const t = /\.csv$/i.test(name) ? 'text/csv;charset=utf-8' : /\.xlsx$/i.test(name) ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : /\.txt$/i.test(name) ? 'text/plain;charset=utf-8' : /\.zip$/i.test(name) ? 'application/zip' : /\.png$/i.test(name) ? 'image/png' : /\.jpe?g$/i.test(name) ? 'image/jpeg' : 'application/pdf';
   return bytes instanceof Blob ? bytes : new Blob([bytes], { type: t });
 }
 const UA = navigator.userAgent || '';
@@ -1237,6 +1252,7 @@ async function saveFile(blob, name) {
 
 let lastBlob = null;
 function deliver(bytes, name, extra) {
+  if (COLLECT) { COLLECT.list.push({ name, bytes: bytes instanceof Blob ? bytes : bytes }); if (extra) COLLECT.notes.push(extra); return; }
   const blob = lastBlob = makeBlob(bytes, name);
   const box = $('#result');
   const iosNote = IS_IOS && !hostDl ? `<div class="hint" style="font-size:12px;color:var(--sub)">아이패드·아이폰: 버튼을 누르면 공유 창이 떠요. <b>'파일에 저장'</b>을 고르세요.</div>` : '';
@@ -1254,6 +1270,7 @@ function deliver(bytes, name, extra) {
   if (!IS_IOS && !hostDl) saveFile(blob, name);
 }
 async function deliverMany(outputs, zipName, extra) { // outputs: [{name, bytes}]
+  if (COLLECT) { const folder = outputs.length > 1 ? baseName(COLLECT.file) + '/' : ''; outputs.forEach((o) => COLLECT.list.push({ name: folder + o.name, bytes: o.bytes })); if (extra) COLLECT.notes.push(extra); return; }
   if (outputs.length === 1) return deliver(outputs[0].bytes, outputs[0].name, extra);
   busy('ZIP 파일로 묶는 중…');
   const JSZip = await loadLib('jszip');
@@ -1411,7 +1428,7 @@ async function preparePdf(item) {
   item.pages = item.doc.numPages;
 }
 function singleCard(item, label) {
-  return `<div class="single"><div class="ic">${label || 'PDF'}</div><div class="nm"><b>${esc(item.name)}</b><span>${fmtSize(item.size)}${item.pages ? ` · ${item.pages}페이지` : ''}</span></div><button class="btn" id="swap">다른 파일</button></div>`;
+  return `<div class="single"><div class="ic">${label || 'PDF'}</div><div class="nm"><b>${esc(item.name)}</b><span>${fmtSize(item.size)}${item.pages ? ` · ${item.pages}페이지` : ''}</span></div>${T && T.batch ? '' : '<button class="btn" id="swap">다른 파일</button>'}</div>`;
 }
 function wireSwap() { const b = $('#swap'); if (b) b.onclick = () => $('#fileIn').click(); }
 
@@ -1458,15 +1475,16 @@ const ICONS = {
   pdf2img: SV(DOC + '<circle cx="10" cy="12" r="1.3"/><path d="M17 17.5l-3.5-3.5-5.5 5.5"/>'),
   pdf2txt: SV(DOC + '<path d="M8.5 12h7M8.5 15h7M8.5 18h4"/>'),
   pdf2excel: SV('<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M3 14.8h18M9 4v16"/>'),
+  pdf2csv: SV(DOC + '<text x="12" y="17.2" font-size="5.6" text-anchor="middle" fill="currentColor" stroke="none" font-weight="800" font-family="system-ui,sans-serif">CSV</text>'),
   pdf2photos: SV('<rect x="6" y="3" width="15" height="13" rx="2"/><path d="M3 7.5V19a2 2 0 0 0 2 2h11.5"/><circle cx="11" cy="8" r="1.6"/><path d="M21 13l-4-4-7 7"/>'),
   nup: SV('<rect x="4" y="2.5" width="16" height="19" rx="2"/><rect x="7" y="5.5" width="4.5" height="6" rx=".8"/><rect x="12.5" y="5.5" width="4.5" height="6" rx=".8"/><rect x="7" y="12.5" width="4.5" height="6" rx=".8"/><rect x="12.5" y="12.5" width="4.5" height="6" rx=".8"/>'),
   resize: SV('<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M14 3v4M3 14h4"/><path d="M10 14l7-7M12.5 7H17v4.5"/>'),
 };
 const GROUPS = [
   { name: 'PDF로 만들기', desc: '사진과 문서를 PDF 한 파일로', c: 'g1', ids: ['img2pdf', 'word2pdf', 'ppt2pdf', 'hwp2pdf'] },
+  { name: 'PDF에서 꺼내기', desc: '표·글자·그림을 다른 형식으로', c: 'g4', ids: ['pdf2excel', 'pdf2csv', 'pdf2txt', 'pdf2img', 'pdf2photos'] },
   { name: 'PDF 정리하기', desc: '합치고, 나누고, 다듬고, 줄이기', c: 'g2', ids: ['merge', 'split', 'organize', 'compress'] },
   { name: 'PDF 편집하기', desc: '표시를 더하고 인쇄 모양 바꾸기', c: 'g3', ids: ['watermark', 'pagenum', 'nup', 'resize'] },
-  { name: 'PDF에서 꺼내기', desc: '표·글자·그림을 다른 형식으로', c: 'g4', ids: ['pdf2excel', 'pdf2txt', 'pdf2img', 'pdf2photos'] },
 ];
 const groupOf = (id) => GROUPS.find((g) => g.ids.includes(id));
 const tint = (g) => `--gc:var(--${g.c});--gs:var(--${g.c}-soft)`;
@@ -1513,7 +1531,7 @@ const TOOLS = [
     if (S.opts.combine) {
       busy('PDF 만드는 중…');
       const out = await Core.imagesToPdf(PDFLib, items, o);
-      deliver(out, (S.files.length === 1 ? baseName(S.files[0].name) : 'images') + '.pdf', `${items.length}페이지`);
+      deliver(out, (S.files.length === 1 ? baseName(CUR().name) : 'images') + '.pdf', `${items.length}페이지`);
     } else {
       const outs = [];
       for (let i = 0; i < items.length; i++) { busy(`PDF 만드는 중… (${i + 1}/${items.length})`, i / items.length); outs.push({ name: baseName(S.files[i].name) + '.pdf', bytes: await Core.imagesToPdf(PDFLib, [items[i]], o) }); }
@@ -1532,7 +1550,7 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', /\.hwpx?$/
   defaults: { fmt: 'jpg', dpi: 150, range: '' },
   prepare: preparePdf,
   renderMain() {
-    const it = S.files[0];
+    const it = CUR();
     $('#main').innerHTML = singleCard(it) + '<div class="files" id="grid"></div>';
     wireSwap();
     pageGrid($('#grid'), it, { order: Array.from({ length: it.pages }, (_, i) => ({ src: i, rot: 0 })) });
@@ -1546,7 +1564,7 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', /\.hwpx?$/
   },
   runLabel: '이미지로 변환',
   async run() {
-    const it = S.files[0];
+    const it = CUR();
     const idx = S.opts.range.trim() ? Core.parseRanges(S.opts.range, it.pages).flatMap(Core.rangeIdx) : Array.from({ length: it.pages }, (_, i) => i);
     const outs = [], ext = S.opts.fmt, pad = String(it.pages).length;
     for (let k = 0; k < idx.length; k++) {
@@ -1590,7 +1608,7 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', /\.hwpx?$/
   },
   async renderMain() {
     const m = $('#main');
-    const it = S.files[0];
+    const it = CUR();
     m.innerHTML = (S.files.length > 1
       ? `<div class="mainbar"><span class="count">PDF ${S.files.length}개 · 각각 .txt로 만들어 ZIP으로 드려요 (미리보기는 첫 파일)</span><button class="btn" id="addMore">+ PDF 추가</button></div>`
       : singleCard(it) + `<div class="mainbar"><span class="count">미리보기 · 첫 3페이지</span><button class="btn" id="addMore">+ PDF 추가</button><button class="btn" id="copyAll">전체 복사</button></div>`) +
@@ -1648,7 +1666,7 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', /\.hwpx?$/
     return (it.rowCache[n] = Core.tableFromItems(items));
   },
   async renderMain() {
-    const it = S.files[0];
+    const it = CUR();
     const n = Math.min(Math.max(1, S.opts.pv), it.pages);
     $('#main').innerHTML = singleCard(it) + `<div class="mainbar"><span class="count">미리보기 · 엑셀에 이렇게 들어가요</span>${it.pages > 1 ? `<button class="btn" id="pvPrev">${IC.left}</button><span style="font-size:14px;font-weight:600;min-width:72px;text-align:center">${n} / ${it.pages}쪽</span><button class="btn" id="pvNext">${IC.right}</button>` : ''}</div><div class="xwrap" id="xwrap"><div class="spinner" style="margin:40px auto"></div></div>`;
     wireSwap();
@@ -1671,7 +1689,7 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', /\.hwpx?$/
   },
   runLabel: '엑셀로 변환',
   async run() {
-    const it = S.files[0];
+    const it = CUR();
     const idx = S.opts.range.trim() ? Core.parseRanges(S.opts.range, it.pages).flatMap(Core.rangeIdx) : Array.from({ length: it.pages }, (_, i) => i);
     const per = [];
     for (let k = 0; k < idx.length; k++) { busy(`표 읽는 중… (${k + 1}/${idx.length})`, k / idx.length); per.push({ n: idx[k] + 1, rows: await this.rows(it, idx[k] + 1) }); }
@@ -1711,7 +1729,7 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', /\.hwpx?$/
     return { name: `${base}_사진${pad}.png`, bytes };
   },
   renderMain() {
-    const it = S.files[0];
+    const it = CUR();
     $('#main').innerHTML = singleCard(it) + `<div class="mainbar"><span class="count">사진 ${it.imgs.length}장 찾음${it.skipped ? ` · 특수 형식 ${it.skipped}장은 건너뜀` : ''}</span></div><div class="files" id="list"></div>`;
     wireSwap();
     const list = $('#list');
@@ -1732,13 +1750,14 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', /\.hwpx?$/
     });
   },
   renderOpts() {
-    optsForm($('#opts'), [{ type: 'note', html: () => S.files[0].imgs.length ? 'PDF 안에 들어 있는 사진을 <b>다시 압축하지 않고</b> 그대로 꺼내요. 아주 작은 아이콘은 빼요.<br><br>여러 장이면 ZIP으로 묶어 드려요.' : '꺼낼 사진이 없어요.' }]);
+    optsForm($('#opts'), [{ type: 'note', html: () => CUR().imgs.length ? 'PDF 안에 들어 있는 사진을 <b>다시 압축하지 않고</b> 그대로 꺼내요. 아주 작은 아이콘은 빼요.<br><br>여러 장이면 ZIP으로 묶어 드려요.' : '꺼낼 사진이 없어요.' }]);
     const b = $('#run'); if (b) b.disabled = !this.ready();
   },
-  ready() { return S.files[0] && S.files[0].imgs.length > 0; },
+  ready() { return S.files.some((f) => f.imgs && f.imgs.length > 0); },
   runLabel: '사진 저장',
   async run() {
-    const it = S.files[0], base = baseName(it.name), outs = [];
+    const it = CUR(), base = baseName(it.name), outs = [];
+    if (!it.imgs.length) throw new Error('사진이 없어요');
     for (let i = 0; i < it.imgs.length; i++) { busy(`사진 꺼내는 중… (${i + 1}/${it.imgs.length})`, i / it.imgs.length); outs.push(await this.toFile(it.imgs[i], i, base)); }
     await deliverMany(outs, `${base}_사진.zip`);
   },
@@ -1787,7 +1806,7 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', /\.hwpx?$/
   defaults: { mode: 'extract', ranges: '', pick: '', every: 1 },
   prepare: preparePdf,
   renderMain() {
-    const it = S.files[0];
+    const it = CUR();
     const sel = this.selected();
     $('#main').innerHTML = singleCard(it) + `<div class="mainbar"><span class="count">페이지를 눌러 선택하면 '선택한 페이지 추출'에 반영돼요</span></div><div class="files" id="grid"></div>`;
     wireSwap();
@@ -1800,9 +1819,9 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', /\.hwpx?$/
       },
     });
   },
-  selected() { try { return new Set(Core.parseRanges(S.opts.pick, S.files[0].pages).flatMap(Core.rangeIdx).map((i) => i + 1)); } catch (e) { return new Set(); } },
+  selected() { try { return new Set(Core.parseRanges(S.opts.pick, CUR().pages).flatMap(Core.rangeIdx).map((i) => i + 1)); } catch (e) { return new Set(); } },
   renderOpts() {
-    const n = S.files[0].pages;
+    const n = CUR().pages;
     optsForm($('#opts'), [
       { key: 'mode', type: 'seg', label: '나누는 방법', options: [['extract', '선택한 페이지 추출'], ['ranges', '범위별로 나누기'], ['every', '일정 간격으로']], onchange: () => this.renderMain() },
       { key: 'pick', type: 'text', label: '추출할 페이지', placeholder: '예: 1-3, 5, 8-', hint: `골라낸 페이지를 PDF 하나로 만들어요 (전체 ${n}페이지)`, show: () => S.opts.mode === 'extract', onchange: () => this.renderMainSoon() },
@@ -1813,7 +1832,7 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', /\.hwpx?$/
   renderMainSoon() { clearTimeout(this._t); this._t = setTimeout(() => this.renderMain(), 350); },
   runLabel: 'PDF 분할',
   async run() {
-    const it = S.files[0], n = it.pages, base = baseName(it.name);
+    const it = CUR(), n = it.pages, base = baseName(it.name);
     const PDFLib = await loadLib('pdflib');
     busy('PDF 읽는 중…');
     const src = await Core.loadPdf(PDFLib, it.bytes);
@@ -1841,7 +1860,7 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', /\.hwpx?$/
   defaults: {},
   async prepare(item) { await preparePdf(item); item.order = Array.from({ length: item.pages }, (_, i) => ({ src: i, rot: 0, del: false })); },
   renderMain() {
-    const it = S.files[0];
+    const it = CUR();
     const kept = it.order.filter((p) => !p.del).length;
     $('#main').innerHTML = singleCard(it) + `<div class="mainbar"><span class="count">${kept} / ${it.pages}페이지 남음 · 끌어서 순서 변경</span><button class="btn" id="allL">${IC.rotL}모두</button><button class="btn" id="allR">${IC.rotR}모두</button><button class="btn" id="reset">원래대로</button></div><div class="files" id="grid"></div>`;
     wireSwap();
@@ -1852,14 +1871,14 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', /\.hwpx?$/
     pageGrid($('#grid'), it, { order: it.order, controls: true, cardClass: (p) => p.del ? 'del' : '', onChange: again });
   },
   renderOpts() {
-    const it = S.files[0], kept = it.order.filter((p) => !p.del).length;
+    const it = CUR(), kept = it.order.filter((p) => !p.del).length;
     optsForm($('#opts'), [{ type: 'note', tone: kept ? '' : 'bad', html: () => kept ? `페이지 카드를 끌어서 순서를 바꾸고, 아래 버튼으로 <b>회전</b>하거나 <b>삭제</b>하세요.<br><br>결과: <b>${kept}페이지</b>` : '모든 페이지가 삭제됐어요. 한 페이지 이상 남겨 주세요.' }]);
     const b = $('#run'); if (b) b.disabled = !this.ready();
   },
-  ready() { return S.files[0] && S.files[0].order.some((p) => !p.del); },
+  ready() { return CUR() && CUR().order.some((p) => !p.del); },
   runLabel: '변경 내용 저장',
   async run() {
-    const it = S.files[0];
+    const it = CUR();
     busy('PDF 저장 중…');
     const PDFLib = await loadLib('pdflib');
     const src = await Core.loadPdf(PDFLib, it.bytes);
@@ -1874,7 +1893,7 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', /\.hwpx?$/
   defaults: { level: 'medium' },
   prepare: preparePdf,
   renderMain() {
-    const it = S.files[0];
+    const it = CUR();
     $('#main').innerHTML = singleCard(it) + '<div class="files" id="grid"></div>';
     wireSwap();
     pageGrid($('#grid'), it, { order: Array.from({ length: Math.min(it.pages, 24) }, (_, i) => ({ src: i, rot: 0 })) });
@@ -1888,7 +1907,7 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', /\.hwpx?$/
   },
   runLabel: 'PDF 압축',
   async run() {
-    const it = S.files[0];
+    const it = CUR();
     const PDFLib = await loadLib('pdflib');
     const P = { light: { maxDim: 3200, quality: 0.85, minBytes: 60000 }, medium: { maxDim: 2200, quality: 0.75, minBytes: 30000 }, strong: { maxDim: 1500, quality: 0.6, minBytes: 15000 } }[S.opts.level];
     busy('문서 안의 사진 찾는 중…');
@@ -1938,7 +1957,7 @@ imposeTool({
   defaults: { text: '대외비', color: '#d32f2f', opacity: 25, size: 60, angle: 45, layout: 'center', bold: true },
   prepare: preparePdf,
   async renderMain() {
-    const it = S.files[0];
+    const it = CUR();
     $('#main').innerHTML = singleCard(it) + '<div class="preview"><canvas id="pv"></canvas></div>';
     wireSwap();
     if (!it.first) it.first = (await renderPage(it.doc, 1, (vp) => Math.min(1.6, 1100 / Math.max(vp.width, vp.height)))).canvas;
@@ -1955,7 +1974,7 @@ imposeTool({
     return c;
   },
   draw() {
-    const it = S.files[0], pv = $('#pv'); if (!pv || !it.first) return;
+    const it = CUR(), pv = $('#pv'); if (!pv || !it.first) return;
     const base = it.first, o = S.opts;
     pv.width = base.width; pv.height = base.height;
     const ctx = pv.getContext('2d'); ctx.drawImage(base, 0, 0);
@@ -1991,8 +2010,8 @@ imposeTool({
     const st = this.stampCanvas();
     const png = await blobBytes(await canvasBlob(st, 'image/png'));
     const o = S.opts;
-    const out = await Core.watermark(PDFLib, S.files[0].bytes, png, st.width, st.height, { angle: o.angle, opacity: o.opacity / 100, widthRatio: o.size / 100, tile: o.layout === 'tile' });
-    deliver(out, `${baseName(S.files[0].name)}_워터마크.pdf`);
+    const out = await Core.watermark(PDFLib, CUR().bytes, png, st.width, st.height, { angle: o.angle, opacity: o.opacity / 100, widthRatio: o.size / 100, tile: o.layout === 'tile' });
+    deliver(out, `${baseName(CUR().name)}_워터마크.pdf`);
   },
 },
 /* ---------- 페이지 번호 ---------- */
@@ -2002,7 +2021,7 @@ imposeTool({
   defaults: { pos: 'bc', fmt: 'n', size: 11, start: 1, skipFirst: false, margin: 28 },
   prepare: preparePdf,
   async renderMain() {
-    const it = S.files[0];
+    const it = CUR();
     $('#main').innerHTML = singleCard(it) + '<div class="preview"><canvas id="pv"></canvas></div>';
     wireSwap();
     const pi = Math.min(it.pages, S.opts.skipFirst && it.pages > 1 ? 2 : 1);
@@ -2011,7 +2030,7 @@ imposeTool({
   },
   label(n, total) { const f = S.opts.fmt; return f === 'n/t' ? `${n} / ${total}` : f === '-n-' ? `- ${n} -` : f === 'page' ? `Page ${n} of ${total}` : String(n); },
   draw() {
-    const it = S.files[0], pv = $('#pv'); if (!pv || !it.prev) return;
+    const it = CUR(), pv = $('#pv'); if (!pv || !it.prev) return;
     const { canvas: base, wPt } = it.prev, o = S.opts;
     pv.width = base.width; pv.height = base.height;
     const ctx = pv.getContext('2d'); ctx.drawImage(base, 0, 0);
@@ -2040,8 +2059,8 @@ imposeTool({
     busy('번호 넣는 중…');
     const PDFLib = await loadLib('pdflib');
     const o = S.opts;
-    const out = await Core.pageNumbers(PDFLib, S.files[0].bytes, { pos: o.pos, fmt: o.fmt, size: o.size, start: Math.max(1, Math.floor(o.start) || 1), skipFirst: o.skipFirst, margin: o.margin });
-    deliver(out, `${baseName(S.files[0].name)}_쪽번호.pdf`);
+    const out = await Core.pageNumbers(PDFLib, CUR().bytes, { pos: o.pos, fmt: o.fmt, size: o.size, start: Math.max(1, Math.floor(o.start) || 1), skipFirst: o.skipFirst, margin: o.margin });
+    deliver(out, `${baseName(CUR().name)}_쪽번호.pdf`);
   },
 },
 ];
@@ -2056,7 +2075,7 @@ function imposeTool(cfg) {
       item.firstLand = vp.width > vp.height;
     },
     async preview() {
-      const it = S.files[0], token = (this._tok = (this._tok || 0) + 1);
+      const it = CUR(), token = (this._tok = (this._tok || 0) + 1);
       const L = cfg.layout(it), per = L.cols * L.rows;
       const PDFLib = await loadLib('pdflib');
       const bytes = await Core.impose(PDFLib, it.bytes, Object.assign({}, L, { pages: Array.from({ length: Math.min(per, it.pages) }, (_, i) => i) }));
@@ -2069,7 +2088,7 @@ function imposeTool(cfg) {
       $('#pvInfo').textContent = `${it.pages}쪽 → 종이 ${sheets}장 (첫 장 미리보기)`;
     },
     renderMain() {
-      const it = S.files[0];
+      const it = CUR();
       $('#main').innerHTML = singleCard(it) + '<div class="mainbar"><span class="count" id="pvInfo">미리보기 만드는 중…</span></div><div class="preview" id="pvBox"><div class="spinner"></div></div>';
       wireSwap();
       this.preview().catch((e) => { const b = $('#pvBox'); if (b) b.innerHTML = `<div class="note bad">${esc(e.message)}</div>`; });
@@ -2080,7 +2099,7 @@ function imposeTool(cfg) {
     },
     runLabel: cfg.runLabel,
     async run() {
-      const it = S.files[0];
+      const it = CUR();
       busy('PDF 만드는 중…');
       const PDFLib = await loadLib('pdflib');
       const out = await Core.impose(PDFLib, it.bytes, cfg.layout(it));
@@ -2090,10 +2109,55 @@ function imposeTool(cfg) {
   };
 }
 
+/* ---------- PDF → CSV (same table detection as 엑셀) ---------- */
+(() => {
+  const X = TOOLS.find((t) => t.id === 'pdf2excel');
+  const csvCell = (v, clean) => {
+    let s = String(v == null ? '' : v);
+    if (clean) { const c = Core.cellOf(s); if (c && c.t === 'n') s = String(c.v); }
+    return /[",\r\n]|^\s|\s$/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const toCsv = (rows, clean) => rows.map((r) => r.map((v) => csvCell(v, clean)).join(',')).join('\r\n');
+  TOOLS.push({
+    id: 'pdf2csv', name: 'PDF → CSV', desc: 'PDF 속 표를 CSV 파일로', accept: '.pdf,application/pdf', multiple: false, test: isPdf,
+    defaults: { split: 'one', range: '', clean: false, pv: 1 },
+    prepare: preparePdf,
+    rows: X.rows,
+    renderMain: X.renderMain,
+    renderOpts() {
+      optsForm($('#opts'), [
+        { key: 'split', type: 'seg', label: '파일 나누기', options: [['one', '한 파일에 모두'], ['page', '페이지마다 파일']] },
+        { key: 'range', type: 'text', label: '페이지 (비우면 전체)', placeholder: '예: 2-4' },
+        { key: 'clean', type: 'check', label: '숫자를 계산용으로 정리', hint: '1,234 → 1234, (120) → -120 처럼 바꿔요. 다른 프로그램에 데이터로 넣을 때 편해요.' },
+        { type: 'note', html: () => '엑셀 변환과 같은 방식으로 칸과 줄을 나눠요. 엑셀에서 열어도 한글이 깨지지 않게 저장해요.<br><br>스캔본(사진으로 된 PDF)은 표를 뽑을 수 없어요.' },
+      ]);
+    },
+    runLabel: 'CSV로 변환',
+    async run() {
+      const it = CUR();
+      const idx = S.opts.range.trim() ? Core.parseRanges(S.opts.range, it.pages).flatMap(Core.rangeIdx) : Array.from({ length: it.pages }, (_, i) => i);
+      const per = [];
+      for (let k = 0; k < idx.length; k++) { busy(`표 읽는 중… (${k + 1}/${idx.length})`, k / idx.length); per.push({ n: idx[k] + 1, rows: await this.rows(it, idx[k] + 1) }); }
+      if (!per.some((p) => p.rows.length)) throw new Error('글자를 찾지 못했어요. 스캔본(사진으로 된 PDF)은 표를 뽑을 수 없어요.');
+      const enc = (text) => new TextEncoder().encode('﻿' + text + '\r\n');
+      const base = baseName(it.name);
+      if (S.opts.split === 'page' && per.length > 1) {
+        await deliverMany(per.map((p) => ({ name: `${base}_${p.n}페이지.csv`, bytes: enc(toCsv(p.rows, S.opts.clean)) })), `${base}_csv.zip`);
+      } else {
+        const rows = [];
+        per.forEach((p, i) => { if (i) rows.push([]); rows.push(...p.rows); });
+        deliver(enc(toCsv(rows, S.opts.clean)), base + '.csv', `${idx.length}페이지`);
+      }
+    },
+  });
+})();
+
+TOOLS.forEach((t) => { if (!t.multiple) t.batch = true; });
+
 /* ---------- Office documents (rendered in-browser) ---------- */
 function docTool(id, name, desc, re, accept, kind, beta) {
   return {
-    id, name, desc, accept, multiple: false, beta,
+    id, name, desc, accept, multiple: false, beta, needsView: true,
     test: (f) => re.test(f.name),
     defaults: {},
     async prepare(item) {
@@ -2142,7 +2206,7 @@ function docTool(id, name, desc, re, accept, kind, beta) {
       } finally { stage.style.cssText = ''; stage.remove(); }
     },
     renderMain() {
-      const it = S.files[0];
+      const it = CUR();
       const m = $('#main');
       m.innerHTML = singleCard(it, kind.toUpperCase()) + `<div class="mainbar"><span class="count">미리보기 · ${it.pages}${kind === 'pptx' ? '장' : '페이지'} — 이 모습 그대로 PDF가 돼요</span></div>`;
       m.appendChild(it.stage);
@@ -2157,11 +2221,11 @@ function docTool(id, name, desc, re, accept, kind, beta) {
       const extra = document.createElement('div'); extra.className = 'field';
       extra.innerHTML = `<button class="btn wide" id="printBtn">방법 2 · 인쇄 창으로 PDF 저장</button><div class="hint">원본과 똑같아야 한다면: ${app}에서 [파일 → 다른 이름으로 저장 → PDF]가 가장 정확해요.</div>`;
       $('#opts').appendChild(extra);
-      $('#printBtn').onclick = () => printStage(S.files[0]);
+      $('#printBtn').onclick = () => printStage(CUR());
     },
     runLabel: '방법 1 · PDF 다운로드',
     async run() {
-      const it = S.files[0];
+      const it = CUR();
       const h2c = await loadLib('h2c');
       const PDFLib = await loadLib('pdflib');
       const out = [];
@@ -2244,13 +2308,14 @@ function showHome() {
 }
 
 function showTool(t) {
-  T = t; S = { files: [], opts: JSON.parse(JSON.stringify(t.defaults || {})) };
+  T = t; S = { files: [], cur: 0, opts: JSON.parse(JSON.stringify(t.defaults || {})) };
+  const many = t.multiple || t.batch;
   document.title = t.name + ' · PDF 작업실';
   app.style.cssText = tint(groupOf(t.id));
   app.innerHTML = `<div class="tool-head"><button type="button" class="back" id="backBtn" title="처음으로">${IC.back}</button><div class="ico">${ICONS[t.id]}</div><div><h1>${esc(t.name)}${t.beta ? '<span class="beta">베타</span>' : ''}</h1><p>${esc(t.desc)}</p></div></div>
-    <input type="file" id="fileIn" accept="${t.accept}" ${t.multiple ? 'multiple' : ''} hidden>
-    <div class="drop" id="drop">${IC.up}<h2>${t.multiple ? '파일을 여기로 끌어다 놓으세요' : '파일을 여기로 끌어다 놓으세요'}</h2><p>또는</p><p style="margin-top:12px"><button class="btn primary big" id="pick">${t.multiple ? '파일 선택 (여러 개 가능)' : '파일 선택'}</button></p><p style="margin-top:14px;font-size:13px">${esc(t.accept.replace(/application\/pdf|image\/\*/g, '').split(',').filter(Boolean).join(', ') || '이미지 파일 (JPG, PNG, GIF, WEBP, BMP)')}</p></div>
-    <div class="work" id="work" hidden><div id="main"></div><aside class="side"><h3>설정</h3><div id="opts" style="display:flex;flex-direction:column;gap:16px"></div><button class="btn primary big wide" id="run">${esc(t.runLabel)}</button><div id="result"></div></aside></div>`;
+    <input type="file" id="fileIn" accept="${t.accept}" ${many ? 'multiple' : ''} hidden>
+    <div class="drop" id="drop">${IC.up}<h2>파일을 여기로 끌어다 놓으세요</h2>${t.batch ? '<p style="margin-bottom:6px">여러 개를 넣으면 같은 설정으로 한 번에 모두 바꿔 드려요</p>' : ''}<p>또는</p><p style="margin-top:12px"><button class="btn primary big" id="pick">${many ? '파일 선택 (여러 개 가능)' : '파일 선택'}</button></p><p style="margin-top:14px;font-size:13px">${esc(t.accept.replace(/application\/pdf|image\/\*/g, '').split(',').filter(Boolean).join(', ') || '이미지 파일 (JPG, PNG, GIF, WEBP, BMP)')}</p></div>
+    <div class="work" id="work" hidden><div><div id="strip"></div><div id="main"></div></div><aside class="side"><h3>설정</h3><div id="opts" style="display:flex;flex-direction:column;gap:16px"></div><button class="btn primary big wide" id="run">${esc(t.runLabel)}</button><div id="result"></div></aside></div>`;
   $('#backBtn').onclick = () => go('');
   $('#pick').onclick = () => $('#fileIn').click();
   $('#fileIn').onchange = (e) => { addFiles(e.target.files); e.target.value = ''; };
@@ -2264,8 +2329,10 @@ async function addFiles(list) {
   const files = all.filter((f) => T.test(f));
   if (!files.length) { toast(`이 도구에서 쓸 수 없는 파일이에요. (${T.accept.replace(/application\/pdf|image\/\*/g, '').split(',').filter(Boolean).join(', ') || '이미지'} 파일을 올려 주세요)`); return; }
   if (files.length < all.length) toast(`형식이 맞지 않는 ${all.length - files.length}개 파일은 뺐어요.`);
-  const take = T.multiple ? files : files.slice(0, 1);
-  if (!T.multiple && files.length > 1) toast('이 도구는 파일을 하나씩 처리해요. 첫 번째 파일만 열었어요.');
+  const many = T.multiple || T.batch;
+  const take = many ? files : files.slice(0, 1);
+  if (!many && files.length > 1) toast('이 도구는 파일을 하나씩 처리해요. 첫 번째 파일만 열었어요.');
+  const firstNew = S.files.length;
   try {
     for (let i = 0; i < take.length; i++) {
       const f = take[i];
@@ -2277,10 +2344,11 @@ async function addFiles(list) {
         if (take.length > 1) { toast(`${f.name}: ${e.message}`); continue; }
         throw e;
       }
-      if (T.multiple) S.files.push(item);
+      if (many) S.files.push(item);
       else { S.files.forEach((x) => { x.doc && x.doc.destroy && x.doc.destroy(); }); S.files = [item]; }
     }
     idle();
+    if (T.batch && S.files.length > firstNew) S.cur = firstNew; // show the first newly added file
     await refresh();
   } catch (e) {
     idle(); console.error(e);
@@ -2293,10 +2361,65 @@ async function refresh() {
   const has = S.files.length > 0;
   $('#drop').hidden = has; $('#work').hidden = !has;
   $('#result').innerHTML = '';
-  if (!has) return;
+  if (!has) { $('#strip').innerHTML = ''; return; }
+  if (S.cur >= S.files.length) S.cur = 0;
+  renderStrip();
   await T.renderMain();
   T.renderOpts();
   $('#run').disabled = T.ready ? !T.ready() : false;
+}
+
+function renderStrip() {
+  const el = $('#strip'); if (!el) return;
+  const n = S.files.length;
+  $('#run').textContent = T.runLabel + (T.batch && n > 1 ? ` (${n}개 모두)` : '');
+  if (!T.batch) { el.innerHTML = ''; return; }
+  if (n === 1) {
+    el.innerHTML = `<div class="strip"><span class="strip-t">파일을 더 넣으면 한 번에 모두 바꿔 드려요</span><button type="button" class="chip add" id="addMore">+ 파일 추가</button></div>`;
+  } else {
+    el.innerHTML = `<div class="strip"><span class="strip-t"><b>${n}개 파일</b> · 설정은 모두에게 똑같이 적용돼요. 눌러서 미리보기를 바꿀 수 있어요</span>` +
+      S.files.map((f, i) => `<span class="chip${i === S.cur ? ' on' : ''}" data-i="${i}" role="button" tabindex="0" title="${esc(f.name)}"><span>${esc(f.name)}</span><button type="button" class="x" data-x="${i}" title="빼기">${IC.x}</button></span>`).join('') +
+      `<button type="button" class="chip add" id="addMore">+ 파일 추가</button></div>`;
+    $$('.chip[data-i]', el).forEach((c) => {
+      const pick = async () => { if (+c.dataset.i === S.cur) return; S.cur = +c.dataset.i; $('#result').innerHTML = ''; renderStrip(); await T.renderMain(); T.renderOpts(); $('#run').disabled = T.ready ? !T.ready() : false; };
+      c.onclick = (e) => { if (e.target.closest('.x')) return; pick(); };
+      c.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } };
+    });
+    $$('.x', el).forEach((b) => b.onclick = () => {
+      const i = +b.dataset.x, f = S.files[i];
+      if (f.doc && f.doc.destroy) f.doc.destroy();
+      S.files.splice(i, 1);
+      if (S.cur > i || S.cur >= S.files.length) S.cur = Math.max(0, S.cur - 1);
+      refresh();
+    });
+  }
+  $('#addMore').onclick = () => $('#fileIn').click();
+}
+
+async function runBatch() {
+  const n = S.files.length, keep = S.cur, list = [], notes = [], failed = [];
+  try {
+    for (let i = 0; i < n; i++) {
+      S.cur = i; BATCH = `(${i + 1}/${n}) `;
+      const f = S.files[i];
+      busy('준비 중…', i / n);
+      try {
+        if (T.needsView) { renderStrip(); await T.renderMain(); await frame(); }
+        if (T.ready && !T.ready()) throw new Error('처리할 내용이 없어요');
+        COLLECT = { list, notes: [], file: f.name };
+        await T.run();
+        if (COLLECT.notes.length && n <= 8) notes.push(`<b>${esc(f.name)}</b> — ${COLLECT.notes.join(' ')}`);
+      } catch (e) { console.error(e); failed.push(`${f.name}: ${e.message || e}`); }
+      finally { COLLECT = null; }
+    }
+  } finally { BATCH = ''; S.cur = keep; }
+  renderStrip(); await T.renderMain(); T.renderOpts();
+  if (!list.length) throw new Error('변환된 파일이 없어요. ' + failed.join(' / '));
+  const ok = n - failed.length;
+  const extra = `${n}개 중 <b>${ok}개 완료</b>` + (failed.length ? `<br><span style="color:var(--bad)">실패 ${failed.length}개: ${esc(failed.join(' / '))}</span>` : '') + (notes.length ? '<br>' + notes.join('<br>') : '');
+  const zipName = `${T.name.replace(/[^0-9A-Za-z가-힣]+/g, '')}_${ok}개.zip`;
+  if (list.length === 1) deliver(list[0].bytes, list[0].name, extra);
+  else await deliverMany(list, zipName, extra);
 }
 
 async function runTool() {
@@ -2304,7 +2427,7 @@ async function runTool() {
   if (T.ready && !T.ready()) return;
   const btn = $('#run'); btn.disabled = true;
   $('#result').innerHTML = '';
-  try { await T.run(); }
+  try { if (T.batch && S.files.length > 1) await runBatch(); else await T.run(); }
   catch (e) { console.error(e); toast(e.message || String(e), 7000); $('#result').innerHTML = `<div class="note bad">${esc(e.message || String(e))}</div>`; }
   finally { idle(); btn.disabled = T && T.ready ? !T.ready() : false; }
 }
