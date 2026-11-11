@@ -2303,7 +2303,7 @@ function showHome() {
     GROUPS.map((g, gi) => `<section class="sect" style="${tint(g)}"><div class="sect-head"><span class="no">0${gi + 1}</span><h2>${g.name}</h2><p>${g.desc}</p></div><div class="grid">` +
       g.ids.map(tool).map((t) => `<button type="button" class="card" data-go="${t.id}"><div class="ico">${ICONS[t.id]}</div>${ARROW}<b>${esc(t.name)}${t.beta ? '<span class="beta">베타</span>' : ''}</b><span>${esc(t.desc)}</span></button>`).join('') +
       `</div></section>`).join('') +
-    `<div class="foot"><p><b>컴퓨터에 저장해 두고 쓰기</b><br>이 HTML 파일 하나에 모든 기능이 들어 있어요. 저장한 뒤 더블클릭하면 인터넷 없이도 열려요.</p><p><b>아이패드·아이폰에서는</b><br>Safari로 열어 주세요. 결과 파일은 '저장하기' → '파일에 저장'으로 보관할 수 있어요.</p></div>`;
+    `<div class="foot" style="grid-template-columns:1fr"><p><b>아이패드·아이폰에서는</b><br>Safari로 열어 주세요. 결과 파일은 '저장하기' → '파일에 저장'으로 보관할 수 있어요.</p></div>`;
   window.scrollTo(0, 0);
 }
 
