@@ -1,4 +1,3 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <!doctype html>
 <html lang="ko">
 <head>
@@ -9,7 +8,7 @@
 :root{
   --bg:#f4f4f1; --panel:#ffffff; --ink:#18181b; --sub:#66666c; --faint:#9a9aa0; --line:#e3e3df; --soft:#efefec;
   --acc:#14524c; --acc-ink:#ffffff; --acc-soft:#e2eeec; --warn:#8a5300; --warn-soft:#fbf1dc; --bad:#b42318; --bad-soft:#fbe7e5;
-  --g1:#c2410c; --g1-soft:#fcece4; --g2:#1d4ed8; --g2-soft:#e6ecfb; --g3:#6d28d9; --g3-soft:#efe8fb;
+  --g1:#c2410c; --g1-soft:#fcece4; --g2:#1d4ed8; --g2-soft:#e6ecfb; --g3:#6d28d9; --g3-soft:#efe8fb; --g4:#047857; --g4-soft:#e1f3ec;
   --radius:16px; --shadow:0 1px 2px rgba(20,20,20,.04),0 2px 8px rgba(20,20,20,.04);
   --shadow-lift:0 2px 4px rgba(20,20,20,.05),0 12px 28px rgba(20,20,20,.08);
   --stage:#e7e7e3;
@@ -18,14 +17,14 @@
   :root:not([data-theme="light"]){
     --bg:#121214; --panel:#1b1b1e; --ink:#ececee; --sub:#a1a1a8; --faint:#6f6f76; --line:#2c2c31; --soft:#242428;
     --acc:#5cbcb1; --acc-ink:#0b1b19; --acc-soft:#17302d; --warn:#f0c46e; --warn-soft:#352b17; --bad:#ff8f85; --bad-soft:#3a1d1b;
-    --g1:#fb923c; --g1-soft:#3a2418; --g2:#7aa2ff; --g2-soft:#1d2640; --g3:#b794f6; --g3-soft:#2b2240;
+    --g1:#fb923c; --g1-soft:#3a2418; --g2:#7aa2ff; --g2-soft:#1d2640; --g3:#b794f6; --g3-soft:#2b2240; --g4:#4fd1a5; --g4-soft:#16322a;
     --shadow:0 1px 2px rgba(0,0,0,.35); --shadow-lift:0 2px 4px rgba(0,0,0,.4),0 12px 28px rgba(0,0,0,.35); --stage:#26262a;
   }
 }
 :root[data-theme="dark"]{
   --bg:#121214; --panel:#1b1b1e; --ink:#ececee; --sub:#a1a1a8; --faint:#6f6f76; --line:#2c2c31; --soft:#242428;
   --acc:#5cbcb1; --acc-ink:#0b1b19; --acc-soft:#17302d; --warn:#f0c46e; --warn-soft:#352b17; --bad:#ff8f85; --bad-soft:#3a1d1b;
-  --g1:#fb923c; --g1-soft:#3a2418; --g2:#7aa2ff; --g2-soft:#1d2640; --g3:#b794f6; --g3-soft:#2b2240;
+  --g1:#fb923c; --g1-soft:#3a2418; --g2:#7aa2ff; --g2-soft:#1d2640; --g3:#b794f6; --g3-soft:#2b2240; --g4:#4fd1a5; --g4-soft:#16322a;
   --shadow:0 1px 2px rgba(0,0,0,.35); --shadow-lift:0 2px 4px rgba(0,0,0,.4),0 12px 28px rgba(0,0,0,.35); --stage:#26262a;
 }
 *{box-sizing:border-box}
@@ -75,6 +74,12 @@ main{max-width:1120px;margin:0 auto;padding:8px 24px 80px}
 .card .go{position:absolute;top:20px;right:18px;width:18px;height:18px;color:var(--faint);opacity:0;transform:translateX(-4px);transition:all .16s}
 .card:hover .go{opacity:1;transform:none;color:var(--gc)}
 .beta{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;padding:1px 6px;border-radius:6px;background:var(--warn-soft);color:var(--warn);vertical-align:2px;letter-spacing:0}
+.xwrap{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:auto;max-height:68vh}
+.xtable{border-collapse:collapse;font-size:13px;min-width:100%}
+.xtable th,.xtable td{border:1px solid var(--line);padding:5px 9px;white-space:nowrap;text-align:left}
+.xtable th{position:sticky;top:0;background:var(--soft);color:var(--sub);font-weight:600;font-size:12px;text-align:center}
+.xtable tr th:first-child{position:sticky;left:0;z-index:1;min-width:36px}
+.xtable td.num{text-align:right;font-variant-numeric:tabular-nums}
 .foot{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);font-size:13px;color:var(--sub);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
 .foot p{margin:0}
 .foot b{color:var(--ink);font-weight:600}
@@ -870,7 +875,227 @@ const Core = (() => {
     return { bytes: result, images: cands.length, changed, saved };
   }
 
-  return { norm, parseRanges, rangeIdx, loadPdf, merge, extract, geom, watermark, pageNumbers, imagesToPdf, rasterPagesToPdf, resave, compressImages, jpegInfo, stripJpeg, unPng };
+
+  /* ---------- PDF → table (rows/columns from text positions) ---------- */
+  // items: [{str, x, y, w, h}] — x,y = baseline start in top-down page coords, w = advance width, h = font size
+  function tableFromItems(items) {
+    const its = items.filter((t) => t.str && t.str.trim() && t.h > 0).sort((a, b) => a.y - b.y || a.x - b.x);
+    if (!its.length) return [];
+    // 1) lines
+    const lines = [];
+    for (const t of its) {
+      const L = lines[lines.length - 1];
+      if (L && Math.abs(t.y - L.y) < 0.45 * Math.max(t.h, L.h)) { L.items.push(t); L.h = Math.max(L.h, t.h); }
+      else lines.push({ y: t.y, h: t.h, items: [t] });
+    }
+    // 2) chunks (cell texts) within each line
+    for (const L of lines) {
+      L.items.sort((a, b) => a.x - b.x);
+      const chunks = [];
+      for (const t of L.items) {
+        const c = chunks[chunks.length - 1];
+        const gap = c ? t.x - c.x1 : Infinity;
+        if (c && gap < 0.75 * Math.max(t.h, c.h)) {
+          const needSpace = gap > 0.12 * t.h && !/\s$/.test(c.text) && !/^\s/.test(t.str);
+          c.text += (needSpace ? ' ' : '') + t.str;
+          c.x1 = Math.max(c.x1, t.x + t.w); c.h = Math.max(c.h, t.h);
+        } else chunks.push({ text: t.str, x0: t.x, x1: t.x + t.w, h: t.h });
+      }
+      chunks.forEach((c) => { c.text = c.text.replace(/\s+/g, ' ').trim(); });
+      L.chunks = chunks.filter((c) => c.text);
+    }
+    // 3) columns, learned from the "fullest" lines (data rows), so spanning titles do not glue columns together
+    const multi = lines.filter((L) => L.chunks.length >= 2);
+    let cols = [];
+    if (multi.length) {
+      const M = Math.max(...multi.map((L) => L.chunks.length));
+      const basis = multi.filter((L) => L.chunks.length >= Math.max(2, Math.ceil(M * 0.6)));
+      const iv = basis.flatMap((L) => L.chunks.map((c) => [c.x0, c.x1])).sort((a, b) => a[0] - b[0]);
+      for (const [a, b] of iv) {
+        const last = cols[cols.length - 1];
+        if (last && a <= last[1] + 1) last[1] = Math.max(last[1], b);
+        else cols.push([a, b]);
+      }
+    }
+    if (!cols.length) return lines.map((L) => [L.chunks.map((c) => c.text).join(' ')]);
+    const colOf = (c) => {
+      // text overlapping several columns (titles, merged headers) goes to the leftmost one it touches
+      const hit = cols.findIndex(([a, b]) => Math.min(b, c.x1) - Math.max(a, c.x0) > 0.5);
+      if (hit >= 0) return hit;
+      let best = 0, d = Infinity;
+      cols.forEach(([a, b], i) => { const dist = c.x1 < a ? a - c.x1 : c.x0 - b; if (dist < d) { d = dist; best = i; } });
+      return best;
+    };
+    // 4) rows; a big vertical gap becomes one empty row
+    const rows = [];
+    let prev = null;
+    for (const L of lines) {
+      if (!L.chunks.length) continue;
+      if (prev && L.y - prev.y > 2.6 * Math.max(L.h, prev.h)) rows.push([]);
+      const r = new Array(cols.length).fill('');
+      for (const c of L.chunks) { const i = colOf(c); r[i] = r[i] ? r[i] + ' ' + c.text : c.text; }
+      rows.push(r);
+      prev = L;
+    }
+    // drop columns that ended up empty
+    const keep = cols.map((_, i) => rows.some((r) => r[i]));
+    return rows.map((r) => r.filter((_, i) => keep[i]));
+  }
+
+  /* ---------- minimal .xlsx writer ---------- */
+  function cellOf(v) {
+    const s = String(v == null ? '' : v).trim();
+    if (!s) return null;
+    let m;
+    if ((m = s.match(/^(\(?)([-+]?)((?:\d{1,3}(?:,\d{3})+)|\d+)(?:\.(\d+))?(\)?)$/))) {
+      const neg = (m[1] && m[5]) || m[2] === '-';
+      if ((m[1] && !m[5]) || (!m[1] && m[5])) return { t: 's', v: s };
+      const intPart = m[3].replace(/,/g, '');
+      if (intPart.length > 1 && intPart[0] === '0' && !m[3].includes(',')) return { t: 's', v: s }; // keep codes like 007
+      if (intPart.length > 15) return { t: 's', v: s };
+      const num = Number(intPart + (m[4] ? '.' + m[4] : '')) * (neg ? -1 : 1);
+      const commas = m[3].includes(',');
+      return { t: 'n', v: num, st: commas ? (m[4] ? (m[4].length === 2 ? 2 : 0) : 1) : 0 };
+    }
+    return { t: 's', v: s };
+  }
+  const xesc = (s) => String(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  function colName(i) { let s = ''; i += 1; while (i) { const r = (i - 1) % 26; s = String.fromCharCode(65 + r) + s; i = Math.floor((i - 1) / 26); } return s; }
+  function textWidth(s) { let w = 0; for (const ch of String(s)) w += /[ᄀ-ᇿ　-鿿가-힯＀-￯]/.test(ch) ? 1.9 : 1; return w; }
+  function sheetName(name, used) {
+    let n = String(name).replace(/[\[\]:*?\/\\]/g, ' ').replace(/^'+|'+$/g, '').slice(0, 31) || 'Sheet';
+    let k = 2; const base = n;
+    while (used.has(n.toLowerCase())) { const suf = ` (${k++})`; n = base.slice(0, 31 - suf.length) + suf; }
+    used.add(n.toLowerCase());
+    return n;
+  }
+  // sheets: [{ name, rows: [[cell,...],...] }]
+  async function buildXlsx(JSZip, sheets) {
+    const zip = new JSZip();
+    const used = new Set();
+    const names = sheets.map((sh) => sheetName(sh.name, used));
+    zip.file('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+      sheets.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('') + '</Types>');
+    zip.file('_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>');
+    zip.file('xl/workbook.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' +
+      names.map((n, i) => `<sheet name="${xesc(n)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('') + '</sheets></workbook>');
+    zip.file('xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      sheets.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('') +
+      `<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`);
+    zip.file('xl/styles.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="1"><font><sz val="11"/><name val="맑은 고딕"/><family val="2"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="3" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="4" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>');
+    sheets.forEach((sh, si) => {
+      const ncol = Math.max(1, ...sh.rows.map((r) => r.length));
+      const widths = new Array(ncol).fill(6);
+      const filled = (r) => r.filter((v) => String(v == null ? '' : v).trim()).length;
+      const sizing = sh.rows.some((r) => filled(r) >= 2) ? (r) => filled(r) >= 2 : () => true; // lone titles overflow into empty cells
+      const rowsXml = sh.rows.map((r, ri) => {
+        const counts = sizing(r);
+        const cells = r.map((v, ci) => {
+          const c = cellOf(v); if (!c) return '';
+          if (counts) widths[ci] = Math.max(widths[ci], textWidth(String(v).trim()));
+          const ref = colName(ci) + (ri + 1);
+          return c.t === 'n' ? `<c r="${ref}"${c.st ? ` s="${c.st}"` : ''}><v>${c.v}</v></c>` : `<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${xesc(c.v)}</t></is></c>`;
+        }).join('');
+        return `<row r="${ri + 1}">${cells}</row>`;
+      }).join('');
+      const colsXml = '<cols>' + widths.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${Math.min(60, Math.round((w * 1.1 + 2) * 10) / 10)}" customWidth="1"/>`).join('') + '</cols>';
+      zip.file(`xl/worksheets/sheet${si + 1}.xml`, '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' + colsXml + `<sheetData>${rowsXml}</sheetData></worksheet>`);
+    });
+    return zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+  }
+
+  /* ---------- list embedded images (for "사진 추출") ---------- */
+  async function listImages(PDFLib, bytes) {
+    const { PDFName, PDFNumber, PDFArray, PDFDict, PDFRawStream, PDFRef } = PDFLib;
+    const N = (n) => PDFName.of(n);
+    const doc = await loadPdf(PDFLib, bytes);
+    const objs = doc.context.enumerateIndirectObjects();
+    const masks = new Set();
+    for (const [, obj] of objs) {
+      const d = obj instanceof PDFRawStream ? obj.dict : obj instanceof PDFDict ? obj : null;
+      if (!d) continue;
+      for (const k of ['SMask', 'Mask']) { const v = d.get(N(k)); if (v instanceof PDFRef) masks.add(v.toString()); }
+    }
+    const nameOf = (v) => (v instanceof PDFName ? v.toString() : null);
+    const out = [];
+    let skipped = 0;
+    for (const [ref, obj] of objs) {
+      if (!(obj instanceof PDFRawStream)) continue;
+      const d = obj.dict;
+      if (nameOf(d.lookup(N('Subtype'))) !== '/Image' || masks.has(ref.toString())) continue;
+      const W = d.lookup(N('Width')), H = d.lookup(N('Height'));
+      if (!(W instanceof PDFNumber) || !(H instanceof PDFNumber)) { skipped++; continue; }
+      const w = W.asNumber(), h = H.asNumber();
+      if (w < 48 || h < 48) continue; // icons, bullets, lines
+      let f = d.lookup(N('Filter')), pre = false;
+      if (f instanceof PDFArray) {
+        if (f.size() === 2 && nameOf(f.lookup(0)) === '/ASCII85Decode') { pre = true; f = f.lookup(1); }
+        else if (f.size() === 1) f = f.lookup(0);
+        else { skipped++; continue; }
+      }
+      const filter = nameOf(f);
+      const cs = d.lookup(N('ColorSpace'));
+      let comps = 0;
+      if (nameOf(cs) === '/DeviceRGB') comps = 3; else if (nameOf(cs) === '/DeviceGray') comps = 1; else if (nameOf(cs) === '/DeviceCMYK') comps = 4;
+      else if (cs instanceof PDFArray && nameOf(cs.lookup(0)) === '/ICCBased') { const n = cs.lookup(1) && cs.lookup(1).dict && cs.lookup(1).dict.lookup(N('N')); if (n instanceof PDFNumber) comps = n.asNumber(); }
+      try {
+        const data = pre ? a85(obj.contents) : obj.contents;
+        if (filter === '/DCTDecode') { out.push({ id: ref.toString(), kind: 'jpeg', data, w, h, comps }); continue; }
+        if (filter === '/FlateDecode' && (comps === 1 || comps === 3)) {
+          const bpc = d.lookup(N('BitsPerComponent'));
+          if (!(bpc instanceof PDFNumber) || bpc.asNumber() !== 8 || d.has(N('Decode'))) { skipped++; continue; }
+          let dp = d.lookup(N('DecodeParms')); if (dp instanceof PDFArray) dp = dp.size() ? dp.lookup(dp.size() - 1) : null;
+          let pred = 1;
+          if (dp instanceof PDFDict) { const p = dp.lookup(N('Predictor')); pred = p instanceof PDFNumber ? p.asNumber() : 1; }
+          if (pred !== 1 && pred < 10) { skipped++; continue; }
+          out.push({ id: ref.toString(), kind: 'raw', data, w, h, comps, pred });
+          continue;
+        }
+      } catch (e) { /* unreadable image */ }
+      skipped++;
+    }
+    return { images: out, skipped };
+  }
+
+  /* ---------- place pages on new sheets (N-up / fit to paper) ---------- */
+  const SHEETS = { a4: [595.28, 841.89], a3: [841.89, 1190.55], letter: [612, 792], b5: [515.91, 728.5] };
+  // opts: { cols, rows, paper, orient: 'portrait'|'landscape'|'auto', margin, gap, border, pages?: [indices] }
+  async function impose(PDFLib, bytes, opts) {
+    const src = await loadPdf(PDFLib, bytes);
+    const out = await PDFLib.PDFDocument.create();
+    const all = src.getPages();
+    const idx = opts.pages || all.map((_, i) => i);
+    const pages = idx.map((i) => all[i]);
+    const boxes = pages.map((p) => p.getCropBox());
+    const emb = await out.embedPages(pages, boxes.map((b) => ({ left: b.x, bottom: b.y, right: b.x + b.width, top: b.y + b.height })));
+    const per = opts.cols * opts.rows, m = opts.margin, g = opts.gap || 0;
+    for (let i = 0; i < pages.length; i += per) {
+      let [pw, ph] = SHEETS[opts.paper] || SHEETS.a4;
+      const r0 = norm(pages[i].getRotation().angle), b0 = boxes[i];
+      const firstLand = (r0 % 180 ? b0.height : b0.width) > (r0 % 180 ? b0.width : b0.height);
+      const land = opts.orient === 'landscape' || (opts.orient === 'auto' && firstLand);
+      if (land) [pw, ph] = [ph, pw];
+      const sheet = out.addPage([pw, ph]);
+      const cw = (pw - 2 * m - (opts.cols - 1) * g) / opts.cols, ch = (ph - 2 * m - (opts.rows - 1) * g) / opts.rows;
+      for (let j = 0; j < per && i + j < pages.length; j++) {
+        const k = i + j, p = pages[k], b = boxes[k], r = norm(p.getRotation().angle);
+        const W = b.width, H = b.height, vw = r % 180 ? H : W, vh = r % 180 ? W : H;
+        const s = Math.min(cw / vw, ch / vh), dw = vw * s, dh = vh * s;
+        const col = j % opts.cols, row = Math.floor(j / opts.cols);
+        const bx = m + col * (cw + g) + (cw - dw) / 2;
+        const by = ph - m - row * (ch + g) - ch + (ch - dh) / 2;
+        let x = bx, y = by;
+        if (r === 90) { x = bx; y = by + W * s; }
+        else if (r === 180) { x = bx + W * s; y = by + H * s; }
+        else if (r === 270) { x = bx + H * s; y = by; }
+        sheet.drawPage(emb[k], { x, y, width: W * s, height: H * s, rotate: PDFLib.degrees(-r) });
+        if (opts.border) sheet.drawRectangle({ x: bx, y: by, width: dw, height: dh, borderColor: PDFLib.rgb(0.6, 0.6, 0.6), borderWidth: 0.5 });
+      }
+    }
+    return out.save();
+  }
+
+  return { norm, parseRanges, rangeIdx, loadPdf, merge, extract, geom, watermark, pageNumbers, imagesToPdf, rasterPagesToPdf, resave, compressImages, jpegInfo, stripJpeg, unPng, a85, tableFromItems, cellOf, buildXlsx, listImages, impose, SHEETS };
 })();
 if (typeof module !== 'undefined') module.exports = Core;
 
@@ -979,7 +1204,7 @@ async function blobBytes(b) { return new Uint8Array(await b.arrayBuffer()); }
 
 /* ---------- download ---------- */
 function makeBlob(bytes, name) {
-  const t = /\.txt$/i.test(name) ? 'text/plain;charset=utf-8' : /\.zip$/i.test(name) ? 'application/zip' : /\.png$/i.test(name) ? 'image/png' : /\.jpe?g$/i.test(name) ? 'image/jpeg' : 'application/pdf';
+  const t = /\.xlsx$/i.test(name) ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : /\.txt$/i.test(name) ? 'text/plain;charset=utf-8' : /\.zip$/i.test(name) ? 'application/zip' : /\.png$/i.test(name) ? 'image/png' : /\.jpe?g$/i.test(name) ? 'image/jpeg' : 'application/pdf';
   return bytes instanceof Blob ? bytes : new Blob([bytes], { type: t });
 }
 const UA = navigator.userAgent || '';
@@ -1232,11 +1457,16 @@ const ICONS = {
   pagenum: SV(DOC + '<path d="M10.5 17.5h3M12 17.5V12l-1.5 1"/>'),
   pdf2img: SV(DOC + '<circle cx="10" cy="12" r="1.3"/><path d="M17 17.5l-3.5-3.5-5.5 5.5"/>'),
   pdf2txt: SV(DOC + '<path d="M8.5 12h7M8.5 15h7M8.5 18h4"/>'),
+  pdf2excel: SV('<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M3 14.8h18M9 4v16"/>'),
+  pdf2photos: SV('<rect x="6" y="3" width="15" height="13" rx="2"/><path d="M3 7.5V19a2 2 0 0 0 2 2h11.5"/><circle cx="11" cy="8" r="1.6"/><path d="M21 13l-4-4-7 7"/>'),
+  nup: SV('<rect x="4" y="2.5" width="16" height="19" rx="2"/><rect x="7" y="5.5" width="4.5" height="6" rx=".8"/><rect x="12.5" y="5.5" width="4.5" height="6" rx=".8"/><rect x="7" y="12.5" width="4.5" height="6" rx=".8"/><rect x="12.5" y="12.5" width="4.5" height="6" rx=".8"/>'),
+  resize: SV('<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M14 3v4M3 14h4"/><path d="M10 14l7-7M12.5 7H17v4.5"/>'),
 };
 const GROUPS = [
   { name: 'PDF로 만들기', desc: '사진과 문서를 PDF 한 파일로', c: 'g1', ids: ['img2pdf', 'word2pdf', 'ppt2pdf', 'hwp2pdf'] },
   { name: 'PDF 정리하기', desc: '합치고, 나누고, 다듬고, 줄이기', c: 'g2', ids: ['merge', 'split', 'organize', 'compress'] },
-  { name: '편집 · 꺼내기', desc: '표시를 더하거나 내용을 밖으로', c: 'g3', ids: ['watermark', 'pagenum', 'pdf2img', 'pdf2txt'] },
+  { name: 'PDF 편집하기', desc: '표시를 더하고 인쇄 모양 바꾸기', c: 'g3', ids: ['watermark', 'pagenum', 'nup', 'resize'] },
+  { name: 'PDF에서 꺼내기', desc: '표·글자·그림을 다른 형식으로', c: 'g4', ids: ['pdf2excel', 'pdf2txt', 'pdf2img', 'pdf2photos'] },
 ];
 const groupOf = (id) => GROUPS.find((g) => g.ids.includes(id));
 const tint = (g) => `--gc:var(--${g.c});--gs:var(--${g.c}-soft)`;
@@ -1392,6 +1622,125 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', /\.hwpx?$/
       outs.push({ name: baseName(it.name) + '.txt', bytes: new TextEncoder().encode(body) });
     }
     await deliverMany(outs, 'pdf_text.zip');
+  },
+},
+/* ---------- PDF → 엑셀 ---------- */
+{
+  id: 'pdf2excel', name: 'PDF → 엑셀', desc: 'PDF 속 표를 엑셀(.xlsx)로', accept: '.pdf,application/pdf', multiple: false, test: isPdf,
+  defaults: { sheets: 'page', range: '', pv: 1 },
+  prepare: preparePdf,
+  async rows(it, n) {
+    it.rowCache = it.rowCache || {};
+    if (it.rowCache[n]) return it.rowCache[n];
+    const pdfjs = await loadLib('pdfjs');
+    const page = await it.doc.getPage(n);
+    const vp = page.getViewport({ scale: 1 });
+    const tc = await page.getTextContent();
+    const items = [];
+    for (const t of tc.items) {
+      if (!t.str || !t.str.trim()) continue;
+      const m = pdfjs.Util.transform(vp.transform, t.transform);
+      if (Math.abs(m[1]) > 0.3 * Math.abs(m[0]) || Math.abs(m[0]) < 1e-6) continue; // skip sideways text
+      const h = Math.hypot(m[2], m[3]);
+      items.push({ str: t.str, x: m[4], y: m[5], w: t.width * vp.scale, h });
+    }
+    page.cleanup();
+    return (it.rowCache[n] = Core.tableFromItems(items));
+  },
+  async renderMain() {
+    const it = S.files[0];
+    const n = Math.min(Math.max(1, S.opts.pv), it.pages);
+    $('#main').innerHTML = singleCard(it) + `<div class="mainbar"><span class="count">미리보기 · 엑셀에 이렇게 들어가요</span>${it.pages > 1 ? `<button class="btn" id="pvPrev">${IC.left}</button><span style="font-size:14px;font-weight:600;min-width:72px;text-align:center">${n} / ${it.pages}쪽</span><button class="btn" id="pvNext">${IC.right}</button>` : ''}</div><div class="xwrap" id="xwrap"><div class="spinner" style="margin:40px auto"></div></div>`;
+    wireSwap();
+    const step = (d) => { S.opts.pv = Math.min(it.pages, Math.max(1, n + d)); this.renderMain(); };
+    if ($('#pvPrev')) { $('#pvPrev').onclick = () => step(-1); $('#pvNext').onclick = () => step(1); }
+    const rows = await this.rows(it, n);
+    if (!$('#xwrap')) return;
+    if (!rows.length) { $('#xwrap').innerHTML = '<div class="note warn" style="margin:16px">이 페이지에서 글자를 찾지 못했어요. <b>스캔본(사진으로 된 PDF)</b>이면 표를 뽑을 수 없어요.</div>'; return; }
+    const nc = Math.max(1, ...rows.map((r) => r.length)), show = rows.slice(0, 200);
+    const head = '<tr><th></th>' + Array.from({ length: nc }, (_, i) => `<th>${String.fromCharCode(65 + (i % 26))}${i >= 26 ? Math.floor(i / 26) : ''}</th>`).join('') + '</tr>';
+    const body = show.map((r, ri) => (r.filter(Boolean).length === 1 && r[0] && nc > 1) ? `<tr><th>${ri + 1}</th><td colspan="${nc}">${esc(r[0])}</td></tr>` : `<tr><th>${ri + 1}</th>` + Array.from({ length: nc }, (_, ci) => { const v = r[ci] || ''; const c = Core.cellOf(v); return `<td${c && c.t === 'n' ? ' class="num"' : ''}>${esc(v)}</td>`; }).join('') + '</tr>').join('');
+    $('#xwrap').innerHTML = `<table class="xtable">${head}${body}</table>` + (rows.length > show.length ? `<div class="hint" style="padding:10px">… 외 ${rows.length - show.length}줄</div>` : '');
+  },
+  renderOpts() {
+    optsForm($('#opts'), [
+      { key: 'sheets', type: 'seg', label: '시트 나누기', options: [['page', '페이지마다 시트'], ['one', '한 시트에 모두']] },
+      { key: 'range', type: 'text', label: '페이지 (비우면 전체)', placeholder: '예: 2-4' },
+      { type: 'note', html: () => '글자 위치를 보고 <b>칸과 줄을 자동으로 나눠요.</b> 숫자(1,234 같은)는 계산 가능한 숫자로 들어가요.<br><br>칸 안에서 줄바꿈된 글은 여러 줄로 나뉠 수 있고, 스캔본은 표를 뽑을 수 없어요. 왼쪽 미리보기로 확인해 주세요.' },
+    ]);
+  },
+  runLabel: '엑셀로 변환',
+  async run() {
+    const it = S.files[0];
+    const idx = S.opts.range.trim() ? Core.parseRanges(S.opts.range, it.pages).flatMap(Core.rangeIdx) : Array.from({ length: it.pages }, (_, i) => i);
+    const per = [];
+    for (let k = 0; k < idx.length; k++) { busy(`표 읽는 중… (${k + 1}/${idx.length})`, k / idx.length); per.push({ n: idx[k] + 1, rows: await this.rows(it, idx[k] + 1) }); }
+    if (!per.some((p) => p.rows.length)) throw new Error('글자를 찾지 못했어요. 스캔본(사진으로 된 PDF)은 표를 뽑을 수 없어요.');
+    let sheets;
+    if (S.opts.sheets === 'one') {
+      const rows = [];
+      per.forEach((p, i) => { if (i) rows.push([]); rows.push(...p.rows); });
+      sheets = [{ name: baseName(it.name), rows }];
+    } else sheets = per.map((p) => ({ name: `${p.n}페이지`, rows: p.rows.length ? p.rows : [['(글자 없음)']] }));
+    busy('엑셀 파일 만드는 중…');
+    const JSZip = await loadLib('jszip');
+    deliver(await Core.buildXlsx(JSZip, sheets), baseName(it.name) + '.xlsx', `${idx.length}페이지 · 시트 ${sheets.length}개`);
+  },
+},
+/* ---------- 사진 추출 ---------- */
+{
+  id: 'pdf2photos', name: '사진 추출', desc: 'PDF에 들어 있는 사진을 원본 화질로', accept: '.pdf,application/pdf', multiple: false, test: isPdf,
+  defaults: {},
+  async prepare(item) {
+    const PDFLib = await loadLib('pdflib');
+    const r = await Core.listImages(PDFLib, item.bytes);
+    item.imgs = r.images; item.skipped = r.skipped;
+    item.imgs.sort((a, b) => b.w * b.h - a.w * a.h);
+  },
+  async toFile(im, i, base) {
+    const pad = String(i + 1).padStart(2, '0');
+    if (im.kind === 'jpeg') return { name: `${base}_사진${pad}.jpg`, bytes: im.data };
+    let raw = await inflateBytes(im.data);
+    if (im.pred >= 10) raw = Core.unPng(raw, im.w, im.h, im.comps);
+    const c = document.createElement('canvas'); c.width = im.w; c.height = im.h;
+    const ctx = c.getContext('2d'), id = ctx.createImageData(im.w, im.h), d = id.data;
+    for (let p = 0, j = 0, n = im.w * im.h; p < n; p++, j += im.comps) { const o = p * 4; if (im.comps === 3) { d[o] = raw[j]; d[o + 1] = raw[j + 1]; d[o + 2] = raw[j + 2]; } else d[o] = d[o + 1] = d[o + 2] = raw[j]; d[o + 3] = 255; }
+    ctx.putImageData(id, 0, 0);
+    const bytes = await blobBytes(await canvasBlob(c, 'image/png'));
+    c.width = c.height = 0;
+    return { name: `${base}_사진${pad}.png`, bytes };
+  },
+  renderMain() {
+    const it = S.files[0];
+    $('#main').innerHTML = singleCard(it) + `<div class="mainbar"><span class="count">사진 ${it.imgs.length}장 찾음${it.skipped ? ` · 특수 형식 ${it.skipped}장은 건너뜀` : ''}</span></div><div class="files" id="list"></div>`;
+    wireSwap();
+    const list = $('#list');
+    if (!it.imgs.length) { list.outerHTML = '<div class="note warn">이 PDF에서 따로 저장된 사진을 찾지 못했어요. 페이지 전체를 그림으로 받으려면 <b>PDF → 이미지</b>를 써 보세요.</div>'; return; }
+    it.imgs.forEach((im, i) => {
+      const c = document.createElement('div'); c.className = 'fcard';
+      c.innerHTML = `<div class="thumb"></div><div class="fname">사진 ${i + 1}</div><div class="fmeta">${im.w}×${im.h} · ${im.kind === 'jpeg' ? 'JPG' : 'PNG'}</div>`;
+      const th = $('.thumb', c);
+      lazy(c, async () => {
+        try {
+          if (im.kind === 'jpeg' && im.comps === 4) { th.innerHTML = '<span class="hint">인쇄용(CMYK) 사진<br>미리보기 없음</span>'; return; }
+          const f = im.thumb || (im.thumb = await this.toFile(im, i, 'x'));
+          const url = URL.createObjectURL(new Blob([f.bytes], { type: im.kind === 'jpeg' ? 'image/jpeg' : 'image/png' }));
+          const img = new Image(); img.alt = ''; img.src = url; th.innerHTML = ''; th.appendChild(img);
+        } catch (e) { th.textContent = '미리보기 실패'; }
+      });
+      list.appendChild(c);
+    });
+  },
+  renderOpts() {
+    optsForm($('#opts'), [{ type: 'note', html: () => S.files[0].imgs.length ? 'PDF 안에 들어 있는 사진을 <b>다시 압축하지 않고</b> 그대로 꺼내요. 아주 작은 아이콘은 빼요.<br><br>여러 장이면 ZIP으로 묶어 드려요.' : '꺼낼 사진이 없어요.' }]);
+    const b = $('#run'); if (b) b.disabled = !this.ready();
+  },
+  ready() { return S.files[0] && S.files[0].imgs.length > 0; },
+  runLabel: '사진 저장',
+  async run() {
+    const it = S.files[0], base = baseName(it.name), outs = [];
+    for (let i = 0; i < it.imgs.length; i++) { busy(`사진 꺼내는 중… (${i + 1}/${it.imgs.length})`, i / it.imgs.length); outs.push(await this.toFile(it.imgs[i], i, base)); }
+    await deliverMany(outs, `${base}_사진.zip`);
   },
 },
 /* ---------- 병합 ---------- */
@@ -1553,6 +1902,35 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', /\.hwpx?$/
     deliver(out, `${baseName(it.name)}_압축.pdf`, msg);
   },
 },
+/* ---------- 모아찍기 / 크기 맞추기 (shared preview) ---------- */
+imposeTool({
+  id: 'nup', name: '모아찍기', desc: '한 장에 여러 페이지 모아서',
+  defaults: { n: 4, paper: 'a4', border: true },
+  layout(it) {
+    const land = it.firstLand, n = S.opts.n;
+    const L = land ? { 2: [1, 2, 'portrait'], 4: [2, 2, 'landscape'], 6: [2, 3, 'portrait'], 9: [3, 3, 'landscape'] } : { 2: [2, 1, 'landscape'], 4: [2, 2, 'portrait'], 6: [3, 2, 'landscape'], 9: [3, 3, 'portrait'] };
+    const [cols, rows, orient] = L[n];
+    return { cols, rows, orient, paper: S.opts.paper, margin: 18, gap: 10, border: S.opts.border };
+  },
+  fields: [
+    { key: 'n', type: 'seg', label: '한 장에 몇 쪽?', options: [[2, '2쪽'], [4, '4쪽'], [6, '6쪽'], [9, '9쪽']] },
+    { key: 'paper', type: 'seg', label: '용지', options: [['a4', 'A4'], ['a3', 'A3'], ['b5', 'B5'], ['letter', 'Letter']] },
+    { key: 'border', type: 'check', label: '페이지마다 테두리 선' },
+  ],
+  note: () => '왼쪽→오른쪽, 위→아래 순서로 배치해요. 가로 슬라이드는 자동으로 맞는 방향을 골라요.',
+  suffix: '모아찍기', runLabel: '모아찍기 PDF 만들기',
+}),
+imposeTool({
+  id: 'resize', name: '크기 맞추기', desc: '모든 페이지를 A4 등 같은 크기로',
+  defaults: { paper: 'a4', margin: 0 },
+  layout() { return { cols: 1, rows: 1, orient: 'auto', paper: S.opts.paper, margin: S.opts.margin, gap: 0, border: false }; },
+  fields: [
+    { key: 'paper', type: 'seg', label: '용지', options: [['a4', 'A4'], ['a3', 'A3'], ['b5', 'B5'], ['letter', 'Letter']] },
+    { key: 'margin', type: 'seg', label: '여백', options: [[0, '없음'], [18, '좁게'], [36, '넓게']] },
+  ],
+  note: () => '크기가 제각각인 페이지를 같은 용지 크기로 맞춰요. 내용 비율은 그대로 두고 가운데에 맞춰 넣어요. 가로 페이지는 가로 용지로 둬요.',
+  suffix: '크기맞춤', runLabel: '크기 맞춘 PDF 만들기',
+}),
 /* ---------- 워터마크 ---------- */
 {
   id: 'watermark', name: '워터마크', desc: '모든 페이지에 글자 도장 찍기',
@@ -1667,6 +2045,50 @@ docTool('hwp2pdf', '한글 → PDF', '한글 문서(.hwp)를 PDF로', /\.hwpx?$/
   },
 },
 ];
+
+function imposeTool(cfg) {
+  return {
+    id: cfg.id, name: cfg.name, desc: cfg.desc, accept: '.pdf,application/pdf', multiple: false, test: isPdf,
+    defaults: cfg.defaults,
+    async prepare(item) {
+      await preparePdf(item);
+      const vp = (await item.doc.getPage(1)).getViewport({ scale: 1 });
+      item.firstLand = vp.width > vp.height;
+    },
+    async preview() {
+      const it = S.files[0], token = (this._tok = (this._tok || 0) + 1);
+      const L = cfg.layout(it), per = L.cols * L.rows;
+      const PDFLib = await loadLib('pdflib');
+      const bytes = await Core.impose(PDFLib, it.bytes, Object.assign({}, L, { pages: Array.from({ length: Math.min(per, it.pages) }, (_, i) => i) }));
+      const doc = await openPdfjs(bytes);
+      const r = await renderPage(doc, 1, (vp) => Math.min(1.6, 1000 / Math.max(vp.width, vp.height)));
+      doc.destroy();
+      if (token !== this._tok || !$('#pvBox')) return;
+      $('#pvBox').innerHTML = ''; $('#pvBox').appendChild(r.canvas);
+      const sheets = Math.ceil(it.pages / per);
+      $('#pvInfo').textContent = `${it.pages}쪽 → 종이 ${sheets}장 (첫 장 미리보기)`;
+    },
+    renderMain() {
+      const it = S.files[0];
+      $('#main').innerHTML = singleCard(it) + '<div class="mainbar"><span class="count" id="pvInfo">미리보기 만드는 중…</span></div><div class="preview" id="pvBox"><div class="spinner"></div></div>';
+      wireSwap();
+      this.preview().catch((e) => { const b = $('#pvBox'); if (b) b.innerHTML = `<div class="note bad">${esc(e.message)}</div>`; });
+    },
+    renderOpts() {
+      const re = () => { clearTimeout(this._t); this._t = setTimeout(() => this.preview().catch(() => {}), 120); };
+      optsForm($('#opts'), cfg.fields.map((f) => Object.assign({}, f, { onchange: re })).concat([{ type: 'note', html: cfg.note }]));
+    },
+    runLabel: cfg.runLabel,
+    async run() {
+      const it = S.files[0];
+      busy('PDF 만드는 중…');
+      const PDFLib = await loadLib('pdflib');
+      const out = await Core.impose(PDFLib, it.bytes, cfg.layout(it));
+      const per = cfg.layout(it).cols * cfg.layout(it).rows;
+      deliver(out, `${baseName(it.name)}_${cfg.suffix}.pdf`, `${it.pages}쪽 → ${Math.ceil(it.pages / per)}장`);
+    },
+  };
+}
 
 /* ---------- Office documents (rendered in-browser) ---------- */
 function docTool(id, name, desc, re, accept, kind, beta) {
@@ -1917,5 +2339,3 @@ route();
 </script>
 </body>
 </html>
-
-</body></html>
