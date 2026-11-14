@@ -17,15 +17,16 @@ for f in sorted(glob.glob(H + '/work/recheck/r*.json')):
         if not v.get('exp'): continue
         if v.get('verdict') == 'confirmed': ov[k] = clean(v['exp']); c['confirmed'] += 1
         else: ov[k] = unc(v['exp']); c['uncertain'] += 1
-for f in sorted(glob.glob(H + '/work/websearch/w*.json')):  # 웹 검증 재확인 결과가 recheck보다 우선
-    for k, v in json.load(open(f)).items():
-        if not v.get('exp'): continue
-        ov[k] = clean(v['exp']) if v.get('verdict') == 'confirmed' else unc(v['exp'])
 for f in sorted(glob.glob(H + '/work/deckexp/d*.json')):
     for k, v in json.load(open(f)).items():
         if not v.get('exp'): continue
         if v.get('uncertain'): ov[k] = unc(v['exp']); c['new_unc'] += 1
         else: ov[k] = clean(v['exp']); c['new'] += 1
+for f in sorted(glob.glob(H + '/work/websearch/w*.json')) + sorted(glob.glob(H + '/work/websearch/x*.json')):  # 웹 검증 결과가 recheck·deckexp보다 우선 (계산 규칙만 그 뒤), x*는 한도 소진분 재검증
+    for k, v in json.load(open(f)).items():
+        if not v.get('exp'): continue
+        if '한도' in v.get('src', '') or '미검색' in v.get('src', ''): continue  # 검색 한도 때문에 근거 없이 채운 문항은 이전 판정 유지
+        ov[k] = clean(v['exp']) if v.get('verdict') == 'confirmed' else unc(v['exp'])
 if os.path.exists(H + '/work/calcfix.json'):  # 계산 문항 규칙(정답표대로 확실, 공식은 조사한 그대로)
     for k, v in json.load(open(H + '/work/calcfix.json')).items():
         if v.get('exp'): ov[k] = clean(v['exp']) if v.get('verdict') == 'confirmed' else unc(v['exp'])
