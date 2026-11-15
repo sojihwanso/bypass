@@ -322,14 +322,17 @@ table.lv tr.fut td{color:var(--muted)}
 
 <div class="wrap"><footer class="foot">
   <p style="margin:0 0 6px" class="foot-dis"><span id="footLead"></span>계산 결과는 법령과 공휴일 규정을 바탕으로 한 참고용 추정입니다. 실제 복무만료일은 소속 해운업체 복무관리 담당자나 관할 지방병무청(병무청 1588-9090)에 확인하세요.</p>
-  <p style="margin:0 0 6px">이 계산기는 <b>대체공휴일 계산을 포함</b>합니다. 대체공휴일은 선거일·임시공휴일과 마찬가지로 관공서의 공휴일로 보아 유급휴가 사용일수에서 빼고, 그만큼 휴가 기간을 늘립니다. 근거: 선원법 제71조(관공서의 공휴일·노동절은 유급휴가 사용일수에 포함하지 않음), 관공서의 공휴일에 관한 규정 제3조(공휴일이 토·일이나 다른 공휴일과 겹치면 다음 첫 비공휴일을 대체공휴일로 함), 공휴일에 관한 법률 제3조.</p>
+  <p style="margin:0 0 6px">이 계산기는 <b>대체공휴일 계산을 포함</b>합니다(기본 설정의 '휴가 중 대체공휴일'에서 끌 수 있음). 대체공휴일은 선거일·임시공휴일과 마찬가지로 관공서의 공휴일로 보아 유급휴가 사용일수에서 빼고, 그만큼 휴가 기간을 늘립니다. 근거: 선원법 제71조(관공서의 공휴일·노동절은 유급휴가 사용일수에 포함하지 않음), 관공서의 공휴일에 관한 규정 제3조(공휴일이 토·일이나 다른 공휴일과 겹치면 다음 첫 비공휴일을 대체공휴일로 함), 공휴일에 관한 법률 제3조.</p>
   <button class="ver" id="verTxt" type="button" title="버전"></button>
 </footer></div>
 
 <script>
 'use strict';
-const VERSION = '1.3.0';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '1.4.0';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  { v: '1.4.0', d: '2026. 11. 16', i: [
+    "기본 설정에 '휴가 중 대체공휴일' 선택 추가: 포함(기본, 휴가 사용일에서 뺌) · 포함 안 함(휴가를 쓴 날로 셈)",
+  ] },
   { v: '1.3.0', d: '2026. 11. 16', i: [
     '화면 아래 주의사항에 대체공휴일 관련 조항과 대체공휴일 계산 포함 안내 추가',
     "도움말에 '대체공휴일도 휴가에서 빠지나요?' 추가(모든 대체공휴일을 휴가 사용일에서 빼고 휴가 기간을 늘림)",
@@ -451,7 +454,12 @@ function holOf(n){
 }
 /* 선원법 제71조: 관공서 공휴일(일요일 포함)·노동절은 휴가 사용일수에서 뺌.
    대체공휴일·선거일·임시공휴일도 모두 관공서가 쉬는 날로 보아 빼고, 그만큼 휴가 기간을 늘림 */
-const isHol = n => dow(n) === 0 || !!holOf(n);
+// S.noSub 이 true 면(기본 설정 '대체공휴일 포함 안 함') 대체공휴일만 휴가를 쓴 날로 셈
+function isHol(n){
+  if (dow(n) === 0) return true;
+  const es = holOf(n); if (!es) return false;
+  return es.some(e => e.k !== 's' || !S.noSub);
+}
 function parseHolidays(doc){
   const map = new Map();
   for (const [y, list] of Object.entries(doc.d || {})){
@@ -699,6 +707,11 @@ function drawCalc(v){
     <div class="fgrid">
       ${field('fEnlist', '승선근무예비역 편입일', S.enlist)}
       ${field('fBirth', '출생연도 <small>(선택 · 30세 기한)</small>', S.birth, 'number', 'inputmode="numeric" min="1960" max="2099" placeholder="예: 2001"')}
+      <div class="f full"><label for="fSub">휴가 중 대체공휴일</label>
+        <select class="inp" id="fSub">
+          <option value="on" ${S.noSub ? '' : 'selected'}>포함 (기본) · 공휴일처럼 휴가 사용일에서 빼고 휴가를 늘림</option>
+          <option value="off" ${S.noSub ? 'selected' : ''}>포함 안 함 · 대체공휴일도 휴가를 쓴 날로 셈</option>
+        </select></div>
     </div>
     <details class="more" ${S.trS || S.trE || S.extra ? 'open' : ''}>
       <summary>군사교육소집 · 추가 인정일수</summary>
@@ -733,6 +746,7 @@ function drawCalc(v){
 
   const bind = (id, key) => { const el = $('#' + id); el.addEventListener('input', () => { S[key] = el.value.trim(); save(); refresh(); }); };
   bind('fEnlist', 'enlist'); bind('fBirth', 'birth'); bind('fTrS', 'trS'); bind('fTrE', 'trE'); bind('fExtra', 'extra');
+  $('#fSub').addEventListener('change', e => { S.noSub = e.target.value === 'off'; save(); refresh(); });
   $('#addRow').onclick = addRow;
   drawRows(); drawSyncBox(); refresh();
 }
@@ -852,6 +866,7 @@ function drawResults(){
     ${base.done != null && base.done > deadline ? `<div class="note badn"><b>기한을 넘깁니다.</b> 1,095일 도달 예정일이 복무 기한(${fmt(deadline)})보다 늦습니다(병역법 제23조의4①: 기한 안에 마칠 수 없으면 편입 취소).</div>` : ''}
     ${P.tr && P.valid.some(r => r.on <= P.tr.e && r.off >= P.tr.s) ? `<div class="note"><b>확인 필요</b> 군사교육소집 기간이 승선 기간과 겹칩니다. 겹친 날은 승선으로 한 번만 셉니다.</div>` : ''}
     ${P.valid.some(r => r.on < P.E) ? `<div class="note"><b>편입 전 승선</b> 편입일 전 날은 인정일수에 넣지 않았습니다(승선 중 편입).</div>` : ''}
+    ${S.noSub ? `<div class="note"><b>대체공휴일 포함 안 함</b> 대체공휴일을 휴가를 쓴 날로 세고 있습니다. 기본 설정에서 바꿀 수 있습니다.</div>` : ''}
     ${HOL.src === 'rule' ? `<div class="note"><b>오프라인 계산</b> 설·추석·부처님 오신 날·선거일·임시공휴일이 빠져 있어 휴가 종료일이 실제보다 빠를 수 있습니다. 인터넷에 연결되면 자동으로 다시 계산합니다.</div>` : ''}`;
 
   // 만료 예상
@@ -1072,7 +1087,7 @@ function helpHTML(){
       <p>선원법 제71조는 '관공서의 공휴일 또는 노동절'을 휴가 사용일수에서 빼라고 정할 뿐, 대체공휴일을 따로 적지 않았습니다.</p>
       <ul><li><b>2013. 11. 5~2021. 8. 3</b>: 관공서의 공휴일에 관한 규정이 대체일을 '공휴일로 한다'고 정해, 이 시기 대체공휴일은 관공서의 공휴일로 보고 빼는 것이 자연스럽습니다.</li>
       <li><b>2021. 8. 4 이후</b>: 규정이 '대체공휴일로 한다'로 바뀌었고, 법제처는 근로기준법에서 대체공휴일을 공휴일과 별개의 휴일로 본 적이 있습니다(법제처 21-0547). 선원법 기준의 공식 해석은 아직 찾지 못했습니다.</li></ul>
-      <p>이 계산기는 <b>모든 대체공휴일을 관공서의 공휴일로 보아 휴가 사용일수에서 빼고</b>, 그만큼 휴가 기간을 늘려 계산합니다. 대체공휴일은 관공서가 쉬는 날이고, 공휴일에 쉰 날을 휴가로 칠 수 없다는 법제처 해석(14-0142)의 취지에 맞기 때문입니다. 회사나 병무청이 달리 처리하면 만료일이 며칠 달라질 수 있습니다.</p></div></details>
+      <p>이 계산기는 <b>모든 대체공휴일을 관공서의 공휴일로 보아 휴가 사용일수에서 빼고</b>, 그만큼 휴가 기간을 늘려 계산합니다. 대체공휴일은 관공서가 쉬는 날이고, 공휴일에 쉰 날을 휴가로 칠 수 없다는 법제처 해석(14-0142)의 취지에 맞기 때문입니다. 회사나 병무청이 대체공휴일을 휴가로 센다면 <b>기본 설정 › 휴가 중 대체공휴일</b>을 '포함 안 함'으로 바꾸세요. 휴가가 그만큼 빨리 끝나 만료일이 며칠 앞당겨질 수 있습니다.</p></div></details>
     <details><summary>온라인·오프라인 모드는 무엇인가요?</summary><div class="body">
       <p>평소에는 <b>온라인 모드</b>로, 서버에 있는 1990~2100년 공휴일 자료(설·추석·부처님 오신 날·대체공휴일·선거일·임시공휴일 포함)로 계산합니다. 인터넷 연결이 끊기면 자동으로 <b>오프라인 모드</b>로 바뀌어 일요일과 양력 고정 공휴일만으로 계산하고, 다시 연결되면 온라인 모드로 돌아갑니다. 상단의 온라인/오프라인 표시를 누르면 자세한 상태를 볼 수 있습니다.</p></div></details>
     <details><summary>미래의 공휴일은 어떻게 정했나요?</summary><div class="body">
