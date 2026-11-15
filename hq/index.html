@@ -249,6 +249,11 @@
   .sc-row.is-hidden .sc-title { color: var(--muted); }
   .sc-row > input[type="checkbox"] { flex: none; width: 18px; height: 18px; }
   .sc-body { flex: 1 1 auto; min-width: 0; }
+  .sc-pic { flex: none; position: relative; width: 72px; height: 45px; padding: 0; border: 1.5px dashed var(--post); border-radius: 8px; background: var(--pave); color: var(--muted); font: inherit; font-size: 11.5px; font-weight: 700; line-height: 1.25; cursor: pointer; overflow: hidden; }
+  .sc-pic.has-pic { border-style: solid; border-color: var(--rule); }
+  .sc-pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .sc-pic:hover::after, .sc-pic:focus-visible::after { content: '바꾸기'; position: absolute; inset: 0; display: grid; place-items: center; background: rgba(0, 0, 0, .55); color: #fff; }
+  .sc-pic:disabled { cursor: progress; opacity: .6; }
   .sc-title { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 15.5px; font-weight: 700; color: var(--ink); text-decoration: none; }
   a.sc-title:hover span:first-child { text-decoration: underline; }
   .sc-meta { margin-top: 2px; font-size: 13px; color: var(--muted); }
@@ -267,8 +272,9 @@
   .cat-edit .acts { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   @media (max-width: 720px) {
     .sc-row { flex-wrap: wrap; }
-    .sc-body { flex-basis: calc(100% - 40px); }
+    .sc-body { flex-basis: calc(100% - 124px); }
     .sc-ctrl { width: 100%; justify-content: flex-start; padding-left: 30px; }
+    .sc-pic { width: 64px; height: 40px; }
   }
   .up-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 12px 4px; border-top: 1px solid var(--rule); }
   .up-row:first-child { border-top: 0; }
@@ -647,8 +653,9 @@
             <button type="button" class="mini-btn" data-sc-bulk-go>분류 옮기기</button>
             <button type="button" class="mini-btn" data-sc-bulk-clear>선택 해제</button>
           </div>
+          <input type="file" id="sc-pic-file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
           <div class="card" style="max-width: none; padding: 8px 18px" data-sc-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
-          <p class="list-hint">‘추천’을 누르면 커뮤니티 결과물 맨 위에 그 순서대로 보입니다(↑↓로 순서 변경). 분류·숨김·추천을 바꿔도 글에 ‘고침’은 붙지 않습니다. 체크해서 여러 개를 한꺼번에 옮길 수 있습니다.</p>
+          <p class="list-hint">왼쪽 그림을 누르면 썸네일을 바꿉니다(PNG·JPG·WebP·GIF, 큰 그림은 저절로 줄임). ‘추천’을 누르면 커뮤니티 결과물 맨 위에 그 순서대로 보입니다(↑↓로 순서 변경). 분류·숨김·추천을 바꿔도 글에 ‘고침’은 붙지 않습니다. 체크해서 여러 개를 한꺼번에 옮길 수 있습니다.</p>
         </div>
         <div id="pane-sc-cats" role="tabpanel" aria-labelledby="tab-sc-cats" data-sc-pane="cats" hidden>
           <div class="toolbar">
@@ -3667,7 +3674,7 @@
   const scList = $('[data-sc-list]'), catList = $('[data-cat-list]');
   async function loadShowcase() {
     scLoaded = true;
-    const cols = 'id, created_at, category, title, url, author_name, hidden, likes, comments, pin_rank';
+    const cols = 'id, created_at, category, title, url, author_name, hidden, likes, comments, thumb_url, pin_rank';
     let r = await B.sb.from('post_feed').select(cols).eq('kind', 'showcase').order('created_at', { ascending: false }).limit(2000);
     scHas027 = !(r.error && /pin_rank/.test(r.error.message || ''));
     if (!scHas027) r = await B.sb.from('post_feed').select(cols.replace(', pin_rank', '')).eq('kind', 'showcase').order('created_at', { ascending: false }).limit(2000);
@@ -3713,6 +3720,10 @@
       const row = el('div', `sc-row${r.hidden ? ' is-hidden' : ''}`);
       const ck = el('input'); ck.type = 'checkbox'; ck.checked = scSel.has(r.id); ck.setAttribute('aria-label', `${r.title} 선택`);
       ck.addEventListener('change', () => { if (ck.checked) scSel.add(r.id); else scSel.delete(r.id); syncBulk(); });
+      const pic = el('button', `sc-pic${r.thumb_url ? ' has-pic' : ''}`); pic.type = 'button';
+      pic.setAttribute('aria-label', `${r.title} 썸네일 ${r.thumb_url ? '바꾸기' : '넣기'}`);
+      if (r.thumb_url) { const im = el('img'); im.src = r.thumb_url; im.alt = ''; im.loading = 'lazy'; pic.append(im); } else pic.append(document.createTextNode('그림 없음'));
+      pic.addEventListener('click', () => { scPicFor = r; $('#sc-pic-file').click(); });
       const body = el('div', 'sc-body');
       const t = el('a', 'sc-title'); t.href = `/community/#p-${r.id}`; t.target = '_blank'; t.rel = 'noopener';
       t.append(el('span', null, r.title));
@@ -3745,11 +3756,62 @@
       const del = el('button', 'mini-btn', '지우기'); del.type = 'button';
       del.addEventListener('click', () => scArm(del, '정말 지우기', () => scDelete(r)));
       ctrl.append(del);
-      row.append(ck, body, ctrl);
+      if (r.thumb_url) {
+        const np = el('button', 'mini-btn', '그림 빼기'); np.type = 'button';
+        np.addEventListener('click', () => scSetPic(r, null));
+        ctrl.insertBefore(np, del);
+      }
+      row.append(ck, pic, body, ctrl);
       return row;
     }));
     syncBulk();
   }
+  // ----- 썸네일: 운영진 폴더(post-thumbs/<내 번호>/)에 올리고 그 글의 thumb_url 을 바꾼다 (023 권한 그대로) -----
+  let scPicFor = null;
+  const SC_IMG_MAX = 2 * 1024 * 1024;
+  const scToBlob = (c, type, q) => new Promise((ok) => c.toBlob(ok, type, q));
+  async function scShrink(file) {
+    if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type)) throw new Error('PNG·JPG·WebP·GIF 그림만 쓸 수 있습니다.');
+    if (file.size > 20e6) throw new Error('그림이 너무 큽니다. 20MB 이하 그림을 골라 주세요.');
+    if (file.type === 'image/gif' && file.size <= SC_IMG_MAX) return { blob: file, type: 'image/gif', ext: 'gif' };
+    const url = URL.createObjectURL(file);
+    try {
+      const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error('그림을 읽지 못했습니다.')); i.src = url; });
+      const k = Math.min(1, 1200 / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(img.naturalWidth * k)); c.height = Math.max(1, Math.round(img.naturalHeight * k));
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      for (const q of [0.86, 0.76, 0.64, 0.5]) {
+        let blob = await scToBlob(c, 'image/webp', q), type = 'image/webp';
+        if (!blob || blob.type !== 'image/webp') { blob = await scToBlob(c, 'image/jpeg', q); type = 'image/jpeg'; }
+        if (blob && blob.size <= SC_IMG_MAX) return { blob, type, ext: type === 'image/webp' ? 'webp' : 'jpg' };
+      }
+      throw new Error('2MB 이하로 줄이지 못했습니다. 더 작은 그림을 골라 주세요.');
+    } finally { URL.revokeObjectURL(url); }
+  }
+  const scPicPath = (u) => { const m = String(u || '').match(/\/post-thumbs\/([0-9a-f-]{36}\/[A-Za-z0-9._-]+)$/); return m ? m[1] : null; };
+  async function scSetPic(r, file) {
+    const btn = $(`.sc-row [aria-label^="${CSS.escape(r.title)} 썸네일"]`);
+    if (btn) btn.disabled = true;
+    const old = r.thumb_url;
+    let url = null;
+    try {
+      if (file) {
+        const out = await scShrink(file);
+        const path = `${user.id}/${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.${out.ext}`;
+        const up = await B.sb.storage.from('post-thumbs').upload(path, out.blob, { contentType: out.type, upsert: false });
+        if (up.error) throw new Error(/bucket|not found/i.test(up.error.message || '') ? '그림 저장소가 없습니다. supabase/023_member_uploads.sql 을 먼저 실행해 주세요.' : `그림을 올리지 못했습니다. (${up.error.message || up.error.statusCode || '오류'})`);
+        url = B.sb.storage.from('post-thumbs').getPublicUrl(path).data.publicUrl;
+      }
+    } catch (x) { if (btn) btn.disabled = false; toast(x.message, true); return; }
+    const ok = await scUpdate([r.id], { thumb_url: url }, url ? '썸네일을 바꿨습니다.' : '썸네일을 뺐습니다. 자동 그림으로 보입니다.');
+    if (!ok) { const p = scPicPath(url); if (p) B.sb.storage.from('post-thumbs').remove([p]); return; }
+    // 예전 그림 파일 정리 (운영진은 남의 폴더 그림도 지울 수 있음)
+    const p = scPicPath(old); if (p) B.sb.storage.from('post-thumbs').remove([p]);
+  }
+  $('#sc-pic-file').addEventListener('change', (e) => {
+    const f = e.target.files[0]; e.target.value = '';
+    if (f && scPicFor) scSetPic(scPicFor, f);
+  });
   // 위험한 버튼: 한 번 누르면 '정말?'으로 바뀌고, 4초 안에 한 번 더 눌러야 실행
   function scArm(btn, text, run) {
     if (btn.classList.contains('is-armed')) { clearTimeout(btn._t); run(); return; }
@@ -3765,7 +3827,7 @@
   }
   async function scUpdate(ids, patch, okText) {
     const { data, error } = await B.sb.from('posts').update(patch).in('id', ids).select('id');
-    if (error) { toast(error.code === '23514' ? '없는 분류입니다. 목록을 새로 불러옵니다.' : errText(error, '저장'), true); loadShowcase(); return false; }
+    if (error) { toast(error.code === '23514' && patch.category ? '없는 분류입니다. 목록을 새로 불러옵니다.' : errText(error, '저장'), true); loadShowcase(); return false; }
     if (!data.length) { toast('이미 지워졌거나 고칠 권한이 없는 결과물입니다. 목록을 새로 불러옵니다.', true); loadShowcase(); return false; }
     data.forEach(({ id }) => Object.assign(scRows.find((r) => r.id === id) || {}, patch));
     renderShowcase(); renderCats();
