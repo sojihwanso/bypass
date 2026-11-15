@@ -17,17 +17,17 @@
   const ini = /^[A-Za-z0-9]/.test(name) ? name[0].toUpperCase() : name.slice(0, 1);
 
   const css = `
-  .mnav { position: sticky; top: 0; z-index: 40; background: rgba(255,255,255,.95); backdrop-filter: saturate(1.4) blur(10px); -webkit-backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid #E6E8EB; font-family: 'Noto Sans KR', system-ui, sans-serif; color: #15171A; }
+  .mnav { position: sticky; top: 0; z-index: 40; background: var(--glass, rgba(255,255,255,.92)); backdrop-filter: saturate(1.8) blur(16px); -webkit-backdrop-filter: saturate(1.8) blur(16px); box-shadow: 0 1px 0 var(--line2, #E6E8EB); font-family: var(--f, 'Pretendard Variable', Pretendard, 'Noto Sans KR', system-ui, sans-serif); color: var(--ink, #15171A); }
   .mnav * { box-sizing: border-box; }
   .mnav-in { max-width: 1240px; margin: 0 auto; padding: 0 24px; height: 56px; display: flex; align-items: center; gap: 14px; }
   .mnav-brand { display: flex; align-items: center; gap: 8px; flex: none; color: inherit; text-decoration: none; font-weight: 700; font-size: 15px; }
   .mnav-tabs { display: flex; gap: 2px; flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; }
   .mnav-tabs::-webkit-scrollbar { display: none; }
-  .mnav-tabs a { flex: none; padding: 7px 12px; border-radius: 999px; font-size: 14px; font-weight: 500; color: #3F444C; text-decoration: none; white-space: nowrap; }
-  .mnav-tabs a:hover { background: #F1F2F4; color: #15171A; }
-  .mnav-tabs a[aria-current="page"] { background: #15171A; color: #fff; font-weight: 700; }
-  .mnav-tabs .mnav-sep { flex: none; width: 1px; height: 18px; background: #E6E8EB; margin: 9px 4px; }
-  .mnav-me { flex: none; width: 36px; height: 36px; border-radius: 999px; background: #DDEBE3; color: #0F5A3A; font-weight: 800; display: grid; place-items: center; text-decoration: none; font-size: 14px; }
+  .mnav-tabs a { flex: none; padding: 7px 12px; border-radius: 999px; font-size: 14px; font-weight: 500; color: var(--sub, #3F444C); text-decoration: none; white-space: nowrap; }
+  .mnav-tabs a:hover { background: var(--hover2, #F1F2F4); color: var(--ink, #15171A); }
+  .mnav-tabs a[aria-current="page"] { background: var(--ink, #15171A); color: var(--on-ink, #fff); font-weight: 650; }
+  .mnav-tabs .mnav-sep { flex: none; width: 1px; height: 18px; background: var(--line, #E6E8EB); margin: 9px 4px; }
+  .mnav-me { flex: none; width: 34px; height: 34px; border-radius: 999px; background: var(--me-bg, #E9F1FE); color: var(--me-fg, #1F56C7); box-shadow: inset 0 0 0 1px var(--me-ring, rgba(31,86,199,.12)); font-weight: 650; display: grid; place-items: center; text-decoration: none; font-size: 13px; }
   .mnav a:focus-visible { outline: 2px solid #E8590C; outline-offset: 2px; }
   @media (max-width: 640px) { .mnav-in { padding: 0 12px; gap: 8px; } .mnav-brand span { display: none; } }
   body.has-mnav .finder { top: 56px !important; }

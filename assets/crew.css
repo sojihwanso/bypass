@@ -1,0 +1,180 @@
+/* BYPASS 커뮤니티 디자인 공통 스타일 (로그인 · 회원가입 · 처리 현황)
+   색·글꼴·버튼·입력칸은 커뮤니티(community/index.html)와 같은 값. 밝게/어둡게는 커뮤니티에서 고른 값(bypass-theme)을 따른다.
+   HQ는 따로 assets/bypass.css 를 쓴다. */
+:root {
+  color-scheme: light;
+  --bg: #FFFFFF; --card: #FFFFFF; --surface: #FFFFFF;
+  --ink: #16181D; --mid: #4B5260; --sub: #6B7280; --faint: #8A919C; --text-2: #5C6370; --text-body: #2A2F38; --on-ink: #FFFFFF;
+  --line: rgba(15, 23, 42, .12); --line2: rgba(15, 23, 42, .06); --hair-1: rgba(15, 23, 42, .04); --hair-3: rgba(15, 23, 42, .10); --hair-panel: rgba(15, 23, 42, .08);
+  --soft: #F3F4F6; --soft2: #F7F8FA; --field: #F5F6F8; --hover: #F6F7F9; --hover2: #F1F3F6; --badge: #EEF0F3;
+  --accent: #E8590C; --accent-ink: #B4400B; --accent-tint: #FFF5EE; --accent-ring: rgba(232, 89, 12, .16); --notice: #C2410C; --warn-fg: #7C2D12;
+  --green: #137A3D; --green-tint: #EAF7EF; --green-ring: rgba(19, 122, 61, .14); --ok-fg: #0F5A2E;
+  --blue: #2F6FEB; --blue-glow: rgba(47, 111, 235, .12); --drop-hover: #F5F8FE;
+  --me-bg: #E9F1FE; --me-fg: #1F56C7; --me-ring: rgba(31, 86, 199, .12);
+  --like-bg: #FFF3F6; --like-fg: #D6204F; --like-ring: rgba(214, 32, 79, .22);
+  --danger: #B42318; --danger-solid: #D92D20; --danger-bg: #FFF6F6;
+  --primary: #16181D; --primary-hover: #262A33; --primary-fg: #FFFFFF; --primary-hi: rgba(255, 255, 255, .12);
+  --glass: rgba(255, 255, 255, .8); --toast: rgba(22, 24, 29, .94); --sel: #FFE3D1; --kbd: #FFFFFF;
+  --pill-glass: rgba(255, 255, 255, .74); --pill-ring: rgba(255, 255, 255, .6); --ini-fg: #16181D;
+  --sh-1: 0 1px 2px rgba(16, 24, 40, .05); --sh-btn: 0 1px 2px rgba(16, 24, 40, .16);
+  --ring: inset 0 0 0 1px rgba(15, 23, 42, .06);
+  --lift: 0 1px 2px rgba(16, 24, 40, .06), 0 14px 28px -10px rgba(16, 24, 40, .22);
+  --c-app-bg: #EAF2FE; --c-app-fg: #1F56C7; --c-app-ring: rgba(31, 86, 199, .10);
+  --up: #D92D20; --up-tint: rgba(217, 45, 32, .10); --down: #1F5FD1; --down-tint: rgba(31, 95, 209, .10);
+  --c-wiki-bg: #F1EEFE; --c-wiki-fg: #5536C9; --c-wiki-ring: rgba(85, 54, 201, .10);
+  --c-tool-bg: #FEF1E8; --c-tool-fg: #B4400B; --c-tool-ring: rgba(180, 64, 11, .10);
+  --c-lab-bg: #EAF7EF; --c-lab-fg: #137A3D; --c-lab-ring: rgba(19, 122, 61, .10);
+  --c-teal-bg: #E6F6F6; --c-teal-fg: #0E6D70; --c-teal-ring: rgba(14, 109, 112, .10);
+  --c-rose-bg: #FDEDF2; --c-rose-fg: #A62A55; --c-rose-ring: rgba(166, 42, 85, .10);
+  --c-gray-bg: #F1F2F4; --c-gray-fg: #4B5260; --c-gray-ring: rgba(75, 82, 96, .12);
+  --dash: #F2F4F6; --panel: #FFFFFF; --panel-2: #F7F8FA;
+  --t1: #FFE8D9; --t2: #DDEBE3; --t3: #E3EEFF; --t4: #F3EEFF; --t5: #FFF6CC; --t6: #FDE2EC;
+  --ease: cubic-bezier(.2, 0, 0, 1);
+  --f: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  --top-h: 60px;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0E0F12; --card: #15171B; --surface: #1A1D22;
+  --ink: #ECEEF1; --mid: #B9BFC8; --sub: #9AA1AC; --faint: #6F7682; --text-2: #A9B0BA; --text-body: #D7DBE0; --on-ink: #0E0F12;
+  --line: rgba(255, 255, 255, .14); --line2: rgba(255, 255, 255, .07); --hair-1: rgba(255, 255, 255, .05); --hair-3: rgba(255, 255, 255, .12); --hair-panel: rgba(255, 255, 255, .08);
+  --soft: #1E2127; --soft2: #16181D; --field: #1C1F25; --hover: #171A1F; --hover2: #1E2228; --badge: #262A31;
+  --accent: #F07A3A; --accent-ink: #FFA06B; --accent-tint: rgba(240, 122, 58, .12); --accent-ring: rgba(240, 122, 58, .26); --notice: #FF9A5E; --warn-fg: #FFC9A6;
+  --green: #5FD08F; --green-tint: rgba(95, 208, 143, .10); --green-ring: rgba(95, 208, 143, .22); --ok-fg: #A6E8C1;
+  --blue: #6E9BF5; --blue-glow: rgba(110, 155, 245, .22); --drop-hover: #171C26;
+  --me-bg: rgba(110, 155, 245, .16); --me-fg: #A9C3FA; --me-ring: rgba(110, 155, 245, .24);
+  --like-bg: rgba(255, 99, 140, .12); --like-fg: #FF7DA3; --like-ring: rgba(255, 99, 140, .30);
+  --danger: #FF8A80; --danger-solid: #E5483D; --danger-bg: rgba(229, 72, 61, .12);
+  --primary: #ECEEF1; --primary-hover: #FFFFFF; --primary-fg: #0E0F12; --primary-hi: rgba(255, 255, 255, .6);
+  --glass: rgba(14, 15, 18, .72); --toast: rgba(38, 42, 49, .96); --sel: rgba(240, 122, 58, .35); --kbd: #22262D;
+  --pill-glass: rgba(14, 15, 18, .55); --pill-ring: rgba(255, 255, 255, .08); --ini-fg: #16181D;
+  --sh-1: 0 1px 2px rgba(0, 0, 0, .35); --sh-btn: 0 1px 2px rgba(0, 0, 0, .45);
+  --ring: inset 0 0 0 1px rgba(255, 255, 255, .07);
+  --lift: 0 1px 2px rgba(0, 0, 0, .4), 0 16px 32px -10px rgba(0, 0, 0, .65);
+  --c-app-bg: #16223A; --c-app-fg: #9DBDFB; --c-app-ring: rgba(157, 189, 251, .14);
+  --up: #FF7A6E; --up-tint: rgba(255, 122, 110, .14); --down: #7FA8FF; --down-tint: rgba(127, 168, 255, .14);
+  --c-wiki-bg: #211C3A; --c-wiki-fg: #C1B2FF; --c-wiki-ring: rgba(193, 178, 255, .14);
+  --c-tool-bg: #2E1D12; --c-tool-fg: #FFB78C; --c-tool-ring: rgba(255, 183, 140, .14);
+  --c-lab-bg: #13291D; --c-lab-fg: #8FDDB0; --c-lab-ring: rgba(143, 221, 176, .14);
+  --c-teal-bg: #10292A; --c-teal-fg: #8ADBDD; --c-teal-ring: rgba(138, 219, 221, .14);
+  --c-rose-bg: #2E1621; --c-rose-fg: #F7A8C3; --c-rose-ring: rgba(247, 168, 195, .14);
+  --c-gray-bg: #22252B; --c-gray-fg: #B9C0CC; --c-gray-ring: rgba(185, 192, 204, .14);
+  --dash: #0E0F12; --panel: #17191E; --panel-2: #1F2228;
+  --t1: #F2C9AE; --t2: #B9D8C6; --t3: #BFD3F7; --t4: #D6CBF5; --t5: #EEDC92; --t6: #F2BCCF;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0E0F12; --card: #15171B; --surface: #1A1D22;
+    --ink: #ECEEF1; --mid: #B9BFC8; --sub: #9AA1AC; --faint: #6F7682; --text-2: #A9B0BA; --text-body: #D7DBE0; --on-ink: #0E0F12;
+    --line: rgba(255, 255, 255, .14); --line2: rgba(255, 255, 255, .07); --hair-1: rgba(255, 255, 255, .05); --hair-3: rgba(255, 255, 255, .12); --hair-panel: rgba(255, 255, 255, .08);
+    --soft: #1E2127; --soft2: #16181D; --field: #1C1F25; --hover: #171A1F; --hover2: #1E2228; --badge: #262A31;
+    --accent: #F07A3A; --accent-ink: #FFA06B; --accent-tint: rgba(240, 122, 58, .12); --accent-ring: rgba(240, 122, 58, .26); --notice: #FF9A5E; --warn-fg: #FFC9A6;
+    --green: #5FD08F; --green-tint: rgba(95, 208, 143, .10); --green-ring: rgba(95, 208, 143, .22); --ok-fg: #A6E8C1;
+    --blue: #6E9BF5; --blue-glow: rgba(110, 155, 245, .22); --drop-hover: #171C26;
+    --me-bg: rgba(110, 155, 245, .16); --me-fg: #A9C3FA; --me-ring: rgba(110, 155, 245, .24);
+    --like-bg: rgba(255, 99, 140, .12); --like-fg: #FF7DA3; --like-ring: rgba(255, 99, 140, .30);
+    --danger: #FF8A80; --danger-solid: #E5483D; --danger-bg: rgba(229, 72, 61, .12);
+    --primary: #ECEEF1; --primary-hover: #FFFFFF; --primary-fg: #0E0F12; --primary-hi: rgba(255, 255, 255, .6);
+    --glass: rgba(14, 15, 18, .72); --toast: rgba(38, 42, 49, .96); --sel: rgba(240, 122, 58, .35); --kbd: #22262D;
+    --pill-glass: rgba(14, 15, 18, .55); --pill-ring: rgba(255, 255, 255, .08); --ini-fg: #16181D;
+    --sh-1: 0 1px 2px rgba(0, 0, 0, .35); --sh-btn: 0 1px 2px rgba(0, 0, 0, .45);
+    --ring: inset 0 0 0 1px rgba(255, 255, 255, .07);
+    --lift: 0 1px 2px rgba(0, 0, 0, .4), 0 16px 32px -10px rgba(0, 0, 0, .65);
+    --c-app-bg: #16223A; --c-app-fg: #9DBDFB; --c-app-ring: rgba(157, 189, 251, .14);
+    --up: #FF7A6E; --up-tint: rgba(255, 122, 110, .14); --down: #7FA8FF; --down-tint: rgba(127, 168, 255, .14);
+    --c-wiki-bg: #211C3A; --c-wiki-fg: #C1B2FF; --c-wiki-ring: rgba(193, 178, 255, .14);
+    --c-tool-bg: #2E1D12; --c-tool-fg: #FFB78C; --c-tool-ring: rgba(255, 183, 140, .14);
+    --c-lab-bg: #13291D; --c-lab-fg: #8FDDB0; --c-lab-ring: rgba(143, 221, 176, .14);
+    --c-teal-bg: #10292A; --c-teal-fg: #8ADBDD; --c-teal-ring: rgba(138, 219, 221, .14);
+    --c-rose-bg: #2E1621; --c-rose-fg: #F7A8C3; --c-rose-ring: rgba(247, 168, 195, .14);
+    --c-gray-bg: #22252B; --c-gray-fg: #B9C0CC; --c-gray-ring: rgba(185, 192, 204, .14);
+    --dash: #0E0F12; --panel: #17191E; --panel-2: #1F2228;
+    --t1: #F2C9AE; --t2: #B9D8C6; --t3: #BFD3F7; --t4: #D6CBF5; --t5: #EEDC92; --t6: #F2BCCF;
+  }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; background: var(--dash); color: var(--ink); font-family: var(--f); font-size: 15px; line-height: 1.6; letter-spacing: -.003em; word-break: keep-all; overflow-wrap: break-word; }
+main { flex: 1; }
+::selection { background: var(--sel); }
+a { color: inherit; }
+button, input, select, textarea { font: inherit; color: inherit; letter-spacing: inherit; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 6px; }
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+@media (max-width: 600px) { .wrap { padding: 0 16px; } }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.skip { position: absolute; left: 16px; top: -60px; z-index: 50; background: var(--primary); color: var(--primary-fg); padding: 10px 16px; border-radius: 10px; font-weight: 700; text-decoration: none; }
+.skip:focus { top: 8px; }
+
+/* ---------- 머리글: 반투명 유리 ---------- */
+.top { position: sticky; top: 0; z-index: 20; background: var(--glass); backdrop-filter: saturate(180%) blur(16px); -webkit-backdrop-filter: saturate(180%) blur(16px); box-shadow: 0 1px 0 var(--line2); }
+.top-in { height: 60px; display: flex; align-items: center; gap: 20px; }
+.brand { display: flex; align-items: center; gap: 8px; flex: none; text-decoration: none; }
+.brand svg { width: 30px; height: 30px; }
+.brand b { font-weight: 750; font-size: 17px; letter-spacing: -.02em; }
+.top-r { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.top-link { display: inline-flex; align-items: center; height: 38px; padding: 0 12px; border-radius: 10px; color: var(--sub); font-weight: 600; font-size: 14.5px; text-decoration: none; transition: background-color 150ms ease-out, color 150ms ease-out; }
+.top-link:hover { background: var(--hover2); color: var(--ink); }
+body.has-mnav .top { display: none; }
+
+/* ---------- 버튼 ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 46px; padding: 0 20px; border-radius: 12px; border: 0; cursor: pointer; font-weight: 650; font-size: 15px; letter-spacing: -.01em; white-space: nowrap; text-decoration: none; transition: transform 120ms ease-out, background-color 150ms ease-out, box-shadow 150ms ease-out; }
+.btn:active { transform: scale(.97); }
+.btn-dark { background: var(--primary); color: var(--primary-fg); box-shadow: inset 0 1px 0 var(--primary-hi), 0 0 0 1px var(--primary), var(--sh-btn); }
+.btn-dark:hover { background: var(--primary-hover); }
+.btn-line { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line), var(--sh-1); }
+.btn-line:hover { background: var(--soft2); }
+.btn-accent { background: var(--accent); color: #16181D; box-shadow: var(--sh-btn); }
+.btn-sm { height: 38px; padding: 0 14px; border-radius: 10px; font-size: 14px; }
+.btn-block { width: 100%; }
+.btn[disabled] { opacity: .55; cursor: progress; transform: none; }
+
+/* ---------- 카드 · 입력칸 ---------- */
+.card { background: var(--panel); border-radius: 24px; padding: 32px; box-shadow: var(--ring); }
+.field-label { display: block; margin: 20px 0 8px; font-size: 14px; font-weight: 600; color: var(--mid); }
+.field-label:first-of-type { margin-top: 0; }
+.in { width: 100%; border: 0; border-radius: 12px; background: var(--surface); padding: 13px 16px; font-size: 16px; outline: none; box-shadow: inset 0 0 0 1px var(--line), var(--sh-1); transition: box-shadow 150ms ease-out; }
+.in::placeholder { color: var(--faint); }
+.in:focus { box-shadow: inset 0 0 0 1px var(--blue), 0 0 0 4px var(--blue-glow); }
+.in[aria-invalid="true"] { box-shadow: inset 0 0 0 1px var(--danger-solid), 0 0 0 4px rgba(217, 45, 32, .10); }
+.pw { position: relative; }
+.pw .in { padding-right: 76px; }
+.pw-toggle { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); height: 34px; padding: 0 12px; border: 0; border-radius: 8px; background: var(--soft); color: var(--mid); font-size: 13px; font-weight: 600; cursor: pointer; }
+.pw-toggle:hover { background: var(--hover2); color: var(--ink); }
+.hint { margin: 8px 0 0; font-size: 13px; color: var(--sub); }
+.hint.is-ok { color: var(--green); font-weight: 600; }
+.hint.is-bad { color: var(--danger); font-weight: 600; }
+.form-error { margin: 18px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--danger-bg); color: var(--danger); font-size: 14px; font-weight: 600; }
+.form-actions { margin-top: 24px; }
+.form-actions .btn { width: 100%; height: 50px; font-size: 16px; }
+
+/* ---------- 로그인 · 가입 ---------- */
+.auth-main { display: flex; justify-content: center; padding: 56px 16px 72px; }
+.auth { width: 100%; max-width: 440px; }
+.auth-head { text-align: center; margin-bottom: 26px; }
+.auth-head .mark { width: 56px; height: 56px; margin: 0 auto 14px; display: block; animation: markIn .6s cubic-bezier(.3, 1.6, .5, 1) both; }
+.auth-head h1 { margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -.035em; line-height: 1.25; }
+.auth-head p { margin: 8px 0 0; color: var(--sub); font-size: 15px; }
+.auth .card { animation: cardIn .5s var(--ease) .05s both; }
+.auth-alt { margin: 22px 0 0; text-align: center; font-size: 14.5px; color: var(--sub); }
+.auth-alt a { color: var(--ink); font-weight: 650; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line); }
+.auth-alt a:hover { text-decoration-color: var(--ink); }
+.auth-note { margin: 16px 0 0; text-align: center; font-size: 13px; color: var(--faint); }
+.auth-note a { color: var(--sub); }
+@keyframes markIn { from { opacity: 0; transform: scale(.4) rotate(-30deg); } }
+@keyframes cardIn { from { opacity: 0; transform: translateY(16px); } }
+@media (max-width: 600px) { .auth-main { padding-top: 34px; } .card { padding: 24px 20px; border-radius: 20px; } .auth-head h1 { font-size: 26px; } }
+
+/* ---------- 바닥글 ---------- */
+.foot { box-shadow: 0 -1px 0 var(--line2); background: var(--bg); }
+.foot .wrap { padding-top: 26px; padding-bottom: 32px; display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; font-size: 13px; color: var(--sub); }
+.foot-links { display: flex; flex-wrap: wrap; gap: 6px 20px; }
+.foot-links a { color: var(--text-2); text-decoration: none; }
+.foot-links a:hover { color: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
