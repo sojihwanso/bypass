@@ -134,7 +134,7 @@ select.inp{font-family:var(--f-body)}
 .vrow{border:1.5px solid var(--rule);border-radius:16px;padding:12px 14px 12px;background:var(--paper)}
 .vrow.bad{border-color:color-mix(in srgb,var(--bad) 55%,var(--rule))}
 .vrow .rh{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.vrow .no{display:grid;place-items:center;min-width:30px;height:30px;padding:0 8px;border-radius:999px;background:var(--acc);color:#fff;font-weight:700;font-size:13.5px;font-family:var(--f-mono)}
+.vrow .no{display:grid;place-items:center;min-width:30px;white-space:nowrap;flex:none;height:30px;padding:0 8px;border-radius:999px;background:var(--acc);color:#fff;font-weight:700;font-size:13.5px;font-family:var(--f-mono)}
 :root[data-theme="dark"] .vrow .no{color:var(--pri-ink)}
 .vrow .rh select{height:36px;border:1.5px solid var(--rule);border-radius:999px;background:var(--surface);padding:0 10px;font-size:13.5px;font-weight:600;min-width:0}
 .xbtn{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;border:0;background:var(--soft);color:var(--ink);margin-left:auto;flex:none}
@@ -265,7 +265,7 @@ table.lv tr.fut td{color:var(--muted)}
 <body>
 <header class="mast"><div class="wrap">
   <button class="brand" type="button" data-go="home" aria-label="처음 화면">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M12 5l6 7H6z" fill="currentColor" fill-opacity=".18"/><path d="M3 16h18l-2.2 3.6a2 2 0 0 1-1.7.9H6.9a2 2 0 0 1-1.7-.9z"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.9 5.6V3.4"/><rect x="3.1" y="5.6" width="3.6" height="8.9" rx=".4"/><path d="M3.1 8h3.6"/><g fill="currentColor" fill-opacity=".24" stroke-width="1.2"><rect x="8.3" y="11.2" width="3.2" height="3.3"/><rect x="11.5" y="11.2" width="3.2" height="3.3"/><rect x="14.7" y="11.2" width="3.2" height="3.3"/><rect x="17.9" y="11.2" width="3.2" height="3.3"/><rect x="8.3" y="7.9" width="3.2" height="3.3"/><rect x="11.5" y="7.9" width="3.2" height="3.3"/><rect x="14.7" y="7.9" width="3.2" height="3.3"/></g><path d="M1.4 14.5h21.4l-1.7 3.7a1.6 1.6 0 0 1-1.5 1H4.3a1.6 1.6 0 0 1-1.4-.9z" fill="currentColor" fill-opacity=".2" stroke-width="1.7"/></svg>
     <b>승선근무예비역 도우미</b>
   </button>
   <span class="sp"></span>
@@ -299,9 +299,9 @@ function ymd(n){ const d = new Date(n * DAY); return [d.getUTCFullYear(), d.getU
 function toS(n){ const [y, m, d] = ymd(n); return y + '-' + z2(m) + '-' + z2(d); }
 const dow = n => (new Date(n * DAY).getUTCDay());
 const WK = '일월화수목금토';
-function fmt(n, wk = true){ if (n == null) return '-'; const [y, m, d] = ymd(n); return `${y}. ${m}. ${d}.` + (wk ? `(${WK[dow(n)]})` : ''); }
-/* 표용: 한 자리 월·일 앞에 빈칸을 넣어 일의 자리끼리 세로로 맞춤 (2019.  4.  3.) */
-function fmtT(n){ if (n == null) return '-'; const [y, m, d] = ymd(n), p = x => (x < 10 ? '\u00a0' : '') + x; return `${y}. ${p(m)}. ${p(d)}.`; }
+function fmt(n, wk = true){ if (n == null) return '-'; const [y, m, d] = ymd(n); return `${y}. ${m}. ${d}` + (wk ? `(${WK[dow(n)]})` : ''); }
+/* 표용: 한 자리 월·일 앞에 빈칸을 넣어 일의 자리끼리 세로로 맞춤 (2019.  4.  3) */
+function fmtT(n){ if (n == null) return '-'; const [y, m, d] = ymd(n), p = x => (x < 10 ? '\u00a0' : '') + x; return `${y}. ${p(m)}. ${p(d)}`; }
 const rangeT = (a, b) => `<span class="rg">${fmtT(a)}<i>~</i>${fmtT(b)}</span>`;
 function addMonths(n, k){ const [y, m, d] = ymd(n); const t = new Date(Date.UTC(y, m - 1 + k, 1)); const last = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth() + 1, 0)).getUTCDate(); return Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), Math.min(d, last)) / DAY; }
 const addYears = (n, k) => addMonths(n, 12 * k);
@@ -902,7 +902,7 @@ function drawSyncBox(){
       : c.err === 'net' ? '<span class="sy-st bad">연결 실패 · 잠시 후 다시 시도</span>'
       : c.err === 'nofn' ? '<span class="sy-st bad">서버 준비 중</span>'
       : c.err === 'notfound' ? '<span class="sy-st bad">서버에 기록 없음</span>'
-      : `<span class="sy-st on">서버 백업 켜짐${c.at ? ' · ' + new Date(c.at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</span>`;
+      : `<span class="sy-st on">서버 백업 켜짐${c.at ? ' · ' + ((t) => `${t.getMonth() + 1}. ${t.getDate()} ${z2(t.getHours())}:${z2(t.getMinutes())}`)(new Date(c.at)) : ''}</span>`;
     html = `<div class="sy-h"><b>기록 백업</b>${st}</div>
       <div class="sy-code"><span>복구 코드</span><code class="mono">${esc(c.code)}</code><button class="btn btn-ghost btn-sm" type="button" data-sy="copy">복사</button></div>
       <p class="sy-p">이 코드를 메모해 두세요. 코드를 잃어버리면 기록을 되찾을 수 없고, 코드를 아는 사람은 누구나 이 기록을 볼 수 있습니다.</p>
@@ -996,7 +996,7 @@ function helpHTML(){
     <details><summary>온라인·오프라인 모드는 무엇인가요?</summary><div class="body">
       <p>평소에는 <b>온라인 모드</b>로, 서버에 있는 1990~2100년 공휴일 자료(설·추석·부처님 오신 날·대체공휴일·선거일·임시공휴일 포함)로 계산합니다. 인터넷 연결이 끊기면 자동으로 <b>오프라인 모드</b>로 바뀌어 일요일과 양력 고정 공휴일만으로 계산하고, 다시 연결되면 온라인 모드로 돌아갑니다. 상단의 온라인/오프라인 표시를 누르면 자세한 상태를 볼 수 있습니다.</p></div></details>
     <details><summary>미래의 공휴일은 어떻게 정했나요?</summary><div class="body">
-      <p>현행 「관공서의 공휴일에 관한 규정」(2026. 5. 11. 시행: 노동절·제헌절 공휴일, 대체공휴일 규정)을 그대로 적용해 2100년까지 만들었습니다. 음력 날짜는 한국 표준시 기준으로 계산했고, 2050년까지는 한국천문연구원 자료와 모두 같습니다. 선거일은 공직선거법 제34조의 규칙으로 계산한 예정일이며, 임시공휴일은 지정되기 전에는 알 수 없어 넣지 않았습니다(2026년 11월 확인분까지 반영).</p></div></details>
+      <p>현행 「관공서의 공휴일에 관한 규정」(2026. 5. 11 시행: 노동절·제헌절 공휴일, 대체공휴일 규정)을 그대로 적용해 2100년까지 만들었습니다. 음력 날짜는 한국 표준시 기준으로 계산했고, 2050년까지는 한국천문연구원 자료와 모두 같습니다. 선거일은 공직선거법 제34조의 규칙으로 계산한 예정일이며, 임시공휴일은 지정되기 전에는 알 수 없어 넣지 않았습니다(2026년 11월 확인분까지 반영).</p></div></details>
     <details><summary>기록은 어디에 저장되나요?</summary><div class="body">
       <p>입력한 내용은 이 브라우저에 저장됩니다. <b>서버 백업</b>을 켜면 복구 코드 하나에 묶어 서버에도 저장하고, 내용이 바뀔 때마다 몇 초 뒤 자동으로 올립니다. 서버에는 코드 원문 대신 암호화한 값(해시)만 남고, 코드를 아는 사람만 기록을 읽고 고칠 수 있습니다. 두 기기에서 고쳤다면 더 나중에 고친 쪽 기록이 남습니다. 서버 없이 <b>파일로 내보내기</b>로 따로 보관할 수도 있습니다.</p></div></details>
     <details><summary>계산이 병무청 결과와 다를 수 있나요?</summary><div class="body">
@@ -1029,14 +1029,14 @@ function helpHTML(){
       <li><b>사용일수</b>: 하선해 귀국한 다음 날부터 승선(외국은 출국) 전날까지. 관공서 공휴일·노동절·교육훈련 기간·포상휴가·기상악화 정박·일시상륙 기간은 빼고 셈 ${L('선원법 제71조')} ${L('시행규칙 제46조의3')}</li>
       <li>공휴일·근로자의 날에 쉰 날을 휴가를 쓴 것으로 칠 수 없다는 해석 ${L('법제처 법령해석 14-0142')}</li></ul></div></details>
     <details><summary>공휴일 기준</summary><div class="body">
-      <ul><li>일요일, 국경일(삼일절·제헌절·광복절·개천절·한글날), 1월 1일, 설·추석 연휴(각 3일), 부처님 오신 날, 노동절(5. 1.), 어린이날, 현충일, 기독탄신일, 임기만료 선거일, 정부가 지정하는 임시공휴일 ${L('관공서의 공휴일에 관한 규정 제2조')}</li>
+      <ul><li>일요일, 국경일(삼일절·제헌절·광복절·개천절·한글날), 1월 1일, 설·추석 연휴(각 3일), 부처님 오신 날, 노동절(5. 1), 어린이날, 현충일, 기독탄신일, 임기만료 선거일, 정부가 지정하는 임시공휴일 ${L('관공서의 공휴일에 관한 규정 제2조')}</li>
       <li>대체공휴일: 국경일·부처님 오신 날·노동절·어린이날·기독탄신일이 토·일과 겹치거나, 설·추석 연휴가 일요일과 겹치거나, 평일에 다른 공휴일과 겹치면 다음 첫 비공휴일 ${L('같은 규정 제3조')}</li>
       <li>선거일: 대통령 임기만료 70일 전, 국회의원 50일 전, 지방선거 30일 전 이후 첫 수요일(공휴일과 겹치거나 앞뒤가 공휴일이면 다음 주 수요일) ${L('공직선거법 제34조')}</li></ul></div></details>
     <details><summary>출처</summary><div class="body">
       <ul><li><a href="https://www.law.go.kr/법령/병역법" target="_blank" rel="noopener">병역법</a> · <a href="https://www.law.go.kr/법령/병역법시행령" target="_blank" rel="noopener">병역법 시행령</a> (국가법령정보센터)</li>
       <li><a href="https://www.law.go.kr/법령/선원법" target="_blank" rel="noopener">선원법</a> · <a href="https://www.law.go.kr/법령/선원법시행규칙" target="_blank" rel="noopener">선원법 시행규칙</a></li>
       <li><a href="https://www.law.go.kr/법령/관공서의공휴일에관한규정" target="_blank" rel="noopener">관공서의 공휴일에 관한 규정</a> · <a href="https://www.law.go.kr/법령/공직선거법" target="_blank" rel="noopener">공직선거법</a> · <a href="https://www.law.go.kr/법령/행정기본법" target="_blank" rel="noopener">행정기본법</a></li>
-      <li>병무청 훈령 「승선근무예비역의 관리규정」(2026. 1. 9. 제2178호)</li>
+      <li>병무청 훈령 「승선근무예비역의 관리규정」(2026. 1. 9, 제2178호)</li>
       <li><a href="https://www.mma.go.kr/contents.do?mc=mma0000774" target="_blank" rel="noopener">병무청 승선근무예비역 복무관리</a> · 병무청 민원상담 1588-9090</li></ul></div></details>
   </div>`;
 }
