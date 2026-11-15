@@ -225,12 +225,12 @@ table.lv tr.fut td{color:var(--muted)}
 .eta-big{border-radius:16px;background:var(--soft);padding:14px 16px}
 .zpick{position:relative}
 .zpick .zq{font-family:var(--f-body)}
-.zlist{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:30;background:var(--surface);border:1.5px solid var(--rule);border-radius:14px;box-shadow:var(--shadow);max-height:calc(15 * 44px + 8px);overflow-y:auto;overscroll-behavior:contain;padding:4px}
-.zi{display:flex;align-items:baseline;gap:10px;width:100%;height:44px;border:0;background:none;border-radius:10px;padding:0 10px;text-align:left;font-size:14px;overflow:hidden;white-space:nowrap}
+.zlist{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:30;background:var(--surface);border:1.5px solid var(--rule);border-radius:14px;box-shadow:var(--shadow);max-height:calc(10 * 44px + 8px);overflow-y:auto;overscroll-behavior:contain;padding:4px}
+.zi{display:flex;align-items:center;gap:10px;width:100%;height:44px;margin:0;border:0;background:none;border-radius:10px;padding:0 10px;text-align:left;font-size:14px;line-height:1.2;overflow:hidden;white-space:nowrap;box-sizing:border-box}
 .zi:hover,.zi:focus{background:var(--acc-bg)}
 .zi b{font-weight:600;overflow:hidden;text-overflow:ellipsis}
 .zi span{margin-left:auto;font-family:var(--f-mono);font-size:12px;color:var(--muted);flex:none}
-@media (max-width:620px){ .zlist{max-height:calc(8 * 44px + 8px)} .zi span{max-width:45%;overflow:hidden;text-overflow:ellipsis} }
+@media (max-width:620px){ .zlist{max-height:calc(7 * 44px + 8px)} .zi span{max-width:45%;overflow:hidden;text-overflow:ellipsis} }
 .nl-h{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px}
 .eta-big .big{margin:4px 0}
 
@@ -354,13 +354,18 @@ table.lv tr.fut td{color:var(--muted)}
 
 <script>
 'use strict';
-const VERSION = '2.2.0';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '2.2.1';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  { v: '2.2.1', d: '2026. 11. 16', i: [
+    "시간대 목록: 맨 위 'UTC±0 · 영국/런던', 그다음 +1, +2 … +14, −1 … −12 순서로 정렬(도시·고정 시간대 모두)",
+    "'기타'(Etc) 시간대 제외, 목록은 한 번에 10줄(휴대폰 7줄)까지",
+    '목록에 마우스를 올렸을 때 강조 칸과 글자 위치가 어긋나던 문제 수정',
+  ] },
   { v: '2.2.0', d: '2026. 11. 16', i: [
     "ETA '지금쯤 남은 거리' 위에 설명 한 줄 추가, 비율은 '(전체 거리의 ○% 남음)'으로 표시",
-    "'시간대 직접 고르기'를 검색 칸 + 목록으로 바꾸고 한 번에 15줄(휴대폰 8줄)까지만 보이게 함, 도시·나라·UTC+9로 찾기",
+    "'시간대 직접 고르기'를 검색 칸 + 목록으로 바꾸고 한 번에 10줄(휴대폰 7줄)까지만 보이게 함, 도시·나라·UTC+9로 찾기",
     '시간대 이름 옆에 나라 이름 표시, 브라우저마다 다른 새·옛 시간대 이름(Asia/Kolkata·Asia/Calcutta 등)도 모두 한국어로',
-    "'현재 선박 시간 기준'의 선박 시간대도 같은 검색형 목록으로(UTC±0 맨 위, 15줄)",
+    "'현재 선박 시간 기준'의 선박 시간대도 같은 검색형 목록으로",
   ] },
   { v: '2.1.0', d: '2026. 11. 16', i: [
     "ETA 계산기 '시간대 직접 고르기'와 선박 시간대 목록에서 UTC±0을 맨 위로",
@@ -1030,13 +1035,19 @@ function zoneLine(z, at){
 const FIXED_OFFS = (() => { const a = []; for (let m = -12 * 60; m <= 14 * 60; m += 30) if (m) a.push(m); [345, 525, 765, 825].forEach(x => a.push(x)); return [0, ...a.sort((x, y) => x - y)]; })();   // UTC±0 을 맨 위에
 /* 시간대 직접 고르기: 검색 칸 + 목록(PC 15줄, 휴대폰 8줄까지 보이고 나머지는 스크롤) */
 let zoneItems = null;
+/* 정렬: UTC±0 → +0:30, +1 … +14 → −0:30, −1 … −12 (같은 시차 안에서는 한국어 이름 순) */
+const offOrder = m => m === 0 ? 0 : m > 0 ? m : 100000 - m;
 function zoneAll(){
   if (zoneItems) return zoneItems;
   let tzs = []; try { tzs = Intl.supportedValuesOf('timeZone'); } catch(e) {}
-  const now = Date.now(), it = [{ v: 'f:0', t: 'UTC±0', k: '협정 세계시(UTC)', s: 'utc 협정 세계시 그리니치 gmt z' }];
-  FIXED_OFFS.filter(m => m).forEach(m => it.push({ v: 'f:' + m, t: offLabel(m), k: '고정 시간대', s: offLabel(m).toLowerCase().replace('−', '-') }));
-  tzs.forEach(t => { const ko = tzKo(t), n = tzCountry(t), o = offLabel(zoneOff({ tz: t }, now)); it.push({ v: 't:' + t, t: `${ko ? ko.split('/').pop() : t}${n ? ' · ' + n : ''}`, k: `${t} · ${o}`, s: `${t} ${ko} ${n} ${o}`.toLowerCase().replace(/−/g, '-') }); });
-  return (zoneItems = it);
+  tzs = tzs.filter(t => t.includes('/') && !/^(Etc|SystemV)\//.test(t));   // '기타'(Etc/GMT+5 같은 이름) 시간대는 뺌
+  const now = Date.now();
+  const it = [{ v: 'f:0', t: 'UTC±0 · 영국/런던', k: '협정 세계시(UTC) · 런던은 여름에 UTC+1', s: 'utc±0 utc+0 utc-0 협정 세계시 그리니치 gmt 영국 런던 london', o: 0 }];
+  FIXED_OFFS.filter(m => m).sort((a, b) => offOrder(a) - offOrder(b)).forEach(m => it.push({ v: 'f:' + m, t: offLabel(m), k: '고정 시간대', s: offLabel(m).toLowerCase().replace('−', '-'), o: m }));
+  const cities = tzs.map(t => { const ko = tzKo(t), n = tzCountry(t), off = zoneOff({ tz: t }, now), o = offLabel(off), city = ko ? ko.split('/').pop() : t;
+    return { v: 't:' + t, t: `${city}${n ? ' · ' + n : ''}`, k: `${o} · ${t}`, s: `${t} ${ko} ${n} ${o}`.toLowerCase().replace(/−/g, '-'), o: off, c: city }; });
+  cities.sort((a, b) => offOrder(a.o) - offOrder(b.o) || a.c.localeCompare(b.c, 'ko'));
+  return (zoneItems = it.concat(cities));
 }
 function zonePickHTML(key){
   return `<div class="zpick" data-for="${key}"><input class="inp zq" type="text" autocomplete="off" placeholder="시간대 직접 고르기 (도시·나라·UTC+9로 찾기)"><div class="zlist" role="listbox" hidden></div></div>`;
