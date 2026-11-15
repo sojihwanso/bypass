@@ -37,6 +37,9 @@ for f in sorted(glob.glob(H + '/work/websearch/w*.json')) + sorted(glob.glob(H +
 if os.path.exists(H + '/work/calcfix.json'):  # 계산 문항 규칙(정답표대로 확실, 공식은 조사한 그대로)
     for k, v in json.load(open(H + '/work/calcfix.json')).items():
         if v.get('exp'): ov[k] = clean(v['exp']) if v.get('verdict') == 'confirmed' else unc(v['exp']) + (' ' + NF if k in WSU else '')
+for f in sorted(glob.glob(H + '/work/textbook/t*.json')):  # 교재 확인: 근거를 찾은 문항만 '확실'로 바꿈(못 찾으면 웹 검증 결과 유지)
+    for k, v in json.load(open(f)).items():
+        if v.get('exp') and v.get('verdict') == 'confirmed': ov[k] = clean(v['exp']); WSU.discard(k)
 V = json.load(open(H + '/verify_2026-11-08.json'))
 cur = {}
 for f in sorted(glob.glob(OUT + '/*.json')):
