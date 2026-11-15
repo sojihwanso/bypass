@@ -26,7 +26,8 @@
 </script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <!-- Pretendard (SIL OFL): 화면에 쓰인 글자만 받아 오는 가변 글꼴 -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="preload" as="style" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"></noscript>
 <style>
 /* BYPASS 커뮤니티 = 로그인한 회원의 첫 화면이자 회원 공간 (예전 '공사장'의 기능을 모두 옮겨 왔다)
    화면: #home 홈 · #showcase 결과물 · #board 게시판 · #meeting 회의실(국원) · #me 내 정보 · #search 찾기 · #p-번호 글 페이지 · #write/showcase·#write/board 쓰기 · #edit-번호 고치기 · #n-번호 공지
@@ -2271,6 +2272,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   const MK_STATE = { open: '장중', pre: '장 시작 전', post: '시간외', closed: '장 마감' };
   let mkSyms = [], mkQuotes = {}, mkErr = {}, mkSel = null, mkRange = '1d', mkHasTable = true, mkTimer = null, mkBusy = false, mkDown = false;
   const mkNames = {};
+  const MK_LS = `bypass-mk-${user.id}`;   // 마지막으로 받은 시세 (다음에 열 때 먼저 보여 주기용)
   // 보이는 이름: 주식·ETF 는 티커만 (NVDA), 지수·환율은 기호가 알아보기 어려우니 짧은 이름 (S&P 500, 원·달러 환율)
   const MK_IDX = { 'CL=F': 'WTI 유가', '^GSPC': 'S&P 500', '^IXIC': '나스닥', '^DJI': '다우존스', '^RUT': '러셀 2000', '^VIX': 'VIX', '^NDX': '나스닥 100', '^SOX': '필라델피아 반도체', 'KRW=X': '원·달러' };
   const mkLabel = (sym) => MK_IDX[sym] || (sym.startsWith('^') || sym.includes('=') ? ((mkQuotes[sym] || {}).name || sym) : sym);   // 찾기 결과에서 본 이름 (시세가 오기 전 편집 목록에 쓰려고)
@@ -2454,6 +2456,13 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
         const { data, error } = await sb.from('market_watch').select('symbols').eq('user_id', user.id).maybeSingle();
         if (error) mkHasTable = false;
         mkSyms = !error && data && Array.isArray(data.symbols) ? data.symbols.slice(0, MK_MAX) : MK_DEFAULT.slice();
+        // 지난번 시세가 15분 안이면 먼저 보여 주고 (새 값은 받는 대로 바뀜)
+        if (!Object.keys(mkQuotes).length) {
+          try {
+            const c = JSON.parse(localStorage.getItem(MK_LS) || 'null');
+            if (c && Date.now() - c.at < 15 * 60000) { mkQuotes = c.q || {}; if (c.f && !mkFng) mkFng = c.f; }
+          } catch (x) { /* 저장분 없음 */ }
+        }
         paintMarket();
       }
       // 공포·탐욕 지수는 따로 받아 둔다 (못 받아도 종목 시세는 그대로)
@@ -2465,6 +2474,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       mkDown = false; mkErr = { ...(r.errors || {}) };
       (r.quotes || []).forEach((q) => { mkQuotes[q.symbol] = q; });
       paintMarket();
+      try { localStorage.setItem(MK_LS, JSON.stringify({ at: Date.now(), q: mkQuotes, f: mkFng || null })); } catch (x) { /* 저장 못 함 */ }
       if (mkSel && mkSel !== FNG && mkRange === '1d') mkDetail(true);
     } catch (e) {
       if (!Object.keys(mkQuotes).length) { mkDown = e.message === 'setup' ? 'setup' : 'fail'; paintMarket(); }
@@ -2962,22 +2972,24 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   }
 
   /* ===== 시작 ===== */
-  await loadCats();
+  // 분류 · 홈 화면 설정 · 내 대시보드를 한꺼번에 받는다 (예전엔 하나씩 기다려서 느렸음)
+  let homeSet = { market: true, fng: true, wti: true, weather: true, showcase: true, board: true };
+  const [, setRes] = await Promise.all([
+    loadCats(),
+    sb.from('site_settings').select('value').eq('key', 'community').maybeSingle().then((r) => r, () => ({})),
+    dbLoad().catch(() => {}),
+  ]);
+  try {
+    const v = (setRes && setRes.data && setRes.data.value) || {};
+    homeSet = { ...homeSet, ...(v.home || {}) };
+    if (Array.isArray(v.market_defaults)) MK_DEFAULT = v.market_defaults.filter((x) => typeof x === 'string' && /^[A-Z0-9.^=-]{1,15}$/.test(x)).slice(0, MK_MAX);
+  } catch (x) { /* 설정을 못 읽으면 기본값 */ }
   paintChips('showcase');
   loadCounts();
   route(true);
   if (q0) runSearch(q0);
-  // 홈 화면 설정 (HQ › 커뮤니티 › 홈 화면 설정 → site_settings 'community')
-  let homeSet = { market: true, fng: true, wti: true, weather: true, showcase: true, board: true };
-  try {
-    const { data } = await sb.from('site_settings').select('value').eq('key', 'community').maybeSingle();
-    const v = (data && data.value) || {};
-    homeSet = { ...homeSet, ...(v.home || {}) };
-    if (Array.isArray(v.market_defaults)) MK_DEFAULT = v.market_defaults.filter((x) => typeof x === 'string' && /^[A-Z0-9.^=-]{1,15}$/.test(x)).slice(0, MK_MAX);
-  } catch (x) { /* 설정을 못 읽으면 기본값 */ }
   mkFngOn = homeSet.fng !== false;
   mkWtiOn = homeSet.wti !== false;
-  await dbLoad();
   dbLayout();
   // 대시보드를 읽기 전에 그려진 결과물 카드의 ☆ 맞추기
   $$('.fav[data-fav-id]').forEach((b) => { const on = dbPrefs.favs.includes(Number(b.dataset.favId)); b.setAttribute('aria-pressed', String(on)); b.textContent = on ? '★' : '☆'; });
