@@ -2239,7 +2239,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   let mkSyms = [], mkQuotes = {}, mkErr = {}, mkSel = null, mkRange = '1d', mkHasTable = true, mkTimer = null, mkBusy = false, mkDown = false;
   const mkNames = {};
   // 보이는 이름: 주식·ETF 는 티커만 (NVDA), 지수·환율은 기호가 알아보기 어려우니 짧은 이름 (S&P 500, 원·달러 환율)
-  const MK_IDX = { '^GSPC': 'S&P 500', '^IXIC': '나스닥', '^DJI': '다우존스', '^RUT': '러셀 2000', '^VIX': 'VIX', '^NDX': '나스닥 100', '^SOX': '필라델피아 반도체', 'KRW=X': '원·달러' };
+  const MK_IDX = { 'CL=F': 'WTI 유가', '^GSPC': 'S&P 500', '^IXIC': '나스닥', '^DJI': '다우존스', '^RUT': '러셀 2000', '^VIX': 'VIX', '^NDX': '나스닥 100', '^SOX': '필라델피아 반도체', 'KRW=X': '원·달러' };
   const mkLabel = (sym) => MK_IDX[sym] || (sym.startsWith('^') || sym.includes('=') ? ((mkQuotes[sym] || {}).name || sym) : sym);   // 찾기 결과에서 본 이름 (시세가 오기 전 편집 목록에 쓰려고)
   const mkF = (n, d = 2) => n == null ? '–' : n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
   const mkPx = (q) => { if (!q || q.price == null) return '–'; const d = q.price >= 1000 ? 2 : q.price >= 1 ? 2 : 4; const v = mkF(q.price, d); return q.symbol.startsWith('^') ? v : q.currency === 'USD' ? `$${v}` : q.currency === 'KRW' ? `${v}원` : `${v} ${q.currency}`; };
@@ -2292,7 +2292,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     b.setAttribute('aria-pressed', String(mkSel === sym));
     const nm = el('span', 'mk-nm', mkLabel(sym));
     b.append(nm);
-    if (!q && mkErr[sym]) {
+    if (!q && mkErr[sym]) {   // WTI 처럼 따로 받는 칸은 wtiCard 가 mkErr 에 실패를 적어 둔다
       b.classList.add('is-err'); b.disabled = true;
       b.append(el('span', 'mk-ch mk-flat', mkErr[sym] === 'not found' ? '없는 종목이에요' : '지금은 못 불러왔어요'));
       return b;
@@ -2307,6 +2307,17 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   // ----- CNN 공포·탐욕 지수 ----- (함수 market › action 'fng', 30분마다 새 값)
   const FNG = '__fng';
   let mkFng = null, mkFngOn = true;
+  // ----- WTI 유가 ----- (뉴욕 원유 선물 CL=F. 내 종목 12개와 따로 받아서 공포·탐욕 지수 옆에 붙인다)
+  const WTI = 'CL=F';
+  let mkWtiOn = true, mkWtiErr = null;
+  const wtiPinned = () => mkWtiOn && !mkSyms.includes(WTI);
+  function wtiCard() {
+    if (mkWtiErr && !mkQuotes[WTI]) mkErr[WTI] = mkWtiErr;
+    const b = mkCard(WTI); b.classList.add('mk-wti');
+    const q = mkQuotes[WTI];
+    if (q) b.setAttribute('aria-label', `WTI 유가 배럴당 ${mkPx(q)}, 전일 대비 ${mkCh(q) || '변동 없음'}`);
+    return b;
+  }
   // 0–24 극단적 공포 · 25–44 공포 · 45–55 중립 · 56–75 탐욕 · 76–100 극단적 탐욕 (공포 파랑 ↔ 탐욕 빨강: 오름 빨강과 같은 방향)
   const FNG_BANDS = [[0, 25, '극단적 공포', '#1F5FD1'], [25, 45, '공포', '#6E98E6'], [45, 56, '중립', '#9097A3'], [56, 76, '탐욕', '#EC7B6B'], [76, 101, '극단적 탐욕', '#D92D20']];
   const fngBand = (v) => FNG_BANDS.find(([a, b]) => v >= a && v < b) || FNG_BANDS[2];
@@ -2395,8 +2406,8 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   function paintMarket() {
     const row = $('[data-mk-row]');
     if (mkDown) { row.replaceChildren(el('p', 'mk-msg', mkDown === 'setup' ? '시세 기능을 준비하고 있어요. 운영진이 설정을 마치면 여기에 보여요.' : '지금은 시세를 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.')); $('[data-mk-detail]').hidden = true; return; }
-    row.replaceChildren(...(mkFngOn ? [fngCard()] : []), ...mkSyms.map(mkCard));
-    if (mkSel && mkSel !== FNG && !mkSyms.includes(mkSel)) mkSel = null;
+    row.replaceChildren(...(mkFngOn ? [fngCard()] : []), ...(wtiPinned() ? [wtiCard()] : []), ...mkSyms.map(mkCard));
+    if (mkSel && mkSel !== FNG && !mkSyms.includes(mkSel) && !(mkSel === WTI && wtiPinned())) mkSel = null;
     $('[data-mk-detail]').hidden = !mkSel;
     const qs = Object.values(mkQuotes).filter((q) => mkSyms.includes(q.symbol));
     const t = qs.reduce((m, q) => Math.max(m, q.time || 0), 0);
@@ -2414,9 +2425,11 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       }
       // 공포·탐욕 지수는 따로 받아 둔다 (못 받아도 종목 시세는 그대로)
       if (mkFngOn && (!silent || !mkFng)) mkCall({ action: 'fng' }).then((f) => { if (f && typeof f.score === 'number') mkFng = { ...f, prev: f.prev || {}, points: Array.isArray(f.points) ? f.points : [] }; else if (!mkFng) mkFng = false; }).catch(() => { if (!mkFng) mkFng = false; }).finally(() => { if (!mkDown) paintMarket(); if (mkSel === FNG) mkDetail(); });
+      // WTI 유가도 따로 (못 받아도 다른 시세는 그대로)
+      if (wtiPinned()) mkCall({ action: 'quotes', symbols: [WTI] }).then((r) => { const q = (r.quotes || []).find((x) => x.symbol === WTI); if (q) { mkQuotes[WTI] = q; mkWtiErr = null; } else if (!mkQuotes[WTI]) mkWtiErr = 'fail'; }).catch(() => { if (!mkQuotes[WTI]) mkWtiErr = 'fail'; }).finally(() => { if (!mkDown) paintMarket(); if (mkSel === WTI && mkRange === '1d') mkDetail(true); });
       if (!mkSyms.length) { paintMarket(); return; }
       const r = await mkCall({ action: 'quotes', symbols: mkSyms });
-      mkDown = false; mkErr = r.errors || {};
+      mkDown = false; mkErr = { ...(r.errors || {}) };
       (r.quotes || []).forEach((q) => { mkQuotes[q.symbol] = q; });
       paintMarket();
       if (mkSel && mkSel !== FNG && mkRange === '1d') mkDetail(true);
@@ -2828,7 +2841,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   route(true);
   if (q0) runSearch(q0);
   // 홈 화면 설정 (HQ › 커뮤니티 › 홈 화면 설정 → site_settings 'community')
-  let homeSet = { market: true, fng: true, showcase: true, board: true };
+  let homeSet = { market: true, fng: true, wti: true, showcase: true, board: true };
   try {
     const { data } = await sb.from('site_settings').select('value').eq('key', 'community').maybeSingle();
     const v = (data && data.value) || {};
@@ -2836,6 +2849,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     if (Array.isArray(v.market_defaults)) MK_DEFAULT = v.market_defaults.filter((x) => typeof x === 'string' && /^[A-Z0-9.^=-]{1,15}$/.test(x)).slice(0, MK_MAX);
   } catch (x) { /* 설정을 못 읽으면 기본값 */ }
   mkFngOn = homeSet.fng !== false;
+  mkWtiOn = homeSet.wti !== false;
   await dbLoad();
   dbLayout();
   // 대시보드를 읽기 전에 그려진 결과물 카드의 ☆ 맞추기

@@ -778,6 +778,7 @@
           <h2>홈에 보일 칸</h2>
           <label class="check"><input type="checkbox" id="cs-market"> <span>미국 증시</span></label>
           <label class="check" style="margin-left: 26px"><input type="checkbox" id="cs-fng"> <span>CNN 공포·탐욕 지수 <small>(미국 증시 칸 맨 앞)</small></span></label>
+          <label class="check" style="margin-left: 26px"><input type="checkbox" id="cs-wti"> <span>WTI 유가 <small>(공포·탐욕 지수 바로 옆, 뉴욕 원유 선물 CL=F)</small></span></label>
           <label class="check"><input type="checkbox" id="cs-show"> <span>새 결과물</span></label>
           <label class="check"><input type="checkbox" id="cs-board"> <span>새 글</span></label>
           <h2 style="margin-top: 26px">미국 증시 기본 종목</h2>
@@ -4327,7 +4328,7 @@
   cmLoadHook('meeting', loadMeeting);
 
   /* ===== 커뮤니티 › 홈 화면 설정 ===== (site_settings 'community', 010 표 그대로) */
-  const CS_DEFAULT = { home: { market: true, fng: true, showcase: true, board: true }, market_defaults: ['^GSPC', '^IXIC', '^DJI'] };
+  const CS_DEFAULT = { home: { market: true, fng: true, wti: true, showcase: true, board: true }, market_defaults: ['^GSPC', '^IXIC', '^DJI'] };
   const CS_SYM = /^[A-Z0-9.^=-]{1,15}$/;
   let csRow = null, csSyms = CS_DEFAULT.market_defaults.slice();
   async function loadCmset() {
@@ -4336,7 +4337,7 @@
     csRow = data;
     const v = (data && data.value) || {};
     const h = { ...CS_DEFAULT.home, ...(v.home || {}) };
-    $('#cs-market').checked = h.market !== false; $('#cs-fng').checked = h.fng !== false; $('#cs-show').checked = h.showcase !== false; $('#cs-board').checked = h.board !== false;
+    $('#cs-market').checked = h.market !== false; $('#cs-fng').checked = h.fng !== false; $('#cs-wti').checked = h.wti !== false; $('#cs-show').checked = h.showcase !== false; $('#cs-board').checked = h.board !== false;
     csSyms = Array.isArray(v.market_defaults) ? v.market_defaults.filter((x) => CS_SYM.test(x)).slice(0, 12) : CS_DEFAULT.market_defaults.slice();
     $('[data-cs-when]').textContent = data && data.updated_at ? `마지막 저장 ${cmDate(data.updated_at)}` : '아직 저장한 적 없음 (기본값)';
     paintCsSyms();
@@ -4362,7 +4363,7 @@
   $('#cs-add').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); csAdd(); } });
   $('[data-cs-form]').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const value = { home: { market: $('#cs-market').checked, fng: $('#cs-fng').checked, showcase: $('#cs-show').checked, board: $('#cs-board').checked }, market_defaults: csSyms };
+    const value = { home: { market: $('#cs-market').checked, fng: $('#cs-fng').checked, wti: $('#cs-wti').checked, showcase: $('#cs-show').checked, board: $('#cs-board').checked }, market_defaults: csSyms };
     const btn = $('[data-cs-save]'); B.setBusy(btn, true, '저장 중…');
     const res = csRow
       ? await B.sb.from('site_settings').update({ value }).eq('key', 'community').select().single()
