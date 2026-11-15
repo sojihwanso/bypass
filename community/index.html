@@ -175,7 +175,29 @@ body[data-v="home"], body[data-v="showcase"] { background: var(--dash); }
 .mini.dark:hover { background: var(--primary-hover); }
 .mini .plus { color: var(--accent); font-size: 17px; font-weight: 800; }
 .db-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
-.wg { position: relative; min-width: 0; background: var(--panel); border-radius: 24px; padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; animation: rise 420ms var(--ease) both; }
+.wg { position: relative; min-width: 0; background: var(--panel); border-radius: 24px; padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; animation: wgIn 700ms cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 70ms + 60ms); transition: box-shadow 250ms ease-out; }
+.wg:hover { box-shadow: 0 10px 30px rgba(16, 24, 40, .06); }
+@keyframes wgIn { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+.db-head { animation: wgIn 700ms cubic-bezier(.2,.8,.2,1) both; }
+/* 게이지 바늘: 왼쪽 끝에서 휙 돌아 탁 멈춤 */
+.ndl { transform-box: view-box; transform-origin: 60px 58px; animation: ndl 1.4s .45s cubic-bezier(.3,1.5,.5,1) both; }
+@keyframes ndl { from { transform: rotate(-90deg); } to { transform: rotate(var(--rot)); } }
+/* 작은 그래프·큰 그래프 선이 그려짐 */
+.draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.2s .3s ease-out forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+/* 큰 그래프: 왼쪽부터 쓱 그려짐 */
+.wipe { animation: wipe .9s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+/* 행·카드 살짝 떠오름 */
+.wg-row, .dd, .fav-grid a, .mk-card { transition: transform 220ms cubic-bezier(.2,.8,.2,1), background-color 150ms ease-out; }
+.dd:hover, .fav-grid a:hover { transform: translateY(-4px); }
+.mk-card:hover { transform: translateY(-4px); }
+.dd { animation: ddPop .55s cubic-bezier(.3,1.5,.5,1) both; }
+@keyframes ddPop { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+.cnt { animation: ddPop .5s .9s cubic-bezier(.3,1.6,.5,1) both; }
+.pill.go { animation: pulseGo 2.4s 1.2s ease-in-out 2; }
+@keyframes pulseGo { 0%, 100% { box-shadow: 0 0 0 0 rgba(232, 89, 12, .45); } 50% { box-shadow: 0 0 0 8px rgba(232, 89, 12, 0); } }
+@media (prefers-reduced-motion: reduce) { .wg, .db-head, .ndl, .draw, .dd, .cnt, .pill.go, .wipe { animation: none !important; stroke-dashoffset: 0; } .ndl { transform: rotate(var(--rot)); } }
 .wg.wide { grid-column: 1 / -1; }
 .wg-h { display: flex; align-items: center; gap: 8px; min-height: 28px; }
 .wg-h h2 { margin: 0; font-size: 17px; font-weight: 750; letter-spacing: -.02em; }
@@ -2235,6 +2257,17 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     }
     return data;
   }
+  // 움직임은 처음 그릴 때 한 번만 (2분마다 새로 그릴 때는 가만히)
+  // 처음 본 지 얼마 안 돼 다시 그리면 이어서 재생 (음수 지연으로 진행 중인 지점부터)
+  const motionSeen = new Map();
+  function motion(node, k, cls, delay, dur) {
+    const now = performance.now();
+    if (!motionSeen.has(k)) motionSeen.set(k, now);
+    const t = now - motionSeen.get(k);
+    if (t > delay + dur) return false;
+    node.setAttribute('class', cls); node.style.animationDelay = `${(delay - t) / 1000}s`;
+    return true;
+  }
   function sparkSvg(points, prev, w = 150, h = 38) {
     const NS = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${w} ${h}`); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('class', 'mk-spark'); svg.setAttribute('aria-hidden', 'true');
@@ -2246,6 +2279,8 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     if (prev != null) { const b = document.createElementNS(NS, 'line'); b.setAttribute('x1', 0); b.setAttribute('x2', w); b.setAttribute('y1', Y(prev)); b.setAttribute('y2', Y(prev)); b.setAttribute('stroke', 'var(--line)'); b.setAttribute('stroke-dasharray', '3 3'); b.setAttribute('vector-effect', 'non-scaling-stroke'); svg.append(b); }
     const path = document.createElementNS(NS, 'path');
     path.setAttribute('d', points.map((p, i) => `${i ? 'L' : 'M'}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join(''));
+    path.setAttribute('pathLength', '1');
+    if (!motion(path, `s:${prev}:${w}`, 'draw', 300, 1200)) path.style.strokeDasharray = 'none';
     path.setAttribute('fill', 'none'); path.setAttribute('stroke', `var(--${mkDir(points[points.length - 1][1] - (prev ?? points[0][1])) === 'down' ? 'down' : mkDir(points[points.length - 1][1] - (prev ?? points[0][1])) === 'up' ? 'up' : 'sub'})`);
     path.setAttribute('stroke-width', '1.6'); path.setAttribute('vector-effect', 'non-scaling-stroke'); path.setAttribute('stroke-linejoin', 'round');
     svg.append(path);
@@ -2287,8 +2322,11 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       p.setAttribute('fill', 'none'); p.setAttribute('stroke', col); p.setAttribute('stroke-width', '10'); p.setAttribute('opacity', v >= a && v < b ? '1' : '.28');
       svg.append(p);
     });
-    const [nx, ny] = pt(Math.max(0, Math.min(100, v)), R - 14);
-    const n = document.createElementNS(NS, 'line'); n.setAttribute('x1', cx); n.setAttribute('y1', cy); n.setAttribute('x2', nx.toFixed(2)); n.setAttribute('y2', ny.toFixed(2));
+    // 바늘은 위를 향해 그리고 돌려 놓는다 (처음 한 번은 왼쪽 끝에서 휙 돌아옴)
+    const n = document.createElementNS(NS, 'line'); n.setAttribute('x1', cx); n.setAttribute('y1', cy); n.setAttribute('x2', cx); n.setAttribute('y2', (cy - (R - 14)).toFixed(2));
+    const rot = `${(Math.max(0, Math.min(100, v)) * 1.8 - 90).toFixed(1)}deg`;
+    n.style.setProperty('--rot', rot);
+    if (!motion(n, 'g:' + cls, 'ndl', 450, 1400)) { n.style.transformOrigin = '60px 58px'; n.style.transformBox = 'view-box'; n.style.transform = `rotate(${rot})`; }
     n.setAttribute('stroke', 'var(--ink)'); n.setAttribute('stroke-width', '3'); n.setAttribute('stroke-linecap', 'round');
     const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', '4.5'); c.setAttribute('fill', 'var(--ink)');
     svg.append(n, c);
@@ -2318,7 +2356,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     const big = el('div', 'fng-big'); const sc = el('div');
     const rt = el('div', 'fng-rt', fngName(f)); rt.style.color = band[3];
     sc.append(el('div', 'fng-score', String(v)), rt);
-    big.append(gaugeSvg(v), sc);
+    big.append(gaugeSvg(v, 'mk-gauge mk-gauge-big'), sc);
     const cmp = el('dl', 'fng-cmp');
     [['전일', f.prev.close], ['1주 전', f.prev.week], ['1달 전', f.prev.month], ['1년 전', f.prev.year]].forEach(([k, x]) => {
       const d = el('div'); const dd = el('dd', null, x == null ? '–' : String(Math.round(x)));
@@ -2334,7 +2372,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     if (!pts || pts.length < 2) { box.append(el('div', 'mk-state', '그래프로 그릴 값이 아직 없어요.')); return; }
     const NS = 'http://www.w3.org/2000/svg', W = 1000, H = 1000, n = pts.length;
     const X = (i) => (i / (n - 1)) * W, Y = (v) => H - (v / 100) * H;
-    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('preserveAspectRatio', 'none');
+    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('class', 'wipe');
     svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', '지난 1년 공포·탐욕 지수 그래프');
     FNG_BANDS.forEach(([a, b, , col]) => { const r = document.createElementNS(NS, 'rect'); r.setAttribute('x', 0); r.setAttribute('width', W); r.setAttribute('y', Y(Math.min(b, 100))); r.setAttribute('height', Y(a) - Y(Math.min(b, 100))); r.setAttribute('fill', col); r.setAttribute('opacity', '.07'); svg.append(r); });
     [25, 45, 55, 75].forEach((g) => { const l = document.createElementNS(NS, 'line'); l.setAttribute('x1', 0); l.setAttribute('x2', W); l.setAttribute('y1', Y(g)); l.setAttribute('y2', Y(g)); l.setAttribute('stroke', 'var(--line)'); l.setAttribute('stroke-dasharray', '3 5'); l.setAttribute('vector-effect', 'non-scaling-stroke'); svg.append(l); });
@@ -2458,7 +2496,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     const n = c.length, slot = W / n, bw = Math.max(slot * 0.62, 1.5);
     const X = (i) => (i + 0.5) * slot;   // 시간 간격이 아니라 순서대로 (장 쉬는 시간 빈칸 없이)
     const Y = (v) => H * (1 - PAD) - ((v - lo) / span) * H * (1 - 2 * PAD);
-    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('preserveAspectRatio', 'none');
+    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('class', 'wipe');
     svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', `${s.name} 캔들 그래프`);
     if (base != null) { const b = document.createElementNS(NS, 'line'); b.setAttribute('x1', 0); b.setAttribute('x2', W); b.setAttribute('y1', Y(base)); b.setAttribute('y2', Y(base)); b.setAttribute('stroke', 'var(--line)'); b.setAttribute('stroke-dasharray', '4 4'); b.setAttribute('vector-effect', 'non-scaling-stroke'); svg.append(b); }
     // 오름(종가≥시가) 빨강 · 내림 파랑, 같은 색끼리 한 path 로 그려 가볍게
@@ -2604,6 +2642,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       sec.hidden = i < 0;
       if (i < 0) return;
       sec.style.order = String(i);
+      sec.style.setProperty('--i', String(i));
       sec.classList.toggle('wide', list[i].w === 2);
       let ctl = sec.querySelector(':scope > .wg-ctl');
       if (!ctl) { ctl = el('div', 'wg-ctl'); ctl.setAttribute('role', 'group'); ctl.setAttribute('aria-label', `${WG[id].name} 위젯 편집`); sec.prepend(ctl); }
