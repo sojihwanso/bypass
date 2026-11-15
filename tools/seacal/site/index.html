@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>승선근무예비역 도우미</title>
+<title>바다생활 계산기</title>
 <!--FAVICON-->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Nanum+Gothic:wght@700;800&display=swap">
 <style>
-/* 승선근무예비역 도우미 — 해기사 시험 문제 풀이(cbttest) 디자인 규칙(모서리·버튼·글꼴)을 따르고
+/* 바다생활 계산기 — 해기사 시험 문제 풀이(cbttest) 디자인 규칙(모서리·버튼·글꼴)을 따르고
    색은 라이트 = 초록 파스텔, 다크 = 그 보색(분홍·자주 계열)으로 바꿨습니다. */
 :root{
   --paper:#F1F7EE; --surface:#FBFEF9; --ink:#1D2A21; --muted:#56705E; --rule:#D2E4CE; --soft:#E4F0DF;
@@ -234,7 +234,7 @@ table.lv tr.fut td{color:var(--muted)}
 .faq .body li{margin:3px 0}
 .law{font-size:12.5px;font-family:var(--f-mono);color:var(--acc);background:var(--acc-bg);border-radius:6px;padding:1px 6px;white-space:nowrap}
 .foot{margin:34px 0 0;padding:18px 0 calc(28px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--rule);color:var(--muted);font-size:13px}
-.foot .ver{font-family:var(--f-mono);font-size:12px;letter-spacing:.1em}
+.foot .ver{display:block;text-align:center;margin-top:10px;font-family:var(--f-mono);font-size:12px;letter-spacing:.1em}
 
 /* 창 */
 .modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:var(--scrim);backdrop-filter:blur(3px);animation:fade .18s ease}
@@ -266,7 +266,7 @@ table.lv tr.fut td{color:var(--muted)}
 <header class="mast"><div class="wrap">
   <button class="brand" type="button" data-go="home" aria-label="처음 화면">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.9 5.6V3.4"/><rect x="3.1" y="5.6" width="3.6" height="8.9" rx=".4"/><path d="M3.1 8h3.6"/><g fill="currentColor" fill-opacity=".24" stroke-width="1.2"><rect x="8.3" y="11.2" width="3.2" height="3.3"/><rect x="11.5" y="11.2" width="3.2" height="3.3"/><rect x="14.7" y="11.2" width="3.2" height="3.3"/><rect x="17.9" y="11.2" width="3.2" height="3.3"/><rect x="8.3" y="7.9" width="3.2" height="3.3"/><rect x="11.5" y="7.9" width="3.2" height="3.3"/><rect x="14.7" y="7.9" width="3.2" height="3.3"/></g><path d="M1.4 14.5h21.4l-1.7 3.7a1.6 1.6 0 0 1-1.5 1H4.3a1.6 1.6 0 0 1-1.4-.9z" fill="currentColor" fill-opacity=".2" stroke-width="1.7"/></svg>
-    <b>승선근무예비역 도우미</b>
+    <b>바다생활 계산기</b>
   </button>
   <span class="sp"></span>
   <button class="net" id="netChip" type="button" title="연결 상태"><i></i><span id="netTxt">온라인</span></button>
@@ -590,11 +590,11 @@ function render(){
 }
 
 function drawHome(v){
-  document.title = '승선근무예비역 도우미';
+  document.title = '바다생활 계산기';
   v.innerHTML = `
   <section class="hero">
     <div class="tag">Sea service · 승선근무예비역</div>
-    <h1>승선근무예비역<br><em>도우미</em></h1>
+    <h1><em>바다생활</em> 계산기</h1>
     <p>승선 기록을 넣으면 휴가와 공휴일을 따져 복무 인정일수와 만료 예정일을 계산합니다.</p>
   </section>
   <nav class="menu" aria-label="기능">
@@ -615,7 +615,7 @@ function field(id, label, val, type = 'date', extra = ''){
 }
 
 function drawCalc(v){
-  document.title = '복무완료 계산기 · 승선근무예비역 도우미';
+  document.title = '복무완료 계산기 · 바다생활 계산기';
   v.innerHTML = `
   <div class="vh"><button class="back" type="button" data-go="home">${IC.back}처음</button><h2>복무완료 계산기</h2></div>
 
