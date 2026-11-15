@@ -21,14 +21,14 @@ const MAX_SYMBOLS = 12;
 const MAX_POINTS = 200;
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 
-// 기간별: Yahoo 의 range·interval, 담아 두는 시간(초)
+// 기간별: Yahoo 의 range·interval(캔들 한 개의 길이), 담아 두는 시간(초)
 export const RANGES: Record<string, { range: string; interval: string; ttl: number }> = {
   '1d': { range: '1d', interval: '5m', ttl: 120 },
   '5d': { range: '5d', interval: '30m', ttl: 600 },
-  '1mo': { range: '1mo', interval: '60m', ttl: 1800 },
-  '6mo': { range: '6mo', interval: '1d', ttl: 3600 },
-  '1y': { range: '1y', interval: '1d', ttl: 3600 },
-  '5y': { range: '5y', interval: '1wk', ttl: 21600 },
+  '1mo': { range: '1mo', interval: '1d', ttl: 1800 },     // 일봉
+  '6mo': { range: '6mo', interval: '1d', ttl: 3600 },     // 일봉
+  '1y': { range: '1y', interval: '1wk', ttl: 3600 },      // 주봉
+  '5y': { range: '5y', interval: '1mo', ttl: 21600 },     // 월봉
 };
 // 지수·환율은 알아보기 쉬운 한글 이름으로
 const NAMES: Record<string, string> = {
@@ -53,7 +53,8 @@ export type Series = {
   symbol: string; name: string; currency: string; exchange: string;
   price: number | null; prev: number | null; change: number | null; pct: number | null;
   time: number | null; state: 'open' | 'pre' | 'post' | 'closed'; tz: string;
-  points: [number, number][];   // [유닉스 초, 종가]
+  points: [number, number][];   // [유닉스 초, 종가] — 작은 그래프용
+  ohlc: [number, number, number, number, number][];   // [유닉스 초, 시가, 고가, 저가, 종가] — 캔들
   range: string;
 };
 
@@ -73,9 +74,19 @@ export function parseChart(j: any, range: string, now = Date.now() / 1000): Seri
   if (!r || !r.meta) return null;
   const m = r.meta;
   const ts: number[] = r.timestamp ?? [];
-  const cl: (number | null)[] = r.indicators?.quote?.[0]?.close ?? [];
+  const q = r.indicators?.quote?.[0] ?? {};
+  const cl: (number | null)[] = q.close ?? [];
+  const op: (number | null)[] = q.open ?? [], hi: (number | null)[] = q.high ?? [], lo: (number | null)[] = q.low ?? [];
+  const R4 = (x: number) => Math.round(x * 10000) / 10000;
+  const num = (x: unknown): x is number => typeof x === 'number' && isFinite(x);
   let points: [number, number][] = [];
-  ts.forEach((t, i) => { const c = cl[i]; if (typeof c === 'number' && isFinite(c)) points.push([t, Math.round(c * 10000) / 10000]); });
+  let ohlc: [number, number, number, number, number][] = [];
+  ts.forEach((t, i) => {
+    const c = cl[i]; if (!num(c)) return;
+    points.push([t, R4(c)]);
+    const o = num(op[i]) ? op[i] as number : c, h = num(hi[i]) ? hi[i] as number : Math.max(o, c), l = num(lo[i]) ? lo[i] as number : Math.min(o, c);
+    ohlc.push([t, R4(o), R4(Math.max(h, o, c)), R4(Math.min(l, o, c)), R4(c)]);
+  });
   // 하루 그래프인데 '그날' 이 아닌 점이 섞이면 마지막 거래일 것만 (5일로 다시 받은 경우)
   let dayBefore: number | null = null;   // 마지막 거래일 전날의 마지막 종가 (5일 치로 받은 경우)
   if (range === '1d' && points.length) {
@@ -85,6 +96,7 @@ export function parseChart(j: any, range: string, now = Date.now() / 1000): Seri
     const before = points.filter(([t]) => day(t) < last);
     if (before.length) dayBefore = before[before.length - 1][1];
     points = points.filter(([t]) => day(t) === last);
+    ohlc = ohlc.filter(([t]) => day(t) === last);
   }
   const price = typeof m.regularMarketPrice === 'number' ? m.regularMarketPrice : points.length ? points[points.length - 1][1] : null;
   // 전일 종가: 하루 그래프면 previousClose, 아니면 그 기간 시작 직전 종가(없으면 첫 점)
@@ -107,6 +119,7 @@ export function parseChart(j: any, range: string, now = Date.now() / 1000): Seri
     time: typeof m.regularMarketTime === 'number' ? m.regularMarketTime : points.length ? points[points.length - 1][0] : null,
     state, tz: m.exchangeTimezoneName ?? 'America/New_York',
     points: thin(points),
+    ohlc: ohlc.slice(-MAX_POINTS),
     range,
   };
 }
@@ -187,12 +200,12 @@ export function makeService(env: Env, http: typeof fetch) {
   }
 
   async function quotes(symbols: string[]) {
-    const keys = symbols.map((s) => `1d:${s}`);
+    const keys = symbols.map((s) => `v2:1d:${s}`);
     const hit = await cacheGet(keys, RANGES['1d'].ttl);
     const fresh: { key: string; data: unknown }[] = [];
     const errors: Record<string, string> = {};
     const list = await many(symbols, async (s) => {
-      const k = `1d:${s}`;
+      const k = `v2:1d:${s}`;
       if (hit[k]) return hit[k] as Series;
       try { const d = await series(s, '1d'); fresh.push({ key: k, data: d }); return d; }
       catch (e) { errors[s] = String((e as Error).message || e).includes('404') ? 'not found' : 'unavailable'; return null; }
@@ -202,7 +215,7 @@ export function makeService(env: Env, http: typeof fetch) {
   }
 
   async function chart(sym: string, range: string) {
-    const k = `${range}:${sym}`;
+    const k = `v2:${range}:${sym}`;
     const hit = await cacheGet([k], RANGES[range].ttl);
     if (hit[k]) return hit[k];
     const d = await series(sym, range);
