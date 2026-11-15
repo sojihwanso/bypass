@@ -1,9 +1,9 @@
--- BYPASS: 결과물 분류를 '형태(앱·위키·도구·실험)'에서 '쓰임(해기사·전공, 영어 …)'으로 바꾸고, HQ에서 관리
+-- BYPASS: 결과물 분류를 '형태(앱·위키·도구·실험)'에서 '쓰임(학습 · 학교생활 · 실무 스킬 · 실험실)'으로 바꾸고, HQ에서 관리
 -- 026 다음에 이 파일 전체를 SQL Editor 에 붙여 넣고 Run 하세요. 여러 번 실행해도 안전합니다.
 --
 -- 바뀌는 것
 --   1) 분류 표 showcase_categories: 이름·설명·색·순서를 HQ › 결과물 › 분류에서 고칩니다 (운영진만)
---        해기사·전공 / 영어 / 실무 스킬 / 학사·일정 / 생활 / 실험실 / 미분류(운영진만 고름)
+--        학습 / 학교생활 / 실무 스킬 / 실험실 / 미분류(운영진만 고름)
 --   2) 이미 올라온 결과물은 제목·주소를 보고 새 분류로 옮깁니다. 못 정한 것은 '미분류' →
 --      HQ › 결과물에서 '미분류'만 골라 보고 하나씩 정해 주세요.
 --   3) 추천 고정(pin_rank): 운영진이 고른 결과물을 커뮤니티 결과물 맨 위에 순서대로 보입니다
@@ -38,13 +38,11 @@ drop policy if exists "분류: 운영진 지우기" on public.showcase_categorie
 create policy "분류: 운영진 지우기" on public.showcase_categories for delete to authenticated using ((select public.bypass_role()) = 'staff');
 
 insert into public.showcase_categories (name, description, color, sort, pickable) values
-  ('해기사·전공', '해기사 시험, 항해·기관 과목, 시뮬레이터, 사고 해설', 'blue',   10, true),
-  ('영어',        '토익, 해사영어(SMCP), 음성 알파벳',              'violet', 20, true),
-  ('실무 스킬',   '엑셀·문서·PDF처럼 졸업 뒤에도 쓰는 것',          'orange', 30, true),
-  ('학사·일정',   '수강, 학점, 시험 일정 같은 학교 절차',            'teal',   40, true),
-  ('생활',        '학식, 교내 생활, 카톡 채널',                     'green',  50, true),
-  ('실험실',      '만드는 중이거나 재미로 만든 것',                  'rose',   60, true),
-  ('미분류',      '운영진이 분류를 정하기 전',                      'gray',   99, false)
+  ('학습',      '해기사 시험, 항해·기관 과목, 시뮬레이터, 토익·해사영어', 'blue',   10, true),
+  ('학교생활',  '수강·학점·시험 일정, 학식, 카톡 채널',                 'green',  20, true),
+  ('실무 스킬', '엑셀·문서·PDF처럼 졸업 뒤에도 쓰는 것',                'orange', 30, true),
+  ('실험실',    '만드는 중이거나 재미로 만든 것',                        'rose',   40, true),
+  ('미분류',    '운영진이 분류를 정하기 전',                            'gray',   99, false)
 on conflict (name) do nothing;
 
 -- ===== 2) 결과물 분류 규칙: 표에 있는 이름만 =====
@@ -143,12 +141,11 @@ alter table public.posts disable trigger posts_stamp;
 update public.posts p
    set category = case
      when p.category = '실험' then '실험실'
-     when (p.title || ' ' || coalesce(p.url, '')) ~* '(토익|toeic|\mrc\M|영어|영단어|smcp|alfa|zulu|english)' then '영어'
+     when (p.title || ' ' || coalesce(p.url, '')) ~* '(토익|toeic|\mrc\M|영어|영단어|smcp|alfa|zulu|english)' then '학습'
      when (p.title || ' ' || coalesce(p.url, '')) ~* '(엑셀|excel|pdf|문서|워드|한글 ?파일|ppt|코딩|python)' then '실무 스킬'
-     when (p.title || ' ' || coalesce(p.url, '')) ~* '(수강|플래너|학점|시간표|학사|mymmu|eesuu|examplan|시험 ?일정)' then '학사·일정'
-     when (p.title || ' ' || coalesce(p.url, '')) ~* '(학식|꿀꿀|식단|기숙사|셔틀|pf\.kakao)' then '생활'
+     when (p.title || ' ' || coalesce(p.url, '')) ~* '(수강|플래너|학점|시간표|학사|mymmu|eesuu|examplan|시험 ?일정|학식|꿀꿀|식단|기숙사|셔틀|pf\.kakao)' then '학교생활'
      when p.category = '위키'
-       or (p.title || ' ' || coalesce(p.url, '')) ~* '(해기사|cbt|ecdis|colreg|marpol|레이더|radar|항해|기관|계기|탱커|선박|해양|해사|사고|allision|ra006)' then '해기사·전공'
+       or (p.title || ' ' || coalesce(p.url, '')) ~* '(해기사|cbt|ecdis|colreg|marpol|레이더|radar|항해|기관|계기|탱커|선박|해양|해사|사고|allision|ra006)' then '학습'
      else '미분류'
    end
  where p.kind = 'showcase' and p.category in ('앱', '위키', '도구', '실험');
