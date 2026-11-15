@@ -49,19 +49,19 @@
     const code = error.code || '';
     const status = error.status;
     if (error.name === 'AuthRetryableFetchError' || status === 0 || /fetch|network/i.test(error.message || '')) {
-      return '서버에 연결하지 못했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.';
+      return '서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 해 주세요.';
     }
-    if (code === 'invalid_credentials') return '아이디 또는 비밀번호가 맞지 않습니다.';
-    if (code === 'user_already_exists' || code === 'email_exists') return '이미 사용 중인 아이디입니다. 다른 아이디를 정해 주세요.';
-    if (code === 'weak_password') return `비밀번호가 너무 약합니다. ${PW_MIN}자 이상, 짐작하기 어렵게 정해 주세요.`;
-    if (code === 'over_request_rate_limit' || status === 429) return '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.';
-    if (code === 'signup_disabled' || code === 'email_provider_disabled') return '지금은 회원가입을 받지 않습니다. 운영진에게 문의해 주세요.';
+    if (code === 'invalid_credentials') return '아이디나 비밀번호가 맞지 않아요.';
+    if (code === 'user_already_exists' || code === 'email_exists') return '이미 누가 쓰는 아이디예요. 다른 걸로 정해 주세요.';
+    if (code === 'weak_password') return `비밀번호가 너무 쉬워요. ${PW_MIN}자 이상, 짐작하기 어렵게 정해 주세요.`;
+    if (code === 'over_request_rate_limit' || status === 429) return '너무 여러 번 눌렀어요. 잠깐 뒤에 다시 해 주세요.';
+    if (code === 'signup_disabled' || code === 'email_provider_disabled') return '지금은 회원가입을 받지 않아요. 운영진에게 물어봐 주세요.';
     if (code === 'email_not_confirmed' || code === 'over_email_send_rate_limit' || code === 'email_address_not_authorized') {
-      return '가입 설정이 아직 끝나지 않았습니다. 운영진에게 알려 주세요. (메일 확인 설정)';
+      return '가입 설정이 아직 안 끝났어요. 운영진에게 알려 주세요. (메일 확인 설정)';
     }
-    if (code === 'email_address_invalid') return '이 아이디는 쓸 수 없습니다. 다른 아이디를 정해 주세요.';
-    const fallback = context === 'signup' ? '가입하지 못했습니다.' : '로그인하지 못했습니다.';
-    return `${fallback} 잠시 후 다시 시도해 주세요.${code ? ` (${code})` : ''}`;
+    if (code === 'email_address_invalid') return '이 아이디는 쓸 수 없어요. 다른 걸로 정해 주세요.';
+    const fallback = context === 'signup' ? '가입하지 못했어요.' : '로그인하지 못했어요.';
+    return `${fallback} 잠깐 뒤에 다시 해 주세요.${code ? ` (${code})` : ''}`;
   }
 
   /* 비밀번호 보기 버튼 */
@@ -93,6 +93,6 @@
     sb, ID_RULE, PW_MIN,
     normalizeId, idToEmail, safeNext, dateText, roleOf, profileOf, errorText,
     bindPasswordToggles, setBusy,
-    unavailableText: '회원 기능을 불러오지 못했습니다. 새로고침해 주세요.'
+    unavailableText: '회원 기능을 불러오지 못했어요. 새로고침해 주세요.'
   };
 })();
