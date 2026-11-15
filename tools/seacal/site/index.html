@@ -152,7 +152,7 @@ select.inp{font-family:var(--f-body)}
 .ring{position:relative;width:150px;height:150px}
 .ring svg{width:150px;height:150px;transform:rotate(-90deg)}
 .ring .ct{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
-.ring .pc{font-family:var(--f-mono);font-size:28px;font-weight:600;line-height:1}
+.ring .pc{font-family:var(--f-mono);font-size:21px;font-weight:600;line-height:1;letter-spacing:-.02em}
 .ring .pl{font-size:12px;color:var(--muted);margin-top:4px}
 .big{font-family:var(--f-mono);font-size:clamp(30px,6vw,40px);font-weight:600;line-height:1.1}
 .big small{font-size:16px;color:var(--muted);font-weight:500}
@@ -164,11 +164,16 @@ select.inp{font-family:var(--f-body)}
 .kv em{display:block;font-style:normal;font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
 .bar{display:flex;height:16px;border-radius:999px;overflow:hidden;background:var(--left);margin-top:18px;border:1px solid var(--rule)}
 .bar i{display:block;height:100%}
-.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 14px;margin-top:10px;font-size:13.5px}
-.legend div{display:flex;align-items:center;gap:7px}
-.legend i{width:11px;height:11px;border-radius:4px;flex:none}
-.legend b{font-family:var(--f-mono);font-weight:600;margin-left:auto}
-.legend em{font-style:normal;color:var(--muted);font-family:var(--f-mono);font-size:12.5px;min-width:52px;text-align:right}
+.legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;font-size:14px}
+@media (max-width:560px){ .legend{grid-template-columns:1fr} }
+.legend .lg{display:flex;align-items:center;gap:10px;background:var(--soft);border-radius:12px;padding:9px 12px}
+.legend i{width:12px;height:12px;border-radius:4px;flex:none}
+.legend .nm{font-weight:600}
+.legend .v{margin-left:auto;text-align:right;line-height:1.35}
+.legend b{font-family:var(--f-mono);font-weight:600}
+.legend b small{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);font-weight:500;margin-left:6px}
+.legend em{display:block;font-style:normal;color:var(--muted);font-size:12.5px}
+.bigd{font-size:14px;color:var(--muted);margin:2px 0 4px;font-weight:600}
 .done{display:flex;align-items:center;gap:10px;margin-top:14px;border-radius:16px;padding:12px 14px;background:var(--ok-bg);color:var(--ok);font-weight:700}
 .done svg{width:24px;height:24px;flex:none}
 .done .mono{margin-left:auto}
@@ -297,6 +302,13 @@ function todayN(){ const d = new Date(); return Date.UTC(d.getFullYear(), d.getM
 const num = x => Number(x).toLocaleString('ko-KR');
 const pct = (a, b) => b ? Math.max(0, Math.min(100, a / b * 100)) : 0;
 const p1 = x => (Math.round(x * 10) / 10).toFixed(1) + '%';
+/* 일수를 년·개월·일로 (1년 = 365일, 1개월 = 30일로 환산 → 1,095일 = 3년) */
+function dur(n){
+  if (!(n >= 30)) return '';
+  const y = Math.floor(n / 365), r = n % 365, m = Math.floor(r / 30), d = r % 30;
+  return [y ? y + '년' : '', m ? m + '개월' : '', d ? d + '일' : ''].filter(Boolean).join(' ');
+}
+const durP = n => { const s = dur(n); return s ? ` (${s})` : ''; };
 
 function toast(msg){ const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); }
 const X_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
@@ -705,8 +717,8 @@ function drawResults(){
     el.querySelectorAll('input[type=date]').forEach(x => x.classList.toggle('err', !!r.err));
     const s = stById.get(r.id);
     el.querySelector('.rs').innerHTML = r.err || !s ? '' :
-      `<span>${r.kind === 'injury' ? '휴직' : '승선'} <b>${num(s.days)}</b>일</span>` +
-      (r.kind === 'injury' ? '' : `<span>휴가 <b>${num(s.ent)}</b>일${r.lvo != null ? '(직접)' : ''}</span>`) +
+      `<span>${r.kind === 'injury' ? '휴직' : '승선'} <b>${num(s.days)}</b>일${durP(s.days)}</span>` +
+      (r.kind === 'injury' ? '' : `<span>휴가 <b>${num(s.ent)}</b>일${durP(s.ent)}${r.lvo != null ? '(직접)' : ''}</span>`) +
       (s.lvS != null ? `<span>휴가 ${fmt(s.lvS, false)} ~ ${fmt(s.lvE, false)}</span>` : '') +
       (s.carry ? `<span>이월 <b>${num(s.carry)}</b>일</span>` : '');
   }
@@ -737,17 +749,19 @@ function drawResults(){
       </div>
       <div>
         <div class="big">${num(Math.min(credit, 99999))}<small> / ${num(TARGET)}일</small></div>
+        ${dur(credit) ? `<div class="bigd">${dur(credit)} / 3년</div>` : ''}
         <div class="sub">${futureIncl ? '입력한 기록 기준(하선 뒤 휴가 예정 포함)' : '입력한 기록 기준'} · 오늘(${fmt(today, false)})까지 <b>${num(base.todayCredit)}</b>일</div>
         <div class="kv">
-          <div><span>남은 일수</span><b>${num(left)}<small>일</small></b></div>
+          <div><span>남은 일수</span><b>${num(left)}<small>일</small></b>${dur(left) ? `<em>${dur(left)}</em>` : ''}</div>
           <div><span>남은 비율</span><b>${p1(leftP)}</b></div>
-          <div><span>승선일수</span><b>${num(by.sea)}<small>일</small></b><em>1,095일의 ${p1(pct(by.sea, TARGET))}</em></div>
-          <div><span>휴가 인정</span><b>${num(by.leave)}<small>일</small></b><em>1,095일의 ${p1(pct(by.leave, TARGET))}</em></div>
+          <div><span>승선일수</span><b>${num(by.sea)}<small>일</small></b>${dur(by.sea) ? `<em>${dur(by.sea)}</em>` : ''}<em>1,095일의 ${p1(pct(by.sea, TARGET))}</em></div>
+          <div><span>휴가 인정</span><b>${num(by.leave)}<small>일</small></b>${dur(by.leave) ? `<em>${dur(by.leave)}</em>` : ''}<em>1,095일의 ${p1(pct(by.leave, TARGET))}</em></div>
         </div>
       </div>
     </div>
     <div class="bar" aria-hidden="true">${segs.map(s => `<i style="width:${pct(s[2], Math.max(TARGET, credit))}%;background:var(--${s[0] === 'edu' ? 'edu' : s[0]})"></i>`).join('')}</div>
-    <div class="legend">${segs.map(s => `<div><i style="background:var(--${s[0]})"></i>${s[1]}<b>${num(s[2])}일</b><em>${p1(pct(s[2], TARGET))}</em></div>`).join('')}<div><i style="background:var(--left);border:1px solid var(--rule)"></i>남은 기간<b>${num(left)}일</b><em>${p1(leftP)}</em></div></div>
+    <div class="legend">${segs.concat([['left', '남은 기간', left]]).map(s => { const pc = s[0] === 'left' ? leftP : pct(s[2], TARGET);
+      return `<div class="lg"><i style="background:var(--${s[0]})${s[0] === 'left' ? ';border:1px solid var(--rule)' : ''}"></i><span class="nm">${s[1]}</span><span class="v"><b>${num(s[2])}일<small>${p1(pc)}</small></b>${dur(s[2]) ? `<em>${dur(s[2])}</em>` : ''}</span></div>`; }).join('')}</div>
     ${base.done != null ? `<div class="done">${IC.check}<span>${base.done <= today ? '복무 완료' : '복무 완료 예정'} · 1,095일 도달</span><span class="mono">${fmt(base.done)}</span></div>` : ''}
     <div class="dl">
       <div>편입 5년 기한 <span class="sub">(편입일부터 5년)</span><b>${fmt(deadline5)}</b></div>
@@ -775,7 +789,7 @@ function drawResults(){
       const a = o.avg;
       h += `<div class="pjc"><h4>${IC.chart}평소처럼 타면 (평균 승선 패턴)</h4>
         <div class="d">${a.done != null ? fmt(a.done) : '-'}${warn(a.done)}</div>
-        <p>지금까지 마친 승선 ${a.n}회 평균 <b>${num(a.avgV)}일</b> 승선${a.avgG != null ? `, 승선 사이 평균 <b>${num(a.avgG)}일</b> 육상` : ', 휴가가 끝나면 바로 다시 승선'}으로 계속할 때의 예상입니다.${a.added ? ` 앞으로 약 <b>${a.added}번</b> 더 승선합니다.` : ''}</p></div>`;
+        <p>지금까지 마친 승선 ${a.n}회 평균 <b>${num(a.avgV)}일</b>${durP(a.avgV)} 승선${a.avgG != null ? `, 승선 사이 평균 <b>${num(a.avgG)}일</b>${durP(a.avgG)} 육상` : ', 휴가가 끝나면 바로 다시 승선'}으로 계속할 때의 예상입니다.${a.added ? ` 앞으로 약 <b>${a.added}번</b> 더 승선합니다.` : ''}</p></div>`;
     } else {
       h += `<div class="pjc"><h4>${IC.chart}평소처럼 타면 (평균 승선 패턴)</h4><p>마친 승선 기록이 1건 이상 있어야 평균 승선 기간으로 예상할 수 있습니다.</p></div>`;
     }
@@ -961,7 +975,8 @@ function helpHTML(){
     <details><summary>인정일수는 어떻게 세나요?</summary><div class="body">
       <p>승선일부터 하선일까지(양 끝 포함)는 모두 인정합니다. 하선 다음 날부터는 그 승선으로 생긴 유급휴가를 씁니다. 휴가 중 공휴일(일요일 포함)과 노동절은 휴가를 쓴 날로 치지 않고 인정일수에도 넣지 않습니다. 토요일은 휴가를 쓴 날로 세고 인정합니다.</p>
       <p>휴가를 다 쓰기 전에 다시 승선하면 남은 휴가는 다음 하선 뒤로 넘어갑니다(이월). 군사교육소집 기간은 모두 인정하며, 휴가 중에 소집되면 휴가를 멈췄다가 퇴영 다음 날부터 이어서 씁니다.</p>
-      <p>인정일수가 <b>1,095일</b>이 되는 날을 복무 완료일로 봅니다.</p></div></details>
+      <p>인정일수가 <b>1,095일</b>이 되는 날을 복무 완료일로 봅니다.</p>
+      <p>30일이 넘는 일수 옆에는 '2년 9개월 13일'처럼 년·개월로 바꾼 값을 함께 적습니다. 1년은 365일, 1개월은 30일로 바꿔서 1,095일이 정확히 3년이 되게 했습니다. 달력의 실제 개월 수와는 며칠 다를 수 있습니다.</p></div></details>
     <details><summary>휴가일수는 어떻게 정해지나요?</summary><div class="body">
       <ul><li><b>외항선</b>: 승선 30일마다 7일(선원법 제70조①의 6일 + 제62조⑤의 1일), 1일 미만은 올림</li>
       <li><b>내항·연해</b>(연해구역이나 15일 안에 국내 항에 들르는 배): 30일마다 6일(5일 + 1일)</li>
