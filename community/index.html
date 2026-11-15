@@ -164,8 +164,17 @@ main.wrap { padding-top: 44px; padding-bottom: 88px; display: flex; flex-directi
 @media (max-width: 980px) {
   .sc-layout { display: block; }
   .sc-side { display: none; }
-  .sc-chips { display: flex; }
+  /* 모바일·태블릿: 분류 칩 한 줄이 헤더 밑에 붙어 따라오고, 옆으로 밀어서 고른다 */
+  .sc-chips { display: flex; position: sticky; top: var(--top-h); z-index: 15; flex-wrap: nowrap; gap: 6px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none;
+    margin: -10px -24px 0; padding: 10px 24px; background: var(--bg); box-shadow: 0 1px 0 var(--line2);
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
+  .sc-chips::-webkit-scrollbar { display: none; }
+  .sc-chips .chip { flex: none; display: inline-flex; align-items: center; gap: 6px; }
+  .sc-chips .chip .dot { width: 8px; height: 8px; border-radius: 2px; }
+  .sc-chips .chip .n { font-size: 12.5px; opacity: .65; font-variant-numeric: tabular-nums; }
+  .sc-main { gap: 18px; }
 }
+@media (max-width: 640px) { .sc-chips { margin-left: -20px; margin-right: -20px; padding-left: 20px; padding-right: 20px; } }
 .st { flex: none; display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 600; background: var(--soft); color: var(--mid); white-space: nowrap; box-shadow: var(--ring); }
 .st.orange { background: var(--accent-tint); color: var(--accent-ink); box-shadow: inset 0 0 0 1px var(--accent-ring); }
 .st.green { background: var(--green-tint); color: var(--green); box-shadow: inset 0 0 0 1px var(--green-ring); }
@@ -1233,13 +1242,28 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     const box = $(kind === 'showcase' ? '[data-show-chips]' : '[data-board-chips]'), viewId = kind === 'showcase' ? 'showcase' : 'board';
     box.replaceChildren(...['전체', ...list].map((k) => {
       const b = el('button', 'chip', k); b.type = 'button'; b.setAttribute('aria-pressed', String(k === f.cat));
+      if (kind === 'showcase') {
+        // 결과물 칩: 분류 색 점 + 개수
+        if (k !== '전체') { const dot = el('span', 'dot'); dot.style.background = artOf(k).fg; b.prepend(dot); }
+        if (catCounts) b.append(el('span', 'n', String(catCounts[k] || 0)));
+      }
       b.addEventListener('click', () => {
         if (f.cat === k) return;
         f.cat = k; paintChips(kind); loadFeed(kind);
         history.replaceState(null, '', k === '전체' ? `#${viewId}` : `#${viewId}/${encodeURIComponent(k)}`);
+        // 칩 줄이 헤더 밑에 붙어 있을 때(목록을 내려 본 상태) 바꾸면 새 목록의 처음으로
+        if (kind === 'showcase' && box.getBoundingClientRect().top <= parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--top-h')) + 1) {
+          const main = $('.sc-main'); window.scrollTo({ top: window.scrollY + main.getBoundingClientRect().top - parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--top-h')) - 10, behavior: 'smooth' });
+        }
       });
       return b;
     }));
+    // 고른 칩이 화면 밖이면 옆으로 밀어서 보이게
+    const on = box.querySelector('[aria-pressed="true"]');
+    if (on && box.scrollWidth > box.clientWidth) {
+      const l = on.getBoundingClientRect().left - box.getBoundingClientRect().left + box.scrollLeft, r = l + on.offsetWidth;
+      if (l < box.scrollLeft + 24 || r > box.scrollLeft + box.clientWidth - 36) box.scrollTo({ left: Math.max(0, l - 24), behavior: 'smooth' });
+    }
   }
   paintChips('showcase'); paintChips('post');
   $('[data-show-more]').addEventListener('click', () => loadFeed('showcase', true));
