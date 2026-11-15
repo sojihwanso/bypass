@@ -241,6 +241,20 @@
   /* 올리기 권한 */
   .up-form { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 12px; }
   .up-form .input { width: 100%; }
+  /* 커뮤니티 관리 (게시판·댓글·회의실·홈 설정) */
+  .cm-snip { margin-top: 3px; font-size: 13.5px; line-height: 1.5; color: var(--ink); opacity: .78; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+  .cm-cbody { font-size: 15px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+  .cm-on { color: var(--ink); text-decoration: none; font-weight: 600; }
+  .cm-on:hover { text-decoration: underline; }
+  .cm-done .sc-title { color: var(--muted); text-decoration: line-through; }
+  .cm-form { display: grid; gap: 4px; padding: 14px 4px; }
+  .cm-form .field-label { margin-top: 8px; }
+  .cm-form .acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .cm-set .check { margin-top: 12px; }
+  .cm-syms { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .cm-sym { display: inline-flex; align-items: center; gap: 4px; padding: 4px 6px 4px 12px; border-radius: 999px; background: var(--pave); font-size: 14px; font-weight: 700; }
+  .cm-sym button { width: 24px; height: 24px; border: 0; border-radius: 50%; background: none; color: var(--muted); cursor: pointer; font: inherit; }
+  .cm-sym button:hover { background: #fff; color: var(--ink); }
   /* 결과물 관리 */
   .sc-bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: -4px 0 12px; padding: 10px 14px; border-radius: 10px; background: var(--ink); color: #fff; font-size: 14.5px; font-weight: 700; }
   .sc-bulk .mini-btn { background: #fff; }
@@ -466,7 +480,7 @@
     .card { padding: 2px 16px 18px; }
     .date-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .toast { bottom: calc(84px + env(safe-area-inset-bottom)); }
-    .hq-tabs { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding-bottom: env(safe-area-inset-bottom); background: #fff; border-top: 1px solid var(--rule); }
+    .hq-tabs { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding-bottom: env(safe-area-inset-bottom); background: #fff; border-top: 1px solid var(--rule); }
     .hq-tab { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 0 7px; color: var(--muted); text-decoration: none; font-size: 12px; font-weight: 700; }
     .hq-tab svg { width: 22px; height: 22px; }
     .hq-tab[aria-current="true"] { color: var(--green); }
@@ -624,8 +638,8 @@
       <section data-view="showcase" hidden>
         <div class="view-head">
           <div>
-            <a class="view-back" href="#g-content">‹ 콘텐츠</a>
-            <p class="view-kicker">콘텐츠</p>
+            <a class="view-back" href="#g-community">‹ 커뮤니티</a>
+            <p class="view-kicker">커뮤니티</p>
             <h1 tabindex="-1">결과물</h1>
           </div>
           <a class="mini-btn" href="/community/#showcase" target="_blank" rel="noopener">커뮤니티에서 보기 ↗</a>
@@ -664,6 +678,121 @@
           <div class="card" style="max-width: none; padding: 8px 18px" data-cat-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
           <p class="list-hint">커뮤니티 왼쪽 목록과 글쓰기 화면에 이 순서대로 보입니다. ‘회원이 고를 수 있음’을 끄면 운영진만 그 분류로 옮길 수 있습니다(예: 미분류). 이름을 바꾸거나 지우면 그 분류의 결과물도 함께 옮겨집니다.</p>
         </div>
+      </section>
+
+      <!-- 커뮤니티 › 게시판 -->
+      <section data-view="board" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-community">‹ 커뮤니티</a>
+            <p class="view-kicker">커뮤니티</p>
+            <h1 tabindex="-1">게시판</h1>
+          </div>
+          <a class="mini-btn" href="/community/#board" target="_blank" rel="noopener">커뮤니티에서 보기 ↗</a>
+        </div>
+        <div class="toolbar">
+          <label class="sr-only" for="bd-find">글 찾기</label>
+          <input class="input" id="bd-find" type="search" placeholder="제목·본문·올린 사람으로 찾기" autocomplete="off">
+          <div class="fchips" role="group" aria-label="상태로 거르기" data-bd-state></div>
+        </div>
+        <div class="toolbar"><div class="fchips" role="group" aria-label="말머리로 거르기" data-bd-chips></div></div>
+        <div class="sc-bulk" data-bd-bulk hidden>
+          <span data-bd-bulk-n></span>
+          <label class="sr-only" for="bd-bulk-cat">옮길 말머리</label>
+          <select class="input" id="bd-bulk-cat"><option>질문</option><option>팁</option><option>자랑</option><option>잡담</option></select>
+          <button type="button" class="mini-btn" data-bd-bulk-move>말머리 옮기기</button>
+          <button type="button" class="mini-btn" data-bd-bulk-hide>숨기기</button>
+          <button type="button" class="mini-btn" data-bd-bulk-show>보이기</button>
+          <button type="button" class="mini-btn" data-bd-bulk-del>지우기</button>
+          <button type="button" class="mini-btn" data-bd-bulk-clear>선택 해제</button>
+        </div>
+        <div class="card" style="max-width: none; padding: 8px 18px" data-bd-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
+        <p class="list-hint">숨긴 글은 올린 사람과 운영진만 봅니다. 말머리·숨김을 바꿔도 글에 ‘고침’은 붙지 않습니다(027 실행 뒤). 지우면 댓글·좋아요도 함께 지워집니다.</p>
+      </section>
+
+      <!-- 커뮤니티 › 댓글 -->
+      <section data-view="comments" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-community">‹ 커뮤니티</a>
+            <p class="view-kicker">커뮤니티</p>
+            <h1 tabindex="-1">댓글</h1>
+          </div>
+        </div>
+        <div class="toolbar">
+          <label class="sr-only" for="cm-find">댓글 찾기</label>
+          <input class="input" id="cm-find" type="search" placeholder="댓글·올린 사람·글 제목으로 찾기" autocomplete="off">
+          <div class="fchips" role="group" aria-label="어디에 단 댓글인지" data-cm-chips></div>
+        </div>
+        <div class="sc-bulk" data-cm-bulk hidden>
+          <span data-cm-bulk-n></span>
+          <button type="button" class="mini-btn" data-cm-bulk-del>지우기</button>
+          <button type="button" class="mini-btn" data-cm-bulk-clear>선택 해제</button>
+        </div>
+        <div class="card" style="max-width: none; padding: 8px 18px" data-cm-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
+        <p class="list-hint">최근 댓글 500개까지 새 것부터 보입니다. 댓글은 고칠 수 없고 지우기만 됩니다.</p>
+      </section>
+
+      <!-- 커뮤니티 › 회의실 -->
+      <section data-view="meeting" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-community">‹ 커뮤니티</a>
+            <p class="view-kicker">커뮤니티</p>
+            <h1 tabindex="-1">회의실</h1>
+          </div>
+          <a class="mini-btn" href="/community/#meeting" target="_blank" rel="noopener">커뮤니티에서 보기 ↗</a>
+        </div>
+        <div class="banner banner-warn" role="alert" data-sql-warn11 hidden>
+          <p><b>고치기는 설정이 한 단계 남았습니다.</b> Supabase SQL Editor에서 <code>supabase/029_meeting_edit.sql</code>을 실행해 주세요. 완료 표시·지우기·새로 올리기는 지금도 됩니다.</p>
+        </div>
+        <div class="subtabs" role="tablist" aria-label="회의실">
+          <button type="button" class="subtab" role="tab" id="tab-mt-agenda" aria-controls="pane-mt-agenda" aria-selected="true" data-mt-tab="agenda">회의 안건</button>
+          <button type="button" class="subtab" role="tab" id="tab-mt-res" aria-controls="pane-mt-res" aria-selected="false" data-mt-tab="res">자료실</button>
+        </div>
+        <div id="pane-mt-agenda" role="tabpanel" aria-labelledby="tab-mt-agenda" data-mt-pane="agenda">
+          <div class="toolbar">
+            <div class="fchips" role="group" aria-label="처리 상태로 거르기" data-ag-chips></div>
+            <button type="button" class="btn btn-primary btn-small" data-ag-new>+ 안건</button>
+          </div>
+          <div class="card" style="max-width: none; padding: 8px 18px" data-ag-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
+        </div>
+        <div id="pane-mt-res" role="tabpanel" aria-labelledby="tab-mt-res" data-mt-pane="res" hidden>
+          <div class="toolbar"><button type="button" class="btn btn-primary btn-small" data-rs-new>+ 자료</button></div>
+          <div class="card" style="max-width: none; padding: 8px 18px" data-rs-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
+        </div>
+        <p class="list-hint">회의실은 국원·운영진만 봅니다. 국원은 올리기와 자기 것 지우기만, 운영진은 완료 표시·고치기·지우기를 모두 할 수 있습니다.</p>
+      </section>
+
+      <!-- 커뮤니티 › 홈 화면 설정 -->
+      <section data-view="cmset" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-community">‹ 커뮤니티</a>
+            <p class="view-kicker">커뮤니티</p>
+            <h1 tabindex="-1">홈 화면 설정</h1>
+          </div>
+          <a class="mini-btn" href="/community/" target="_blank" rel="noopener">커뮤니티 홈 보기 ↗</a>
+        </div>
+        <form class="card cm-set" style="max-width: 640px" data-cs-form novalidate>
+          <h2>홈에 보일 칸</h2>
+          <label class="check"><input type="checkbox" id="cs-market"> <span>미국 증시</span></label>
+          <label class="check"><input type="checkbox" id="cs-show"> <span>새 결과물</span></label>
+          <label class="check"><input type="checkbox" id="cs-board"> <span>새 글</span></label>
+          <h2 style="margin-top: 26px">미국 증시 기본 종목</h2>
+          <p class="hint" style="margin-top: 2px">종목을 직접 고른 적 없는 회원에게 보이는 목록입니다(12개까지). 회원이 ‘기본으로 되돌리기’를 누르면 이 목록이 됩니다.</p>
+          <div class="cm-syms" data-cs-syms></div>
+          <div class="toolbar" style="margin: 12px 0 0">
+            <label class="sr-only" for="cs-add">티커 추가</label>
+            <input class="input" id="cs-add" placeholder="티커 (예: NVDA, ^GSPC, KRW=X)" maxlength="15" autocomplete="off" style="max-width: 260px">
+            <button type="button" class="mini-btn" data-cs-add>추가</button>
+          </div>
+          <p class="form-error" role="alert" data-cs-err hidden></p>
+          <div style="display: flex; gap: 10px; align-items: center; margin-top: 22px">
+            <button type="submit" class="btn btn-primary btn-small" data-cs-save>저장</button>
+            <span class="list-hint" style="margin: 0" data-cs-when></span>
+          </div>
+        </form>
       </section>
 
       <!-- 페이지 문구 -->
@@ -1319,6 +1448,7 @@
 <nav class="hq-tabs" aria-label="HQ 묶음" data-tabs>
   <a class="hq-tab" href="#g-home" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/></svg>홈</a>
   <a class="hq-tab" href="#g-inbox" data-tab="inbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M4 13h4l1.5 2.5h5L16 13h4"/></svg>접수</a>
+  <a class="hq-tab" href="#g-community" data-tab="community"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>커뮤니티</a>
   <a class="hq-tab" href="#g-content" data-tab="content"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>콘텐츠</a>
   <a class="hq-tab" href="#g-ops" data-tab="ops"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>운영</a>
 </nav>
@@ -1398,14 +1528,18 @@
   }
 
   /* ===== 메뉴 ===== */
-  const GROUPS = [['home', '홈'], ['inbox', '접수'], ['content', '콘텐츠'], ['ops', '운영']];
+  const GROUPS = [['home', '홈'], ['inbox', '접수'], ['community', '커뮤니티'], ['content', '콘텐츠'], ['ops', '운영']];
   const LEGACY = { inbox: ['/community/#meeting', '커뮤니티 회의실'], home: ['/community/#me', '커뮤니티 내 정보'] };
   const MENUS = [
     { id: 'dashboard', group: 'home', name: '대시보드', ready: true },
     { id: 'stats', group: 'home', name: '통계', ready: true },
     { id: 'reports', group: 'inbox', name: '불편 제보', ready: true },
     { id: 'applications', group: 'inbox', name: '합류 신청', ready: true },
-    { id: 'showcase', group: 'content', name: '결과물', ready: true },
+    { id: 'showcase', group: 'community', name: '결과물', ready: true },
+    { id: 'board', group: 'community', name: '게시판', ready: true },
+    { id: 'comments', group: 'community', name: '댓글', ready: true },
+    { id: 'meeting', group: 'community', name: '회의실', ready: true },
+    { id: 'cmset', group: 'community', name: '홈 화면 설정', ready: true },
     { id: 'dockets', group: 'content', name: '처리 현황', ready: true },
     { id: 'routes', group: 'content', name: '준공 현황 (보관)', ready: true },
     { id: 'notices', group: 'content', name: '공지', ready: true },
@@ -3969,6 +4103,275 @@
   $('[data-cat-new]').addEventListener('click', () => { scEditing = ''; renderCats(); });
   viewHooks.push(view => { if (view === 'showcase' && !scLoaded) loadShowcase(); });
   if (decodeURIComponent(location.hash.slice(1)) === 'showcase') loadShowcase();
+
+
+  /* ===== 커뮤니티 공통 ===== */
+  const cmErr = (e, what = '저장') => {
+    if (!e) return '';
+    if (e.code === '42501' || /permission|row-level/i.test(e.message || '')) return '운영진 권한이 확인되지 않거나, 이 칸은 아직 고칠 수 없습니다.';
+    if (e.code === '23514') return '입력한 값의 형식이나 길이를 확인해 주세요.';
+    return `${what}하지 못했습니다. 잠시 뒤 다시 해 주세요. (${e.message || e.code || '오류'})`;
+  };
+  const cmDate = (t) => B.dateText(t);
+  function cmBox(list, empty, rows) { list.replaceChildren(...(rows.length ? rows : [el('p', 'list-state', empty)])); }
+  function cmCheck(set, id, label, onChange) {
+    const ck = el('input'); ck.type = 'checkbox'; ck.checked = set.has(id); ck.setAttribute('aria-label', `${label} 선택`);
+    ck.addEventListener('change', () => { if (ck.checked) set.add(id); else set.delete(id); onChange(); });
+    return ck;
+  }
+  function cmBtn(text, onClick, cls = 'mini-btn') { const b = el('button', cls, text); b.type = 'button'; b.addEventListener('click', onClick); return b; }
+  function cmLoadHook(view, load) {
+    let done = false;
+    const go = () => { if (!done) { done = true; load(); } };
+    viewHooks.push((v) => { if (v === view) go(); });
+    if (decodeURIComponent(location.hash.slice(1)) === view) go();
+  }
+
+  /* ===== 커뮤니티 › 게시판 ===== (022 posts kind='post') */
+  const BD_CATS = ['질문', '팁', '자랑', '잡담'];
+  let bdRows = [], bdCat = 'all', bdState = 'all';
+  const bdSel = new Set(), bdList = $('[data-bd-list]');
+  async function loadBoard() {
+    const { data, error } = await B.sb.from('post_feed').select('id, created_at, updated_at, category, title, body, author_name, hidden, likes, comments').eq('kind', 'post').order('created_at', { ascending: false }).limit(2000);
+    if (error) { bdList.replaceChildren(el('p', 'list-state', cmErr(error, '불러오기'))); return; }
+    bdRows = data; [...bdSel].forEach((id) => { if (!bdRows.some((r) => r.id === id)) bdSel.delete(id); });
+    renderBoard();
+  }
+  function renderBoard() {
+    const cnt = (k) => bdRows.filter((r) => r.category === k).length;
+    scChipRow($('[data-bd-chips]'), [['all', '전체', bdRows.length], ...BD_CATS.map((k) => [k, k, cnt(k)])], bdCat, (v) => { bdCat = v; renderBoard(); });
+    scChipRow($('[data-bd-state]'), [['all', '모두', bdRows.length], ['hidden', '숨김', bdRows.filter((r) => r.hidden).length]], bdState, (v) => { bdState = v; renderBoard(); });
+    const q = $('#bd-find').value.trim().toLowerCase();
+    const rows = bdRows.filter((r) => (bdCat === 'all' || r.category === bdCat) && (bdState === 'all' || r.hidden) && (!q || `${r.title} ${r.body || ''} ${r.author_name || ''}`.toLowerCase().includes(q)));
+    cmBox(bdList, bdRows.length ? '조건에 맞는 글이 없습니다.' : '아직 올라온 글이 없습니다.', rows.map((r) => {
+      const row = el('div', `sc-row${r.hidden ? ' is-hidden' : ''}`);
+      const body = el('div', 'sc-body');
+      const t = el('a', 'sc-title'); t.href = `/community/#p-${r.id}`; t.target = '_blank'; t.rel = 'noopener';
+      t.append(el('span', null, r.title)); if (r.hidden) t.append(el('span', 'flag flag-hidden', '숨김'));
+      body.append(t);
+      if (r.body) body.append(el('div', 'cm-snip', r.body));
+      body.append(el('div', 'sc-meta', `${r.category} · ${r.author_name || '회원'} · ${cmDate(r.created_at)}${r.updated_at ? ' · 고침' : ''} · ♥ ${r.likes} · 댓글 ${r.comments}`));
+      const ctrl = el('div', 'sc-ctrl');
+      const sel = el('select', 'input'); sel.setAttribute('aria-label', `${r.title} 말머리`);
+      BD_CATS.forEach((k) => { const o = el('option', null, k); o.selected = k === r.category; sel.append(o); });
+      sel.addEventListener('change', () => bdUpdate([r.id], { category: sel.value }, `‘${sel.value}’(으)로 옮겼습니다.`));
+      const del = cmBtn('지우기', () => scArm(del, '정말 지우기', () => bdDelete([r.id])));
+      ctrl.append(sel, cmBtn(r.hidden ? '보이기' : '숨기기', () => bdUpdate([r.id], { hidden: !r.hidden }, r.hidden ? '다시 보이게 했습니다.' : '숨겼습니다. 올린 사람과 운영진만 봅니다.')), del);
+      row.append(cmCheck(bdSel, r.id, r.title, bdSync), body, ctrl);
+      return row;
+    }));
+    bdSync();
+  }
+  function bdSync() { $('[data-bd-bulk]').hidden = !bdSel.size; $('[data-bd-bulk-n]').textContent = `${bdSel.size}개 선택`; }
+  async function bdUpdate(ids, patch, ok) {
+    const { data, error } = await B.sb.from('posts').update(patch).in('id', ids).select('id');
+    if (error) return toast(cmErr(error), true);
+    if (!data.length) { toast('이미 지워진 글입니다. 목록을 새로 불러옵니다.', true); return loadBoard(); }
+    data.forEach(({ id }) => Object.assign(bdRows.find((r) => r.id === id) || {}, patch));
+    renderBoard(); toast(ids.length > 1 ? `${data.length}개: ${ok}` : ok);
+  }
+  async function bdDelete(ids) {
+    const { error } = await B.sb.from('posts').delete().in('id', ids);
+    if (error) return toast(cmErr(error, '지우기'), true);
+    bdRows = bdRows.filter((r) => !ids.includes(r.id)); ids.forEach((id) => bdSel.delete(id));
+    renderBoard(); toast(`${ids.length > 1 ? `${ids.length}개 글을` : '글을'} 지웠습니다. 댓글·좋아요도 함께 지워졌습니다.`);
+  }
+  $('#bd-find').addEventListener('input', renderBoard);
+  $('[data-bd-bulk-move]').addEventListener('click', () => bdUpdate([...bdSel], { category: $('#bd-bulk-cat').value }, `‘${$('#bd-bulk-cat').value}’(으)로 옮겼습니다.`));
+  $('[data-bd-bulk-hide]').addEventListener('click', () => bdUpdate([...bdSel], { hidden: true }, '숨겼습니다.'));
+  $('[data-bd-bulk-show]').addEventListener('click', () => bdUpdate([...bdSel], { hidden: false }, '다시 보이게 했습니다.'));
+  $('[data-bd-bulk-del]').addEventListener('click', (e) => scArm(e.currentTarget, `${bdSel.size}개 정말 지우기`, () => bdDelete([...bdSel])));
+  $('[data-bd-bulk-clear]').addEventListener('click', () => { bdSel.clear(); renderBoard(); });
+  cmLoadHook('board', loadBoard);
+
+  /* ===== 커뮤니티 › 댓글 ===== (022 post_comments) */
+  let cmRows = [], cmKind = 'all';
+  const cmSel = new Set(), cmList = $('[data-cm-list]');
+  async function loadComments() {
+    const { data, error } = await B.sb.from('post_comments').select('id, created_at, body, author_name, post_id, posts(title, kind, hidden)').order('created_at', { ascending: false }).limit(500);
+    if (error) { cmList.replaceChildren(el('p', 'list-state', cmErr(error, '불러오기'))); return; }
+    cmRows = data; [...cmSel].forEach((id) => { if (!cmRows.some((r) => r.id === id)) cmSel.delete(id); });
+    renderComments();
+  }
+  function renderComments() {
+    const k = (r) => (r.posts || {}).kind;
+    scChipRow($('[data-cm-chips]'), [['all', '전체', cmRows.length], ['post', '게시판', cmRows.filter((r) => k(r) === 'post').length], ['showcase', '결과물', cmRows.filter((r) => k(r) === 'showcase').length]], cmKind, (v) => { cmKind = v; renderComments(); });
+    const q = $('#cm-find').value.trim().toLowerCase();
+    const rows = cmRows.filter((r) => (cmKind === 'all' || k(r) === cmKind) && (!q || `${r.body} ${r.author_name || ''} ${(r.posts || {}).title || ''}`.toLowerCase().includes(q)));
+    cmBox(cmList, cmRows.length ? '조건에 맞는 댓글이 없습니다.' : '아직 댓글이 없습니다.', rows.map((r) => {
+      const row = el('div', 'sc-row');
+      const body = el('div', 'sc-body');
+      body.append(el('div', 'cm-cbody', r.body));
+      const meta = el('div', 'sc-meta');
+      const on = el('a', 'cm-on', (r.posts || {}).title || '(지워진 글)'); on.href = `/community/#p-${r.post_id}`; on.target = '_blank'; on.rel = 'noopener';
+      meta.append(document.createTextNode(`${r.author_name || '회원'} · ${cmDate(r.created_at)} · ${k(r) === 'showcase' ? '결과물' : '게시판'} `), on);
+      if ((r.posts || {}).hidden) meta.append(el('span', 'flag flag-hidden', '숨긴 글'));
+      body.append(meta);
+      const del = cmBtn('지우기', () => scArm(del, '정말 지우기', () => cmDelete([r.id])));
+      const ctrl = el('div', 'sc-ctrl'); ctrl.append(del);
+      row.append(cmCheck(cmSel, r.id, r.body.slice(0, 20), cmSync), body, ctrl);
+      return row;
+    }));
+    cmSync();
+  }
+  function cmSync() { $('[data-cm-bulk]').hidden = !cmSel.size; $('[data-cm-bulk-n]').textContent = `${cmSel.size}개 선택`; }
+  async function cmDelete(ids) {
+    const { error } = await B.sb.from('post_comments').delete().in('id', ids);
+    if (error) return toast(cmErr(error, '지우기'), true);
+    cmRows = cmRows.filter((r) => !ids.includes(r.id)); ids.forEach((id) => cmSel.delete(id));
+    renderComments(); toast(`${ids.length > 1 ? `댓글 ${ids.length}개를` : '댓글을'} 지웠습니다.`);
+  }
+  $('#cm-find').addEventListener('input', renderComments);
+  $('[data-cm-bulk-del]').addEventListener('click', (e) => scArm(e.currentTarget, `${cmSel.size}개 정말 지우기`, () => cmDelete([...cmSel])));
+  $('[data-cm-bulk-clear]').addEventListener('click', () => { cmSel.clear(); renderComments(); });
+  cmLoadHook('comments', loadComments);
+
+  /* ===== 커뮤니티 › 회의실 ===== (003 agenda_items · resources, 029 고치기) */
+  let agRows = [], rsRows = [], agF = 'open', mtEditing = null;   // mtEditing: 'ag:new' 'ag:12' 'rs:new' 'rs:3'
+  async function loadMeeting() {
+    const [a, r] = await Promise.all([
+      B.sb.from('agenda_items').select('*').order('created_at', { ascending: false }).limit(1000),
+      B.sb.from('resources').select('*').order('created_at', { ascending: false }).limit(1000),
+    ]);
+    if (a.error) $('[data-ag-list]').replaceChildren(el('p', 'list-state', cmErr(a.error, '불러오기'))); else agRows = a.data;
+    if (r.error) $('[data-rs-list]').replaceChildren(el('p', 'list-state', cmErr(r.error, '불러오기'))); else rsRows = r.data;
+    if (!a.error) renderAgenda(); if (!r.error) renderRes();
+  }
+  function mtForm(kind, row) {
+    const isAg = kind === 'ag', f = el('form', 'cm-form'); f.noValidate = true;
+    const fld = (label, inp) => { const l = el('label', 'field-label', label); l.htmlFor = inp.id; f.append(l, inp); };
+    const ti = el('input', 'input'); ti.id = `${kind}-f-title`; ti.maxLength = 200; ti.value = row ? row.title : '';
+    fld(isAg ? '안건' : '이름', ti);
+    let ur = null;
+    if (!isAg) { ur = el('input', 'input'); ur.id = 'rs-f-url'; ur.type = 'url'; ur.maxLength = 1000; ur.placeholder = 'https://'; ur.value = row ? row.url : ''; fld('주소', ur); }
+    const no = el('input', 'input'); no.id = `${kind}-f-note`; no.maxLength = isAg ? 1000 : 500; no.value = row && row.note ? row.note : '';
+    fld(isAg ? '메모 (선택)' : '설명 (선택)', no);
+    const err = el('p', 'form-error'); err.setAttribute('role', 'alert'); err.hidden = true;
+    const acts = el('div', 'acts'); const save = el('button', 'btn btn-primary btn-small', row ? '저장' : '올리기'); save.type = 'submit';
+    acts.append(save, cmBtn('취소', () => { mtEditing = null; isAg ? renderAgenda() : renderRes(); }));
+    f.append(err, acts);
+    f.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const bad = (t) => { err.textContent = t; err.hidden = false; };
+      const v = { title: ti.value.trim(), note: no.value.trim() || null };
+      if (!v.title) return bad(isAg ? '안건을 입력해 주세요.' : '이름을 입력해 주세요.');
+      if (!isAg) { v.url = ur.value.trim(); if (!/^https?:\/\/\S+$/i.test(v.url)) return bad('주소는 http:// 또는 https:// 로 시작해야 합니다.'); }
+      B.setBusy(save, true, '저장 중…');
+      const t = B.sb.from(isAg ? 'agenda_items' : 'resources');
+      const res = row ? await t.update(v).eq('id', row.id).select().single() : await t.insert(v).select().single();
+      B.setBusy(save, false);
+      if (res.error) {
+        if (row && (res.error.code === '42501' || /permission/i.test(res.error.message || ''))) { $('[data-sql-warn11]').hidden = false; return bad('고치기는 029_meeting_edit.sql 을 실행한 뒤에 됩니다.'); }
+        return bad(cmErr(res.error));
+      }
+      const list = isAg ? agRows : rsRows;
+      if (row) Object.assign(list.find((x) => x.id === row.id) || {}, res.data); else list.unshift(res.data);
+      mtEditing = null; isAg ? renderAgenda() : renderRes(); toast(row ? '저장했습니다.' : '올렸습니다.');
+    });
+    setTimeout(() => ti.focus(), 0);
+    return f;
+  }
+  async function mtDelete(kind, row) {
+    const { error } = await B.sb.from(kind === 'ag' ? 'agenda_items' : 'resources').delete().eq('id', row.id);
+    if (error) return toast(cmErr(error, '지우기'), true);
+    if (kind === 'ag') { agRows = agRows.filter((x) => x.id !== row.id); renderAgenda(); } else { rsRows = rsRows.filter((x) => x.id !== row.id); renderRes(); }
+    toast('지웠습니다.');
+  }
+  function renderAgenda() {
+    scChipRow($('[data-ag-chips]'), [['open', '처리 전', agRows.filter((r) => !r.done).length], ['done', '처리함', agRows.filter((r) => r.done).length], ['all', '전체', agRows.length]], agF, (v) => { agF = v; renderAgenda(); });
+    const rows = [];
+    if (mtEditing === 'ag:new') { const d = el('div', 'sc-row'); d.append(mtForm('ag', null)); rows.push(d); }
+    agRows.filter((r) => agF === 'all' || (agF === 'done') === r.done).forEach((r) => {
+      const row = el('div', `sc-row${r.done ? ' cm-done' : ''}`);
+      if (mtEditing === `ag:${r.id}`) { row.append(mtForm('ag', r)); rows.push(row); return; }
+      const body = el('div', 'sc-body');
+      const t = el('div', 'sc-title'); t.append(el('span', null, r.title)); if (r.report_id) t.append(el('span', 'flag', '불편 제보'));
+      body.append(t); if (r.note) body.append(el('div', 'cm-snip', r.note));
+      body.append(el('div', 'sc-meta', `${r.author_name || '회원'} · ${cmDate(r.created_at)}`));
+      const ctrl = el('div', 'sc-ctrl');
+      const dn = cmBtn(r.done ? '처리 전으로' : '처리함', async () => {
+        const { error } = await B.sb.from('agenda_items').update({ done: !r.done }).eq('id', r.id);
+        if (error) return toast(cmErr(error), true);
+        r.done = !r.done; renderAgenda(); toast(r.done ? '처리한 안건으로 옮겼습니다.' : '처리 전으로 되돌렸습니다.');
+      });
+      if (r.report_id) { const a = el('a', 'mini-btn', '제보 보기'); a.href = `#reports`; ctrl.append(a); }
+      const del = cmBtn('지우기', () => scArm(del, '정말 지우기', () => mtDelete('ag', r)));
+      ctrl.append(dn, cmBtn('고치기', () => { mtEditing = `ag:${r.id}`; renderAgenda(); }), del);
+      row.append(body, ctrl); rows.push(row);
+    });
+    cmBox($('[data-ag-list]'), agRows.length ? '이 상태의 안건이 없습니다.' : '아직 안건이 없습니다.', rows);
+  }
+  function renderRes() {
+    const rows = [];
+    if (mtEditing === 'rs:new') { const d = el('div', 'sc-row'); d.append(mtForm('rs', null)); rows.push(d); }
+    rsRows.forEach((r) => {
+      const row = el('div', 'sc-row');
+      if (mtEditing === `rs:${r.id}`) { row.append(mtForm('rs', r)); rows.push(row); return; }
+      const body = el('div', 'sc-body');
+      const t = el('a', 'sc-title'); t.href = r.url; t.target = '_blank'; t.rel = 'noopener'; t.append(el('span', null, r.title));
+      body.append(t); if (r.note) body.append(el('div', 'cm-snip', r.note));
+      body.append(el('div', 'sc-meta', `${r.url.replace(/^https?:\/\//, '').slice(0, 60)} · ${r.author_name || '회원'} · ${cmDate(r.created_at)}`));
+      const del = cmBtn('지우기', () => scArm(del, '정말 지우기', () => mtDelete('rs', r)));
+      const ctrl = el('div', 'sc-ctrl'); ctrl.append(cmBtn('고치기', () => { mtEditing = `rs:${r.id}`; renderRes(); }), del);
+      row.append(body, ctrl); rows.push(row);
+    });
+    cmBox($('[data-rs-list]'), '아직 자료가 없습니다.', rows);
+  }
+  $('[data-ag-new]').addEventListener('click', () => { mtEditing = 'ag:new'; agF = agF === 'done' ? 'open' : agF; renderAgenda(); });
+  $('[data-rs-new]').addEventListener('click', () => { mtEditing = 'rs:new'; renderRes(); });
+  $$('[data-mt-tab]').forEach((b) => b.addEventListener('click', () => {
+    $$('[data-mt-tab]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+    $$('[data-mt-pane]').forEach((p) => { p.hidden = p.dataset.mtPane !== b.dataset.mtTab; });
+  }));
+  cmLoadHook('meeting', loadMeeting);
+
+  /* ===== 커뮤니티 › 홈 화면 설정 ===== (site_settings 'community', 010 표 그대로) */
+  const CS_DEFAULT = { home: { market: true, showcase: true, board: true }, market_defaults: ['^GSPC', '^IXIC', '^DJI'] };
+  const CS_SYM = /^[A-Z0-9.^=-]{1,15}$/;
+  let csRow = null, csSyms = CS_DEFAULT.market_defaults.slice();
+  async function loadCmset() {
+    const { data, error } = await B.sb.from('site_settings').select('*').eq('key', 'community').maybeSingle();
+    if (error) { $('[data-cs-err]').textContent = cmErr(error, '불러오기'); $('[data-cs-err]').hidden = false; return; }
+    csRow = data;
+    const v = (data && data.value) || {};
+    const h = { ...CS_DEFAULT.home, ...(v.home || {}) };
+    $('#cs-market').checked = h.market !== false; $('#cs-show').checked = h.showcase !== false; $('#cs-board').checked = h.board !== false;
+    csSyms = Array.isArray(v.market_defaults) ? v.market_defaults.filter((x) => CS_SYM.test(x)).slice(0, 12) : CS_DEFAULT.market_defaults.slice();
+    $('[data-cs-when]').textContent = data && data.updated_at ? `마지막 저장 ${cmDate(data.updated_at)}` : '아직 저장한 적 없음 (기본값)';
+    paintCsSyms();
+  }
+  function paintCsSyms() {
+    $('[data-cs-syms]').replaceChildren(...(csSyms.length ? csSyms.map((sym, i) => {
+      const c = el('span', 'cm-sym', sym);
+      const x = el('button', null, '✕'); x.type = 'button'; x.setAttribute('aria-label', `${sym} 빼기`);
+      x.addEventListener('click', () => { csSyms.splice(i, 1); paintCsSyms(); });
+      c.append(x); return c;
+    }) : [el('span', 'list-hint', '비어 있으면 처음 온 회원에게 종목이 없습니다.')]));
+  }
+  function csAdd() {
+    const v = $('#cs-add').value.trim().toUpperCase(), err = $('[data-cs-err]');
+    err.hidden = true;
+    if (!v) return;
+    if (!CS_SYM.test(v)) { err.textContent = '티커는 영문 대문자·숫자와 . ^ = - 만 쓸 수 있습니다.'; err.hidden = false; return; }
+    if (csSyms.includes(v)) { err.textContent = '이미 있는 종목입니다.'; err.hidden = false; return; }
+    if (csSyms.length >= 12) { err.textContent = '12개까지 넣을 수 있습니다.'; err.hidden = false; return; }
+    csSyms.push(v); $('#cs-add').value = ''; paintCsSyms();
+  }
+  $('[data-cs-add]').addEventListener('click', csAdd);
+  $('#cs-add').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); csAdd(); } });
+  $('[data-cs-form]').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const value = { home: { market: $('#cs-market').checked, showcase: $('#cs-show').checked, board: $('#cs-board').checked }, market_defaults: csSyms };
+    const btn = $('[data-cs-save]'); B.setBusy(btn, true, '저장 중…');
+    const res = csRow
+      ? await B.sb.from('site_settings').update({ value }).eq('key', 'community').select().single()
+      : await B.sb.from('site_settings').insert({ key: 'community', value }).select().single();
+    B.setBusy(btn, false);
+    if (res.error) { $('[data-cs-err]').textContent = cmErr(res.error); $('[data-cs-err]').hidden = false; return; }
+    csRow = res.data; $('[data-cs-when]').textContent = `마지막 저장 ${cmDate(csRow.updated_at)}`;
+    toast('저장했습니다. 커뮤니티 홈을 새로 고치면 바뀝니다.');
+  });
+  cmLoadHook('cmset', loadCmset);
 
   /* ===== 변경 기록 ===== (020: audit_log, 트리거가 저절로 쌓음) */
   const LOG_TABLES = {
