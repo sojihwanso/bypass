@@ -27,12 +27,12 @@ for f in sorted(glob.glob(H + '/work/deckexp/d*.json')):
         if v.get('uncertain'): ov[k] = unc(v['exp']); c['new_unc'] += 1
         else: ov[k] = clean(v['exp']); c['new'] += 1
 WSU = set()  # 웹 검증에서 근거를 못 찾은 문항
-for f in sorted(glob.glob(H + '/work/websearch/w*.json')) + sorted(glob.glob(H + '/work/websearch/x*.json')):  # 웹 검증 결과가 recheck·deckexp보다 우선 (계산 규칙만 그 뒤), x*는 한도 소진분 재검증
+for f in sorted(glob.glob(H + '/work/websearch/w*.json')) + sorted(glob.glob(H + '/work/websearch/x*.json')) + sorted(glob.glob(H + '/work/websearch/y*.json')):  # 웹 검증 결과가 recheck·deckexp보다 우선 (계산 규칙만 그 뒤), x*는 한도 소진분 재검증
     for k, v in json.load(open(f)).items():
         if not v.get('exp'): continue
         if re.search(r'검색\s*한도|한도\s*(?:\(세션|소진)|미검색', v.get('src', '')): continue  # 검색 한도 때문에 근거 없이 채운 문항은 이전 판정 유지
-        ov[k] = clean(v['exp']) if v.get('verdict') == 'confirmed' else unc(v['exp']) + ('' if k in NOWDIFF else ' ' + NF)
-        if v.get('verdict') == 'confirmed': WSU.discard(k)
+        ov[k] = clean(v['exp']) if v.get('verdict') == 'confirmed' else unc(v['exp']) + ('' if (k in NOWDIFF or '현행과 다름' in v.get('src', '')) else ' ' + NF)
+        if v.get('verdict') == 'confirmed' or '현행과 다름' in v.get('src', ''): WSU.discard(k)
         elif k not in NOWDIFF: WSU.add(k)
 if os.path.exists(H + '/work/calcfix.json'):  # 계산 문항 규칙(정답표대로 확실, 공식은 조사한 그대로)
     for k, v in json.load(open(H + '/work/calcfix.json')).items():
