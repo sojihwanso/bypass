@@ -13,6 +13,7 @@
 //   { action: 'quotes', symbols: ['^GSPC', 'AAPL'] }   → 카드용: 현재가·전일 대비·오늘 그래프
 //   { action: 'chart',  symbol: 'AAPL', range: '1mo' } → 큰 그래프: 1d 5d 1mo 6mo 1y 5y
 //   { action: 'search', q: 'nvidia' }                  → 종목 찾기
+//   { action: 'fng' }                                  → CNN 공포·탐욕 지수 (지금 값, 전일·1주·1달·1년 전, 1년 그래프)
 
 const ALLOWED_ORIGINS = ['https://teambypass.vercel.app', 'https://bypass-three.vercel.app'];
 const PREVIEW_ORIGIN = /^https:\/\/bypass-git-[a-z0-9-]+-oojoo1\.vercel\.app$/;
@@ -121,6 +122,42 @@ export function parseChart(j: any, range: string, now = Date.now() / 1000): Seri
     points: thin(points),
     ohlc: ohlc.slice(-MAX_POINTS),
     range,
+  };
+}
+
+// ----- CNN 공포·탐욕 지수 -----
+// CNN 웹페이지가 쓰는 데이터 주소. 공식 API 는 아니라서 응답 모양이 바뀌면 그래프의 마지막 값으로 대신 계산한다.
+export const FNG_URL = 'https://production.dataviz.cnn.io/index/fearandgreed/graphdata/';
+export type Fng = {
+  score: number; rating: string; time: number;
+  prev: { close: number | null; week: number | null; month: number | null; year: number | null };
+  points: [number, number][];   // [유닉스 초, 점수] 1년
+};
+// CNN 구간: 0–24 극단적 공포, 25–44 공포, 45–55 중립, 56–75 탐욕, 76–100 극단적 탐욕
+export const fngRating = (v: number) => v < 25 ? 'extreme fear' : v < 45 ? 'fear' : v <= 55 ? 'neutral' : v <= 75 ? 'greed' : 'extreme greed';
+// deno-lint-ignore no-explicit-any
+export function parseFng(j: any): Fng | null {
+  // deno-lint-ignore no-explicit-any
+  const hist: any[] = j?.fear_and_greed_historical?.data ?? [];
+  const pts: [number, number][] = hist
+    .filter((d) => typeof d?.x === 'number' && typeof d?.y === 'number' && isFinite(d.y))
+    .map((d) => [Math.round(d.x > 1e11 ? d.x / 1000 : d.x), Math.round(d.y * 10) / 10] as [number, number])
+    .sort((a, b) => a[0] - b[0]);
+  const f = j?.fear_and_greed ?? {};
+  const num = (x: unknown) => (typeof x === 'number' && isFinite(x) ? Math.round(x * 10) / 10 : null);
+  const last = pts.length ? pts[pts.length - 1] : null;
+  const score = num(f.score) ?? (last ? last[1] : null);
+  if (score == null) return null;
+  const tParsed = typeof f.timestamp === 'string' ? Date.parse(f.timestamp) / 1000 : typeof f.timestamp === 'number' ? (f.timestamp > 1e11 ? f.timestamp / 1000 : f.timestamp) : NaN;
+  const time = isFinite(tParsed) ? Math.round(tParsed) : last ? last[0] : Math.round(Date.now() / 1000);
+  // 응답에 지난 값이 없으면 그래프에서 그 날짜 즈음 값을 찾는다
+  const ago = (days: number) => { const t = time - days * 86400; let v: number | null = null; for (const [x, y] of pts) { if (x <= t) v = y; else break; } return v; };
+  return {
+    score,
+    rating: typeof f.rating === 'string' && f.rating ? f.rating.toLowerCase() : fngRating(score),
+    time,
+    prev: { close: num(f.previous_close) ?? ago(1), week: num(f.previous_1_week) ?? ago(7), month: num(f.previous_1_month) ?? ago(30), year: num(f.previous_1_year) ?? ago(365) },
+    points: thin(pts.filter(([x]) => x >= time - 366 * 86400)),
   };
 }
 
@@ -238,7 +275,26 @@ export function makeService(env: Env, http: typeof fetch) {
     return data;
   }
 
-  return { quotes, chart, search };
+  async function fng() {
+    const k = 'v2:fng';
+    const hit = await cacheGet([k], 1800);   // 30분
+    if (hit[k]) return hit[k];
+    const from = new Date(Date.now() - 400 * 86400000).toISOString().slice(0, 10);
+    let last = '';
+    for (const url of [FNG_URL + from, FNG_URL.replace(/\/$/, '')]) {
+      try {
+        const res = await http(url, { headers: { 'User-Agent': UA, Accept: 'application/json, text/plain, */*', Referer: 'https://edition.cnn.com/', Origin: 'https://edition.cnn.com' } });
+        if (!res.ok) { last = `HTTP ${res.status}`; continue; }
+        const d = parseFng(await res.json());
+        if (!d) { last = 'shape'; continue; }
+        await cachePut([{ key: k, data: d }]);
+        return d;
+      } catch (e) { last = String(e); }
+    }
+    throw new Error(`fng ${last}`);
+  }
+
+  return { quotes, chart, search, fng };
 }
 
 let service: ReturnType<typeof makeService> | null = null;
@@ -270,6 +326,7 @@ export async function handle(req: Request, env: Env = (k) => Deno.env.get(k), ht
       if (!SYMBOL.test(sym) || !RANGES[range]) return reply(req, 400, { error: '종목이나 기간이 올바르지 않습니다.' });
       return reply(req, 200, await s.chart(sym, range));
     }
+    if (body.action === 'fng') return reply(req, 200, await s.fng());
     if (body.action === 'search') {
       const q = String(body.q ?? '').trim().slice(0, 40);
       if (!q) return reply(req, 400, { error: '찾을 말을 입력해 주세요.' });
