@@ -208,6 +208,23 @@ table.lv tr.fut td{color:var(--muted)}
 
 .src-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--muted)}
 
+/* ETA */
+.seg2{display:flex;gap:6px;background:var(--soft);border-radius:999px;padding:4px}
+.seg2 button{flex:1;border:0;background:none;border-radius:999px;padding:9px 12px;font-weight:600;font-size:14.5px;color:var(--muted)}
+.seg2 button.on{background:var(--pri);color:var(--pri-ink);box-shadow:0 2px 0 color-mix(in srgb,var(--pri) 55%,#000)}
+.place .lb{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:5px}
+.psearch{display:flex;gap:8px}.psearch .inp{font-family:var(--f-body)}.psearch .btn{flex:none;white-space:nowrap}
+.pchip .btn{flex:none;white-space:nowrap}
+.pres{display:grid;gap:6px;margin-top:8px}
+.pitem{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;text-align:left;border:1.5px solid var(--rule);background:var(--paper);border-radius:12px;padding:9px 12px}
+.pitem:hover{border-color:var(--acc)}
+.pitem .pz{margin-left:auto;font-family:var(--f-mono);font-size:12.5px;color:var(--acc)}
+.pchip{display:flex;align-items:center;gap:10px;border:1.5px solid var(--acc);background:var(--acc-bg);border-radius:14px;padding:10px 12px}
+.pchip > div{flex:1;min-width:0}
+.pchip .sub{font-size:13px}
+.eta-big{border-radius:16px;background:var(--soft);padding:14px 16px}
+.eta-big .big{margin:4px 0}
+
 /* 백업 */
 .sy-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .sy-st{font-size:12.5px;font-weight:600;border-radius:999px;padding:2px 10px;background:var(--soft);color:var(--muted)}
@@ -321,15 +338,21 @@ table.lv tr.fut td{color:var(--muted)}
 <main class="wrap" id="view"></main>
 
 <div class="wrap"><footer class="foot">
-  <p style="margin:0 0 6px" class="foot-dis"><span id="footLead"></span>계산 결과는 법령과 공휴일 규정을 바탕으로 한 참고용 추정입니다. 실제 복무만료일은 소속 해운업체 복무관리 담당자나 관할 지방병무청(병무청 1588-9090)에 확인하세요.</p>
-  <p style="margin:0 0 6px">이 계산기는 <b>대체공휴일 계산을 포함</b>합니다(기본 설정의 '휴가 중 대체공휴일'에서 끌 수 있음). 대체공휴일은 선거일·임시공휴일과 마찬가지로 관공서의 공휴일로 보아 유급휴가 사용일수에서 빼고, 그만큼 휴가 기간을 늘립니다. 근거: 선원법 제71조(관공서의 공휴일·노동절은 유급휴가 사용일수에 포함하지 않음), 관공서의 공휴일에 관한 규정 제3조(공휴일이 토·일이나 다른 공휴일과 겹치면 다음 첫 비공휴일을 대체공휴일로 함), 공휴일에 관한 법률 제3조.</p>
+  <p style="margin:0 0 6px" class="foot-dis" id="foot1"><span id="footLead"></span>계산 결과는 법령과 공휴일 규정을 바탕으로 한 참고용 추정입니다. 실제 복무만료일은 소속 해운업체 복무관리 담당자나 관할 지방병무청(병무청 1588-9090)에 확인하세요.</p>
+  <p style="margin:0 0 6px" id="foot2">이 계산기는 <b>대체공휴일 계산을 포함</b>합니다(기본 설정의 '휴가 중 대체공휴일'에서 끌 수 있음). 대체공휴일은 선거일·임시공휴일과 마찬가지로 관공서의 공휴일로 보아 유급휴가 사용일수에서 빼고, 그만큼 휴가 기간을 늘립니다. 근거: 선원법 제71조(관공서의 공휴일·노동절은 유급휴가 사용일수에 포함하지 않음), 관공서의 공휴일에 관한 규정 제3조(공휴일이 토·일이나 다른 공휴일과 겹치면 다음 첫 비공휴일을 대체공휴일로 함), 공휴일에 관한 법률 제3조.</p>
   <button class="ver" id="verTxt" type="button" title="버전"></button>
 </footer></div>
 
 <script>
 'use strict';
-const VERSION = '1.4.0';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '2.0.0';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  { v: '2.0.0', d: '2026. 11. 16', i: [
+    'ETA 계산기 추가: 출항 일시·출항지·속력·거리·목적지로 목적지 현지 도착 시각, 출항지·UTC 기준 ETA, 항해 시간, 시차 계산',
+    '출항지·목적지는 온라인 지명 검색으로 시간대를 받아오고, 표준시·일광절약시(시작·끝 날짜)는 브라우저 세계 시간대 자료로 계산. 오프라인이면 시간대 직접 선택',
+    "'현재 선박 시간 기준' 모드: 배 시계 시각과 선박 시간대(UTC±)로 남은 시간과 ETA 계산",
+    '24시간이 넘는 시간은 일, 30일이 넘으면 달을 괄호 안에 함께 표시',
+  ] },
   { v: '1.4.0', d: '2026. 11. 16', i: [
     "기본 설정에 '휴가 중 대체공휴일' 선택 추가: 포함(기본, 휴가 사용일에서 뺌) · 포함 안 함(휴가를 쓴 날로 셈)",
   ] },
@@ -499,6 +522,7 @@ function setNet(on){
   $('#netTxt').textContent = on ? '온라인' : '오프라인';
   c.title = on ? '온라인: 서버의 공휴일 자료와 기록 백업을 씁니다' : '오프라인: 인터넷 연결이 없어 양력 고정 공휴일만으로 계산합니다';
   if (on && !was){ loadHolidays(); syncSoon(800); }
+  if (on !== was && route() === 'eta') document.querySelectorAll('.place').forEach(b => { if (!b.querySelector('.pchip')){ b.outerHTML = placeHTML(b.dataset.key, b.querySelector('.lb').textContent); bindPlace(document.querySelector(`.place[data-key="${b.dataset.key}"]`)); } });
 }
 window.addEventListener('online', () => { setNet(true); loadHolidays(); });
 window.addEventListener('offline', () => setNet(false));
@@ -664,11 +688,15 @@ function route(){ return location.hash.replace(/^#\/?/, '') || 'home'; }
 window.addEventListener('hashchange', render);
 document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g){ e.preventDefault(); const to = g.dataset.go; location.hash = to === 'home' ? '' : '#/' + to; } });
 
+let FOOT1 = null;
 function render(){
   const r = route();
-  $('#footLead').textContent = r === 'calc' ? '' : '복무만료 계산기의 ';
+  const f1 = $('#foot1'), f2 = $('#foot2');
+  if (FOOT1 == null) FOOT1 = f1.innerHTML;
+  if (r === 'eta'){ f1.innerHTML = 'ETA 계산 결과는 입력한 속력을 끝까지 유지한다고 가정한 참고값입니다. 실제 입항 시각은 기상·해류·항로·대기 등에 따라 달라지니 항해 계획과 선장 판단을 따르세요. 시간대·일광절약시는 브라우저의 세계 시간대 자료로 계산합니다.'; f2.hidden = true; }
+  else { f1.innerHTML = FOOT1; f2.hidden = false; $('#footLead').textContent = r === 'calc' ? '' : '복무만료 계산기의 '; }
   const v = $('#view');
-  if (r === 'calc') drawCalc(v); else drawHome(v);
+  if (r === 'calc') drawCalc(v); else if (r === 'eta') drawEta(v); else drawHome(v);
   window.scrollTo(0, 0);
 }
 
@@ -678,12 +706,17 @@ function drawHome(v){
   <section class="hero">
     <div class="tag">Sea service</div>
     <h1><em>바다생활</em> 계산기</h1>
-    <p>승선 기록을 넣으면 휴가와 공휴일을 따져 복무 인정일수와 만료 예정일을 계산합니다.</p>
+    <p>승선근무예비역 복무 인정일수와 만료 예정일, 항해 ETA를 계산합니다.</p>
   </section>
   <nav class="menu" aria-label="기능">
     <button class="mcard" type="button" data-go="calc">
       <span class="ic">${IC.calc}</span>
       <span><h2>복무완료 계산기</h2><p>편입일과 승선·하선일로 1,095일까지 남은 날과 만료 예정일 계산</p></span>
+      <span class="go">${IC.arrow}</span>
+    </button>
+    <button class="mcard" type="button" data-go="eta">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/><path d="M16.5 3.5l2 2M7.5 3.5l-2 2"/></svg></span>
+      <span><h2>ETA 계산기</h2><p>출항 시각·속력·거리로 시차와 일광절약시까지 따진 목적지 도착 시각 계산</p></span>
       <span class="go">${IC.arrow}</span>
     </button>
     <div class="mcard soon" aria-disabled="true">
@@ -904,6 +937,210 @@ function drawResults(){
       </tbody></table></div>
       <p class="sub" style="margin:10px 0 0">휴가는 하선 다음 날부터 씁니다. 공휴일(일요일·대체공휴일·선거일·임시공휴일 포함)과 노동절(근로자의 날)은 휴가를 쓴 날로 세지 않아 휴가 기간이 그만큼 길어지고, 그날은 인정일수에도 들어가지 않습니다. 토요일은 휴가를 쓴 날로 셉니다. 흐린 줄은 오늘 이후 예정입니다.</p>`;
   }
+}
+
+/* ---------- ETA 계산기 ----------
+   - 시간대: 지명 검색은 Open-Meteo 지오코딩(온라인, 결과에 IANA 시간대 포함)으로 받고,
+     그 시간대의 UTC 오프셋·일광절약시는 브라우저에 들어 있는 세계 시간대 자료(Intl)로 계산합니다.
+   - 오프라인이면 검색 대신 시간대를 직접 고릅니다(UTC±시각 또는 IANA 시간대 목록). 오프라인용 내장 자료는 아직 넣지 않았습니다. */
+const LS_ETA = 'sd-eta-v1';
+let ET = lsGet(LS_ETA, null) || { mode: 'dep', depAt: '', dep: null, dest: null, spd: '', dist: '', shipAt: '', shipOff: 540 };
+const saveEta = () => lsSet(LS_ETA, ET);
+const offFmt = new Map();
+function zoneOff(z, ms){   // 그 순간 UTC보다 몇 분 빠른지
+  if (!z) return 0;
+  if (z.fixed != null) return z.fixed;
+  let f = offFmt.get(z.tz);
+  if (!f){ try { f = new Intl.DateTimeFormat('en-US', { timeZone: z.tz, timeZoneName: 'longOffset', year: 'numeric' }); } catch(e) { return 0; } offFmt.set(z.tz, f); }
+  const p = (f.formatToParts(new Date(ms)).find(x => x.type === 'timeZoneName') || {}).value || 'GMT';
+  const m = p.match(/GMT([+-])(\d{1,2})(?::?(\d{2}))?/);
+  return m ? (m[1] === '-' ? -1 : 1) * (+m[2] * 60 + +(m[3] || 0)) : 0;
+}
+function wallMs(s){ const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(s || ''); return m ? Date.UTC(+m[1], m[2] - 1, +m[3], +m[4], +m[5]) : null; }
+function wallToUtc(w, z){ let u = w - zoneOff(z, w) * 6e4; u = w - zoneOff(z, u) * 6e4; return u; }
+function wallParts(utc, z){ const w = new Date(utc + zoneOff(z, utc) * 6e4); return [w.getUTCFullYear(), w.getUTCMonth() + 1, w.getUTCDate(), w.getUTCHours(), w.getUTCMinutes(), w.getUTCDay()]; }
+function toLocalInput(utc, z){ const [y, m, d, h, mi] = wallParts(utc, z); return `${y}-${z2(m)}-${z2(d)}T${z2(h)}:${z2(mi)}`; }
+function offLabel(min){ if (!min) return 'UTC±0'; const a = Math.abs(min); return `UTC${min < 0 ? '−' : '+'}${Math.floor(a / 60)}${a % 60 ? ':' + z2(a % 60) : ''}`; }
+function fmtZ(utc, z){ const [y, m, d, h, mi, w] = wallParts(utc, z); return `${y}. ${m}. ${d}(${WK[w]}) ${z2(h)}:${z2(mi)}`; }
+/* 시간 표시: 24시간이 넘으면 일, 30일이 넘으면 달을 괄호 안에 (1달 = 30일) */
+function fmtH(h){
+  const tm = Math.max(0, Math.round(h * 60));
+  if (tm < 1440) return tm % 60 ? `${Math.floor(tm / 60)}시간 ${tm % 60}분` : `${tm / 60}시간`;
+  let d = Math.floor(tm / 1440); const r = tm % 1440, mo = Math.floor(d / 30); d %= 30;
+  const parts = [mo ? mo + '달' : '', d ? d + '일' : '', Math.floor(r / 60) ? Math.floor(r / 60) + '시간' : '', r % 60 ? r % 60 + '분' : ''].filter(Boolean);
+  return `${num(Math.round(tm / 6) / 10)}시간 (${parts.join(' ')})`;
+}
+/* 그 해의 일광절약시: 하루씩 오프셋을 보고 바뀌는 순간을 분 단위로 찾음 */
+const dstCache = new Map();
+function dstInfo(z, year){
+  if (!z || z.fixed != null) return null;
+  const key = z.tz + '|' + year; if (dstCache.has(key)) return dstCache.get(key);
+  const t0 = Date.UTC(year, 0, 1), t1 = Date.UTC(year + 1, 0, 1);
+  let prev = zoneOff(z, t0); const first = prev, trans = [];
+  for (let t = t0 + 864e5; t <= t1; t += 864e5){
+    const o = zoneOff(z, t);
+    if (o !== prev){
+      let lo = t - 864e5, hi = t;
+      while (hi - lo > 6e4){ const mid = Math.floor((lo + hi) / 2 / 6e4) * 6e4; if (zoneOff(z, mid) === prev) lo = mid; else hi = mid; }
+      trans.push({ at: hi, from: prev, to: o }); prev = o;
+    }
+  }
+  const all = [first, ...trans.map(x => x.to)], std = Math.min(...all), hi = Math.max(...all);
+  const r = { std, dst: hi !== std ? hi : null, trans };
+  dstCache.set(key, r); return r;
+}
+function zoneName(z){ return z ? (z.fixed != null ? offLabel(z.fixed) + ' (직접 선택)' : z.tz) : ''; }
+function zoneLine(z, at){
+  if (!z) return '';
+  const off = zoneOff(z, at);
+  if (z.fixed != null) return `${offLabel(off)} · 일광절약시 없음(고정 시간대)`;
+  const di = dstInfo(z, new Date(at).getUTCFullYear());
+  if (!di || di.dst == null) return `표준시 ${offLabel(off)} · 일광절약시 없음`;
+  const on = off !== di.std;
+  const period = di.trans.map(t => `${fmtZ(t.at, z).replace(/ \d\d:\d\d$/, '')} ${t.to > t.from ? '시작' : '끝'}`).join(', ');
+  return `표준시 ${offLabel(di.std)} · 일광절약시 ${offLabel(di.dst)} <b>${on ? '적용 중' : '적용 안 함'}</b>${period ? ` (${new Date(at).getUTCFullYear()}년: ${period})` : ''}`;
+}
+const FIXED_OFFS = (() => { const a = []; for (let m = -12 * 60; m <= 14 * 60; m += 30) a.push(m); [345, 525, 765, 825].forEach(x => a.push(x)); return a.sort((x, y) => x - y); })();
+function zoneSelectHTML(id, cur, withIana = true){
+  let tzs = []; try { tzs = Intl.supportedValuesOf('timeZone'); } catch(e) {}
+  const val = cur ? (cur.fixed != null ? 'f:' + cur.fixed : 't:' + cur.tz) : '';
+  return `<select class="inp" id="${id}"><option value="">시간대 직접 고르기…</option>
+    <optgroup label="UTC 오프셋(고정)">${FIXED_OFFS.map(m => `<option value="f:${m}" ${val === 'f:' + m ? 'selected' : ''}>${offLabel(m)}</option>`).join('')}</optgroup>
+    ${withIana && tzs.length ? `<optgroup label="지역 시간대(일광절약시 자동)">${tzs.map(t => `<option value="t:${esc(t)}" ${val === 't:' + t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</optgroup>` : ''}</select>`;
+}
+function parseZoneVal(v){ if (!v) return null; if (v.startsWith('f:')) return { fixed: +v.slice(2) }; return { tz: v.slice(2) }; }
+
+function placeHTML(key, label){
+  const p = ET[key], now = Date.now();
+  return `<div class="f full place" data-key="${key}"><span class="lb">${label}</span>
+    ${p ? `<div class="pchip"><div><b>${esc(p.name || zoneName(p))}</b>${p.country ? ` <span class="sub">· ${esc([p.admin, p.country].filter(Boolean).join(', '))}</span>` : ''}<div class="sub">${esc(zoneName(p))} · ${zoneLine(p, now)}</div></div><button class="btn btn-ghost btn-sm" type="button" data-pclear>바꾸기</button></div>`
+    : `<div class="psearch"><input class="inp" type="text" data-pq placeholder="${net ? '항구·도시 이름 (예: 부산, Rotterdam)' : '오프라인: 아래에서 시간대를 고르세요'}" ${net ? '' : 'disabled'} autocomplete="off"><button class="btn btn-pri btn-sm" type="button" data-pgo ${net ? '' : 'disabled'}>검색</button></div>
+       <div class="pres" data-pres></div>
+       <div style="margin-top:8px">${zoneSelectHTML('z_' + key, null)}</div>`}
+  </div>`;
+}
+function bindPlace(box){
+  const key = box.dataset.key;
+  const redraw = () => { box.outerHTML = placeHTML(key, box.querySelector('.lb').textContent); bindPlace(document.querySelector(`.place[data-key="${key}"]`)); calcEta(); };
+  const clr = box.querySelector('[data-pclear]'); if (clr) clr.onclick = () => { ET[key] = null; saveEta(); redraw(); };
+  const sel = box.querySelector('select'); if (sel) sel.onchange = () => { const z = parseZoneVal(sel.value); if (z){ ET[key] = z; saveEta(); redraw(); } };
+  const q = box.querySelector('[data-pq]'), go = box.querySelector('[data-pgo]'), res = box.querySelector('[data-pres]');
+  if (!q) return;
+  const run = async () => {
+    const s = q.value.trim(); if (!s) return;
+    res.innerHTML = '<p class="sub" style="margin:6px 0 0">찾는 중…</p>';
+    try {
+      const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 8000);
+      const r = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=8&language=ko&format=json&name=' + encodeURIComponent(s), { signal: ctl.signal });
+      clearTimeout(tm);
+      if (!r.ok) throw new Error('http');
+      const list = ((await r.json()).results || []).filter(x => x.timezone);
+      if (!list.length){ res.innerHTML = '<p class="sub" style="margin:6px 0 0">찾은 곳이 없습니다. 영어 이름으로 찾거나 아래에서 시간대를 직접 고르세요.</p>'; return; }
+      const now = Date.now();
+      res.innerHTML = list.map((x, i) => `<button class="pitem" type="button" data-i="${i}"><b>${esc(x.name)}</b> <span class="sub">${esc([x.admin1, x.country].filter(Boolean).join(', '))}</span><span class="pz">${esc(x.timezone)} · ${offLabel(zoneOff({ tz: x.timezone }, now))}</span></button>`).join('');
+      res.querySelectorAll('.pitem').forEach(b => b.onclick = () => { const x = list[+b.dataset.i]; ET[key] = { tz: x.timezone, name: x.name, country: x.country || '', admin: x.admin1 || '', lat: x.latitude, lon: x.longitude }; saveEta(); redraw(); });
+    } catch(e) {
+      if (!navigator.onLine) setNet(false);
+      res.innerHTML = '<p class="sub" style="margin:6px 0 0">검색 서버에 연결하지 못했습니다. 아래에서 시간대를 직접 고르세요.</p>';
+    }
+  };
+  go.onclick = run; q.onkeydown = e => { if (e.key === 'Enter') run(); };
+}
+
+function drawEta(v){
+  document.title = 'ETA 계산기 · 바다생활 계산기';
+  const shipNow = () => toLocalInput(Date.now(), { fixed: ET.shipOff });
+  if (ET.mode === 'ship' && !ET.shipAt) ET.shipAt = shipNow();
+  v.innerHTML = `
+  <div class="vh"><button class="back" type="button" data-go="home">${IC.back}처음</button><h2>ETA 계산기</h2></div>
+  <div class="sec-t"><h3>${IC.gear}계산 기준</h3></div>
+  <div class="card">
+    <div class="seg2" role="tablist">
+      <button type="button" data-mode="dep" class="${ET.mode !== 'ship' ? 'on' : ''}">출항 기준</button>
+      <button type="button" data-mode="ship" class="${ET.mode === 'ship' ? 'on' : ''}">현재 선박 시간 기준</button>
+    </div>
+    <p class="sub" style="margin:10px 0 0">${ET.mode === 'ship' ? '지금 배의 시계와 남은 거리로 목적지 도착 시각과 남은 시간을 계산합니다.' : '출항 시각(출항지 현지 시각)과 거리로 목적지 도착 시각을 계산합니다.'}</p>
+  </div>
+  <div class="sec-t"><h3>${IC.ship}항해 정보</h3></div>
+  <div class="card"><div class="fgrid">
+    ${ET.mode === 'ship' ? `
+      <div class="f"><label for="eShipAt">현재 선박 시각</label><input class="inp" id="eShipAt" type="datetime-local" value="${esc(ET.shipAt)}"></div>
+      <div class="f"><label for="eShipOff">선박 시간대</label><select class="inp" id="eShipOff">${FIXED_OFFS.map(m => `<option value="${m}" ${+ET.shipOff === m ? 'selected' : ''}>${offLabel(m)}</option>`).join('')}</select></div>
+      <div class="f full"><button class="btn btn-ghost btn-sm" type="button" id="eNow">지금 시각으로 채우기</button></div>`
+    : `<div class="f full"><label for="eDepAt">출항 일시 <small>(출항지 현지 시각)</small></label><input class="inp" id="eDepAt" type="datetime-local" value="${esc(ET.depAt)}"></div>
+      ${placeHTML('dep', '출항지')}`}
+    <div class="f"><label for="eSpd">속력 <small>(노트)</small></label><input class="inp" id="eSpd" type="number" inputmode="decimal" min="0" step="0.1" value="${esc(ET.spd)}" placeholder="예: 14"></div>
+    <div class="f"><label for="eDist">남은 거리 <small>(해리)</small></label><input class="inp" id="eDist" type="number" inputmode="decimal" min="0" step="0.1" value="${esc(ET.dist)}" placeholder="예: 4500"></div>
+    ${placeHTML('dest', '목적지')}
+  </div></div>
+  <div class="sec-t"><h3>${IC.clock}ETA</h3></div>
+  <div class="card" id="etaRes"></div>
+  ${etaHelpHTML()}`;
+  v.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { ET.mode = b.dataset.mode; saveEta(); drawEta(v); });
+  const bind = (id, k, num = false) => { const el = $('#' + id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => { ET[k] = num ? +el.value : el.value.trim(); saveEta(); calcEta(); }); };
+  bind('eDepAt', 'depAt'); bind('eSpd', 'spd'); bind('eDist', 'dist'); bind('eShipAt', 'shipAt'); bind('eShipOff', 'shipOff', true);
+  const nb = $('#eNow'); if (nb) nb.onclick = () => { ET.shipAt = shipNow(); saveEta(); $('#eShipAt').value = ET.shipAt; calcEta(); };
+  v.querySelectorAll('.place').forEach(bindPlace);
+  calcEta();
+}
+
+function calcEta(){
+  const box = $('#etaRes'); if (!box) return;
+  const spd = parseFloat(ET.spd), dist = parseFloat(ET.dist);
+  const ship = ET.mode === 'ship';
+  const startZone = ship ? { fixed: +ET.shipOff } : ET.dep;
+  const startW = wallMs(ship ? ET.shipAt : ET.depAt);
+  const miss = [];
+  if (startW == null) miss.push(ship ? '현재 선박 시각' : '출항 일시');
+  if (!ship && !ET.dep) miss.push('출항지');
+  if (!(spd > 0)) miss.push('속력');
+  if (!(dist >= 0) || ET.dist === '') miss.push('남은 거리');
+  if (miss.length){ box.innerHTML = `<p class="sub" style="margin:0">${miss.join(' · ')}을(를) 넣으면 ETA가 나옵니다.${!ET.dest ? ' 목적지를 고르면 목적지 현지 시각으로도 보여 줍니다.' : ''}</p>`; return; }
+  const startUtc = wallToUtc(startW, startZone);
+  const hours = dist / spd, eta = Math.round((startUtc + hours * 3.6e6) / 6e4) * 6e4, now = Date.now();   // 도착 시각은 분 단위로 반올림
+  const dz = ET.dest;
+  const diff = dz ? zoneOff(dz, eta) - zoneOff(startZone, startUtc) : null;
+  const diffTxt = diff == null ? '' : diff === 0 ? '시차 없음' : `목적지가 ${ship ? '선박 시간' : '출항지'}보다 ${fmtH(Math.abs(diff) / 60).replace(/ \(.*/, '')} ${diff > 0 ? '빠름' : '늦음'}`;
+  let nowLine = '';
+  if (!ship){
+    if (now < startUtc) nowLine = `출항까지 <b>${fmtH((startUtc - now) / 3.6e6)}</b> · 도착까지 <b>${fmtH((eta - now) / 3.6e6)}</b>`;
+    else if (now < eta){ const left = (eta - now) / 3.6e6; nowLine = `도착까지 <b>${fmtH(left)}</b> · 지금쯤 남은 거리 약 <b>${num(Math.round(left * spd))}해리</b> (${p1(pct(eta - now, eta - startUtc))})`; }
+    else nowLine = `도착 예정 시각이 <b>${fmtH((now - eta) / 3.6e6)}</b> 지났습니다.`;
+  }
+  box.innerHTML = `
+    <div class="eta-big"><span class="sub">${dz ? '목적지 현지 시각' : (ship ? '선박 시간 기준' : '출항지 시각 기준')}</span>
+      <div class="big" style="font-size:clamp(24px,5vw,34px)">${fmtZ(eta, dz || startZone)}</div>
+      <div class="sub">${dz ? esc(dz.name || zoneName(dz)) + ' · ' + offLabel(zoneOff(dz, eta)) : offLabel(zoneOff(startZone, eta))}</div></div>
+    <div class="kv">
+      <div><span>${ship ? '남은 항해 시간' : '항해 시간'}</span><b style="font-size:16px">${fmtH(hours)}</b><em>${num(dist)}해리 ÷ ${num(spd)}노트</em></div>
+      <div><span>시차</span><b style="font-size:16px">${diff == null ? '-' : diff === 0 ? '0시간' : (diff > 0 ? '+' : '−') + fmtH(Math.abs(diff) / 60).replace(/ \(.*/, '')}</b><em>${diffTxt || '목적지를 고르면 계산'}</em></div>
+      <div><span>${ship ? '선박 시간 기준 ETA' : '출항지 시각 기준 ETA'}</span><b style="font-size:15px">${fmtZ(eta, startZone)}</b><em>${offLabel(zoneOff(startZone, eta))}</em></div>
+      <div><span>UTC 기준 ETA</span><b style="font-size:15px">${fmtZ(eta, { fixed: 0 })}</b><em>${ship ? '선박 시각 ' + fmtZ(startUtc, startZone) : '출항 ' + fmtZ(startUtc, { fixed: 0 }) + ' UTC'}</em></div>
+    </div>
+    ${nowLine ? `<div class="note okn" style="margin-top:14px">${nowLine}</div>` : ''}
+    ${dz && dz.fixed == null ? `<p class="sub" style="margin:12px 0 0">목적지 ${esc(dz.tz)}: ${zoneLine(dz, eta)}</p>` : ''}
+    ${!ship && ET.dep && ET.dep.fixed == null ? `<p class="sub" style="margin:4px 0 0">출항지 ${esc(ET.dep.tz)}: ${zoneLine(ET.dep, startUtc)}</p>` : ''}
+    ${!dz ? '<p class="sub" style="margin:12px 0 0">목적지를 고르면 목적지 현지 시각과 시차도 보여 줍니다.</p>' : ''}`;
+}
+
+function etaHelpHTML(){
+  return `
+  <div class="sec-t"><h3>${IC.help}사용 방법</h3></div>
+  <div class="card help"><ol class="steps">
+    <li>위에서 <b>출항 기준</b>이나 <b>현재 선박 시간 기준</b>을 고릅니다.</li>
+    <li>출항 기준이면 <b>출항 일시</b>를 출항지 현지 시각으로 넣고 <b>출항지</b>를 검색해 고릅니다. 현재 선박 시간 기준이면 <b>현재 선박 시각</b>과 배 시계의 <b>선박 시간대</b>(UTC±)를 넣습니다.</li>
+    <li><b>속력</b>(노트)과 <b>남은 거리</b>(해리)를 넣습니다. 출항 기준에서는 출항지부터 목적지까지의 거리입니다.</li>
+    <li><b>목적지</b>를 검색해 고르면 ETA가 목적지 현지 시각으로 나오고, 시차와 일광절약시 적용 여부도 함께 보입니다.</li>
+    <li>인터넷이 없으면 지명 검색 대신 <b>시간대 직접 고르기</b>에서 UTC 오프셋이나 지역 시간대를 고르세요.</li>
+  </ol></div>
+  <div class="sec-t"><h3>${IC.help}도움말</h3></div>
+  <div class="card faq">
+    <details><summary>ETA는 어떻게 계산하나요?</summary><div class="body"><p>항해 시간 = 남은 거리(해리) ÷ 속력(노트)입니다. 출발 시각을 그 지역의 시간대로 UTC(세계 표준시)로 바꾼 뒤 항해 시간을 더하고, 다시 목적지 시간대로 바꿔 보여 줍니다. 속력은 끝까지 같다고 가정합니다.</p></div></details>
+    <details><summary>시차와 일광절약시는 어떻게 반영하나요?</summary><div class="body"><p>출항지·목적지를 검색하면 그곳의 지역 시간대(예: Europe/Amsterdam)를 받아옵니다. 그 시간대의 표준시와 일광절약시(서머타임) 시작·끝 날짜는 브라우저에 들어 있는 세계 시간대 자료로 계산하므로, 도착하는 날짜에 일광절약시가 적용되는지까지 따져서 현지 시각을 냅니다. 시차는 '도착 시각의 목적지 오프셋 − 출발 시각의 출발지(또는 선박) 오프셋'입니다.</p></div></details>
+    <details><summary>'현재 선박 시간 기준'은 언제 쓰나요?</summary><div class="body"><p>항해 중에 배 시계(Ship's time)를 기준으로 남은 시간을 보고 싶을 때 씁니다. 배 시계는 항해하면서 시간대를 바꾸므로 지역 시간대 대신 UTC±시각으로 고르고, 바꿀 때마다 같이 고쳐 주세요.</p></div></details>
+    <details><summary>시간 표시의 괄호는 무엇인가요?</summary><div class="body"><p>24시간이 넘으면 일, 30일이 넘으면 달로 바꿔 괄호 안에 함께 적습니다(예: 321.4시간 (13일 9시간 26분)). 1달은 30일로 셉니다.</p></div></details>
+    <details><summary>지명 검색은 어디서 하나요?</summary><div class="body"><p>온라인 지명 검색 서비스(Open-Meteo Geocoding)를 씁니다. 입력한 지명만 보내고 다른 기록은 보내지 않습니다. 항구 이름이 안 나오면 가까운 도시 이름이나 영어 이름으로 찾아보세요.</p></div></details>
+  </div>`;
 }
 
 /* ---------- 기록 백업 (로그인 없이 복구 코드로) ----------
