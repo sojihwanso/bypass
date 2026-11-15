@@ -241,6 +241,35 @@
   /* 올리기 권한 */
   .up-form { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 12px; }
   .up-form .input { width: 100%; }
+  /* 결과물 관리 */
+  .sc-bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: -4px 0 12px; padding: 10px 14px; border-radius: 10px; background: var(--ink); color: #fff; font-size: 14.5px; font-weight: 700; }
+  .sc-bulk .mini-btn { background: #fff; }
+  .sc-row { display: flex; align-items: center; gap: 10px 12px; padding: 12px 4px; border-top: 1px solid var(--rule); }
+  .sc-row:first-child { border-top: 0; }
+  .sc-row.is-hidden .sc-title { color: var(--muted); }
+  .sc-row > input[type="checkbox"] { flex: none; width: 18px; height: 18px; }
+  .sc-body { flex: 1 1 auto; min-width: 0; }
+  .sc-title { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 15.5px; font-weight: 700; color: var(--ink); text-decoration: none; }
+  a.sc-title:hover span:first-child { text-decoration: underline; }
+  .sc-meta { margin-top: 2px; font-size: 13px; color: var(--muted); }
+  .sc-ctrl { flex: none; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px; }
+  .card .sc-ctrl .input, .sc-bulk .input { width: auto; max-width: 150px; min-height: 0; height: auto; padding: 4px 8px; font-size: 14px; border-width: 1.5px; }
+  .sc-ctrl .mini-btn[aria-pressed="true"] { background: var(--green-tint); color: var(--green); border-color: var(--green); }
+  .mini-btn.is-armed { background: #9A3412; color: #fff; border-color: #9A3412; }
+  .sc-dot { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 3px; vertical-align: 0; }
+  .cat-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px 4px; border-top: 1px solid var(--rule); }
+  .cat-row:first-child { border-top: 0; }
+  .cat-row .sc-body b { font-size: 15.5px; }
+  .cat-edit { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px 14px; width: 100%; padding: 4px 0 6px; }
+  .cat-edit .wide { grid-column: 1 / -1; }
+  .cat-edit .check { margin-top: 0; }
+  .cat-edit .field-label { margin: 0 0 6px; }
+  .cat-edit .acts { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  @media (max-width: 720px) {
+    .sc-row { flex-wrap: wrap; }
+    .sc-body { flex-basis: calc(100% - 40px); }
+    .sc-ctrl { width: 100%; justify-content: flex-start; padding-left: 30px; }
+  }
   .up-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 12px 4px; border-top: 1px solid var(--rule); }
   .up-row:first-child { border-top: 0; }
   .up-who { flex: 1 1 220px; min-width: 0; }
@@ -583,6 +612,51 @@
         </div>
         <div data-nt-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
         <p class="list-hint">회원 전용 공지는 커뮤니티에만, 전체 공개 공지는 게시 기간 동안 메인 전광판 둘째 줄에도 보입니다. 고정한 공지가 맨 위에 옵니다.</p>
+      </section>
+
+      <!-- 결과물 -->
+      <section data-view="showcase" hidden>
+        <div class="view-head">
+          <div>
+            <a class="view-back" href="#g-content">‹ 콘텐츠</a>
+            <p class="view-kicker">콘텐츠</p>
+            <h1 tabindex="-1">결과물</h1>
+          </div>
+          <a class="mini-btn" href="/community/#showcase" target="_blank" rel="noopener">커뮤니티에서 보기 ↗</a>
+        </div>
+        <div class="banner banner-warn" role="alert" data-sql-warn10 hidden>
+          <p><b>데이터베이스 설정이 한 단계 남았습니다.</b> Supabase SQL Editor에서 <code>supabase/027_showcase_categories.sql</code>을 실행해 주세요. 그 전에는 숨기기·지우기만 되고, 분류 관리와 추천 고정은 쓸 수 없습니다.</p>
+        </div>
+        <div class="subtabs" role="tablist" aria-label="결과물 관리">
+          <button type="button" class="subtab" role="tab" id="tab-sc-items" aria-controls="pane-sc-items" aria-selected="true" data-sc-tab="items">결과물 목록</button>
+          <button type="button" class="subtab" role="tab" id="tab-sc-cats" aria-controls="pane-sc-cats" aria-selected="false" data-sc-tab="cats">분류</button>
+        </div>
+        <div id="pane-sc-items" role="tabpanel" aria-labelledby="tab-sc-items" data-sc-pane="items">
+          <div class="toolbar">
+            <label class="sr-only" for="sc-find">결과물 찾기</label>
+            <input class="input" id="sc-find" type="search" placeholder="제목·올린 사람으로 찾기" autocomplete="off">
+            <div class="fchips" role="group" aria-label="상태로 거르기" data-sc-state></div>
+          </div>
+          <div class="toolbar">
+            <div class="fchips" role="group" aria-label="분류로 거르기" data-sc-chips></div>
+          </div>
+          <div class="sc-bulk" data-sc-bulk hidden>
+            <span data-sc-bulk-n></span>
+            <label class="sr-only" for="sc-bulk-cat">옮길 분류</label>
+            <select class="input" id="sc-bulk-cat"></select>
+            <button type="button" class="mini-btn" data-sc-bulk-go>분류 옮기기</button>
+            <button type="button" class="mini-btn" data-sc-bulk-clear>선택 해제</button>
+          </div>
+          <div class="card" style="max-width: none; padding: 8px 18px" data-sc-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
+          <p class="list-hint">‘추천’을 누르면 커뮤니티 결과물 맨 위에 그 순서대로 보입니다(↑↓로 순서 변경). 분류·숨김·추천을 바꿔도 글에 ‘고침’은 붙지 않습니다. 체크해서 여러 개를 한꺼번에 옮길 수 있습니다.</p>
+        </div>
+        <div id="pane-sc-cats" role="tabpanel" aria-labelledby="tab-sc-cats" data-sc-pane="cats" hidden>
+          <div class="toolbar">
+            <button type="button" class="btn btn-primary btn-small" data-cat-new>+ 분류 추가</button>
+          </div>
+          <div class="card" style="max-width: none; padding: 8px 18px" data-cat-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
+          <p class="list-hint">커뮤니티 왼쪽 목록과 글쓰기 화면에 이 순서대로 보입니다. ‘회원이 고를 수 있음’을 끄면 운영진만 그 분류로 옮길 수 있습니다(예: 미분류). 이름을 바꾸거나 지우면 그 분류의 결과물도 함께 옮겨집니다.</p>
+        </div>
       </section>
 
       <!-- 페이지 문구 -->
@@ -1324,6 +1398,7 @@
     { id: 'stats', group: 'home', name: '통계', ready: true },
     { id: 'reports', group: 'inbox', name: '불편 제보', ready: true },
     { id: 'applications', group: 'inbox', name: '합류 신청', ready: true },
+    { id: 'showcase', group: 'content', name: '결과물', ready: true },
     { id: 'dockets', group: 'content', name: '처리 현황', ready: true },
     { id: 'routes', group: 'content', name: '준공 현황 (보관)', ready: true },
     { id: 'notices', group: 'content', name: '공지', ready: true },
@@ -3581,6 +3656,257 @@
   }
   viewHooks.push(view => { if (view === 'notices' && !ntLoaded) loadNotices(); });
   if (decodeURIComponent(location.hash.slice(1)) === 'notices') loadNotices();
+
+  /* ===== 결과물 ===== (022 posts · 027 showcase_categories · pin_rank) */
+  let scRows = [], scCats = [], scLoaded = false, scHas027 = true, scCatF = 'all', scStateF = 'all', scTab = 'items';
+  const scSel = new Set();
+  let scEditing = null;   // 고치는 중인 분류 이름 ('' = 새 분류)
+  const SC_COLORS = { blue: ['파랑', '#2F6FED'], violet: ['보라', '#7A4FD8'], orange: ['주황', '#E8590C'], green: ['초록', '#1F9D55'], teal: ['청록', '#0E8C8F'], rose: ['장미', '#D6336C'], gray: ['회색', '#7A808C'] };
+  const scColor = (name) => (SC_COLORS[(scCats.find((c) => c.name === name) || {}).color] || SC_COLORS.gray)[1];
+  const scDot = (name) => { const d = el('span', 'sc-dot'); d.style.background = scColor(name); return d; };
+  const scList = $('[data-sc-list]'), catList = $('[data-cat-list]');
+  async function loadShowcase() {
+    scLoaded = true;
+    const cols = 'id, created_at, category, title, url, author_name, hidden, likes, comments, pin_rank';
+    let r = await B.sb.from('post_feed').select(cols).eq('kind', 'showcase').order('created_at', { ascending: false }).limit(2000);
+    scHas027 = !(r.error && /pin_rank/.test(r.error.message || ''));
+    if (!scHas027) r = await B.sb.from('post_feed').select(cols.replace(', pin_rank', '')).eq('kind', 'showcase').order('created_at', { ascending: false }).limit(2000);
+    const c = await B.sb.from('showcase_categories').select('*').order('sort').order('name');
+    if (c.error) scHas027 = false;
+    $('[data-sql-warn10]').hidden = scHas027;
+    $('[data-cat-new]').disabled = !scHas027;
+    if (r.error) { scList.replaceChildren(el('p', 'list-state', errText(r.error, '불러오기'))); return; }
+    scRows = r.data;
+    scCats = c.error ? [...new Set(scRows.map((x) => x.category))].map((name, i) => ({ name, sort: i, pickable: true, color: 'gray' })) : c.data;
+    [...scSel].forEach((id) => { if (!scRows.some((x) => x.id === id)) scSel.delete(id); });
+    renderShowcase(); renderCats();
+  }
+  const scCount = (name) => scRows.filter((r) => r.category === name).length;
+  const scPinned = () => scRows.filter((r) => r.pin_rank).sort((a, b) => a.pin_rank - b.pin_rank);
+  function scChipRow(box, items, cur, onPick) {
+    box.replaceChildren(...items.map(([v, t, n, dot]) => {
+      const b = el('button', 'fchip'); b.type = 'button';
+      if (dot) { const d = scDot(v); d.style.marginRight = '6px'; b.append(d); }
+      b.append(document.createTextNode(t), el('span', null, String(n)));
+      b.setAttribute('aria-pressed', String(v === cur));
+      b.addEventListener('click', () => onPick(v));
+      return b;
+    }));
+  }
+  function catSelect(cur, id) {
+    const sel = el('select', 'input'); if (id) sel.id = id;
+    const names = scCats.map((c) => c.name);
+    if (cur && !names.includes(cur)) names.push(cur);
+    names.forEach((n) => { const o = el('option', null, n); o.value = n; if (n === cur) o.selected = true; sel.append(o); });
+    return sel;
+  }
+  function renderShowcase() {
+    const unknown = [...new Set(scRows.map((r) => r.category))].filter((n) => !scCats.some((c) => c.name === n));
+    scChipRow($('[data-sc-chips]'), [['all', '전체', scRows.length], ...scCats.map((c) => [c.name, c.name, scCount(c.name), true]), ...unknown.map((n) => [n, `${n} (예전)`, scCount(n), true])], scCatF, (v) => { scCatF = v; renderShowcase(); });
+    scChipRow($('[data-sc-state]'), [['all', '모두', scRows.length], ['pin', '추천', scPinned().length], ['hidden', '숨김', scRows.filter((r) => r.hidden).length]], scStateF, (v) => { scStateF = v; renderShowcase(); });
+    const q = $('#sc-find').value.trim().toLowerCase();
+    let rows = scRows.filter((r) => (scCatF === 'all' || r.category === scCatF) && (scStateF === 'all' || (scStateF === 'pin' ? r.pin_rank : r.hidden)) && (!q || `${r.title} ${r.author_name || ''} ${r.url || ''}`.toLowerCase().includes(q)));
+    rows = rows.slice().sort((a, b) => ((a.pin_rank || 999) - (b.pin_rank || 999)) || String(b.created_at).localeCompare(String(a.created_at)));
+    const pins = scPinned();
+    if (!rows.length) scList.replaceChildren(el('p', 'list-state', scRows.length ? '조건에 맞는 결과물이 없습니다.' : '아직 올라온 결과물이 없습니다.'));
+    else scList.replaceChildren(...rows.map((r) => {
+      const row = el('div', `sc-row${r.hidden ? ' is-hidden' : ''}`);
+      const ck = el('input'); ck.type = 'checkbox'; ck.checked = scSel.has(r.id); ck.setAttribute('aria-label', `${r.title} 선택`);
+      ck.addEventListener('change', () => { if (ck.checked) scSel.add(r.id); else scSel.delete(r.id); syncBulk(); });
+      const body = el('div', 'sc-body');
+      const t = el('a', 'sc-title'); t.href = `/community/#p-${r.id}`; t.target = '_blank'; t.rel = 'noopener';
+      t.append(el('span', null, r.title));
+      if (r.pin_rank) t.append(el('span', 'flag flag-feat', `추천 ${pins.indexOf(r) + 1}`));
+      if (r.hidden) t.append(el('span', 'flag flag-hidden', '숨김'));
+      const meta = el('div', 'sc-meta');
+      meta.append(scDot(r.category), document.createTextNode(` ${r.category} · ${r.author_name || '회원'} · ${B.dateText(r.created_at)} · ♥ ${r.likes} · 댓글 ${r.comments}`));
+      body.append(t, meta);
+      const ctrl = el('div', 'sc-ctrl');
+      const sel = catSelect(r.category); sel.setAttribute('aria-label', `${r.title} 분류`); sel.disabled = !scHas027;
+      sel.addEventListener('change', () => setCat([r.id], sel.value));
+      ctrl.append(sel);
+      if (scHas027) {
+        const pin = el('button', 'mini-btn', r.pin_rank ? '추천 ✓' : '추천'); pin.type = 'button'; pin.setAttribute('aria-pressed', String(!!r.pin_rank));
+        pin.addEventListener('click', () => togglePin(r));
+        ctrl.append(pin);
+        if (r.pin_rank) {
+          const i = pins.indexOf(r);
+          [['↑', -1, '위로'], ['↓', 1, '아래로']].forEach(([s0, d, lab]) => {
+            const b = el('button', 'mini-btn', s0); b.type = 'button'; b.setAttribute('aria-label', `추천 순서 ${lab}`);
+            b.disabled = !pins[i + d]; b.addEventListener('click', () => movePin(r, d));
+            ctrl.append(b);
+          });
+        }
+      }
+      const hid = el('button', 'mini-btn', r.hidden ? '보이기' : '숨기기'); hid.type = 'button';
+      hid.addEventListener('click', () => scUpdate([r.id], { hidden: !r.hidden }, r.hidden ? '다시 보이게 했습니다.' : '숨겼습니다. 올린 사람과 운영진만 봅니다.'));
+      ctrl.append(hid);
+      if (r.url) { const a = el('a', 'mini-btn', '열기 ↗'); a.href = r.url; a.target = '_blank'; a.rel = 'noopener'; ctrl.append(a); }
+      const del = el('button', 'mini-btn', '지우기'); del.type = 'button';
+      del.addEventListener('click', () => scArm(del, '정말 지우기', () => scDelete(r)));
+      ctrl.append(del);
+      row.append(ck, body, ctrl);
+      return row;
+    }));
+    syncBulk();
+  }
+  // 위험한 버튼: 한 번 누르면 '정말?'으로 바뀌고, 4초 안에 한 번 더 눌러야 실행
+  function scArm(btn, text, run) {
+    if (btn.classList.contains('is-armed')) { clearTimeout(btn._t); run(); return; }
+    const old = btn.textContent; btn.classList.add('is-armed'); btn.textContent = text;
+    btn._t = setTimeout(() => { btn.classList.remove('is-armed'); btn.textContent = old; }, 4000);
+  }
+  function syncBulk() {
+    const n = scSel.size;
+    $('[data-sc-bulk]').hidden = !n || !scHas027;
+    $('[data-sc-bulk-n]').textContent = `${n}개 선택`;
+    const cur = $('#sc-bulk-cat').value;
+    $('#sc-bulk-cat').replaceWith(catSelect(cur || (scCats[0] || {}).name, 'sc-bulk-cat'));
+  }
+  async function scUpdate(ids, patch, okText) {
+    const { data, error } = await B.sb.from('posts').update(patch).in('id', ids).select('id');
+    if (error) { toast(error.code === '23514' ? '없는 분류입니다. 목록을 새로 불러옵니다.' : errText(error, '저장'), true); loadShowcase(); return false; }
+    if (!data.length) { toast('이미 지워졌거나 고칠 권한이 없는 결과물입니다. 목록을 새로 불러옵니다.', true); loadShowcase(); return false; }
+    data.forEach(({ id }) => Object.assign(scRows.find((r) => r.id === id) || {}, patch));
+    renderShowcase(); renderCats();
+    if (okText) toast(okText);
+    return true;
+  }
+  const setCat = (ids, cat) => scUpdate(ids, { category: cat }, `${ids.length > 1 ? `${ids.length}개를 ` : ''}‘${cat}’(으)로 옮겼습니다.`);
+  $('[data-sc-bulk-go]').addEventListener('click', async () => { if (await setCat([...scSel], $('#sc-bulk-cat').value)) { scSel.clear(); renderShowcase(); } });
+  $('[data-sc-bulk-clear]').addEventListener('click', () => { scSel.clear(); renderShowcase(); });
+  function togglePin(r) {
+    if (r.pin_rank) return scUpdate([r.id], { pin_rank: null }, '추천에서 뺐습니다.');
+    const pins = scPinned();
+    if (pins.length >= 99) return toast('추천은 99개까지입니다.', true);
+    return scUpdate([r.id], { pin_rank: pins.length ? pins[pins.length - 1].pin_rank + 1 : 1 }, '추천에 넣었습니다. 커뮤니티 결과물 맨 위에 보입니다.');
+  }
+  async function movePin(r, d) {
+    const pins = scPinned(), i = pins.indexOf(r), o = pins[i + d];
+    if (!o) return;
+    // 순서를 1부터 다시 매긴 뒤 둘을 바꾼다 (중간에 빠진 번호가 있어도 정리됨)
+    pins[i] = o; pins[i + d] = r;
+    const changes = pins.map((x, k) => [x, k + 1]).filter(([x, k]) => x.pin_rank !== k);
+    for (const [x, k] of changes) { if (!(await scUpdate([x.id], { pin_rank: k }))) return; }
+  }
+  async function scDelete(r) {
+    const { error } = await B.sb.from('posts').delete().eq('id', r.id);
+    if (error) return toast(errText(error, '지우기'), true);
+    scRows = scRows.filter((x) => x.id !== r.id); scSel.delete(r.id);
+    renderShowcase(); renderCats(); toast('결과물을 지웠습니다. 댓글·좋아요도 함께 지워졌습니다.');
+  }
+  $('#sc-find').addEventListener('input', renderShowcase);
+  $$('[data-sc-tab]').forEach((b) => b.addEventListener('click', () => {
+    scTab = b.dataset.scTab;
+    $$('[data-sc-tab]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+    $$('[data-sc-pane]').forEach((p) => { p.hidden = p.dataset.scPane !== scTab; });
+  }));
+
+  // ----- 분류 -----
+  function colorSelect(cur, id) {
+    const sel = el('select', 'input'); sel.id = id;
+    Object.entries(SC_COLORS).forEach(([v, [t]]) => { const o = el('option', null, t); o.value = v; if (v === cur) o.selected = true; sel.append(o); });
+    return sel;
+  }
+  function catForm(c) {
+    const isNew = !c; c = c || { name: '', description: '', color: 'gray', pickable: true };
+    const f = el('form', 'cat-edit'); f.noValidate = true;
+    const field = (label, input, wide) => { const d = el('div', wide ? 'wide' : null); const l = el('label', 'field-label', label); l.htmlFor = input.id; d.append(l, input); return d; };
+    const nm = el('input', 'input'); nm.id = 'cat-name'; nm.maxLength = 20; nm.value = c.name; nm.autocomplete = 'off';
+    const ds = el('input', 'input'); ds.id = 'cat-desc'; ds.maxLength = 80; ds.value = c.description || ''; ds.placeholder = '커뮤니티 목록·글쓰기에 보이는 한 줄 (80자)';
+    const co = colorSelect(c.color, 'cat-color');
+    const pk = el('label', 'check'); const pkc = el('input'); pkc.type = 'checkbox'; pkc.checked = c.pickable; pk.append(pkc, document.createTextNode(' 회원이 고를 수 있음'));
+    const err = el('p', 'form-error'); err.setAttribute('role', 'alert'); err.hidden = true;
+    const acts = el('div', 'acts');
+    const save = el('button', 'btn btn-primary btn-small', isNew ? '추가' : '저장'); save.type = 'submit';
+    const cancel = el('button', 'mini-btn', '취소'); cancel.type = 'button';
+    cancel.addEventListener('click', () => { scEditing = null; renderCats(); });
+    acts.append(save, cancel);
+    f.append(field('이름 (20자)', nm), field('색', co), field('설명', ds, true), pk, err, acts);
+    f.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = nm.value.trim(), description = ds.value.trim() || null;
+      const bad = (t) => { err.textContent = t; err.hidden = false; };
+      if (!name) return bad('이름을 입력해 주세요.');
+      if (/[<>"]/.test(name)) return bad('이름에 < > " 는 쓸 수 없습니다.');
+      if (name !== c.name && scCats.some((x) => x.name === name)) return bad('같은 이름의 분류가 이미 있습니다.');
+      B.setBusy(save, true, '저장 중…');
+      let res;
+      if (isNew) {
+        const sort = scCats.reduce((m, x) => Math.max(m, x.sort), 0) + 10;
+        res = await B.sb.from('showcase_categories').insert({ name, description, color: co.value, pickable: pkc.checked, sort });
+      } else {
+        if (name !== c.name) res = await B.sb.rpc('showcase_category_rename', { p_old: c.name, p_new: name });
+        if (!res || !res.error) res = await B.sb.from('showcase_categories').update({ description, color: co.value, pickable: pkc.checked }).eq('name', name);
+      }
+      B.setBusy(save, false);
+      if (res.error) return bad(res.error.code === '23505' ? '같은 이름의 분류가 이미 있습니다.' : res.error.code === '23514' ? '이름(20자)·설명(80자) 길이를 확인해 주세요.' : errText(res.error, '저장'));
+      if (!isNew && name !== c.name && scCatF === c.name) scCatF = name;
+      scEditing = null; toast(isNew ? `‘${name}’ 분류를 만들었습니다.` : '저장했습니다.');
+      loadShowcase();
+    });
+    setTimeout(() => nm.focus(), 0);
+    return f;
+  }
+  function renderCats() {
+    const rows = [];
+    if (scEditing === '') { const r = el('div', 'cat-row'); r.append(catForm(null)); rows.push(r); }
+    scCats.forEach((c, i) => {
+      const r = el('div', 'cat-row');
+      if (scEditing === c.name) { r.append(catForm(c)); rows.push(r); return; }
+      const body = el('div', 'sc-body');
+      const t = el('div', 'sc-title'); t.append(scDot(c.name), el('b', null, c.name), el('span', 'flag', `${scCount(c.name)}개`));
+      if (!c.pickable) t.append(el('span', 'flag flag-hidden', '운영진만'));
+      body.append(t, el('div', 'sc-meta', c.description || '설명 없음'));
+      r.append(body);
+      if (scHas027) {
+        const ctrl = el('div', 'sc-ctrl');
+        [['↑', -1, '위로'], ['↓', 1, '아래로']].forEach(([s0, d, lab]) => {
+          const b = el('button', 'mini-btn', s0); b.type = 'button'; b.setAttribute('aria-label', `${c.name} ${lab}`);
+          b.disabled = !scCats[i + d]; b.addEventListener('click', () => moveCat(i, d));
+          ctrl.append(b);
+        });
+        const ed = el('button', 'mini-btn', '고치기'); ed.type = 'button';
+        ed.addEventListener('click', () => { scEditing = c.name; renderCats(); });
+        ctrl.append(ed);
+        const n = scCount(c.name), others = scCats.filter((x) => x.name !== c.name);
+        let to = null;
+        if (n) {
+          to = el('select', 'input'); to.setAttribute('aria-label', `${c.name}의 결과물을 옮길 분류`);
+          others.forEach((x) => { const o = el('option', null, `→ ${x.name}`); o.value = x.name; if (x.name === '미분류') o.selected = true; to.append(o); });
+          ctrl.append(to);
+        }
+        const del = el('button', 'mini-btn', '지우기'); del.type = 'button';
+        del.disabled = !others.length;
+        del.addEventListener('click', () => scArm(del, n ? `${n}개 옮기고 지우기` : '정말 지우기', () => deleteCat(c, to && to.value)));
+        ctrl.append(del);
+        r.append(ctrl);
+      }
+      rows.push(r);
+    });
+    if (!rows.length) rows.push(el('p', 'list-state', '분류가 없습니다.'));
+    catList.replaceChildren(...rows);
+  }
+  async function moveCat(i, d) {
+    const list = scCats.slice(); [list[i], list[i + d]] = [list[i + d], list[i]];
+    const changes = list.map((c, k) => [c, (k + 1) * 10]).filter(([c, s0]) => c.sort !== s0);
+    for (const [c, s0] of changes) {
+      const { error } = await B.sb.from('showcase_categories').update({ sort: s0 }).eq('name', c.name);
+      if (error) { toast(errText(error, '저장'), true); loadShowcase(); return; }
+      c.sort = s0;
+    }
+    scCats = list; renderCats(); renderShowcase();
+  }
+  async function deleteCat(c, moveTo) {
+    const { error } = await B.sb.rpc('showcase_category_delete', { p_name: c.name, p_move_to: moveTo || null });
+    if (error) return toast(error.code === '23503' ? '이 분류에 결과물이 있어 옮길 분류를 골라야 합니다.' : errText(error, '지우기'), true);
+    if (scCatF === c.name) scCatF = 'all';
+    toast(moveTo ? `‘${c.name}’을(를) 지우고 결과물을 ‘${moveTo}’(으)로 옮겼습니다.` : `‘${c.name}’을(를) 지웠습니다.`);
+    loadShowcase();
+  }
+  $('[data-cat-new]').addEventListener('click', () => { scEditing = ''; renderCats(); });
+  viewHooks.push(view => { if (view === 'showcase' && !scLoaded) loadShowcase(); });
+  if (decodeURIComponent(location.hash.slice(1)) === 'showcase') loadShowcase();
 
   /* ===== 변경 기록 ===== (020: audit_log, 트리거가 저절로 쌓음) */
   const LOG_TABLES = {

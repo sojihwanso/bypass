@@ -54,6 +54,9 @@
   --c-wiki-bg: #F1EEFE; --c-wiki-fg: #5536C9; --c-wiki-ring: rgba(85, 54, 201, .10);
   --c-tool-bg: #FEF1E8; --c-tool-fg: #B4400B; --c-tool-ring: rgba(180, 64, 11, .10);
   --c-lab-bg: #EAF7EF; --c-lab-fg: #137A3D; --c-lab-ring: rgba(19, 122, 61, .10);
+  --c-teal-bg: #E6F6F6; --c-teal-fg: #0E6D70; --c-teal-ring: rgba(14, 109, 112, .10);
+  --c-rose-bg: #FDEDF2; --c-rose-fg: #A62A55; --c-rose-ring: rgba(166, 42, 85, .10);
+  --c-gray-bg: #F1F2F4; --c-gray-fg: #4B5260; --c-gray-ring: rgba(75, 82, 96, .12);
   --t1: #FFE8D9; --t2: #DDEBE3; --t3: #E3EEFF; --t4: #F3EEFF; --t5: #FFF6CC; --t6: #FDE2EC;
   --ease: cubic-bezier(.2, 0, 0, 1);
   --f: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
@@ -141,6 +144,28 @@ main.wrap { padding-top: 44px; padding-bottom: 88px; display: flex; flex-directi
 .empty b { display: block; color: var(--ink); font-size: 16px; font-weight: 650; margin-bottom: 4px; }
 .empty .btn { margin-top: 14px; }
 .more-row { display: flex; justify-content: center; }
+/* 결과물: PC 는 왼쪽에 분류 목록(스크롤해도 따라옴), 좁은 화면은 위에 칩 */
+.sc-layout { display: grid; grid-template-columns: 196px minmax(0, 1fr); gap: 40px; align-items: start; }
+.sc-main { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.sc-side { position: sticky; top: calc(var(--top-h, 60px) + 24px); max-height: calc(100vh - var(--top-h, 60px) - 48px); overflow-y: auto; scrollbar-width: thin; }
+.sc-side h2 { margin: 0 0 8px; padding: 0 10px; font-size: 12.5px; font-weight: 600; color: var(--mid); letter-spacing: .02em; }
+.sc-cats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.sc-cat { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: 0; border-radius: 10px; background: none; color: var(--ink); font: inherit; font-size: 14.5px; font-weight: 500; text-align: left; cursor: pointer; transition: background-color 150ms ease-out; }
+.sc-cat:hover { background: var(--field); }
+.sc-cat[aria-current="true"] { background: var(--field); font-weight: 700; }
+.sc-cat .dot { flex: none; width: 10px; height: 10px; border-radius: 3px; }
+.sc-cat .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sc-cat .n { flex: none; font-size: 12.5px; color: var(--mid); font-variant-numeric: tabular-nums; }
+.sc-desc { margin: 2px 10px 6px 30px; font-size: 12.5px; line-height: 1.5; color: var(--mid); }
+.sc-chips { display: none; }
+.sc-cur { margin: -8px 0 0; font-size: 14px; color: var(--mid); }
+.sc-cur:empty { display: none; }
+.thumb .pin { position: absolute; right: 14px; top: 14px; z-index: 1; padding: 3px 9px; border-radius: 999px; background: var(--ink); color: var(--on-ink); font-size: 12px; font-weight: 700; }
+@media (max-width: 980px) {
+  .sc-layout { display: block; }
+  .sc-side { display: none; }
+  .sc-chips { display: flex; }
+}
 .st { flex: none; display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 600; background: var(--soft); color: var(--mid); white-space: nowrap; box-shadow: var(--ring); }
 .st.orange { background: var(--accent-tint); color: var(--accent-ink); box-shadow: inset 0 0 0 1px var(--accent-ring); }
 .st.green { background: var(--green-tint); color: var(--green); box-shadow: inset 0 0 0 1px var(--green-ring); }
@@ -386,6 +411,9 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   --c-wiki-bg: #211C3A; --c-wiki-fg: #C1B2FF; --c-wiki-ring: rgba(193, 178, 255, .14);
   --c-tool-bg: #2E1D12; --c-tool-fg: #FFB78C; --c-tool-ring: rgba(255, 183, 140, .14);
   --c-lab-bg: #13291D; --c-lab-fg: #8FDDB0; --c-lab-ring: rgba(143, 221, 176, .14);
+  --c-teal-bg: #10292A; --c-teal-fg: #8ADBDD; --c-teal-ring: rgba(138, 219, 221, .14);
+  --c-rose-bg: #2E1621; --c-rose-fg: #F7A8C3; --c-rose-ring: rgba(247, 168, 195, .14);
+  --c-gray-bg: #22252B; --c-gray-fg: #B9C0CC; --c-gray-ring: rgba(185, 192, 204, .14);
   --t1: #F2C9AE; --t2: #B9D8C6; --t3: #BFD3F7; --t4: #D6CBF5; --t5: #EEDC92; --t6: #F2BCCF;
 }
 @media (prefers-color-scheme: dark) {
@@ -411,6 +439,9 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     --c-wiki-bg: #211C3A; --c-wiki-fg: #C1B2FF; --c-wiki-ring: rgba(193, 178, 255, .14);
     --c-tool-bg: #2E1D12; --c-tool-fg: #FFB78C; --c-tool-ring: rgba(255, 183, 140, .14);
     --c-lab-bg: #13291D; --c-lab-fg: #8FDDB0; --c-lab-ring: rgba(143, 221, 176, .14);
+    --c-teal-bg: #10292A; --c-teal-fg: #8ADBDD; --c-teal-ring: rgba(138, 219, 221, .14);
+    --c-rose-bg: #2E1621; --c-rose-fg: #F7A8C3; --c-rose-ring: rgba(247, 168, 195, .14);
+    --c-gray-bg: #22252B; --c-gray-fg: #B9C0CC; --c-gray-ring: rgba(185, 192, 204, .14);
     --t1: #F2C9AE; --t2: #B9D8C6; --t3: #BFD3F7; --t4: #D6CBF5; --t5: #EEDC92; --t6: #F2BCCF;
   }
 }
@@ -550,9 +581,15 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       <div><p class="kick">SHOWCASE</p><h1 class="view-title" id="t-show" tabindex="-1">결과물</h1></div>
       <button type="button" class="btn btn-dark" data-write="showcase">결과물 올리기</button>
     </div>
-    <div class="chips" role="group" aria-label="종류로 거르기" data-show-chips></div>
-    <div class="grid" data-show-list aria-live="polite"></div>
-    <div class="more-row" data-show-more-row hidden><button type="button" class="btn btn-line pill" data-show-more>결과물 더 보기</button></div>
+    <div class="sc-layout">
+      <nav class="sc-side" aria-label="결과물 분류" data-show-side></nav>
+      <div class="sc-main">
+        <div class="chips sc-chips" role="group" aria-label="분류로 거르기" data-show-chips></div>
+        <p class="sc-cur" data-show-cur></p>
+        <div class="grid" data-show-list aria-live="polite"></div>
+        <div class="more-row" data-show-more-row hidden><button type="button" class="btn btn-line pill" data-show-more>결과물 더 보기</button></div>
+      </div>
+    </div>
   </section>
 
   <!-- ===== 게시판 ===== -->
@@ -727,6 +764,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     <div class="field">
       <span class="lbl" id="w-cat-l" data-w-cat-label>종류</span>
       <div class="seg" role="radiogroup" aria-labelledby="w-cat-l" data-w-cats></div>
+      <p class="hint" data-w-cat-hint hidden></p>
     </div>
     <div class="field">
       <label for="w-t">제목</label>
@@ -892,14 +930,33 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   if (!isCrew) $('[data-joinus]').hidden = false;
 
   /* ===== 결과물 · 게시판 상수 ===== */
-  const SHOW_KINDS = ['앱', '위키', '도구', '실험'];
+  // 결과물 분류: supabase/027 의 showcase_categories 표에서 읽는다 (HQ › 결과물 › 분류에서 관리)
+  // 표가 아직 없으면 예전 분류(앱·위키·도구·실험)로 동작한다
+  let CATS = [
+    { name: '앱', color: 'blue', pickable: true }, { name: '위키', color: 'violet', pickable: true },
+    { name: '도구', color: 'orange', pickable: true }, { name: '실험', color: 'green', pickable: true },
+  ];
+  let SHOW_KINDS = CATS.map((c) => c.name);
+  let catCounts = null, hasPin = true;
+  const catOf = (name) => CATS.find((c) => c.name === name);
+  const pickableCats = () => CATS.filter((c) => c.pickable || isStaff).map((c) => c.name);
+  async function loadCats() {
+    const { data, error } = await sb.from('showcase_categories').select('name, description, color, sort, pickable').order('sort').order('name');
+    if (!error && data && data.length) { CATS = data; SHOW_KINDS = data.map((c) => c.name); }
+  }
+  async function loadCounts() {
+    const { data, error } = await sb.from('post_feed').select('category').eq('kind', 'showcase').limit(2000);
+    if (error) return;
+    catCounts = {}; data.forEach((r) => { catCounts[r.category] = (catCounts[r.category] || 0) + 1; });
+    catCounts['전체'] = data.length;
+    paintChips('showcase');
+  }
   const POST_CATS = ['질문', '팁', '자랑', '잡담'];
   // 썸네일 그림이 없을 때 쓰는 옅은 바탕색과 글자색 (종류마다 하나)
-  const ART = {
-    '앱': { bg: 'var(--c-app-bg)', fg: 'var(--c-app-fg)', ring: 'var(--c-app-ring)' },
-    '위키': { bg: 'var(--c-wiki-bg)', fg: 'var(--c-wiki-fg)', ring: 'var(--c-wiki-ring)' },
-    '도구': { bg: 'var(--c-tool-bg)', fg: 'var(--c-tool-fg)', ring: 'var(--c-tool-ring)' },
-    '실험': { bg: 'var(--c-lab-bg)', fg: 'var(--c-lab-fg)', ring: 'var(--c-lab-ring)' },
+  const SLOT = { blue: 'app', violet: 'wiki', orange: 'tool', green: 'lab', teal: 'teal', rose: 'rose', gray: 'gray' };
+  const artOf = (name) => {
+    const k = SLOT[(catOf(name) || {}).color] || 'gray';
+    return { bg: `var(--c-${k}-bg)`, fg: `var(--c-${k}-fg)`, ring: `var(--c-${k}-ring)` };
   };
   const PAGE = { showcase: 12, post: 15 };
   const feed = { showcase: { rows: [], cat: '전체', more: false }, post: { rows: [], cat: '전체', more: false } };
@@ -1012,9 +1069,15 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     const f = feed[kind];
     const seq = (f.seq = (f.seq || 0) + 1);
     const from = append ? f.rows.length : 0;
-    let q = sb.from('post_feed').select('*').eq('kind', kind).order('created_at', { ascending: false }).range(from, from + PAGE[kind]);
-    if (f.cat !== '전체') q = q.eq('category', f.cat);
-    const { data, error } = await q;
+    const make = () => {
+      let q = sb.from('post_feed').select('*').eq('kind', kind);
+      // 결과물은 운영진이 고른 추천을 맨 위에 (027 전에는 pin_rank 가 없다)
+      if (kind === 'showcase' && hasPin) q = q.order('pin_rank', { ascending: true, nullsFirst: false });
+      q = q.order('created_at', { ascending: false }).range(from, from + PAGE[kind]);
+      return f.cat !== '전체' ? q.eq('category', f.cat) : q;
+    };
+    let { data, error } = await make();
+    if (error && kind === 'showcase' && hasPin && /pin_rank/.test(error.message || '')) { hasPin = false; ({ data, error } = await make()); }
     if (seq !== f.seq) return;
     if (error) { f.error = error; f.rows = []; failed(error); renderFeed(kind); return; }
     f.error = null;
@@ -1046,7 +1109,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   }
   // 그림이 있으면 그림, 없으면 종류 색 바탕에 제목
   function thumbBox(r) {
-    const a = ART[r.category] || ART['앱'];
+    const a = artOf(r.category);
     const th = el('div', 'thumb'); th.style.background = a.bg;
     const cat = el('span', 'th-cat', r.category); cat.style.color = a.fg;
     const ra = el('span', 'ring a'), rb = el('span', 'ring b');
@@ -1056,6 +1119,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     th.append(cat, ra, rb, g);
     if (r.thumb_url) { const im = el('img', 'pic'); im.src = r.thumb_url; im.alt = ''; im.loading = 'lazy'; im.decoding = 'async'; th.classList.add('has-pic'); th.append(im); }
     if (r.hidden) th.append(el('span', 'hid', '숨김'));
+    else if (r.pin_rank) th.append(el('span', 'pin', '추천'));
     return th;
   }
   const waiting = (r) => r.kind === 'post' && r.category === '질문' && !r.comments;
@@ -1135,15 +1199,44 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       $('[data-board-more-row]').hidden = !f.more;
     }
   }
+  function pickCat(k) {
+    const f = feed.showcase;
+    if (f.cat === k) return;
+    f.cat = k; paintChips('showcase'); loadFeed('showcase');
+    history.replaceState(null, '', k === '전체' ? '#showcase' : `#showcase/${encodeURIComponent(k)}`);
+  }
+  // 비어 있는 '고를 수 없는 분류'(미분류)는 회원에게 보이지 않는다
+  const visibleCat = (k) => { const c = catOf(k); return !c || c.pickable || isStaff || !!(catCounts && catCounts[k]); };
+  function paintSide() {
+    const f = feed.showcase, box = $('[data-show-side]');
+    const n = (k) => (catCounts ? String(catCounts[k] || 0) : '');
+    const ul = el('ul', 'sc-cats');
+    ['전체', ...SHOW_KINDS.filter(visibleCat)].forEach((k) => {
+      const c = catOf(k);
+      const li = el('li');
+      const b = el('button', 'sc-cat'); b.type = 'button';
+      if (k === f.cat) b.setAttribute('aria-current', 'true');
+      const dot = el('span', 'dot'); dot.style.background = k === '전체' ? 'var(--ink)' : artOf(k).fg;
+      b.append(dot, el('span', 'nm', k), el('span', 'n', n(k)));
+      b.addEventListener('click', () => pickCat(k));
+      li.append(b);
+      if (k === f.cat && c && c.description) li.append(el('p', 'sc-desc', c.description));
+      ul.append(li);
+    });
+    box.replaceChildren(el('h2', null, '분류'), ul);
+    const cur = catOf(f.cat);
+    $('[data-show-cur]').textContent = cur && cur.description ? cur.description : '';
+  }
   function paintChips(kind) {
-    const f = feed[kind], list = kind === 'showcase' ? SHOW_KINDS : POST_CATS;
+    if (kind === 'showcase') paintSide();
+    const f = feed[kind], list = kind === 'showcase' ? SHOW_KINDS.filter(visibleCat) : POST_CATS;
     const box = $(kind === 'showcase' ? '[data-show-chips]' : '[data-board-chips]'), viewId = kind === 'showcase' ? 'showcase' : 'board';
     box.replaceChildren(...['전체', ...list].map((k) => {
       const b = el('button', 'chip', k); b.type = 'button'; b.setAttribute('aria-pressed', String(k === f.cat));
       b.addEventListener('click', () => {
         if (f.cat === k) return;
         f.cat = k; paintChips(kind); loadFeed(kind);
-        history.replaceState(null, '', k === '전체' ? `#${viewId}` : `#${viewId}/${k}`);
+        history.replaceState(null, '', k === '전체' ? `#${viewId}` : `#${viewId}/${encodeURIComponent(k)}`);
       });
       return b;
     }));
@@ -1151,7 +1244,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   paintChips('showcase'); paintChips('post');
   $('[data-show-more]').addEventListener('click', () => loadFeed('showcase', true));
   $('[data-board-more]').addEventListener('click', () => loadFeed('post', true));
-  function refreshAll(kind) { loadHome(); if (loaded[kind === 'showcase' ? 'showcase' : 'board']) loadFeed(kind); if (loaded.me) loadMine(); }
+  function refreshAll(kind) { loadHome(); if (loaded[kind === 'showcase' ? 'showcase' : 'board']) loadFeed(kind); if (kind === 'showcase') loadCounts(); if (loaded.me) loadMine(); }
 
   /* ===== 찾기 ===== */
   async function runSearch(q) {
@@ -1238,6 +1331,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     location.replace(k === 'showcase' ? '#write/showcase' : '#write/board');
   }));
   // 올릴 폴더: 회원은 /apps/, 운영진이 '위키'로 올리면 /wiki/ (예전 HQ › 위키 올리기를 여기로 옮김)
+  // (027 뒤에는 '위키' 분류가 없으므로 새 페이지는 모두 /apps/ — 진도 저장 껍데기가 붙는다. 이미 /wiki/ 인 것은 그 자리에서 고친다)
   const upFolder = () => (isStaff && wKind === 'showcase' && wCat === '위키' ? 'wiki' : 'apps');
   function syncSrc() {
     const s = wKind === 'showcase';
@@ -1276,7 +1370,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     wEdit = post || null;
     wKind = post ? post.kind : kind;
     const f = feed[wKind];
-    wCat = post ? post.category : f.cat !== '전체' ? f.cat : wKind === 'showcase' ? '앱' : '질문';
+    wCat = post ? post.category : f.cat !== '전체' && (wKind !== 'showcase' || pickableCats().includes(f.cat)) ? f.cat : wKind === 'showcase' ? pickableCats()[0] : '질문';
     wForm.reset(); $('[data-w-err]').hidden = true; $$('[aria-invalid]', wForm).forEach((x) => x.removeAttribute('aria-invalid'));
     const s = wKind === 'showcase';
     // 내가 올린 /apps/ 페이지(운영진은 /wiki/ 도)면 같은 주소로 다시 올려 고칠 수 있다
@@ -1347,7 +1441,9 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   window.addEventListener('beforeunload', (e) => { if (view === 'write' && wDirty) { e.preventDefault(); e.returnValue = ''; } });
   $('[data-w-cancel]').addEventListener('click', () => { const b = $('[data-w-back]'); if (b.dataset.viaBack) history.back(); else location.hash = b.getAttribute('href'); });
   function paintCats() {
-    const list = wKind === 'showcase' ? SHOW_KINDS : POST_CATS;
+    const list = wKind === 'showcase' ? [...new Set([...pickableCats(), ...(wCat && SHOW_KINDS.includes(wCat) ? [wCat] : [])])] : POST_CATS;
+    const hint = $('[data-w-cat-hint]'), cc = wKind === 'showcase' && catOf(wCat);
+    if (hint) { hint.textContent = cc && cc.description ? cc.description : ''; hint.hidden = !hint.textContent; }
     $('[data-w-cats]').replaceChildren(...list.map((c) => {
       const b = el('button', null, c); b.type = 'button'; b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(c === wCat));
       b.addEventListener('click', () => { if (wCat !== c) wDirty = true; wCat = c; paintCats(); paintPreview(); syncSrc(); });
@@ -1856,6 +1952,9 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   if (q0) { history.replaceState(null, '', location.pathname + '#search'); $('#q-top').value = q0; }
 
   /* ===== 시작 ===== */
+  await loadCats();
+  paintChips('showcase');
+  loadCounts();
   route(true);
   if (q0) runSearch(q0);
   await Promise.all([loadHome(), loadNotices(), loadCrewCount(), loadUpload()]);
