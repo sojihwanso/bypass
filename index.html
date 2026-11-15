@@ -256,7 +256,7 @@ details.q:hover{background:#FFE3EC!important}
   header{top:10px!important;left:10px!important;right:10px!important}
   .nav{padding:4px!important}
   .nav a{height:36px!important;padding:0 12px!important;font-size:13px!important}
-  nav.nav a:not(.on):not(.acct){display:none!important}
+  nav.nav a:not(.on):not(.cm){display:none!important}
   .btn{height:54px;font-size:15px;padding-left:20px;gap:12px}
   .btn .ar{width:38px;height:38px}
   /* 부팅 */
@@ -359,6 +359,9 @@ button.btn{border:0;cursor:pointer;font-family:inherit}
 .notice-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .notice-pill .more{flex:none;color:#4A413B}
 .nav a.acct{color:#4A413B}
+.nav a[hidden]{display:none!important}
+.nav a.cm{background:#16120F;color:#FFFDF8}
+.nav a.cm:hover{background:#FF5A1F;color:#16120F}
 /* 대화상자 */
 .dlg{width:min(520px,calc(100% - 24px));max-height:calc(100dvh - 40px);padding:0;border:2px solid #16120F;border-radius:22px;background:#FFFDF8;color:#16120F;box-shadow:8px 8px 0 #16120F;font-family:'Noto Sans KR',system-ui,sans-serif}
 .dlg::backdrop{background:rgba(22,18,15,.55);backdrop-filter:blur(3px)}
@@ -499,6 +502,7 @@ a7 39 11 7c 82 b5 62 e4 0a e1 3a 0a f9 38 25 84 5e 4c 94 c2 49 80 89 e3 07 0c af
       <a href="#anyone">누구나</a>
       <a href="#anything">무엇이든</a>
       <a class="acct" id="nav-account" href="/login/">로그인</a>
+      <a class="cm" href="/community/">커뮤니티</a>
       <a class="on" href="#join">나도 할래 ↗</a>
     </nav>
   </header>
@@ -946,14 +950,12 @@ a7 39 11 7c 82 b5 62 e4 0a e1 3a 0a f9 38 25 84 5e 4c 94 c2 49 80 89 e3 07 0c af
     history.replaceState(null, '', location.pathname + location.hash);
   }
 
-  /* ===== 머리글 계정 링크: 로그인한 상태면 '공사장' =====
+  /* ===== 머리글 계정 링크: 로그인한 상태면 '로그인'은 숨김 (바로 옆 '커뮤니티' 버튼으로 간다) =====
      Supabase 라이브러리를 불러오지 않고, 브라우저에 저장된 로그인 기록만 확인한다. */
   try {
     const saved = JSON.parse(localStorage.getItem('sb-itzdjdgjqcpmxdfssfel-auth-token') || 'null');
     if (saved && saved.refresh_token) {
-      const account = document.getElementById('nav-account');
-      account.textContent = '커뮤니티';
-      account.href = '/community/';
+      document.getElementById('nav-account').hidden = true;
     }
   } catch (e) { /* 저장소를 쓸 수 없으면 '로그인' 그대로 */ }
 
