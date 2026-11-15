@@ -254,6 +254,20 @@ main.wrap { padding-top: 44px; padding-bottom: 88px; display: flex; flex-directi
 .mk-hits .n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--mid); }
 .mk-hits .x { flex: none; font-size: 12px; color: var(--faint); }
 .mk-msg { margin: 0; font-size: 13.5px; color: var(--sub); }
+/* CNN 공포·탐욕 지수 */
+.mk-fng .mk-px { display: flex; align-items: baseline; gap: 6px; }
+.mk-fng .mk-rt { font-size: 13.5px; font-weight: 700; }
+.mk-gauge { display: block; width: 100%; max-width: 132px; height: auto; margin: 4px 0 -2px; }
+.fng-big { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; margin-top: 6px; }
+.fng-big .mk-gauge { width: 220px; max-width: 60vw; margin: 0; }
+.fng-score { font-size: 44px; font-weight: 800; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+.fng-rt { margin-top: 4px; font-size: 17px; font-weight: 700; }
+.fng-cmp { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 16px 0 6px; }
+.fng-cmp div { padding: 10px 12px; border-radius: 12px; background: var(--soft2); }
+.fng-cmp dt { font-size: 12.5px; color: var(--sub); }
+.fng-cmp dd { margin: 2px 0 0; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.fng-cmp dd small { margin-left: 4px; font-size: 12px; font-weight: 600; }
+@media (max-width: 640px) { .fng-cmp { grid-template-columns: repeat(2, minmax(0, 1fr)); } .fng-score { font-size: 38px; } }
 .mk-src { margin: -8px 0 0; font-size: 12px; color: var(--faint); }
 @media (max-width: 640px) {
   .mk-row { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin: 0 -20px; padding: 2px 20px 4px; }
@@ -653,7 +667,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       </div>
       <div class="mk-row" data-mk-row aria-live="polite"></div>
       <div class="mk-detail" data-mk-detail hidden></div>
-      <p class="mk-src">Yahoo Finance 시세 · 몇 분 늦을 수 있어요 · 투자 판단은 직접 확인한 뒤에</p>
+      <p class="mk-src">시세 Yahoo Finance · 공포·탐욕 지수 CNN · 몇 분 늦을 수 있어요 · 투자 판단은 직접 확인한 뒤에</p>
     </section>
     <section class="hsec" aria-labelledby="t-hshow">
       <div class="hsec-head"><h2 id="t-hshow">새 결과물</h2><a class="link-more" href="#showcase">전체 보기</a></div>
@@ -2119,11 +2133,97 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     b.addEventListener('click', () => { mkSel = mkSel === sym ? null : sym; if (mkSel) mkRange = '1d'; paintMarket(); if (mkSel) mkDetail(); });
     return b;
   }
+
+  // ----- CNN 공포·탐욕 지수 ----- (함수 market › action 'fng', 30분마다 새 값)
+  const FNG = '__fng';
+  let mkFng = null, mkFngOn = true;
+  // 0–24 극단적 공포 · 25–44 공포 · 45–55 중립 · 56–75 탐욕 · 76–100 극단적 탐욕 (공포 파랑 ↔ 탐욕 빨강: 오름 빨강과 같은 방향)
+  const FNG_BANDS = [[0, 25, '극단적 공포', '#1F5FD1'], [25, 45, '공포', '#6E98E6'], [45, 56, '중립', '#9097A3'], [56, 76, '탐욕', '#EC7B6B'], [76, 101, '극단적 탐욕', '#D92D20']];
+  const fngBand = (v) => FNG_BANDS.find(([a, b]) => v >= a && v < b) || FNG_BANDS[2];
+  const FNG_KO = { 'extreme fear': '극단적 공포', fear: '공포', neutral: '중립', greed: '탐욕', 'extreme greed': '극단적 탐욕' };
+  const fngName = (f) => FNG_KO[f.rating] || fngBand(f.score)[2];
+  function gaugeSvg(v, cls = 'mk-gauge') {
+    const NS = 'http://www.w3.org/2000/svg', R = 50, cx = 60, cy = 58;
+    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '0 0 120 66'); svg.setAttribute('class', cls); svg.setAttribute('aria-hidden', 'true');
+    const pt = (val, r) => { const a = Math.PI * (1 - val / 100); return [cx + r * Math.cos(a), cy - r * Math.sin(a)]; };
+    FNG_BANDS.forEach(([a, b, , col]) => {
+      const [x1, y1] = pt(a + (a ? 0.8 : 0), R), [x2, y2] = pt(Math.min(b, 100) - (b < 100 ? 0.8 : 0), R);
+      const p = document.createElementNS(NS, 'path'); p.setAttribute('d', `M${x1.toFixed(2)},${y1.toFixed(2)} A${R},${R} 0 0 1 ${x2.toFixed(2)},${y2.toFixed(2)}`);
+      p.setAttribute('fill', 'none'); p.setAttribute('stroke', col); p.setAttribute('stroke-width', '10'); p.setAttribute('opacity', v >= a && v < b ? '1' : '.28');
+      svg.append(p);
+    });
+    const [nx, ny] = pt(Math.max(0, Math.min(100, v)), R - 14);
+    const n = document.createElementNS(NS, 'line'); n.setAttribute('x1', cx); n.setAttribute('y1', cy); n.setAttribute('x2', nx.toFixed(2)); n.setAttribute('y2', ny.toFixed(2));
+    n.setAttribute('stroke', 'var(--ink)'); n.setAttribute('stroke-width', '3'); n.setAttribute('stroke-linecap', 'round');
+    const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', '4.5'); c.setAttribute('fill', 'var(--ink)');
+    svg.append(n, c);
+    return svg;
+  }
+  function fngCard() {
+    const b = el('button', 'mk-card mk-fng'); b.type = 'button'; b.setAttribute('aria-pressed', String(mkSel === FNG));
+    const nm = el('span', 'mk-nm', '공포·탐욕 지수'); nm.append(el('span', 'mk-sym', 'CNN'));
+    b.append(nm);
+    if (!mkFng) { b.classList.add('is-skel'); b.disabled = !!mkFngOn && mkFng === false; b.append(el('span', 'mk-px', mkFng === false ? '' : '00'), el('span', 'mk-ch', mkFng === false ? '지금은 못 불러왔어요' : '불러오는 중')); if (mkFng === false) b.classList.replace('is-skel', 'is-err'); return b; }
+    const v = Math.round(mkFng.score), band = fngBand(v);
+    const px = el('span', 'mk-px', String(v)); const rt = el('span', 'mk-rt', fngName(mkFng)); rt.style.color = band[3]; px.append(rt);
+    const pc = mkFng.prev.close;
+    const d = pc == null ? null : v - Math.round(pc);
+    b.append(px, el('span', `mk-ch mk-${d > 0 ? 'up' : d < 0 ? 'down' : 'flat'}`, d == null ? '' : `전일 ${Math.round(pc)} → ${d > 0 ? '+' : ''}${d}`), gaugeSvg(v));
+    b.setAttribute('aria-label', `CNN 공포·탐욕 지수 ${v}, ${fngName(mkFng)}`);
+    b.addEventListener('click', () => { mkSel = mkSel === FNG ? null : FNG; paintMarket(); if (mkSel) mkDetail(); });
+    return b;
+  }
+  function fngDetail(box) {
+    const f = mkFng; if (!f) { box.hidden = true; return; }
+    const v = Math.round(f.score), band = fngBand(v);
+    const top = el('div', 'mk-d-top');
+    const close = el('button', 'mk-ib mk-d-close', '✕'); close.type = 'button'; close.setAttribute('aria-label', '닫기');
+    close.addEventListener('click', () => { mkSel = null; paintMarket(); });
+    top.append(el('p', 'mk-d-nm', 'CNN 공포·탐욕 지수 (Fear & Greed Index)'), close);
+    const big = el('div', 'fng-big'); const sc = el('div');
+    const rt = el('div', 'fng-rt', fngName(f)); rt.style.color = band[3];
+    sc.append(el('div', 'fng-score', String(v)), rt);
+    big.append(gaugeSvg(v), sc);
+    const cmp = el('dl', 'fng-cmp');
+    [['전일', f.prev.close], ['1주 전', f.prev.week], ['1달 전', f.prev.month], ['1년 전', f.prev.year]].forEach(([k, x]) => {
+      const d = el('div'); const dd = el('dd', null, x == null ? '–' : String(Math.round(x)));
+      if (x != null) { const sm = el('small', null, fngBand(Math.round(x))[2]); sm.style.color = fngBand(Math.round(x))[3]; dd.append(sm); }
+      d.append(el('dt', null, k), dd); cmp.append(d);
+    });
+    const chart = el('div', 'mk-chart'), axis = el('div', 'mk-axis');
+    box.replaceChildren(top, big, cmp, chart, axis, el('p', 'mk-d-foot', `0~100 · 25 미만 극단적 공포, 45~55 중립, 75 넘으면 극단적 탐욕 · 주가 흐름·변동성 등 7가지 지표로 CNN 이 매일 계산 · ${kst(f.time, { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })} (한국 시각) 기준`));
+    fngChart(chart, f.points);
+    if (f.points.length) axis.replaceChildren(el('span', null, kst(f.points[0][0], { year: '2-digit', month: 'numeric', day: 'numeric' })), el('span', null, kst(f.points[f.points.length - 1][0], { year: '2-digit', month: 'numeric', day: 'numeric' })));
+  }
+  function fngChart(box, pts) {
+    if (!pts || pts.length < 2) { box.append(el('div', 'mk-state', '그래프로 그릴 값이 아직 없어요.')); return; }
+    const NS = 'http://www.w3.org/2000/svg', W = 1000, H = 1000, n = pts.length;
+    const X = (i) => (i / (n - 1)) * W, Y = (v) => H - (v / 100) * H;
+    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('preserveAspectRatio', 'none');
+    svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', '지난 1년 공포·탐욕 지수 그래프');
+    FNG_BANDS.forEach(([a, b, , col]) => { const r = document.createElementNS(NS, 'rect'); r.setAttribute('x', 0); r.setAttribute('width', W); r.setAttribute('y', Y(Math.min(b, 100))); r.setAttribute('height', Y(a) - Y(Math.min(b, 100))); r.setAttribute('fill', col); r.setAttribute('opacity', '.07'); svg.append(r); });
+    [25, 45, 55, 75].forEach((g) => { const l = document.createElementNS(NS, 'line'); l.setAttribute('x1', 0); l.setAttribute('x2', W); l.setAttribute('y1', Y(g)); l.setAttribute('y2', Y(g)); l.setAttribute('stroke', 'var(--line)'); l.setAttribute('stroke-dasharray', '3 5'); l.setAttribute('vector-effect', 'non-scaling-stroke'); svg.append(l); });
+    const path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', pts.map((p, i) => `${i ? 'L' : 'M'}${X(i).toFixed(2)},${Y(p[1]).toFixed(2)}`).join(''));
+    path.setAttribute('fill', 'none'); path.setAttribute('stroke', 'var(--ink)'); path.setAttribute('stroke-width', '1.8'); path.setAttribute('vector-effect', 'non-scaling-stroke'); path.setAttribute('stroke-linejoin', 'round');
+    svg.append(path);
+    const cross = el('div', 'mk-cross'), tip = el('div', 'mk-tip'); [cross, tip].forEach((x) => { x.hidden = true; });
+    box.append(svg, cross, tip);
+    const at = (cx) => {
+      const r = box.getBoundingClientRect(); const i = Math.max(0, Math.min(n - 1, Math.round(((cx - r.left) / r.width) * (n - 1))));
+      cross.style.left = `${(i / (n - 1)) * 100}%`;
+      tip.textContent = `${kst(pts[i][0], { year: '2-digit', month: 'numeric', day: 'numeric' })} · ${Math.round(pts[i][1])} ${fngBand(Math.round(pts[i][1]))[2]}`;
+      [cross, tip].forEach((x) => { x.hidden = false; });
+    };
+    box.addEventListener('pointermove', (e) => at(e.clientX)); box.addEventListener('pointerdown', (e) => at(e.clientX));
+    box.addEventListener('pointerleave', () => { [cross, tip].forEach((x) => { x.hidden = true; }); });
+    box.addEventListener('pointerup', (e) => { if (e.pointerType !== 'mouse') setTimeout(() => { [cross, tip].forEach((x) => { x.hidden = true; }); }, 1800); });
+  }
   function paintMarket() {
     const row = $('[data-mk-row]');
     if (mkDown) { row.replaceChildren(el('p', 'mk-msg', mkDown === 'setup' ? '시세 기능을 준비하고 있어요. 운영진이 설정을 마치면 여기에 보여요.' : '지금은 시세를 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.')); $('[data-mk-detail]').hidden = true; return; }
-    row.replaceChildren(...mkSyms.map(mkCard));
-    if (mkSel && !mkSyms.includes(mkSel)) mkSel = null;
+    row.replaceChildren(...(mkFngOn ? [fngCard()] : []), ...mkSyms.map(mkCard));
+    if (mkSel && mkSel !== FNG && !mkSyms.includes(mkSel)) mkSel = null;
     $('[data-mk-detail]').hidden = !mkSel;
     const qs = Object.values(mkQuotes).filter((q) => mkSyms.includes(q.symbol));
     const t = qs.reduce((m, q) => Math.max(m, q.time || 0), 0);
@@ -2139,12 +2239,14 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
         mkSyms = !error && data && Array.isArray(data.symbols) ? data.symbols.slice(0, MK_MAX) : MK_DEFAULT.slice();
         paintMarket();
       }
+      // 공포·탐욕 지수는 따로 받아 둔다 (못 받아도 종목 시세는 그대로)
+      if (mkFngOn && (!silent || !mkFng)) mkCall({ action: 'fng' }).then((f) => { mkFng = f; }).catch(() => { if (!mkFng) mkFng = false; }).finally(() => { if (!mkDown) paintMarket(); if (mkSel === FNG) mkDetail(); });
       if (!mkSyms.length) { paintMarket(); return; }
       const r = await mkCall({ action: 'quotes', symbols: mkSyms });
       mkDown = false; mkErr = r.errors || {};
       (r.quotes || []).forEach((q) => { mkQuotes[q.symbol] = q; });
       paintMarket();
-      if (mkSel && mkRange === '1d') mkDetail(true);
+      if (mkSel && mkSel !== FNG && mkRange === '1d') mkDetail(true);
     } catch (e) {
       if (!Object.keys(mkQuotes).length) { mkDown = e.message === 'setup' ? 'setup' : 'fail'; paintMarket(); }
     } finally { mkBusy = false; }
@@ -2161,6 +2263,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   async function mkDetail(quiet) {
     const box = $('[data-mk-detail]'), sym = mkSel;
     if (!sym) { box.hidden = true; return; }
+    if (sym === FNG) { box.hidden = false; fngDetail(box); return; }
     const q0 = mkQuotes[sym];
     const tok = ++mkChartTok;
     box.hidden = false;
@@ -2328,7 +2431,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   route(true);
   if (q0) runSearch(q0);
   // 홈 화면 설정 (HQ › 커뮤니티 › 홈 화면 설정 → site_settings 'community')
-  let homeSet = { market: true, showcase: true, board: true };
+  let homeSet = { market: true, fng: true, showcase: true, board: true };
   try {
     const { data } = await sb.from('site_settings').select('value').eq('key', 'community').maybeSingle();
     const v = (data && data.value) || {};
@@ -2336,6 +2439,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     if (Array.isArray(v.market_defaults)) MK_DEFAULT = v.market_defaults.filter((x) => typeof x === 'string' && /^[A-Z0-9.^=-]{1,15}$/.test(x)).slice(0, MK_MAX);
   } catch (x) { /* 설정을 못 읽으면 기본값 */ }
   $('[data-mk]').hidden = homeSet.market === false;
+  mkFngOn = homeSet.fng !== false;
   $('[aria-labelledby="t-hshow"]').hidden = homeSet.showcase === false;
   $('[aria-labelledby="t-hboard"]').hidden = homeSet.board === false;
   if (homeSet.market !== false) loadMarket().then(mkTick);
