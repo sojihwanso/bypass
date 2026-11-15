@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta name="bypass-owner" content="20f3c701-02e4-48bc-b6c5-837d6d650ee8"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>뉴올리언스 유조선–리버보트 충돌 해설</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#E9EDF0; --paper:#F6F8F9; --surface:#FFFFFF; --ink:#13202A; --muted:#566571; --line:#CDD6DC; --line-2:#9FACB6;
+  --accent:#D24F1A; --accent-soft:rgba(210,79,26,.12);
+  --oil:#B07216; --oil-soft:rgba(176,114,22,.18);
+  --sea:#1A8494; --sea-soft:rgba(26,132,148,.15);
+  --vap:#6558AE;
+  --steel:#E1E7EB; --steel-2:#C5CFD6; --hull:#42515D; --antifoul:#963A31;
+  --ok:#2A7F50; --warn:#AD780C; --bad:#BE3127;
+  --water3d:#8FC3CB; --land3d:#D5DBD3; --boat3d:#FBFCFC;
+  --grid:rgba(19,32,42,.055);
+  --f-display:'Barlow Condensed','IBM Plex Sans KR',sans-serif;
+  --f-body:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0B1115; --paper:#10181E; --surface:#152029; --ink:#E1E8EC; --muted:#8A9AA6; --line:#23303A; --line-2:#3A4955;
+  --accent:#FF7A3E; --accent-soft:rgba(255,122,62,.15);
+  --oil:#E2A548; --oil-soft:rgba(226,165,72,.18);
+  --sea:#4BB8C6; --sea-soft:rgba(75,184,198,.14);
+  --vap:#A89DEB;
+  --steel:#1B2731; --steel-2:#2B3944; --hull:#617281; --antifoul:#B2564C;
+  --ok:#52BE83; --warn:#E2AD42; --bad:#F06B5F;
+  --water3d:#123A44; --land3d:#27323A; --boat3d:#DDE5EA;
+  --grid:rgba(225,232,236,.045); color-scheme:dark}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:anywhere}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+h1,h2,h3,h4{text-wrap:balance;margin:0}
+p{margin:0}
+button{font-family:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--paper);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1200px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:18px;height:52px}
+.brand{font:700 16px var(--f-display);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.brand i{width:10px;height:10px;background:var(--accent);display:inline-block;transform:rotate(45deg)}
+.nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.nav::-webkit-scrollbar{display:none}
+.nav a{font-size:13px;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:5px;white-space:nowrap;display:flex;gap:6px;align-items:baseline}
+.nav a b{font:500 11px var(--f-mono);color:var(--line-2)}
+.nav a:hover,.nav a.on{color:var(--ink);background:var(--steel)}
+.nav a.on b{color:var(--accent)}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 72px}
+
+.hero{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:32px;padding-block:44px 28px;align-items:end}
+@media (max-width:820px){.hero{grid-template-columns:1fr;gap:20px;padding-block:28px 22px}}
+.eyebrow{font:600 13px var(--f-display);letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.hero h1{font:700 clamp(30px,5vw,52px)/1.12 var(--f-body);letter-spacing:-.02em}
+.hero h1 small{display:block;font:600 clamp(15px,2vw,21px)/1.3 var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:10px}
+.lede{margin-top:18px;max-width:62ch;color:var(--muted);font-size:15.5px}
+.tblock{border:1.5px solid var(--ink);font-size:12.5px;background:var(--paper);margin:0}
+.tblock div{display:grid;grid-template-columns:76px 1fr;border-bottom:1px solid var(--line-2)}
+.tblock div:last-child{border-bottom:0}
+.tblock dt,.tblock dd{margin:0;padding:7px 10px}
+.tblock dt{font:500 11px var(--f-mono);letter-spacing:.06em;color:var(--muted);border-right:1px solid var(--line-2)}
+.tblock dd{line-height:1.5}
+
+.sec{padding-block:52px 8px;border-top:1px solid var(--line)}
+.sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.sec-no{font:700 15px var(--f-mono);color:var(--accent);letter-spacing:.04em}
+.sec h2{font:700 clamp(22px,3vw,32px)/1.25 var(--f-body);letter-spacing:-.015em}
+.sec-en{font:600 14px var(--f-display);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);width:100%;padding-left:34px;margin-top:-6px}
+.prose{max-width:68ch}
+.prose + .prose{margin-top:10px}
+.prose strong{font-weight:600}
+.sub-h{font:700 19px/1.35 var(--f-body);margin:40px 0 12px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.sub-h span{font:500 12px var(--f-mono);color:var(--muted)}
+.term{font-family:var(--f-mono);font-size:.88em;color:var(--muted)}
+
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line-2);border-radius:6px;overflow:hidden;background:var(--surface)}
+.seg button{font-size:13px;padding:7px 12px;background:transparent;color:var(--muted);border:0;border-right:1px solid var(--line);cursor:pointer;line-height:1.4}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.btn{font-size:13px;padding:7px 14px;border:1px solid var(--line-2);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer;line-height:1.4}
+.btn:hover{border-color:var(--ink)}
+.btn.hot{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+.sl{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13px}
+.sl-l{color:var(--muted)}
+.sl input{width:100%;accent-color:var(--accent);min-width:0}
+.sl output{font:500 13px var(--f-mono);min-width:62px;text-align:right;font-variant-numeric:tabular-nums}
+.pill{display:inline-flex;align-items:center;gap:6px;font:500 12px/1.4 var(--f-mono);padding:3px 10px;border-radius:99px;border:1px solid currentColor}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.pill.ok{color:var(--ok)} .pill.bad{color:var(--bad)} .pill.warn{color:var(--warn)} .pill.neu{color:var(--muted)}
+.meter{display:grid;gap:5px;font-size:12.5px}
+.meter-top{display:flex;justify-content:space-between;gap:8px;color:var(--muted)}
+.meter-top b{font:500 12px var(--f-mono);color:var(--ink);font-variant-numeric:tabular-nums}
+.meter-bar{height:7px;background:var(--steel);border-radius:4px;overflow:hidden}
+.meter-bar i{display:block;height:100%;width:0;background:var(--ink);transition:width .2s,background .2s}
+.meter-bar i.ok{background:var(--ok)} .meter-bar i.bad{background:var(--bad)} .meter-bar i.warn{background:var(--warn)}
+
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:11px 14px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{font:600 11px var(--f-mono);letter-spacing:.08em;color:var(--muted);background:var(--paper)}
+td:first-child{font-weight:600}
+td .en{display:block;font:500 12px var(--f-mono);color:var(--muted)}
+
+.bench{border:1px solid var(--line);background:var(--surface);border-radius:8px;overflow:hidden;margin-top:18px}
+.bench-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--paper);font:500 11.5px var(--f-mono);letter-spacing:.06em;color:var(--muted)}
+.bench-head b{color:var(--ink);font-weight:600}
+.bench-body{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}
+@media (max-width:880px){.bench-body{grid-template-columns:1fr}}
+.bench-stage{padding:12px;border-right:1px solid var(--line);min-width:0;display:flex;flex-direction:column;gap:10px}
+@media (max-width:880px){.bench-stage{border-right:0;border-bottom:1px solid var(--line)}}
+.bench-stage svg{width:100%;height:auto;display:block}
+.bench-side{padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.side-label{font:600 11px var(--f-mono);letter-spacing:.1em;color:var(--muted);margin-bottom:-6px}
+.status{border-left:3px solid var(--line-2);padding:8px 12px;background:var(--paper);font-size:14px;line-height:1.55;min-height:3.4em}
+.status.ok{border-color:var(--ok)} .status.bad{border-color:var(--bad)} .status.warn{border-color:var(--warn)}
+.status small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.note{font-size:12px;color:var(--muted)}
+.mini-ctl{display:flex;flex-direction:column;gap:10px}
+.mini-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0;margin-top:18px;border:1px solid var(--line);border-radius:8px;background:var(--surface);overflow:hidden}
+.steps article{padding:16px 18px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:grid;gap:6px;align-content:start;margin:0 -1px -1px 0}
+.steps .k{font:600 11px var(--f-mono);letter-spacing:.08em;color:var(--accent)}
+.steps p{font-size:13.5px;color:var(--muted);line-height:1.55}
+.big-num{font:700 40px/1 var(--f-display);color:var(--ink)}
+.big-num small{font-size:16px;color:var(--muted);margin-left:4px}
+
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:18px}
+.duo article{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:16px 18px;display:grid;gap:6px;align-content:start}
+.duo .k{font:600 11px var(--f-mono);letter-spacing:.08em;color:var(--muted)}
+.duo h4{font:700 17px var(--f-body)}
+.duo dl{margin:4px 0 0;display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:13.5px}
+.duo dt{color:var(--muted)}
+.duo dd{margin:0}
+
+/* 3D stage */
+.stage3d{position:relative;width:100%;aspect-ratio:16/10;min-height:270px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:linear-gradient(var(--paper),var(--steel));touch-action:pan-y;cursor:grab}
+.stage3d:active{cursor:grabbing}
+.stage3d canvas{display:block;width:100%;height:100%}
+.lab3d{position:absolute;left:0;top:0;transform:translate(-50%,-100%);font:600 11.5px/1.3 var(--f-body);color:var(--ink);background:color-mix(in srgb,var(--surface) 88%,transparent);border:1px solid var(--line-2);border-radius:4px;padding:2px 7px;white-space:nowrap;pointer-events:none}
+.lab3d small{display:block;font:500 10px var(--f-mono);color:var(--muted)}
+.clock3d{position:absolute;left:10px;top:10px;font:600 13px var(--f-mono);background:var(--ink);color:var(--paper);border-radius:4px;padding:3px 9px;pointer-events:none}
+.hint3d{position:absolute;right:10px;bottom:8px;font:500 10.5px var(--f-mono);color:var(--muted);pointer-events:none}
+.fallback3d{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted);font-size:14px}
+.playrow{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center}
+.playrow input{width:100%;accent-color:var(--accent)}
+.stagechips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.stagechips::-webkit-scrollbar{display:none}
+.stagechips button{flex:none;font-size:12.5px;padding:5px 11px;border-radius:99px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);cursor:pointer;white-space:nowrap}
+.stagechips button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.st-no{font:700 30px/1 var(--f-display);color:var(--accent)}
+.st-title{font:700 21px/1.3 var(--f-body)}
+.st-time{font:500 12px var(--f-mono);color:var(--muted)}
+.st-text{font-size:15px;line-height:1.75}
+.st-key{border-top:1px dashed var(--line-2);padding-top:12px;font-size:13.5px;color:var(--muted)}
+.st-key b{display:block;font:600 11px var(--f-mono);letter-spacing:.1em;color:var(--ink);margin-bottom:3px}
+
+.rep{max-width:78ch;display:grid;gap:10px}
+.rep h3{font:700 19px/1.4 var(--f-body);margin-top:30px;display:flex;gap:10px;align-items:baseline}
+.rep h3 b{font:600 13px var(--f-mono);color:var(--accent)}
+.rep p{font-size:15px;line-height:1.8}
+.rep ul,.rep ol{margin:0;padding-left:20px;display:grid;gap:5px;font-size:15px;line-height:1.7}
+.rep strong{font-weight:600}
+.fx{font:500 13.5px/1.7 var(--f-mono);background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:4px;padding:10px 14px;overflow-x:auto;white-space:nowrap}
+.fx small{display:block;font:400 12px var(--f-body);color:var(--muted);white-space:normal;margin-top:4px}
+.abstract{border:1.5px solid var(--ink);background:var(--surface);border-radius:8px;padding:18px 20px;font-size:14.5px;line-height:1.8;max-width:78ch}
+.abstract b.k{display:block;font:600 11px var(--f-mono);letter-spacing:.12em;color:var(--accent);margin-bottom:6px}
+.rep .tbl-wrap{margin-block:4px}
+.summary{margin-top:22px;border:1.5px solid var(--ink);border-radius:8px;background:var(--surface);padding:22px 24px;display:grid;gap:14px}
+.summary .k{font:600 11px var(--f-mono);letter-spacing:.12em;color:var(--accent)}
+.summary p{font-size:16px;line-height:1.8;max-width:72ch}
+footer{margin-top:40px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;display:grid;gap:8px}
+footer ul{margin:0;padding-left:18px;display:grid;gap:3px}
+
+.m-wall{fill:none;stroke:var(--ink);stroke-width:2}
+.m-lab{font:500 10.5px var(--f-mono);fill:var(--muted)}
+.m-labk{font:600 12px var(--f-body);fill:var(--ink)}
+.m-water{fill:var(--sea-soft)}
+.m-wl{stroke:var(--sea);stroke-width:1.2;stroke-dasharray:5 4;fill:none}
+.m-hull{fill:var(--steel-2);stroke:var(--hull);stroke-width:1.5}
+.m-house{fill:var(--surface);stroke:var(--hull);stroke-width:1.3}
+.m-sea{fill:var(--sea);fill-opacity:.5}
+.m-bank{fill:var(--steel-2)}
+.m-grid{fill:url(#grid)}
+.grid-line{fill:none;stroke:var(--grid);stroke-width:1}
+</style></head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" class="grid-line"/></pattern>
+</defs></svg>
+
+<header class="topbar"><div class="topbar-in">
+  <div class="brand"><i></i>Collision Brief</div>
+  <nav class="nav" aria-label="섹션">
+    <a href="#s1"><b>01</b>한눈에</a>
+    <a href="#s2"><b>02</b>3D 재현</a>
+    <a href="#s3"><b>03</b>왜 뒤집혔나</a>
+    <a href="#s4"><b>04</b>조타 상실</a>
+    <a href="#s5"><b>05</b>확인 · 미확인</a>
+    <a href="#s6"><b>06</b>전문 분석</a>
+    <a href="#s7"><b>07</b>결론</a>
+  </nav>
+</div></header>
+
+<main class="wrap">
+
+<section class="hero">
+  <div>
+    <div class="eyebrow">사고 해설 · 2026년 11월 13일 뉴올리언스</div>
+    <h1>유조선이 부두의 유람선을 들이받았다<small>Atlantic Asphalt × American Heritage</small></h1>
+    <p class="lede">미국 뉴올리언스 미시시피강에서 길이 160 m 아스팔트 운반 유조선이 부두에 묶여 있던 81 m 외륜 유람선(리버보트)의 옆구리를 들이받았고, 유람선은 물이 차며 옆으로 넘어졌습니다. 타고 있던 사람은 모두 살았습니다. 무슨 일이 있었는지 3D로 돌려 보고, 왜 그렇게 됐는지 직접 움직여 보며 이해하는 페이지입니다.</p>
+  </div>
+  <dl class="tblock" aria-label="사고 개요">
+    <div><dt>일시</dt><dd>11월 13일(금) 낮 12시 30분경, 현지시각 · 한국시각 14일 03시 30분경</dd></div>
+    <div><dt>장소</dt><dd>미국 루이지애나주 뉴올리언스항, 미시시피강 Thalia Street 터미널</dd></div>
+    <div><dt>인명</dt><dd>사망·실종 0명 · 32명 병원 이송</dd></div>
+    <div><dt>원인</dt><dd>조사 중. 해안경비대는 유조선의 "조타 상실로 보인다"고만 밝힘</dd></div>
+    <div><dt>기준</dt><dd>11월 14일(현지) 보도까지 반영. 이후 수치는 달라질 수 있음</dd></div>
+  </dl>
+</section>
+
+<!-- 01 -->
+<section class="sec" id="s1">
+  <div class="sec-head"><span class="sec-no">01</span><h2>한눈에 보는 사고</h2><span class="sec-en">At a glance</span></div>
+  <p class="prose">유람선 <strong>American Heritage</strong>는 약 2시간 전 부두에 도착해 승객을 내리던 중이었습니다. 그때 강을 지나던 유조선 <strong>Atlantic Asphalt</strong>가 통제를 잃고 유람선의 강 쪽 옆면(좌현)을 들이받았습니다. 유람선은 물이 들어차다가 옆으로 넘어갔고, 약 100명이 강물에 빠졌다가 구조됐습니다.</p>
+
+  <div class="steps">
+    <article><span class="k">탑승</span><div class="big-num">191<small>명</small></div><p>유람선의 승객과 승무원. 시장이 14일 밝힌 수치</p></article>
+    <article><span class="k">사망 · 실종</span><div class="big-num">0<small>명</small></div><p>양쪽 배 모두 전원 확인. 유조선 쪽 부상자 없음</p></article>
+    <article><span class="k">강에서 구조</span><div class="big-num">약 100<small>명</small></div><p>물에 빠졌다가 건져 올려진 사람</p></article>
+    <article><span class="k">전복 전 대피</span><div class="big-num">80+<small>명</small></div><p>배가 넘어가기 전 항만경찰이 내리게 한 사람</p></article>
+    <article><span class="k">병원 이송</span><div class="big-num">32<small>명</small></div><p>14일 기준 8명 입원 중, 그중 2명 중상</p></article>
+    <article><span class="k">전복까지</span><div class="big-num">30~45<small>분</small></div><p>충돌 뒤 넘어가기까지. 항만경찰청장 추정치</p></article>
+  </div>
+
+  <h3 class="sub-h">두 배는 얼마나 달랐나 <span>크기 비교</span></h3>
+  <div class="bench" style="margin-top:0"><div class="bench-stage" style="border:0">
+    <svg viewBox="0 0 660 190" role="img" aria-label="유조선 160미터와 유람선 81미터 길이 비교">
+      <rect width="660" height="190" class="m-grid"/>
+      <rect x="0" y="150" width="660" height="40" class="m-water"/><path d="M0,150H660" class="m-wl"/>
+      <path d="M30,118 H470 L500,104 C498,128 490,146 474,158 H56 C42,158 34,150 30,140 Z" class="m-hull"/>
+      <path d="M30,150 H482 C478,154 476,156 474,158 H56 C44,158 36,154 32,150 Z" fill="var(--antifoul)" opacity=".85"/>
+      <rect x="52" y="78" width="54" height="40" class="m-house"/><rect x="84" y="56" width="16" height="22" fill="var(--hull)"/>
+      <path d="M120,112 H440" stroke="var(--oil)" stroke-width="3"/>
+      <text x="265" y="100" class="m-labk" text-anchor="middle">유조선 Atlantic Asphalt</text>
+      <path d="M30,172 H500" stroke="var(--ink)" stroke-width="1.2"/><path d="M30,167V177M500,167V177" stroke="var(--ink)" stroke-width="1.2"/>
+      <text x="265" y="186" class="m-lab" text-anchor="middle">160 m · 아스팔트 운반</text>
+      <g transform="translate(410,0)">
+        <path d="M112,138 H238 L246,134 C245,146 242,152 236,154 H116 C113,154 112,150 112,146 Z" class="m-hull"/>
+        <rect x="118" y="90" width="112" height="48" class="m-house"/>
+        <path d="M118,102H230M118,114H230M118,126H230" stroke="var(--line-2)" stroke-width="1"/>
+        <rect x="150" y="80" width="56" height="10" class="m-house"/>
+        <circle cx="106" cy="138" r="12" fill="none" stroke="var(--accent)" stroke-width="3"/><path d="M94,138H118M106,126V150" stroke="var(--accent)" stroke-width="2"/>
+        <text x="172" y="70" class="m-labk" text-anchor="middle">유람선 American Heritage</text>
+        <path d="M94,172 H246" stroke="var(--ink)" stroke-width="1.2"/><path d="M94,167V177M246,167V177" stroke="var(--ink)" stroke-width="1.2"/>
+        <text x="170" y="186" class="m-lab" text-anchor="middle">81 m · 5층 · 정원 150명</text>
+      </g>
+    </svg>
+    <p class="note">길이만 실제 비율입니다. 높이와 세부 모양은 이해를 돕는 그림입니다.</p>
+  </div></div>
+
+  <div class="duo">
+    <article><span class="k">들이받은 배</span><h4>Atlantic Asphalt</h4>
+      <dl><dt>종류</dt><dd>아스팔트·역청 운반 유조선</dd><dt>길이</dt><dd>160 m</dd><dt>국적(선적)</dt><dd>마셜제도</dd><dt>소유 · 관리</dt><dd>Nave Shipping SA · Thome Ship Management (항만 측 소장 기준). 중국 조선그룹 CSSC 계열사 소유로 보도됨</dd><dt>조종</dt><dd>현지 강 도선사가 타고 있었음</dd></dl></article>
+    <article><span class="k">받힌 배</span><h4>American Heritage</h4>
+      <dl><dt>종류</dt><dd>외륜(물레바퀴) 강 유람선</dd><dt>길이</dt><dd>81 m, 5층</dd><dt>국적</dt><dd>미국</dd><dt>운영</dt><dd>American Cruise Lines</dd><dt>건조 · 정원</dt><dd>2015년 · 승객 150명</dd><dt>상태</dt><dd>부두에 묶인 채 승객 하선 중</dd></dl></article>
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="sec" id="s2">
+  <div class="sec-head"><span class="sec-no">02</span><h2>3D로 다시 보는 사고 순간</h2><span class="sec-en">3D Reconstruction</span></div>
+  <p class="prose">재생 버튼을 누르거나 막대를 끌어 시간을 움직여 보세요. 화면을 좌우로 끌면 시점이 돌아갑니다. 두 배의 길이 비율, 받힌 면(유람선 좌현), 사건 순서는 보도 내용을 따랐고, <strong>유조선이 지나온 길·속력·유람선이 넘어간 방향은 공개되지 않아 임의로 그린 개념도</strong>입니다.</p>
+
+  <div class="bench" id="bench3d">
+    <div class="bench-head"><span><b>재현</b> · 충돌에서 구조까지</span><span>개념 재구성 · 실제 항적 아님</span></div>
+    <div class="bench-body">
+      <div class="bench-stage">
+        <div class="stage3d" id="stage3d">
+          <canvas id="cv3d" aria-label="유조선과 유람선 충돌 3D 재현"></canvas>
+          <div class="clock3d" id="clock3d">10:30경</div>
+          <div class="hint3d">끌어서 시점 회전</div>
+        </div>
+        <div class="playrow">
+          <button class="btn hot" type="button" id="play3d">▶ 재생</button>
+          <input type="range" id="scrub3d" min="0" max="1000" value="0" aria-label="시간 이동">
+        </div>
+        <div class="stagechips" id="chips3d" role="group" aria-label="단계 이동"></div>
+        <div class="mini-row">
+          <div class="seg" id="view3d" role="group" aria-label="시점">
+            <button type="button" data-v="wide" aria-pressed="true">전경</button>
+            <button type="button" data-v="top" aria-pressed="false">위에서</button>
+            <button type="button" data-v="dock" aria-pressed="false">부두에서</button>
+            <button type="button" data-v="follow" aria-pressed="false">유조선 뒤에서</button>
+          </div>
+          <button class="btn" type="button" id="zin" aria-label="확대">＋</button>
+          <button class="btn" type="button" id="zout" aria-label="축소">－</button>
+        </div>
+        <div class="legend"><span><i class="dot" style="background:var(--accent)"></i>물에 빠진 사람 (점 1개 ≈ 4명)</span><span><i class="dot" style="background:var(--ok)"></i>걸어서 대피</span><span><i class="dot" style="background:var(--warn)"></i>구조 보트</span></div>
+      </div>
+      <div class="bench-side" aria-live="polite">
+        <div class="mini-row"><span class="st-no" id="stNo">01</span><span class="st-time" id="stTime"></span></div>
+        <h3 class="st-title" id="stTitle"></h3>
+        <p class="st-text" id="stText"></p>
+        <div class="st-key"><b>알아둘 점</b><span id="stKey"></span></div>
+        <div id="stMeter"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="sec" id="s3">
+  <div class="sec-head"><span class="sec-no">03</span><h2>유람선은 왜 뒤집혔나</h2><span class="sec-en">Why it capsized</span></div>
+  <p class="prose">배는 물이 한쪽으로 들어차면 그쪽이 무거워져 기웁니다. 강 유람선은 얕은 강을 다니려고 <strong>물에 잠기는 부분이 얕고</strong>, 객실을 여러 층 쌓아 <strong>키가 큽니다</strong>. 그래서 무게중심이 높고, 한번 기울기 시작하면 버티는 힘이 바다 화물선보다 작습니다. 승무원 한 명은 식당 쪽 선체에 구멍이 났다고 말했습니다.</p>
+  <p class="prose">아래는 이 <strong>일반 원리</strong>를 보여 주는 모형입니다. 이번 사고에서 물이 정확히 어디로, 얼마나 빨리 들어왔는지는 아직 조사 중입니다.</p>
+
+  <div class="bench" id="capBench">
+    <div class="bench-head"><span><b>실험대 A</b> · 침수와 기울기</span><span>개념 모델 · 실측값 아님</span></div>
+    <div class="bench-body">
+      <div class="bench-stage"><svg id="capSvg" viewBox="0 0 660 320" role="img" aria-label="배 단면에 물이 들어차며 기우는 모형"></svg></div>
+      <div class="bench-side">
+        <div class="side-label">배 모양</div>
+        <div id="capType"></div>
+        <div id="capCtl" class="mini-ctl"></div>
+        <div class="status" id="capStatus"></div>
+        <p class="note">같은 양의 물이 들어와도 키 크고 얕은 배가 훨씬 많이 기웁니다. 물을 70% 넘게 채우면 유람선형은 스스로 되돌아오지 못합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 -->
+<section class="sec" id="s4">
+  <div class="sec-head"><span class="sec-no">04</span><h2>'조타 상실'이란 무엇인가</h2><span class="sec-en">Loss of steering</span></div>
+  <p class="prose">조타는 배 뒤의 <strong>타(방향키)</strong>를 움직여 방향을 바꾸는 일입니다. 조타 장치가 고장 나면 타가 멈춘 각도 그대로 굳어 배가 한쪽으로 계속 돌 수 있습니다. 큰 배는 자동차처럼 바로 서지 못합니다. 엔진을 뒤로 돌려도 수백 미터를 더 나아갑니다. 강폭이 좁은 항구에서는 그 사이에 부두에 닿을 수 있습니다.</p>
+  <p class="prose">해안경비대는 유조선이 "일종의 조타 상실"을 겪은 것으로 보인다고 했지만 <strong>이유는 모른다</strong>고 밝혔습니다. 아래 모형은 이번 사고의 재현이 아니라, 조타가 고장 나면 어떤 일이 생기는지 보는 연습용입니다.</p>
+
+  <div class="bench" id="strBench">
+    <div class="bench-head"><span><b>실험대 B</b> · 타가 굳은 160 m 선박</span><span>위에서 본 강 · 개념 모델</span></div>
+    <div class="bench-body">
+      <div class="bench-stage"><svg id="strSvg" viewBox="0 0 660 300" role="img" aria-label="강 위에서 조타가 고장 난 배의 움직임 모형"></svg></div>
+      <div class="bench-side">
+        <div id="strCtl" class="mini-ctl"></div>
+        <div class="status" id="strStatus"></div>
+        <p class="note">고장을 낸 뒤 '전속 후진'과 '닻 투하'를 얼마나 빨리 누르느냐에 따라 결과가 달라집니다. 속력이 빠를수록 멈추기 어렵습니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub-h">기사에 나오는 용어 <span>GLOSSARY</span></h3>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>용어</th><th>뜻</th><th>이번 사고에서</th></tr></thead>
+    <tbody>
+      <tr><td>도선사<span class="en">Pilot</span></td><td>그 지역 물길을 잘 아는 전문가. 큰 배가 항구나 강을 지날 때 올라타 선장에게 조종을 조언합니다.</td><td>유조선에 현지 강 도선사가 타고 있었습니다.</td></tr>
+      <tr><td>항해기록장치<span class="en">VDR</span></td><td>배의 블랙박스. 속력, 침로, 조종실 음성 등을 기록합니다.</td><td>NTSB가 유조선의 VDR을 확보했습니다.</td></tr>
+      <tr><td>선적<span class="en">Flag</span></td><td>배가 등록된 나라. 소유 회사의 나라와 다를 수 있습니다.</td><td>유조선은 마셜제도 선적입니다.</td></tr>
+      <tr><td>전복<span class="en">Capsize</span></td><td>배가 옆으로 넘어가거나 뒤집히는 것. 물 밑으로 가라앉는 '침몰'과 다릅니다.</td><td>유람선은 부두 옆에서 옆으로 누운 채 대부분 잠겼습니다.</td></tr>
+      <tr><td>좌현 · 우현<span class="en">Port · Starboard</span></td><td>뱃머리를 바라보고 섰을 때 왼쪽이 좌현, 오른쪽이 우현입니다.</td><td>받힌 곳은 강 쪽을 향한 좌현입니다.</td></tr>
+      <tr><td>접촉사고<span class="en">Allision</span></td><td>움직이는 배가 부두·교량·정박선처럼 고정된 물체를 들이받는 사고. 움직이는 배끼리의 '충돌(collision)'과 구분합니다.</td><td>정박 중인 배가 받혔으므로 항만 측 소장도 이 용어를 씁니다.</td></tr>
+      <tr><td>선박 압류<span class="en">Arrest</span></td><td>배상을 확보하려고 법원 명령으로 배를 떠나지 못하게 잡아 두는 절차입니다.</td><td>연방 판사가 유조선 압류를 승인했습니다.</td></tr>
+      <tr><td>NTSB</td><td>미국 연방교통안전위원회. 사고 원인을 밝히고 재발 방지 권고를 내는 독립 기관입니다.</td><td>해안경비대와 함께 조사 중입니다.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 05 -->
+<section class="sec" id="s5">
+  <div class="sec-head"><span class="sec-no">05</span><h2>확인된 것과 아직 모르는 것</h2><span class="sec-en">Known &amp; unknown</span></div>
+  <p class="prose">속보는 시간이 지나며 숫자가 바뀝니다. 이 사고도 탑승 인원이 처음엔 "약 129명"으로 전해졌다가 다음 날 191명으로 정리됐습니다. 아래 표는 여러 매체를 대조한 결과입니다.</p>
+
+  <div class="tbl-wrap" style="margin-top:16px"><table>
+    <thead><tr><th>항목</th><th>확인된 내용</th><th>주의할 점</th></tr></thead>
+    <tbody>
+      <tr><td>탑승 인원</td><td>승객·승무원 191명 (시장, 14일)</td><td>초기 보도는 "승객 약 129명". 항만 소송 관련 보도에는 197명으로 나옴</td></tr>
+      <tr><td>인명 피해</td><td>사망·실종 없음. 32명 병원 이송</td><td>32명의 구성은 매체마다 다름(승객 32명 + 경찰 2명 / 승객 30명 + 경찰 2명). 14일 기준 8명 입원, 2명 중상</td></tr>
+      <tr><td>충돌 시각 · 위치</td><td>12시 30분경, 유람선 좌현(강 쪽 옆면)</td><td>선박 추적 자료에는 12시 29분 근접 기록</td></tr>
+      <tr><td>원인</td><td>유조선이 통제를 잃음. "조타 상실로 보임"</td><td>왜 조타를 잃었는지는 미확인. 기계 고장인지 여부도 발표 없음</td></tr>
+      <tr><td>테러 가능성</td><td>해안경비대 "그런 징후 없음"</td><td>조사는 계속 진행 중</td></tr>
+      <tr><td>기름 유출</td><td>강에서 제거할 유출물은 관측되지 않음</td><td>유람선에 연료 약 1만 6천 갤런(약 6만 L)이 남아 있어 먼저 빼내야 함</td></tr>
+      <tr><td>강 통행</td><td>약 3마일(4.8 km) 구간 전면 통제 → 13일 밤 일방통행 → 14일 제한적 양방향</td><td>잔해 주변 500피트(약 150 m) 안전구역 유지</td></tr>
+      <tr><td>인양</td><td>"며칠이 아니라 몇 주" 걸릴 전망</td><td>잠수사 점검과 연료 제거가 먼저</td></tr>
+      <tr><td>조사 일정</td><td>NTSB 조사관 16명 현장 투입, VDR 확보</td><td>예비 보고서 약 30일 뒤, 최종 보고서 18~24개월 뒤 예정</td></tr>
+      <tr><td>법적 대응</td><td>항만 당국이 유조선·소유사·관리사 상대 소송, 유조선 압류 승인</td><td>터미널 피해 100만 달러 초과 추산. '과실' 주장은 소장상의 주장이며 확정된 사실이 아님</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 class="sub-h">구조는 어떻게 이뤄졌나 <span>RESCUE</span></h3>
+  <div class="steps" style="margin-top:0">
+    <article><span class="k">항만경찰</span><p>가장 먼저 도착해 전복 전 80명 넘게 하선시키고 강에 뛰어들어 구조. 경찰관 2명도 병원 이송</p></article>
+    <article><span class="k">소방</span><p>부두 위에서 사다리를 내려 사람들을 끌어올림</p></article>
+    <article><span class="k">경찰 드론</span><p>다른 출동 중이던 드론을 돌려 물에 빠진 사람 위치 파악</p></article>
+    <article><span class="k">해안경비대</span><p>소형정·경비함·헬기 투입, 강 통제</p></article>
+    <article><span class="k">주변 선박</span><p>지나던 상선과 개인 보트가 합류해 사람들을 건짐</p></article>
+    <article><span class="k">선장</span><p>다친 상태로 끝까지 남아 전원 확인 뒤 마지막으로 하선</p></article>
+  </div>
+</section>
+
+<!-- 06 -->
+<section class="sec" id="s6">
+  <div class="sec-head"><span class="sec-no">06</span><h2>전문 분석: 항해·해사 관점의 보충</h2><span class="sec-en">Technical Report</span></div>
+
+  <div class="abstract"><b class="k">초록</b>본 장은 보도된 사실에 항해학·선박조종·복원성·해사법규 지식을 덧붙여 이번 사고를 해석합니다. 사고의 법적 성격(접촉사고), 조타장치 관련 국제·미국 규정, 조타 상실 시 비상 대응, 하천 조선의 제약, 도선사와 선장의 관계, 유람선 전복의 복원성 해석, 충돌 에너지 개략 계산, 조사와 책임 절차, 인양 순서를 차례로 다룹니다. 규정과 이론은 일반 지식이며, 이번 사고에 실제로 어떻게 적용되는지는 NTSB와 해안경비대의 조사 결과가 나와야 확정됩니다. 추정에는 '추정' 또는 '가정'이라고 적었습니다.</div>
+
+  <div class="rep">
+    <h3><b>6.1</b>사고의 성격: 충돌이 아니라 접촉사고(Allision)</h3>
+    <p>해사 실무에서는 움직이는 선박끼리 부딪히면 충돌(collision), 움직이는 선박이 부두·교량·정박선 같은 고정 물체를 들이받으면 접촉사고(allision)로 구분합니다. American Heritage는 계류삭으로 부두에 묶여 있었으므로 이번 사고는 후자입니다.</p>
+    <p>이 구분은 책임 판단에 직접 영향을 줍니다. 미국 해사 판례의 <strong>오리건 원칙(The Oregon, 1895)</strong>은 움직이던 선박이 고정 물체를 받으면 움직이던 쪽에 과실이 있다고 추정합니다. 유조선 측이 책임을 벗으려면 합리적 주의를 다했다는 점이나 불가항력(inevitable accident)을 스스로 입증해야 합니다. 조타장치 고장이 원인이더라도, 그 고장이 정비·점검으로 막을 수 있었는지가 쟁점이 됩니다. 법규 위반이 확인되면 위반과 사고의 인과관계를 추정하는 <strong>펜실베이니아 원칙</strong>도 함께 적용될 수 있습니다.</p>
+    <p>항법 측면에서 정박선에는 피항 의무가 성립하지 않습니다. 미시시피강에는 국제해상충돌예방규칙(COLREG)이 아니라 미국 내수항법규칙(Inland Navigation Rules, 33 CFR Part 83)이 적용되지만, 경계(제5조), 안전한 속력(제6조), 좁은 수로(제9조), 선원의 상무(제2조)의 취지는 같습니다.</p>
+
+    <h3><b>6.2</b>조타장치 관련 규정</h3>
+    <p>해안경비대가 언급한 '조타 상실'을 평가하려면 조타장치가 갖춰야 할 성능과 운용 규정을 알아야 합니다. 핵심은 다음과 같습니다.</p>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>규정</th><th>요구 내용</th><th>조사에서 볼 점</th></tr></thead>
+      <tbody>
+        <tr><td>SOLAS II-1장 29규칙<span class="en">주조타장치</span></td><td>최대 항해흘수·최대 전진속력에서 타를 한쪽 35°에서 반대쪽 35°까지 돌릴 수 있고, 35°에서 반대쪽 30°까지 28초 이내</td><td>설계 성능은 충족했을 것이므로 고장 시점의 실제 응답이 관건</td></tr>
+        <tr><td>SOLAS II-1장 29규칙<span class="en">보조조타장치</span></td><td>최대 전진속력의 1/2 또는 7노트 중 큰 속력에서 한쪽 15°에서 반대쪽 15°까지 60초 이내</td><td>보조 계통으로 전환이 시도됐는지, 걸린 시간</td></tr>
+        <tr><td>SOLAS II-1장 29규칙<span class="en">탱커 추가 요건</span></td><td>총톤수 1만 톤 이상 탱커는 배관·동력장치의 단일 고장 뒤 45초 이내에 조타능력을 회복</td><td>본선 총톤수는 보도에 없어 적용 여부 미확인</td></tr>
+        <tr><td>SOLAS V장 24규칙</td><td>위험한 항해 상황에서는 자동 조타에서 즉시 수동 조타로 바꿀 수 있어야 함</td><td>사고 당시 조타 모드와 조타수 배치</td></tr>
+        <tr><td>SOLAS V장 25규칙</td><td>항해에 특별한 주의가 필요한 수역에서는 조타 동력장치를 2대 이상 동시에 운전</td><td>항내에서 유압펌프 2대가 돌고 있었는지</td></tr>
+        <tr><td>SOLAS V장 26규칙</td><td>출항 전 12시간 이내 조타장치 점검·시험, 비상조타 훈련은 3개월마다 1회 이상</td><td>시험 기록과 훈련 기록</td></tr>
+        <tr><td>33 CFR 164.25<span class="en">미국 규정</span></td><td>미국 가항수역에 들어오거나 출항하기 전 12시간 이내 조타장치 시험</td><td>미국 입항 전 시험 기록의 사실 여부</td></tr>
+      </tbody>
+    </table></div>
+    <p>'조타 상실'은 원인별로 넷으로 나눌 수 있습니다. 첫째는 제어계통 고장으로, 조타 스탠드의 신호가 조타기에 전달되지 않거나 엉뚱한 타각이 지시되는 경우입니다. 둘째는 동력 상실로, 유압펌프 고장이나 선내 정전(블랙아웃)이 해당합니다. 셋째는 타두재·유압 실린더 같은 기계 부분의 손상입니다. 넷째는 조타 명령 오인이나 모드 전환 실수 같은 인적 요인입니다. 추진력을 잃어도 타에 닿는 물살이 약해져 타효가 급감하므로, 보도상의 '조타 상실'이 추진 계통 이상을 포함하는지도 확인이 필요합니다. NTSB가 유조선의 정비 기록과 기계 이력을 살펴보겠다고 한 것은 이 구분을 위한 것입니다.</p>
+
+    <h3><b>6.3</b>조타 상실 시 비상 대응 절차</h3>
+    <p>선교에서 조타 이상을 인지했을 때의 표준 대응은 대체로 다음 순서입니다. 여러 조치를 동시에 진행합니다.</p>
+    <ol>
+      <li><strong>조타 방식 전환.</strong> 추종(Follow-up) 조타에서 비추종(Non-follow-up) 조타로, 다른 제어 계통·다른 동력장치로 바꿉니다. 안 되면 조타기실에서 직접 조작하는 비상조타로 넘어갑니다.</li>
+      <li><strong>기관 사용.</strong> 감속·정지·후진으로 타력을 줄입니다. 우회전 고정피치 프로펠러 한 개를 가진 배는 후진 때 횡압력으로 선수가 우현으로 돌아가는 경향이 있어, 후진이 선회를 더 키울 수도 줄일 수도 있습니다.</li>
+      <li><strong>투묘.</strong> 선수 인원을 배치해 닻을 놓습니다. 닻을 끌며 속력과 선수 방향을 잡는 용묘(dredging)가 협수로의 마지막 제동 수단입니다.</li>
+      <li><strong>경고와 통보.</strong> 단음 5회 이상의 경고신호를 울리고, VHF로 주변 선박과 선박교통관제(VTS)에 알립니다. 미국 내수에서는 선교 간 통신 채널(VHF 13)을 씁니다.</li>
+      <li><strong>운전부자유선 표시.</strong> 낮에는 흑구 2개, 밤에는 홍색 전주등 2개를 답니다.</li>
+      <li><strong>예인선 요청과 선내 경보.</strong> 가까운 예인선에 지원을 요청하고 승무원에게 충격 대비를 알립니다.</li>
+    </ol>
+    <p>문제는 시간입니다. 강폭이 수백 미터인 항내에서 160 m 선박이 부두 쪽으로 돌기 시작하면 접촉까지 남는 시간은 길어야 몇 분입니다. 비상조타 전환에는 인원이 조타기실까지 가는 시간이 들고, 닻은 저질과 속력에 따라 끌릴 수 있습니다. 2024년 볼티모어 교량 사고 이후 항내 저속 구간에서의 동력·조타 상실 대응 시간이 국제적으로 주목받는 이유입니다. 실험대 B에서 고장 뒤 후진과 투묘를 늦게 누를수록 결과가 나빠지는 것이 이 관계를 단순화한 것입니다.</p>
+
+    <h3><b>6.4</b>하천 조선의 제약</h3>
+    <p>강에서는 바다에 없는 조건이 겹칩니다. 이번 사고에서 유조선의 진행 방향과 당시 유속은 발표되지 않았으므로, 아래는 일반론입니다.</p>
+    <ul>
+      <li><strong>조류 방향.</strong> 순조(물살을 타고 내려갈 때)에서는 대지속력이 커지는 반면 타에 닿는 대수속력은 그대로여서, 같은 타각으로 얻는 선회 효과에 비해 이동 거리가 길어지고 정지도 어렵습니다. 역조에서는 낮은 대지속력으로도 타효를 유지할 수 있어 조종이 유리합니다.</li>
+      <li><strong>측벽 효과.</strong> 강둑이나 부두 가까이 지나면 선체와 벽 사이 유속이 빨라져 선미가 벽 쪽으로 끌리고(bank suction) 선수는 밀려납니다(bank cushion). 타가 듣지 않는 상태에서는 이 힘을 상쇄할 수단이 없습니다.</li>
+      <li><strong>천수 효과.</strong> 수심이 얕으면 선회권이 커지고 타 응답이 둔해지며 선체 침하(squat)가 생깁니다.</li>
+      <li><strong>정지 성능.</strong> 대형선의 긴급 정지거리는 항해 속력에서 선체 길이의 여러 배에 이릅니다. 항내 속력에서는 짧아지지만 강폭보다 길 수 있습니다.</li>
+      <li><strong>굴곡부.</strong> 뉴올리언스 구간에는 알제 포인트 같은 급한 굴곡이 있어 유향이 복잡합니다. 한 보도는 유조선이 이 굴곡을 이미 지난 뒤였다고 전했습니다.</li>
+    </ul>
+
+    <h3><b>6.5</b>도선사와 선장의 관계</h3>
+    <p>해안경비대는 유조선을 조종하던 사람이 강 도선사였다고 밝혔습니다. 이것이 곧 도선사의 책임을 뜻하지는 않습니다. 도선사는 현지 수로 지식으로 조선을 조언·지휘하지만, 선박의 안전에 대한 최종 책임과 지휘권은 선장에게 남습니다. 한국 도선법도 같은 원칙을 두고 있습니다. 조타장치가 기계적으로 고장 났다면 도선사의 조선 명령과는 별개의 문제이고, 선박의 감항성과 정비는 선주·관리회사의 책임 영역입니다.</p>
+    <p>조사에서는 도선사 승선 시 정보 교환(Master–Pilot Exchange)이 제대로 이뤄졌는지, 조타 명령이 복창·확인되는 폐쇄형 의사소통이 지켜졌는지, 선교 인원이 타각 지시기를 감시하고 있었는지를 봅니다. VDR의 선교 음성과 타각 명령·응답 기록이 이를 판단하는 근거가 됩니다.</p>
+
+    <h3><b>6.6</b>유람선 전복의 복원성 해석</h3>
+    <p>03장에서 '키가 크고 얕은 배는 잘 기운다'고 설명했지만, 전공 관점에서는 조금 더 정확히 나눠야 합니다. 초기 복원성은 메타센터 높이 GM으로 나타냅니다.</p>
+    <div class="fx">GM = KB + BM − KG ,  BM = I / ∇<small>KB: 부심 높이, KG: 무게중심 높이, I: 수선면 2차 모멘트(폭의 세제곱에 비례), ∇: 배수용적</small></div>
+    <p>강 유람선은 폭이 넓고 흘수가 얕아 BM이 크므로 <strong>초기 GM은 오히려 클 수 있습니다.</strong> 약점은 건현이 낮아 조금만 기울어도 갑판 끝이 물에 잠기고, 그 뒤로는 복원정(GZ)이 빠르게 줄어 <strong>복원력 범위가 좁다</strong>는 데 있습니다. 여기에 여러 층의 객실로 KG가 높고, 현측에 문과 창 같은 개구부가 많습니다.</p>
+    <p>침수가 시작되면 세 가지가 겹칩니다.</p>
+    <div class="fx">tan θ = (w · d) / (Δ · GM)<small>한쪽 구획에 무게 w의 물이 중심선에서 d만큼 떨어져 들어오면 θ만큼 기웁니다. Δ는 배수량.</small></div>
+    <div class="fx">GG₁ = (ρ · i) / Δ ,  i = l · b³ / 12<small>구획 안에서 물이 출렁이는 자유표면은 무게중심이 GG₁만큼 올라간 것과 같은 효과를 냅니다. 구획 폭 b의 세제곱에 비례하므로 넓은 식당 같은 공간이 침수되면 손실이 큽니다.</small></div>
+    <ul>
+      <li><strong>편심 침수에 의한 경사.</strong> 파공이 좌현에 있으므로 물은 한쪽부터 찹니다.</li>
+      <li><strong>자유표면에 의한 GM 감소.</strong> 승무원이 말한 식당 구획은 칸막이가 적은 넓은 공간일 가능성이 큽니다(추정).</li>
+      <li><strong>점진 침수.</strong> 경사가 커져 개구부가 수면 아래로 내려가는 각도(해수유입각)에 이르면 침수 속도가 급증합니다.</li>
+    </ul>
+    <p>충돌 뒤 30~45분 동안 버티다가 갑자기 넘어갔다는 증언은, 천천히 기울다가 어느 각도를 넘으며 복원력이 사라지는 점진 침수형 전복의 전형적인 경과와 맞습니다(추정). 하선하려는 승객이 한쪽 현으로 몰리며 생기는 경사 모멘트, 계류삭의 장력과 부두의 반력도 실제 거동에 영향을 주었을 것입니다. 정확한 침수 경로는 잠수 조사와 인양 뒤에 확인됩니다.</p>
+
+    <h3><b>6.7</b>충돌 에너지 개략 계산</h3>
+    <p>유조선의 배수량과 충돌 속력은 공개되지 않았습니다. 규모를 가늠하기 위해 배수량 15,000톤, 속력 6노트(3.09 m/s)를 <strong>가정</strong>하면 운동에너지는 다음과 같습니다.</p>
+    <div class="fx">E = ½ m v² = ½ × 1.5×10⁷ kg × (3.09 m/s)² ≈ 72 MJ<small>부가수질량은 제외한 값. 속력이 절반(3노트)이면 에너지는 1/4인 약 18 MJ.</small></div>
+    <p>에너지가 속력의 제곱에 비례하므로, 접촉 전에 속력을 조금이라도 줄이는 조치의 가치가 큽니다. 받힌 쪽은 부두에 등을 대고 있어 밀려나며 충격을 흘릴 수 없었고, 좁은 선수가 얇은 외판의 한 지점에 하중을 집중시켰습니다. 강 유람선은 원양 선박처럼 충돌 격벽과 이중 선측을 두는 구조가 아닌 경우가 많아 파공에 취약합니다(일반론).</p>
+
+    <h3><b>6.8</b>비상 대피와 구조 평가</h3>
+    <p>사망자가 없었던 데에는 몇 가지 조건이 작용했습니다. 배가 부두에 붙어 있어 현문으로 걸어 내릴 수 있었고, 전복까지 30분 이상 시간이 있었으며, 낮이었고, 항만경찰·소방·해안경비대가 가까이 있었습니다. 80명 이상이 전복 전에 내렸고, 물에 빠진 사람들도 구명조끼를 입고 있었던 것으로 영상에 나타납니다. 승무원은 이런 상황을 매주 훈련한다고 말했습니다.</p>
+    <p>반대로 보면 경사가 커진 뒤에는 대피 수단이 급격히 줄어듭니다. 국제항해 여객선의 구명정도 횡경사 20°까지만 진수가 보장되도록 설계됩니다. 통로와 계단은 기울면 이동이 어렵고, 고령 승객이 많은 유람선에서는 더 그렇습니다. 같은 사고가 야간에, 또는 강 한가운데에서 일어났다면 결과가 달랐을 수 있습니다.</p>
+
+    <h3><b>6.9</b>조사와 책임 절차</h3>
+    <ul>
+      <li><strong>조사 주체.</strong> NTSB는 원인 규명과 안전 권고를, 해안경비대는 법규 위반과 해기사 면허에 관한 조사를 맡습니다. 국제해사기구의 사고조사 코드에 따라 기국인 마셜제도도 이해관계국으로 조사에 참여할 수 있습니다.</li>
+      <li><strong>증거.</strong> VDR에는 선교 음성, 속력, 침로, 타각 명령과 응답, 기관 명령, 주요 경보가 남습니다. 여기에 선박자동식별장치(AIS) 항적, VTS 기록, 조타장치 정비 기록, 승무원·도선사 면담이 더해집니다.</li>
+      <li><strong>대물 소송과 압류.</strong> 해사법에서는 선박 자체를 피고로 삼는 대물(in rem) 소송이 가능합니다. 항만 당국이 유조선을 압류한 것은 배가 미국을 떠나기 전에 배상 담보를 확보하려는 조치입니다. 통상 선주 측 보험자(P&amp;I 클럽)가 보증장을 내고 배를 풀어 갑니다.</li>
+      <li><strong>책임 제한.</strong> 미국 선주책임제한법은 선주가 사고 원인을 알지 못했고 관여하지 않았다면 책임을 사고 뒤 선박 가액과 운임 범위로 제한할 수 있게 합니다. 정비 부실이 드러나면 제한이 깨질 수 있어 조타장치 고장 원인이 배상 규모까지 좌우합니다.</li>
+      <li><strong>유류 오염.</strong> 유람선의 잔존 연료가 새면 미국 유류오염법(OPA 90)에 따른 방제 책임이 문제 됩니다.</li>
+    </ul>
+
+    <h3><b>6.10</b>인양 순서</h3>
+    <p>해안경비대가 '몇 주'라고 한 인양은 보통 다음 순서로 진행됩니다. 잔해가 더 움직이지 않도록 고정하고, 잠수사가 파공과 선체 상태를 조사하며, 오일펜스를 치고 연료 탱크에서 약 1만 6천 갤런의 연료를 뽑아냅니다. 그다음 크레인 바지와 와이어로 선체를 굴려 바로 세우거나(parbuckling) 들어 올리고, 불가능하면 절단해 치웁니다. 마지막으로 항로 수심을 측량해 통항 제한을 풉니다. 잔해 주변 500피트 안전구역은 이 작업 동안 유지됩니다.</p>
+
+    <h3><b>6.11</b>시사점</h3>
+    <ul>
+      <li>여객선 부두가 대형선 항로에 바로 접해 있으면, 정박 중인 여객선도 통항선의 고장에 노출됩니다. 항만 배치와 통항 분리의 문제입니다.</li>
+      <li>항내에서 조타·추진 계통의 이중화가 실제로 가동 중이었는지, 출항 전 시험이 형식에 그치지 않았는지가 반복되는 쟁점입니다.</li>
+      <li>고장 뒤 몇 분 안에 쓸 수 있는 수단(비상조타, 투묘, 예인선)은 사전 준비 상태에 달려 있습니다. 협수로에서 선수 투묘 인원 배치와 닻 준비가 기본으로 강조되는 이유입니다.</li>
+      <li>복원력 범위가 좁은 선박은 침수 초기의 경사가 작아 보여도 전복까지의 여유가 적습니다. 조기 하선 결정이 인명 피해를 갈랐습니다.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 07 -->
+<section class="sec" id="s7">
+  <div class="sec-head"><span class="sec-no">07</span><h2>결론</h2><span class="sec-en">Conclusion</span></div>
+  <div class="summary">
+    <span class="k">요약</span>
+    <p>강을 지나던 <strong>160 m 유조선이 조타를 잃은 것으로 보이는 상태</strong>에서 부두에 묶여 있던 <strong>81 m 유람선의 좌현</strong>을 들이받았습니다. 유람선은 물이 차 30~45분 만에 옆으로 넘어갔지만, 항만경찰·소방·해안경비대·주변 선박의 구조로 <strong>191명 전원이 살았습니다</strong>.</p>
+    <p>전공 관점에서 이 사고는 정박선에 대한 접촉사고이며, 움직이던 유조선 측에 과실 추정이 걸립니다. 원인 규명의 핵심은 조타 상실이 제어·동력·기계·인적 요인 중 무엇이었는지, 그리고 이중화와 출항 전 시험이 제대로 작동했는지입니다. 유람선의 전복은 편심 침수, 자유표면 효과, 점진 침수가 겹친 결과로 추정됩니다. NTSB 예비 보고서는 약 30일 뒤 나올 예정입니다.</p>
+  </div>
+
+  <footer>
+    <span>출처 (2026년 11월 13~14일 보도). NBC 원문 기사는 자동 열람이 막혀 같은 기사의 검색 요약과 NBC 계열사 게재본으로 확인했습니다.</span>
+    <ul>
+      <li><a href="https://www.nbcnews.com/news/us-news/rescue-underway-oil-tanker-collides-new-orleans-river-boat-rcna609235" target="_blank" rel="noopener">NBC News — 100 pulled from water after tanker capsizes New Orleans riverboat</a></li>
+      <li><a href="https://www.cbsnews.com/news/tanker-cruise-collision-mississippi-river-new-orleans/" target="_blank" rel="noopener">CBS News — River cruise ship, tanker crash in New Orleans</a></li>
+      <li><a href="https://abcnews.com/US/vessel-collision-port-new-orleans-emergency-crews-responding/story?id=138119847" target="_blank" rel="noopener">ABC News — All rescued from capsized New Orleans riverboat</a></li>
+      <li><a href="https://www.foxnews.com/us/100-people-pulled-mississippi-river-new-orleans-ship-crash-salvage-effort" target="_blank" rel="noopener">Fox News — At least 100 people pulled from Mississippi River</a></li>
+      <li><a href="https://gcaptain.com/tanker-strikes-docked-paddlewheeler-on-mississippi-river-causing-it-to-capsize/" target="_blank" rel="noopener">gCaptain — Tanker Strikes Docked Paddlewheeler</a></li>
+      <li><a href="https://www.wwno.org/local-regional-news/2026-11-13/tanker-strikes-paddlewheel-cruise-ship-in-new-orleans-32-injured-no-passengers-missing" target="_blank" rel="noopener">WWNO — Tanker strikes paddlewheel cruise ship in New Orleans</a></li>
+      <li><a href="https://cbs12.com/news/nation-world/new-orleans-port-accuses-tanker-companies-of-negligence-in-1-million-lawsuit" target="_blank" rel="noopener">CBS12 — New Orleans port accuses tanker companies of negligence</a></li>
+    </ul>
+    <span>3D 재현과 두 실험대의 항로·속력·기울기·정지 거리는 원리 이해를 위한 개념값이며 조사 결과가 아닙니다.</span>
+  </footer>
+</section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(()=>{
+'use strict';
+const NS='http://www.w3.org/2000/svg';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+function S(tag,a,p){const e=document.createElementNS(NS,tag);if(a)for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;}
+function H(tag,cls,p,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;if(p)p.appendChild(e);return e;}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const ease=t=>t*t*(3-2*t);
+const seg01=(s,a,b)=>clamp((s-a)/(b-a),0,1);
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* animation loop */
+const sims=new Set();
+function sim(root,tick){const o={tick,on:true};sims.add(o);if('IntersectionObserver' in window){new IntersectionObserver(es=>es.forEach(e=>o.on=e.isIntersecting)).observe(root);}return o;}
+let last=performance.now();
+function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;sims.forEach(o=>{if(o.on){try{o.tick(dt)}catch(err){console.error(err);sims.delete(o)}}});requestAnimationFrame(frame);}
+requestAnimationFrame(frame);
+
+/* control helpers */
+function seg(parent,opts,val,on,label){
+  const w=H('div','seg',parent);w.setAttribute('role','group');if(label)w.setAttribute('aria-label',label);
+  opts.forEach(o=>{const b=H('button','',w,o.l);b.type='button';b.setAttribute('aria-pressed',String(o.v===val));
+    b.addEventListener('click',()=>{$$('button',w).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));on(o.v);});});
+  return w;
+}
+let slId=0;
+function slider(parent,{label,min,max,step=1,value,fmt=v=>v},on){
+  const id='sl'+(++slId);const w=H('label','sl',parent);w.htmlFor=id;
+  w.innerHTML=`<span class="sl-l">${label}</span><input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${value}"><output>${fmt(value)}</output>`;
+  const i=$('input',w),o=$('output',w);
+  i.addEventListener('input',()=>{o.textContent=fmt(+i.value);on(+i.value);});
+  on(value);
+  return {i,set(v){i.value=v;o.textContent=fmt(v);on(v);}};
+}
+function btn(parent,text,on,cls){const b=H('button','btn'+(cls?' '+cls:''),parent,text);b.type='button';b.addEventListener('click',on);return b;}
+function meter(parent,label){
+  const w=H('div','meter',parent);w.innerHTML=`<div class="meter-top"><span>${label}</span><b></b></div><div class="meter-bar"><i></i></div>`;
+  const b=$('b',w),i=$('i',w);let lt='';
+  return (pct,state,txt)=>{i.style.width=clamp(pct,0,100)+'%';i.className=state||'';const t=txt??Math.round(pct)+'%';if(t!==lt){b.textContent=t;lt=t;}};
+}
+function setHTML(el){let k=null;return (h,cls)=>{const n=h+'|'+(cls||'');if(n!==k){k=n;el.innerHTML=h;if(cls!==undefined)el.className=cls;}};}
+function txt(parent,x,y,s,cls,anchor){const t=S('text',{x,y,class:cls||'m-lab'},parent);if(anchor)t.setAttribute('text-anchor',anchor);t.textContent=s;return t;}
+
+
+/* scroll spy */
+(function(){const links=$$('.nav a');const secs=links.map(a=>$(a.getAttribute('href')));
+  if(!('IntersectionObserver' in window))return;
+  const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){const i=secs.indexOf(e.target);links.forEach((l,j)=>l.classList.toggle('on',j===i));}});},{rootMargin:'-45% 0px -50% 0px'});
+  secs.forEach(s=>io.observe(s));})();
+
+/* =====================================================
+   02 · 3D RECONSTRUCTION
+   ===================================================== */
+const STAGES=[
+ {a:0,b:.12,time:'10:30경',clock:'10:30경',title:'유람선, 부두에 도착',text:'American Heritage가 미시시피주 나체즈에서 내려와 뉴올리언스 부두에 배를 댔습니다. 약 2시간 동안 묶여 있었고 승객들이 내리기 시작했습니다.',key:'유람선은 움직이지 않고 있었습니다. 피할 방법이 없었다는 뜻입니다.'},
+ {a:.12,b:.40,time:'12:30 직전',clock:'12:29',title:'유조선이 통제를 잃다',text:'강을 지나던 Atlantic Asphalt가 통제를 잃고 부두 쪽으로 향했습니다. 해안경비대는 "일종의 조타 상실"로 보인다고 했고, 조종은 현지 강 도선사가 맡고 있었습니다.',key:'왜 조타를 잃었는지는 아직 발표되지 않았습니다. 화면 속 항로는 임의로 그린 것입니다.'},
+ {a:.40,b:.46,time:'12:30경',clock:'12:30',title:'옆구리를 들이받다',text:'유조선 뱃머리가 유람선의 강 쪽 옆면(좌현)을 세게 받았습니다. 유람선 회사는 "T자 모양으로 받혔다"고 표현했습니다. 한 승객은 한 번 더 부딪혔다고 말했습니다.',key:'길이가 두 배인 배가 옆면을 받으면 충격이 선체 한 곳에 집중됩니다.'},
+ {a:.46,b:.72,time:'충돌 후 ~30분',clock:'12:30~13:00',title:'물이 차고, 대피가 시작되다',text:'유람선이 물을 먹기 시작했습니다. 항만경찰이 80명 넘는 사람을 부두로 내리게 했습니다. 승무원은 식당 쪽 선체에 구멍이 난 것을 봤다고 했습니다.',key:'이 시간 덕분에 절반 가까이가 물에 빠지지 않고 걸어 나왔습니다.'},
+ {a:.72,b:.80,time:'충돌 후 30~45분',clock:'13:00~13:15경',title:'유람선이 옆으로 넘어가다',text:'배가 급격히 기울다 옆으로 넘어갔습니다. 미처 내리지 못한 약 100명이 강물에 빠졌습니다. 영상에는 구명조끼를 입은 사람들이 보입니다.',key:'넘어간 방향과 정확한 시각은 조사 중입니다. 30~45분은 항만경찰청장의 추정입니다.'},
+ {a:.80,b:1.001,time:'이후',clock:'오후',title:'"미시시피의 기적"',text:'항만경찰과 소방, 해안경비대, 지나던 배들이 사람들을 건져 올렸습니다. 약 4시간 뒤 시장은 실종자가 없다고 발표했습니다. 선장은 다친 채 마지막까지 남았습니다.',key:'191명 전원 생존. 32명이 병원으로 옮겨졌습니다.'}
+];
+(function(){
+  const host=$('#stage3d'),canvas=$('#cv3d');
+  const chips=$('#chips3d');
+  STAGES.forEach((st,i)=>{const b=H('button','',chips,`${i+1} · ${st.title}`);b.type='button';b.setAttribute('aria-pressed','false');b.addEventListener('click',()=>{playing=false;setS([0,.3,.44,.62,.795,.93][i]);syncUI();});});
+  const stNo=$('#stNo'),stTime=$('#stTime'),stTitle=$('#stTitle'),stText=$('#stText'),stKey=$('#stKey'),clock=$('#clock3d');
+  const mWater=meter($('#stMeter'),'강에 빠진 사람 중 구조된 비율');
+  let s=0,playing=false,curStage=-1;
+  const scrub=$('#scrub3d'),playB=$('#play3d');
+  function syncUI(){scrub.value=Math.round(s*1000);playB.textContent=playing?'❚❚ 멈춤':(s>=.999?'↺ 처음부터':'▶ 재생');}
+  function stageOf(v){for(let i=0;i<STAGES.length;i++)if(v<STAGES[i].b)return i;return STAGES.length-1;}
+  function panel(){const i=stageOf(s);if(i!==curStage){curStage=i;const st=STAGES[i];stNo.textContent=String(i+1).padStart(2,'0');stTime.textContent=st.time;stTitle.textContent=st.title;stText.textContent=st.text;stKey.textContent=st.key;clock.textContent=st.clock;
+      $$('button',chips).forEach((b,j)=>b.setAttribute('aria-pressed',String(j===i)));}
+    const r=seg01(s,.82,.96);mWater(s<.775?0:r*100,r>=1?'ok':'warn',s<.775?'아직 전복 전':'약 '+Math.round(r*100)+'명 / 100명');}
+  playB.addEventListener('click',()=>{if(s>=.999)setS(0);playing=!playing;syncUI();});
+  scrub.addEventListener('input',()=>{playing=false;setS(+scrub.value/1000);syncUI();});
+
+  let apply3d=()=>{};
+  function setS(v){s=clamp(v,0,1);panel();apply3d(s);}
+
+  /* ----- three.js scene ----- */
+  let ok=typeof THREE!=='undefined';
+  let renderer,scene,camera;
+  if(ok){try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});}catch(e){ok=false;}}
+  if(!ok){canvas.remove();H('div','fallback3d',host,'이 기기에서는 3D 화면을 불러올 수 없습니다. 아래 단계 버튼과 오른쪽 설명으로 사고 순서를 볼 수 있습니다.');
+    setS(0);syncUI();sim($('#bench3d'),dt=>{if(playing){setS(s+dt/26);if(s>=1)playing=false;syncUI();}});return;}
+
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  scene=new THREE.Scene();
+  camera=new THREE.PerspectiveCamera(36,16/10,2,6000);
+  const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const mats=[];
+  function M(v,opt){const m=new THREE.MeshLambertMaterial(Object.assign({color:new THREE.Color(css(v))},opt||{}));mats.push([m,v]);return m;}
+  function recolor(){mats.forEach(([m,v])=>m.color.set(css(v)));}
+  if(window.matchMedia){const mq=matchMedia('(prefers-color-scheme: dark)');const f=()=>setTimeout(recolor,30);if(mq.addEventListener)mq.addEventListener('change',f);}
+  const mWaterM=M('--water3d'),mLand=M('--land3d'),mSteel=M('--steel-2'),mHull=M('--hull'),mRed=M('--antifoul'),mWhite=M('--boat3d'),mWin=M('--line-2'),mAcc=M('--accent'),mOil=M('--oil'),mInk=M('--ink'),mOk=M('--ok'),mWarn=M('--warn'),mDeck=M('--steel');
+  scene.add(new THREE.HemisphereLight(0xffffff,0x8899aa,.85));
+  const sun=new THREE.DirectionalLight(0xffffff,.65);sun.position.set(-300,500,400);scene.add(sun);
+
+  function box(w,h,d,m,x,y,z,p){const g=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);g.position.set(x,y,z);(p||scene).add(g);return g;}
+  function hullShape(L,B,bow){const sh=new THREE.Shape();const l=L/2,b=B/2;sh.moveTo(-l,-b*.85);sh.lineTo(-l+L*.04,-b);sh.lineTo(l-bow,-b);sh.lineTo(l,0);sh.lineTo(l-bow,b);sh.lineTo(-l+L*.04,b);sh.lineTo(-l,b*.85);sh.closePath();return sh;}
+  function hull(L,B,bow,y0,h,m,p){const g=new THREE.ExtrudeGeometry(hullShape(L,B,bow),{depth:h,bevelEnabled:false});g.rotateX(-Math.PI/2);const me=new THREE.Mesh(g,m);me.position.y=y0;p.add(me);return me;}
+
+  /* environment: x = along the wharf, z>0 = river, z<0 = land */
+  const water=new THREE.Mesh(new THREE.PlaneGeometry(3600,1500),mWaterM);water.rotation.x=-Math.PI/2;water.position.set(0,0,560);scene.add(water);
+  box(3600,10,400,mLand,0,-1,-200);                 /* near bank */
+  box(560,5,64,mSteel,0,1.6,-32);                   /* wharf apron (top ≈ 4 m) */
+  box(230,10,36,mDeck,-90,9,-42);                   /* terminal shed */
+  box(120,8,30,mDeck,150,8,-44);
+  box(3600,6,300,mLand,0,-1,900);                   /* far bank */
+  /* bridge upriver (landmark only) */
+  const br=new THREE.Group();scene.add(br);br.position.x=-470;
+  box(22,4,1100,mHull,0,52,330,br);box(14,56,14,mSteel,0,24,170,br);box(14,56,14,mSteel,0,24,560,br);
+  box(6,34,6,mHull,0,70,170,br);box(6,34,6,mHull,0,70,560,br);
+
+  /* riverboat (origin: centre, waterline) */
+  const boat=new THREE.Group();scene.add(boat);
+  const BZ=10.5;
+  hull(81,16,10,-1.6,3.4,mWhite,boat);
+  [[72,0],[70,-1],[64,-3],[40,-8]].forEach(([len,off],i)=>{const y=1.8+i*3.1;
+    box(len,2.2,15-i*.8,mWhite,off,y+1.1,0,boat);box(len-1,.9,15.2-i*.8,mWin,off,y+1.5,0,boat);box(len+2,.35,16-i*.8,mWhite,off,y+2.55,0,boat);});
+  box(14,2.4,8,mWhite,6,15.6,0,boat);
+  box(1.4,9,1.4,mInk,22,19,3,boat);box(1.4,9,1.4,mInk,22,19,-3,boat);
+  const wheel=new THREE.Mesh(new THREE.CylinderGeometry(5,5,12,14),mAcc);wheel.rotation.x=Math.PI/2;wheel.position.set(-45,1.5,0);boat.add(wheel);
+  const gang=box(3,.4,10,mSteel,8,3.6,-9.5,boat);gang.rotation.x=.12;
+  boat.position.set(0,0,BZ);
+
+  /* tanker (origin: centre, waterline) */
+  const tk=new THREE.Group();scene.add(tk);
+  hull(160,26,26,-6,5.2,mRed,tk);hull(160,26,26,-.8,6.4,mHull,tk);
+  hull(154,23,24,5.5,.3,mDeck,tk);
+  box(20,15,22,mWhite,-60,13.3,0,tk);box(8,3,30,mWhite,-56,22.3,0,tk);
+  box(8,9,8,mHull,-70,25,0,tk);
+  box(96,1.2,1.6,mOil,2,6.6,0,tk);box(96,.9,1,mOil,2,6.5,4,tk);box(3,1.4,20,mOil,0,6.8,0,tk);
+  box(1,12,1,mHull,62,12,0,tk);
+  for(let i=0;i<5;i++)box(1.6,2.4,1.6,mSteel,-34+i*18,7,-6,tk);
+
+  /* people + rescue boats */
+  const evac=[];for(let i=0;i<10;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(1.5,8,6),mOk);scene.add(m);evac.push(m);}
+  const NW=25,wet=[];
+  for(let i=0;i<NW;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(1.7,8,6),mAcc);const a=(i*2.399)%6.283,r=10+((i*37)%29);
+    m.userData={x:Math.cos(a)*r*1.6+((i%5)-2)*6,z:BZ+16+Math.abs(Math.sin(a))*r,ph:i*.7,t:.82+.14*((i*7)%NW)/NW};scene.add(m);wet.push(m);}
+  const rbs=[[330,150,34,38],[-300,190,-30,52],[240,60,2,60],[-200,90,-52,36]].map(([x0,z0,x1,z1])=>{const g=new THREE.Group();box(11,2.2,4,mWarn,0,.9,0,g);box(4,2,3,mWhite,-1.5,2.8,0,g);scene.add(g);g.userData={x0,z0,x1,z1};return g;});
+
+  /* labels */
+  const labs=[
+    {el:H('div','lab3d',host,'유조선 Atlantic Asphalt<small>160 m</small>'),obj:tk,off:new THREE.Vector3(0,34,0)},
+    {el:H('div','lab3d',host,'유람선 American Heritage<small>81 m · 부두에 정박</small>'),obj:boat,off:new THREE.Vector3(0,30,0)},
+    {el:H('div','lab3d',host,'부두 (Thalia Street 터미널)'),pos:new THREE.Vector3(-150,18,-42)},
+    {el:H('div','lab3d',host,'다리 (위치 표시용)'),pos:new THREE.Vector3(-470,96,300)}
+  ];
+
+  /* tanker path: straight run, then a curve toward the wharf (illustrative) */
+  const P0=[-560,190],P1=[-300,190],C=[-120,190],P2=[-45,83];
+  function tkPose(v){
+    if(v<.12){return{x:lerp(P0[0],P1[0],v/.12*.55),z:190,r:0};}
+    if(v<.40){const u=seg01(v,.12,.40);const xs=lerp(P0[0],P1[0],.55);
+      if(u<.3){return{x:lerp(xs,P1[0],u/.3),z:190,r:0};}
+      const t=(u-.3)/.7;const x=(1-t)*(1-t)*P1[0]+2*(1-t)*t*C[0]+t*t*P2[0],z=(1-t)*(1-t)*P1[1]+2*(1-t)*t*C[1]+t*t*P2[1];
+      const dx=2*(1-t)*(C[0]-P1[0])+2*t*(P2[0]-C[0]),dz=2*(1-t)*(C[1]-P1[1])+2*t*(P2[1]-C[1]);
+      return{x,z,r:Math.atan2(-dz,dx)};}
+    const r=Math.atan2(-(P2[1]-C[1]),P2[0]-C[0]);const cx=Math.cos(r),cz=-Math.sin(r);
+    const push=ease(seg01(v,.40,.45))*5,back=ease(seg01(v,.60,.95))*150;
+    return{x:P2[0]+cx*(push-back),z:P2[1]+cz*(push-back),r};
+  }
+  apply3d=v=>{
+    const p=tkPose(v);tk.position.set(p.x,0,p.z);tk.rotation.y=p.r;
+    const jolt=Math.sin(seg01(v,.40,.46)*Math.PI),list=ease(seg01(v,.46,.72)),cap=ease(seg01(v,.72,.80));
+    boat.rotation.x=-jolt*.08+list*.3+cap*1.15;
+    boat.position.set(0,-list*1.6-cap*3.2,BZ-jolt*1.5+cap*5);
+    gang.visible=v<.7;
+    evac.forEach((m,i)=>{const on=v>.445&&v<.71;m.visible=on;if(on){const u=((v-.445)*26+i/evac.length)%1;m.position.set(8+Math.sin(i)*1.2,lerp(4.6,5.8,u),lerp(BZ-7,-26,u));}});
+    wet.forEach(m=>{const d=m.userData;const on=v>=.775&&v<d.t;m.visible=on;if(on)m.position.set(d.x,.4+Math.sin(v*90+d.ph)*.5,d.z);});
+    rbs.forEach((g,i)=>{const d=g.userData;const u=ease(seg01(v,.74+i*.012,.84+i*.012));g.visible=v>.72;const w=v>.84?Math.sin(v*40+i*2)*10:0;g.position.set(lerp(d.x0,d.x1,u)+w,0,lerp(d.z0,d.z1,u)+w*.4);g.rotation.y=Math.atan2(-(d.z1-d.z0),d.x1-d.x0);});
+  };
+
+  /* camera */
+  const VIEWS={wide:{az:.62,el:.42,dist:560,t:[-40,0,70]},top:{az:.001,el:1.5,dist:640,t:[-60,0,90]},dock:{az:2.75,el:.2,dist:300,t:[0,6,40]}};
+  const cam={az:.62,el:.42,dist:560,t:new THREE.Vector3(-40,0,70)};let goal=null,follow=false;
+  function setView(k){follow=k==='follow';if(!follow){const v=VIEWS[k];goal={az:v.az,el:v.el,dist:v.dist,t:new THREE.Vector3(...v.t)};}}
+  $$('#view3d button').forEach(b=>b.addEventListener('click',()=>{$$('#view3d button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));setView(b.dataset.v);}));
+  $('#zin').addEventListener('click',()=>{goal=null;cam.dist=clamp(cam.dist*.8,120,1100);});
+  $('#zout').addEventListener('click',()=>{goal=null;cam.dist=clamp(cam.dist*1.25,120,1100);});
+  let drag=null;
+  host.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,touch:e.pointerType==='touch'};goal=null;if(follow){follow=false;$$('#view3d button').forEach(x=>x.setAttribute('aria-pressed','false'));}});
+  window.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag.x=e.clientX;drag.y=e.clientY;cam.az-=dx*.006;if(!drag.touch)cam.el=clamp(cam.el+dy*.005,.08,1.5);});
+  window.addEventListener('pointerup',()=>drag=null);window.addEventListener('pointercancel',()=>drag=null);
+
+  function resize(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+  if('ResizeObserver' in window)new ResizeObserver(resize).observe(host);else window.addEventListener('resize',resize);
+  resize();
+  const tmp=new THREE.Vector3();
+  setS(0);syncUI();
+  sim($('#bench3d'),dt=>{
+    if(playing){const slow=(s>.38&&s<.48)||(s>.7&&s<.82)?.55:1;setS(s+dt/26*slow);if(s>=1){playing=false;}syncUI();}
+    if(follow){const r=tk.rotation.y;const bx=Math.cos(r),bz=-Math.sin(r);camera.position.set(tk.position.x-bx*190,62,tk.position.z-bz*190);camera.lookAt(tk.position.x+bx*120,6,tk.position.z+bz*120);}
+    else{if(goal){const k=Math.min(1,dt*3.5);let da=goal.az-cam.az;da=Math.atan2(Math.sin(da),Math.cos(da));cam.az+=da*k;cam.el=lerp(cam.el,goal.el,k);cam.dist=lerp(cam.dist,goal.dist,k);cam.t.lerp(goal.t,k);}
+      const ce=Math.cos(cam.el);camera.position.set(cam.t.x+cam.dist*ce*Math.sin(cam.az),cam.t.y+cam.dist*Math.sin(cam.el),cam.t.z+cam.dist*ce*Math.cos(cam.az));camera.lookAt(cam.t);}
+    renderer.render(scene,camera);
+    const w=host.clientWidth,h=host.clientHeight;
+    labs.forEach(l=>{if(l.obj){tmp.copy(l.obj.position).add(l.off);}else tmp.copy(l.pos);tmp.project(camera);
+      const vis=tmp.z<1&&tmp.x>-1.1&&tmp.x<1.1&&tmp.y>-1.1&&tmp.y<1.1;l.el.style.display=vis?'':'none';
+      if(vis){l.el.style.left=((tmp.x*.5+.5)*w).toFixed(1)+'px';l.el.style.top=((-tmp.y*.5+.5)*h).toFixed(1)+'px';}});
+  });
+})();
+
+/* =====================================================
+   03 · CAPSIZE MODEL
+   ===================================================== */
+(function(){
+  const svg=$('#capSvg');
+  S('rect',{width:660,height:320,class:'m-grid'},svg);
+  S('rect',{x:0,y:210,width:660,height:110,class:'m-water'},svg);
+  S('rect',{x:0,y:150,width:120,height:170,class:'m-bank'},svg);txt(svg,60,142,'부두','m-labk','middle');
+  const g=S('g',{},svg);
+  const clip=S('clipPath',{id:'capClip'},svg);const clipR=S('rect',{},clip);
+  const hullR=S('rect',{class:'m-hull'},g);
+  const floodG=S('g',{'clip-path':'url(#capClip)'},g);const flood=S('polygon',{class:'m-sea'},floodG);
+  const house=S('rect',{class:'m-house'},g);const decks=S('g',{},g);
+  const hole=S('path',{style:'stroke:var(--bad);stroke-width:3;fill:none'},g);
+  const cg=S('g',{},g);S('circle',{r:6,fill:'var(--accent)'},cg);const cgT=txt(cg,12,4,'무게중심','m-labk');
+  S('path',{d:'M0,210H660',class:'m-wl'},svg);txt(svg,652,204,'수면','m-lab','end');
+  txt(svg,560,150,'강 쪽 →','m-lab','middle');
+  const angT=txt(svg,330,40,'','m-labk','middle');
+  let tall=true,f=0,th=0,gone=false;
+  let dim;
+  function build(){dim=tall?{hw:74,top:196,bot:226,hTop:96,hw2:64}:{hw:104,top:176,bot:240,hTop:150,hw2:36};
+    hullR.setAttribute('x',330-dim.hw);hullR.setAttribute('y',dim.top);hullR.setAttribute('width',dim.hw*2);hullR.setAttribute('height',dim.bot-dim.top);
+    clipR.setAttribute('x',330-dim.hw+2);clipR.setAttribute('y',dim.top+2);clipR.setAttribute('width',dim.hw*2-4);clipR.setAttribute('height',dim.bot-dim.top-4);
+    const hx=tall?330-dim.hw2:330-dim.hw+14;house.setAttribute('x',hx);house.setAttribute('y',dim.hTop);house.setAttribute('width',dim.hw2*2);house.setAttribute('height',dim.top-dim.hTop);
+    decks.innerHTML='';if(tall)for(let y=dim.hTop+25;y<dim.top-4;y+=25)S('path',{d:`M${hx},${y}H${hx+dim.hw2*2}`,style:'stroke:var(--line-2);stroke-width:1'},decks);
+    hole.setAttribute('d',`M${330+dim.hw},${dim.top+6} l-5,5 l5,5 l-5,5`);
+    cg.setAttribute('transform',`translate(330,${tall?158:204})`);cgT.textContent=tall?'무게중심 (높음)':'무게중심 (낮음)';
+    gone=false;}
+  seg($('#capType'),[{v:1,l:'키 큰 강 유람선'},{v:0,l:'낮고 넓은 화물선'}],1,v=>{tall=!!v;build();},'배 모양');
+  const ctl=$('#capCtl');const m=meter(ctl,'기울기');
+  const sl=slider(ctl,{label:'들어온 물',min:0,max:100,value:0,fmt:v=>v+'%'},v=>{f=v/100;if(f<.7)gone=false;});
+  btn(ctl,'물 빼고 처음부터',()=>{sl.set(0);gone=false;});
+  const status=setHTML($('#capStatus'));
+  build();
+  sim($('#capBench'),dt=>{
+    if(tall&&f>.7)gone=true;
+    const target=gone?86:(tall?58:20)*Math.pow(f,1.5);
+    th=lerp(th,target,Math.min(1,dt*(gone?1.6:5)));
+    const sink=f*(tall?10:8)+(gone?14:0)*clamp((th-40)/46,0,1);
+    g.setAttribute('transform',`translate(0,${sink.toFixed(1)}) rotate(${th.toFixed(2)} 330 ${dim.bot-6})`);
+    const hgt=(dim.bot-dim.top)*f, x0=330-dim.hw,x1=330+dim.hw, sl2=Math.tan(th*Math.PI/180)*.9;
+    const yl=dim.bot-hgt*.5+sl2*dim.hw*.5, yr=dim.bot-hgt*1.5-sl2*dim.hw*.5;
+    flood.setAttribute('points',`${x0},${dim.bot} ${x0},${Math.min(dim.bot,yl).toFixed(1)} ${x1},${Math.min(dim.bot,yr).toFixed(1)} ${x1},${dim.bot}`);
+    angT.textContent='기울기 약 '+Math.round(th)+'°';
+    m(th/90*100,th>45?'bad':th>15?'warn':'ok',Math.round(th)+'°');
+    if(gone&&th>70)status('전복 — 옆으로 완전히 넘어감<small>무게중심이 받침점 바깥으로 나가면 배는 스스로 일어서지 못합니다.</small>','status bad');
+    else if(th>15)status('위험 — 기운 쪽으로 물과 사람·물건이 더 쏠림<small>기울수록 더 기우는 악순환이 시작됩니다.</small>','status warn');
+    else if(f>0)status('침수 시작 — 구멍 난 쪽이 무거워지며 기울기 시작<small>'+(tall?'얕고 높은 배는 기울기가 빠르게 커집니다.':'넓고 낮은 배는 같은 물에도 덜 기웁니다.')+'</small>','status');
+    else status('정상 — 배가 똑바로 떠 있음<small>슬라이더로 물을 넣어 보세요.</small>','status ok');
+  });
+})();
+
+/* =====================================================
+   04 · STEERING FAILURE MODEL
+   ===================================================== */
+(function(){
+  const svg=$('#strSvg');const K=.5; /* px per metre */
+  S('rect',{width:660,height:300,class:'m-water'},svg);S('rect',{width:660,height:300,class:'m-grid'},svg);
+  S('rect',{x:0,y:0,width:660,height:22,class:'m-bank'},svg);S('rect',{x:0,y:250,width:660,height:50,class:'m-bank'},svg);
+  txt(svg,10,15,'건너편 강둑','m-lab');txt(svg,10,270,'부두 쪽','m-lab');
+  S('rect',{x:392,y:240,width:40.5,height:9,rx:2,class:'m-house'},svg);txt(svg,412,266,'정박한 유람선 81 m','m-lab','middle');
+  S('path',{d:'M560,285H660',stroke:'var(--ink)','stroke-width':1.2},svg);S('path',{d:'M560,281V289M660,281V289',stroke:'var(--ink)','stroke-width':1.2},svg);txt(svg,610,279,'200 m','m-lab','middle');
+  const trail=S('polyline',{fill:'none',stroke:'var(--accent)','stroke-width':1.5,'stroke-dasharray':'3 4'},svg);
+  const ship=S('g',{},svg);
+  S('path',{d:'M-40,-6.5 H27 L40,0 L27,6.5 H-40 Z',class:'m-hull'},ship);S('rect',{x:-36,y:-5,width:9,height:10,class:'m-house'},ship);
+  const rud=S('line',{x1:-40,y1:0,x2:-52,y2:0,stroke:'var(--accent)','stroke-width':3,'stroke-linecap':'round'},ship);
+  const flash=S('circle',{r:0,fill:'var(--bad)',opacity:.5},svg);
+  const ctl=$('#strCtl');
+  let kn=8,delta=20,st;
+  function reset(){st={x:50,y:105,hd:0,v:kn*.5144,fail:false,astern:false,anchor:false,done:null,pts:[]};flash.setAttribute('r',0);bF.disabled=false;bA.disabled=false;bN.disabled=false;}
+  slider(ctl,{label:'처음 속력',min:4,max:12,value:8,fmt:v=>v+' 노트'},v=>{kn=v;});
+  slider(ctl,{label:'타가 굳은 각도',min:5,max:35,value:20,fmt:v=>v+'°'},v=>{delta=v;});
+  const row=H('div','mini-row',ctl);
+  const bF=btn(row,'조타 고장 발생',()=>{st.fail=true;bF.disabled=true;},'hot');
+  const bA=btn(row,'전속 후진',()=>{st.astern=true;bA.disabled=true;});
+  const bN=btn(row,'닻 투하',()=>{st.anchor=true;bN.disabled=true;});
+  btn(row,'다시',()=>reset());
+  const mV=meter(ctl,'속력');const mD=meter(ctl,'뱃머리에서 부두까지');
+  const status=setHTML($('#strStatus'));
+  reset();
+  sim($('#strBench'),rdt=>{const T=rdt*(RM?6:11);
+    if(!st.done){
+      if(st.fail)st.hd+=st.v/(160*1.5/Math.sin(delta*Math.PI/180))*T;
+      const a=.003+(st.astern?.03:0)+(st.anchor?.025:0);st.v=Math.max(0,st.v-a*T);
+      st.x+=Math.cos(st.hd)*st.v*T*K;st.y+=Math.sin(st.hd)*st.v*T*K;
+      const bx=st.x+40*Math.cos(st.hd),by=st.y+40*Math.sin(st.hd);
+      if(st.pts.length<400)st.pts.push(st.x.toFixed(1)+','+st.y.toFixed(1));
+      const hitBoat=bx>388&&bx<436&&by>=240;
+      if(hitBoat||by>=250){st.done=hitBoat?'boat':'bank';st.hitV=st.v;flash.setAttribute('cx',bx);flash.setAttribute('cy',Math.min(by,250));flash.setAttribute('r',16);}
+      else if(st.v<=0)st.done='stop';
+      else if(st.x>720){reset();}
+    }
+    ship.setAttribute('transform',`translate(${st.x.toFixed(1)},${st.y.toFixed(1)}) rotate(${(st.hd*57.3).toFixed(1)})`);
+    const ra=st.fail?delta*Math.PI/180:0;rud.setAttribute('x2',(-40-12*Math.cos(ra)).toFixed(1));rud.setAttribute('y2',(-12*Math.sin(ra)).toFixed(1));
+    trail.setAttribute('points',st.pts.join(' '));
+    const by=st.y+40*Math.sin(st.hd);const dist=Math.max(0,(250-by)/K);
+    mV(st.v/(12*.5144)*100,'',(st.v/.5144).toFixed(1)+' 노트');mD(dist/320*100,dist<80?'bad':dist<160?'warn':'ok',Math.round(dist)+' m');
+    if(st.done==='boat')status(`정박한 배와 충돌 · 충돌 속력 ${(st.hitV/.5144).toFixed(1)} 노트<small>묶여 있는 배는 피할 수 없습니다. '다시'를 눌러 더 빨리 대응해 보세요.</small>`,'status bad');
+    else if(st.done==='bank')status(`부두와 충돌 · 충돌 속력 ${(st.hitV/.5144).toFixed(1)} 노트<small>후진과 닻을 써도 멈추기 전에 닿았습니다.</small>`,'status bad');
+    else if(st.done==='stop')status(`정지 — 부두까지 ${Math.round(dist)} m 남기고 멈춤<small>빠른 대응과 낮은 속력이 만든 차이입니다.</small>`,'status ok');
+    else if(st.fail)status('조타 고장 — 타가 굳어 배가 부두 쪽으로 계속 도는 중'+`<small>${st.astern||st.anchor?'감속 중이지만 큰 배는 천천히 멈춥니다.':'후진이나 닻으로 속력을 줄여 보세요.'}</small>`,'status warn');
+    else status('정상 항해 — 강 가운데를 따라 직진<small>\'조타 고장 발생\'을 눌러 보세요.</small>','status');
+  });
+})();
+
+})();
+</script>
+</body></html>
