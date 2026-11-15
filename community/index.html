@@ -51,6 +51,7 @@
   --ring: inset 0 0 0 1px rgba(15, 23, 42, .06);
   --lift: 0 1px 2px rgba(16, 24, 40, .06), 0 14px 28px -10px rgba(16, 24, 40, .22);
   --c-app-bg: #EAF2FE; --c-app-fg: #1F56C7; --c-app-ring: rgba(31, 86, 199, .10);
+  --up: #D92D20; --up-tint: rgba(217, 45, 32, .10); --down: #1F5FD1; --down-tint: rgba(31, 95, 209, .10);
   --c-wiki-bg: #F1EEFE; --c-wiki-fg: #5536C9; --c-wiki-ring: rgba(85, 54, 201, .10);
   --c-tool-bg: #FEF1E8; --c-tool-fg: #B4400B; --c-tool-ring: rgba(180, 64, 11, .10);
   --c-lab-bg: #EAF7EF; --c-lab-fg: #137A3D; --c-lab-ring: rgba(19, 122, 61, .10);
@@ -201,6 +202,67 @@ main.wrap { padding-top: 44px; padding-bottom: 88px; display: flex; flex-directi
 .hsec-head h2 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -.022em; }
 .hsec-head .chips { flex: 1 1 auto; }
 .hsec-head .link-more { margin-left: auto; }
+/* ----- 미국 증시 ----- */
+.mk-head-r { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.mk-when { font-size: 12.5px; color: var(--faint); font-variant-numeric: tabular-nums; }
+.mk-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(178px, 1fr)); gap: 10px; }
+.mk-card { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 14px 14px 10px; border: 0; border-radius: 14px; background: var(--surface); color: var(--ink); text-align: left; font: inherit; cursor: pointer; box-shadow: var(--ring), var(--sh-1); transition: box-shadow 150ms ease-out, transform 120ms ease-out; }
+.mk-card:hover { box-shadow: inset 0 0 0 1px var(--line), var(--sh-1); }
+.mk-card:active { transform: scale(.98); }
+.mk-card[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--ink); }
+.mk-nm { font-size: 13.5px; font-weight: 600; color: var(--mid); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mk-sym { font-size: 11.5px; font-weight: 500; color: var(--faint); margin-left: 4px; }
+.mk-px { font-size: 20px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.mk-ch { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.mk-up { color: var(--up); } .mk-down { color: var(--down); } .mk-flat { color: var(--sub); }
+.mk-spark { display: block; width: 100%; height: 38px; margin-top: 6px; }
+.mk-card.is-err { cursor: default; }
+.mk-card.is-skel .mk-px, .mk-card.is-skel .mk-ch { color: transparent; background: var(--soft); border-radius: 6px; width: 60%; }
+.mk-detail { position: relative; padding: 20px 22px 16px; border-radius: 16px; background: var(--surface); box-shadow: var(--ring), var(--sh-1); }
+.mk-d-top { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px 16px; }
+.mk-d-nm { margin: 0; font-size: 15px; font-weight: 600; color: var(--mid); width: 100%; }
+.mk-d-px { font-size: 30px; font-weight: 750; letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.mk-d-ch { font-size: 15px; font-weight: 650; font-variant-numeric: tabular-nums; padding-bottom: 3px; }
+.mk-d-close { position: absolute; top: 12px; right: 12px; }
+.mk-d-nm { padding-right: 36px; }
+.mk-ranges { display: flex; gap: 4px; margin: 14px 0 6px; overflow-x: auto; scrollbar-width: none; }
+.mk-ranges button { flex: none; height: 30px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: var(--sub); font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+.mk-ranges button[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
+.mk-chart { position: relative; height: 240px; touch-action: pan-y; }
+.mk-chart svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.mk-chart .mk-state { position: absolute; inset: 0; display: grid; place-items: center; color: var(--sub); font-size: 14px; }
+.mk-cross { position: absolute; top: 0; bottom: 18px; width: 1px; background: var(--line); pointer-events: none; }
+.mk-tip { position: absolute; top: -6px; left: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; padding: 4px 8px; border-radius: 8px; background: var(--ink); color: var(--on-ink); font-size: 12px; font-weight: 600; white-space: nowrap; pointer-events: none; font-variant-numeric: tabular-nums; }
+.mk-axis { display: flex; justify-content: space-between; margin-top: 2px; font-size: 11.5px; color: var(--faint); font-variant-numeric: tabular-nums; }
+.mk-d-foot { margin: 10px 0 0; font-size: 12.5px; color: var(--faint); }
+.mk-editor { padding: 18px 20px; border-radius: 16px; background: var(--soft2); box-shadow: var(--ring); display: flex; flex-direction: column; gap: 14px; }
+.mk-editor h3 { margin: 0; font-size: 15px; font-weight: 700; }
+.mk-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.mk-li { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 14px; border-radius: 10px; background: var(--surface); box-shadow: var(--ring); }
+.mk-li .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14.5px; font-weight: 600; }
+.mk-li .t small { margin-left: 6px; font-weight: 500; color: var(--faint); }
+.mk-ib { flex: none; width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; color: var(--mid); font: inherit; font-size: 15px; cursor: pointer; }
+.mk-ib:hover { background: var(--field); }
+.mk-ib:disabled { opacity: .3; cursor: default; background: none; }
+.mk-find { display: flex; gap: 8px; }
+.mk-find .in { padding: 10px 14px; font-size: 15px; }
+.mk-hits { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.mk-hits button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; border: 0; border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; font-size: 14.5px; text-align: left; cursor: pointer; box-shadow: var(--ring); }
+.mk-hits button:hover { background: var(--hover2); }
+.mk-hits button:disabled { opacity: .5; cursor: default; }
+.mk-hits .s { font-weight: 700; min-width: 64px; }
+.mk-hits .n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--mid); }
+.mk-hits .x { flex: none; font-size: 12px; color: var(--faint); }
+.mk-msg { margin: 0; font-size: 13.5px; color: var(--sub); }
+.mk-src { margin: -8px 0 0; font-size: 12px; color: var(--faint); }
+@media (max-width: 640px) {
+  .mk-row { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin: 0 -20px; padding: 2px 20px 4px; }
+  .mk-row::-webkit-scrollbar { display: none; }
+  .mk-card { flex: 0 0 156px; scroll-snap-align: start; }
+  .mk-detail { padding: 16px 16px 12px; }
+  .mk-d-px { font-size: 26px; }
+  .mk-chart { height: 200px; }
+}
 .home-show { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
 
 /* ---------- 결과물 카드: 안쪽 1px 선 · 들어올릴 때 두 겹 그림자 ---------- */
@@ -417,6 +479,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   --ring: inset 0 0 0 1px rgba(255, 255, 255, .07);
   --lift: 0 1px 2px rgba(0, 0, 0, .4), 0 16px 32px -10px rgba(0, 0, 0, .65);
   --c-app-bg: #16223A; --c-app-fg: #9DBDFB; --c-app-ring: rgba(157, 189, 251, .14);
+  --up: #FF7A6E; --up-tint: rgba(255, 122, 110, .14); --down: #7FA8FF; --down-tint: rgba(127, 168, 255, .14);
   --c-wiki-bg: #211C3A; --c-wiki-fg: #C1B2FF; --c-wiki-ring: rgba(193, 178, 255, .14);
   --c-tool-bg: #2E1D12; --c-tool-fg: #FFB78C; --c-tool-ring: rgba(255, 183, 140, .14);
   --c-lab-bg: #13291D; --c-lab-fg: #8FDDB0; --c-lab-ring: rgba(143, 221, 176, .14);
@@ -445,6 +508,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     --ring: inset 0 0 0 1px rgba(255, 255, 255, .07);
     --lift: 0 1px 2px rgba(0, 0, 0, .4), 0 16px 32px -10px rgba(0, 0, 0, .65);
     --c-app-bg: #16223A; --c-app-fg: #9DBDFB; --c-app-ring: rgba(157, 189, 251, .14);
+    --up: #FF7A6E; --up-tint: rgba(255, 122, 110, .14); --down: #7FA8FF; --down-tint: rgba(127, 168, 255, .14);
     --c-wiki-bg: #211C3A; --c-wiki-fg: #C1B2FF; --c-wiki-ring: rgba(193, 178, 255, .14);
     --c-tool-bg: #2E1D12; --c-tool-fg: #FFB78C; --c-tool-ring: rgba(255, 183, 140, .14);
     --c-lab-bg: #13291D; --c-lab-fg: #8FDDB0; --c-lab-ring: rgba(143, 221, 176, .14);
@@ -570,6 +634,27 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
         <svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
       </a>
     </div>
+    <section class="hsec" aria-labelledby="t-hmk" data-mk>
+      <div class="hsec-head">
+        <h2 id="t-hmk">미국 증시</h2>
+        <div class="mk-head-r"><span class="mk-when" data-mk-when></span><button type="button" class="btn btn-line btn-sm" data-mk-edit aria-expanded="false">종목 편집</button></div>
+      </div>
+      <div class="mk-editor" data-mk-editor hidden>
+        <h3>내 종목 <small class="mk-msg" style="display:inline;font-weight:400" data-mk-count></small></h3>
+        <ul class="mk-list" data-mk-list></ul>
+        <form class="mk-find" data-mk-find role="search">
+          <label class="sr" for="mk-q">종목 찾기</label>
+          <input class="in" id="mk-q" type="search" placeholder="회사 이름이나 기호로 찾기 (예: 엔비디아 → nvidia, NVDA)" autocomplete="off" maxlength="40">
+          <button type="submit" class="btn btn-dark btn-sm" style="height:auto">찾기</button>
+        </form>
+        <ul class="mk-hits" data-mk-hits></ul>
+        <p class="mk-msg" data-mk-msg hidden></p>
+        <div><button type="button" class="btn btn-line btn-sm" data-mk-reset>기본(S&amp;P 500·나스닥·다우)으로 되돌리기</button></div>
+      </div>
+      <div class="mk-row" data-mk-row aria-live="polite"></div>
+      <div class="mk-detail" data-mk-detail hidden></div>
+      <p class="mk-src">Yahoo Finance 시세 · 몇 분 늦을 수 있어요 · 투자 판단은 직접 확인한 뒤에</p>
+    </section>
     <section class="hsec" aria-labelledby="t-hshow">
       <div class="hsec-head"><h2 id="t-hshow">새 결과물</h2><a class="link-more" href="#showcase">전체 보기</a></div>
       <div data-home-show aria-live="polite"></div>
@@ -1975,12 +2060,272 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   const q0 = (params.get('q') || '').slice(0, 60);
   if (q0) { history.replaceState(null, '', location.pathname + '#search'); $('#q-top').value = q0; }
 
+  /* ===== 미국 증시 (홈) ===== 함수: supabase/functions/market · 내 종목: 028 market_watch */
+  const MK_DEFAULT = ['^GSPC', '^IXIC', '^DJI'];
+  const MK_MAX = 12;
+  const MK_RANGES = [['1d', '1일'], ['5d', '5일'], ['1mo', '1달'], ['6mo', '6달'], ['1y', '1년'], ['5y', '5년']];
+  const MK_STATE = { open: '장중', pre: '장 시작 전', post: '시간외', closed: '장 마감' };
+  let mkSyms = MK_DEFAULT.slice(), mkQuotes = {}, mkErr = {}, mkSel = null, mkRange = '1d', mkHasTable = true, mkTimer = null, mkBusy = false, mkDown = false;
+  const mkNames = {};   // 찾기 결과에서 본 이름 (시세가 오기 전 편집 목록에 쓰려고)
+  const mkF = (n, d = 2) => n == null ? '–' : n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const mkPx = (q) => { if (!q || q.price == null) return '–'; const d = q.price >= 1000 ? 2 : q.price >= 1 ? 2 : 4; const v = mkF(q.price, d); return q.symbol.startsWith('^') ? v : q.currency === 'USD' ? `$${v}` : q.currency === 'KRW' ? `${v}원` : `${v} ${q.currency}`; };
+  const mkDir = (c) => c == null || Math.abs(c) < 1e-9 ? 'flat' : c > 0 ? 'up' : 'down';
+  const mkCh = (q) => q.change == null ? '' : `${q.change > 0 ? '▲' : q.change < 0 ? '▼' : ''} ${mkF(Math.abs(q.change))} (${q.pct > 0 ? '+' : ''}${mkF(q.pct)}%)`;
+  const kst = (t, o) => new Date(t * 1000).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', ...o });
+  async function mkCall(body) {
+    const { data, error } = await sb.functions.invoke('market', { body });
+    if (error) {
+      let msg = '';
+      try { if (error.context && error.context.json) msg = (await error.context.json()).error || ''; } catch (x) { /* 본문 없음 */ }
+      const st = error.context && error.context.status;
+      const e = new Error(msg || (st === 404 || error.name === 'FunctionsFetchError' || error.name === 'FunctionsRelayError' ? 'setup' : '시세를 받아오지 못했어요.'));
+      e.status = st; throw e;
+    }
+    return data;
+  }
+  function sparkSvg(points, prev, w = 150, h = 38) {
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${w} ${h}`); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('class', 'mk-spark'); svg.setAttribute('aria-hidden', 'true');
+    if (!points || points.length < 2) return svg;
+    const ys = points.map((p) => p[1]).concat(prev != null ? [prev] : []);
+    const lo = Math.min(...ys), hi = Math.max(...ys), span = hi - lo || 1;
+    const t0 = points[0][0], t1 = points[points.length - 1][0] || t0 + 1;
+    const X = (t) => ((t - t0) / (t1 - t0 || 1)) * w, Y = (v) => h - 2 - ((v - lo) / span) * (h - 4);
+    if (prev != null) { const b = document.createElementNS(NS, 'line'); b.setAttribute('x1', 0); b.setAttribute('x2', w); b.setAttribute('y1', Y(prev)); b.setAttribute('y2', Y(prev)); b.setAttribute('stroke', 'var(--line)'); b.setAttribute('stroke-dasharray', '3 3'); b.setAttribute('vector-effect', 'non-scaling-stroke'); svg.append(b); }
+    const path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', points.map((p, i) => `${i ? 'L' : 'M'}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join(''));
+    path.setAttribute('fill', 'none'); path.setAttribute('stroke', `var(--${mkDir(points[points.length - 1][1] - (prev ?? points[0][1])) === 'down' ? 'down' : mkDir(points[points.length - 1][1] - (prev ?? points[0][1])) === 'up' ? 'up' : 'sub'})`);
+    path.setAttribute('stroke-width', '1.6'); path.setAttribute('vector-effect', 'non-scaling-stroke'); path.setAttribute('stroke-linejoin', 'round');
+    svg.append(path);
+    return svg;
+  }
+  function mkCard(sym) {
+    const q = mkQuotes[sym];
+    const b = el('button', 'mk-card'); b.type = 'button'; b.dataset.sym = sym;
+    b.setAttribute('aria-pressed', String(mkSel === sym));
+    const nm = el('span', 'mk-nm', q ? q.name : mkNames[sym] || sym);
+    if (q && q.name !== q.symbol && !sym.startsWith('^')) nm.append(el('span', 'mk-sym', sym));
+    b.append(nm);
+    if (!q && mkErr[sym]) {
+      b.classList.add('is-err'); b.disabled = true;
+      b.append(el('span', 'mk-ch mk-flat', mkErr[sym] === 'not found' ? '없는 종목이에요' : '지금은 못 불러왔어요'));
+      return b;
+    }
+    if (!q) { b.classList.add('is-skel'); b.append(el('span', 'mk-px', '000.00'), el('span', 'mk-ch', '+0.00%')); return b; }
+    b.append(el('span', 'mk-px', mkPx(q)), el('span', `mk-ch mk-${mkDir(q.change)}`, mkCh(q)), sparkSvg(q.points, q.prev));
+    b.setAttribute('aria-label', `${q.name} ${mkPx(q)}, 전일 대비 ${mkCh(q) || '변동 없음'}`);
+    b.addEventListener('click', () => { mkSel = mkSel === sym ? null : sym; if (mkSel) mkRange = '1d'; paintMarket(); if (mkSel) mkDetail(); });
+    return b;
+  }
+  function paintMarket() {
+    const row = $('[data-mk-row]');
+    if (mkDown) { row.replaceChildren(el('p', 'mk-msg', mkDown === 'setup' ? '시세 기능을 준비하고 있어요. 운영진이 설정을 마치면 여기에 보여요.' : '지금은 시세를 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.')); $('[data-mk-detail]').hidden = true; return; }
+    row.replaceChildren(...mkSyms.map(mkCard));
+    if (mkSel && !mkSyms.includes(mkSel)) mkSel = null;
+    $('[data-mk-detail]').hidden = !mkSel;
+    const qs = Object.values(mkQuotes).filter((q) => mkSyms.includes(q.symbol));
+    const t = qs.reduce((m, q) => Math.max(m, q.time || 0), 0);
+    const st = (qs.find((q) => q.symbol === '^GSPC') || qs[0] || {}).state;
+    $('[data-mk-when]').textContent = t ? `${st ? MK_STATE[st] + ' · ' : ''}${kst(t, { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })} 기준` : '';
+  }
+  async function loadMarket(silent) {
+    if (mkBusy) return; mkBusy = true;
+    try {
+      if (!silent) {
+        const { data, error } = await sb.from('market_watch').select('symbols').eq('user_id', user.id).maybeSingle();
+        if (error) mkHasTable = false;
+        else if (data && Array.isArray(data.symbols)) mkSyms = data.symbols.slice(0, MK_MAX);
+        paintMarket();
+      }
+      if (!mkSyms.length) { paintMarket(); return; }
+      const r = await mkCall({ action: 'quotes', symbols: mkSyms });
+      mkDown = false; mkErr = r.errors || {};
+      (r.quotes || []).forEach((q) => { mkQuotes[q.symbol] = q; });
+      paintMarket();
+      if (mkSel && mkRange === '1d') mkDetail(true);
+    } catch (e) {
+      if (!Object.keys(mkQuotes).length) { mkDown = e.message === 'setup' ? 'setup' : 'fail'; paintMarket(); }
+    } finally { mkBusy = false; }
+  }
+  // 홈을 보고 있고 창이 보일 때만 2분마다 새로
+  function mkTick() {
+    clearInterval(mkTimer);
+    mkTimer = setInterval(() => { if (view === 'home' && document.visibilityState === 'visible' && !mkDown) loadMarket(true); }, 120000);
+  }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && view === 'home' && !mkDown) loadMarket(true); });
+
+  // ----- 큰 그래프 -----
+  let mkChartTok = 0;
+  async function mkDetail(quiet) {
+    const box = $('[data-mk-detail]'), sym = mkSel;
+    if (!sym) { box.hidden = true; return; }
+    const q0 = mkQuotes[sym];
+    const tok = ++mkChartTok;
+    box.hidden = false;
+    const top = el('div', 'mk-d-top');
+    const nm = el('p', 'mk-d-nm', q0 ? `${q0.name}${q0.name !== sym ? ` · ${sym}` : ''}${q0.exchange ? ` · ${q0.exchange}` : ''}` : sym);
+    const px = el('span', 'mk-d-px', mkPx(q0)), ch = el('span', 'mk-d-ch');
+    const close = el('button', 'mk-ib mk-d-close', '✕'); close.type = 'button'; close.setAttribute('aria-label', '그래프 닫기');
+    close.addEventListener('click', () => { mkSel = null; paintMarket(); });
+    top.append(nm, px, ch, close);
+    const rg = el('div', 'mk-ranges'); rg.setAttribute('role', 'group'); rg.setAttribute('aria-label', '기간');
+    MK_RANGES.forEach(([v, t]) => {
+      const b = el('button', null, t); b.type = 'button'; b.setAttribute('aria-pressed', String(v === mkRange));
+      b.addEventListener('click', () => { if (v !== mkRange) { mkRange = v; mkDetail(); } });
+      rg.append(b);
+    });
+    const chart = el('div', 'mk-chart'), axis = el('div', 'mk-axis'), foot = el('p', 'mk-d-foot');
+    if (!quiet) chart.append(el('div', 'mk-state', '불러오는 중…'));
+    else { const old = box.querySelector('.mk-chart'); if (old) chart.replaceChildren(...old.childNodes); }
+    box.replaceChildren(top, rg, chart, axis, foot);
+    let s;
+    try { s = mkRange === '1d' && q0 ? q0 : await mkCall({ action: 'chart', symbol: sym, range: mkRange }); }
+    catch (e) { if (tok === mkChartTok) chart.replaceChildren(el('div', 'mk-state', e.message === 'setup' ? '시세 기능을 준비하고 있어요.' : e.message)); return; }
+    if (tok !== mkChartTok) return;
+    const base = mkRange === '1d' ? s.prev : s.prev ?? (s.points[0] || [])[1];
+    const last = s.points.length ? s.points[s.points.length - 1][1] : s.price;
+    const cur = mkRange === '1d' ? s.price : last;
+    const diff = cur != null && base != null ? cur - base : null, pct = diff != null && base ? diff / base * 100 : null;
+    px.textContent = mkPx({ ...s, price: mkRange === '1d' ? s.price : (q0 && q0.price) ?? cur });
+    ch.className = `mk-d-ch mk-${mkDir(diff)}`;
+    ch.textContent = diff == null ? '' : `${diff > 0 ? '▲' : diff < 0 ? '▼' : ''} ${mkF(Math.abs(diff))} (${pct > 0 ? '+' : ''}${mkF(pct)}%) · ${mkRange === '1d' ? '전일 대비' : `${MK_RANGES.find((r) => r[0] === mkRange)[1]} 동안`}`;
+    const k = drawChart(chart, s.points, base, mkDir(diff), s);
+    if (s.points.length) {
+      const fmt = mkRange === '1d' || mkRange === '5d' ? { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false } : mkRange === '5y' ? { year: 'numeric', month: 'numeric' } : { year: '2-digit', month: 'numeric', day: 'numeric' };
+      axis.replaceChildren(el('span', null, kst(s.points[0][0], fmt)), el('span', null, kst(s.points[s.points.length - 1][0], fmt)));
+    }
+    foot.textContent = `캔들 1개 = ${k > 1 ? `${MK_CANDLE[mkRange]}×${k}` : MK_CANDLE[mkRange]} · 빨강 오름, 파랑 내림${mkRange === '1d' ? ' · 점선은 전일 종가' : ''} · ${s.time ? kst(s.time, { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) + ' (한국 시각) 기준 · ' : ''}${MK_STATE[s.state] || ''}`;
+  }
+  const MK_CANDLE = { '1d': '5분', '5d': '30분', '1mo': '하루', '6mo': '하루', '1y': '한 주', '5y': '한 달' };
+  // 캔들이 화면 폭에 비해 너무 많으면 이웃끼리 묶는다 (시가=처음, 고가=최고, 저가=최저, 종가=마지막)
+  function mkMerge(c, max) {
+    if (c.length <= max) return { list: c, k: 1 };
+    const k = Math.ceil(c.length / max), out = [];
+    for (let i = 0; i < c.length; i += k) {
+      const g = c.slice(i, i + k);
+      out.push([g[0][0], g[0][1], Math.max(...g.map((x) => x[2])), Math.min(...g.map((x) => x[3])), g[g.length - 1][4]]);
+    }
+    return { list: out, k };
+  }
+  function drawChart(box, points, base, dir, s) {
+    box.replaceChildren();
+    // 예전 응답(종가만)이면 앞 종가를 시가로 삼아 캔들을 만든다
+    let raw = s.ohlc && s.ohlc.length ? s.ohlc : (points || []).map((p, i, a) => { const o = i ? a[i - 1][1] : base ?? p[1]; return [p[0], o, Math.max(o, p[1]), Math.min(o, p[1]), p[1]]; });
+    if (raw.length < 2) { box.append(el('div', 'mk-state', '그래프로 그릴 시세가 아직 없어요.')); return 1; }
+    const { list: c, k } = mkMerge(raw, Math.max(20, Math.floor((box.clientWidth || 600) / 6)));
+    const NS = 'http://www.w3.org/2000/svg', W = 1000, H = 1000, PAD = 0.05;
+    const lo = Math.min(...c.map((x) => x[3]), ...(base != null ? [base] : [])), hi = Math.max(...c.map((x) => x[2]), ...(base != null ? [base] : [])), span = hi - lo || 1;
+    const n = c.length, slot = W / n, bw = Math.max(slot * 0.62, 1.5);
+    const X = (i) => (i + 0.5) * slot;   // 시간 간격이 아니라 순서대로 (장 쉬는 시간 빈칸 없이)
+    const Y = (v) => H * (1 - PAD) - ((v - lo) / span) * H * (1 - 2 * PAD);
+    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('preserveAspectRatio', 'none');
+    svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', `${s.name} 캔들 그래프`);
+    if (base != null) { const b = document.createElementNS(NS, 'line'); b.setAttribute('x1', 0); b.setAttribute('x2', W); b.setAttribute('y1', Y(base)); b.setAttribute('y2', Y(base)); b.setAttribute('stroke', 'var(--line)'); b.setAttribute('stroke-dasharray', '4 4'); b.setAttribute('vector-effect', 'non-scaling-stroke'); svg.append(b); }
+    // 오름(종가≥시가) 빨강 · 내림 파랑, 같은 색끼리 한 path 로 그려 가볍게
+    const wick = { up: '', down: '' }, body = { up: '', down: '' };
+    c.forEach(([, o, h, l, cl], i) => {
+      const d = cl >= o ? 'up' : 'down', x = X(i);
+      wick[d] += `M${x.toFixed(2)},${Y(h).toFixed(2)}V${Y(l).toFixed(2)}`;
+      const y1 = Y(Math.max(o, cl)), y2 = Y(Math.min(o, cl)), hgt = Math.max(y2 - y1, 3);
+      body[d] += `M${(x - bw / 2).toFixed(2)},${y1.toFixed(2)}h${bw.toFixed(2)}v${hgt.toFixed(2)}h${(-bw).toFixed(2)}Z`;
+    });
+    ['up', 'down'].forEach((d) => {
+      const w = document.createElementNS(NS, 'path'); w.setAttribute('d', wick[d]); w.setAttribute('stroke', `var(--${d})`); w.setAttribute('stroke-width', '1'); w.setAttribute('vector-effect', 'non-scaling-stroke'); w.setAttribute('fill', 'none');
+      const b = document.createElementNS(NS, 'path'); b.setAttribute('d', body[d]); b.setAttribute('fill', `var(--${d})`);
+      svg.append(w, b);
+    });
+    const cross = el('div', 'mk-cross'), tip = el('div', 'mk-tip');
+    [cross, tip].forEach((x) => { x.hidden = true; });
+    box.append(svg, cross, tip);
+    const fmt = mkRange === '1d' || mkRange === '5d' ? { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false } : mkRange === '5y' ? { year: 'numeric', month: 'numeric' } : { year: '2-digit', month: 'numeric', day: 'numeric' };
+    const P = (v) => mkPx({ ...s, price: v });
+    const at = (clientX) => {
+      const r = box.getBoundingClientRect();
+      const i = Math.max(0, Math.min(n - 1, Math.floor(((clientX - r.left) / r.width) * n)));
+      const xp = X(i) / W * 100, [t, o, h, l, cl] = c[i];
+      cross.style.left = `${xp}%`;
+      tip.textContent = `${kst(t, fmt)} · 시 ${P(o)} 고 ${P(h)} 저 ${P(l)} 종 ${P(cl)}`;
+      [cross, tip].forEach((x) => { x.hidden = false; });
+    };
+    const off = () => { [cross, tip].forEach((x) => { x.hidden = true; }); };
+    box.addEventListener('pointermove', (e) => at(e.clientX));
+    box.addEventListener('pointerdown', (e) => at(e.clientX));
+    box.addEventListener('pointerleave', off);
+    box.addEventListener('pointerup', (e) => { if (e.pointerType !== 'mouse') setTimeout(off, 1800); });
+    return k;
+  }
+
+  // ----- 종목 편집 -----
+  function paintMkList() {
+    const ul = $('[data-mk-list]');
+    $('[data-mk-count]').textContent = `${mkSyms.length}/${MK_MAX}`;
+    if (!mkSyms.length) { ul.replaceChildren(el('li', 'mk-msg', '아직 고른 종목이 없어요. 아래에서 찾아 추가해 보세요.')); return; }
+    ul.replaceChildren(...mkSyms.map((sym, i) => {
+      const li = el('li', 'mk-li'); const q = mkQuotes[sym];
+      const t = el('span', 't', q ? q.name : mkNames[sym] || sym); if ((q ? q.name : mkNames[sym]) && (q ? q.name : mkNames[sym]) !== sym && !sym.startsWith('^')) t.append(el('small', null, sym));
+      li.append(t);
+      [['↑', -1, '위로'], ['↓', 1, '아래로']].forEach(([g, d, lab]) => {
+        const b = el('button', 'mk-ib', g); b.type = 'button'; b.setAttribute('aria-label', `${t.firstChild.textContent} ${lab}`); b.disabled = !mkSyms[i + d];
+        b.addEventListener('click', () => { const a = mkSyms.slice(); [a[i], a[i + d]] = [a[i + d], a[i]]; mkSave(a); });
+        li.append(b);
+      });
+      const x = el('button', 'mk-ib', '✕'); x.type = 'button'; x.setAttribute('aria-label', `${t.firstChild.textContent} 빼기`);
+      x.addEventListener('click', () => mkSave(mkSyms.filter((v) => v !== sym)));
+      li.append(x);
+      return li;
+    }));
+  }
+  function mkMsg(t) { const m = $('[data-mk-msg]'); m.textContent = t || ''; m.hidden = !t; }
+  async function mkSave(next) {
+    const prev = mkSyms;
+    mkSyms = next; paintMkList(); paintMarket();
+    if (!mkHasTable) { mkMsg('지금은 이 기기에서만 바뀌어요. (운영진: supabase/028_market_watch.sql 실행 필요)'); return; }
+    const { error } = await sb.from('market_watch').upsert({ user_id: user.id, symbols: next }, { onConflict: 'user_id' });
+    if (error) { mkSyms = prev; paintMkList(); paintMarket(); mkMsg('저장하지 못했어요. 잠시 뒤 다시 해 주세요.'); return; }
+    mkMsg('');
+    if (next.some((v) => !mkQuotes[v] && !mkErr[v])) loadMarket(true);
+  }
+  $('[data-mk-edit]').addEventListener('click', (e) => {
+    const ed = $('[data-mk-editor]'); ed.hidden = !ed.hidden;
+    e.currentTarget.setAttribute('aria-expanded', String(!ed.hidden));
+    e.currentTarget.textContent = ed.hidden ? '종목 편집' : '편집 닫기';
+    if (!ed.hidden) { paintMkList(); mkMsg(mkHasTable ? '' : '지금은 이 기기에서만 바뀌어요. (운영진: supabase/028_market_watch.sql 실행 필요)'); setTimeout(() => $('#mk-q').focus(), 30); }
+  });
+  $('[data-mk-reset]').addEventListener('click', () => mkSave(MK_DEFAULT.slice()));
+  $('[data-mk-find]').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const q = $('#mk-q').value.trim(); const hits = $('[data-mk-hits]');
+    if (!q) return;
+    hits.replaceChildren(el('li', 'mk-msg', '찾는 중…'));
+    let items = [];
+    try { items = (await mkCall({ action: 'search', q })).items || []; }
+    catch (x) { hits.replaceChildren(el('li', 'mk-msg', x.message === 'setup' ? '시세 기능을 준비하고 있어요.' : '찾지 못했어요. 잠시 뒤 다시 해 주세요.')); return; }
+    // 기호를 그대로 쓴 경우 (예: TSLA) 결과에 없어도 바로 넣을 수 있게
+    const raw = q.toUpperCase();
+    if (/^[A-Z0-9.^=-]{1,15}$/.test(raw) && !items.some((x) => x.symbol === raw)) items.push({ symbol: raw, name: '기호 그대로 추가', exch: '', type: '' });
+    if (!items.length) { hits.replaceChildren(el('li', 'mk-msg', '맞는 종목이 없어요. 영어 이름이나 기호(예: NVDA)로 찾아 보세요.')); return; }
+    hits.replaceChildren(...items.map((x) => {
+      const li = el('li'); const b = el('button'); b.type = 'button';
+      const has = mkSyms.includes(x.symbol);
+      b.append(el('span', 's', x.symbol), el('span', 'n', x.name), el('span', 'x', has ? '추가됨' : [x.exch, x.type === 'ETF' ? 'ETF' : x.type === 'INDEX' ? '지수' : ''].filter(Boolean).join(' · ') || '+ 추가'));
+      b.disabled = has;
+      b.addEventListener('click', () => {
+        if (mkSyms.length >= MK_MAX) { mkMsg(`종목은 ${MK_MAX}개까지 넣을 수 있어요.`); return; }
+        if (x.type) mkNames[x.symbol] = x.name;
+        mkSave([...mkSyms, x.symbol]);
+        b.disabled = true; b.lastChild.textContent = '추가됨';
+      });
+      li.append(b); return li;
+    }));
+  });
+
   /* ===== 시작 ===== */
   await loadCats();
   paintChips('showcase');
   loadCounts();
   route(true);
   if (q0) runSearch(q0);
+  loadMarket().then(mkTick);
   await Promise.all([loadHome(), loadNotices(), loadCrewCount(), loadUpload()]);
 })();
 </script>
