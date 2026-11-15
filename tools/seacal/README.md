@@ -1,20 +1,20 @@
 # 승선근무예비역 도우미 (원본)
 
-`apps/seaduty/`는 배포본이고, 이 폴더가 원본과 작업 도구입니다. 주소: `/apps/seaduty/`
+`apps/seacal/`는 배포본이고, 이 폴더가 원본과 작업 도구입니다. 주소: `/apps/seacal/`
 
 ## 폴더 구성
 
 | 경로 | 내용 |
 |---|---|
 | `site/index.html` | 앱 원본(스타일·스크립트 포함 한 파일). **수정은 여기서** |
-| `build.sh` | 원본 → `apps/seaduty/index.html` (cbttest와 같은 파비콘을 넣음) |
-| `build_holidays.py` | 1990~2100 공휴일 → `apps/seaduty/data/holidays.json` (온라인 모드에서 받아 씀) |
+| `build.sh` | 원본 → `apps/seacal/index.html` (cbttest와 같은 파비콘을 넣음) |
+| `build_holidays.py` | 1990~2100 공휴일 → `apps/seacal/data/holidays.json` (온라인 모드에서 받아 씀) |
 | `../../supabase/031_seaduty_sync.sql` | 복구 코드 서버 백업 표·함수. Supabase SQL Editor에서 한 번 실행 |
 
 ```bash
-bash tools/seaduty/build.sh                       # 앱 수정 후
+bash tools/seacal/build.sh                       # 앱 수정 후
 pip install ephem holidays korean-lunar-calendar  # 공휴일 다시 만들 때만
-python3 tools/seaduty/build_holidays.py --check   # 생성 + 교차 검증
+python3 tools/seacal/build_holidays.py --check   # 생성 + 교차 검증
 ```
 
 ## 계산 규칙

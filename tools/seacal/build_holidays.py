@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""대한민국 관공서 공휴일 1990~2100 생성기 → apps/seaduty/data/holidays.json
+"""대한민국 관공서 공휴일 1990~2100 생성기 → apps/seacal/data/holidays.json
 
 근거
 - 「관공서의 공휴일에 관한 규정」 [시행 2026.5.11, 대통령령 제36290호] 와 그 연혁(부칙)
@@ -308,7 +308,7 @@ def main():
         'd': out,
     }
     root = os.path.dirname(os.path.abspath(__file__))
-    dst = os.path.join(root, '..', '..', 'apps', 'seaduty', 'data', 'holidays.json')
+    dst = os.path.join(root, '..', '..', 'apps', 'seacal', 'data', 'holidays.json')
     raw = json.dumps(doc, ensure_ascii=False, separators=(',', ':'))
     with open(dst, 'w', encoding='utf-8') as f:
         f.write(raw)
