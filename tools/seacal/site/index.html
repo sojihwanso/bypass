@@ -344,8 +344,13 @@ table.lv tr.fut td{color:var(--muted)}
 
 <script>
 'use strict';
-const VERSION = '2.0.0';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '2.1.0';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  { v: '2.1.0', d: '2026. 11. 16', i: [
+    "ETA 계산기 '시간대 직접 고르기'와 선박 시간대 목록에서 UTC±0을 맨 위로",
+    '지역 시간대 이름을 영한 병기(예: Asia/Seoul · 아시아/서울)',
+    "지명 검색에서 이름만 같은 작은 마을·산·섬·공항 같은 엉뚱한 결과를 빼고 실제 도시·항구만 표시, 한글 검색은 '○○광역시'·'○○시'·영문 표기로도 함께 찾기",
+  ] },
   { v: '2.0.0', d: '2026. 11. 16', i: [
     'ETA 계산기 추가: 출항 일시·출항지·속력·거리·목적지로 목적지 현지 도착 시각, 출항지·UTC 기준 ETA, 항해 시간, 시차 계산',
     '출항지·목적지는 온라인 지명 검색으로 시간대를 받아오고, 표준시·일광절약시(시작·끝 날짜)는 브라우저 세계 시간대 자료로 계산. 오프라인이면 시간대 직접 선택',
@@ -988,7 +993,12 @@ function dstInfo(z, year){
   const r = { std, dst: hi !== std ? hi : null, trans };
   dstCache.set(key, r); return r;
 }
-function zoneName(z){ return z ? (z.fixed != null ? offLabel(z.fixed) + ' (직접 선택)' : z.tz) : ''; }
+/* 지역 시간대 한국어 이름: 대륙은 직접, 도시는 CLDR(유니코드 공통 지역 자료) 한국어 이름 */
+const TZ_CONT = { Africa: '아프리카', America: '아메리카', Antarctica: '남극', Arctic: '북극', Asia: '아시아', Atlantic: '대서양', Australia: '오스트레일리아', Europe: '유럽', Indian: '인도양', Pacific: '태평양', Etc: '기타' };
+const TZ_KO = {"Antarctica/DumontDUrville":"뒤몽 뒤르빌","America/St_Barthelemy":"생바르텔레미","America/Noronha":"노롱야","America/Coral_Harbour":"코랄하버","America/St_Johns":"세인트존스","America/Curacao":"퀴라소","Africa/Asmera":"아스메라","Pacific/Truk":"트루크","Pacific/Ponape":"포나페","Atlantic/Faeroe":"페로 제도","America/Godthab":"고드호프","America/Scoresbysund":"스코레스바이선드","Asia/Calcutta":"콜카타","America/St_Kitts":"세인트키츠","America/St_Lucia":"세인트루시아","Asia/Rangoon":"랑군","Asia/Macau":"마카오","America/Ciudad_Juarez":"시우다드후아레스","America/Bahia_Banderas":"바이아 반데라스","America/Merida":"메리다","America/Cancun":"칸쿤","Asia/Katmandu":"카트만두","America/Asuncion":"아순시온","Indian/Reunion":"레위니옹","Atlantic/St_Helena":"세인트 헬레나","Africa/Sao_Tome":"상투메","America/Lower_Princes":"로워 프린스 쿼터","Europe/Kiev":"키이우","America/North_Dakota/Beulah":"노스다코타주, 베라","America/North_Dakota/New_Salem":"노스다코타주, 뉴살렘","America/North_Dakota/Center":"중부, 노스다코타","America/Indiana/Vincennes":"인디애나주, 빈센스","America/Indiana/Petersburg":"인디애나주, 피츠버그","America/Indiana/Tell_City":"인디애나주, 텔시티","America/Indiana/Knox":"인디애나주, 녹스","America/Indiana/Winamac":"인디애나주, 위너맥","America/Indiana/Marengo":"인디애나주, 머렝고","America/Indiana/Vevay":"인디애나주, 비비","America/Kentucky/Monticello":"켄터키주, 몬티첼로","America/St_Vincent":"세인트빈센트","America/St_Thomas":"세인트토마스","Asia/Saigon":"사이공","Pacific/Honolulu":"호놀룰루","Etc/Unknown":"알 수 없는 장소","Europe/Andorra":"안도라","Asia/Dubai":"두바이","Asia/Kabul":"카불","America/Antigua":"안티과","America/Anguilla":"앙귈라","Europe/Tirane":"티라나","Asia/Yerevan":"예레반","Africa/Luanda":"루안다","Antarctica/Rothera":"로데라","Antarctica/Palmer":"파머","Antarctica/Troll":"트롤","Antarctica/Syowa":"쇼와","Antarctica/Mawson":"모슨","Antarctica/Davis":"데이비스","Antarctica/Vostok":"보스토크","Antarctica/Casey":"케이시","Antarctica/McMurdo":"맥머도","America/Argentina/Rio_Gallegos":"리오 가예고스","America/Mendoza":"멘도사","America/Argentina/San_Juan":"산후안","America/Argentina/Ushuaia":"우수아이아","America/Argentina/La_Rioja":"라 리오하","America/Argentina/San_Luis":"산루이스","America/Catamarca":"카타마르카","America/Argentina/Salta":"살타","America/Jujuy":"후후이","America/Argentina/Tucuman":"투쿠만","America/Cordoba":"코르도바","America/Buenos_Aires":"부에노스 아이레스","Pacific/Pago_Pago":"파고파고","Europe/Vienna":"비엔나","Australia/Perth":"퍼스","Australia/Eucla":"유클라","Australia/Darwin":"다윈","Australia/Adelaide":"애들레이드","Australia/Broken_Hill":"브로컨힐","Australia/Melbourne":"멜버른","Australia/Hobart":"호바트","Australia/Lindeman":"린데만","Australia/Sydney":"시드니","Australia/Brisbane":"브리스베인","Antarctica/Macquarie":"맥쿼리","Australia/Lord_Howe":"로드 하우","America/Aruba":"아루바","Europe/Mariehamn":"마리에함","Asia/Baku":"바쿠","Europe/Sarajevo":"사라예보","America/Barbados":"바베이도스","Asia/Dhaka":"다카","Europe/Brussels":"브뤼셀","Africa/Ouagadougou":"와가두구","Europe/Sofia":"소피아","Asia/Bahrain":"바레인","Africa/Bujumbura":"부줌부라","Africa/Porto-Novo":"포르토노보","Atlantic/Bermuda":"버뮤다","Asia/Brunei":"브루나이","America/La_Paz":"라파스","America/Kralendijk":"크라렌디즈크","America/Eirunepe":"아이루네페","America/Rio_Branco":"히우 브랑쿠","America/Porto_Velho":"포르토벨료","America/Boa_Vista":"보아 비스타","America/Manaus":"마나우스","America/Cuiaba":"쿠이아바","America/Santarem":"산타렘","America/Campo_Grande":"캄포 그란데","America/Belem":"벨렘","America/Araguaina":"아라과이나","America/Sao_Paulo":"상파울루","America/Bahia":"바히아","America/Fortaleza":"포르탈레자","America/Maceio":"마세이오","America/Recife":"레시페","America/Nassau":"나소","Asia/Thimphu":"팀부","Africa/Gaborone":"가보로네","Europe/Minsk":"민스크","America/Belize":"벨리즈","America/Dawson":"도슨","America/Whitehorse":"화이트호스","America/Inuvik":"이누빅","America/Vancouver":"벤쿠버","America/Fort_Nelson":"포트 넬슨","America/Dawson_Creek":"도슨크릭","America/Creston":"크레스톤","America/Edmonton":"에드먼턴","America/Swift_Current":"스위프트커런트","America/Cambridge_Bay":"케임브리지 베이","America/Regina":"리자이나","America/Winnipeg":"위니펙","America/Resolute":"리졸루트","America/Rankin_Inlet":"랭킹 인렛","America/Toronto":"토론토","America/Iqaluit":"이칼루이트","America/Moncton":"몽턴","America/Halifax":"핼리팩스","America/Goose_Bay":"구즈베이","America/Glace_Bay":"글라스베이","America/Blanc-Sablon":"블랑 사블롱","Indian/Cocos":"코코스","Africa/Kinshasa":"킨샤사","Africa/Lubumbashi":"루붐바시","Africa/Bangui":"방기","Africa/Brazzaville":"브라자빌","Europe/Zurich":"취리히","Africa/Abidjan":"아비장","Pacific/Rarotonga":"라로통가","Pacific/Easter":"이스터 섬","America/Punta_Arenas":"푼타아레나스","America/Santiago":"산티아고","Africa/Douala":"두알라","Asia/Urumqi":"우루무치","Asia/Shanghai":"상하이","America/Bogota":"보고타","America/Costa_Rica":"코스타리카","America/Havana":"하바나","Atlantic/Cape_Verde":"카보 베르데","Indian/Christmas":"크리스마스","Asia/Nicosia":"니코시아","Asia/Famagusta":"파마구스타","Europe/Prague":"프라하","Europe/Busingen":"뷔지겐","Europe/Berlin":"베를린","Africa/Djibouti":"지부티","Europe/Copenhagen":"코펜하겐","America/Dominica":"도미니카","America/Santo_Domingo":"산토도밍고","Africa/Algiers":"알제","Pacific/Galapagos":"갈라파고스","America/Guayaquil":"과야킬","Europe/Tallinn":"탈린","Africa/Cairo":"카이로","Africa/El_Aaiun":"엘아이운","Atlantic/Canary":"카나리아 제도","Africa/Ceuta":"세우타","Europe/Madrid":"마드리드","Africa/Addis_Ababa":"아디스아바바","Europe/Helsinki":"헬싱키","Pacific/Fiji":"피지","Atlantic/Stanley":"스탠리","Pacific/Kosrae":"코스레","Europe/Paris":"파리","Africa/Libreville":"리브르빌","Europe/London":"런던","America/Grenada":"그레나다","Asia/Tbilisi":"트빌리시","America/Cayenne":"카옌","Europe/Guernsey":"건지","Africa/Accra":"아크라","Europe/Gibraltar":"지브롤터","America/Thule":"툴레","America/Danmarkshavn":"덴마크샤븐","Africa/Banjul":"반줄","Africa/Conakry":"코나크리","America/Guadeloupe":"과들루프","Africa/Malabo":"말라보","Europe/Athens":"아테네","Atlantic/South_Georgia":"사우스조지아","America/Guatemala":"과테말라","Pacific/Guam":"괌","Africa/Bissau":"비사우","America/Guyana":"가이아나","Asia/Hong_Kong":"홍콩","America/Tegucigalpa":"테구시갈파","Europe/Zagreb":"자그레브","America/Port-au-Prince":"포르토프랭스","Europe/Budapest":"부다페스트","Asia/Jakarta":"자카르타","Asia/Pontianak":"폰티아나크","Asia/Makassar":"마카사르","Asia/Jayapura":"자야푸라","Europe/Dublin":"더블린","Asia/Jerusalem":"예루살렘","Europe/Isle_of_Man":"맨섬","Indian/Chagos":"차고스","Asia/Baghdad":"바그다드","Asia/Tehran":"테헤란","Atlantic/Reykjavik":"레이캬비크","Europe/Rome":"로마","Europe/Jersey":"저지","America/Jamaica":"자메이카","Asia/Amman":"암만","Asia/Tokyo":"도쿄","Africa/Nairobi":"나이로비","Asia/Bishkek":"비슈케크","Asia/Phnom_Penh":"프놈펜","Pacific/Enderbury":"엔더베리","Pacific/Kanton":"칸톤","Pacific/Kiritimati":"키리티마티","Pacific/Tarawa":"타라와","Indian/Comoro":"코모로","Asia/Pyongyang":"평양","Asia/Seoul":"서울","Asia/Kuwait":"쿠웨이트","America/Cayman":"케이맨","Asia/Aqtau":"아크타우","Asia/Oral":"오랄","Asia/Atyrau":"아티라우","Asia/Aqtobe":"악토브","Asia/Qostanay":"코스타나이","Asia/Qyzylorda":"키질로르다","Asia/Almaty":"알마티","Asia/Vientiane":"비엔티안","Asia/Beirut":"베이루트","Europe/Vaduz":"파두츠","Asia/Colombo":"콜롬보","Africa/Monrovia":"몬로비아","Africa/Maseru":"마세루","Europe/Vilnius":"빌니우스","Europe/Luxembourg":"룩셈부르크","Europe/Riga":"리가","Africa/Tripoli":"트리폴리","Africa/Casablanca":"카사블랑카","Europe/Monaco":"모나코","Europe/Chisinau":"키시나우","Europe/Podgorica":"포드고리차","America/Marigot":"마리곳","Indian/Antananarivo":"안타나나리보","Pacific/Kwajalein":"콰잘렌","Pacific/Majuro":"마주로","Europe/Skopje":"스코페","Africa/Bamako":"바마코","Asia/Hovd":"호브드","Asia/Ulaanbaatar":"울란바토르","Pacific/Saipan":"사이판","America/Martinique":"마티니크","Africa/Nouakchott":"누악쇼트","America/Montserrat":"몬세라트","Europe/Malta":"몰타","Indian/Mauritius":"모리셔스","Indian/Maldives":"몰디브","Africa/Blantyre":"블랜타이어","America/Tijuana":"티후아나","America/Hermosillo":"에르모시요","America/Mazatlan":"마사틀란","America/Chihuahua":"치와와","America/Ojinaga":"오히나가","America/Monterrey":"몬테레이","America/Mexico_City":"멕시코 시티","America/Matamoros":"마타모로스","Asia/Kuala_Lumpur":"쿠알라룸푸르","Asia/Kuching":"쿠칭","Africa/Maputo":"마푸토","Africa/Windhoek":"빈트후크","Pacific/Noumea":"누메아","Africa/Niamey":"니아메","Pacific/Norfolk":"노퍽","Africa/Lagos":"라고스","America/Managua":"마나과","Europe/Amsterdam":"암스테르담","Europe/Oslo":"오슬로","Pacific/Nauru":"나우루","Pacific/Niue":"니우에","Pacific/Chatham":"채텀","Pacific/Auckland":"오클랜드","Asia/Muscat":"무스카트","America/Panama":"파나마","America/Lima":"리마","Pacific/Tahiti":"타히티","Pacific/Marquesas":"마퀘사스","Pacific/Gambier":"감비어","Pacific/Port_Moresby":"포트모르즈비","Pacific/Bougainville":"부갱빌","Asia/Manila":"마닐라","Asia/Karachi":"카라치","Europe/Warsaw":"바르샤바","America/Miquelon":"미클롱","Pacific/Pitcairn":"핏케언","America/Puerto_Rico":"푸에르토리코","Asia/Gaza":"가자","Asia/Hebron":"헤브론","Atlantic/Azores":"아조레스","Atlantic/Madeira":"마데이라","Europe/Lisbon":"리스본","Pacific/Palau":"팔라우","Asia/Qatar":"카타르","Europe/Bucharest":"부쿠레슈티","Europe/Belgrade":"베오그라드","Europe/Kaliningrad":"칼리닌그라드","Europe/Moscow":"모스크바","Europe/Volgograd":"볼고그라트","Europe/Saratov":"사라토프","Europe/Astrakhan":"아스트라한","Europe/Ulyanovsk":"울리야노프스크","Europe/Kirov":"키로프","Europe/Samara":"사마라","Asia/Yekaterinburg":"예카테린부르크","Asia/Omsk":"옴스크","Asia/Novosibirsk":"노보시비르스크","Asia/Barnaul":"바르나울","Asia/Tomsk":"톰스크","Asia/Novokuznetsk":"노보쿠즈네츠크","Asia/Krasnoyarsk":"크라스노야르스크","Asia/Irkutsk":"이르쿠츠크","Asia/Chita":"치타","Asia/Yakutsk":"야쿠츠크","Asia/Vladivostok":"블라디보스토크","Asia/Khandyga":"한디가","Asia/Sakhalin":"사할린","Asia/Ust-Nera":"우스티네라","Asia/Magadan":"마가단","Asia/Srednekolymsk":"스레드네콜림스크","Asia/Kamchatka":"캄차카","Asia/Anadyr":"아나디리","Africa/Kigali":"키갈리","Asia/Riyadh":"리야드","Pacific/Guadalcanal":"과달카날","Indian/Mahe":"마헤","Africa/Khartoum":"카르툼","Europe/Stockholm":"스톡홀름","Asia/Singapore":"싱가포르","Europe/Ljubljana":"류블랴나","Arctic/Longyearbyen":"롱이어비엔","Europe/Bratislava":"브라티슬라바","Africa/Freetown":"프리타운","Europe/San_Marino":"산마리노","Africa/Dakar":"다카르","Africa/Mogadishu":"모가디슈","America/Paramaribo":"파라마리보","Africa/Juba":"주바","America/El_Salvador":"엘살바도르","Asia/Damascus":"다마스쿠스","Africa/Mbabane":"음바바네","America/Grand_Turk":"그랜드 터크","Africa/Ndjamena":"엔자메나","Indian/Kerguelen":"케르켈렌","Africa/Lome":"로메","Asia/Bangkok":"방콕","Asia/Dushanbe":"두샨베","Pacific/Fakaofo":"파카오푸","Asia/Dili":"딜리","Asia/Ashgabat":"아슈하바트","Africa/Tunis":"튀니스","Pacific/Tongatapu":"통가타푸","Europe/Istanbul":"이스탄불","America/Port_of_Spain":"포트오브스페인","Pacific/Funafuti":"푸나푸티","Asia/Taipei":"타이베이","Africa/Dar_es_Salaam":"다르에스살람","Europe/Simferopol":"심페로폴","Africa/Kampala":"캄팔라","Pacific/Midway":"미드웨이","Pacific/Wake":"웨이크","America/Adak":"에이닥","America/Nome":"놈","America/Anchorage":"앵커리지","America/Yakutat":"야쿠타트","America/Sitka":"싯카","America/Juneau":"주노","America/Metlakatla":"메틀라카틀라","America/Los_Angeles":"로스앤젤레스","America/Boise":"보이시","America/Phoenix":"피닉스","America/Denver":"덴버","America/Chicago":"시카고","America/Menominee":"메노미니","America/Indianapolis":"인디애나폴리스","America/Louisville":"루이빌","America/Detroit":"디트로이트","America/New_York":"뉴욕","America/Montevideo":"몬테비데오","Asia/Samarkand":"사마르칸트","Asia/Tashkent":"타슈켄트","Europe/Vatican":"바티칸","America/Caracas":"카라카스","America/Tortola":"토르톨라","Pacific/Efate":"에파테","Pacific/Wallis":"월리스","Pacific/Apia":"아피아","Asia/Aden":"아덴","Indian/Mayotte":"메요트","Africa/Johannesburg":"요하네스버그","Africa/Lusaka":"루사카","Africa/Harare":"하라레","America/Coyhaique":"코이아이케"};
+function tzKo(tz){ const c = TZ_CONT[tz.split('/')[0]], k = TZ_KO[tz]; return c && k ? `${c}/${k}` : (k || c || ''); }
+function tzLabel(tz){ const k = tzKo(tz); return k ? `${tz} · ${k}` : tz; }
+function zoneName(z){ return z ? (z.fixed != null ? offLabel(z.fixed) + ' (직접 선택)' : tzLabel(z.tz)) : ''; }
 function zoneLine(z, at){
   if (!z) return '';
   const off = zoneOff(z, at);
@@ -999,13 +1009,14 @@ function zoneLine(z, at){
   const period = di.trans.map(t => `${fmtZ(t.at, z).replace(/ \d\d:\d\d$/, '')} ${t.to > t.from ? '시작' : '끝'}`).join(', ');
   return `표준시 ${offLabel(di.std)} · 일광절약시 ${offLabel(di.dst)} <b>${on ? '적용 중' : '적용 안 함'}</b>${period ? ` (${new Date(at).getUTCFullYear()}년: ${period})` : ''}`;
 }
-const FIXED_OFFS = (() => { const a = []; for (let m = -12 * 60; m <= 14 * 60; m += 30) a.push(m); [345, 525, 765, 825].forEach(x => a.push(x)); return a.sort((x, y) => x - y); })();
+const FIXED_OFFS = (() => { const a = []; for (let m = -12 * 60; m <= 14 * 60; m += 30) if (m) a.push(m); [345, 525, 765, 825].forEach(x => a.push(x)); return [0, ...a.sort((x, y) => x - y)]; })();   // UTC±0 을 맨 위에
 function zoneSelectHTML(id, cur, withIana = true){
   let tzs = []; try { tzs = Intl.supportedValuesOf('timeZone'); } catch(e) {}
   const val = cur ? (cur.fixed != null ? 'f:' + cur.fixed : 't:' + cur.tz) : '';
   return `<select class="inp" id="${id}"><option value="">시간대 직접 고르기…</option>
-    <optgroup label="UTC 오프셋(고정)">${FIXED_OFFS.map(m => `<option value="f:${m}" ${val === 'f:' + m ? 'selected' : ''}>${offLabel(m)}</option>`).join('')}</optgroup>
-    ${withIana && tzs.length ? `<optgroup label="지역 시간대(일광절약시 자동)">${tzs.map(t => `<option value="t:${esc(t)}" ${val === 't:' + t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</optgroup>` : ''}</select>`;
+    <option value="f:0" ${val === 'f:0' ? 'selected' : ''}>UTC±0 · 협정 세계시(UTC)</option>
+    <optgroup label="UTC 오프셋(고정)">${FIXED_OFFS.filter(m => m).map(m => `<option value="f:${m}" ${val === 'f:' + m ? 'selected' : ''}>${offLabel(m)}</option>`).join('')}</optgroup>
+    ${withIana && tzs.length ? `<optgroup label="지역 시간대(일광절약시 자동)">${tzs.map(t => `<option value="t:${esc(t)}" ${val === 't:' + t ? 'selected' : ''}>${esc(tzLabel(t))}</option>`).join('')}</optgroup>` : ''}</select>`;
 }
 function parseZoneVal(v){ if (!v) return null; if (v.startsWith('f:')) return { fixed: +v.slice(2) }; return { tz: v.slice(2) }; }
 
@@ -1018,6 +1029,57 @@ function placeHTML(key, label){
        <div style="margin-top:8px">${zoneSelectHTML('z_' + key, null)}</div>`}
   </div>`;
 }
+/* 지명 검색: 실제 도시·항구만 남김
+   - 인구가 있는 곳, 수도·행정 중심지(PPLC·PPLA*), 항구(PRT·HBR)만 보여 줌
+     → 이름만 같은 작은 마을·산·섬·공항(예: '광양'을 찾을 때 나오던 경기도 'Kwangyang')은 뺌
+   - 한글로 찾으면 '○○광역시', '○○시'와 영문 표기(로마자)로도 함께 찾음 ('부산'만으로는 부산광역시가 안 나와서) */
+const KEEP_FC = /^(PPLC|PPLA\d?|PPLG|PRT|HBR)$/;
+function romanize(t){
+  const I = ['g','kk','n','d','tt','r','m','b','pp','s','ss','','j','jj','ch','k','t','p','h'];
+  const V = ['a','ae','ya','yae','eo','e','yeo','ye','o','wa','wae','oe','yo','u','wo','we','wi','yu','eu','ui','i'];
+  const F = ['','k','k','k','n','n','n','t','l','k','m','l','l','l','p','l','m','p','p','t','t','ng','t','t','k','t','p','t'];
+  let out = '';
+  for (const ch of t){
+    const c = ch.charCodeAt(0) - 0xAC00;
+    if (c < 0 || c > 11171){ out += ch; continue; }
+    out += I[Math.floor(c / 588)] + V[Math.floor((c % 588) / 28)] + F[c % 28];
+  }
+  return out.charAt(0).toUpperCase() + out.slice(1);
+}
+async function geoQuery(name){
+  const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 8000);
+  try {
+    const r = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=10&language=ko&format=json&name=' + encodeURIComponent(name), { signal: ctl.signal });
+    if (!r.ok) throw new Error('http');
+    return (await r.json()).results || [];
+  } finally { clearTimeout(tm); }
+}
+async function searchPlaces(q){
+  // 한글 검색어의 기본형: '광역시·시·군'을 떼고, '광양항'처럼 3글자 이상이면 끝의 '항'도 뗀 형태를 함께 씀('포항'은 그대로)
+  const hangul = /[가-힣]/.test(q), qs = [q], bases = [];
+  if (hangul){
+    const b0 = q.replace(/\s+/g, '').replace(/(광역시|특별시|특별자치시|시|군)$/, '');
+    if (b0){ bases.push(b0); if (/항$/.test(b0) && b0.length >= 3) bases.push(b0.slice(0, -1)); }
+    for (const b of bases) qs.push(b, b + '광역시', b + '시', romanize(b));
+  }
+  const all = (await Promise.all([...new Set(qs)].map(geoQuery))).flat();
+  // 이름 확인: 검색어와 실제로 같은 이름만 (비슷하기만 한 다른 곳은 뺌)
+  const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').normalize('NFC').toLowerCase().replace(/[^a-z0-9가-힣]/g, '');
+  const nb = bases.map(norm), romans = bases.map(b => norm(romanize(b)));
+  const nameOK = x => {
+    const n = norm(x.name);
+    if (/[가-힣]/.test(x.name)) return !hangul || nb.some(b => n.includes(b));                       // 한글 이름: 검색어(한글)를 포함해야
+    return hangul ? romans.some(r => n === r || n === r + 'si') : n.includes(norm(q));               // 로마자 이름: 영문 표기와 같거나 검색어 포함
+  };
+  const seen = new Set(), list = [];
+  for (const x of all){
+    if (!x.timezone || seen.has(x.id)) continue; seen.add(x.id);
+    if (/^PCL/.test(x.feature_code || '')) continue;                          // 나라 자체(행정구역 아님)
+    if (((x.population || 0) > 0 || KEEP_FC.test(x.feature_code || '')) && nameOK(x)) list.push(x);
+  }
+  const rank = x => (x.feature_code === 'PPLC' ? 3 : /^PPLA/.test(x.feature_code) ? 2 : /^(PRT|HBR)$/.test(x.feature_code) ? 2 : 1);
+  return list.sort((a, b) => rank(b) - rank(a) || (b.population || 0) - (a.population || 0)).slice(0, 8);
+}
 function bindPlace(box){
   const key = box.dataset.key;
   const redraw = () => { box.outerHTML = placeHTML(key, box.querySelector('.lb').textContent); bindPlace(document.querySelector(`.place[data-key="${key}"]`)); calcEta(); };
@@ -1029,14 +1091,10 @@ function bindPlace(box){
     const s = q.value.trim(); if (!s) return;
     res.innerHTML = '<p class="sub" style="margin:6px 0 0">찾는 중…</p>';
     try {
-      const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 8000);
-      const r = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=8&language=ko&format=json&name=' + encodeURIComponent(s), { signal: ctl.signal });
-      clearTimeout(tm);
-      if (!r.ok) throw new Error('http');
-      const list = ((await r.json()).results || []).filter(x => x.timezone);
-      if (!list.length){ res.innerHTML = '<p class="sub" style="margin:6px 0 0">찾은 곳이 없습니다. 영어 이름으로 찾거나 아래에서 시간대를 직접 고르세요.</p>'; return; }
+      const list = await searchPlaces(s);
+      if (!list.length){ res.innerHTML = '<p class="sub" style="margin:6px 0 0">도시·항구를 찾지 못했습니다. 영어 이름(예: Gwangyang)이나 가까운 도시 이름으로 찾거나, 아래에서 시간대를 직접 고르세요.</p>'; return; }
       const now = Date.now();
-      res.innerHTML = list.map((x, i) => `<button class="pitem" type="button" data-i="${i}"><b>${esc(x.name)}</b> <span class="sub">${esc([x.admin1, x.country].filter(Boolean).join(', '))}</span><span class="pz">${esc(x.timezone)} · ${offLabel(zoneOff({ tz: x.timezone }, now))}</span></button>`).join('');
+      res.innerHTML = list.map((x, i) => `<button class="pitem" type="button" data-i="${i}"><b>${esc(x.name)}</b> <span class="sub">${esc([x.admin1, x.country].filter(Boolean).join(', '))}</span><span class="pz">${esc(tzLabel(x.timezone))} · ${offLabel(zoneOff({ tz: x.timezone }, now))}</span></button>`).join('');
       res.querySelectorAll('.pitem').forEach(b => b.onclick = () => { const x = list[+b.dataset.i]; ET[key] = { tz: x.timezone, name: x.name, country: x.country || '', admin: x.admin1 || '', lat: x.latitude, lon: x.longitude }; saveEta(); redraw(); });
     } catch(e) {
       if (!navigator.onLine) setNet(false);
@@ -1138,7 +1196,7 @@ function etaHelpHTML(){
     <details><summary>시차와 일광절약시는 어떻게 반영하나요?</summary><div class="body"><p>출항지·목적지를 검색하면 그곳의 지역 시간대(예: Europe/Amsterdam)를 받아옵니다. 그 시간대의 표준시와 일광절약시(서머타임) 시작·끝 날짜는 브라우저에 들어 있는 세계 시간대 자료로 계산하므로, 도착하는 날짜에 일광절약시가 적용되는지까지 따져서 현지 시각을 냅니다. 시차는 '도착 시각의 목적지 오프셋 − 출발 시각의 출발지(또는 선박) 오프셋'입니다.</p></div></details>
     <details><summary>'현재 선박 시간 기준'은 언제 쓰나요?</summary><div class="body"><p>항해 중에 배 시계(Ship's time)를 기준으로 남은 시간을 보고 싶을 때 씁니다. 배 시계는 항해하면서 시간대를 바꾸므로 지역 시간대 대신 UTC±시각으로 고르고, 바꿀 때마다 같이 고쳐 주세요.</p></div></details>
     <details><summary>시간 표시의 괄호는 무엇인가요?</summary><div class="body"><p>24시간이 넘으면 일, 30일이 넘으면 달로 바꿔 괄호 안에 함께 적습니다(예: 321.4시간 (13일 9시간 26분)). 1달은 30일로 셉니다.</p></div></details>
-    <details><summary>지명 검색은 어디서 하나요?</summary><div class="body"><p>온라인 지명 검색 서비스(Open-Meteo Geocoding)를 씁니다. 입력한 지명만 보내고 다른 기록은 보내지 않습니다. 항구 이름이 안 나오면 가까운 도시 이름이나 영어 이름으로 찾아보세요.</p></div></details>
+    <details><summary>지명 검색은 어디서 하나요?</summary><div class="body"><p>온라인 지명 검색 서비스(Open-Meteo Geocoding)를 씁니다. 입력한 지명만 보내고 다른 기록은 보내지 않습니다. 이름만 같은 작은 마을·산·섬·공항은 빼고 실제 도시·항구만 보여 주며, 한글로 찾으면 '○○광역시'·'○○시'와 영문 표기로도 함께 찾습니다. 항구 이름이 안 나오면 가까운 도시 이름이나 영어 이름으로 찾아보세요.</p><p>시간대 목록의 지역 이름은 영어와 한국어를 함께 적었습니다(예: Asia/Seoul · 아시아/서울).</p></div></details>
   </div>`;
 }
 
