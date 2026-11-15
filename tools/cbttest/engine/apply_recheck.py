@@ -25,7 +25,7 @@ for f in sorted(glob.glob(H + '/work/deckexp/d*.json')):
 for f in sorted(glob.glob(H + '/work/websearch/w*.json')) + sorted(glob.glob(H + '/work/websearch/x*.json')):  # 웹 검증 결과가 recheck·deckexp보다 우선 (계산 규칙만 그 뒤), x*는 한도 소진분 재검증
     for k, v in json.load(open(f)).items():
         if not v.get('exp'): continue
-        if '한도' in v.get('src', '') or '미검색' in v.get('src', ''): continue  # 검색 한도 때문에 근거 없이 채운 문항은 이전 판정 유지
+        if re.search(r'검색\s*한도|한도\s*(?:\(세션|소진)|미검색', v.get('src', '')): continue  # 검색 한도 때문에 근거 없이 채운 문항은 이전 판정 유지
         ov[k] = clean(v['exp']) if v.get('verdict') == 'confirmed' else unc(v['exp'])
 if os.path.exists(H + '/work/calcfix.json'):  # 계산 문항 규칙(정답표대로 확실, 공식은 조사한 그대로)
     for k, v in json.load(open(H + '/work/calcfix.json')).items():
