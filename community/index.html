@@ -220,6 +220,35 @@ a.wg-row:hover { background: var(--panel-2); }
 .wg-news .t { font-size: 14.5px; line-height: 1.5; }
 .wg-news .t b { display: inline; font-weight: 700; white-space: normal; }
 .cnt { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; background: var(--danger-solid); color: #fff; font-size: 11.5px; font-weight: 750; }
+/* 날씨 (Open-Meteo) */
+.wx-now { display: flex; align-items: center; gap: 16px; }
+.wx-ico { flex: none; font-size: 54px; line-height: 1; filter: drop-shadow(0 6px 10px rgba(16, 24, 40, .12)); animation: wxFloat 5s ease-in-out infinite; }
+@keyframes wxFloat { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-5px) rotate(-3deg); } }
+.wx-t { min-width: 0; }
+.wx-deg { font-size: 44px; font-weight: 800; letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+.wx-deg small { font-size: 22px; font-weight: 700; color: var(--sub); margin-left: 2px; }
+.wx-desc { margin-top: 6px; font-size: 15px; font-weight: 650; }
+.wx-sub { margin-top: 2px; font-size: 13.5px; color: var(--sub); }
+.wx-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.wx-stats div { padding: 10px 12px; border-radius: 14px; background: var(--panel-2); min-width: 0; }
+.wx-stats dt { font-size: 12.5px; color: var(--sub); }
+.wx-stats dd { margin: 3px 0 0; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 5px; }
+.wx-stats dd small { font-size: 12px; font-weight: 600; color: var(--sub); }
+.wx-arrow { display: inline-block; transition: transform 600ms cubic-bezier(.2, .8, .2, 1); }
+.wx-hours { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 0 -4px; padding: 2px 4px 4px; scroll-snap-type: x proximity; }
+.wx-hours::-webkit-scrollbar { display: none; }
+.wx-h { flex: none; width: 54px; padding: 8px 0 9px; border-radius: 14px; background: var(--panel-2); text-align: center; scroll-snap-align: start; animation: wxIn 500ms cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--k) * 40ms + 300ms); }
+.wx-h.now { background: var(--ink); color: var(--on-ink); }
+.wx-h .hh { font-size: 12px; color: var(--sub); }
+.wx-h.now .hh { color: inherit; opacity: .75; }
+.wx-h .hi { display: block; margin: 4px 0 2px; font-size: 20px; line-height: 1.2; }
+.wx-h .ht { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.wx-h .hp { display: block; margin-top: 2px; font-size: 11.5px; font-weight: 650; color: var(--blue); min-height: 15px; }
+.wx-h.now .hp { color: inherit; }
+@keyframes wxIn { from { opacity: 0; transform: translateY(10px); } }
+.wx-foot { margin: 0; font-size: 12.5px; color: var(--faint); }
+.wx-retry { margin-left: 6px; border: 0; background: none; padding: 0; font: inherit; font-weight: 650; color: var(--sub); text-decoration: underline; cursor: pointer; }
+@media (max-width: 640px) { .wx-ico { font-size: 46px; } .wx-deg { font-size: 38px; } }
 .dd-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
 .dd { border-radius: 18px; background: #16181D; color: #fff; padding: 16px 18px; display: flex; flex-direction: column; gap: 2px; }
 .dd span { font-size: 13.5px; color: #B9C0CC; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -762,7 +791,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       <div class="db-acts">
         <a class="mini" href="#write/showcase"><span class="plus" aria-hidden="true">+</span>결과물 올리기</a>
         <a class="mini" href="#write/board">글쓰기</a>
-        <a class="mini" href="/?report=1">불편 제보</a>
+        <a class="mini" href="/?report=1">아이디어 남기기</a>
         <button type="button" class="mini dark" data-db-edit aria-pressed="false">대시보드 편집</button>
       </div>
     </div>
@@ -807,6 +836,10 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       <section class="wg" data-wg="dday" aria-labelledby="t-wd">
         <div class="wg-h"><h2 id="t-wd">D-day</h2></div>
         <div data-wg-dday></div>
+      </section>
+      <section class="wg" data-wg="weather" aria-labelledby="t-wx">
+        <div class="wg-h"><h2 id="t-wx">목포 날씨</h2><span class="wg-r hint" data-wx-when></span></div>
+        <div data-wx aria-live="polite"><p class="state">날씨 불러오는 중…</p></div>
       </section>
       <section class="wg" data-wg="favs" aria-labelledby="t-wf">
         <div class="wg-h"><h2 id="t-wf">즐겨찾기</h2><a class="link-more wg-r" href="#showcase">결과물</a></div>
@@ -2610,13 +2643,102 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     }));
   });
 
+
+  /* ===== 목포 날씨 ===== Open-Meteo (키 없이 쓰는 무료 예보, 비상업용) — 브라우저에서 바로 부르고 20분 동안 이 브라우저에 담아 둔다 */
+  const WX_AT = { lat: 34.79, lon: 126.38 };          // 목포해양대 근처
+  const WX_SEA = { lat: 34.75, lon: 125.75 };         // 목포 앞바다(신안 서쪽 바깥 바다) — 파고용
+  const WX_LS = 'bypass-wx-v1', WX_TTL = 20 * 60 * 1000;
+  let wxTimer = null, wxBusy = false;
+  const WX_CODE = { 0: ['맑음', '☀️', '🌙'], 1: ['대체로 맑음', '🌤️', '🌙'], 2: ['구름 조금', '⛅', '☁️'], 3: ['흐림', '☁️', '☁️'], 45: ['안개', '🌫️'], 48: ['짙은 안개', '🌫️'],
+    51: ['약한 이슬비', '🌦️'], 53: ['이슬비', '🌦️'], 55: ['강한 이슬비', '🌧️'], 56: ['어는 이슬비', '🌧️'], 57: ['어는 이슬비', '🌧️'],
+    61: ['약한 비', '🌦️'], 63: ['비', '🌧️'], 65: ['강한 비', '🌧️'], 66: ['어는 비', '🌧️'], 67: ['어는 비', '🌧️'],
+    71: ['약한 눈', '🌨️'], 73: ['눈', '🌨️'], 75: ['많은 눈', '❄️'], 77: ['싸락눈', '🌨️'],
+    80: ['소나기', '🌦️'], 81: ['소나기', '🌧️'], 82: ['강한 소나기', '⛈️'], 85: ['눈 소나기', '🌨️'], 86: ['강한 눈 소나기', '❄️'],
+    95: ['뇌우', '⛈️'], 96: ['우박 뇌우', '⛈️'], 99: ['강한 우박 뇌우', '⛈️'] };
+  const wxInfo = (c, day = 1) => { const w = WX_CODE[c] || ['날씨 정보 없음', '🌡️']; return { text: w[0], ico: !day && w[2] ? w[2] : w[1] }; };
+  const WX_DIR = ['북', '북북동', '북동', '동북동', '동', '동남동', '남동', '남남동', '남', '남남서', '남서', '서남서', '서', '서북서', '북서', '북북서'];
+  const wxDir = (d) => WX_DIR[Math.round(((d % 360) + 360) % 360 / 22.5) % 16];
+  const wxWave = (h) => h < 0.5 ? '잔잔' : h < 1.5 ? '보통' : h < 2.5 ? '조금 높음' : '높음';
+  const wxHM = (iso) => iso ? iso.slice(11, 16) : '';
+  async function wxGet(url) {
+    const ac = new AbortController(); const tm = setTimeout(() => ac.abort(), 10000);
+    try { const r = await fetch(url, { signal: ac.signal }); if (!r.ok) throw new Error(String(r.status)); return await r.json(); }
+    finally { clearTimeout(tm); }
+  }
+  async function wxFetch() {
+    const q = new URLSearchParams({ latitude: WX_AT.lat, longitude: WX_AT.lon, timezone: 'Asia/Seoul', wind_speed_unit: 'ms', forecast_days: '2',
+      current: 'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,is_day',
+      hourly: 'temperature_2m,precipitation_probability,weather_code,is_day', daily: 'temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset' });
+    const m = new URLSearchParams({ latitude: WX_SEA.lat, longitude: WX_SEA.lon, timezone: 'Asia/Seoul', current: 'wave_height,wave_period' });
+    const [f, s] = await Promise.allSettled([wxGet(`https://api.open-meteo.com/v1/forecast?${q}`), wxGet(`https://marine-api.open-meteo.com/v1/marine?${m}`)]);
+    if (f.status !== 'fulfilled' || !f.value || !f.value.current) throw new Error('weather');
+    return { at: Date.now(), f: f.value, sea: s.status === 'fulfilled' && s.value && s.value.current ? s.value.current : null };
+  }
+  function paintWeather(w, err) {
+    const box = $('[data-wx]');
+    if (!w) {
+      const p = el('p', 'state', err ? '지금은 날씨를 못 불러왔어요.' : '날씨 불러오는 중…');
+      if (err) { const r = el('button', 'wx-retry', '다시 시도'); r.type = 'button'; r.addEventListener('click', () => loadWeather(true)); p.append(r); }
+      box.replaceChildren(p); $('[data-wx-when]').textContent = ''; return;
+    }
+    const c = w.f.current, d = w.f.daily || {}, h = w.f.hourly || {};
+    const now = wxInfo(c.weather_code, c.is_day);
+    const ico = el('span', 'wx-ico', now.ico); ico.setAttribute('aria-hidden', 'true');
+    const deg = el('div', 'wx-deg', String(Math.round(c.temperature_2m))); deg.append(el('small', null, '°C'));
+    const hi = d.temperature_2m_max ? Math.round(d.temperature_2m_max[0]) : null, lo = d.temperature_2m_min ? Math.round(d.temperature_2m_min[0]) : null;
+    const tx = el('div', 'wx-t'); tx.append(deg, el('div', 'wx-desc', now.text), el('div', 'wx-sub', `체감 ${Math.round(c.apparent_temperature)}°${hi != null ? ` · 최고 ${hi}° / 최저 ${lo}°` : ''}`));
+    const top = el('div', 'wx-now'); top.append(ico, tx);
+    const st = el('dl', 'wx-stats');
+    const add = (k, ...v) => { const g = el('div'); const dd = el('dd'); dd.append(...v); g.append(el('dt', null, k), dd); st.append(g); };
+    const ar = el('span', 'wx-arrow', '↓'); ar.style.transform = `rotate(${Math.round(c.wind_direction_10m)}deg)`; ar.setAttribute('aria-hidden', 'true');
+    add('바람', ar, `${c.wind_speed_10m.toFixed(1)}`, el('small', null, `m/s ${wxDir(c.wind_direction_10m)}풍`));
+    add('습도', `${Math.round(c.relative_humidity_2m)}`, el('small', null, '%'));
+    if (w.sea && w.sea.wave_height != null) add('앞바다 파고', `${w.sea.wave_height.toFixed(1)}`, el('small', null, `m ${wxWave(w.sea.wave_height)}`));
+    else add('비 올 확률', `${d.precipitation_probability_max ? d.precipitation_probability_max[0] : 0}`, el('small', null, '% 오늘'));
+    // 지금부터 12시간
+    const hrs = el('div', 'wx-hours'); hrs.setAttribute('role', 'list'); hrs.setAttribute('aria-label', '앞으로 12시간');
+    const t0 = (h.time || []).findIndex((x) => x.slice(0, 13) === (c.time || '').slice(0, 13));
+    for (let k = 0; t0 >= 0 && k < 12 && t0 + k < h.time.length; k++) {
+      const i = t0 + k, hi2 = k ? wxInfo(h.weather_code[i], h.is_day ? h.is_day[i] : 1) : now, pp = h.precipitation_probability ? h.precipitation_probability[i] : null;
+      const tp = Math.round(k ? h.temperature_2m[i] : c.temperature_2m);   // '지금' 칸은 위의 큰 숫자와 같게
+      const cell = el('div', `wx-h${k ? '' : ' now'}`); cell.setAttribute('role', 'listitem'); cell.style.setProperty('--k', String(k));
+      const hi3 = el('span', 'hi', hi2.ico); hi3.setAttribute('aria-hidden', 'true');
+      cell.append(el('span', 'hh', k ? `${Number(h.time[i].slice(11, 13))}시` : '지금'), hi3, el('span', 'ht', `${tp}°`), el('span', 'hp', pp >= 20 ? `💧${pp}%` : ''));
+      cell.setAttribute('aria-label', `${k ? `${Number(h.time[i].slice(11, 13))}시` : '지금'} ${tp}도 ${hi2.text}${pp >= 20 ? `, 비 올 확률 ${pp}%` : ''}`);
+      hrs.append(cell);
+    }
+    const foot = el('p', 'wx-foot', `${d.sunrise ? `일출 ${wxHM(d.sunrise[0])} · 일몰 ${wxHM(d.sunset[0])} · ` : ''}예보 Open-Meteo`);
+    box.replaceChildren(top, st, ...(hrs.childNodes.length ? [hrs] : []), foot);
+    $('[data-wx-when]').textContent = `${new Date(w.at).toLocaleTimeString('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false })} 기준`;
+  }
+  async function loadWeather(force) {
+    if (wxBusy) return;
+    let cached = null;
+    try { cached = JSON.parse(localStorage.getItem(WX_LS) || 'null'); } catch (x) { /* 저장소 못 씀 */ }
+    if (cached && cached.f) paintWeather(cached);
+    if (!force && cached && Date.now() - cached.at < WX_TTL) return wxTick();
+    wxBusy = true;
+    try {
+      const w = await wxFetch();
+      try { localStorage.setItem(WX_LS, JSON.stringify(w)); } catch (x) { /* 저장 못 함 */ }
+      paintWeather(w);
+    } catch (e) { if (!cached || !cached.f) paintWeather(null, true); }
+    finally { wxBusy = false; wxTick(); }
+  }
+  // 홈을 보고 있고 창이 보일 때만 20분마다
+  function wxTick() {
+    clearInterval(wxTimer);
+    wxTimer = setInterval(() => { if (view === 'home' && document.visibilityState === 'visible' && dbShown('weather')) loadWeather(); }, WX_TTL);
+  }
+
   /* ===== 내 대시보드 ===== (030 dashboard_prefs · 표가 없으면 이 브라우저에만) */
   const WG = {
     market: { name: '내 종목 · 증시', w: 2 }, continue: { name: '이어서 하기', w: 1 }, news: { name: '내 소식', w: 1 },
-    dday: { name: 'D-day', w: 1 }, favs: { name: '즐겨찾기', w: 1 }, board: { name: '새 글', w: 1 },
+    dday: { name: 'D-day', w: 1 }, favs: { name: '즐겨찾기', w: 1 }, board: { name: '새 글', w: 1 }, weather: { name: '날씨', w: 1 },
     showcase: { name: '새 결과물', w: 2 }, meeting: { name: '회의 안건', w: 1, crew: true },
   };
-  const DB_DEFAULT = () => ({ widgets: [{ id: 'market', w: 2 }, { id: 'continue', w: 1 }, { id: 'news', w: 1 }, { id: 'board', w: 1 }, { id: 'favs', w: 1 }].concat(isCrew ? [{ id: 'meeting', w: 1 }] : []), ddays: [], favs: [] });
+  const DB_DEFAULT = () => ({ widgets: [{ id: 'market', w: 2 }, { id: 'weather', w: 1 }, { id: 'continue', w: 1 }, { id: 'news', w: 1 }, { id: 'board', w: 1 }, { id: 'favs', w: 1 }].concat(isCrew ? [{ id: 'meeting', w: 1 }] : []), ddays: [], favs: [], added: ['weather'] });
+  const NEW_WG = ['weather'];
   let dbPrefs = DB_DEFAULT(), dbHasTable = true, dbEditing = false, dbSaveT = null;
   const DB_LS = `bypass-dash-${user.id}`;
   function dbClean(v) {
@@ -2626,7 +2748,10 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     const ws = Array.isArray(v.widgets) ? v.widgets.filter((x) => x && WG[x.id] && !seen.has(x.id) && seen.add(x.id)).map((x) => ({ id: x.id, w: x.w === 2 ? 2 : 1 })) : d.widgets;
     const dd = Array.isArray(v.ddays) ? v.ddays.filter((x) => x && typeof x.name === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x.date || '')).slice(0, 6).map((x) => ({ name: x.name.slice(0, 30), date: x.date })) : [];
     const fv = Array.isArray(v.favs) ? v.favs.filter((x) => Number.isInteger(x)).slice(0, 12) : [];
-    return { widgets: ws, ddays: dd, favs: fv };
+    // 새로 생긴 위젯은 예전에 저장한 회원에게도 한 번만 넣어 준다 (빼면 다시 안 넣음)
+    const added = Array.isArray(v.added) ? v.added.filter((x) => WG[x]) : [];
+    NEW_WG.forEach((id) => { if (!added.includes(id)) { added.push(id); if (Array.isArray(v.widgets) && !ws.some((x) => x.id === id)) ws.splice(Math.min(1, ws.length), 0, { id, w: WG[id].w }); } });
+    return { widgets: ws, ddays: dd, favs: fv, added };
   }
   async function dbLoad() {
     const { data, error } = await sb.from('dashboard_prefs').select('layout').eq('user_id', user.id).maybeSingle();
@@ -2646,6 +2771,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     if (id === 'market' && homeSet.market === false) return false;
     if (id === 'showcase' && homeSet.showcase === false) return false;
     if (id === 'board' && homeSet.board === false) return false;
+    if (id === 'weather' && homeSet.weather === false) return false;
     return true;
   };
   function dbLayout() {
@@ -2690,13 +2816,14 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   }
   $('[data-db-edit]').addEventListener('click', () => dbEdit(!dbEditing));
   $('[data-db-done]').addEventListener('click', () => dbEdit(false));
-  $('[data-db-reset]').addEventListener('click', () => { const f = dbPrefs.favs, d = dbPrefs.ddays; dbPrefs = DB_DEFAULT(); dbPrefs.favs = f; dbPrefs.ddays = d; dbSave(); dbLayout(); ['continue', 'news', 'favs', 'meeting'].forEach(dbFill); });
+  $('[data-db-reset]').addEventListener('click', () => { const f = dbPrefs.favs, d = dbPrefs.ddays; dbPrefs = DB_DEFAULT(); dbPrefs.favs = f; dbPrefs.ddays = d; dbSave(); dbLayout(); ['continue', 'news', 'favs', 'meeting', 'weather'].forEach(dbFill); });
   const dbShown = (id) => dbPrefs.widgets.some((x) => x.id === id) && wgOn(id);
   function dbFill(id) {
     if (id === 'continue') loadContinue();
     else if (id === 'news') loadNews();
     else if (id === 'favs') loadFavs();
     else if (id === 'meeting') loadWgMeeting();
+    else if (id === 'weather') loadWeather();
     else if (id === 'market' && !mkSyms.length && !Object.keys(mkQuotes).length) loadMarket().then(mkTick);
   }
 
@@ -2841,7 +2968,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   route(true);
   if (q0) runSearch(q0);
   // 홈 화면 설정 (HQ › 커뮤니티 › 홈 화면 설정 → site_settings 'community')
-  let homeSet = { market: true, fng: true, wti: true, showcase: true, board: true };
+  let homeSet = { market: true, fng: true, wti: true, weather: true, showcase: true, board: true };
   try {
     const { data } = await sb.from('site_settings').select('value').eq('key', 'community').maybeSingle();
     const v = (data && data.value) || {};
@@ -2855,7 +2982,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   // 대시보드를 읽기 전에 그려진 결과물 카드의 ☆ 맞추기
   $$('.fav[data-fav-id]').forEach((b) => { const on = dbPrefs.favs.includes(Number(b.dataset.favId)); b.setAttribute('aria-pressed', String(on)); b.textContent = on ? '★' : '☆'; });
   if (dbShown('market')) loadMarket().then(mkTick);
-  ['continue', 'news', 'favs', 'meeting'].forEach((id) => { if (dbShown(id)) dbFill(id); });
+  ['continue', 'news', 'favs', 'meeting', 'weather'].forEach((id) => { if (dbShown(id)) dbFill(id); });
   await Promise.all([loadHome(), loadNotices(), loadCrewCount(), loadUpload()]);
 })();
 </script>
