@@ -235,7 +235,7 @@ table.lv tr.fut td{color:var(--muted)}
 .faq .body li{margin:3px 0}
 .law{font-size:12.5px;font-family:var(--f-mono);color:var(--acc);background:var(--acc-bg);border-radius:6px;padding:1px 6px;white-space:nowrap}
 .foot{margin:34px 0 0;padding:18px 0 calc(28px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--rule);color:var(--muted);font-size:13px}
-.foot .ver{display:block;text-align:center;margin-top:10px;font-family:var(--f-mono);font-size:12px;letter-spacing:.1em}
+.foot .ver{display:block;margin:10px auto 0;border:0;background:none;padding:4px 8px;color:inherit;font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;cursor:default;-webkit-tap-highlight-color:transparent}
 
 /* 창 */
 .modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:var(--scrim);backdrop-filter:blur(3px);animation:fade .18s ease}
@@ -247,6 +247,43 @@ table.lv tr.fut td{color:var(--muted)}
 .dlg-x:hover{background:var(--acc-bg);color:var(--acc)}
 .dlg-x svg{width:16px;height:16px}
 @keyframes fade{from{opacity:0}to{opacity:1}}
+
+/* 이스터에그 (버전 표시 5번 누르기) — 해기사 시험 문제 풀이와 같은 모양, 카드 바탕은 흰색 고정 */
+.egg{position:fixed;inset:0;z-index:70;background:rgba(8,20,14,.55);display:flex;align-items:center;justify-content:center;padding:16px;cursor:pointer;animation:fade .18s ease}
+.egg-card{background:#FFFFFF;color:#16241B;border-radius:14px;padding:22px 26px 20px;text-align:center;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.35);animation:eggpop .35s ease-out}
+.egg-card svg.art{width:100%;max-width:280px;display:block;margin:0 auto 10px;border-radius:10px}
+.egg-card .ev{font-family:var(--f-mono);font-size:15px;font-weight:600}
+.egg-card .eb{font-family:var(--f-disp);font-size:20px;font-weight:800;margin-top:4px}
+.egg-card small{display:block;margin-top:14px;font-size:12px;color:#62756A}
+.egg-btns{display:flex;justify-content:center;gap:10px;margin-top:16px}
+.egg-btns button{display:block;margin:0;width:120px;border:0;border-radius:14px;color:#fff;font:inherit;font-weight:700;font-size:14px;padding:9px 0;cursor:pointer}
+.egg-btns button:hover{filter:brightness(1.1)}
+.egg-pn{background:#2D6A4C}
+.egg-hd{background:#B8517A}
+.egg-card.pn{max-width:560px;text-align:left;padding:0;display:flex;flex-direction:column;max-height:min(80vh,720px);cursor:default;overflow:hidden}
+.pn-h{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid #D2E4CE}
+.pn-h b{font-family:var(--f-disp);font-weight:800;font-size:20px;margin-right:auto}
+.pn-x,.pn-nav{border:0;background:#E4F0DF;color:#1D2A21;min-width:34px;height:34px;border-radius:10px;font-size:18px;line-height:1;cursor:pointer;font-family:var(--f-mono)}
+.pn-nav{font-size:15px;font-weight:600;padding:0 10px}
+.pn-nav[disabled]{opacity:.35;cursor:default}
+.pn-b{overflow:auto;padding:6px 18px 16px;overscroll-behavior:contain}
+.pn-b section{padding:12px 0;border-top:1px dashed #D2E4CE}
+.pn-b section:first-child{border-top:0}
+.pn-b h4{margin:0 0 6px;display:flex;align-items:baseline;gap:10px;font-size:12.5px;font-weight:500;color:#56705E;font-family:var(--f-mono)}
+.pn-b h4 span{font-size:15px;font-weight:700;color:#2D6A4C}
+.pn-b ul{margin:0;padding-left:18px;display:grid;gap:3px;font-size:14px;line-height:1.6;color:#1D2A21}
+.pn-b li{word-break:keep-all;overflow-wrap:anywhere}
+.hd-list{list-style:none;padding:0!important;gap:0!important}
+.hd-list li{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #EAF2E6}
+.hd-list li:last-child{border-bottom:0}
+.hd-list .dt{font-family:var(--f-mono);font-size:13.5px;min-width:86px;white-space:pre}
+.hd-list .k{margin-left:auto;font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 8px;background:#E4F0DF;color:#2D6A4C;white-space:nowrap}
+.hd-list .k.s{background:#FBE7EF;color:#A8466E}
+.hd-list .k.e,.hd-list .k.t{background:#FCF0D6;color:#8A5A00}
+.hd-list .k.l{background:#EEF1EE;color:#62756A}
+.hd-note{font-size:12.5px;color:#62756A;margin:8px 0 0}
+@keyframes eggpop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.egg-card,.egg{animation:none}}
 .toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--ink);color:var(--paper);border-radius:999px;padding:10px 18px;font-size:14px;font-weight:600;box-shadow:var(--shadow);animation:fade .18s ease;max-width:calc(100% - 32px);text-align:center}
 
 @media (max-width:620px){
@@ -277,13 +314,31 @@ table.lv tr.fut td{color:var(--muted)}
 <main class="wrap" id="view"></main>
 
 <div class="wrap"><footer class="foot">
-  <p style="margin:0 0 6px">계산 결과는 법령과 공휴일 규정을 바탕으로 한 참고용 추정입니다. 실제 복무만료일은 소속 해운업체 복무관리 담당자나 관할 지방병무청(병무청 1588-9090)에 확인하세요.</p>
-  <span class="ver" id="verTxt"></span>
+  <p style="margin:0 0 6px"><span id="footLead"></span>계산 결과는 법령과 공휴일 규정을 바탕으로 한 참고용 추정입니다. 실제 복무만료일은 소속 해운업체 복무관리 담당자나 관할 지방병무청(병무청 1588-9090)에 확인하세요.</p>
+  <button class="ver" id="verTxt" type="button" title="버전"></button>
 </footer></div>
 
 <script>
 'use strict';
-const VERSION = '1.0.0';
+const VERSION = '1.1.1';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const PATCH_NOTES = [
+  { v: '1.1.1', d: '2026. 11. 16', i: [
+    "처음 화면 아래 안내 문구 앞에 '복무만료 계산기의' 추가",
+  ] },
+  { v: '1.1.0', d: '2026. 11. 16', i: [
+    '버전 표시를 5번 누르면 열리는 이스터에그 추가: 패치노트, 연도별 공휴일 보기',
+    "처음 화면 'SEA SERVICE' 옆 '승선근무예비역' 글귀 삭제",
+  ] },
+  { v: '1.0.0', d: '2026. 11. 15~16', i: [
+    '복무완료 계산기 첫 공개: 편입일·승선 기록으로 인정일수, 진행률, 남은 일수, 만료 예상일 계산',
+    '휴가 중 공휴일·노동절 제외, 남은 휴가 이월, 군사교육소집, 편입 5년·30세 기한 확인',
+    '1990~2100년 공휴일 자료(온라인), 연결이 끊기면 오프라인 모드로 자동 전환',
+    '복구 코드 서버 백업, 파일로 내보내기·가져오기',
+    "앱 이름 '바다생활 계산기', 주소 /apps/seacal/",
+    '결과 범례를 칸별 상자로 구분, 30일 넘는 일수에 년·개월 표시, 휴가 내역 표 열 구분·날짜 정렬',
+    '날짜 끝 점 삭제, 상단 아이콘을 컨테이너선으로 변경',
+  ] },
+];
 const TARGET = 1095;                       // 복무 완료 기준 일수 (3년 = 1,095일로 계산)
 const DAY = 864e5;
 const LS_STATE = 'sd-calc-v1', LS_THEME = 'sd-theme', LS_SYNC = 'sd-sync-v1';
@@ -585,6 +640,7 @@ document.addEventListener('click', e => { const g = e.target.closest('[data-go]'
 
 function render(){
   const r = route();
+  $('#footLead').textContent = r === 'calc' ? '' : '복무만료 계산기의 ';
   const v = $('#view');
   if (r === 'calc') drawCalc(v); else drawHome(v);
   window.scrollTo(0, 0);
@@ -594,7 +650,7 @@ function drawHome(v){
   document.title = '바다생활 계산기';
   v.innerHTML = `
   <section class="hero">
-    <div class="tag">Sea service · 승선근무예비역</div>
+    <div class="tag">Sea service</div>
     <h1><em>바다생활</em> 계산기</h1>
     <p>승선 기록을 넣으면 휴가와 공휴일을 따져 복무 인정일수와 만료 예정일을 계산합니다.</p>
   </section>
@@ -1040,6 +1096,67 @@ function helpHTML(){
       <li>병무청 훈령 「승선근무예비역의 관리규정」(2026. 1. 9, 제2178호)</li>
       <li><a href="https://www.mma.go.kr/contents.do?mc=mma0000774" target="_blank" rel="noopener">병무청 승선근무예비역 복무관리</a> · 병무청 민원상담 1588-9090</li></ul></div></details>
   </div>`;
+}
+
+/* ---------- 이스터에그: 버전 표시 5번 누르기 ---------- */
+const EGG_ART = `<svg class="art" viewBox="0 0 280 170" role="img" aria-label="노을 지는 바다를 지나는 컨테이너선">
+  <defs><linearGradient id="eggSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#CFEBD9"/><stop offset=".62" stop-color="#F7E3D6"/><stop offset="1" stop-color="#FBD1DF"/></linearGradient>
+  <linearGradient id="eggSea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5FA582"/><stop offset="1" stop-color="#2D6A4C"/></linearGradient></defs>
+  <rect width="280" height="170" fill="url(#eggSky)"/>
+  <circle cx="214" cy="84" r="26" fill="#F6A9C4" opacity=".85"/>
+  <path d="M28 40c8-6 18-6 24 0M44 48c6-4 12-4 16 0" stroke="#5E7F6B" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <rect y="104" width="280" height="66" fill="url(#eggSea)"/>
+  <g transform="translate(40 58)">
+    <rect x="14" y="10" width="7" height="10" rx="1.5" fill="#1D2A21"/>
+    <rect x="8" y="20" width="22" height="34" rx="2" fill="#F4FAF2" stroke="#1D2A21" stroke-width="2.5"/>
+    <path d="M8 29h22M12 24h3M17 24h3M22 24h3" stroke="#1D2A21" stroke-width="2"/>
+    <g stroke="#1D2A21" stroke-width="2">
+      <rect x="36" y="38" width="22" height="16" fill="#E86A92"/><rect x="58" y="38" width="22" height="16" fill="#3F8F68"/><rect x="80" y="38" width="22" height="16" fill="#F2B84B"/><rect x="102" y="38" width="22" height="16" fill="#4E86C2"/><rect x="124" y="38" width="22" height="16" fill="#E86A92"/>
+      <rect x="47" y="22" width="22" height="16" fill="#F2B84B"/><rect x="69" y="22" width="22" height="16" fill="#4E86C2"/><rect x="91" y="22" width="22" height="16" fill="#3F8F68"/><rect x="113" y="22" width="22" height="16" fill="#E86A92"/>
+    </g>
+    <path d="M0 54h170l-12 22a6 6 0 0 1-5 3H14a6 6 0 0 1-5-3z" fill="#2B3B31" stroke="#1D2A21" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M6 62h158" stroke="#E86A92" stroke-width="3"/>
+  </g>
+  <path d="M0 128c20 6 40 6 60 0s40-6 60 0 40 6 60 0 40-6 60 0 40 6 40 0" stroke="#CFEBD9" stroke-width="2" fill="none" opacity=".7"/>
+  <path d="M0 148c20 5 40 5 60 0s40-5 60 0 40 5 60 0 40-5 60 0 40 5 40 0" stroke="#CFEBD9" stroke-width="2" fill="none" opacity=".45"/>
+</svg>`;
+let eggN = 0, eggT = null;
+$('#verTxt').addEventListener('click', () => { eggN++; clearTimeout(eggT); eggT = setTimeout(() => eggN = 0, 1500); if (eggN >= 5){ eggN = 0; showEgg(); } });
+const HOL_KIND = { p: '공휴일', s: '대체공휴일', e: '선거일', t: '임시공휴일', l: '근로자의 날' };
+function holidayList(y){
+  const out = [];
+  if (HOL.src === 'server' && y >= HOL.range[0] && y <= HOL.range[1]){ for (const [n, es] of HOL.map) if (ymd(n)[0] === y) for (const e of es) out.push([n, e]); }
+  else for (const [n, es] of ruleYear(y)) for (const e of es) out.push([n, e]);
+  return out.sort((a, b) => a[0] - b[0]);
+}
+function showEgg(){
+  if (document.querySelector('.egg')) return;
+  const o = document.createElement('div'); o.className = 'egg'; o.setAttribute('role', 'dialog'); o.setAttribute('aria-label', 'Made by "Bypass"');
+  o.innerHTML = `<div class="egg-card">${EGG_ART}<div class="ev">Ver.${VERSION}</div><div class="eb">Made by &quot;Bypass&quot;</div><div class="egg-btns"><button class="egg-pn" type="button">패치노트</button><button class="egg-hd" type="button">공휴일 보기</button></div><small>아무 곳이나 누르면 닫힙니다</small></div>`;
+  const close = () => { o.remove(); document.removeEventListener('keydown', k); };
+  const k = e => { if (e.key === 'Escape') close(); };
+  const card = o.querySelector('.egg-card');
+  const panel = (title, body, nav = '') => {
+    card.classList.add('pn');
+    card.innerHTML = `<div class="pn-h"><b>${title}</b>${nav}<button class="pn-x" type="button" aria-label="닫기">×</button></div><div class="pn-b">${body}</div>`;
+    card.onclick = ev => ev.stopPropagation();
+    card.querySelector('.pn-x').onclick = close;
+  };
+  o.querySelector('.egg-pn').addEventListener('click', e => {
+    e.stopPropagation();
+    panel('패치노트', PATCH_NOTES.map(n => `<section><h4><span>v${n.v}</span>${esc(n.d)}</h4><ul>${n.i.map(x => `<li>${esc(x)}</li>`).join('')}</ul></section>`).join(''));
+  });
+  const drawYear = y => {
+    const [lo, hi] = HOL.range, list = holidayList(y);
+    const pad = x => (x < 10 ? ' ' : '') + x;
+    const body = `<ul class="hd-list">${list.map(([n, e]) => { const [, m, d] = ymd(n); return `<li><span class="dt">${pad(m)}. ${pad(d)}(${WK[dow(n)]})</span><span>${esc(e.nm)}</span><span class="k ${e.k}">${HOL_KIND[e.k] || ''}</span></li>`; }).join('') || '<li>자료가 없습니다</li>'}</ul>
+      <p class="hd-note">일요일은 목록에 없지만 계산에서는 공휴일로 셉니다. ${HOL.src === 'server' ? '서버 공휴일 자료 기준이며, 선거일·음력은 규정으로 계산한 값입니다.' : '오프라인이라 양력 고정 공휴일만 보입니다.'}</p>`;
+    panel(`${y}년 공휴일`, body, `<button class="pn-nav" type="button" data-y="${y - 1}" ${y <= lo ? 'disabled' : ''} aria-label="이전 해">‹</button><button class="pn-nav" type="button" data-y="${y + 1}" ${y >= hi ? 'disabled' : ''} aria-label="다음 해">›</button>`);
+    card.querySelectorAll('.pn-nav').forEach(b => b.onclick = () => drawYear(+b.dataset.y));
+  };
+  o.querySelector('.egg-hd').addEventListener('click', e => { e.stopPropagation(); drawYear(ymd(todayN())[0]); });
+  o.addEventListener('click', close); document.addEventListener('keydown', k); document.body.appendChild(o);
+  o.querySelector('.egg-pn').focus();
 }
 
 /* ---------- 시작 ---------- */
