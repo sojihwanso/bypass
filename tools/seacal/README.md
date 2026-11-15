@@ -2,6 +2,8 @@
 
 `apps/seacal/`는 배포본이고, 이 폴더가 원본과 작업 도구입니다. 주소: `/apps/seacal/`
 
+기능: **복무완료 계산기**(`#/calc`, 승선근무예비역 인정일수·만료 예정일)와 **ETA 계산기**(`#/eta`, 시차·일광절약시를 따진 도착 예정 시각). 기록 백업(복구 코드·파일)에는 두 계산기의 입력이 함께 들어갑니다.
+
 ## 폴더 구성
 
 | 경로 | 내용 |
@@ -9,7 +11,7 @@
 | `site/index.html` | 앱 원본(스타일·스크립트 포함 한 파일). **수정은 여기서** |
 | `build.sh` | 원본 → `apps/seacal/index.html` (cbttest와 같은 파비콘을 넣음) |
 | `build_holidays.py` | 1990~2100 공휴일 → `apps/seacal/data/holidays.json` (온라인 모드에서 받아 씀) |
-| `../../supabase/031_seaduty_sync.sql` | 복구 코드 서버 백업 표·함수. Supabase SQL Editor에서 한 번 실행 |
+| `../../supabase/031_seaduty_sync.sql` | 복구 코드 서버 백업 표·함수(복무 기록 + ETA 입력값). Supabase SQL Editor에서 한 번 실행 |
 
 ```bash
 bash tools/seacal/build.sh                       # 앱 수정 후

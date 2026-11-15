@@ -347,14 +347,20 @@ table.lv tr.fut td{color:var(--muted)}
 
 <div class="wrap"><footer class="foot">
   <p style="margin:0 0 6px" class="foot-dis" id="foot1"><span id="footLead"></span>계산 결과는 법령과 공휴일 규정을 바탕으로 한 참고용 추정입니다. 실제 복무만료일은 소속 해운업체 복무관리 담당자나 관할 지방병무청(병무청 1588-9090)에 확인하세요.</p>
-  <p style="margin:0 0 6px" id="foot2">이 계산기는 <b>대체공휴일 계산을 포함</b>합니다(기본 설정의 '휴가 중 대체공휴일'에서 끌 수 있음). 대체공휴일은 선거일·임시공휴일과 마찬가지로 관공서의 공휴일로 보아 유급휴가 사용일수에서 빼고, 그만큼 휴가 기간을 늘립니다. 근거: 선원법 제71조(관공서의 공휴일·노동절은 유급휴가 사용일수에 포함하지 않음), 관공서의 공휴일에 관한 규정 제3조(공휴일이 토·일이나 다른 공휴일과 겹치면 다음 첫 비공휴일을 대체공휴일로 함), 공휴일에 관한 법률 제3조.</p>
+  <p style="margin:0 0 6px" id="foot2"><span id="foot2Lead">이 계산기는</span> <b>대체공휴일 계산을 포함</b>합니다(기본 설정의 '휴가 중 대체공휴일'에서 끌 수 있음). 대체공휴일은 선거일·임시공휴일과 마찬가지로 관공서의 공휴일로 보아 유급휴가 사용일수에서 빼고, 그만큼 휴가 기간을 늘립니다. 근거: 선원법 제71조(관공서의 공휴일·노동절은 유급휴가 사용일수에 포함하지 않음), 관공서의 공휴일에 관한 규정 제3조(공휴일이 토·일이나 다른 공휴일과 겹치면 다음 첫 비공휴일을 대체공휴일로 함), 공휴일에 관한 법률 제3조.</p>
+  <p style="margin:0 0 6px" id="foot3"><span id="etaLead">ETA 계산기의 </span>계산 결과는 입력한 속력을 끝까지 유지한다고 가정한 참고값입니다. 실제 입항 시각은 기상·해류·항로·대기 등에 따라 달라지니 항해 계획과 선장 판단을 따르세요. 시간대·일광절약시는 브라우저의 세계 시간대 자료로 계산합니다.</p>
   <button class="ver" id="verTxt" type="button" title="버전"></button>
 </footer></div>
 
 <script>
 'use strict';
-const VERSION = '2.2.2';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '2.3.0';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  { v: '2.3.0', d: '2026. 11. 16', i: [
+    "처음 화면 아래 안내에 ETA 계산기 안내 추가(각 계산기 화면에는 그 계산기 안내만)",
+    '기록 백업(복구 코드·파일 내보내기)에 ETA 계산기 입력값도 함께 저장, ETA 화면에도 기록 백업 칸 추가',
+    "상단 온라인/오프라인 안내와 도움말에 ETA 계산기(지명 검색·시간대 직접 고르기) 내용 추가, 내보내기 파일 이름을 '바다생활계산기_기록'으로",
+  ] },
   { v: '2.2.2', d: '2026. 11. 16', i: [
     "시간대 목록 맨 위 'UTC±0'에서 '영국/런던' 표시 삭제",
   ] },
@@ -547,7 +553,7 @@ function setNet(on){
   const was = net; net = on;
   const c = $('#netChip'); c.classList.toggle('off', !on);
   $('#netTxt').textContent = on ? '온라인' : '오프라인';
-  c.title = on ? '온라인: 서버의 공휴일 자료와 기록 백업을 씁니다' : '오프라인: 인터넷 연결이 없어 양력 고정 공휴일만으로 계산합니다';
+  c.title = on ? '온라인: 공휴일 자료·지명 검색·기록 백업을 씁니다' : '오프라인: 공휴일은 양력 고정 공휴일만, ETA는 지명 검색 대신 시간대 직접 고르기';
   if (on && !was){ loadHolidays(); syncSoon(800); }
   if (on !== was && route() === 'eta') document.querySelectorAll('.place').forEach(b => { if (!b.querySelector('.pchip')){ b.outerHTML = placeHTML(b.dataset.key, b.querySelector('.lb').textContent); bindPlace(document.querySelector(`.place[data-key="${b.dataset.key}"]`)); } });
 }
@@ -557,9 +563,9 @@ $('#netChip').onclick = () => {
   const on = net && HOL.src === 'server', kept = !net && HOL.src === 'server';
   modal(`<h3>${on ? '온라인 모드' : '오프라인 모드'}</h3>
     <p class="sub">${on
-      ? `서버의 공휴일 자료(${HOL.range[0]}~${HOL.range[1]}년, ${esc(HOL.built)} 생성)로 계산합니다. 인터넷 연결이 끊기면 자동으로 오프라인 모드로 바뀝니다.`
-      : kept ? `인터넷 연결이 끊겼습니다. 이 화면을 연 뒤 이미 받아 둔 공휴일 자료로 계속 계산합니다. 서버 백업은 멈췄다가 다시 연결되면 자동으로 이어서 저장합니다.`
-      : `인터넷 연결이 확인되지 않아 오프라인 모드로 계산합니다. 일요일과 양력으로 날짜가 정해진 공휴일(신정·삼일절·노동절·어린이날·현충일·제헌절·광복절·개천절·한글날·기독탄신일)만 반영되고, <b>설·추석·부처님 오신 날·선거일·임시공휴일과 그에 따른 대체공휴일은 빠집니다.</b> 그래서 휴가가 끝나는 날이 실제보다 빠르게 나올 수 있습니다. 연결되면 자동으로 온라인 모드로 돌아갑니다.`}</p>
+      ? `복무완료 계산기는 서버의 공휴일 자료(${HOL.range[0]}~${HOL.range[1]}년, ${esc(HOL.built)} 생성)로 계산하고, ETA 계산기는 출항지·목적지를 온라인 지명 검색으로 찾습니다. 인터넷 연결이 끊기면 자동으로 오프라인 모드로 바뀝니다.`
+      : kept ? `인터넷 연결이 끊겼습니다. 복무완료 계산기는 이 화면을 연 뒤 이미 받아 둔 공휴일 자료로 계속 계산합니다. ETA 계산기는 지명 검색 대신 '시간대 직접 고르기'를 쓰세요(일광절약시 계산은 그대로 됩니다). 서버 백업은 멈췄다가 다시 연결되면 자동으로 이어서 저장합니다.`
+      : `인터넷 연결이 확인되지 않아 오프라인 모드로 계산합니다. 일요일과 양력으로 날짜가 정해진 공휴일(신정·삼일절·노동절·어린이날·현충일·제헌절·광복절·개천절·한글날·기독탄신일)만 반영되고, <b>설·추석·부처님 오신 날·선거일·임시공휴일과 그에 따른 대체공휴일은 빠집니다.</b> 그래서 휴가가 끝나는 날이 실제보다 빠르게 나올 수 있습니다. ETA 계산기는 지명 검색 대신 '시간대 직접 고르기'를 쓰세요(일광절약시 계산은 그대로 됩니다). 연결되면 자동으로 온라인 모드로 돌아갑니다.`}</p>
     ${HOL.basis && on ? `<p class="sub">기준: ${esc(HOL.basis)}</p>` : ''}
     <div class="acts">${on ? '' : '<button class="btn btn-ghost" id="netRetry">다시 연결</button>'}<button class="btn btn-pri" data-close>확인</button></div>`, m => {
       const r = m.querySelector('#netRetry'); if (r) r.onclick = async () => { r.disabled = true; HOL.src = 'none'; const ok = await loadHolidays(); closeLayer(); toast(ok ? '온라인 모드로 바꿨습니다' : '아직 연결되지 않았습니다'); };
@@ -715,13 +721,14 @@ function route(){ return location.hash.replace(/^#\/?/, '') || 'home'; }
 window.addEventListener('hashchange', render);
 document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g){ e.preventDefault(); const to = g.dataset.go; location.hash = to === 'home' ? '' : '#/' + to; } });
 
-let FOOT1 = null;
 function render(){
   const r = route();
-  const f1 = $('#foot1'), f2 = $('#foot2');
-  if (FOOT1 == null) FOOT1 = f1.innerHTML;
-  if (r === 'eta'){ f1.innerHTML = 'ETA 계산 결과는 입력한 속력을 끝까지 유지한다고 가정한 참고값입니다. 실제 입항 시각은 기상·해류·항로·대기 등에 따라 달라지니 항해 계획과 선장 판단을 따르세요. 시간대·일광절약시는 브라우저의 세계 시간대 자료로 계산합니다.'; f2.hidden = true; }
-  else { f1.innerHTML = FOOT1; f2.hidden = false; $('#footLead').textContent = r === 'calc' ? '' : '복무만료 계산기의 '; }
+  // 하단 안내: 처음 화면은 두 계산기 모두, 각 계산기 화면은 그 계산기 것만
+  $('#foot1').hidden = $('#foot2').hidden = r === 'eta';
+  $('#foot3').hidden = r === 'calc';
+  $('#footLead').textContent = r === 'calc' ? '' : '복무만료 계산기의 ';
+  $('#etaLead').hidden = r === 'eta';
+  $('#foot2Lead').textContent = r === 'calc' ? '이 계산기는' : '복무완료 계산기는';
   const v = $('#view');
   if (r === 'calc') drawCalc(v); else if (r === 'eta') drawEta(v); else drawHome(v);
   window.scrollTo(0, 0);
@@ -972,7 +979,7 @@ function drawResults(){
    - 오프라인이면 검색 대신 시간대를 직접 고릅니다(UTC±시각 또는 IANA 시간대 목록). 오프라인용 내장 자료는 아직 넣지 않았습니다. */
 const LS_ETA = 'sd-eta-v1';
 let ET = lsGet(LS_ETA, null) || { mode: 'dep', depAt: '', dep: null, dest: null, spd: '', dist: '', shipAt: '', shipOff: 540 };
-const saveEta = () => lsSet(LS_ETA, ET);
+const saveEta = () => { lsSet(LS_ETA, ET); S.t = Date.now(); lsSet(LS_STATE, S); syncSoon(); };   // ETA 입력값도 기록 백업에 함께 올림
 const offFmt = new Map();
 function zoneOff(z, ms){   // 그 순간 UTC보다 몇 분 빠른지
   if (!z) return 0;
@@ -1182,6 +1189,8 @@ function drawEta(v){
   </div></div>
   <div class="sec-t"><h3>${IC.clock}ETA</h3></div>
   <div class="card" id="etaRes"></div>
+  <div class="sec-t"><h3>${IC.cloud}기록 백업</h3></div>
+  <div class="card" id="syncCard"></div>
   ${etaHelpHTML()}`;
   v.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { ET.mode = b.dataset.mode; saveEta(); drawEta(v); });
   const bind = (id, k, num = false) => { const el = $('#' + id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => { ET[k] = num ? +el.value : el.value.trim(); saveEta(); calcEta(); }); };
@@ -1195,6 +1204,7 @@ function drawEta(v){
   }
   const nb = $('#eNow'); if (nb) nb.onclick = () => { ET.shipAt = shipNow(); saveEta(); $('#eShipAt').value = ET.shipAt; calcEta(); };
   v.querySelectorAll('.place').forEach(bindPlace);
+  drawSyncBox();
   calcEta();
 }
 
@@ -1253,6 +1263,7 @@ function etaHelpHTML(){
     <details><summary>시차와 일광절약시는 어떻게 반영하나요?</summary><div class="body"><p>출항지·목적지를 검색하면 그곳의 지역 시간대(예: Europe/Amsterdam)를 받아옵니다. 그 시간대의 표준시와 일광절약시(서머타임) 시작·끝 날짜는 브라우저에 들어 있는 세계 시간대 자료로 계산하므로, 도착하는 날짜에 일광절약시가 적용되는지까지 따져서 현지 시각을 냅니다. 시차는 '도착 시각의 목적지 오프셋 − 출발 시각의 출발지(또는 선박) 오프셋'입니다.</p></div></details>
     <details><summary>'현재 선박 시간 기준'은 언제 쓰나요?</summary><div class="body"><p>항해 중에 배 시계(Ship's time)를 기준으로 남은 시간을 보고 싶을 때 씁니다. 배 시계는 항해하면서 시간대를 바꾸므로 지역 시간대 대신 UTC±시각으로 고르고, 바꿀 때마다 같이 고쳐 주세요.</p></div></details>
     <details><summary>시간 표시의 괄호는 무엇인가요?</summary><div class="body"><p>24시간이 넘으면 일, 30일이 넘으면 달로 바꿔 괄호 안에 함께 적습니다(예: 321.4시간 (13일 9시간 26분)). 1달은 30일로 셉니다.</p></div></details>
+    <details><summary>입력한 내용은 어디에 저장되나요?</summary><div class="body"><p>이 브라우저에 저장되어 다음에 열어도 그대로 남습니다. 아래 <b>기록 백업</b>에서 서버 백업을 켜면 복무완료 계산기 기록과 함께 복구 코드 하나로 서버에 저장되고, 다른 기기에서 같은 코드로 불러올 수 있습니다.</p></div></details>
     <details><summary>지명 검색은 어디서 하나요?</summary><div class="body"><p>온라인 지명 검색 서비스(Open-Meteo Geocoding)를 씁니다. 입력한 지명만 보내고 다른 기록은 보내지 않습니다. 이름만 같은 작은 마을·산·섬·공항은 빼고 실제 도시·항구만 보여 주며, 한글로 찾으면 '○○광역시'·'○○시'와 영문 표기로도 함께 찾습니다. 항구 이름이 안 나오면 가까운 도시 이름이나 영어 이름으로 찾아보세요.</p><p>시간대 목록의 지역 이름은 영어와 한국어를 함께 적었습니다(예: Asia/Seoul · 아시아/서울).</p></div></details>
   </div>`;
 }
@@ -1277,6 +1288,14 @@ async function rpc(fn, body, keepalive){
 }
 function syncSoon(ms = 3000){ if (!SYNC_AVAIL || !syncCfg().code || !net) return; clearTimeout(syncT); syncT = setTimeout(() => syncNow(), ms); }
 function validState(o){ return o && typeof o === 'object' && Array.isArray(o.rows); }
+// 백업에 올리는 내용: 복무완료 계산기 기록(S) + ETA 계산기 입력값(eta)
+const syncPayload = () => Object.assign({}, S, { eta: ET });
+function applyBackup(o){
+  const { eta, app, ...rest } = o;
+  S = Object.assign({ v: 1 }, rest); rid = 1 + Math.max(0, ...S.rows.map(r => r.id || 0)); lsSet(LS_STATE, S);
+  if (eta && typeof eta === 'object'){ ET = Object.assign({ mode: 'dep', shipOff: 540 }, eta); lsSet(LS_ETA, ET); }
+  const r = route(); if (r === 'calc') drawCalc($('#view')); else if (r === 'eta') drawEta($('#view'));
+}
 async function syncNow(opts = {}){
   const cfg = syncCfg();
   if (!SYNC_AVAIL || !cfg.code) return false;
@@ -1288,10 +1307,9 @@ async function syncNow(opts = {}){
     if (!got && opts.mustExist) throw new Error('notfound');
     const remote = got && got.data;
     if (validState(remote) && (remote.t || 0) > (S.t || 0)){
-      S = remote; rid = 1 + Math.max(0, ...S.rows.map(r => r.id || 0)); lsSet(LS_STATE, S);
-      if (route() === 'calc') drawCalc($('#view'));
+      applyBackup(remote);
     } else if (!validState(remote) || (remote.t || 0) < (S.t || 0)){
-      await rpc('seaduty_sync_put', { p_code: cfg.code, p_data: S });
+      await rpc('seaduty_sync_put', { p_code: cfg.code, p_data: syncPayload() });
     }
     syncCfgSet({ at: Date.now(), err: null }); drawSyncBox();
     return true;
@@ -1303,13 +1321,13 @@ async function syncNow(opts = {}){
 }
 document.addEventListener('visibilitychange', () => {
   const c = syncCfg();
-  if (document.hidden && syncT && SYNC_AVAIL && c.code && net && !syncBusy){ clearTimeout(syncT); syncT = null; rpc('seaduty_sync_put', { p_code: c.code, p_data: S }, true).catch(() => {}); }
+  if (document.hidden && syncT && SYNC_AVAIL && c.code && net && !syncBusy){ clearTimeout(syncT); syncT = null; rpc('seaduty_sync_put', { p_code: c.code, p_data: syncPayload() }, true).catch(() => {}); }
 });
 function exportFile(){
   const d = new Date();
-  const blob = new Blob([JSON.stringify({ app: 'bypass-seaduty', ...S })], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify({ app: 'bypass-seaduty', ...syncPayload() })], { type: 'application/json' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = `승선근무_복무기록_${d.getFullYear()}${z2(d.getMonth() + 1)}${z2(d.getDate())}.json`;
+  a.download = `바다생활계산기_기록_${d.getFullYear()}${z2(d.getMonth() + 1)}${z2(d.getDate())}.json`;
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
 }
 function importFile(){
@@ -1319,8 +1337,7 @@ function importFile(){
     try {
       const o = JSON.parse(await f.text());
       if (!o || o.app !== 'bypass-seaduty' || !validState(o)) throw 0;
-      delete o.app; S = Object.assign({ v: 1 }, o); rid = 1 + Math.max(0, ...S.rows.map(r => r.id || 0)); save();
-      drawCalc($('#view')); toast('기록 파일을 불러왔습니다');
+      applyBackup(o); save(); toast('기록 파일을 불러왔습니다');
     } catch(e) { toast('이 계산기에서 내보낸 기록 파일이 아닙니다'); }
   };
   inp.click();
@@ -1440,11 +1457,11 @@ function helpHTML(){
       <li><b>2021. 8. 4 이후</b>: 규정이 '대체공휴일로 한다'로 바뀌었고, 법제처는 근로기준법에서 대체공휴일을 공휴일과 별개의 휴일로 본 적이 있습니다(법제처 21-0547). 선원법 기준의 공식 해석은 아직 찾지 못했습니다.</li></ul>
       <p>이 계산기는 <b>모든 대체공휴일을 관공서의 공휴일로 보아 휴가 사용일수에서 빼고</b>, 그만큼 휴가 기간을 늘려 계산합니다. 대체공휴일은 관공서가 쉬는 날이고, 공휴일에 쉰 날을 휴가로 칠 수 없다는 법제처 해석(14-0142)의 취지에 맞기 때문입니다. 회사나 병무청이 대체공휴일을 휴가로 센다면 <b>기본 설정 › 휴가 중 대체공휴일</b>을 '포함 안 함'으로 바꾸세요. 휴가가 그만큼 빨리 끝나 만료일이 며칠 앞당겨질 수 있습니다.</p></div></details>
     <details><summary>온라인·오프라인 모드는 무엇인가요?</summary><div class="body">
-      <p>평소에는 <b>온라인 모드</b>로, 서버에 있는 1990~2100년 공휴일 자료(설·추석·부처님 오신 날·대체공휴일·선거일·임시공휴일 포함)로 계산합니다. 인터넷 연결이 끊기면 자동으로 <b>오프라인 모드</b>로 바뀌어 일요일과 양력 고정 공휴일만으로 계산하고, 다시 연결되면 온라인 모드로 돌아갑니다. 상단의 온라인/오프라인 표시를 누르면 자세한 상태를 볼 수 있습니다.</p></div></details>
+      <p>평소에는 <b>온라인 모드</b>로, 서버에 있는 1990~2100년 공휴일 자료(설·추석·부처님 오신 날·대체공휴일·선거일·임시공휴일 포함)로 계산합니다. 인터넷 연결이 끊기면 자동으로 <b>오프라인 모드</b>로 바뀌어 일요일과 양력 고정 공휴일만으로 계산하고, 다시 연결되면 온라인 모드로 돌아갑니다. ETA 계산기는 오프라인일 때 지명 검색 대신 '시간대 직접 고르기'를 씁니다. 상단의 온라인/오프라인 표시를 누르면 자세한 상태를 볼 수 있습니다.</p></div></details>
     <details><summary>미래의 공휴일은 어떻게 정했나요?</summary><div class="body">
       <p>현행 「관공서의 공휴일에 관한 규정」(2026. 5. 11 시행: 노동절·제헌절 공휴일, 대체공휴일 규정)을 그대로 적용해 2100년까지 만들었습니다. 음력 날짜는 한국 표준시 기준으로 계산했고, 2050년까지는 한국천문연구원 자료와 모두 같습니다. 선거일은 공직선거법 제34조의 규칙으로 계산한 예정일이며, 임시공휴일은 지정되기 전에는 알 수 없어 넣지 않았습니다(2026년 11월 확인분까지 반영).</p></div></details>
     <details><summary>기록은 어디에 저장되나요?</summary><div class="body">
-      <p>입력한 내용은 이 브라우저에 저장됩니다. <b>서버 백업</b>을 켜면 복구 코드 하나에 묶어 서버에도 저장하고, 내용이 바뀔 때마다 몇 초 뒤 자동으로 올립니다. 서버에는 코드 원문 대신 암호화한 값(해시)만 남고, 코드를 아는 사람만 기록을 읽고 고칠 수 있습니다. 두 기기에서 고쳤다면 더 나중에 고친 쪽 기록이 남습니다. 서버 없이 <b>파일로 내보내기</b>로 따로 보관할 수도 있습니다.</p></div></details>
+      <p>입력한 내용은 이 브라우저에 저장됩니다. <b>서버 백업</b>을 켜면 이 계산기 기록과 ETA 계산기 입력값을 복구 코드 하나에 묶어 서버에도 저장하고, 내용이 바뀔 때마다 몇 초 뒤 자동으로 올립니다. 서버에는 코드 원문 대신 암호화한 값(해시)만 남고, 코드를 아는 사람만 기록을 읽고 고칠 수 있습니다. 두 기기에서 고쳤다면 더 나중에 고친 쪽 기록이 남습니다. 서버 없이 <b>파일로 내보내기</b>로 따로 보관할 수도 있습니다.</p></div></details>
     <details><summary>계산이 병무청 결과와 다를 수 있나요?</summary><div class="body">
       <p>네. 법령은 복무기간을 '3년'으로만 정하고 일수로 바꾸는 규정이 없어, 이 계산기는 1,095일을 기준으로 삼았습니다. 회사의 휴가 부여 방식, 휴직·겸직 처리, 선원명부 기재일에 따라 실제 만료일은 달라질 수 있습니다. 중요한 일정은 반드시 회사 복무관리 담당자나 관할 지방병무청에 확인하세요.</p></div></details>
   </div>
