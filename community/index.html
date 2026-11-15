@@ -2240,7 +2240,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
         paintMarket();
       }
       // 공포·탐욕 지수는 따로 받아 둔다 (못 받아도 종목 시세는 그대로)
-      if (mkFngOn && (!silent || !mkFng)) mkCall({ action: 'fng' }).then((f) => { mkFng = f; }).catch(() => { if (!mkFng) mkFng = false; }).finally(() => { if (!mkDown) paintMarket(); if (mkSel === FNG) mkDetail(); });
+      if (mkFngOn && (!silent || !mkFng)) mkCall({ action: 'fng' }).then((f) => { if (f && typeof f.score === 'number') mkFng = { ...f, prev: f.prev || {}, points: Array.isArray(f.points) ? f.points : [] }; else if (!mkFng) mkFng = false; }).catch(() => { if (!mkFng) mkFng = false; }).finally(() => { if (!mkDown) paintMarket(); if (mkSel === FNG) mkDetail(); });
       if (!mkSyms.length) { paintMarket(); return; }
       const r = await mkCall({ action: 'quotes', symbols: mkSyms });
       mkDown = false; mkErr = r.errors || {};
