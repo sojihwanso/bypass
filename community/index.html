@@ -2066,7 +2066,10 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   const MK_RANGES = [['1d', '1일'], ['5d', '5일'], ['1mo', '1달'], ['6mo', '6달'], ['1y', '1년'], ['5y', '5년']];
   const MK_STATE = { open: '장중', pre: '장 시작 전', post: '시간외', closed: '장 마감' };
   let mkSyms = MK_DEFAULT.slice(), mkQuotes = {}, mkErr = {}, mkSel = null, mkRange = '1d', mkHasTable = true, mkTimer = null, mkBusy = false, mkDown = false;
-  const mkNames = {};   // 찾기 결과에서 본 이름 (시세가 오기 전 편집 목록에 쓰려고)
+  const mkNames = {};
+  // 보이는 이름: 주식·ETF 는 티커만 (NVDA), 지수·환율은 기호가 알아보기 어려우니 짧은 이름 (S&P 500, 원·달러 환율)
+  const MK_IDX = { '^GSPC': 'S&P 500', '^IXIC': '나스닥', '^DJI': '다우존스', '^RUT': '러셀 2000', '^VIX': 'VIX', '^NDX': '나스닥 100', '^SOX': '필라델피아 반도체', 'KRW=X': '원·달러' };
+  const mkLabel = (sym) => MK_IDX[sym] || (sym.startsWith('^') || sym.includes('=') ? ((mkQuotes[sym] || {}).name || sym) : sym);   // 찾기 결과에서 본 이름 (시세가 오기 전 편집 목록에 쓰려고)
   const mkF = (n, d = 2) => n == null ? '–' : n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
   const mkPx = (q) => { if (!q || q.price == null) return '–'; const d = q.price >= 1000 ? 2 : q.price >= 1 ? 2 : 4; const v = mkF(q.price, d); return q.symbol.startsWith('^') ? v : q.currency === 'USD' ? `$${v}` : q.currency === 'KRW' ? `${v}원` : `${v} ${q.currency}`; };
   const mkDir = (c) => c == null || Math.abs(c) < 1e-9 ? 'flat' : c > 0 ? 'up' : 'down';
@@ -2103,8 +2106,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     const q = mkQuotes[sym];
     const b = el('button', 'mk-card'); b.type = 'button'; b.dataset.sym = sym;
     b.setAttribute('aria-pressed', String(mkSel === sym));
-    const nm = el('span', 'mk-nm', q ? q.name : mkNames[sym] || sym);
-    if (q && q.name !== q.symbol && !sym.startsWith('^')) nm.append(el('span', 'mk-sym', sym));
+    const nm = el('span', 'mk-nm', mkLabel(sym));
     b.append(nm);
     if (!q && mkErr[sym]) {
       b.classList.add('is-err'); b.disabled = true;
@@ -2113,7 +2115,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     }
     if (!q) { b.classList.add('is-skel'); b.append(el('span', 'mk-px', '000.00'), el('span', 'mk-ch', '+0.00%')); return b; }
     b.append(el('span', 'mk-px', mkPx(q)), el('span', `mk-ch mk-${mkDir(q.change)}`, mkCh(q)), sparkSvg(q.points, q.prev));
-    b.setAttribute('aria-label', `${q.name} ${mkPx(q)}, 전일 대비 ${mkCh(q) || '변동 없음'}`);
+    b.setAttribute('aria-label', `${mkLabel(sym)} ${mkPx(q)}, 전일 대비 ${mkCh(q) || '변동 없음'}`);
     b.addEventListener('click', () => { mkSel = mkSel === sym ? null : sym; if (mkSel) mkRange = '1d'; paintMarket(); if (mkSel) mkDetail(); });
     return b;
   }
@@ -2163,7 +2165,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     const tok = ++mkChartTok;
     box.hidden = false;
     const top = el('div', 'mk-d-top');
-    const nm = el('p', 'mk-d-nm', q0 ? `${q0.name}${q0.name !== sym ? ` · ${sym}` : ''}${q0.exchange ? ` · ${q0.exchange}` : ''}` : sym);
+    const nm = el('p', 'mk-d-nm', `${mkLabel(sym)}${q0 && q0.exchange ? ` · ${q0.exchange}` : ''}`);
     const px = el('span', 'mk-d-px', mkPx(q0)), ch = el('span', 'mk-d-ch');
     const close = el('button', 'mk-ib mk-d-close', '✕'); close.type = 'button'; close.setAttribute('aria-label', '그래프 닫기');
     close.addEventListener('click', () => { mkSel = null; paintMarket(); });
@@ -2262,7 +2264,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     if (!mkSyms.length) { ul.replaceChildren(el('li', 'mk-msg', '아직 고른 종목이 없어요. 아래에서 찾아 추가해 보세요.')); return; }
     ul.replaceChildren(...mkSyms.map((sym, i) => {
       const li = el('li', 'mk-li'); const q = mkQuotes[sym];
-      const t = el('span', 't', q ? q.name : mkNames[sym] || sym); if ((q ? q.name : mkNames[sym]) && (q ? q.name : mkNames[sym]) !== sym && !sym.startsWith('^')) t.append(el('small', null, sym));
+      const t = el('span', 't', mkLabel(sym));
       li.append(t);
       [['↑', -1, '위로'], ['↓', 1, '아래로']].forEach(([g, d, lab]) => {
         const b = el('button', 'mk-ib', g); b.type = 'button'; b.setAttribute('aria-label', `${t.firstChild.textContent} ${lab}`); b.disabled = !mkSyms[i + d];
