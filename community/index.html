@@ -25,6 +25,8 @@
   try { const s = JSON.parse(localStorage.getItem('sb-itzdjdgjqcpmxdfssfel-auth-token') || 'null'); if (!s || !s.refresh_token) location.replace('/login/?next=' + encodeURIComponent('/community/' + location.search + location.hash)); } catch (e) { /* 저장소를 못 쓰면 아래에서 다시 확인 */ }
 </script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://itzdjdgjqcpmxdfssfel.supabase.co" crossorigin>
+<link rel="preload" href="/assets/vendor/supabase-js-2.117.2.js" as="script">
 <!-- Pretendard (SIL OFL): 화면에 쓰인 글자만 받아 오는 가변 글꼴 -->
 <link rel="preload" as="style" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"></noscript>
@@ -2247,6 +2249,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   });
   $('[data-logout]').addEventListener('click', async (e) => {
     leaving = true; e.currentTarget.disabled = true;
+    try { Object.keys(localStorage).filter((k) => /^bypass-(cm|mk|dash)-/.test(k)).forEach((k) => localStorage.removeItem(k)); } catch (x) { /* 저장소 못 씀 */ }
     try { await sb.auth.signOut({ scope: 'local' }); } finally { location.replace('/'); }
   });
 
@@ -2453,16 +2456,16 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     if (mkBusy) return; mkBusy = true;
     try {
       if (!silent) {
+        // 지난번 종목·시세(15분 안)를 먼저 보여 주고, 서버에서 내 종목을 받아 오면 맞춘다
+        let c = null;
+        try { c = JSON.parse(localStorage.getItem(MK_LS) || 'null'); } catch (x) { /* 저장분 없음 */ }
+        if (c && Date.now() - c.at < 15 * 60000 && !Object.keys(mkQuotes).length) {
+          mkQuotes = c.q || {}; if (c.f && !mkFng) mkFng = c.f;
+          if (Array.isArray(c.syms)) { mkSyms = c.syms.slice(0, MK_MAX); paintMarket(); }
+        }
         const { data, error } = await sb.from('market_watch').select('symbols').eq('user_id', user.id).maybeSingle();
         if (error) mkHasTable = false;
         mkSyms = !error && data && Array.isArray(data.symbols) ? data.symbols.slice(0, MK_MAX) : MK_DEFAULT.slice();
-        // 지난번 시세가 15분 안이면 먼저 보여 주고 (새 값은 받는 대로 바뀜)
-        if (!Object.keys(mkQuotes).length) {
-          try {
-            const c = JSON.parse(localStorage.getItem(MK_LS) || 'null');
-            if (c && Date.now() - c.at < 15 * 60000) { mkQuotes = c.q || {}; if (c.f && !mkFng) mkFng = c.f; }
-          } catch (x) { /* 저장분 없음 */ }
-        }
         paintMarket();
       }
       // 공포·탐욕 지수는 따로 받아 둔다 (못 받아도 종목 시세는 그대로)
@@ -2474,7 +2477,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       mkDown = false; mkErr = { ...(r.errors || {}) };
       (r.quotes || []).forEach((q) => { mkQuotes[q.symbol] = q; });
       paintMarket();
-      try { localStorage.setItem(MK_LS, JSON.stringify({ at: Date.now(), q: mkQuotes, f: mkFng || null })); } catch (x) { /* 저장 못 함 */ }
+      try { localStorage.setItem(MK_LS, JSON.stringify({ at: Date.now(), syms: mkSyms, q: mkQuotes, f: mkFng || null })); } catch (x) { /* 저장 못 함 */ }
       if (mkSel && mkSel !== FNG && mkRange === '1d') mkDetail(true);
     } catch (e) {
       if (!Object.keys(mkQuotes).length) { mkDown = e.message === 'setup' ? 'setup' : 'fail'; paintMarket(); }
@@ -2972,30 +2975,63 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   }
 
   /* ===== 시작 ===== */
-  // 분류 · 홈 화면 설정 · 내 대시보드를 한꺼번에 받는다 (예전엔 하나씩 기다려서 느렸음)
+  // 1) 지난번에 본 화면(분류·홈 설정·대시보드 배치·새 글·새 결과물)을 이 브라우저에서 꺼내 바로 그리고
+  // 2) 서버에서 새로 받은 값으로 바꾼다. 서버 요청은 줄줄이 기다리지 않고 한꺼번에.
+  const CM_LS = `bypass-cm-${user.id}`;
   let homeSet = { market: true, fng: true, wti: true, weather: true, showcase: true, board: true };
+  let setVal = null;
+  function applySet(v) {
+    v = v || {};
+    homeSet = { market: true, fng: true, wti: true, weather: true, showcase: true, board: true, ...(v.home || {}) };
+    if (Array.isArray(v.market_defaults)) MK_DEFAULT = v.market_defaults.filter((x) => typeof x === 'string' && /^[A-Z0-9.^=-]{1,15}$/.test(x)).slice(0, MK_MAX);
+    mkFngOn = homeSet.fng !== false;
+    mkWtiOn = homeSet.wti !== false;
+  }
+  const filled = new Set();
+  function fillShown() {
+    if (dbShown('market') && !filled.has('market')) { filled.add('market'); loadMarket().then(mkTick); }
+    ['continue', 'news', 'favs', 'meeting', 'weather'].forEach((id) => { if (dbShown(id) && !filled.has(id)) { filled.add(id); dbFill(id); } });
+  }
+  // 대시보드를 읽기 전에 그려진 결과물 카드의 ☆ 맞추기
+  const syncFavs = () => $$('.fav[data-fav-id]').forEach((b) => { const on = dbPrefs.favs.includes(Number(b.dataset.favId)); b.setAttribute('aria-pressed', String(on)); b.textContent = on ? '★' : '☆'; });
+  function saveBoot() {
+    try {
+      localStorage.setItem(CM_LS, JSON.stringify({ at: Date.now(), cats: CATS, set: setVal, prefs: dbPrefs,
+        home: { showcase: Array.isArray(home.showcase) ? home.showcase : null, post: Array.isArray(home.post) ? home.post : null } }));
+    } catch (x) { /* 저장 공간이 없으면 다음에도 서버에서 */ }
+  }
+  let cmBoot = null;
+  try { cmBoot = JSON.parse(localStorage.getItem(CM_LS) || 'null'); } catch (x) { /* 없음 */ }
+  if (!cmBoot || !(Date.now() - cmBoot.at < 7 * 86400000)) cmBoot = null;
+  if (cmBoot) {
+    if (Array.isArray(cmBoot.cats) && cmBoot.cats.length) { CATS = cmBoot.cats; SHOW_KINDS = CATS.map((c) => c.name); }
+    setVal = cmBoot.set || null; applySet(setVal);
+    if (cmBoot.prefs) dbPrefs = dbClean(cmBoot.prefs);
+    paintChips('showcase');
+    route(true);
+    if (q0) runSearch(q0);
+    dbLayout(); syncFavs(); fillShown();
+    if (cmBoot.home && (cmBoot.home.showcase || cmBoot.home.post)) {
+      home.showcase = cmBoot.home.showcase; home.post = cmBoot.home.post;
+      if (home.showcase) remember(home.showcase);
+      if (home.post) remember(home.post);
+      renderHome();
+    }
+  }
   const [, setRes] = await Promise.all([
     loadCats(),
     sb.from('site_settings').select('value').eq('key', 'community').maybeSingle().then((r) => r, () => ({})),
     dbLoad().catch(() => {}),
   ]);
-  try {
-    const v = (setRes && setRes.data && setRes.data.value) || {};
-    homeSet = { ...homeSet, ...(v.home || {}) };
-    if (Array.isArray(v.market_defaults)) MK_DEFAULT = v.market_defaults.filter((x) => typeof x === 'string' && /^[A-Z0-9.^=-]{1,15}$/.test(x)).slice(0, MK_MAX);
-  } catch (x) { /* 설정을 못 읽으면 기본값 */ }
+  if (setRes && !setRes.error) setVal = (setRes.data && setRes.data.value) || null;
+  applySet(setVal);
   paintChips('showcase');
-  loadCounts();
-  route(true);
-  if (q0) runSearch(q0);
-  mkFngOn = homeSet.fng !== false;
-  mkWtiOn = homeSet.wti !== false;
-  dbLayout();
-  // 대시보드를 읽기 전에 그려진 결과물 카드의 ☆ 맞추기
-  $$('.fav[data-fav-id]').forEach((b) => { const on = dbPrefs.favs.includes(Number(b.dataset.favId)); b.setAttribute('aria-pressed', String(on)); b.textContent = on ? '★' : '☆'; });
-  if (dbShown('market')) loadMarket().then(mkTick);
-  ['continue', 'news', 'favs', 'meeting', 'weather'].forEach((id) => { if (dbShown(id)) dbFill(id); });
+  if (!cmBoot) { route(true); if (q0) runSearch(q0); }
+  dbLayout(); syncFavs(); fillShown();
+  // 결과물 분류별 개수(최대 2,000줄)는 급하지 않으니 화면이 다 뜬 뒤에
+  (window.requestIdleCallback || ((f) => setTimeout(f, 1200)))(() => loadCounts(), { timeout: 2500 });
   await Promise.all([loadHome(), loadNotices(), loadCrewCount(), loadUpload()]);
+  saveBoot();
 })();
 </script>
 <script src="/assets/track.js" defer></script>
