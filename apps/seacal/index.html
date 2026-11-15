@@ -297,6 +297,8 @@ function toS(n){ const [y, m, d] = ymd(n); return y + '-' + z2(m) + '-' + z2(d);
 const dow = n => (new Date(n * DAY).getUTCDay());
 const WK = '일월화수목금토';
 function fmt(n, wk = true){ if (n == null) return '-'; const [y, m, d] = ymd(n); return `${y}. ${m}. ${d}.` + (wk ? `(${WK[dow(n)]})` : ''); }
+/* 표용: 월·일을 두 자리로 맞춰 세로 줄이 맞게 (2019. 04. 03.) */
+function fmtT(n){ if (n == null) return '-'; const [y, m, d] = ymd(n); return `${y}. ${z2(m)}. ${z2(d)}.`; }
 function addMonths(n, k){ const [y, m, d] = ymd(n); const t = new Date(Date.UTC(y, m - 1 + k, 1)); const last = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth() + 1, 0)).getUTCDate(); return Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), Math.min(d, last)) / DAY; }
 const addYears = (n, k) => addMonths(n, 12 * k);
 function todayN(){ const d = new Date(); return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / DAY; }
@@ -804,7 +806,7 @@ function drawResults(){
   else {
     lv.innerHTML = `<div class="tbl-wrap"><table class="lv"><thead><tr><th>차수</th><th>구분</th><th>기간</th><th class="n">일수</th><th class="n">휴가</th><th>휴가 기간</th><th class="n">공휴일</th><th class="n">사용</th><th class="n">이월</th></tr></thead><tbody>
       ${vrows.map(r => { const s = stById.get(r.id); const fut = s.lvE != null && s.lvE > today;
-        return `<tr class="${fut ? 'fut' : ''}"><td>${r.idx + 1}차</td><td style="font-family:var(--f-body)">${KINDS[r.kind].nm}</td><td>${fmt(r.on, false)} ~ ${fmt(r.off, false)}</td><td class="n">${num(s.days)}</td><td class="n">${num(s.ent)}</td><td>${s.lvS != null ? fmt(s.lvS, false) + ' ~ ' + fmt(s.lvE, false) : '-'}</td><td class="n">${num(s.hol)}</td><td class="n">${num(s.used)}</td><td class="n">${num(s.carry || 0)}</td></tr>`; }).join('')}
+        return `<tr class="${fut ? 'fut' : ''}"><td>${r.idx + 1}차</td><td style="font-family:var(--f-body)">${KINDS[r.kind].nm}</td><td>${fmtT(r.on)} ~ ${fmtT(r.off)}</td><td class="n">${num(s.days)}</td><td class="n">${num(s.ent)}</td><td>${s.lvS != null ? fmtT(s.lvS) + ' ~ ' + fmtT(s.lvE) : '-'}</td><td class="n">${num(s.hol)}</td><td class="n">${num(s.used)}</td><td class="n">${num(s.carry || 0)}</td></tr>`; }).join('')}
       </tbody></table></div>
       <p class="sub" style="margin:10px 0 0">휴가는 하선 다음 날부터 씁니다. 공휴일(일요일·대체공휴일·선거일·임시공휴일 포함)과 노동절(근로자의 날)은 휴가를 쓴 날로 세지 않아 휴가 기간이 그만큼 길어지고, 그날은 인정일수에도 들어가지 않습니다. 토요일은 휴가를 쓴 날로 셉니다. 흐린 줄은 오늘 이후 예정입니다.</p>`;
   }
