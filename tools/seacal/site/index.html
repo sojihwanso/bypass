@@ -353,10 +353,13 @@ table.lv tr.fut td{color:var(--muted)}
 
 <script>
 'use strict';
-const VERSION = '2.2.1';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '2.2.2';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  { v: '2.2.2', d: '2026. 11. 16', i: [
+    "시간대 목록 맨 위 'UTC±0'에서 '영국/런던' 표시 삭제",
+  ] },
   { v: '2.2.1', d: '2026. 11. 16', i: [
-    "시간대 목록: 맨 위 'UTC±0 · 영국/런던', 그다음 +1, +2 … +14, −1 … −12 순서로 정렬(도시·고정 시간대 모두)",
+    "시간대 목록: 맨 위 'UTC±0', 그다음 +1, +2 … +14, −1 … −12 순서로 정렬(도시·고정 시간대 모두)",
     "'기타'(Etc) 시간대 제외, 목록은 한 번에 10줄(휴대폰 7줄)까지",
     '목록에 마우스를 올렸을 때 강조 칸과 글자 위치가 어긋나던 문제 수정',
   ] },
@@ -1041,7 +1044,7 @@ function zoneAll(){
   let tzs = []; try { tzs = Intl.supportedValuesOf('timeZone'); } catch(e) {}
   tzs = tzs.filter(t => t.includes('/') && !/^(Etc|SystemV)\//.test(t));   // '기타'(Etc/GMT+5 같은 이름) 시간대는 뺌
   const now = Date.now();
-  const it = [{ v: 'f:0', t: 'UTC±0 · 영국/런던', k: '협정 세계시(UTC) · 런던은 여름에 UTC+1', s: 'utc±0 utc+0 utc-0 협정 세계시 그리니치 gmt 영국 런던 london', o: 0 }];
+  const it = [{ v: 'f:0', t: 'UTC±0', k: '협정 세계시(UTC)', s: 'utc±0 utc+0 utc-0 협정 세계시 그리니치 gmt', o: 0 }];
   FIXED_OFFS.filter(m => m).sort((a, b) => offOrder(a) - offOrder(b)).forEach(m => it.push({ v: 'f:' + m, t: offLabel(m), k: '고정 시간대', s: offLabel(m).toLowerCase().replace('−', '-'), o: m }));
   const cities = tzs.map(t => { const ko = tzKo(t), n = tzCountry(t), off = zoneOff({ tz: t }, now), o = offLabel(off), city = ko ? ko.split('/').pop() : t;
     return { v: 't:' + t, t: `${city}${n ? ' · ' + n : ''}`, k: `${o} · ${t}`, s: `${t} ${ko} ${n} ${o}`.toLowerCase().replace(/−/g, '-'), o: off, c: city }; });
