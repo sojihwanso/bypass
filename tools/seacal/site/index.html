@@ -55,6 +55,11 @@ a{color:var(--acc)}
 .iconbtn{display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--rule);border-radius:12px;background:var(--surface);flex:none}
 .iconbtn:hover{background:var(--soft)}
 .iconbtn svg{width:19px;height:19px}
+.home-logo{display:inline-flex;flex:none;border-radius:6px;padding:2px}
+.home-logo img{display:block;width:30px;height:30px;transition:transform .15s}
+.home-logo:hover img{transform:scale(1.08)}
+.mver{border:1px solid var(--rule);border-radius:999px;background:none;padding:3px 10px;color:var(--muted);font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.04em;white-space:nowrap;cursor:default;-webkit-tap-highlight-color:transparent}
+@media (max-width:520px){ .mver{display:none} }
 
 /* 버튼 */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:var(--r-btn);padding:12px 22px;font-weight:600;font-size:15.5px;transition:filter .15s,background .15s,border-color .15s,transform .15s;text-decoration:none}
@@ -308,6 +313,8 @@ table.lv tr.fut td{color:var(--muted)}
   <span class="sp"></span>
   <button class="net" id="netChip" type="button" title="연결 상태"><i></i><span id="netTxt">온라인</span></button>
   <button class="iconbtn" id="themeBtn" type="button" aria-label="화면 테마 바꾸기"></button>
+  <button class="mver" id="mastVer" type="button" title="버전"></button>
+  <a class="home-logo" href="https://teambypass.vercel.app/" target="_top" title="Team Bypass 메인 페이지" aria-label="Team Bypass 메인 페이지"><img src="/assets/favicon.svg" alt="" width="30" height="30"></a>
 </div></header>
 
 <main class="wrap" id="view"></main>
@@ -319,8 +326,11 @@ table.lv tr.fut td{color:var(--muted)}
 
 <script>
 'use strict';
-const VERSION = '1.1.1';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '1.2.0';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  { v: '1.2.0', d: '2026. 11. 16', i: [
+    '상단 막대의 화면 테마 버튼 옆에 버전 표시(5번 누르면 이스터에그)와 Team Bypass 메인 페이지로 가는 로고 추가(해기사 시험 문제 풀이와 같은 모양)',
+  ] },
   { v: '1.1.1', d: '2026. 11. 16', i: [
     "처음 화면 아래 안내 문구 앞에 '복무만료 계산기의' 추가",
   ] },
@@ -342,6 +352,7 @@ const TARGET = 1095;                       // 복무 완료 기준 일수 (3년 
 const DAY = 864e5;
 const LS_STATE = 'sd-calc-v1', LS_THEME = 'sd-theme', LS_SYNC = 'sd-sync-v1';
 document.getElementById('verTxt').textContent = 'v. ' + VERSION + ' · TEAM BYPASS';
+document.getElementById('mastVer').textContent = 'v. ' + VERSION;
 
 /* ---------- 작은 도구 ---------- */
 const $ = (s, el = document) => el.querySelector(s);
@@ -1120,7 +1131,7 @@ const EGG_ART = `<svg class="art" viewBox="0 0 280 170" role="img" aria-label="�
   <path d="M0 148c20 5 40 5 60 0s40-5 60 0 40 5 60 0 40-5 60 0 40 5 40 0" stroke="#CFEBD9" stroke-width="2" fill="none" opacity=".45"/>
 </svg>`;
 let eggN = 0, eggT = null;
-$('#verTxt').addEventListener('click', () => { eggN++; clearTimeout(eggT); eggT = setTimeout(() => eggN = 0, 1500); if (eggN >= 5){ eggN = 0; showEgg(); } });
+['#verTxt', '#mastVer'].forEach(sel => $(sel).addEventListener('click', () => { eggN++; clearTimeout(eggT); eggT = setTimeout(() => eggN = 0, 1500); if (eggN >= 5){ eggN = 0; showEgg(); } }));
 const HOL_KIND = { p: '공휴일', s: '대체공휴일', e: '선거일', t: '임시공휴일', l: '근로자의 날' };
 function holidayList(y){
   const out = [];
