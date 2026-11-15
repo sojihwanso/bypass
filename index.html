@@ -11,1059 +11,755 @@
       if (s && s.refresh_token) location.replace('/community/');
     }
   } catch (e) { /* 저장소를 못 쓰면 소개 페이지 그대로 */ }
+  /* 제보·합류 주소로 바로 들어오면 부팅 화면은 건너뛴다 */
+  if (/[?&](report|join)=1\b/.test(location.search)) document.documentElement.classList.add('noboot');
 </script>
-<title>BYPASS | 느린 시스템의 실용적 대안 마련국</title>
-<meta name="description" content="BYPASS는 국립목포해양대학교 바이브 코딩 크루입니다. 학교생활의 불필요한 절차를 AI와 코드로 건너뜁니다.">
+<title>BYPASS | 누구나, 무엇이든.</title>
+<meta name="description" content="BYPASS는 목포해양대 바이브 코딩 크루예요. 코딩 몰라도, 이유 없어도 괜찮아요. 누구나, 무엇이든 만들어요.">
 <!-- 링크 미리보기 (카카오톡·인스타그램·디스코드 등) -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="BYPASS">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:url" content="https://teambypass.vercel.app/">
-<meta property="og:title" content="BYPASS | 느린 시스템의 실용적 대안 마련국">
-<meta property="og:description" content="국립목포해양대학교 바이브 코딩 크루. 학교생활의 불필요한 절차를 AI와 코드로 건너뜁니다.">
+<meta property="og:title" content="BYPASS | 누구나, 무엇이든.">
+<meta property="og:description" content="목포해양대 바이브 코딩 크루. 코딩 몰라도, 이유 없어도 괜찮아요. 누구나, 무엇이든.">
 <meta property="og:image" content="https://teambypass.vercel.app/assets/og-bypass-crew.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="도도새가 그려진 주황색 마름모 경고 표지판과 BYPASS 글자">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#0F5A3A">
+<meta name="theme-color" content="#FFFDF8">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/assets/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gaegu:wght@700&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --ground: #E4E6E1;      /* 콘크리트 바탕 */
-    --pave: #D3D7D0;        /* 보도 경계 */
-    --white: #FFFFFF;
-    --ink: #1C211E;
-    --muted: #4A534E;
-    --rule: #C3C8C1;
-    --post: #8E958F;
-    --post-dark: #5C635E;
-    --green: #0F5A3A;       /* 안내 표지 녹색 */
-    --green-deep: #0A4029;
-    --green-tint: #E3ECE6;
-    --orange: #EE6A1F;      /* 우회·임시 표지, 상태 배지 (면 전용) */
-    --orange-ink: #A8420A;  /* 흰 바탕 위 주황 글자 */
-    --asphalt: #3A403C;
-    --vms: #1F2421;
-    --amber: #FFB13B;
-    --sans: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-  }
+/* 색 (처음 시안)
+   주황 #FF5A1F / 글자용 #D9530F · 노랑 #FFD43B · 하늘 #7CE0FF
+   먹 #16120F · 크림 종이 #FFFDF8 · 연분홍 #FFE3EC · 연하늘 #E7F5FF · 갈색 회색 글자 #4A413B */
+@property --p{syntax:'<integer>';inherits:false;initial-value:0}
+body{margin:0;background:#FFFDF8}
+body,body *{word-break:keep-all;overflow-wrap:break-word}
+h1,h2,h3{text-wrap:balance}
+p,summary{text-wrap:pretty}
+a{color:#16120F}
+.d{font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-weight:400;letter-spacing:-.02em}
+.hand{font-family:'Gaegu',cursive;font-weight:700}
+.mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
+.wrap{max-width:1240px;margin:0 auto;padding:0 40px;box-sizing:border-box}
+.paper{background-color:#FFFDF8;background-image:linear-gradient(rgba(22,18,15,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(22,18,15,.055) 1px,transparent 1px);background-size:32px 32px}
+.ol{color:transparent;-webkit-text-stroke:1.5px currentColor}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-  *, *::before, *::after { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+/* =========================================================
+   0. 부팅 인트로 — 터미널이 돌고, 글자가 해독되고, 화면이 위아래로 갈라짐
+   ========================================================= */
+.boot{position:fixed;inset:0;z-index:100;visibility:hidden;animation:bootLife 3.5s linear both}
+@keyframes bootLife{0%,99%{visibility:visible}100%{visibility:hidden}}
+.boot .pt,.boot .pb{position:absolute;left:0;right:0;height:50%;background:#0E0B09;animation:.75s 2.75s cubic-bezier(.8,0,.15,1) both}
+.boot .pt{top:0;animation-name:upOut}
+.boot .pb{bottom:0;animation-name:downOut}
+@keyframes upOut{to{transform:translateY(-101%)}}
+@keyframes downOut{to{transform:translateY(101%)}}
+.boot .seam{position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;background:#FF5A1F;box-shadow:0 0 24px 4px rgba(255,90,31,.7);transform:scaleX(0);animation:seam .9s 2.35s cubic-bezier(.7,0,.2,1) both}
+@keyframes seam{0%{transform:scaleX(0);opacity:1}45%{transform:scaleX(1);opacity:1}100%{transform:scaleX(1);opacity:0}}
+.boot .ui{position:absolute;inset:0;color:#9BA0AA;animation:uiOut .3s 2.5s ease-in both}
+@keyframes uiOut{to{opacity:0;filter:blur(6px)}}
+.boot .hex{position:absolute;inset:-20% 0 0;margin:0;font-size:12px;line-height:1.7;color:#FF5A1F;opacity:.07;white-space:pre;overflow:hidden;animation:hexUp 6s linear both}
+@keyframes hexUp{to{transform:translateY(-18%)}}
+.boot .scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px);pointer-events:none}
+.boot .ln{display:block;max-width:0;overflow:hidden;white-space:nowrap;animation:typeW .32s var(--t) steps(28,end) both}
+@keyframes typeW{from{max-width:0}to{max-width:70ch}}
+.boot .ok{color:#FF5A1F}.boot .vi{color:#FFD43B}.boot .wh{color:#FFFDF8}
+.boot .pct{counter-reset:p var(--p);animation:pct 2.1s .15s cubic-bezier(.65,0,.25,1) both}
+.boot .pct::after{content:counter(p)}
+@keyframes pct{from{--p:0}to{--p:100}}
+.boot .pbar{height:3px;background:rgba(255,255,255,.1);overflow:hidden}
+.boot .pbar i{display:block;height:100%;background:linear-gradient(90deg,#16120F,#FF5A1F);transform-origin:left;animation:grow 2.1s .15s cubic-bezier(.65,0,.25,1) both}
+.boot .dec{position:relative;display:inline-block}
+.boot .dec .fin{opacity:0;animation:decOn .01s 1.34s linear forwards}
+.boot .dec i{position:absolute;left:50%;top:0;transform:translateX(-50%);white-space:nowrap;font-style:normal;opacity:0;animation:decFr var(--dur,.11s) var(--at) steps(1) none}
+.boot .dec i.f0{opacity:0;animation:decFr .35s 0s steps(1) none}
+@keyframes decFr{from{opacity:1}to{opacity:1}}
+@keyframes decOn{to{opacity:1}}
+.boot .glitch{position:relative;display:inline-block;animation:glitch .3s .8s steps(2) both,glitch .25s 1.45s steps(2) both,glitch .45s 2.05s steps(3) both}
+@keyframes glitch{0%{transform:none;text-shadow:none;clip-path:none}20%{transform:translate(-6px,1px) skewX(-6deg);text-shadow:4px 0 #FF5A1F,-4px 0 #7CE0FF;clip-path:inset(10% 0 45% 0)}40%{transform:translate(5px,-2px);text-shadow:-4px 0 #FF5A1F,4px 0 #7CE0FF;clip-path:inset(55% 0 5% 0)}60%{transform:translate(-3px,0) skewX(4deg);text-shadow:3px 0 #FFD43B,-3px 0 #FF5A1F;clip-path:none}80%{transform:translate(2px,1px);text-shadow:-2px 0 #7CE0FF}100%{transform:none;text-shadow:none;clip-path:none}}
+.boot .cur{display:inline-block;width:.6em;height:1.05em;vertical-align:-.15em;background:#FF5A1F;animation:blink .8s steps(1) infinite}
 
-  body {
-    margin: 0;
-    background: var(--ground);
-    color: var(--ink);
-    font-family: var(--sans);
-    font-size: 17px;
-    line-height: 1.7;
-    word-break: keep-all;
-    overflow-wrap: break-word;
-    -webkit-font-smoothing: antialiased;
-  }
+/* =========================================================
+   버튼 — 알약도 상자도 아닌, 살짝 둥근 매끈한 블록
+   ========================================================= */
+.btn{position:relative;overflow:hidden;isolation:isolate;display:inline-flex;align-items:center;gap:16px;height:60px;padding:0 9px 0 26px;border-radius:14px;background:#16120F;color:#FFFDF8;font-size:16.5px;font-weight:800;letter-spacing:-.01em;text-decoration:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 10px 24px -12px rgba(22,18,15,.6);transition:transform .35s cubic-bezier(.3,1.5,.5,1),box-shadow .35s}
+.btn .ar{display:grid;place-items:center;width:42px;height:42px;border-radius:10px;background:#FF5A1F;color:#16120F;overflow:hidden;transition:transform .35s cubic-bezier(.3,1.5,.5,1)}
+.btn .ar i{font-style:normal;font-size:19px;font-weight:900;display:block}
+.btn::after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;z-index:-1;background:linear-gradient(100deg,transparent,rgba(255,255,255,.22),transparent);transform:skewX(-20deg);transition:left .7s cubic-bezier(.3,0,.2,1)}
+.btn:hover{transform:translateY(-3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 18px 36px -14px rgba(255,90,31,.75)}
+.btn:hover::after{left:130%}
+.btn:hover .ar{transform:rotate(-8deg) scale(1.06)}
+.btn:hover .ar i{animation:arrowLoop .55s cubic-bezier(.7,0,.2,1)}
+.btn:active{transform:translateY(0) scale(.98)}
+.btn.go{background:#FF5A1F;color:#16120F;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 0 rgba(0,0,0,.12),0 10px 24px -12px rgba(200,70,20,.8)}
+.btn.go .ar{background:#16120F;color:#FF5A1F}
+.btn.go:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 18px 40px -12px rgba(255,90,31,.9)}
+.btn.ghost{background:rgba(255,255,255,.6);color:#16120F;box-shadow:inset 0 0 0 1.5px rgba(22,18,15,.85);backdrop-filter:blur(6px)}
+.btn.ghost .ar{background:#16120F;color:#FFFDF8}
+.btn.ghost::after{background:linear-gradient(100deg,transparent,rgba(255,90,31,.18),transparent)}
+.btn:focus-visible,.nav a:focus-visible{outline:3px solid #16120F;outline-offset:3px}
+@keyframes arrowLoop{0%{transform:none}45%{transform:translateX(170%)}46%{transform:translateX(-170%)}100%{transform:none}}
 
-  a { color: var(--green); text-underline-offset: 3px; }
-  :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
-  .on-green :focus-visible { outline-color: #fff; }
+/* 메뉴: 유리 같은 막대 하나 */
+.nav{pointer-events:auto;display:flex;align-items:center;gap:4px;padding:6px;border-radius:16px;background:rgba(255,253,248,.72);backdrop-filter:blur(14px) saturate(1.6);box-shadow:inset 0 0 0 1px rgba(22,18,15,.12),0 10px 30px -18px rgba(22,18,15,.5)}
+.nav a{display:inline-flex;align-items:center;height:40px;padding:0 16px;border-radius:11px;font-size:14.5px;font-weight:800;text-decoration:none;transition:background .25s,color .25s}
+.nav a:hover{background:rgba(22,18,15,.07)}
+.nav a.on{background:#FF5A1F;color:#16120F}
+.nav a.on:hover{background:#16120F;color:#FF5A1F}
 
-  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-  @media (max-width: 600px) { .wrap { padding: 0 16px; } }
+.stk{position:absolute;display:flex;align-items:center;gap:10px;padding:10px 16px 10px 10px;border-radius:12px;border:2px solid #16120F;box-shadow:4px 4px 0 #16120F;font-size:17px;font-weight:900;white-space:nowrap;cursor:grab;transition:scale .3s cubic-bezier(.3,1.6,.5,1),box-shadow .3s}
+.stk:hover{scale:1.1;box-shadow:8px 8px 0 #16120F;z-index:5}
+.ico{display:grid;place-items:center;width:36px;height:36px;border-radius:8px;font-size:13px}
 
-  .sr-only {
-    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
-  }
+/* =========================================================
+   1. 첫 화면 (부팅이 끝난 뒤 3초부터 시작)
+   ========================================================= */
+.ch{display:inline-block;animation:drop .95s calc(3s + var(--d,0s) + .07s * var(--i)) cubic-bezier(.2,1.5,.4,1) both}
+@keyframes drop{0%{opacity:0;transform:translateY(-180px) rotate(var(--rr,20deg)) scale(1.3)}55%{opacity:1}100%{opacity:1;transform:none}}
+.mk{position:relative;z-index:0}
+.mk::before{content:"";position:absolute;left:-3%;right:-1%;top:22%;bottom:4%;z-index:-1;background:#FF5A1F;transform:skewX(-10deg);transform-origin:left;animation:mark .7s 4.05s cubic-bezier(.7,0,.2,1) both}
+.mk.v::before{background:#16120F;animation:none}
+@keyframes mark{from{transform:skewX(-10deg) scaleX(0)}to{transform:skewX(-10deg) scaleX(1)}}
+@keyframes popIn{0%{opacity:0;transform:scale(0) rotate(var(--r))}70%{opacity:1;transform:scale(1.12) rotate(var(--r))}100%{opacity:1;transform:scale(1) rotate(var(--r))}}
+@keyframes bob{0%,100%{translate:0 0}50%{translate:0 -14px}}
+.pop{opacity:0;animation:popIn .6s cubic-bezier(.3,1.6,.5,1) forwards, bob 5s ease-in-out infinite}
+@keyframes pan{to{background-position:32px 32px,32px 32px}}
+.pan{animation:pan 4s linear infinite}
+@keyframes blink{50%{opacity:0}}
+.caret{display:inline-block;width:.08em;height:.9em;margin-left:.08em;vertical-align:-.08em;background:#FF5A1F;animation:blink 1s steps(1) infinite}
 
-  .skip {
-    position: absolute; left: 16px; top: -60px; z-index: 10;
-    background: var(--ink); color: #fff; padding: 10px 16px; font-weight: 700; text-decoration: none;
-  }
-  .skip:focus { top: 8px; }
+.slot{display:inline-block;height:1.25em;overflow:hidden;vertical-align:bottom}
+.slot > span{display:flex;flex-direction:column;animation:roll 12s cubic-bezier(.7,0,.3,1) infinite}
+.slot > span > b{display:block;height:1.25em;line-height:1.25em;font-weight:inherit}
+.slot.b > span{animation-delay:-1.5s}
+@keyframes roll{0%,20%{transform:translateY(0)}25%,45%{transform:translateY(-1.25em)}50%,70%{transform:translateY(-2.5em)}75%,95%{transform:translateY(-3.75em)}100%{transform:translateY(-5em)}}
 
-  /* 운영 상태: 도로 전광판 */
-  .vms { background: var(--vms); color: var(--amber); font-size: 15px; line-height: 1.5; font-weight: 700; border-bottom: 4px solid var(--post-dark); }
-  .vms .wrap { display: flex; align-items: center; gap: 14px; padding-top: 10px; padding-bottom: 10px; }
-  /* 전체 공개 공지: 전광판 둘째 줄 (HQ › 공지) */
-  .vms-notice { border-top: 1px dashed rgba(255, 177, 59, 0.35); }
-  .vms-notice .wrap { padding-top: 8px; padding-bottom: 9px; }
-  .vms-notice button { display: inline-flex; align-items: baseline; gap: 10px; min-width: 0; max-width: 100%; padding: 0; border: 0; background: none; color: #fff; font: inherit; font-weight: 700; text-align: left; cursor: pointer; }
-  .vms-notice button:hover .vms-notice-t { text-decoration: underline; text-underline-offset: 3px; }
-  .vms-notice-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .vms-notice-more { flex: none; color: var(--amber); font-size: 13px; }
-  .notice-list { list-style: none; margin: 0; padding: 0; }
-  .notice-list li + li { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--rule); }
-  .notice-list h3 { margin: 0; font-size: 19px; font-weight: 900; line-height: 1.4; }
-  .notice-list time { display: block; margin-top: 2px; font-size: 13.5px; color: var(--muted); }
-  .notice-list p { margin: 10px 0 0; white-space: pre-line; }
-  .vms-label { flex-shrink: 0; border: 1.5px solid var(--amber); border-radius: 3px; padding: 0 8px; font-size: 13px; line-height: 1.7; }
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes mqr{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+.mq{display:flex;width:max-content;gap:28px;align-items:center;animation:mq 26s linear infinite}
+.mq.r{animation-name:mqr}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin 14s linear infinite}
+.spin.slow{animation-duration:22s}
+.spin.rev{animation-direction:reverse}
+.wv{display:inline-block;animation:wave 2.6s calc(.09s * var(--i)) ease-in-out infinite}
+@keyframes wave{0%,40%,100%{transform:none}15%{transform:translateY(-.14em) rotate(-4deg)}28%{transform:translateY(.03em)}}
 
-  /* 머리글 */
-  .site-head .wrap { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-top: 18px; padding-bottom: 18px; }
-  .brand { display: flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; }
-  .brand-mark { width: 42px; height: 42px; flex-shrink: 0; }
-  .brand-name { display: block; font-weight: 900; font-size: 22px; line-height: 1.1; letter-spacing: 0.03em; }
-  .brand-sub { display: block; font-size: 13px; font-weight: 500; color: var(--muted); line-height: 1.4; margin-top: 3px; }
-  .site-nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 26px; }
-  .site-nav a { color: var(--ink); text-decoration: none; font-weight: 700; font-size: 15px; white-space: nowrap; }
-  .site-nav a:hover { text-decoration: underline; text-decoration-color: var(--green); text-decoration-thickness: 2px; }
-  /* 계정 버튼: 로그인 / 공사장 */
-  .site-head .wrap { position: relative; }
-  .site-nav { margin-left: auto; }
-  .nav-account {
-    flex-shrink: 0; display: inline-block; padding: 7px 14px; border-radius: 7px;
-    font-weight: 700; font-size: 15px; line-height: 1.3; white-space: nowrap; text-decoration: none;
-    background: var(--white); color: var(--green); box-shadow: inset 0 0 0 2px var(--green);
-  }
-  .nav-account:hover { background: var(--green-tint); }
-  /* 다른 페이지로 가는 버튼 묶음: 준공 현황(녹색 표지) + 로그인 */
-  .head-btns { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-  .nav-routes {
-    display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px 7px 10px; border-radius: 7px;
-    font-weight: 900; font-size: 15px; line-height: 1.3; white-space: nowrap; text-decoration: none;
-    background: var(--green); color: #fff; box-shadow: inset 0 0 0 2px var(--green), inset 0 0 0 3.5px #fff;
-  }
-  .nav-routes svg { width: 20px; height: 20px; color: var(--amber); }
-  .nav-routes:hover { background: var(--green-deep); box-shadow: inset 0 0 0 2px var(--green-deep), inset 0 0 0 3.5px #fff; }
-  @media (max-width: 1000px) { .site-nav ul { gap: 20px; } }
-  @media (max-width: 900px) {
-    .site-head .wrap { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .site-nav { width: 100%; overflow-x: auto; }
-    .site-nav ul { gap: 20px; padding-bottom: 4px; }
-    .site-nav { margin-left: 0; }
-    /* 가로 메뉴: 스크롤바는 숨기고, 더 넘길 수 있는 쪽 끝을 흐리게 */
-    .site-nav {
-      scrollbar-width: none; overscroll-behavior-x: contain;
-      --fade-l: 0px; --fade-r: 40px;
-      -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent);
-              mask-image: linear-gradient(to right, transparent, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent);
-    }
-    .site-nav::-webkit-scrollbar { display: none; }
-    .site-nav.is-scrolled { --fade-l: 28px; }
-    .site-nav.at-end { --fade-r: 0px; }
-    .head-btns { position: absolute; top: 22px; right: 24px; }
-  }
-  @media (max-width: 600px) { .head-btns { right: 16px; gap: 6px; } }
-  /* 휴대폰: 버튼 두 개가 들어가도록 부제를 숨기고 버튼을 조금 줄인다 */
-  @media (max-width: 560px) {
-    .brand-sub { display: none; }
-    .nav-routes, .nav-account { font-size: 14px; padding: 6px 10px; }
-    .nav-routes { padding-left: 8px; }
-    .nav-routes svg { width: 18px; height: 18px; }
-  }
-  @media (max-width: 350px) { .nav-routes .nr-long { display: none; } }
+.tile{position:relative;transition:translate .35s cubic-bezier(.3,1.6,.5,1),rotate .35s cubic-bezier(.3,1.6,.5,1),box-shadow .35s}
+.tile:hover{translate:0 -10px;rotate:calc(var(--r,0deg) * -1);box-shadow:12px 12px 0 #16120F}
+.tile.inv:hover{box-shadow:12px 12px 0 #FF5A1F}
 
-  /* 첫 화면: 지름길 안내 표지 */
-  .hero { border-bottom: 6px solid var(--post); }
-  .hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 590px); gap: 48px; align-items: center; padding-top: 40px; }
-  .hero-copy { padding-bottom: 72px; }
-  .sign-code {
-    display: inline-block; margin: 0 0 26px;
-    border: 2px solid var(--green); border-radius: 5px; background: var(--white);
-    color: var(--green); font-weight: 700; font-size: 14px; line-height: 1.6; padding: 3px 10px;
-  }
-  .hero h1 {
-    margin: 0 0 24px;
-    font-weight: 900;
-    font-size: clamp(2.05rem, 4.1vw, 3.3rem);
-    line-height: 1.22;
-    letter-spacing: -0.035em;
-  }
-  .identity { margin: 0 0 34px; font-size: clamp(1.05rem, 1.5vw, 1.2rem); line-height: 1.75; max-width: 27em; }
-  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
-  .scene { display: block; width: 100%; height: auto; align-self: end; }
-  .scene text { font-family: var(--sans); }
-  @media (max-width: 900px) {
-    .hero .wrap { grid-template-columns: 1fr; gap: 8px; padding-top: 28px; }
-    .hero h1 { font-size: clamp(2.05rem, 6vw, 3rem); }
-    .hero-copy { padding-bottom: 28px; }
-    .scene { max-width: 560px; }
-  }
+/* ---- 스크롤에 붙은 움직임 ---- */
+@keyframes rise{from{opacity:0;transform:translateY(100px) rotate(var(--r,0deg))}to{opacity:1;transform:rotate(var(--r,0deg))}}
+@keyframes flipIn{from{opacity:0;transform:perspective(900px) translateY(80px) rotateX(-80deg) rotate(var(--r,0deg))}to{opacity:1;transform:rotate(var(--r,0deg))}}
+@keyframes strike{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes fade{from{opacity:1}to{opacity:.3}}
+@keyframes newWord{from{opacity:0;transform:translateY(24px) rotate(-10deg) scale(.5)}to{opacity:1;transform:rotate(-4deg)}}
+@keyframes bubble{from{opacity:0;transform:translateY(30px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes type{from{width:0}to{width:100%}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes outL{to{transform:translateX(-38%) rotate(-7deg);opacity:.15}}
+@keyframes outR{to{transform:translateX(38%) rotate(6deg);opacity:.15}}
+@keyframes burst{to{transform:scale(1.7);opacity:0}}
+@keyframes tiltA{from{transform:rotate(-10deg)}to{transform:rotate(1deg)}}
+@keyframes tiltB{from{transform:rotate(9deg)}to{transform:rotate(-1deg)}}
+@keyframes iris{from{clip-path:circle(0% at 50% 60%)}to{clip-path:circle(80% at 50% 50%)}}
+@keyframes fillText{from{background-size:0% 100%}to{background-size:100% 100%}}
+@keyframes zoomOut{from{transform:scale(1.8);opacity:0}to{transform:none;opacity:1}}
+.bar-top{position:fixed;left:0;top:0;right:0;height:4px;z-index:40;background:linear-gradient(90deg,#16120F,#FF5A1F);transform-origin:left;transform:scaleX(0)}
+@supports (animation-timeline: view()){
+  .bar-top{animation:grow linear both;animation-timeline:scroll(root)}
+  .sr{animation:rise linear both;animation-timeline:view();animation-range:entry 0% cover 30%}
+  .tp{transform-origin:50% 0;animation:flipIn linear both;animation-timeline:view();animation-range:entry 0% cover 32%}
+  .zo{animation:zoomOut linear both;animation-timeline:view();animation-range:entry 10% cover 40%}
+  .l1{animation:outL linear both;animation-timeline:view();animation-range:exit 0% exit 100%}
+  .l2{animation:outR linear both;animation-timeline:view();animation-range:exit 0% exit 100%}
+  .burst{animation:burst linear both;animation-timeline:view();animation-range:exit 0% exit 100%}
+  .tilt-a{animation:tiltA linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
+  .tilt-b{animation:tiltB linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
+  .st-line .old{animation:fade linear both;animation-timeline:view();animation-range:cover 35% cover 45%}
+  .st-line .bar{animation:strike linear both;animation-timeline:view();animation-range:cover 35% cover 45%}
+  .st-line .new{animation:newWord linear both;animation-timeline:view();animation-range:cover 44% cover 52%}
+  .chat{view-timeline-name:--chat}
+  .cprog{animation:grow linear both;animation-timeline:--chat;animation-range:contain 0% contain 85%}
+  .b1{animation:bubble linear both;animation-timeline:--chat;animation-range:contain 5% contain 15%}
+  .b2{animation:bubble linear both;animation-timeline:--chat;animation-range:contain 20% contain 30%}
+  .b3{animation:bubble linear both;animation-timeline:--chat;animation-range:contain 35% contain 45%}
+  .b4{animation:bubble linear both;animation-timeline:--chat;animation-range:contain 50% contain 62%}
+  .b5{animation:flipIn linear both;animation-timeline:--chat;animation-range:contain 66% contain 80%}
+  .ty{animation:type linear both;animation-timeline:--chat;animation-range:contain 20% contain 32%}
+  .iris{animation:iris linear both;animation-timeline:view();animation-range:entry 5% entry 95%}
+  .ft{view-timeline-name:--ft}
+  .fill{animation:fillText linear both;animation-timeline:--ft;animation-range:entry 0% entry 100%}
+}
+.st-line{position:relative;display:inline-block}
+.st-line .bar{position:absolute;left:-4px;right:-4px;top:52%;height:.11em;background:#16120F;transform-origin:left}
+.st-line .new{position:absolute;left:10%;top:-0.9em;white-space:nowrap;padding:0 .2em;border-radius:.15em;background:#FF5A1F;color:#16120F;transform:rotate(-4deg)}
+.fill{color:transparent;-webkit-text-stroke:2px #FF5A1F;background:linear-gradient(90deg,#FF5A1F,#FF5A1F) no-repeat 0 0 / 100% 100%;-webkit-background-clip:text;background-clip:text}
+summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:20px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:#16120F;color:#FFFDF8;font-size:22px;font-weight:900;transition:transform .35s cubic-bezier(.3,1.6,.5,1),background .3s,color .3s}
+details[open] summary::after{transform:rotate(135deg);background:#FF5A1F;color:#16120F}
+details.q{transition:background .25s,transform .25s}
+details.q:hover{background:#FFE3EC!important}
 
-  /* 버튼: 안내 표지의 안쪽 흰 테두리를 그대로 */
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    font-family: var(--sans); font-weight: 700; font-size: 17px; line-height: 1.2;
-    padding: 16px 24px; border-radius: 10px; border: 0; cursor: pointer; text-decoration: none;
-  }
-  .btn-primary { --bg: var(--green); background: var(--bg); color: #fff; box-shadow: inset 0 0 0 4px var(--bg), inset 0 0 0 6px #fff; }
-  .btn-primary:hover { --bg: var(--green-deep); }
-  .btn-secondary { background: var(--white); color: var(--green); box-shadow: inset 0 0 0 2.5px var(--green); }
-  .btn-secondary:hover { background: var(--green-tint); }
-  .on-green .btn-primary { --bg: #fff; color: var(--green); box-shadow: inset 0 0 0 4px #fff, inset 0 0 0 6px var(--green); }
-  .on-green .btn-primary:hover { --bg: var(--green-tint); }
-  .on-green .btn-secondary { background: transparent; color: #fff; box-shadow: inset 0 0 0 2.5px #fff; }
-  .on-green .btn-secondary:hover { background: var(--green-deep); }
+/* ===== 추가 모션 ===== */
+/* 첫 화면 글자: 마우스 올리면 톡 튀어오름 */
+.ch{transition:translate .35s cubic-bezier(.3,1.8,.5,1),color .2s}
+.ch:hover{translate:0 -.1em}
+.l1 .ch:hover{color:#FF5A1F}
+/* 타일: 마우스 올리면 빛이 쓱 지나감 */
+.tile{overflow:hidden}
+.tile::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%) no-repeat;background-size:250% 100%;background-position:150% 0;transition:background-position .8s cubic-bezier(.3,0,.2,1)}
+.tile:hover::after{background-position:-60% 0}
+/* 단어에 하나씩 불 들어오는 문단 */
+.lit{view-timeline-name:--lit}
+.lit .w{color:#D8CFC6;transition:color .2s}
+/* 숫자 카운트다운 */
+@property --n{syntax:'<integer>';inherits:false;initial-value:0}
+.cnt{--n:0;counter-reset:n var(--n)}
+.cnt::after{content:counter(n)}
+@keyframes cntDown{from{--n:var(--from)}to{--n:0}}
+@keyframes inf{0%,100%{transform:rotate(0) scaleX(1)}50%{transform:rotate(180deg) scaleX(-1)}}
+.inf{display:inline-block;animation:inf 3.5s cubic-bezier(.7,0,.3,1) infinite}
+.stat{transition:translate .35s cubic-bezier(.3,1.6,.5,1),rotate .35s cubic-bezier(.3,1.6,.5,1)}
+.stat:hover{translate:0 -8px;rotate:0deg!important}
+/* 가로로 넘어가는 과정 */
+.hz{view-timeline-name:--hz}
+@keyframes slideX{from{transform:translateX(0)}to{transform:translateX(calc(-100% + 100vw - 80px))}}
+.step{transition:rotate .35s cubic-bezier(.3,1.6,.5,1),translate .35s}
+.step:hover{rotate:0deg!important;translate:0 -10px}
+/* 색종이 */
+@keyframes fall{0%{transform:translateY(-80px) rotate(0)}100%{transform:translateY(1100px) rotate(var(--rot))}}
+@keyframes sway{0%,100%{translate:0 0}50%{translate:30px 0}}
+.cf{position:absolute;top:0;width:var(--s);height:calc(var(--s) * .55);border:1.5px solid #16120F;animation:fall var(--du) var(--de) linear infinite, sway calc(var(--du) / 3) ease-in-out infinite;pointer-events:none}
+@supports (animation-timeline: view()){
+  .lit .w{animation:wLit linear both;animation-timeline:--lit;animation-range:cover calc(25% + var(--i) * 1.6%) cover calc(28% + var(--i) * 1.6%)}
+  .cnt{animation:cntDown linear both;animation-timeline:view();animation-range:entry 30% cover 55%}
+  .hz .track{animation:slideX linear both;animation-timeline:--hz;animation-range:contain 0% contain 100%}
+  .hz .hzbar{animation:grow linear both;animation-timeline:--hz;animation-range:contain 0% contain 100%}
+}
+@keyframes wLit{from{color:#D8CFC6}to{color:#16120F}}
 
-  /* 공통 섹션 */
-  .sec { padding: 96px 0; }
-  .sec-title { margin: 0 0 40px; font-weight: 900; font-size: clamp(1.7rem, 3.2vw, 2.45rem); line-height: 1.3; letter-spacing: -0.03em; }
-  .note { font-size: 15px; color: var(--muted); margin: 26px 0 0; }
-  @media (max-width: 600px) { .sec { padding: 68px 0; } .sec-title { margin-bottom: 30px; } }
+/* ===== 폰 화면 (720px 이하) ===== */
+@media (max-width: 720px){
+  .wrap{padding:0 20px!important}
+  header{top:10px!important;left:10px!important;right:10px!important}
+  .nav{padding:4px!important}
+  .nav a{height:36px!important;padding:0 12px!important;font-size:13px!important}
+  nav.nav a:not(.on):not(.acct){display:none!important}
+  .btn{height:54px;font-size:15px;padding-left:20px;gap:12px}
+  .btn .ar{width:38px;height:38px}
+  /* 부팅 */
+  .boot .ui > div[style*="left: 48px; top: 44px"]{left:18px!important;top:22px!important;font-size:10px!important}
+  .boot .ui > div[style*="right: 48px; top: 44px"]{display:none!important}
+  .boot .ui > div[style*="left: 48px; right: 48px"]{left:18px!important;right:18px!important;bottom:22px!important}
+  .boot .ui span[style*="font-size: 64px"]{font-size:44px!important}
+  .boot .dec{font-size:10vw!important}
+  /* 첫 화면 */
+  #top{min-height:0!important;padding:150px 0 90px!important}
+  #hero-t{font-size:21vw!important}
+  #hero-t + p{margin-top:36px!important;padding:12px 16px!important;font-size:17px!important;border-radius:12px!important}
+  #hero-t + p + p{font-size:15px!important}
+  #hero-t + p + p br{display:none}
+  .burst > span:nth-of-type(n+3),.burst > div{display:none!important}
+  .burst .stk{font-size:12px!important;padding:6px 10px 6px 6px!important;gap:6px!important;box-shadow:3px 3px 0 #16120F!important}
+  .burst .ico{width:24px!important;height:24px!important;font-size:9px!important;border-radius:6px!important}
+  .burst > span:nth-of-type(1){left:4%!important;top:90px!important}
+  .burst > span:nth-of-type(2){right:4%!important;top:96px!important}
+  /* 흐르는 띠 */
+  section[aria-label="누구나, 무엇이든"]{height:170px!important}
+  .tilt-a{top:30px!important;padding:12px 0!important}
+  .tilt-b{top:90px!important;padding:12px 0!important}
+  .tilt-a .mq,.tilt-b .mq{font-size:24px!important}
+  /* 누구나 */
+  #anyone{padding:90px 0 100px!important}
+  #anyone .hand{font-size:24px!important}
+  #any-t{font-size:8.4vw!important;margin-top:16px!important;line-height:1.75!important}
+  #any-t .st-line{white-space:nowrap}
+  .lit{font-size:22px!important;margin-top:40px!important}
+  /* 무엇이든 */
+  #anything{padding:90px 0 100px!important}
+  #thing-t{font-size:19vw!important}
+  #thing-t + p{font-size:20px!important;margin:0!important}
+  #anything .wrap > div[style*="grid-template-columns"]{grid-template-columns:1fr 1fr!important;grid-auto-rows:150px!important;gap:14px!important;margin-top:34px!important}
+  .tile{grid-column:span 1!important;grid-row:span 1!important;padding:16px!important;gap:14px!important}
+  .tile[style*="span 2"]{grid-column:span 2!important}
+  .tile[style*="grid-row: span 2"]{grid-row:span 1!important}
+  .tile b.d{font-size:22px!important}
+  .tile[style*="grid-row: span 2"] b.d{font-size:34px!important}
+  .tile span[style*="font-size: 15px"],.tile span[style*="font-size: 18px"]{font-size:12.5px!important}
+  .tile .hand{font-size:15px!important}
+  .tile > span[aria-hidden="true"][style*="grid-template-columns"]{display:none!important}
+  .tile > span.hand[style*="position: absolute"]{top:14px!important;right:14px!important}
+  .tile .spin{width:70px!important;height:70px!important}
+  .tile > svg{width:130px!important;height:130px!important}
+  /* 말하면 만들어져요 */
+  .chat{height:1800px!important}
+  .chat > div{height:100svh!important;padding:64px 0 16px!important;box-sizing:border-box}
+  .chat .wrap{gap:14px!important}
+  .chat .wrap > div:first-child{flex-basis:auto!important}
+  .chat .hand{font-size:20px!important}
+  #how-t{font-size:40px!important;margin-top:6px!important}
+  #how-t + p{display:none}
+  .chat .wrap > div:last-child{flex-basis:auto!important;width:100%}
+  .chat .wrap > div:last-child > div:last-child{padding:14px!important;gap:9px!important}
+  .b1,.b2,.b3,.b4{font-size:13.5px!important;padding:10px 13px!important}
+  .b2 .mono{font-size:10.5px!important;padding:7px 9px!important}
+  .b5{padding:9px 13px!important;gap:10px!important}
+  .b5 .d[style*="width: 52px"]{width:38px!important;height:38px!important;font-size:18px!important}
+  .b5 b.d{font-size:18px!important}
+  .b5 .hand{font-size:14px!important}
+  /* 너도 해볼래 */
+  .iris{padding:110px 0 100px!important}
+  #join .iris > svg.spin,#join .iris > span.spin.rev,#join .iris > span.pop,#join .iris > span[style*="left: 22%"],#join .iris > span[style*="right: 22%"]{display:none!important}
+  #join .iris > span.d.spin{font-size:54px!important;top:30px!important;right:6%!important}
+  #join .hand{font-size:22px!important}
+  #join-t{font-size:13vw!important}
+  #join-t + p{font-size:17px!important;padding:12px 16px!important;margin-top:28px!important}
+  #join .wrap > p:last-child{font-size:14px!important}
+  /* 질문 */
+  section[aria-labelledby="faq-t"]{padding:80px 0!important}
+  #faq-t{font-size:40px!important}
+  details.q{padding:16px 18px!important}
+  summary{font-size:16.5px!important}
+  summary::after{width:32px;height:32px;font-size:18px}
+  details.q p{font-size:15px!important}
+  /* 끝 */
+  .ft{padding:44px 0 36px!important}
+  .ft .mq{font-size:84px!important;gap:30px!important}
+  .ft .wrap{flex-direction:column;align-items:flex-start!important;gap:12px!important;margin-top:30px!important}
+  .ft .wrap a[href="/community/"]{margin-left:0!important}
+}
 
-  /* 명칭 안내: 머리글자 명칭 표지 */
-  .sec-lead { margin: -24px 0 32px; font-size: 18px; line-height: 1.7; }
-  .name-sign {
-    background: var(--green); color: #fff; border-radius: 20px; padding: 38px 34px 30px;
-    box-shadow: inset 0 0 0 8px var(--green), inset 0 0 0 11px #fff;
-  }
-  .acro { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
-  .acro li { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 8px 4px; }
-  .acro li + li { border-left: 2px solid rgba(255, 255, 255, 0.3); }
-  .acro-letter { font-weight: 900; font-size: clamp(3.2rem, 6.4vw, 4.8rem); line-height: 1; letter-spacing: -0.02em; }
-  .acro-word { margin-top: 14px; font-weight: 700; font-size: 16px; line-height: 1.4; white-space: nowrap; }
-  .acro-prep { font-weight: 500; color: rgba(255, 255, 255, 0.78); margin-right: 5px; }
-  .acro-gloss { margin-top: 12px; background: #fff; color: var(--green); border-radius: 4px; padding: 1px 10px; font-weight: 900; font-size: 15px; line-height: 1.6; white-space: nowrap; }
-  .name-full { margin-top: 30px; padding-top: 20px; border-top: 3px solid #fff; text-align: center; }
-  .name-full p { margin: 0; }
-  .name-en { font-size: 15px; font-weight: 500; letter-spacing: 0.01em; }
-  .name-ko { margin-top: 2px !important; font-size: clamp(1.25rem, 2.4vw, 1.6rem); font-weight: 900; letter-spacing: -0.01em; }
-  @media (max-width: 900px) {
-    .acro { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 26px; }
-    .acro li + li { border-left: 0; }
-  }
-  @media (max-width: 520px) {
-    .name-sign { padding: 30px 18px 24px; border-radius: 16px; box-shadow: inset 0 0 0 6px var(--green), inset 0 0 0 9px #fff; }
-    .acro { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 22px; }
-    .acro-word { font-size: 15px; }
-    .sec-lead { font-size: 17px; }
-  }
-
-  /* 설치 규정: 흰 규정 안내판 */
-  .rule-board {
-    position: relative; max-width: 900px; margin: 0 auto;
-    background: var(--white); border: 4px solid var(--ink); border-radius: 12px;
-    padding: 40px 52px 34px;
-  }
-  .rule-board::before, .rule-board::after, .rule-body::before, .rule-body::after {
-    content: ""; position: absolute; width: 11px; height: 11px; border-radius: 50%;
-    background: var(--ground); border: 2px solid var(--post);
-  }
-  .rule-board::before { top: 12px; left: 12px; }
-  .rule-board::after { top: 12px; right: 12px; }
-  .rule-body::before { bottom: 12px; left: 12px; }
-  .rule-body::after { bottom: 12px; right: 12px; }
-  .rule-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 4px 20px; padding-bottom: 16px; border-bottom: 4px solid var(--ink); }
-  .rule-head h2 { margin: 0; font-weight: 900; font-size: clamp(1.7rem, 3.2vw, 2.45rem); line-height: 1.3; letter-spacing: -0.03em; }
-  .rule-date { font-size: 15px; font-weight: 500; color: var(--muted); }
-  .article { display: grid; grid-template-columns: 9.2em 1fr; gap: 4px 24px; padding: 20px 0; border-bottom: 1px solid var(--rule); }
-  .article:last-child { border-bottom: 0; padding-bottom: 6px; }
-  .article-no { font-weight: 900; color: var(--green); font-size: 17px; }
-  .article p { margin: 0; }
-  .items { list-style: none; margin: 14px 0 0; padding: 0; counter-reset: item; }
-  .items li { counter-increment: item; display: grid; grid-template-columns: 38px 1fr; gap: 0 4px; padding: 9px 0; }
-  .items li::before {
-    content: counter(item); width: 26px; height: 26px; margin-top: 2px; border-radius: 5px;
-    background: var(--green); color: #fff; font-weight: 900; font-size: 14px; line-height: 26px; text-align: center;
-  }
-  .items .example { display: block; font-size: 15px; color: var(--muted); }
-  @media (max-width: 600px) {
-    .rule-board { padding: 32px 20px 26px; border-width: 3px; }
-    .article { grid-template-columns: 1fr; }
-  }
-
-  /* 처리 절차: 고속도로 출구 순서 */
-  .sec-process { overflow-x: clip; padding-bottom: 0; }
-  .exits { list-style: none; margin: 0; padding: 0 0 104px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; position: relative; }
-  .exits::before {
-    content: ""; position: absolute; bottom: 0; left: calc(50% - 50vw); width: 100vw; height: 64px;
-    background: var(--asphalt); border-top: 4px solid #fff; border-bottom: 4px solid #fff;
-  }
-  .exits::after {
-    content: ""; position: absolute; bottom: 30px; left: calc(50% - 50vw); width: 100vw; height: 4px;
-    background: repeating-linear-gradient(90deg, #fff 0 34px, transparent 34px 64px);
-  }
-  .exit { position: relative; display: flex; flex-direction: column; }
-  .exit::before, .exit::after {
-    content: ""; position: absolute; top: 100%; width: 10px; height: 40px; background: var(--post);
-  }
-  .exit::before { left: 24%; }
-  .exit::after { right: 24%; }
-  .exit-tab {
-    align-self: flex-start; margin-left: 16px; padding: 3px 14px 2px;
-    background: var(--green); color: #fff; border: 2.5px solid #fff; border-bottom: 0; border-radius: 9px 9px 0 0;
-    font-weight: 700; font-size: 15px; line-height: 1.5; position: relative; top: 2px;
-  }
-  .exit-sign {
-    flex: 1; display: flex; flex-direction: column;
-    background: var(--green); color: #fff; border-radius: 14px; padding: 22px 22px 22px;
-    box-shadow: inset 0 0 0 5px var(--green), inset 0 0 0 7.5px #fff;
-  }
-  .exit-sign h3 { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; font-weight: 900; font-size: 32px; line-height: 1.2; letter-spacing: -0.02em; }
-  .exit-sign h3 svg { width: 34px; height: 34px; }
-  .exit-sign h3 svg.exit-dodo { width: 52px; height: 52px; margin: -10px 0 -10px -6px; filter: drop-shadow(1.5px 2px 0 rgba(28, 33, 30, 0.35)); }
-  .exit-sign p { margin: 0; font-size: 16px; line-height: 1.65; }
-  .exit-sign .exit-due { margin-top: auto; padding-top: 16px; }
-  .exit-due span { display: inline-block; background: #fff; color: var(--green); border-radius: 4px; padding: 2px 9px; font-size: 14px; font-weight: 700; line-height: 1.6; }
-  .exit-due b { font-weight: 900; }
-  .exit-detour .exit-tab { background: var(--orange); color: var(--ink); border-color: var(--ink); }
-  .exit-detour .exit-sign { background: var(--orange); color: var(--ink); box-shadow: inset 0 0 0 5px var(--orange), inset 0 0 0 7.5px var(--ink); }
-  @media (max-width: 900px) {
-    .sec-process { padding-bottom: 68px; }
-    .exits { grid-template-columns: 1fr; gap: 26px; padding: 0 0 0 76px; }
-    .exits::before { top: -12px; bottom: -12px; left: 0; width: 48px; height: auto; border: 0; border-left: 4px solid #fff; border-right: 4px solid #fff; }
-    .exits::after { top: -12px; bottom: -12px; left: 22px; width: 4px; height: auto; background: repeating-linear-gradient(180deg, #fff 0 30px, transparent 30px 56px); }
-    .exit::before { top: auto; bottom: 34px; left: -28px; width: 28px; height: 10px; }
-    .exit::after { display: none; }
-    .exit-tab { margin-left: 14px; }
-  }
-
-  /* 처리 현황: 안내판 모양은 /assets/dockets.css, 그리는 코드는 /assets/dockets.js */
-  #dockets { padding: 76px 0 72px; }
-  #dockets .sec-title { margin-bottom: 34px; }
-  .map-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 28px; }
-  .map-cta-note { font-size: 15px; color: var(--muted); }
-  .map-cta-arrow { margin-left: 10px; }
-  .swipe-hint { display: none; margin: 12px 0 0; font-size: 14px; font-weight: 700; color: var(--muted); }
-  .dockets-more { margin: 14px 0 0; text-align: right; font-weight: 700; font-size: 15px; }
-  .dockets-more a { color: var(--green); }
-  @media (max-width: 640px) {
-    #dockets { padding: 60px 0; }
-    .swipe-hint { display: block; }
-    .dockets-more { text-align: left; }
-  }
-
-  /* 도도새 직인 안내: 규정 안내판과 같은 볼트 고정 안내판 */
-  .sec-seal { padding-top: 0; }
-  .seal-board { max-width: 960px; padding: 44px 52px 40px; }
-  .seal-body { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 48px; align-items: center; }
-  .seal-figure { margin: 0; display: flex; flex-direction: column; align-items: center; }
-  .seal-figure svg { width: 220px; height: 220px; color: var(--orange); transform: rotate(-8deg); mix-blend-mode: multiply; }
-  .seal-figure figcaption { margin-top: 10px; font-size: 14px; font-weight: 700; color: var(--muted); }
-  .seal-text h2 { margin: 0 0 18px; padding-bottom: 14px; border-bottom: 4px solid var(--ink); font-weight: 900; font-size: clamp(1.6rem, 2.8vw, 2.1rem); line-height: 1.3; letter-spacing: -0.03em; }
-  .seal-text p { margin: 0 0 12px; }
-  .seal-lead { font-weight: 700; font-size: 18px; }
-  .seal-spec { margin: 18px 0 0; border-top: 2px solid var(--ink); }
-  .seal-spec div { display: grid; grid-template-columns: 6.2em 1fr; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
-  .seal-spec dt { font-weight: 900; color: var(--green); font-size: 15px; line-height: 1.75; }
-  .seal-spec dd { margin: 0; font-size: 16px; line-height: 1.65; }
-  @media (max-width: 760px) {
-    .seal-board { padding: 34px 22px 28px; }
-    .seal-body { grid-template-columns: 1fr; gap: 20px; }
-    .seal-figure svg { width: 176px; height: 176px; }
-  }
-  @media (max-width: 600px) { .seal-board { border-width: 3px; } }
-
-  /* 국원 모집: 큰 안내 표지 */
-  .recruit-sign {
-    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); gap: 44px; align-items: start;
-    background: var(--green); color: #fff; border-radius: 22px; padding: 52px 52px 52px;
-    box-shadow: inset 0 0 0 10px var(--green), inset 0 0 0 14px #fff;
-  }
-  .recruit-sign h2 { margin: 0 0 22px; font-weight: 900; font-size: clamp(1.75rem, 3.3vw, 2.5rem); line-height: 1.3; letter-spacing: -0.03em; }
-  .lead-line { margin: 0 0 34px; font-size: clamp(1.15rem, 1.9vw, 1.4rem); font-weight: 700; line-height: 1.65; }
-  .plate { background: var(--white); color: var(--ink); border-radius: 8px; padding: 6px 22px; }
-  .req { width: 100%; border-collapse: collapse; }
-  .req caption { text-align: left; font-weight: 900; font-size: 18px; padding: 14px 0 10px; border-bottom: 3px solid var(--ink); }
-  .req th, .req td { text-align: left; vertical-align: top; padding: 12px 0; border-bottom: 1px solid var(--rule); font-size: 16px; line-height: 1.65; }
-  .req tr:last-child th, .req tr:last-child td { border-bottom: 0; }
-  .req th { width: 7.6em; padding-right: 16px; color: var(--green); font-weight: 900; }
-  .tbd { color: var(--muted); }
-  /* 문의 창구: 카카오톡 1:1 오픈채팅 */
-  .ask-btn {
-    display: inline-flex; align-items: center; gap: 10px; padding: 7px 16px 7px 9px; border-radius: 10px;
-    background: var(--green); color: #fff; text-decoration: none; line-height: 1.25;
-    box-shadow: inset 0 0 0 3px var(--green), inset 0 0 0 5px #fff;
-  }
-  .ask-btn:hover { background: var(--green-deep); box-shadow: inset 0 0 0 3px var(--green-deep), inset 0 0 0 5px #fff; }
-  .ask-icon { width: 40px; height: 36px; flex: none; }
-  .ask-text { display: flex; flex-direction: column; }
-  .ask-small { font-size: 12.5px; font-weight: 500; opacity: .85; }
-  .ask-big { font-size: 16.5px; font-weight: 900; }
-  .ask-note { display: block; margin-top: 8px; font-size: 14.5px; color: var(--muted); }
-  .foot-ask { color: #fff; font-weight: 700; text-decoration-color: var(--amber); text-underline-offset: 4px; }
-  .foot-ask:hover { color: var(--amber); }
-
-  .keep { display: inline-block; }
-  @media (max-width: 900px) {
-    .recruit-sign { grid-template-columns: 1fr; gap: 30px; padding: 40px 30px 34px; }
-  }
-  @media (max-width: 600px) {
-    .recruit-sign { padding: 34px 22px 26px; border-radius: 18px; box-shadow: inset 0 0 0 7px var(--green), inset 0 0 0 10px #fff; }
-    .plate { padding: 4px 16px; }
-    .req th, .req td { display: block; width: auto; padding: 0; border: 0; }
-    .req th { padding-top: 12px; }
-    .req td { padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
-    .req tr:last-child td { border-bottom: 0; }
-  }
-
-  /* 업무 범위: 금지 안내판 / 자주 묻는 질문 */
-  .scope-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 64px; align-items: start; }
-  @media (max-width: 900px) { .scope-grid { grid-template-columns: 1fr; gap: 64px; } }
-  .ban-board { background: var(--white); border: 9px solid var(--ink); border-radius: 18px; padding: 28px 30px 30px; }
-  .ban-article { display: grid; grid-template-columns: 64px 1fr; gap: 18px; align-items: start; padding-bottom: 22px; margin-bottom: 20px; border-bottom: 3px solid var(--ink); }
-  .ban-article svg { width: 64px; height: 64px; color: var(--orange-ink); }
-  .ban-article p { margin: 0; font-size: 20px; font-weight: 700; line-height: 1.55; }
-  .ban-article b { display: block; font-size: 15px; font-weight: 900; color: var(--green); margin-bottom: 4px; }
-  .ban-lead { margin: 0 0 8px; font-weight: 700; }
-  .ban-list { list-style: none; margin: 0; padding: 0; }
-  .ban-list li { display: grid; grid-template-columns: 30px 1fr; gap: 8px; padding: 9px 0; }
-  .ban-list svg { width: 22px; height: 22px; margin-top: 3px; color: var(--orange-ink); }
-  .ban-list .example { color: var(--muted); }
-
-  .faq details { border-bottom: 2px solid var(--rule); }
-  .faq details:first-of-type { border-top: 2px solid var(--ink); }
-  .faq summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 2.2em 1fr 1.5em; align-items: baseline; padding: 18px 0; font-weight: 700; font-size: 17px; }
-  .faq summary::-webkit-details-marker { display: none; }
-  .faq summary::after { content: "+"; font-weight: 500; font-size: 24px; line-height: 1; color: var(--green); justify-self: end; }
-  .faq details[open] summary::after { content: "\2212"; }
-  .faq .q { font-weight: 900; color: var(--green); }
-  .faq details p { margin: 0; padding: 0 1.5em 20px 2.2em; }
-
-  /* 바닥글: 도로 끝 */
-  .site-foot { position: relative; background: var(--vms); color: #E6E9E5; padding: 64px 0 60px; font-size: 15px; border-top: 6px solid var(--post); }
-  .site-foot::before {
-    content: ""; position: absolute; top: 22px; left: 0; right: 0; height: 4px;
-    background: repeating-linear-gradient(90deg, #E6E9E5 0 34px, transparent 34px 64px);
-  }
-  .site-foot .wrap { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap; }
-  .foot-info { max-width: 50em; }
-  .foot-info p { margin: 0 0 10px; }
-  .foot-name { font-size: 16px; }
-  .foot-name strong { font-weight: 900; letter-spacing: 0.03em; margin-right: 8px; color: #fff; }
-  .foot-meta { margin: 18px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 16px; color: #B7BEB9; }
-  .foot-meta dt { font-weight: 700; }
-  .foot-meta dd { margin: 0; }
-  .caution { display: flex; flex-direction: column; align-items: center; width: 210px; background: linear-gradient(var(--post-dark), var(--post-dark)) center 60px / 10px calc(100% - 60px) no-repeat; }
-  .caution svg { width: 132px; height: 132px; display: block; }
-  .caution-plate { margin: -2px 0 0; background: var(--white); color: var(--ink); border-radius: 6px; padding: 10px 14px; font-size: 14px; font-weight: 700; line-height: 1.5; text-align: center; }
-  .caution-post { height: 44px; }
-
-  /* 제보·합류 대화상자: 표지판 형식 */
-  .form-dialog {
-    width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px);
-    padding: 0; border: 5px solid var(--green); border-radius: 16px;
-    background: var(--white); color: var(--ink);
-  }
-  .form-dialog::backdrop { background: rgba(28, 33, 30, 0.55); }
-  .dlg-head {
-    display: flex; justify-content: space-between; align-items: center; gap: 16px;
-    background: var(--green); color: #fff; padding: 16px 22px 16px 24px;
-  }
-  .dlg-head h2 { margin: 0; font-size: 24px; font-weight: 900; line-height: 1.3; }
-  .dlg-close { background: transparent; border: 2px solid #fff; color: #fff; font: inherit; font-size: 14px; font-weight: 700; padding: 3px 12px; border-radius: 6px; cursor: pointer; }
-  .dlg-close:hover { background: var(--green-deep); }
-  .dlg-body { padding: 22px 26px 28px; }
-  @media (max-width: 600px) { .dlg-body { padding: 20px 18px 24px; } .dlg-head { padding: 14px 16px 14px 18px; } }
-  .dlg-notice { margin: 0 0 4px; padding: 12px 14px; background: var(--green-tint); border-radius: 6px; font-size: 15px; }
-  .field-label { display: block; margin: 18px 0 8px; font-weight: 700; font-size: 16px; }
-  .opt { font-weight: 400; color: var(--muted); }
-  .form-dialog input, .form-dialog textarea {
-    width: 100%; font: inherit; font-size: 16px; color: var(--ink);
-    background: #fff; border: 1.5px solid var(--post-dark); border-radius: 4px; padding: 11px 12px;
-  }
-  .form-dialog textarea { resize: vertical; min-height: 84px; }
-  .form-dialog input::placeholder, .form-dialog textarea::placeholder { color: #6A716C; }
-  .form-dialog [aria-invalid="true"] { border: 2.5px solid var(--orange-ink); background: #FFF6F0; }
-  .hint { margin: 6px 0 0; font-size: 14px; color: var(--muted); }
-  .form-error {
-    margin: 20px 0 0; padding: 11px 14px; border-radius: 6px;
-    background: var(--orange); color: var(--ink); font-weight: 700; font-size: 15px; line-height: 1.55;
-    box-shadow: inset 0 0 0 3px var(--orange), inset 0 0 0 5px var(--ink);
-  }
-  .dlg-actions { margin-top: 24px; }
-  .dlg-actions .btn { width: 100%; }
-
-  /* 접수 표지: 경첩에 매달린 표지가 내려와 걸림 */
-  .receipt { text-align: center; padding-top: 4px; }
-  .rsg { perspective: 900px; display: flex; flex-direction: column; align-items: center; }
-  .rsg-bar { width: 260px; height: 10px; border-radius: 5px; background: var(--post-dark); }
-  .rsg-hangers { display: flex; justify-content: space-between; width: 168px; height: 14px; }
-  .rsg-hangers span { width: 6px; background: var(--post-dark); }
-  .rsg-panel {
-    display: grid; justify-items: center; gap: 2px; width: 248px; padding: 16px 18px 18px;
-    background: var(--green); color: #fff; border-radius: 12px;
-    box-shadow: inset 0 0 0 5px var(--green), inset 0 0 0 7.5px #fff;
-    transform-origin: 50% -14px;
-  }
-  .rsg-code { font-size: 13px; font-weight: 700; }
-  .rsg-main { font-size: 34px; font-weight: 900; letter-spacing: -0.01em; line-height: 1.3; }
-  .rsg-no { margin-top: 6px; background: #fff; color: var(--green); border-radius: 4px; padding: 1px 10px; font-size: 16px; font-weight: 900; letter-spacing: 0.04em; }
-  .rsg-date { font-size: 13px; font-weight: 500; margin-top: 4px; }
-  .rsg-panel.is-updated { animation: swing 1s cubic-bezier(0.3, 0.7, 0.4, 1) both; }
-  @keyframes swing {
-    0% { transform: rotateX(-96deg); }
-    45% { transform: rotateX(16deg); }
-    68% { transform: rotateX(-7deg); }
-    86% { transform: rotateX(2.5deg); }
-    100% { transform: rotateX(0deg); }
-  }
-  @media (prefers-reduced-motion: reduce) { .rsg-panel.is-updated { animation: none; } }
-  .receipt h3 { margin: 24px 0 10px; font-size: 21px; font-weight: 900; line-height: 1.45; }
-  .receipt h3:focus { outline: none; }
-  .receipt p { margin: 0 0 6px; }
-  .receipt-no strong { font-weight: 900; font-size: 18px; letter-spacing: 0.03em; }
-  .receipt .btn { margin-top: 22px; min-width: 160px; }
+/* ===== 실제 사이트용 추가 ===== */
+.skip{position:absolute;left:-9999px;top:8px;z-index:200;padding:10px 16px;border-radius:10px;background:#16120F;color:#FFFDF8;font-weight:900}
+.skip:focus{left:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+button.btn{border:0;cursor:pointer;font-family:inherit}
+.noboot .boot{display:none!important}
+.kakao{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px;background:#FEE500;color:#191919!important;font-weight:900;text-decoration:none}
+.kakao::before{content:"💬"}
+.kakao::after{content:"↗"}
+.idea-link{border:0;background:none;padding:0;font:inherit;font-weight:900;color:#16120F;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.status-chip{display:inline-block;margin:0 0 22px;padding:8px 16px;border-radius:999px;background:#16120F;color:#FFFDF8;font-size:15px;font-weight:900}
+.status-chip::before{content:"";display:inline-block;width:8px;height:8px;margin-right:8px;border-radius:50%;background:#FFD43B;vertical-align:1px;animation:blink 1s steps(1) infinite}
+.notice-pill{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:29;max-width:calc(100% - 24px)}
+.notice-pill button{display:flex;align-items:center;gap:10px;max-width:100%;padding:9px 16px;border:2px solid #16120F;border-radius:999px;background:#FFD43B;font:inherit;font-size:14px;font-weight:700;cursor:pointer;box-shadow:3px 3px 0 #16120F}
+.notice-pill b{padding:2px 8px;border-radius:999px;background:#16120F;color:#FFFDF8;font-size:12px}
+.notice-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notice-pill .more{flex:none;color:#4A413B}
+.nav a.acct{color:#4A413B}
+/* 대화상자 */
+.dlg{width:min(520px,calc(100% - 24px));max-height:calc(100dvh - 40px);padding:0;border:2px solid #16120F;border-radius:22px;background:#FFFDF8;color:#16120F;box-shadow:8px 8px 0 #16120F;font-family:'Noto Sans KR',system-ui,sans-serif}
+.dlg::backdrop{background:rgba(22,18,15,.55);backdrop-filter:blur(3px)}
+.dlg[open]{animation:dlgIn .35s cubic-bezier(.3,1.5,.5,1)}
+@keyframes dlgIn{from{opacity:0;transform:translateY(30px) scale(.96)}}
+.dlg-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 22px;border-bottom:2px solid #16120F;background:#FF5A1F}
+.dlg-head h2{margin:0;font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-weight:400;font-size:28px}
+.dlg-close{height:38px;padding:0 14px;border:2px solid #16120F;border-radius:10px;background:#FFFDF8;font:inherit;font-weight:900;cursor:pointer}
+.dlg-body{padding:22px}
+.dlg-notice{margin:0 0 16px;font-size:15px;color:#4A413B;line-height:1.6}
+.field-label{display:block;margin:16px 0 6px;font-weight:900;font-size:15px}
+.field-label .opt{font-weight:500;color:#6B5E55}
+.dlg input,.dlg textarea{width:100%;box-sizing:border-box;padding:12px 14px;border:2px solid #16120F;border-radius:12px;background:#FFFFFF;font:inherit;font-size:16px;color:#16120F}
+.dlg input:focus,.dlg textarea:focus{outline:3px solid #FFD43B;outline-offset:1px}
+.dlg [aria-invalid="true"]{border-color:#D9530F;background:#FFF1EA}
+.hint{margin:6px 0 0;font-size:13px;color:#6B5E55}
+.form-error{margin:14px 0 0;padding:10px 12px;border-radius:10px;background:#FFE3D6;color:#A8420A;font-weight:700;font-size:14px}
+.dlg-actions{margin-top:20px}
+.dlg-actions .btn{width:100%;justify-content:space-between}
+.receipt{text-align:center}
+.receipt-card{margin:4px 0 18px;padding:24px;border:2px solid #16120F;border-radius:18px;background:#FFD43B;box-shadow:5px 5px 0 #16120F}
+.receipt-card b{display:block;font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-weight:400;font-size:40px}
+.receipt-card > span{display:block;margin-top:6px;font-weight:700}
+.receipt-card.is-updated{animation:popIn .5s cubic-bezier(.3,1.6,.5,1)}
+.receipt h3{margin:0 0 6px;font-size:20px}
+.receipt p{margin:0 0 16px;color:#4A413B}
+.notice-list{margin:0;padding:0;list-style:none}
+.notice-list li+li{margin-top:16px;padding-top:16px;border-top:2px dashed #D8CFC6}
+.notice-list h3{margin:0;font-size:18px}
+.notice-list time{font-size:13px;color:#6B5E55}
+.notice-list p{margin:8px 0 0;line-height:1.7;white-space:pre-line}
+@media (max-width:720px){.notice-pill{top:auto;bottom:14px}.dlg-head h2{font-size:24px}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;opacity:1!important}}
 </style>
-<link rel="stylesheet" href="/assets/dockets.css">
 </head>
 <body>
-
-<!-- 공통 그래픽: 도도새, 우회 기호, 금지 기호 -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <defs>
-    <symbol id="dodo" viewBox="0 0 100 100">
-      <g fill="currentColor">
-        <ellipse cx="44" cy="60" rx="27" ry="23"/>
-        <path d="M51 45 C55 37 58 31 61 25 L72 30 C68 36 66 44 64 53 Z"/>
-        <circle cx="66" cy="26" r="10"/>
-        <path d="M72 20 C83 19 93 24 95 32 C96 38 91 41 88 37 C86 34 82 33 74 33 Z"/>
-        <path d="M19 52 C10 47 7 40 11 34 C14 43 20 46 23 46 Z"/>
-        <path d="M37 80 L35 92 L27 95 L41 95 L42 81 Z"/>
-        <path d="M51 80 L51 92 L44 95 L58 95 L56 81 Z"/>
-      </g>
-      <circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/>
-      <path d="M32 55 C40 50 51 54 54 64" fill="none" stroke="#EE6A1F" stroke-width="2.6" stroke-linecap="round"/>
-    </symbol>
-    <!-- 도도새 마름모 표지판 (머리글 로고·파비콘과 같은 모양) -->
-    <symbol id="dodo-sign" viewBox="1 1 130 130">
-      <path d="M66 4 L128 66 L66 128 L4 66 Z" fill="#EE6A1F" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/>
-      <path d="M66 15 L117 66 L66 117 L15 66 Z" fill="none" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/>
-      <use href="#dodo" x="34" y="32" width="64" height="64" style="color:#1C211E"/>
-    </symbol>
-    <symbol id="bypass" viewBox="0 0 32 32">
-      <rect x="12" y="17" width="8" height="9" fill="currentColor"/>
-      <path d="M3 22h6c0-12 14-12 14 0h6M26 19l3 3-3 3" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </symbol>
-    <symbol id="ban" viewBox="0 0 32 32">
-      <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="4"/>
-      <path d="M7 7 L25 25" stroke="currentColor" stroke-width="4"/>
-    </symbol>
-    <pattern id="stripes" patternUnits="userSpaceOnUse" width="22" height="22" patternTransform="rotate(45)">
-      <rect width="11" height="22" fill="#EE6A1F"/>
-    </pattern>
-    <!-- 처리 완료 직인 -->
-    <symbol id="dodo-plain" viewBox="0 0 100 100">
-      <g fill="currentColor">
-        <ellipse cx="44" cy="60" rx="27" ry="23"/>
-        <path d="M51 45 C55 37 58 31 61 25 L72 30 C68 36 66 44 64 53 Z"/>
-        <circle cx="66" cy="26" r="10"/>
-        <path d="M72 20 C83 19 93 24 95 32 C96 38 91 41 88 37 C86 34 82 33 74 33 Z"/>
-        <path d="M19 52 C10 47 7 40 11 34 C14 43 20 46 23 46 Z"/>
-        <path d="M37 80 L35 92 L27 95 L41 95 L42 81 Z"/>
-        <path d="M51 80 L51 92 L44 95 L58 95 L56 81 Z"/>
-      </g>
-      <circle cx="68" cy="23.5" r="2" fill="#fff"/>
-      <path d="M32 55 C40 50 51 54 54 64" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
-    </symbol>
-    <path id="seal-top" d="M25 100 A75 75 0 0 1 175 100"/>
-    <path id="seal-bottom" d="M13 100 A87 87 0 0 0 187 100"/>
-    <filter id="ink" x="-5%" y="-5%" width="110%" height="110%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise"/>
-      <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.15" result="speckle"/>
-      <feComposite in="SourceGraphic" in2="speckle" operator="in"/>
-    </filter>
-    <symbol id="done-seal" viewBox="0 0 200 200">
-      <g filter="url(#ink)">
-        <circle cx="100" cy="100" r="94" fill="none" stroke="currentColor" stroke-width="5"/>
-        <circle cx="100" cy="100" r="64" fill="none" stroke="currentColor" stroke-width="2.5"/>
-        <text font-size="17.5" font-weight="900" letter-spacing="0.5" text-anchor="middle" fill="currentColor"><textPath href="#seal-top" startOffset="50%">이 업무 방식은 도도새와</textPath></text>
-        <text font-size="17.5" font-weight="900" letter-spacing="0.5" text-anchor="middle" fill="currentColor"><textPath href="#seal-bottom" startOffset="50%">함께 멸종했어야 합니다</textPath></text>
-        <text x="22" y="104" font-size="11" text-anchor="middle" fill="currentColor">★</text>
-        <text x="178" y="104" font-size="11" text-anchor="middle" fill="currentColor">★</text>
-        <use href="#dodo-plain" x="62" y="42" width="76" height="76"/>
-        <text x="100" y="150" text-anchor="middle" font-size="17" font-weight="900" letter-spacing="3" fill="currentColor">처리 완료</text>
-      </g>
-    </symbol>
-    <!-- 신설 준공 인장: 새로 만든 앱·서비스에 찍는다 -->
-    <mask id="open-behind" maskUnits="userSpaceOnUse" x="0" y="0" width="240" height="200"><rect width="240" height="200" fill="#fff"/><path d="M4 70.5 H140 Q166 70.5 178 84" fill="none" stroke="#000" stroke-width="17.8"/><path d="M236 70.5 H222 Q206 70.5 198.5 86" fill="none" stroke="#000" stroke-width="17.8"/></mask><mask id="open-near" maskUnits="userSpaceOnUse" x="0" y="0" width="240" height="200"><path d="M4 70.5 H140 Q166 70.5 178 84" fill="none" stroke="#fff" stroke-width="17.8"/><path d="M236 70.5 H222 Q206 70.5 198.5 86" fill="none" stroke="#fff" stroke-width="17.8"/></mask><mask id="open-ros-hole"><rect width="240" height="200" fill="#fff"/><circle cx="104" cy="70" r="8.5" fill="#000"/></mask><symbol id="open-seal" viewBox="0 0 240 200"><g filter="url(#ink)" fill="#0F5A3A"><rect x="4" y="4" width="232" height="192" rx="18" fill="none" stroke="#0F5A3A" stroke-width="6"/>
-<rect x="14" y="14" width="212" height="172" rx="11" fill="none" stroke="#0F5A3A" stroke-width="2.2"/>
-<text x="104" y="40" text-anchor="middle" font-size="13.5" font-weight="900" letter-spacing="5">BYPASS</text><g mask="url(#open-ros-hole)">
-<circle cx="119" cy="70" r="7"/><circle cx="116.1" cy="78.8" r="7"/><circle cx="108.6" cy="84.3" r="7"/><circle cx="99.4" cy="84.3" r="7"/><circle cx="91.9" cy="78.8" r="7"/>
-<circle cx="89" cy="70" r="7"/><circle cx="91.9" cy="61.2" r="7"/><circle cx="99.4" cy="55.7" r="7"/><circle cx="108.6" cy="55.7" r="7"/><circle cx="116.1" cy="61.2" r="7"/>
-<circle cx="104" cy="70" r="15"/></g>
-<circle cx="104" cy="70" r="4.2"/>
-<path d="M99 86 L92 110 L98 106 L101 112 L105 88 Z"/>
-<path d="M109 86 L116 110 L110 106 L107 112 L103 88 Z"/><g mask="url(#open-behind)"><path d="M194.63 41.56 L198.31 98.73 L199.31 98.71 L200.22 41.43 Z"/></g><path d="M4 70.5 H140 Q166 70.5 178 84" fill="none" stroke="#0F5A3A" stroke-width="13"/><path d="M236 70.5 H222 Q206 70.5 198.5 86" fill="none" stroke="#0F5A3A" stroke-width="13"/><path d="M197.43 41.49 L196.21 28.11" fill="none" stroke="#0F5A3A" stroke-width="2.8" stroke-linecap="round"/><circle cx="195.70" cy="22.53" r="5.6" fill="none" stroke="#0F5A3A" stroke-width="2.8"/><path d="M197.43 41.49 L206.28 31.38" fill="none" stroke="#0F5A3A" stroke-width="2.8" stroke-linecap="round"/><circle cx="209.97" cy="27.17" r="5.6" fill="none" stroke="#0F5A3A" stroke-width="2.8"/><g mask="url(#open-near)" fill="#fff"><path d="M195.14 39.87 L164.16 87.31 L164.98 87.89 L199.71 43.12 Z" stroke="#fff" stroke-width="2.6" paint-order="stroke" stroke-linejoin="round"/></g><path d="M195.14 39.87 L164.16 87.31 L164.98 87.89 L199.71 43.12 Z"/><circle cx="197.43" cy="41.49" r="2.3"/><text x="120" y="142" text-anchor="middle" font-size="33" font-weight="900" letter-spacing="2">신설 준공</text>
-<text x="120" y="164" text-anchor="middle" font-size="13" font-weight="700">이 길은 원래 지도에</text>
-<text x="120" y="180" text-anchor="middle" font-size="13" font-weight="700">없었습니다</text></g></symbol>
-  </defs>
-</svg>
-
 <a class="skip" href="#main">본문 바로가기</a>
+<div id="main" style="font-family: 'Noto Sans KR', system-ui, sans-serif; color: #16120F; background: #FFFDF8; min-height: 100%; overflow-x: clip">
 
-<div class="vms">
-  <div class="wrap" role="status">
-    <span class="vms-label">운영 상태</span>
-    <span id="status-text">본 국은 현재 정상 운영 중입니다. 제보는 상시 접수합니다.</span>
-  </div>
-  <div class="vms-notice" data-vms-notice hidden>
-    <div class="wrap">
-      <span class="vms-label">공지</span>
-      <button type="button" data-open-notice aria-haspopup="dialog"><span class="vms-notice-t" data-vms-notice-title></span><span class="vms-notice-more" data-vms-notice-more></span></button>
+  <!-- 0. 부팅 인트로 (약 3초, 페이지 열 때 한 번) -->
+  <div class="boot" aria-hidden="true">
+    <div class="pt"></div><div class="pb"></div>
+    <div class="ui mono">
+      <pre class="hex">a5 4d ca 18 25 30 bb 1d 6d 13 2c de d6 23 7b 2e d9 1e 3f 72 1f cb 19 71 17 44 94 d6 49 3c 9d 5c 34 60 be 31 20 1e 69 fe da a0 ee e8 b9 99 7f 5c 7c 29 99 fd af e5 93 25 3c d6 54 af 4d fa d7 14
+27 a0 ae b3 fe e9 23 2f 8a f2 21 1f 9e e4 91 c5 b1 0b ec b5 56 3b fc 1e 6f 93 42 7e cb c8 fe 29 55 e5 cd 8e 46 dc 8e d4 b7 c2 76 4d 2a 5a 4d 76 77 06 f8 5d 86 90 02 4a d6 bd a3 40 1b e9 c8 cb
+cc c9 35 f6 cd 1f 61 22 6a e1 53 38 ae 1a 34 00 4d 33 ba 0d 24 6a c0 4c 81 b1 ba f2 3e 3b f9 ee f5 f7 9f 2b 49 34 af 87 f5 52 0b 69 b9 4b 0d 98 2e 85 bb 55 b6 72 a8 72 63 7a cd 74 66 fc b6 0e
+0e 8f f1 84 63 b0 e4 b2 ba 29 70 34 74 f0 64 ac 68 f7 00 f5 b0 2b 3d c6 66 f4 5b de aa 2c ca ed cd 2b 51 57 41 0e 4d ee 4a f2 b3 4f 43 0a 07 34 47 de 63 6c 0e 80 6c 95 7b a6 84 d6 43 1f b5 ea
+d7 42 4d 09 e1 5d 02 4c 58 48 f2 3d 1f a6 f7 36 1d 7f 61 8d 15 32 e7 0e 20 e2 a6 66 8d e7 f4 7e 84 67 e5 46 d5 3e c8 e2 a1 25 7b db 25 6c 9b 3e 4f bb 49 81 46 ef 70 30 cb f9 53 72 52 dc ce ad
+d7 64 b6 a3 2f bb 09 ad ea e1 09 c4 a9 97 20 39 75 35 2b 87 8b 14 5c 8a 42 d8 84 cf 4c fd a7 2d 8e 1d 5d d9 25 89 08 2d 85 2a 71 22 87 3e e8 05 ad d5 89 42 16 7a 38 52 86 19 5c 67 9f 9c 69 94
+e4 5b 8a b1 09 80 12 07 09 61 f3 7d e4 36 dd fd c9 9d 6e 75 af 65 47 cf b1 1b 42 07 24 82 dc 53 1c 2b c3 90 7c 96 17 eb 5e 50 89 e4 01 86 ba a8 a5 7d 11 9e 6f b6 5d 00 ab c3 2a f3 8e 66 7f 02
+2e 87 2d 49 cc 15 c9 0b 99 9b 77 2b 4f c7 a6 fd 4c 91 4a 16 db 47 08 75 2b 0f 15 44 b8 35 c0 e7 19 09 7d fa 87 01 e9 23 2f 21 f2 81 26 87 78 69 76 eb fc c3 27 f5 93 17 65 27 4b a9 82 9b 44 06
+f6 1f f8 89 32 6f fa 94 92 ed ee ee 3c 66 9f 2b f2 08 94 ea 27 e6 89 c6 6b 6b 26 2e 48 86 b8 43 8f 39 ba 76 fe f8 c9 0c 51 01 fb e6 cf 9a 48 d5 b0 c0 a1 3d a9 00 a6 ad cb 3d 64 06 94 81 be 21
+c9 c7 27 b8 db 8c 18 8f 34 1a 92 4c 7f 88 df a1 61 bf db 0e cc 68 29 19 d2 e6 46 92 f8 19 41 57 f1 d4 af 90 98 82 85 cf 7a 9a f7 c9 3d 55 52 26 6a fe 70 e7 aa e6 da 47 62 7c 2e 59 af 2e a3 7a
+bc 84 67 0a d3 c4 d3 6b c0 8a ad 1f ff 8e b8 40 6e 2f 8a 7f c4 cc e4 dd 9f 0b 41 10 d9 f2 fa 00 25 c8 ef e5 7f 37 72 4f 4d 37 ea 2b 14 00 40 77 13 9b 41 80 df 39 32 24 99 62 c6 85 72 00 05 9a
+eb 8e a1 7c f3 78 7e 0e d2 9d 1c 0b 63 ff d7 29 83 74 d9 bd 74 fc 11 ad d7 b9 ca 65 03 95 22 69 fd 66 9f 63 76 ee 71 87 97 37 fd 5f 72 f8 d5 1c 4a c9 1b 6d 0c 48 d4 1a 1e 5e c9 e6 a0 39 28 54
+a8 61 5e ef 10 9f c1 bf a9 e2 56 37 01 28 8f 29 b3 d7 3f 6a c2 b6 9e dd 2c 19 f2 64 be e4 62 a5 ba f2 0f d2 7e cf 14 c0 11 ed 20 1f 83 63 20 ad b9 8b ab 16 86 a2 8d 98 01 21 0c 77 36 f3 ee c5
+80 dc fc 43 fe 5d 04 9b 4d 78 a7 a3 eb b9 28 65 c8 51 7e d0 21 11 f6 a6 52 da 35 24 87 2b 6a 31 d7 ff e4 58 77 44 d5 eb 78 3e 96 96 8f 89 be 82 85 65 e0 7e 5f 7d 78 4e 90 60 a7 21 ca 80 7d 76
+33 ed 12 34 02 f3 76 e5 bf 14 96 77 3d 19 61 63 26 be 5b e5 85 03 36 b3 6f 13 bc ae 48 16 68 82 13 68 05 a7 d1 be 5e 9f 27 68 10 fd f7 20 d0 33 ca 4f 2e 53 cb 8a d1 91 9d d5 1a 9f b6 d4 d5 09
+ba 64 c8 cf 68 03 de 50 d8 3a 2e cf ba eb 53 42 07 1a 48 cb 2d bd 57 4a b2 91 52 57 22 37 c4 fb 65 9a 40 16 f7 a1 1b c6 2c 52 71 cf 64 f2 5d 6f 15 cc 50 c4 b7 3f 4c 7e 62 15 13 a5 3c c7 e9 9c
+d7 9d 7f d9 c7 bc e4 e0 5b 0b 01 fa ee 78 e4 ea 5b f2 cc 36 22 41 b7 dc bb 2e e2 14 14 42 2a a0 28 1b c1 45 0d 21 38 63 43 fb 93 54 71 21 b3 81 51 a5 8c e9 49 82 f5 6a 86 79 a3 be 12 65 5d ce
+52 8e a7 c0 56 87 3a 18 b8 e7 35 81 c9 be 87 c0 bc 4a b8 a9 29 e2 75 5a 18 97 81 9e a0 00 11 71 4c 94 dd d5 ba 18 43 fa 74 17 0b 1b 01 b5 9b 36 b6 72 d3 9a 44 68 bb f3 51 44 07 7c 4c e6 31 20
+4a 8a cd 87 05 1c b3 e3 fc 7f 54 00 16 1f 0c cf 5f 79 51 1d 35 06 64 48 d3 66 d4 59 9e 20 99 18 f4 03 c0 df ee 29 e7 59 73 35 85 76 13 3f ab 86 1a 88 df 87 97 6f 2b 07 56 85 78 67 51 a7 62 c7
+a8 7a c2 f0 f1 03 0d df 77 9d 6c c8 27 57 4a 10 0d 39 36 52 b0 48 0e 0f 15 46 15 22 17 21 ba 66 21 c4 36 7e 69 68 39 11 11 2c 93 f4 33 43 32 68 96 a3 ac d8 85 0a b3 83 90 18 bc a4 f3 93 0f d3
+0f df 32 b1 f0 18 6e 2e 93 57 df 00 67 93 1b 02 b2 fb 30 fb 5e fd b1 85 51 91 6d 76 ff 54 38 29 fb 35 a7 b6 30 cd ca 2c d8 0c be 69 9b 86 db 57 c2 77 eb 40 11 b2 a7 4f e6 a5 56 ed e0 83 76 40
+ab ec 79 62 88 9a 4f 4f 7e a7 b2 52 78 a7 60 84 34 54 34 64 c4 4d 4b 9a 98 de 8c 64 37 36 8f 69 c6 ed 11 06 cc df 71 97 ed 0b 48 83 cf 02 7c dc d7 75 75 5c 3f e8 dd a0 85 32 d6 7c cc 50 80 d8
+f7 e9 0a d1 5d a7 05 c7 fa 36 13 80 6f 52 66 b2 33 e9 68 f3 08 bd af d2 e9 6b 5e c8 3e b6 1c 81 8c c3 cc 1f 06 26 d6 d7 b4 87 37 72 9b cd 70 c8 ec 6c 54 42 23 62 f0 73 4a b4 d3 ef 96 40 f0 b5
+75 88 c0 81 da 5f f6 01 8f b7 7d 9a a4 f5 f8 db 2b b9 4e 9b c5 1d 2b a6 47 b0 07 05 6b 24 96 80 33 49 77 5f e7 b1 4e 6a ce 55 2e 98 65 fd 6d 28 e0 3b 3c 87 d6 77 47 f2 fc 1d f7 ef 49 fb 7e ff
+54 03 52 a4 ef fe 97 ee bf da d6 26 5c b8 0e 0a 17 a9 30 f7 f8 49 11 6d d4 40 ad 30 bb ae f2 6b 91 de af d8 80 1a 94 95 b5 fc ce aa 8b b0 68 fc 3c a9 62 a2 99 41 2c 14 cc cf 19 cc 99 37 03 17
+61 f3 1e c0 4b 2a 6c 14 ea 59 33 5c 12 d7 33 06 bc 47 9e 84 9a 5e d7 11 a3 0a dc 1b fe 14 3c d7 cf e4 22 07 c6 4f f3 d3 34 2a f1 6c 4d 07 da 02 04 3e 2d 6f 3e 42 f1 09 8d 7c e6 5f 19 bb 4a 2b
+96 ff eb 82 1a 10 05 1f 07 28 c7 9f 9f 54 f9 1e a1 bc e0 f0 55 4a 3b b9 53 d5 f4 c5 e7 8b aa 95 8f 1f aa 07 4d 9e db 7e c0 c6 c0 77 e7 91 00 a4 86 89 d8 50 15 93 48 4b 8c ff b1 2b f8 c3 66 77
+9e 1d ca ee 69 82 04 c5 eb 2c b5 20 77 cb 84 a4 f4 67 60 6c 62 2f 5c 94 b9 b7 ce 4c 7e 16 fc bf 36 be ed 29 4f a1 0f b0 8f 0a 30 11 68 f8 6d 85 8f da 31 e4 43 82 13 ad 66 5c c1 2a 0e 1a 11 bd
+ea f9 20 cb 3d 2e 83 a3 77 2d c9 5d e5 51 bd 78 71 58 13 83 b4 1e 0e 18 84 f7 1c 33 4a a2 02 65 98 e1 35 f1 a5 be 83 c7 3f bf f6 c2 56 e1 7a 49 06 ef 63 12 50 70 27 bf 47 e4 31 c5 0b 26 e7 ad
+a5 77 f4 3b bb 49 a9 71 1d 5c e7 4a e0 4c 88 d6 d2 7e 4f 0d 8a 97 ab 55 85 fb 37 a2 e9 f7 3a 4e 1d 6c f4 92 3d 83 67 ba dd 85 7a 79 31 c7 94 d4 53 1d 96 49 08 e2 ae 47 e2 00 92 5f b8 de 14 d1
+6f 8d 5c 46 5c 75 59 64 28 2c fd 8c 59 69 46 62 9d 67 05 21 d0 1c b1 ab 90 fc 2e 07 d1 f4 44 88 7f 5f bb 12 53 be 02 b6 e4 24 3d b6 7d a4 c3 1f 95 37 fd e4 0d 44 0a 7c 2d 72 5d 55 34 9f 80 0f
+09 31 63 85 09 ed 7a e3 34 b3 30 5b 17 8b 3f ee fc 8f 38 3e 3e cf 46 74 74 4b ec cb 54 09 c7 d7 12 ca 1a b9 ad cd 7b ab df a4 cd 1b a6 4b b4 7f d8 05 ba 37 5f 23 a6 dd 66 0a 73 47 d7 cb e8 17
+14 11 88 8b 12 33 80 3e 06 de 79 14 93 39 9c b1 55 3d 1e 89 2b ee 4b e1 3f 43 96 d0 93 8c 7c 2c 93 e8 71 c5 67 bb eb 9b f4 f0 9e 0f 7c aa 71 60 c4 ca 06 b4 53 7a a5 a6 fb 8a 91 6e 97 1d 0b 51
+22 b2 e1 1f c6 e1 b5 37 73 4f d5 ac b4 47 67 8d 30 f3 89 41 d3 34 02 d2 3c fe cb 4c d5 8f 38 c2 e7 ea 93 b4 95 b4 c8 c4 a4 03 ff c2 e3 99 5e 9b 4a df c1 76 2d a9 a5 7c a6 68 da 05 0d 18 83 fe
+99 9f df dc c7 ed b7 14 b3 e7 05 22 75 32 d1 bf cd 4e 60 d7 f9 cd e1 af 2f 57 b9 a2 bb 26 9f 59 38 96 af d7 50 94 6a 60 d3 5d 1e 36 b4 15 d2 05 01 9d 02 9b cb 32 07 0f 64 59 fe 88 49 65 d2 3e
+4a 50 36 0e 33 26 57 fb ef dc 1f 06 a5 49 79 b5 8d 56 10 88 32 20 b2 62 e6 c5 0a 1b 70 ca 16 e1 1b 7a 7f 72 16 51 58 a1 03 e9 9b d6 81 fd 22 7c c7 71 d3 9e cc f8 0b 7c 2c 58 57 b7 c2 5f 03 94
+ca b9 3a ab c5 ab ce 21 3f d8 b3 7d c6 61 ef 91 b0 79 df 11 8e 0c ae 4f 7b 42 2f 64 8a 41 e2 ef 7a 51 bc b4 6e cf c0 6a 98 f3 68 74 e7 43 85 e1 bc 7e ce 6c 40 3e 2e 8a c5 0e 4a 9f 07 c7 2c 5a
+76 a4 60 37 22 b9 98 62 21 9f 2d 73 93 40 cc 90 b6 ce ed 43 8d 5a 0f bb b3 d3 0c ec 7f cd b4 32 5d 95 3a 8a 70 14 cf 14 52 dc 65 9b 4f c2 14 9f 5b 74 fe 82 de b2 00 39 92 15 18 7d 38 13 a3 6b
+b0 2c d5 c9 71 8f 2e b2 d9 e2 ae e7 1b 69 db 41 fa 60 16 85 59 53 78 85 7f 1e 56 b7 b1 d2 2f 67 9f 46 45 f9 f7 79 7b 03 e3 44 b3 99 44 48 7b aa 3c d9 56 4f ec cf 69 3a 94 06 b8 f9 69 16 1e 8f
+9b 64 38 9e e5 39 52 a6 e3 ef b9 94 56 24 17 05 ef f8 2a a9 87 37 fa de fa 61 a4 04 b7 2e 92 80 7d 28 46 0e 0c ca 4a 97 bc 5f 56 34 9e a7 c2 5e b6 a3 75 bc 45 bd 81 7a 1d 15 36 ce 19 6e fd d8
+ff 50 99 29 48 74 53 46 e2 cd 2d 14 e1 f5 61 6f be 01 10 d9 49 91 24 1c d7 ad 20 e0 04 5a 54 c1 97 02 e2 b2 64 f0 2b a5 eb db 4f cd 29 1e a9 98 d7 bc f6 46 99 af 0e 60 71 e5 2b 4b be d5 b8 7b
+e1 ca 85 3a 74 5c 67 39 71 81 30 60 80 fa 74 ea 73 39 29 d0 25 e1 44 3a 34 eb c8 57 62 f3 2f 46 bf 1d cf 79 18 be 15 07 6d eb 99 3d 45 da 2c 67 3a b5 56 bb ae 05 82 3e 7a be b6 fa 16 b4 33 b6
+a7 39 11 7c 82 b5 62 e4 0a e1 3a 0a f9 38 25 84 5e 4c 94 c2 49 80 89 e3 07 0c af 4d f9 f7 10 12 26 5d c8 f3 51 e5 c9 75 26 b8 a8 6e 9f 43 16 6c 56 b8 ef a9 ef c6 b5 a0 03 ab f7 aa 74 0a 7f eb
+17 4a 49 8b c4 8b 20 86 b6 47 11 30 66 da 32 b9 90 79 48 24 9b ae b9 7d b3 cf ab 1e ac a5 f6 bc 7c 78 b2 4d 45 69 03 e8 cf e4 ca 9a 56 21 49 9a 9d 81 ae 25 61 28 5b 9b b4 ef b6 db 22 f8 a3 59
+8d 83 0b 54 89 79 0a 6f 18 cc e5 66 90 32 64 7b 1d 42 18 28 25 ae 45 02 60 8a 07 a5 0e 6c a4 a7 0d f8 cf ac 59 1d d4 17 2c ab fd cc 83 ed 06 0d a2 a0 1c d4 a8 50 2f 09 4f 6b 49 2e b7 b9 d8 b0
+4e a9 75 84 f4 10 9e e8 8e b9 8c 43 81 04 f3 33 b9 4d 74 cd 2e 0e 44 3e 1e 68 5d 84 bb 4c 5a 52 0e b3 7c e2 ff 6d b0 c7 eb 6c a5 0d 37 07 21 cd b3 1e 74 c0 d1 c0 72 0f 80 0a 86 de 7b 76 b5 68</pre>
+      <div class="scan"></div>
+      <!-- 왼쪽 위: 부팅 로그 -->
+      <div style="position: absolute; left: 48px; top: 44px; font-size: 14px; line-height: 1.9">
+        <span class="ln wh" style="--t: .05s">BYPASS/OS 26.11 — vibe-kernel x86_64</span>
+        <span class="ln" style="--t: .25s">$ git clone mmu/bypass-crew --depth=∞</span>
+        <span class="ln" style="--t: .5s">[ <span class="ok">ok</span> ] resolve 누구나 ................ 0.002s</span>
+        <span class="ln" style="--t: .75s">[ <span class="ok">ok</span> ] link 무엇이든 ................. 0.001s</span>
+        <span class="ln" style="--t: 1s">[ <span class="vi">..</span> ] compile ideas → apps (prompt mode)</span>
+        <span class="ln" style="--t: 1.25s">[ <span class="ok">ok</span> ] mount /dev/vibe on /campus</span>
+        <span class="ln" style="--t: 1.5s">[ <span class="ok">ok</span> ] experience_required = false</span>
+        <span class="ln" style="--t: 1.75s">[ <span class="ok">ok</span> ] 0 errors · 0 warnings · 0 excuses</span>
+        <span class="ln wh" style="--t: 2s">$ ./start --anyone --anything<span class="cur"></span></span>
+      </div>
+      <!-- 오른쪽 위: 시스템 수치 -->
+      <div style="position: absolute; right: 48px; top: 44px; text-align: right; font-size: 12px; line-height: 2; letter-spacing: .08em">
+        <div>PID 0x00B1 · TTY /dev/pts/0</div>
+        <div>MEM 26.1 / 64 GB · CPU ▮▮▮▮▮▮▯▯</div>
+        <div class="ok">● LIVE · 34.79°N 126.38°E</div>
+      </div>
+      <!-- 가운데: 해독되는 슬로건 -->
+      <div style="position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-62%); text-align: center">
+        <div style="font-size: 13px; letter-spacing: .4em; color: #6B707A">DECRYPTING MANIFESTO</div>
+        <div class="glitch" style="margin-top: 18px"><span class="dec d" style="font-size: 76px; color: #FFFDF8; letter-spacing: -.01em"><i class="f0">▓▒░█ ▒▓░█▒░.</i><i style="--at: 0.35s">#@%$ &*!@%^.</i><i style="--at: 0.46s">누@%, &*!@%.</i><i style="--at: 0.57s">누#나, ※!@#.</i><i style="--at: 0.68s">누구%, 무@#$.</i><i style="--at: 0.79s">누구나, 무$%든.</i><i style="--at: 0.90s">누구나, 무엇%든.</i><i style="--at: 1.01s">누구나, 무엇이#.</i><i style="--at: 1.12s">누구나, 무엇이든_</i><span class="fin">누구나, 무엇이든.</span></span></div>
+      </div>
+      <!-- 아래: 진행률 -->
+      <div style="position: absolute; left: 48px; right: 48px; bottom: 44px">
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 14px">
+          <span style="font-size: 12px; letter-spacing: .2em">BOOTING CREW ENVIRONMENT</span>
+          <span style="font-size: 64px; line-height: .8; font-weight: 700; color: #FFFDF8"><span class="pct"></span><span style="font-size: 22px; color: #FF5A1F">%</span></span>
+        </div>
+        <div class="pbar"><i></i></div>
+      </div>
     </div>
+    <div class="seam"></div>
   </div>
+
+  <!-- 스크롤한 만큼 차오르는 줄 -->
+  <div class="bar-top" aria-hidden="true"></div>
+
+  <!-- 메뉴 -->
+  <header style="position: fixed; top: 18px; left: 18px; right: 18px; z-index: 30; display: flex; align-items: center; justify-content: space-between; pointer-events: none">
+    <div class="nav">
+      <a href="#top" aria-label="BYPASS 처음으로" style="gap: 8px; padding: 0 14px 0 6px">
+        <svg width="30" height="30" viewBox="1 1 130 130" aria-hidden="true"><path d="M66 4 L128 66 L66 128 L4 66 Z" fill="#FF5A1F" stroke="#16120F" stroke-width="5" stroke-linejoin="round"/><path d="M66 15 L117 66 L66 117 L15 66 Z" fill="none" stroke="#16120F" stroke-width="5" stroke-linejoin="round"/><g transform="translate(34 32) scale(0.64)" fill="#16120F"><ellipse cx="44" cy="60" rx="27" ry="23"/><path d="M51 45 C55 37 58 31 61 25 L72 30 C68 36 66 44 64 53 Z"/><circle cx="66" cy="26" r="10"/><path d="M72 20 C83 19 93 24 95 32 C96 38 91 41 88 37 C86 34 82 33 74 33 Z"/><path d="M19 52 C10 47 7 40 11 34 C14 43 20 46 23 46 Z"/><path d="M37 80 L35 92 L27 95 L41 95 L42 81 Z"/><path d="M51 80 L51 92 L44 95 L58 95 L56 81 Z"/><circle cx="68" cy="23.5" r="2" fill="#FF5A1F"/><path d="M32 55 C40 50 51 54 54 64" fill="none" stroke="#FF5A1F" stroke-width="2.6" stroke-linecap="round"/></g></svg>
+        <span class="d" style="font-size: 21px">BYPASS</span>
+      </a>
+    </div>
+    <nav class="nav" aria-label="주 메뉴">
+      <a href="#anyone">누구나</a>
+      <a href="#anything">무엇이든</a>
+      <a class="acct" id="nav-account" href="/login/">로그인</a>
+      <a class="on" href="#join">나도 할래 ↗</a>
+    </nav>
+  </header>
+
+  <!-- 전체 공개 공지 (HQ › 공지에서 '전체 공개'로 올린 게 있을 때만) -->
+  <div class="notice-pill" data-vms-notice hidden>
+    <button type="button" data-open-notice aria-haspopup="dialog"><b>공지</b><span data-vms-notice-title></span><span class="more" data-vms-notice-more></span></button>
+  </div>
+
+  <!-- 1. 첫 화면 -->
+  <section id="top" class="paper pan" aria-labelledby="hero-t" style="position: relative; min-height: 940px; padding: 170px 0 120px; box-sizing: border-box; overflow: hidden">
+    <div class="wrap" style="position: relative; z-index: 2; text-align: center">
+      <h1 id="hero-t" class="d" aria-label="누구나, 무엇이든." style="margin: 0; font-size: 172px; line-height: 1">
+        <span class="l1" aria-hidden="true" style="display: block"><span class="ch" style="--i: 0; --rr: -40deg">누</span><span class="ch" style="--i: 1; --rr: 25deg">구</span><span class="ch" style="--i: 2; --rr: -18deg">나</span><span class="ch" style="--i: 3; --rr: 60deg; color: #FF5A1F">,</span></span>
+        <span class="l2" aria-hidden="true" style="display: block"><span class="mk"><span class="ch" style="--d: .35s; --i: 0; --rr: 30deg">무</span><span class="ch" style="--d: .35s; --i: 1; --rr: -35deg">엇</span><span class="ch" style="--d: .35s; --i: 2; --rr: 15deg">이</span><span class="ch" style="--d: .35s; --i: 3; --rr: -25deg">든</span><span class="ch" style="--d: .35s; --i: 4; --rr: 70deg">.</span></span></span>
+      </h1>
+      <p class="pop" style="--r: -1.5deg; animation-delay: 4.3s, 4.9s; display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 0 .35em; margin: 60px 0 0; padding: 18px 30px; border-radius: 16px; background: #16120F; color: #FFFDF8; font-size: 30px; font-weight: 900; letter-spacing: -.02em; box-shadow: 6px 6px 0 #FF5A1F">
+        <span class="slot" style="color: #FF5A1F"><span><b>코딩 0일차가</b><b>항해학과 1학년이</b><b>시험 전날의 누군가가</b><b>배고픈 누군가가</b><b>코딩 0일차가</b></span></span>
+        <span class="slot b" style="color: #7CE0FF"><span><b>시간표 앱을</b><b>해기사 문제집을</b><b>토익 단어장을</b><b>학식 알리미를</b><b>시간표 앱을</b></span></span>
+        <span>만들었어요.<span class="caret" aria-hidden="true"></span></span>
+      </p>
+      <p class="pop" style="--r: 0deg; animation-delay: 4.6s, 5.2s; margin: 28px auto 0; max-width: 640px; font-size: 20px; line-height: 1.65; font-weight: 500; color: #4A413B">목포해양대 바이브 코딩 크루 <b style="color: #16120F">BYPASS</b>. <br>코딩 몰라도, 이유 없어도, 대충이어도 괜찮아요.</p>
+      <div class="pop" style="--r: 0deg; animation-delay: 4.9s, 5.5s; display: flex; justify-content: center; gap: 12px; margin-top: 40px; flex-wrap: wrap">
+        <a class="btn ghost" href="#anything">만든 거 구경하기<span class="ar" aria-hidden="true"><i>↓</i></span></a>
+        <a class="btn go" href="#join">나도 만들래<span class="ar" aria-hidden="true"><i>→</i></span></a>
+      </div>
+    </div>
+
+    <!-- 둥둥 떠다니는 스티커들 (스크롤하면 바깥으로 터져 나감) -->
+    <div class="burst" aria-hidden="true" style="position: absolute; inset: 0">
+      <span class="stk pop" style="--r: -9deg; left: 4%; top: 240px; background: #FFFFFF; animation-delay: 3.7s, 4.3s"><span class="ico" style="background: #FF5A1F">수강</span>수강플래너</span>
+      <span class="stk pop" style="--r: 7deg; right: 5%; top: 220px; background: #FFE3EC; animation-delay: 3.85s, 4.9s"><span class="ico" style="background: #16120F; color: #FFFFFF">꿀</span>꿀꿀이</span>
+      <span class="stk pop" style="--r: 6deg; left: 7%; top: 560px; background: #FFD43B; animation-delay: 4s, 5.4s"><span class="ico" style="background: #16120F; color: #FFD43B">RC</span>토익 RC 10문제</span>
+      <span class="stk pop" style="--r: -6deg; right: 3%; top: 520px; background: #16120F; color: #FFFDF8; box-shadow: 4px 4px 0 #FF5A1F; animation-delay: 4.15s, 4.6s"><span class="ico" style="background: #FF5A1F; color: #16120F">X</span>엑셀 훈련소</span>
+      <span class="stk pop" style="--r: 12deg; left: 18%; bottom: 90px; background: #E7F5FF; animation-delay: 4.3s, 5.8s"><span class="ico" style="background: #16120F; color: #FF5A1F; font-size: 10px">ECDIS</span>ECDIS 연습</span>
+      <span class="stk pop" style="--r: -10deg; right: 16%; bottom: 70px; background: #FFFFFF; animation-delay: 4.45s, 5s"><span class="ico" style="background: #16120F; color: #FFFFFF">?</span>쓸데없는 게임</span>
+      <span class="hand pop" style="--r: -8deg; position: absolute; left: 6%; top: 185px; font-size: 26px; color: #D9530F; animation-delay: 4.8s, 6s">← 시간표 짜기 귀찮아서</span>
+      <span class="hand pop" style="--r: 6deg; position: absolute; right: 5%; top: 300px; font-size: 26px; color: #D9530F; animation-delay: 5s, 5.6s">배고파서 만듦 ↑</span>
+      <span class="hand pop" style="--r: 8deg; position: absolute; right: 17%; bottom: 140px; font-size: 24px; color: #6B5E55; animation-delay: 5.2s, 6.4s">이유? 없음 ↓</span>
+      <!-- 도도새 표지판 + 둘레를 도는 글씨 -->
+      <div class="pop" style="--r: 0deg; position: absolute; left: 3%; top: 335px; width: 170px; height: 170px; animation-delay: 4.1s, 5.1s">
+        <svg class="spin slow" viewBox="0 0 200 200" style="position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible">
+          <defs><path id="ring-hero" d="M100,100 m-80,0 a80,80 0 1,1 160,0 a80,80 0 1,1 -160,0"/></defs>
+          <circle cx="100" cy="100" r="97" fill="#16120F"/>
+          <text fill="#FFFFFF" font-family="Noto Sans KR, sans-serif" font-size="17" font-weight="900" letter-spacing="2.4"><textPath href="#ring-hero">누구나 ✱ 무엇이든 ✱ 바이브 코딩 크루 ✱ BYPASS ✱</textPath></text>
+        </svg>
+        <svg width="92" height="92" viewBox="1 1 130 130" style="position: absolute; left: 39px; top: 39px; transform: rotate(14deg)"><path d="M66 4 L128 66 L66 128 L4 66 Z" fill="#FF5A1F" stroke="#16120F" stroke-width="5" stroke-linejoin="round"/><path d="M66 15 L117 66 L66 117 L15 66 Z" fill="none" stroke="#16120F" stroke-width="5" stroke-linejoin="round"/><g transform="translate(34 32) scale(0.64)" fill="#16120F"><ellipse cx="44" cy="60" rx="27" ry="23"/><path d="M51 45 C55 37 58 31 61 25 L72 30 C68 36 66 44 64 53 Z"/><circle cx="66" cy="26" r="10"/><path d="M72 20 C83 19 93 24 95 32 C96 38 91 41 88 37 C86 34 82 33 74 33 Z"/><path d="M19 52 C10 47 7 40 11 34 C14 43 20 46 23 46 Z"/><path d="M37 80 L35 92 L27 95 L41 95 L42 81 Z"/><path d="M51 80 L51 92 L44 95 L58 95 L56 81 Z"/><circle cx="68" cy="23.5" r="2" fill="#FF5A1F"/><path d="M32 55 C40 50 51 54 54 64" fill="none" stroke="#FF5A1F" stroke-width="2.6" stroke-linecap="round"/></g></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 엇갈려 흐르는 두 줄 -->
+  <section aria-label="누구나, 무엇이든" style="position: relative; height: 280px; overflow: hidden; background: #FFFDF8">
+    <div class="tilt-a" style="position: absolute; left: -6%; right: -6%; top: 56px; transform: rotate(-4deg); background: #FF5A1F; border-block: 2px solid #16120F; padding: 18px 0">
+      <div class="mq d" aria-hidden="true" style="font-size: 40px">
+        <span>누구나</span><span>✱</span><span class="ol">코딩 0일차</span><span>✱</span><span>항해학과</span><span>✱</span><span class="ol">기관학과</span><span>✱</span><span>해양경찰학과</span><span>✱</span><span class="ol">휴학생</span><span>✱</span><span>새벽 3시의 너</span><span>✱</span>
+        <span>누구나</span><span>✱</span><span class="ol">코딩 0일차</span><span>✱</span><span>항해학과</span><span>✱</span><span class="ol">기관학과</span><span>✱</span><span>해양경찰학과</span><span>✱</span><span class="ol">휴학생</span><span>✱</span><span>새벽 3시의 너</span><span>✱</span>
+      </div>
+    </div>
+    <div class="tilt-b" style="position: absolute; left: -6%; right: -6%; top: 140px; transform: rotate(3deg); background: #16120F; color: #FFFFFF; border-block: 2px solid #16120F; padding: 18px 0">
+      <div class="mq r d" aria-hidden="true" style="font-size: 40px">
+        <span style="color: #FF5A1F">무엇이든</span><span>●</span><span>시간표 앱</span><span>●</span><span class="ol" style="-webkit-text-stroke: 1.5px #FF5A1F">문제집</span><span>●</span><span>단어장</span><span>●</span><span class="ol" style="-webkit-text-stroke: 1.5px #FF5A1F">학식 알리미</span><span>●</span><span>시뮬레이터</span><span>●</span><span class="ol" style="-webkit-text-stroke: 1.5px #FF5A1F">게임</span><span>●</span>
+        <span style="color: #FF5A1F">무엇이든</span><span>●</span><span>시간표 앱</span><span>●</span><span class="ol" style="-webkit-text-stroke: 1.5px #FF5A1F">문제집</span><span>●</span><span>단어장</span><span>●</span><span class="ol" style="-webkit-text-stroke: 1.5px #FF5A1F">학식 알리미</span><span>●</span><span>시뮬레이터</span><span>●</span><span class="ol" style="-webkit-text-stroke: 1.5px #FF5A1F">게임</span><span>●</span>
+      </div>
+    </div>
+    <p class="sr-only">누구나: 코딩 0일차, 항해학과, 기관학과, 해양경찰학과, 휴학생. 무엇이든: 시간표 앱, 문제집, 단어장, 학식 알리미, 시뮬레이터, 게임.</p>
+  </section>
+
+  <!-- 3. 누구나: 줄 긋고 고쳐 쓰기 -->
+  <section id="anyone" aria-labelledby="any-t" style="padding: 170px 0 180px">
+    <div class="wrap">
+      <p class="hand sr" style="--r: -3deg; margin: 0; font-size: 34px; color: #D9530F">누구나 ↓</p>
+      <h2 id="any-t" class="d" aria-label="코딩을 몰라도 돼요. 전공이 뭐든 돼요. 귀찮아서, 재밌어서여도 돼요." style="margin: 30px 0 0; font-size: 92px; line-height: 1.6">
+        코딩을 <span class="st-line"><span class="old">알아야</span><span class="bar" aria-hidden="true"></span><span class="new hand" aria-hidden="true" style="font-size: .6em">몰라도</span></span> 돼요.<br>
+        전공이 <span class="st-line"><span class="old">컴공이어야</span><span class="bar" aria-hidden="true"></span><span class="new hand" aria-hidden="true" style="font-size: .6em">뭐든</span></span> 돼요.<br>
+        <span class="st-line"><span class="old">거창한 이유가 있어야</span><span class="bar" aria-hidden="true"></span><span class="new hand" aria-hidden="true" style="font-size: .6em">귀찮아서, 재밌어서여도</span></span> 돼요.
+      </h2>
+      <p class="lit" style="margin: 64px 0 0; max-width: 980px; font-size: 44px; line-height: 1.5; font-weight: 900; letter-spacing: -.03em"><span class="w" style="--i: 0; background: linear-gradient(transparent 62%, #FFD43B 62%)">AI한테</span> <span class="w" style="--i: 1; background: linear-gradient(transparent 62%, #FFD43B 62%)">말로</span> <span class="w" style="--i: 2">설명하면</span> <span class="w" style="--i: 3">같이</span> <span class="w" style="--i: 4">만들어</span> <span class="w" style="--i: 5">줘요.</span> <span class="w" style="--i: 6">우리도</span> <span class="w" style="--i: 7">처음엔</span> <span class="w" style="--i: 8">다</span> <span class="w" style="--i: 9; background: linear-gradient(transparent 62%, #FFD43B 62%)">몰랐어요.</span> <span class="w" style="--i: 10">막히면</span> <span class="w" style="--i: 11">옆</span> <span class="w" style="--i: 12">사람한테</span> <span class="w" style="--i: 13; background: linear-gradient(transparent 62%, #FFD43B 62%)">물어보면</span> <span class="w" style="--i: 14">되고요.</span></p>
+    </div>
+  </section>
+
+
+  <!-- 4. 무엇이든: 넘어지듯 붙는 타일 -->
+  <section id="anything" class="paper" aria-labelledby="thing-t" style="padding: 150px 0 170px; border-block: 2px solid #16120F">
+    <div class="wrap">
+      <div style="display: flex; align-items: flex-end; gap: 20px 40px; flex-wrap: wrap">
+        <h2 id="thing-t" class="d zo" style="margin: 0; font-size: 124px; line-height: 1">무엇이든<span style="color: #FF5A1F">.</span></h2>
+        <p class="hand sr" style="--r: 3deg; margin: 0 0 14px; font-size: 30px; color: #6B5E55">쓸모 있어도, 없어도 ↘</p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 200px; gap: 22px; margin-top: 64px">
+        <a href="https://mymmu.my/" target="_blank" rel="noopener" class="tp tile" style="--r: -2deg; grid-column: span 2; grid-row: span 2; border-radius: 20px; background: #FF5A1F; border: 2px solid #16120F; box-shadow: 6px 6px 0 #16120F; padding: 34px; text-decoration: none; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden">
+          <span class="hand" style="position: absolute; top: 26px; right: 28px; padding: 4px 14px; border-radius: 8px; background: #16120F; color: #FF5A1F; font-size: 22px; transform: rotate(6deg)">귀찮아서</span>
+          <span aria-hidden="true" style="position: absolute; left: 34px; top: 34px; display: grid; grid-template-columns: repeat(5, 42px); grid-auto-rows: 30px; gap: 6px"><span style="grid-row: span 2; border-radius: 6px; background: #16120F"></span><span></span><span style="grid-row: span 2; border-radius: 6px; background: #16120F"></span><span></span><span style="border-radius: 6px; background: #FFFFFF"></span><span></span><span></span><span></span><span style="border-radius: 6px; background: #FFD43B; border: 2px solid #16120F"></span></span>
+          <b class="d" style="font-size: 56px; line-height: 1.1">수강플래너</b><span style="margin-top: 8px; font-size: 18px">시간표 맞추기 귀찮아서. 과목만 담으면 끝.</span>
+        </a>
+        <a href="https://pf.kakao.com/_uuxfmX" target="_blank" rel="noopener" class="tp tile" style="--r: 3deg; border-radius: 20px; background: #16120F; color: #FFFFFF; border: 2px solid #16120F; box-shadow: 6px 6px 0 #16120F; padding: 26px; text-decoration: none; display: flex; flex-direction: column; justify-content: space-between">
+          <span class="hand" style="align-self: flex-start; padding: 2px 12px; border-radius: 8px; background: #FFFFFF; color: #D9530F; font-size: 19px">배고파서</span>
+          <span><b class="d" style="display: block; font-size: 34px">꿀꿀이</b><span style="font-size: 15px; opacity: .9">학식 메뉴, 카톡으로</span></span>
+        </a>
+        <a href="/apps/toeic-rc/" class="tp tile" style="--r: -4deg; border-radius: 20px; background: #FFD43B; border: 2px solid #16120F; box-shadow: 6px 6px 0 #16120F; text-decoration: none; display: grid; place-items: center; text-align: center; overflow: hidden">
+          <svg class="spin slow rev" aria-hidden="true" viewBox="0 0 200 200" style="position: absolute; width: 190px; height: 190px; opacity: .5"><defs><path id="ring-rc" d="M100,100 m-82,0 a82,82 0 1,1 164,0 a82,82 0 1,1 -164,0"/></defs><text fill="#16120F" font-size="15" font-weight="900" letter-spacing="3"><textPath href="#ring-rc">PART 5 · PART 6 · PART 7 · 매일 10문제 ·</textPath></text></svg>
+          <span style="position: relative"><b class="d" style="display: block; font-size: 32px">토익<br>RC 10문제</b><span class="hand" style="font-size: 20px">매일 조금씩</span></span>
+        </a>
+        <a href="/apps/ecdis/" class="tp tile inv" style="--r: 2deg; grid-column: span 2; border-radius: 20px; background: #16120F; color: #FFFDF8; border: 2px solid #16120F; box-shadow: 6px 6px 0 #FF5A1F; padding: 26px 30px; text-decoration: none; display: flex; align-items: center; gap: 26px; overflow: hidden">
+          <span class="spin" aria-hidden="true" style="flex: none; width: 120px; height: 120px; border-radius: 50%; border: 2px dashed #FF5A1F; position: relative; background: radial-gradient(circle, rgba(255,90,31,.18), transparent 70%)"><span style="position: absolute; left: 50%; top: 50%; width: 50%; height: 3px; background: #FF5A1F; transform-origin: left"></span></span>
+          <span><span class="hand" style="font-size: 20px; color: #7CE0FF">공부하다가</span><b class="d" style="display: block; font-size: 38px">ECDIS 시뮬레이터</b><span style="font-size: 15px; opacity: .8">시험 전에 미리 만져 보기</span></span>
+        </a>
+        <a href="/apps/excel/" class="tp tile" style="--r: -3deg; border-radius: 20px; background: #FFFFFF; border: 2px solid #16120F; box-shadow: 6px 6px 0 #16120F; padding: 26px; text-decoration: none; display: flex; flex-direction: column; justify-content: space-between">
+          <span class="hand" style="align-self: flex-end; padding: 0 10px; border-radius: 8px; background: #E7F5FF; color: #16120F; font-size: 20px">졸업하고도 씀</span>
+          <span><b class="d" style="display: block; font-size: 34px">엑셀 훈련소</b><span style="font-size: 15px; color: #4A413B">단축키부터 함수까지</span></span>
+        </a>
+        <a href="#join" class="tp tile" style="--r: 4deg; border-radius: 20px; background: #FFE3EC; border: 2px dashed #D9530F; padding: 26px; text-decoration: none; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center">
+          <b class="d" style="font-size: 30px">다음은<br>네 차례</b><span class="hand" style="font-size: 22px; color: #D9530F">뭐 만들래?</span>
+        </a>
+      </div>
+      <p class="sr" style="margin: 52px 0 0; text-align: center"><a class="btn" href="/community/#showcase">만든 거 전부 보기<span class="ar" aria-hidden="true"><i>→</i></span></a></p>
+    </div>
+  </section>
+
+
+  <!-- 5. 어떻게? 말하면 만들어진다 -->
+  <section class="chat" aria-labelledby="how-t" style="height: 2400px; background: #16120F; color: #FFFDF8">
+    <div style="position: sticky; top: 0; height: 900px; display: flex; align-items: center">
+      <div class="wrap" style="width: 100%; display: flex; flex-wrap: wrap; gap: 60px; align-items: center">
+        <div style="flex: 1 1 380px">
+          <p class="hand" style="margin: 0; font-size: 30px; color: #7CE0FF">어떻게 만드냐면 ↓</p>
+          <h2 id="how-t" class="d" style="margin: 16px 0 0; font-size: 86px; line-height: 1.08">말하면,<br><span style="color: #FF5A1F">만들어져요.</span></h2>
+          <p style="margin: 26px 0 0; font-size: 20px; line-height: 1.7; color: #CFC6BE">코드를 한 줄도 몰라도 괜찮아요. 하고 싶은 걸 AI한테 말로 설명하면 같이 만들어 줘요. 그게 바이브 코딩이에요.</p>
+        </div>
+        <div style="flex: 1 1 460px; border-radius: 22px; overflow: hidden; border: 1px solid #3A302A; background: #241D18; box-shadow: 0 40px 80px -40px rgba(255,90,31,.55)">
+          <div class="mono" style="display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px solid #3A302A; font-size: 12.5px; color: #A39890">
+            <span style="width: 11px; height: 11px; border-radius: 50%; background: #FF5A1F"></span><span style="width: 11px; height: 11px; border-radius: 50%; background: #16120F"></span><span style="width: 11px; height: 11px; border-radius: 50%; background: #FFD43B"></span>
+            <span style="margin-left: 8px">~/bypass/kkulkkuri — vibe session</span>
+          </div>
+          <div class="cprog" aria-hidden="true" style="height: 3px; background: linear-gradient(90deg, #16120F, #FF5A1F); transform-origin: left"></div>
+          <div style="display: flex; flex-direction: column; gap: 16px; padding: 28px">
+            <div class="b1" style="align-self: flex-end; max-width: 80%; padding: 16px 20px; border-radius: 20px 20px 4px 20px; background: #FF5A1F; color: #16120F; font-size: 18px; font-weight: 700">오늘 학식 메뉴를 카톡으로 확인하고 싶어</div>
+            <div class="b2" style="align-self: flex-start; max-width: 86%; padding: 16px 20px; border-radius: 20px 20px 20px 4px; background: #FFFDF8; color: #16120F; font-size: 17px; line-height: 1.6">좋아요! 카톡으로 물어보면 식단 페이지에서 오늘 메뉴를 찾아서 답해 주게 만들어 볼게요.
+              <span class="mono" style="display: block; margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: #16120F; color: #FF5A1F; font-size: 13px; overflow: hidden; white-space: nowrap"><span class="ty" style="display: block; overflow: hidden"><span style="color: #7CE0FF">const</span> menu = <span style="color: #7CE0FF">await</span> getTodayMenu();</span></span>
+            </div>
+            <div class="b3" style="align-self: flex-end; max-width: 80%; padding: 16px 20px; border-radius: 20px 20px 4px 20px; background: #FF5A1F; color: #16120F; font-size: 18px; font-weight: 700">이름은 꿀꿀이로 해 줘 ㅋㅋ</div>
+            <div class="b4" style="align-self: flex-start; padding: 16px 20px; border-radius: 20px 20px 20px 4px; background: #FFFDF8; color: #16120F; font-size: 17px">완성! 친구 추가하고 "오늘 학식" 보내면 바로 알려 줘요.</div>
+            <div class="b5" style="--r: -3deg; align-self: center; display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-radius: 16px; background: #16120F; color: #FFFFFF; border: 2px solid #FFFDF8; box-shadow: 6px 6px 0 #FF5A1F">
+              <span class="d" style="display: grid; place-items: center; width: 52px; height: 52px; border-radius: 12px; background: #FFFFFF; color: #D9530F; font-size: 26px">꿀</span>
+              <span><b class="d" style="display: block; font-size: 26px">꿀꿀이 완성</b><span class="hand" style="font-size: 18px">진짜 이렇게 만들어졌어요</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. 너도 해볼래? (스크롤하면 초록 원이 화면을 덮으며 열림) -->
+  <section id="join" aria-labelledby="join-t" style="position: relative; background: #16120F; overflow: hidden; text-align: center">
+    <div class="iris" style="position: relative; padding: 170px 0; background: #FF5A1F">
+      <svg class="spin slow" aria-hidden="true" viewBox="0 0 200 200" style="position: absolute; left: 5%; top: 70px; width: 170px; height: 170px"><defs><path id="ring-join" d="M100,100 m-80,0 a80,80 0 1,1 160,0 a80,80 0 1,1 -160,0"/></defs><circle cx="100" cy="100" r="97" fill="#16120F"/><text fill="#FF5A1F" font-size="17" font-weight="900" letter-spacing="2.4"><textPath href="#ring-join">너도 ✱ 나도 ✱ 누구나 ✱ 일단 해 봐 ✱ 같이 하자 ✱</textPath></text><text x="100" y="116" text-anchor="middle" font-size="46" font-weight="900" fill="#FFFFFF">↗</text></svg>
+      <span class="spin rev" aria-hidden="true" style="position: absolute; right: 8%; bottom: 90px; width: 90px; height: 90px; border-radius: 22px; background: #16120F; border: 2px solid #16120F"></span>
+      <span aria-hidden="true" class="d spin" style="position: absolute; right: 10%; top: 80px; font-size: 96px; line-height: 1; color: #16120F">✱</span>
+      <span aria-hidden="true" class="pop" style="--r: -12deg; position: absolute; left: 12%; bottom: 110px; width: 60px; height: 60px; border-radius: 50%; background: #FFD43B; border: 2px solid #16120F; animation-delay: 0s, 0s"></span>
+      <div aria-hidden="true" style="position: absolute; inset: 0; overflow: hidden; pointer-events: none"><span class="cf" style="left: 32%; --s: 23px; background: #16120F; --du: 7.2s; --de: -3.3s; --rot: 427deg; border-radius: 2px"></span><span class="cf" style="left: 3%; --s: 21px; background: #FFFDF8; --du: 6.0s; --de: -2.1s; --rot: 847deg; border-radius: 50%"></span><span class="cf" style="left: 83%; --s: 16px; background: #FFD43B; --du: 5.9s; --de: -1.4s; --rot: 375deg; border-radius: 2px"></span><span class="cf" style="left: 10%; --s: 16px; background: #7CE0FF; --du: 8.0s; --de: -5.3s; --rot: 391deg; border-radius: 50%"></span><span class="cf" style="left: 62%; --s: 23px; background: #FFE3EC; --du: 7.9s; --de: -7.9s; --rot: 764deg; border-radius: 2px"></span><span class="cf" style="left: 75%; --s: 21px; background: #16120F; --du: 8.9s; --de: -1.2s; --rot: 459deg; border-radius: 2px"></span><span class="cf" style="left: 19%; --s: 21px; background: #FFFDF8; --du: 5.9s; --de: -8.7s; --rot: 668deg; border-radius: 50%"></span><span class="cf" style="left: 66%; --s: 20px; background: #FFD43B; --du: 7.3s; --de: -4.8s; --rot: 597deg; border-radius: 50%"></span><span class="cf" style="left: 89%; --s: 14px; background: #16120F; --du: 8.4s; --de: -8.9s; --rot: -694deg; border-radius: 2px"></span><span class="cf" style="left: 75%; --s: 23px; background: #FFFDF8; --du: 5.4s; --de: -5.9s; --rot: 651deg; border-radius: 2px"></span><span class="cf" style="left: 10%; --s: 21px; background: #FFD43B; --du: 8.4s; --de: -8.9s; --rot: -712deg; border-radius: 2px"></span><span class="cf" style="left: 54%; --s: 16px; background: #7CE0FF; --du: 5.1s; --de: -3.8s; --rot: 481deg; border-radius: 2px"></span><span class="cf" style="left: 79%; --s: 23px; background: #FFE3EC; --du: 8.0s; --de: -3.4s; --rot: 645deg; border-radius: 2px"></span><span class="cf" style="left: 32%; --s: 14px; background: #16120F; --du: 6.2s; --de: -0.7s; --rot: -562deg; border-radius: 50%"></span><span class="cf" style="left: 39%; --s: 23px; background: #FFFDF8; --du: 6.1s; --de: -6.2s; --rot: 681deg; border-radius: 50%"></span><span class="cf" style="left: 19%; --s: 20px; background: #FFD43B; --du: 6.5s; --de: -7.8s; --rot: 465deg; border-radius: 2px"></span><span class="cf" style="left: 66%; --s: 18px; background: #16120F; --du: 6.7s; --de: -6.5s; --rot: -668deg; border-radius: 50%"></span><span class="cf" style="left: 35%; --s: 22px; background: #FFFDF8; --du: 6.2s; --de: -3.1s; --rot: 682deg; border-radius: 2px"></span><span class="cf" style="left: 50%; --s: 23px; background: #FFD43B; --du: 7.4s; --de: -1.2s; --rot: 837deg; border-radius: 50%"></span><span class="cf" style="left: 88%; --s: 19px; background: #7CE0FF; --du: 7.4s; --de: -2.5s; --rot: 382deg; border-radius: 2px"></span><span class="cf" style="left: 9%; --s: 24px; background: #FFE3EC; --du: 5.1s; --de: -3.3s; --rot: 665deg; border-radius: 2px"></span><span class="cf" style="left: 78%; --s: 19px; background: #16120F; --du: 5.7s; --de: -1.7s; --rot: 630deg; border-radius: 50%"></span></div>
+      <div class="wrap" style="position: relative">
+        <p class="status-chip" id="status-chip" hidden></p>
+        <p class="hand sr" style="--r: -3deg; margin: 0; font-size: 34px">구경만 하기엔 아깝잖아,</p>
+        <h2 id="join-t" class="d sr" aria-label="너도 하나 만들어 볼래?" style="margin: 14px 0 0; font-size: 112px; line-height: 1.05"><span aria-hidden="true">너도<br>하나 만들어 <span style="display: inline-block; padding: 0 .14em; border-radius: .12em; background: #16120F; color: #FFFFFF; transform: rotate(-2deg)"><span class="wv" style="--i: 0">볼</span><span class="wv" style="--i: 1">래</span><span class="wv" style="--i: 2">?</span></span></span></h2>
+        <p class="sr" style="display: inline-flex; gap: .3em; margin: 44px 0 0; padding: 14px 26px; border-radius: 14px; background: #16120F; color: #FFFDF8; font-size: 26px; font-weight: 900">
+          <span class="slot" style="color: #FF5A1F"><span><b>셔틀 시간표</b><b>과제 마감 알림</b><b>동아리 출석부</b><b>아무 게임</b><b>셔틀 시간표</b></span></span><span>정도는 금방이야.</span>
+        </p>
+        <div class="sr" style="display: flex; justify-content: center; gap: 12px; margin-top: 56px; flex-wrap: wrap">
+          <button type="button" class="btn" data-open="join">크루 합류하기<span class="ar" aria-hidden="true"><i>→</i></span></button>
+          <a class="btn ghost" href="/join/">일단 써 볼래<span class="ar" aria-hidden="true"><i>↗</i></span></a>
+        </div>
+        <p class="sr" style="margin: 30px 0 0; font-size: 17px; font-weight: 500">처음엔 다 몰랐어. 같이 하면 돼. <button type="button" class="idea-link" data-open="report">아이디어만 남겨 둬도 좋고 →</button></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. 질문 -->
+  <section aria-labelledby="faq-t" class="paper" style="padding: 140px 0">
+    <div class="wrap">
+      <h2 id="faq-t" class="d sr" style="margin: 0; font-size: 64px">궁금한 거<span style="color: #FF5A1F">?</span></h2>
+      <div id="faq" style="display: grid; gap: 12px; margin-top: 44px; max-width: 900px">
+        <details open class="q sr" style="padding: 22px 26px; border-radius: 18px; background: #FFFFFF; box-shadow: inset 0 0 0 1.5px #16120F"><summary style="font-size: 21px; font-weight: 900; cursor: pointer">코딩 진짜 하나도 몰라도 돼요?</summary><p style="margin: 12px 0 0; font-size: 18px; line-height: 1.7; color: #4A413B">네. 대부분 AI랑 대화하면서 만들어요. 다들 처음엔 몰랐어요.</p></details>
+        <details class="q sr" style="padding: 22px 26px; border-radius: 18px; background: #FFFFFF; box-shadow: inset 0 0 0 1.5px #16120F"><summary style="font-size: 21px; font-weight: 900; cursor: pointer">꼭 뭘 만들어야 해요?</summary><p style="margin: 12px 0 0; font-size: 18px; line-height: 1.7; color: #4A413B">아니요. 쓰기만 해도 되고, 만들고 싶어질 때 만들면 돼요.</p></details>
+        <details class="q sr" style="padding: 22px 26px; border-radius: 18px; background: #FFFFFF; box-shadow: inset 0 0 0 1.5px #16120F"><summary style="font-size: 21px; font-weight: 900; cursor: pointer">어떤 걸 만들어요?</summary><p style="margin: 12px 0 0; font-size: 18px; line-height: 1.7; color: #4A413B">학교생활 도구, 공부 정리본, 그냥 재미로 만든 것까지. 진짜 무엇이든요.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. 끝: 테두리만 있던 슬로건이 스크롤하면 초록으로 차오름 -->
+  <footer class="ft" style="background: #16120F; color: #FFFDF8; padding: 70px 0 50px; overflow: hidden">
+    <div class="mq d" aria-hidden="true" style="font-size: 200px; line-height: 1.1; gap: 60px; animation-duration: 40s">
+      <span>누구나,</span><span class="fill">무엇이든.</span><span>누구나,</span><span class="fill">무엇이든.</span>
+    </div>
+    <div class="wrap" style="display: flex; flex-wrap: wrap; gap: 14px 40px; align-items: center; margin-top: 50px; font-size: 15px; color: #A39890">
+      <span class="d" style="font-size: 26px; color: #FFFDF8">BYPASS</span>
+      <span>목포해양대 학생들이 자유롭게 만드는 바이브 코딩 크루</span>
+      <a class="kakao" data-foot-contact data-ask href="https://open.kakao.com/o/snJ3HuTi" target="_blank" rel="noopener">카카오톡 문의 창구<span class="sr-only"> (새 창)</span></a>
+      <a href="/community/" style="margin-left: auto; color: #FF5A1F; font-weight: 900">커뮤니티 →</a>
+    </div>
+  </footer>
 </div>
 
-<header class="site-head">
-  <div class="wrap">
-    <a class="brand" href="#top" aria-label="BYPASS 처음으로">
-      <svg class="brand-mark" viewBox="1 1 130 130" aria-hidden="true">
-        <path d="M66 4 L128 66 L66 128 L4 66 Z" fill="#EE6A1F" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/>
-        <path d="M66 15 L117 66 L66 117 L15 66 Z" fill="none" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/>
-        <g transform="translate(34 32) scale(0.64)" fill="#1C211E">
-        <ellipse cx="44" cy="60" rx="27" ry="23"/>
-        <path d="M51 45 C55 37 58 31 61 25 L72 30 C68 36 66 44 64 53 Z"/>
-        <circle cx="66" cy="26" r="10"/>
-        <path d="M72 20 C83 19 93 24 95 32 C96 38 91 41 88 37 C86 34 82 33 74 33 Z"/>
-        <path d="M19 52 C10 47 7 40 11 34 C14 43 20 46 23 46 Z"/>
-        <path d="M37 80 L35 92 L27 95 L41 95 L42 81 Z"/>
-        <path d="M51 80 L51 92 L44 95 L58 95 L56 81 Z"/>
-        <circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/>
-        <path d="M32 55 C40 50 51 54 54 64" fill="none" stroke="#EE6A1F" stroke-width="2.6" stroke-linecap="round"/>
-        </g>
-      </svg>
-      <span>
-        <span class="brand-name">BYPASS</span>
-        <span class="brand-sub">느린 시스템의 실용적 대안 마련국</span>
-      </span>
-    </a>
-    <nav class="site-nav" aria-label="주 메뉴">
-      <ul>
-        <li><a href="#statute">설치 규정</a></li>
-        <li><a href="#process">처리 절차</a></li>
-        <li><a href="#dockets">처리 현황</a></li>
-        <li><a href="#recruit">국원 모집</a></li>
-        <li><a href="#scope">업무 범위</a></li>
-        <li><a href="#faq">자주 묻는 질문</a></li>
-      </ul>
-    </nav>
-    <div class="head-btns">
-      <a class="nav-routes" href="/community/#showcase"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 H9 L15 6 H20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="18" r="2.6" fill="#fff" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2.6" fill="#fff" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="6" r="2.6" fill="#fff" stroke="currentColor" stroke-width="2"/></svg>결과물</a>
-      <a class="nav-account" id="nav-account" href="/login/">로그인</a>
-    </div>
-  </div>
-</header>
-
-<main id="main">
-
-  <!-- ① 첫 화면 -->
-  <section class="hero" id="top" aria-labelledby="hero-title">
-    <div class="wrap">
-      <div class="hero-copy">
-        <p class="sign-code">BYPASS 안내 제2026-001호</p>
-        <h1 id="hero-title">귀하의 반복 업무는<br>단축 대상으로 지정되었습니다.</h1>
-        <p class="identity">BYPASS는 국립목포해양대학교 바이브 코딩 크루입니다.<br>학교생활의 불필요한 절차를 AI와 코드로 건너뜁니다.</p>
-        <div class="actions" id="hero-actions">
-          <button type="button" class="btn btn-primary" id="cta-report" data-open="report">불편 제보하기</button>
-          <button type="button" class="btn btn-secondary" id="cta-join" data-open="join">BYPASS 합류하기</button>
-        </div>
-      </div>
-
-      <svg class="scene" viewBox="0 0 640 690" role="img" aria-labelledby="scene-title">
-        <title id="scene-title">도로 안내 표지. 업무 완료로 가는 원래 도로인 불필요한 절차는 구불구불 돌아가는 상습 정체 구간이며, BYPASS 지름길이 그 도로의 두 지점을 직선으로 바로 잇습니다. 그 앞의 임시 표지: 불필요한 절차 공사 중, 우회하십시오.</title>
-        <!-- 지주 -->
-        <rect x="146" y="508" width="18" height="182" fill="#8E958F"/>
-        <rect x="476" y="508" width="18" height="182" fill="#8E958F"/>
-        <!-- 안내 표지 판 -->
-        <rect x="6" y="6" width="628" height="508" rx="26" fill="#0F5A3A" stroke="#0A4029" stroke-width="3"/>
-        <rect x="19" y="19" width="602" height="482" rx="15" fill="none" stroke="#fff" stroke-width="5"/>
-        <!-- 목적지 -->
-        <text x="300" y="96" text-anchor="middle" font-size="58" font-weight="900" fill="#fff" letter-spacing="-1">업무 완료</text>
-        <text x="444" y="95" font-size="32" font-weight="700" fill="#fff">0.3km</text>
-        <text x="300" y="131" text-anchor="middle" font-size="23" font-weight="500" fill="#fff">Done</text>
-        <!-- 원래 도로: 불필요한 절차 (아래에서 들어와 구불구불 돌아 목적지로) -->
-        <path d="M300 501 V480 A30 30 0 0 1 330 450 H430 A31 31 0 0 0 430 388 H110 A31 31 0 0 1 110 326 H430 A31 31 0 0 0 430 264 H330 A30 30 0 0 1 300 234 V204" fill="none" stroke="#fff" stroke-width="22"/>
-        <path d="M300 150 L264 210 L336 210 Z" fill="#fff"/>
-        <text x="60" y="262" font-size="26" font-weight="900" fill="#fff">불필요한 절차</text>
-        <text x="60" y="292" font-size="20" font-weight="500" fill="#fff">(상습 정체 구간)</text>
-        <!-- BYPASS: 원래 도로의 두 지점을 곧게 잇는 지름길. 가운데 두 굽이는 고가로 건너뛴다 -->
-        <rect x="356" y="308" width="48" height="98" fill="#0F5A3A"/>
-        <rect x="361" y="264" width="38" height="186" fill="#fff"/>
-        <rect x="367" y="264" width="26" height="186" fill="#EE6A1F"/>
-        <path d="M371 372 L380 358 L389 372" fill="none" stroke="#1C211E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
-        <path d="M371 398 L380 384 L389 398" fill="none" stroke="#1C211E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
-        <!-- 지름길 명칭 -->
-        <rect x="488" y="334" width="118" height="42" rx="6" fill="#EE6A1F"/>
-        <text x="547" y="364" text-anchor="middle" font-size="23" font-weight="900" fill="#1C211E" letter-spacing="1.5">BYPASS</text>
-        <text x="547" y="406" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">지름길</text>
-
-        <!-- 임시 표지와 거치대 -->
-        <path d="M58 640 L44 688 M212 640 L226 688" stroke="#5C635E" stroke-width="8" stroke-linecap="round"/>
-        <rect x="22" y="466" width="226" height="178" rx="10" fill="#EE6A1F" stroke="#B4500F" stroke-width="2"/>
-        <rect x="32" y="476" width="206" height="158" rx="5" fill="none" stroke="#1C211E" stroke-width="4"/>
-        <text x="135" y="512" text-anchor="middle" font-size="22" font-weight="900" fill="#1C211E">불필요한 절차</text>
-        <text x="135" y="566" text-anchor="middle" font-size="46" font-weight="900" fill="#1C211E" letter-spacing="2">공사 중</text>
-        <line x1="44" y1="584" x2="226" y2="584" stroke="#1C211E" stroke-width="3"/>
-        <text x="122" y="620" text-anchor="middle" font-size="24" font-weight="900" fill="#1C211E">우회하십시오</text>
-        <path d="M204 624 V609 H221 M215 603 L222 609 L215 615" fill="none" stroke="#1C211E" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
-  </section>
-
-  <!-- 명칭 안내 -->
-  <section class="sec sec-name" id="name" aria-labelledby="name-title">
-    <div class="wrap">
-      <h2 class="sec-title" id="name-title">명칭 안내</h2>
-      <p class="sec-lead">BYPASS는 영문 명칭의 머리글자를 딴 약칭입니다.</p>
-      <div class="name-sign">
-        <ol class="acro">
-          <li><span class="acro-letter" aria-hidden="true">B</span><span class="acro-word" lang="en">Bureau</span><span class="acro-gloss">국(局)</span></li>
-          <li><span class="acro-letter" aria-hidden="true">Y</span><span class="acro-word" lang="en"><span class="acro-prep">for</span>Yielding</span><span class="acro-gloss">마련하는</span></li>
-          <li><span class="acro-letter" aria-hidden="true">P</span><span class="acro-word" lang="en">Practical</span><span class="acro-gloss">실용적</span></li>
-          <li><span class="acro-letter" aria-hidden="true">A</span><span class="acro-word" lang="en">Alternatives</span><span class="acro-gloss">대안</span></li>
-          <li><span class="acro-letter" aria-hidden="true">S</span><span class="acro-word" lang="en"><span class="acro-prep">to</span>Slow</span><span class="acro-gloss">느린</span></li>
-          <li><span class="acro-letter" aria-hidden="true">S</span><span class="acro-word" lang="en">Systems</span><span class="acro-gloss">시스템</span></li>
-        </ol>
-        <div class="name-full">
-          <p class="name-en" lang="en">Bureau for Yielding Practical Alternatives to Slow Systems</p>
-          <p class="name-ko">느린 시스템의 실용적 대안 마련국</p>
-        </div>
-      </div>
-      <p class="note">※ for와 to는 전치사이므로 약칭에서 제외하였습니다.<br>※ 영어 bypass는 돌아가는 길이 아니라, 막힌 구간을 건너뛰어 곧장 가는 길을 뜻합니다. 의도한 것입니다.</p>
-    </div>
-  </section>
-
-  <!-- ② 설치 규정 -->
-  <section class="sec" id="statute" aria-labelledby="statute-title">
-    <div class="wrap">
-      <div class="rule-board">
-        <!-- 조문은 HQ › 페이지 문구에서 고친다 (assets/site-texts.js). 아래는 데이터베이스를 못 읽을 때 보이는 기본 문구 -->
-        <div class="rule-body" data-statute>
-          <div class="rule-head">
-            <h2 id="statute-title">BYPASS 설치 규정</h2>
-            <span class="rule-date" data-rule-date>[제정 2026. 10. 19.]</span>
-          </div>
-          <div class="article">
-            <span class="article-no">제1조(목적)</span>
-            <p>이 국은 불필요한 절차를 불필요한 절차 없이 단축함을 목적으로 한다.</p>
-          </div>
-          <div class="article">
-            <span class="article-no">제2조(정의)</span>
-            <p>“불필요한 절차”란 더 나은 방법이 이미 존재함에도 사람이 손으로 반복하는 일을 말한다.</p>
-          </div>
-          <div class="article">
-            <span class="article-no">제3조(단축 대상)</span>
-            <div>
-              <p>다음 각 호의 업무를 1차 단축 대상으로 지정한다.</p>
-              <ol class="items">
-                <li><span><strong>중복 입력</strong>: 이미 제출한 정보를 재차 요구하는 행위<span class="example">예: 신청서마다 학번과 계좌번호를 다시 쓰는 일</span></span></li>
-                <li><span><strong>과다 이동</strong>: 업무 하나를 위해 여러 화면을 거치게 하는 행위<span class="example">예: 공지 하나를 찾으려고 게시판 여러 곳을 확인하는 일</span></span></li>
-                <li><span><strong>정보 은닉</strong>: 존재하나 찾을 수 없도록 배치된 정보<span class="example">예: 분명히 공지됐다는데 아무도 위치를 모르는 일정</span></span></li>
-                <li><span><strong>수기 계산</strong>: 컴퓨터가 할 일을 사람이 하는 행위<span class="example">예: 졸업까지 남은 학점을 손으로 세는 일</span></span></li>
-              </ol>
-            </div>
-          </div>
-          <div class="article">
-            <span class="article-no">제4조(추가 지정)</span>
-            <p>단축 대상은 제보에 따라 수시로 추가 지정한다.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ③ 처리 절차 -->
-  <section class="sec sec-process" id="process" aria-labelledby="process-title">
-    <div class="wrap">
-      <h2 class="sec-title" id="process-title">민원 대신, 지름길을 만듭니다.</h2>
-      <ol class="exits">
-        <li class="exit">
-          <span class="exit-tab">출구 1</span>
-          <div class="exit-sign">
-            <h3>접수</h3>
-            <p>제보를 받으면 접수번호를 발급합니다.</p>
-            <p class="exit-due"><span>처리 기한 <b>즉시</b></span></p>
-          </div>
-        </li>
-        <li class="exit">
-          <span class="exit-tab">출구 2</span>
-          <div class="exit-sign">
-            <h3>심의</h3>
-            <p>주 1회 정기 회의에서 처리 여부를 결정합니다.</p>
-            <p class="exit-due"><span>처리 기한 <b>7일 이내 결과 공개</b></span></p>
-          </div>
-        </li>
-        <li class="exit exit-detour">
-          <span class="exit-tab">출구 3</span>
-          <div class="exit-sign">
-            <h3><svg class="exit-dodo" aria-hidden="true"><use href="#dodo-sign"/></svg>단축</h3>
-            <p>AI와 코드로 더 빠른 길을 만듭니다.</p>
-          </div>
-        </li>
-        <li class="exit">
-          <span class="exit-tab">출구 4</span>
-          <div class="exit-sign">
-            <h3>배포</h3>
-            <p>실제로 써 보고, 불편이 남아 있으면 재접수합니다.</p>
-          </div>
-        </li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- ④ 처리 현황 -->
-  <section class="sec" id="dockets" aria-labelledby="dockets-title">
-    <div class="wrap">
-      <h2 class="sec-title" id="dockets-title">안건 처리 현황</h2>
-      <!-- 안건 안내판: HQ › 처리 현황에서 고친다(앞에서 4건). 아래는 데이터베이스를 못 읽을 때 보이는 기본 안내판. -->
-      <div class="boards" data-boards>
-        <div class="board-unit">
-          <article class="board" aria-labelledby="bd1">
-            <div class="board-head"><p class="board-no">제0-1호 (창립 전)</p><h3 id="bd1">수강플래너</h3></div>
-            <span class="badge badge-done">준공</span>
-            <dl><div><dt>기존 절차</dt><dd>강의 목록을 하나씩 열어 시간이 겹치는지 맞춰 봄</dd></div><div><dt>개선 후</dt><dd>과목을 담으면 시간표로 바로 보이고, 계획을 여러 개 비교·공유</dd></div></dl>
-            <div class="board-foot"><a class="board-go" href="https://mymmu.my/" target="_blank" rel="noopener"><span class="go-text"><span>지름길</span><span>바로가기</span></span><span class="sr-only"> (수강플래너, 새 창)</span> <span aria-hidden="true">→</span></a><svg class="done-seal" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
-          </article>
-          <div class="legs" aria-hidden="true"></div>
-        </div>
-        <div class="board-unit">
-          <article class="board" aria-labelledby="bd2">
-            <div class="board-head"><p class="board-no">제0-2호 (창립 전)</p><h3 id="bd2">졸업이수학점 계산기</h3></div>
-            <span class="badge badge-done">준공</span>
-            <dl><div><dt>기존 절차</dt><dd>졸업이수학점 직접 계산</dd></div><div><dt>개선 후</dt><dd>들은 과목을 체크하면 남은 졸업 요건을 한 화면에 표시 </dd></div></dl>
-            <div class="board-foot"><a class="board-go" href="https://eesuu.mymmu.my/" target="_blank" rel="noopener"><span class="go-text"><span>지름길</span><span>바로가기</span></span><span class="sr-only"> (졸업이수학점 계산기, 새 창)</span> <span aria-hidden="true">→</span></a><svg class="done-seal" style="--r: 7deg" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
-          </article>
-          <div class="legs" aria-hidden="true"></div>
-        </div>
-        <div class="board-unit">
-          <article class="board" aria-labelledby="bd3">
-            <div class="board-head"><p class="board-no">제0-3호 (창립 전)</p><h3 id="bd3">학식 알리미 ‘꿀꿀이’</h3></div>
-            <span class="badge badge-done">준공</span>
-            <dl><div><dt>기존 절차</dt><dd>오늘 학식이 뭔지 보려고 식단 게시판을 찾아 들어감</dd></div><div><dt>개선 후</dt><dd>카톡에서 식단을 바로 확인</dd></div></dl>
-            <div class="board-foot"><a class="board-go" href="https://pf.kakao.com/_uuxfmX" target="_blank" rel="noopener"><span class="go-text"><span>지름길</span><span>바로가기</span></span><span class="sr-only"> (목해대 꿀꿀이 카카오톡 채널, 새 창)</span> <span aria-hidden="true">→</span></a><svg class="done-seal" style="--r: -4deg" role="img" aria-label="도도새 처리 완료 직인. 이 업무 방식은 도도새와 함께 멸종했어야 합니다."><use href="#done-seal"/></svg></div>
-          </article>
-          <div class="legs" aria-hidden="true"></div>
-        </div>
-        <div class="board-unit">
-          <article class="board board-rejected" aria-labelledby="bd4">
-            <div class="board-head"><p class="board-no">제0-4호</p><h3 id="bd4">강의동 이동 불편</h3></div>
-            <span class="badge badge-rejected">반려</span>
-            <span class="specimen">견본</span>
-            <dl><div><dt>접수 내용</dt><dd>비 오는 날 강의동까지 걸어가야 함</dd></div><div><dt>반려 사유</dt><dd>해당 불편은 절차가 아닌 날씨에 기인함.</dd></div></dl>
-            <div class="board-foot"></div>
-          </article>
-          <div class="legs" aria-hidden="true"></div>
-        </div>
-      </div>
-      <p class="swipe-hint">옆으로 넘겨 다른 안건을 보십시오.</p>
-      <p class="dockets-more" data-dockets-more hidden><a href="/dockets/">처리 현황 전체 보기<span data-dockets-count></span> →</a></p>
-      <div class="map-cta">
-        <a class="btn btn-primary" href="/community/#showcase">만든 결과물 모두 보기<span class="map-cta-arrow" aria-hidden="true">→</span></a>
-        <span class="map-cta-note">앱·위키·도구는 BYPASS 커뮤니티 ‘결과물’에 모여 있습니다. (회원 로그인)</span>
-      </div>
-      <p class="note">※ 기존 업무 방식을 대체한 안건에는 도도새 직인을, 새로 만든 안건에는 신설 준공 인장을 찍습니다.<br>※ <span data-sample-note>제0-4호는 견본입니다. </span>처리 내역은 처리 즉시 이곳에 공고됩니다.</p>
-    </div>
-  </section>
-
-  <!-- 도도새 직인 안내 -->
-  <section class="sec sec-seal" id="seal" aria-labelledby="seal-title">
-    <div class="wrap">
-      <div class="rule-board seal-board">
-        <div class="rule-body seal-body">
-          <figure class="seal-figure">
-            <svg role="img" aria-label="도도새 직인. 둘레에 '이 업무 방식은 도도새와 함께 멸종했어야 합니다', 가운데에 도도새와 '처리 완료'가 새겨져 있습니다."><use href="#done-seal"/></svg>
-            <figcaption>인영(印影)</figcaption>
-          </figure>
-          <div class="seal-text">
-            <h2 id="seal-title">도도새 직인 안내</h2>
-            <p class="seal-lead">처리를 마친 안건에는 도도새 직인을 찍습니다.</p>
-            <p>도도새는 모리셔스섬에 살던 날지 못하는 새로, 17세기 말에 멸종하였습니다. 영어 관용구 ‘as dead as a dodo’는 완전히 사라져 다시 볼 수 없는 것을 뜻합니다. 본 국이 건너뛴 업무 방식도 이와 같이 되어야 한다는 뜻에서 도도새를 상징으로 정하였습니다.</p>
-            <dl class="seal-spec">
-              <div><dt>인영 문구</dt><dd>이 업무 방식은 도도새와 함께 멸종했어야 합니다.</dd></div>
-              <div><dt>날인 대상</dt><dd>처리 완료 안건. 반려 안건에는 날인하지 않습니다.</dd></div>
-              <div><dt>인주 색상</dt><dd>주황. 첫 화면 지름길과 같은 색입니다.</dd></div>
-            </dl>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ⑤ 국원 공개 모집 -->
-  <section class="sec" id="recruit" aria-labelledby="recruit-title">
-    <div class="wrap">
-      <div class="recruit-sign on-green">
-        <div>
-          <h2 id="recruit-title">비효율에 유난히 <span class="keep">예민한 분을 모십니다.</span></h2>
-          <p class="lead-line">코딩 경험이 없어도 <span class="keep">직접 만들 수 있습니다.</span><br>그게 바이브 코딩입니다.</p>
-          <div class="actions">
-            <button type="button" class="btn btn-primary" data-open="join">합류 신청하기</button>
-            <button type="button" class="btn btn-secondary" data-open="report">불편 제보하기</button>
-          </div>
-        </div>
-        <div class="plate">
-          <table class="req">
-            <caption>국원 모집 요강</caption>
-            <tbody>
-              <tr><th scope="row">지원 자격</th><td>국립목포해양대학교 재학생. 전공, 학년, 코딩 경험 무관</td></tr>
-              <tr><th scope="row">우대 사항</th><td>같은 일을 세 번 반복하면 참을 수 없는 분<br>이미 엑셀 매크로를 몰래 만들어 본 분</td></tr>
-              <tr><th scope="row">주요 업무</th><td>정기 심의 회의 참석, 안건별 소규모 제작</td></tr>
-              <tr><th scope="row">모집 기간</th><td class="tbd" id="recruit-period">언제나</td></tr>
-              <tr><th scope="row">활동 일시·장소</th><td class="tbd">추후 공고</td></tr>
-              <tr><th scope="row">제출 서류</th><td>없음. 본 국은 불필요한 서류를 요구하지 않습니다.</td></tr>
-              <tr><th scope="row">문의</th><td><a class="ask-btn" data-ask href="https://open.kakao.com/o/snJ3HuTi" target="_blank" rel="noopener"><svg class="ask-icon" viewBox="0 0 40 36" aria-hidden="true"><path d="M20 3C10 3 3 9.2 3 16.6c0 4.6 2.8 8.6 7 11l-1.6 6.1 7-4.3c1.5.3 3 .4 4.6.4 10 0 17-6.2 17-13.6S30 3 20 3Z" fill="#FFE14A" stroke="#1C211E" stroke-width="2.6" stroke-linejoin="round"/><text x="20" y="21.5" text-anchor="middle" font-size="12.5" font-weight="900" fill="#1C211E" font-family="Noto Sans KR, sans-serif">1:1</text></svg><span class="ask-text"><span class="ask-small">카카오톡 오픈채팅</span><span class="ask-big">1:1 문의 창구</span></span><span class="sr-only"> (새 창)</span></a><span class="ask-note">합류·제보·궁금한 점 무엇이든. 운영진이 답합니다.</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ⑥ 업무 범위 및 FAQ -->
-  <section class="sec" aria-label="업무 범위 및 자주 묻는 질문">
-    <div class="wrap">
-      <div class="scope-grid">
-        <div id="scope">
-          <h2 class="sec-title">업무 범위</h2>
-          <div class="ban-board" data-ban>
-            <div class="ban-article">
-              <svg aria-hidden="true"><use href="#ban"/></svg>
-              <p><b>설치 규정 제5조(금지)</b>이 국은 절차를 건너뛰며, 규칙을 건너뛰지 아니한다.</p>
-            </div>
-            <p class="ban-lead">다음 안건은 접수하지 않습니다.</p>
-            <ul class="ban-list">
-              <li><svg aria-hidden="true"><use href="#ban"/></svg><span>학교 시스템의 보안이나 인증을 우회하는 일 <span class="example"><br>(예: 수강신청 매크로)</span></span></li>
-              <li><svg aria-hidden="true"><use href="#ban"/></svg><span>출석, 평가 등 공정성을 해치는 자동화</span></li>
-              <li><svg aria-hidden="true"><use href="#ban"/></svg><span>타인의 개인정보를 수집하거나 이용하는 도구</span></li>
-            </ul>
-          </div>
-        </div>
-        <div class="faq" id="faq">
-          <h2 class="sec-title">자주 묻는 질문</h2>
-          <!-- 질문은 HQ › 자주 묻는 질문에서 고친다. 아래는 데이터베이스를 못 읽을 때 보이는 기본 질문 -->
-          <details>
-            <summary><span class="q">Q.</span><span>코딩을 전혀 몰라도 됩니까?</span></summary>
-            <p>됩니다. AI와 함께 만드는 방법은 활동하며 함께 익힙니다.</p>
-          </details>
-          <details>
-            <summary><span class="q">Q.</span><span>공식 행정기관입니까?</span></summary>
-            <p>아닙니다. 행정기관도, 정식 동아리도 아닌 그냥 크루입니다.<br>진지한 것은 말투뿐입니다.</p>
-          </details>
-          <details>
-            <summary><span class="q">Q.</span><span>어떤 불편을 제보할 수 있습니까?</span></summary>
-            <p>학교생활에서 손으로 반복하는 일이라면 무엇이든 가능합니다.<br>단, 제5조에 해당하는 안건은 제외합니다.</p>
-          </details>
-          <details>
-            <summary><span class="q">Q.</span><span>제보하면 반드시 처리됩니까?</span></summary>
-            <p>모든 안건은 심의하나, 모두 처리하지는 않습니다.<br>결과는 처리 현황에 공개합니다.</p>
-          </details>
-        </div>
-      </div>
-    </div>
-  </section>
-
-</main>
-
-<!-- ⑦ 바닥글 -->
-<footer class="site-foot">
-  <div class="wrap">
-    <div class="foot-info">
-      <p class="foot-name"><strong>BYPASS</strong>느린 시스템의 실용적 대안 마련국</p>
-      <p>본 사이트는 BYPASS 크루가 운영하며, 국립목포해양대학교 행정 부서 및 정부 기관과 무관합니다.</p>
-      <dl class="foot-meta">
-        <dt>연락처</dt><dd><a class="foot-ask" data-foot-contact href="https://open.kakao.com/o/snJ3HuTi" target="_blank" rel="noopener">카카오톡 1:1 오픈채팅 ‘문의 창구’<span class="sr-only"> (새 창)</span></a></dd>
-        <dt>최종 개정</dt><dd data-foot-revised>2026. 10. 19.</dd>
-      </dl>
-    </div>
-    <div class="caution">
-      <svg viewBox="0 0 132 132" aria-hidden="true">
-        <path d="M66 4 L128 66 L66 128 L4 66 Z" fill="#EE6A1F" stroke="#1C211E" stroke-width="3" stroke-linejoin="round"/>
-        <path d="M66 15 L117 66 L66 117 L15 66 Z" fill="none" stroke="#1C211E" stroke-width="4" stroke-linejoin="round"/>
-        <use href="#dodo" x="34" y="32" width="64" height="64" style="color:#1C211E"/>
-      </svg>
-      <p class="caution-plate">이 업무 방식은 도도새와 함께 멸종했어야 합니다.</p>
-      <span class="caution-post" aria-hidden="true"></span>
-    </div>
-  </div>
-</footer>
-
-<!-- 전체 공개 공지 대화상자 (HQ › 공지에서 '전체 공개'로 올린 것) -->
-<dialog class="form-dialog notice-dialog" id="notice-dialog" aria-labelledby="notice-title">
-  <div class="dlg-head on-green">
-    <h2 id="notice-title">공지</h2>
-    <button type="button" class="dlg-close" data-close>닫기</button>
-  </div>
+<!-- 전체 공개 공지 (HQ › 공지) -->
+<dialog class="dlg notice-dialog" id="notice-dialog" aria-labelledby="notice-title">
+  <div class="dlg-head"><h2 id="notice-title">공지</h2><button type="button" class="dlg-close" data-close>닫기</button></div>
   <div class="dlg-body"><ul class="notice-list" data-notice-list></ul></div>
 </dialog>
 
-<!-- 불편 제보 대화상자 -->
-<dialog class="form-dialog" id="report-dialog" aria-labelledby="report-title">
-  <div class="dlg-head on-green">
-    <h2 id="report-title">불편 제보</h2>
-    <button type="button" class="dlg-close" data-close>닫기</button>
-  </div>
+<!-- 아이디어 남기기 (예전 '불편 제보'. 저장 함수는 그대로 submit_report) -->
+<dialog class="dlg form-dialog" id="report-dialog" aria-labelledby="report-title">
+  <div class="dlg-head"><h2 id="report-title">아이디어 남기기</h2><button type="button" class="dlg-close" data-close>닫기</button></div>
   <div class="dlg-body">
     <form novalidate>
-      <p class="dlg-notice">본 양식은 세 개 항목만 요구합니다. 그 이상은 설치 규정 제1조에 위배되기 때문입니다.</p>
-      <label class="field-label" for="r-what">무엇이 불편합니까?</label>
-      <textarea id="r-what" maxlength="2000" name="what" rows="3" required placeholder="예: 신청서마다 학번과 계좌번호를 다시 씁니다."></textarea>
-      <label class="field-label" for="r-how">지금은 어떻게 하고 있습니까?</label>
-      <textarea id="r-how" maxlength="2000" name="how" rows="3" required></textarea>
+      <p class="dlg-notice">불편한 거, 있으면 좋겠는 거 아무거나. 만들고 싶은 사람이 가져가요.</p>
+      <label class="field-label" for="r-what">뭐가 불편하거나, 뭐가 있으면 좋겠어요?</label>
+      <textarea id="r-what" maxlength="2000" name="what" rows="3" required placeholder="예: 셔틀 시간표를 매번 사진으로 찾아봐야 해요."></textarea>
+      <label class="field-label" for="r-how">지금은 어떻게 하고 있어요?</label>
+      <textarea id="r-how" maxlength="2000" name="how" rows="3" required placeholder="대충 적어도 돼요."></textarea>
       <label class="field-label" for="r-contact">연락처 <span class="opt">(선택)</span></label>
       <input id="r-contact" maxlength="100" name="contact" type="text" autocomplete="email" placeholder="이메일 또는 전화번호" aria-describedby="r-contact-hint">
-      <p class="hint" id="r-contact-hint">연락처는 처리 결과 회신에만 쓰며, 처리가 끝나면 파기합니다.</p>
-      <p class="form-error" role="alert" hidden>필수 항목이 누락되었습니다. 본 국도 이 문구를 쓰게 되어 유감입니다.</p>
-      <div class="dlg-actions"><button type="submit" class="btn btn-primary">제보 제출하기</button></div>
+      <p class="hint" id="r-contact-hint">만들어지면 알려 드릴 때만 써요. 끝나면 지워요.</p>
+      <p class="form-error" role="alert" hidden></p>
+      <div class="dlg-actions"><button type="submit" class="btn">남기기<span class="ar" aria-hidden="true"><i>→</i></span></button></div>
     </form>
     <div class="receipt" hidden>
-      <div class="rsg" aria-hidden="true">
-        <span class="rsg-bar"></span>
-        <span class="rsg-hangers"><span></span><span></span></span>
-        <div class="rsg-panel">
-          <span class="rsg-code">BYPASS 접수 안내</span>
-          <span class="rsg-main">접수 완료</span>
-          <span class="rsg-no" data-no></span>
-          <span class="rsg-date" data-date></span>
-        </div>
-      </div>
-      <h3 tabindex="-1">귀하의 제보가 정상 접수되었습니다.</h3>
-      <p class="receipt-no">접수번호 <strong data-no></strong></p>
-      <p>심의 결과는 7일 이내 처리 현황에 공고됩니다.</p>
-      <button type="button" class="btn btn-primary" data-close>확인</button>
+      <div class="receipt-card"><b>접수 완료</b><span>번호 <span data-no></span> · <span data-date></span></span></div>
+      <h3 tabindex="-1">아이디어 잘 받았어요!</h3>
+      <p>누가 만들기 시작하면 커뮤니티에 올라와요.</p>
+      <button type="button" class="btn" data-close>확인<span class="ar" aria-hidden="true"><i>✓</i></span></button>
     </div>
   </div>
 </dialog>
 
-<!-- 합류 신청 대화상자 -->
-<dialog class="form-dialog" id="join-dialog" aria-labelledby="join-title">
-  <div class="dlg-head on-green">
-    <h2 id="join-title">합류 신청</h2>
-    <button type="button" class="dlg-close" data-close>닫기</button>
-  </div>
+<!-- 크루 합류 (저장 함수는 그대로 submit_application) -->
+<dialog class="dlg form-dialog" id="join-dialog" aria-labelledby="join-title">
+  <div class="dlg-head"><h2 id="join-title">크루 합류하기</h2><button type="button" class="dlg-close" data-close>닫기</button></div>
   <div class="dlg-body">
     <form novalidate>
-      <p class="dlg-notice">본 신청서는 네 개 항목만 요구합니다. 그중 하나는 선택입니다.</p>
+      <p class="dlg-notice">네 칸이면 끝. 그중 하나는 안 써도 돼요.</p>
       <label class="field-label" for="j-name">이름</label>
       <input id="j-name" maxlength="40" name="name" type="text" autocomplete="name" required>
       <label class="field-label" for="j-contact">연락처</label>
       <input id="j-contact" maxlength="100" name="contact" type="text" autocomplete="email" required placeholder="이메일 또는 전화번호" aria-describedby="j-contact-hint">
-      <p class="hint" id="j-contact-hint">연락처는 합류 안내에만 씁니다.</p>
+      <p class="hint" id="j-contact-hint">합류 안내할 때만 써요.</p>
       <label class="field-label" for="j-major">학과 <span class="opt">(선택)</span></label>
       <input id="j-major" maxlength="60" name="major" type="text">
-      <label class="field-label" for="j-want">하고 싶은 것 한 줄</label>
-      <input id="j-want" maxlength="300" name="want" type="text" required placeholder="예: 공지 알림을 한곳으로 모으고 싶습니다.">
-      <p class="form-error" role="alert" hidden>필수 항목이 누락되었습니다. 본 국도 이 문구를 쓰게 되어 유감입니다.</p>
-      <div class="dlg-actions"><button type="submit" class="btn btn-primary">합류 신청하기</button></div>
+      <label class="field-label" for="j-want">만들어 보고 싶은 거 한 줄</label>
+      <input id="j-want" maxlength="300" name="want" type="text" required placeholder="예: 과제 마감 알림 / 아직 몰라요">
+      <p class="form-error" role="alert" hidden></p>
+      <div class="dlg-actions"><button type="submit" class="btn">합류 신청하기<span class="ar" aria-hidden="true"><i>→</i></span></button></div>
     </form>
     <div class="receipt" hidden>
-      <div class="rsg" aria-hidden="true">
-        <span class="rsg-bar"></span>
-        <span class="rsg-hangers"><span></span><span></span></span>
-        <div class="rsg-panel">
-          <span class="rsg-code">BYPASS 접수 안내</span>
-          <span class="rsg-main">접수 완료</span>
-          <span class="rsg-no" data-no></span>
-          <span class="rsg-date" data-date></span>
-        </div>
-      </div>
-      <h3 tabindex="-1">귀하의 합류 신청이 정상 접수되었습니다.</h3>
-      <p class="receipt-no">접수번호 <strong data-no></strong></p>
-      <p>결과는 기재하신 연락처로 안내합니다.</p>
-      <button type="button" class="btn btn-primary" data-close>확인</button>
+      <div class="receipt-card"><b>접수 완료</b><span>번호 <span data-no></span> · <span data-date></span></span></div>
+      <h3 tabindex="-1">환영해요, 곧 연락할게요!</h3>
+      <p>적어 준 연락처로 합류 안내를 보내요.</p>
+      <button type="button" class="btn" data-close>확인<span class="ar" aria-hidden="true"><i>✓</i></span></button>
     </div>
   </div>
 </dialog>
 
 <script src="/assets/site-status.js"></script>
-<script src="/assets/dockets.js"></script>
 <script src="/assets/site-texts.js"></script>
 <script>
   const SB_URL = 'https://itzdjdgjqcpmxdfssfel.supabase.co';
@@ -1076,39 +772,8 @@
   function applyStatus(value) {
     if (!window.BYPASS_STATUS) return;
     const v = window.BYPASS_STATUS.view(value);
-    document.getElementById('status-text').textContent = v.text;
-    const period = document.getElementById('recruit-period');
-    period.textContent = v.period;
-    period.classList.toggle('tbd', v.period === '언제나');
-    const report = document.getElementById('cta-report');
-    const join = document.getElementById('cta-join');
-    const recruiting = v.mode === 'recruiting';
-    report.classList.toggle('btn-primary', !recruiting); report.classList.toggle('btn-secondary', recruiting);
-    join.classList.toggle('btn-primary', recruiting); join.classList.toggle('btn-secondary', !recruiting);
-    const first = recruiting ? join : report, second = recruiting ? report : join;
-    if (first.nextElementSibling !== second) first.parentNode.insertBefore(first, second);
-  }
-
-  /* ===== 처리 현황 안내판 =====
-     HQ › 처리 현황에서 고친 안건(Supabase dockets)을 앞에서 4건 보여 준다. 읽기 전·실패하면 HTML에 적힌 안내판 그대로. */
-  function applyDockets(list, total) {
-    const D = window.BYPASS_DOCKETS;
-    if (!D) return;
-    const boards = document.querySelector('[data-boards]');
-    if (!list.length) {
-      const empty = document.createElement('p');
-      empty.className = 'note';
-      empty.textContent = '공고할 안건이 아직 없습니다.';
-      boards.replaceChildren(empty);
-    } else {
-      boards.replaceChildren(...list.map((d, i) => D.board(d, { index: i })));
-    }
-    boards.scrollLeft = 0;
-    const note = D.sampleNote(list);
-    document.querySelector('[data-sample-note]').textContent = note ? note + ' ' : '';
-    const more = document.querySelector('[data-dockets-more]');
-    document.querySelector('[data-dockets-count]').textContent = total > list.length ? ` (${total}건)` : '';
-    more.hidden = !(total > 0);
+    const chip = document.getElementById('status-chip');
+    if (v.mode === 'recruiting') { chip.textContent = v.text; chip.hidden = false; }
   }
 
   /* ===== 자주 묻는 질문 =====
@@ -1116,18 +781,17 @@
   function applyFaqs(list) {
     if (!list.length) return;
     const box = document.getElementById('faq');
-    box.querySelectorAll(':scope > details').forEach(d => d.remove());
-    list.forEach(f => {
-      const d = document.createElement('details');
-      const sm = document.createElement('summary');
-      const q = document.createElement('span'); q.className = 'q'; q.textContent = 'Q.';
-      const t = document.createElement('span'); t.textContent = f.question;
-      sm.append(q, t);
-      const p = document.createElement('p');
-      String(f.answer).split('\n').forEach((line, i) => { if (i) p.append(document.createElement('br')); p.append(line); });
+    const tpl = box.querySelector('details');
+    box.replaceChildren(...list.map((f, i) => {
+      const d = tpl.cloneNode(false);
+      d.open = i === 0;
+      const sm = tpl.querySelector('summary').cloneNode(false);
+      sm.textContent = f.question;
+      const p = tpl.querySelector('p').cloneNode(false);
+      String(f.answer).split('\n').forEach((line, k) => { if (k) p.append(document.createElement('br')); p.append(line); });
       d.append(sm, p);
-      box.append(d);
-    });
+      return d;
+    }));
   }
 
   /* ===== 전체 공개 공지: 전광판 둘째 줄 =====
@@ -1156,18 +820,8 @@
 
   (async function loadFromDb() {
     const get = (q, extra) => fetch(`${SB_URL}/rest/v1/${q}`, { headers: { apikey: SB_KEY, ...extra } });
-    const [st, dk, fq, tx, nt] = await Promise.allSettled([
+    const [st, fq, tx, nt] = await Promise.allSettled([
       get('site_settings?key=eq.status&select=value').then(r => r.ok ? r.json() : Promise.reject(r.status)),
-      window.BYPASS_DOCKETS
-        ? get(`dockets?select=${window.BYPASS_DOCKETS.SELECT}&hidden=is.false&order=sort.asc,id.asc&limit=4`, { Prefer: 'count=exact' })
-            .then(async r => {
-              if (!r.ok) throw r.status;
-              const range = r.headers.get('content-range') || '';
-              const total = Number(range.split('/')[1]);
-              const list = await r.json();
-              return { list, total: Number.isFinite(total) ? total : list.length };
-            })
-        : Promise.reject('no module'),
       get('faqs?select=question,answer&hidden=is.false&order=sort.asc,id.asc').then(r => r.ok ? r.json() : Promise.reject(r.status)),
       get('site_settings?key=eq.texts&select=value').then(r => r.ok ? r.json() : Promise.reject(r.status)),
       get('notices?select=id,title,body,created_at,pinned&audience=eq.public&order=pinned.desc,created_at.desc&limit=5').then(r => r.ok ? r.json() : Promise.reject(r.status))
@@ -1176,7 +830,6 @@
     if (tx.status === 'fulfilled' && tx.value[0] && window.BYPASS_TEXTS) window.BYPASS_TEXTS.apply(document, tx.value[0].value);
     if (fq.status === 'fulfilled' && Array.isArray(fq.value)) applyFaqs(fq.value);
     if (st.status === 'fulfilled' && st.value[0]) applyStatus(st.value[0].value);
-    if (dk.status === 'fulfilled' && Array.isArray(dk.value.list)) applyDockets(dk.value.list, dk.value.total);
   })();
 
   /* ===== 제보·합류 대화상자 =====
@@ -1210,8 +863,8 @@
     'report-dialog': f => submitTo('submit_report', { p_what: val(f, 'what'), p_how: val(f, 'how'), p_contact: val(f, 'contact') || null }),
     'join-dialog': f => submitTo('submit_application', { p_name: val(f, 'name'), p_contact: val(f, 'contact'), p_want: val(f, 'want'), p_major: val(f, 'major') || null })
   };
-  const MISSING_TEXT = '필수 항목이 누락되었습니다. 본 국도 이 문구를 쓰게 되어 유감입니다.';
-  const FAIL_TEXT = '전송 중 정체가 발생하여 접수하지 못했습니다. 잠시 후 다시 시도해 주십시오. 본 국도 이 정체가 유감입니다.';
+  const MISSING_TEXT = '빈칸이 있어요. 표시된 칸만 채워 주세요.';
+  const FAIL_TEXT = '보내다가 막혔어요. 잠깐 뒤에 다시 눌러 주세요.';
 
   function resetDialog(dlg) {
     const form = dlg.querySelector('form');
@@ -1230,7 +883,7 @@
     });
   });
 
-  document.querySelectorAll('.form-dialog:not(.notice-dialog)').forEach(dlg => {
+  document.querySelectorAll('.form-dialog').forEach(dlg => {
     dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
     dlg.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => dlg.close()));
 
@@ -1253,8 +906,8 @@
       error.hidden = true;
 
       sending = true;
-      const label = submitBtn.textContent;
-      submitBtn.textContent = '접수 중…';
+      const label = submitBtn.firstChild.textContent;
+      submitBtn.firstChild.textContent = '보내는 중…';
       submitBtn.disabled = true;
       let receiptNo;
       try {
@@ -1265,17 +918,17 @@
         return;
       } finally {
         sending = false;
-        submitBtn.textContent = label;
+        submitBtn.firstChild.textContent = label;
         submitBtn.disabled = false;
       }
 
       const receipt = dlg.querySelector('.receipt');
       receipt.querySelectorAll('[data-no]').forEach(el => { el.textContent = receiptNo; });
-      receipt.querySelector('[data-date]').textContent = dateText;
+      receipt.querySelectorAll('[data-date]').forEach(el => { el.textContent = dateText; });
 
       form.hidden = true;
       receipt.hidden = false;
-      const panel = receipt.querySelector('.rsg-panel');
+      const panel = receipt.querySelector('.receipt-card');
       panel.classList.remove('is-updated');
       void panel.offsetWidth;
       panel.classList.add('is-updated');
@@ -1304,36 +957,6 @@
     }
   } catch (e) { /* 저장소를 쓸 수 없으면 '로그인' 그대로 */ }
 
-  /* ===== 가로로 넘기는 줄(메뉴·처리 현황): 스크롤바 대신 =====
-     넘길 수 있는 쪽 끝만 흐리게 하고, 마우스 휠을 굴려도 옆으로 넘어가게 한다. */
-  const siteNav = document.querySelector('.site-nav');
-  function updateNavFade() {
-    const max = siteNav.scrollWidth - siteNav.clientWidth;
-    siteNav.classList.toggle('is-scrolled', siteNav.scrollLeft > 2);
-    siteNav.classList.toggle('at-end', siteNav.scrollLeft >= max - 2);
-  }
-  siteNav.addEventListener('scroll', updateNavFade, { passive: true });
-  window.addEventListener('resize', updateNavFade);
-  updateNavFade();
-
-  document.querySelectorAll('.site-nav, .boards').forEach(row => {
-    row.addEventListener('wheel', e => {
-      if (e.ctrlKey || Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;  // 확대·가로 스크롤은 그대로
-      const max = row.scrollWidth - row.clientWidth;
-      if (max <= 0) return;                                               // 넘길 게 없으면 페이지 스크롤
-      const goingRight = e.deltaY > 0;
-      if ((goingRight && row.scrollLeft >= max - 1) || (!goingRight && row.scrollLeft <= 0)) return;  // 끝에 닿으면 페이지 스크롤
-      e.preventDefault();
-      const dy = e.deltaMode === 1 ? e.deltaY * 32 : e.deltaY;            // 줄 단위 휠 보정
-      if (!row.classList.contains('boards')) { row.scrollBy({ left: dy }); return; }
-      // 안내판은 한 장씩 맞춰 서므로(scroll-snap), 작은 움직임은 모았다가 한 장씩 넘긴다.
-      row._acc = (row._acc || 0) + dy;
-      if (Math.abs(row._acc) < 40) return;
-      const card = row.firstElementChild.offsetWidth + parseFloat(getComputedStyle(row).columnGap || 0);
-      row.scrollBy({ left: Math.sign(row._acc) * card, behavior: 'smooth' });
-      row._acc = 0;
-    }, { passive: false });
-  });
 </script>
 <script src="/assets/track.js" defer></script>
 </body>
