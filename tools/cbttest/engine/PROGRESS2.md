@@ -82,3 +82,4 @@
 - 진행 방법(지난 y00~y02와 동일): ① 목록으로 문항 블록 파일(지문·보기는 화면 보기 순서 ord 반영, 이미지 문항은 data/img 스프라이트를 잘라 PNG) 생성 → work/websearch/zNN.txt ② 에이전트에 맡겨 zNN.json({키:{verdict,exp,src}}) 작성 — 문항당 WebSearch 1회 원칙, 정답표 유지, 계산 문제는 정답표대로 confirmed, 현행과 다르면 src 끝에 "[현행과 다름: …]" ③ apply_recheck.py의 websearch glob에 z*.json 추가 → exp_merge.py → build.sh → 패치노트·버전 셋째 자리 올려 배포. '현행과 다름' 문항은 법령·협약이면 NOWDIFF(노란), 정답 보기 자체 의심이면 KEYDOUBT(주황)로 분류.
 - 어선전문은 웹 근거가 거의 없어(이전 결과 대부분 uncertain) 수산 교재(고등학교 어업·수산 교과서 등)가 있으면 함께 쓰는 것이 효과적.
 - 11/15 v1.2.2: 이스터에그 '정답만 출력(해설 포함)' 카드 형식(정답 배지 머리줄 오른쪽, 해설·안내 아래).
+- 11/16 v1.2.3: 처음 화면만 LINE Seed KR(jsDelivr noonfonts_11-01, #app.home-ls, setRoute에서 토글).
