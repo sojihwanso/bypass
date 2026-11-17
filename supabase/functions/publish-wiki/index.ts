@@ -127,6 +127,51 @@ iframe{position:fixed;inset:0;width:100%;height:100%;border:0;display:block}
 `;
 }
 
+// ===== 링크 미리보기 기본 그림 =====
+// 올린 페이지에 og:image 가 없으면 사이트 공통 그림(HQ › 링크 미리보기 › 모든 페이지 공통 그림)을 붙인다.
+// 공통 그림은 site_settings 'share' 에서, 없으면 메인 페이지의 og:image 를 쓴다.
+const SITE = 'https://teambypass.vercel.app';
+type Share = { image: string; alt: string };
+async function shareDefault(env: (k: string) => string | undefined, http: typeof fetch): Promise<Share | null> {
+  try {
+    const key = env('SUPABASE_ANON_KEY') || '';
+    const r = await http(`${env('SUPABASE_URL')}/rest/v1/site_settings?key=eq.share&select=value`, { headers: { apikey: key, Authorization: `Bearer ${key}` } });
+    if (r.ok) { const v = (await r.json())?.[0]?.value; if (v && typeof v.image === 'string' && v.image) return { image: v.image, alt: String(v.alt ?? '') }; }
+  } catch { /* 다음 방법으로 */ }
+  try {
+    const h = await (await http(`${SITE}/`)).text();
+    const img = h.match(/<meta\s+property="og:image"\s+content="([^"]*)"/i);
+    const alt = h.match(/<meta\s+property="og:image:alt"\s+content="([^"]*)"/i);
+    if (img && img[1]) return { image: unesc(img[1]), alt: alt ? unesc(alt[1]) : '' };
+  } catch { /* 없으면 그림 없이 */ }
+  return null;
+}
+// <head> 에 og:image 가 없을 때만 미리보기 태그 묶음을 넣는다 (있으면 그대로 둔다)
+export function withShare(html: string, url: string, share: Share | null): string {
+  if (!share || /<meta\s+property=["']og:image["']/i.test(html)) return html;
+  // </head> 앞에. 생략한 페이지면 <title> 뒤, 그것도 없으면 <head> 바로 뒤
+  let head = html.search(/<\/head>/i);
+  if (head < 0) { const m = html.match(/<title[^>]*>[^<]*<\/title>\s*/i) || html.match(/<head[^>]*>\s*/i); head = m && m.index !== undefined ? m.index + m[0].length : -1; }
+  if (head < 0) return html;
+  const has = (k: string) => new RegExp(`<meta\\s+(property|name)=["']${k.replace(/[.:]/g, '\\$&')}["']`, 'i').test(html);
+  const t = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+  const title = unesc(t ? t[1] : '').trim() || 'BYPASS';
+  const d = html.match(/<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i);
+  const tags: string[] = [];
+  const put = (kind: string, k: string, v: string) => { if (v && !has(k)) tags.push(`<meta ${kind}="${k}" content="${esc(v)}">`); };
+  put('property', 'og:type', 'website');
+  put('property', 'og:site_name', 'BYPASS');
+  put('property', 'og:url', SITE + url);
+  put('property', 'og:title', /BYPASS/.test(title) ? title : `${title} | BYPASS`);
+  put('property', 'og:description', d ? unesc(d[1]) : 'BYPASS 크루가 만든 것. 누구나, 무엇이든.');
+  tags.push(`<meta property="og:image" content="${esc(share.image)}">`);
+  put('property', 'og:image:width', '1200');
+  put('property', 'og:image:height', '630');
+  put('property', 'og:image:alt', share.alt);
+  put('name', 'twitter:card', 'summary_large_image');
+  return html.slice(0, head) + tags.join('\n') + '\n' + html.slice(head);
+}
+
 const NOTE_ERRORS: Record<string, [number, string]> = {
   'upload not allowed': [403, '아직 올리기 권한이 없습니다. 커뮤니티 › 내 정보에서 요건을 확인해 주세요.'],
   'too many publishes': [429, '한 시간에 10번까지 올릴 수 있습니다. 잠시 후 다시 올려 주세요.'],
@@ -228,6 +273,9 @@ export async function handle(req: Request, env: (k: string) => string | undefine
   }
 
   const name = user?.user_metadata?.display_name || user?.user_metadata?.username || (staff ? '운영진' : '회원');
+  // 링크 미리보기 그림이 없으면 사이트 공통 그림을 붙인다 (앱은 아래 껍데기에)
+  const share = await shareDefault(env, http);
+  if (!shelled) content = withShare(content, `/${folder}/${slug}/`, share);
   const put = await gh(path, '', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -245,7 +293,7 @@ export async function handle(req: Request, env: (k: string) => string | undefine
   const saved = await put.json();
   // 껍데기(index.html): 없거나, 제목·설명이 바뀌었거나, 예전 방식 페이지면 새로 쓴다
   if (shelled) {
-    const shell = makeShell(slug, content);
+    const shell = withShare(makeShell(slug, content), `/${folder}/${slug}/`, share);
     if (index.text !== shell) {
       const sp = await gh(`${dir}/index.html`, '', {
         method: 'PUT',
