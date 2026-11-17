@@ -1,16 +1,17 @@
-/* BYPASS 이스터에그: 우회 항해 (미니게임)
+/* BYPASS 이스터에그: 컨테이너 쌓기 (미니게임)
    여는 법 (일부러 안 알려 줌)
    - 키보드로 b-y-p-a-s-s 를 차례로 치기 (글 쓰는 칸 밖에서)
    - 왼쪽 위 BYPASS 로고를 2초 안에 5번 누르기 (폰)
-   게임: 마스코트가 탄 작은 배가 부표·암초를 뛰어넘고, 갈매기는 숙여서 피한다.
-         스페이스/↑/화면 누르기 = 점프, ↓/아래로 밀기 = 숙이기, Esc = 닫기. 최고 점수는 이 브라우저에만. */
+   게임: 크레인에 매달려 왔다 갔다 하는 컨테이너를 눌러서 떨어뜨려 배 위에 쌓는다.
+         삐져나온 만큼 잘려 바다에 빠지고, 딱 맞추면 PERFECT (3번 연속이면 다시 넓어짐).
+         누르기 / 스페이스 = 떨어뜨리기, Esc = 닫기. 최고 기록은 이 브라우저에만. */
 (function () {
   'use strict';
   if (window.__bypassEgg) return; window.__bypassEgg = true;
 
   /* ----- 여는 방법 ----- */
   const WORD = 'bypass';
-  let typed = '';
+  let typed = '', open = false;
   addEventListener('keydown', (e) => {
     if (open) return;
     const t = e.target;
@@ -28,149 +29,188 @@
     if (taps.length >= 5) { taps = []; e.preventDefault(); start(); }
   }, true);
 
-  /* ----- 화면 ----- */
-  let open = false, ov, cv, ctx, raf = 0, scoreEl, msgEl, bestEl;
-  const BEST = 'bypass-egg-best';
+  /* ----- 저장 ----- */
+  const BEST = 'bypass-egg-stack';
   const best = () => { try { return Number(localStorage.getItem(BEST)) || 0; } catch (e) { return 0; } };
   const setBest = (n) => { try { localStorage.setItem(BEST, String(n)); } catch (e) { /* 저장 못 함 */ } };
 
-  const LOGO = new Image();
-  LOGO.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="1 1 130 130"><path d="M66 4 L128 66 L66 128 L4 66 Z" fill="#EE6A1F" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/><path d="M66 15 L117 66 L66 117 L15 66 Z" fill="none" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/><g transform="translate(34 32) scale(0.64)" fill="#1C211E"><ellipse cx="44" cy="60" rx="27" ry="23"/><path d="M51 45 C55 37 58 31 61 25 L72 30 C68 36 66 44 64 53 Z"/><circle cx="66" cy="26" r="10"/><path d="M72 20 C83 19 93 24 95 32 C96 38 91 41 88 37 C86 34 82 33 74 33 Z"/><path d="M19 52 C10 47 7 40 11 34 C14 43 20 46 23 46 Z"/><path d="M37 80 L35 92 L27 95 L41 95 L42 81 Z"/><path d="M51 80 L51 92 L44 95 L58 95 L56 81 Z"/><circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/></g></svg>');
-
+  /* ----- 화면 ----- */
+  let ov, cv, ctx, raf = 0, scoreEl, bestEl, msgEl, prevFocus = null;
+  const FONT = '-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif';
   function build() {
     ov = document.createElement('div');
-    ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', '우회 항해 미니게임');
-    ov.style.cssText = 'position:fixed;inset:0;z-index:2147483600;display:grid;place-items:center;background:rgba(10,12,16,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;opacity:0;transition:opacity .25s';
+    ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', '컨테이너 쌓기 미니게임');
+    ov.style.cssText = `position:fixed;inset:0;z-index:2147483600;display:grid;place-items:center;background:rgba(10,12,16,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-family:${FONT};opacity:0;transition:opacity .25s`;
     const box = document.createElement('div');
-    box.style.cssText = 'position:relative;width:min(760px,calc(100vw - 24px));border-radius:22px;overflow:hidden;background:#FFF8EE;box-shadow:0 30px 80px rgba(0,0,0,.45);touch-action:none;user-select:none;-webkit-user-select:none';
+    box.style.cssText = 'position:relative;width:min(440px,calc(100vw - 24px),calc((100dvh - 110px) * .75 ));border-radius:22px;overflow:hidden;background:#FFF8EE;box-shadow:0 30px 80px rgba(0,0,0,.45);touch-action:none;user-select:none;-webkit-user-select:none';
     const bar = document.createElement('div');
     bar.style.cssText = 'display:flex;align-items:center;gap:10px;padding:12px 16px;background:#16181D;color:#fff;font-size:14px;font-weight:700';
-    const ttl = document.createElement('span'); ttl.textContent = '⚓ 우회 항해'; ttl.style.flex = '1';
+    const ttl = document.createElement('span'); ttl.textContent = '📦 컨테이너 쌓기'; ttl.style.flex = '1';
     scoreEl = document.createElement('span'); scoreEl.style.cssText = 'font-variant-numeric:tabular-nums';
     bestEl = document.createElement('span'); bestEl.style.cssText = 'color:#9AA1AD;font-weight:600;font-variant-numeric:tabular-nums';
     const x = document.createElement('button'); x.type = 'button'; x.textContent = '✕'; x.setAttribute('aria-label', '게임 닫기');
     x.style.cssText = 'margin-left:6px;width:30px;height:30px;border:0;border-radius:8px;background:#2A2E36;color:#fff;font-size:14px;cursor:pointer';
     x.addEventListener('click', stop);
     bar.append(ttl, scoreEl, bestEl, x);
-    cv = document.createElement('canvas'); cv.style.cssText = 'display:block;width:100%;aspect-ratio:760/300;cursor:pointer';
+    cv = document.createElement('canvas'); cv.style.cssText = 'display:block;width:100%;aspect-ratio:3/4;cursor:pointer';
     msgEl = document.createElement('div');
-    msgEl.style.cssText = 'position:absolute;left:0;right:0;top:46px;bottom:0;display:grid;place-items:center;text-align:center;color:#16181D;pointer-events:none;font-size:15px;line-height:1.7';
+    msgEl.style.cssText = 'position:absolute;left:0;right:0;top:54px;bottom:0;display:grid;place-items:center;text-align:center;color:#fff;pointer-events:none;font-size:15px;line-height:1.7;align-items:start;padding-top:22%';
     box.append(bar, cv, msgEl);
     ov.append(box);
     ov.addEventListener('click', (e) => { if (e.target === ov) stop(); });
-    // 조작
-    cv.addEventListener('pointerdown', (e) => { e.preventDefault(); sy = e.clientY; press(); });
-    cv.addEventListener('pointermove', (e) => { if (sy != null && e.clientY - sy > 24) duck(true); });
-    addEventListener('pointerup', () => { sy = null; duck(false); });
+    cv.addEventListener('pointerdown', (e) => { e.preventDefault(); act(); });
   }
-  let sy = null;
   function onKey(e) {
     if (!open) return;
     if (e.key === 'Escape') { e.preventDefault(); stop(); return; }
-    if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w') { e.preventDefault(); if (e.type === 'keydown') press(); }
-    if (e.key === 'ArrowDown' || e.key === 's') { e.preventDefault(); duck(e.type === 'keydown'); }
+    if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowDown') { e.preventDefault(); if (!e.repeat) act(); }
   }
+  function say(html) { msgEl.innerHTML = html ? `<div style="max-width:86%;padding:18px 22px;border-radius:18px;background:rgba(22,24,29,.82);box-shadow:0 10px 30px rgba(0,0,0,.25)">${html}</div>` : ''; msgEl.style.display = html ? 'grid' : 'none'; }
 
   /* ----- 게임 ----- */
-  let W = 760, K = 1;   // 폰에서는 화면을 당겨서(가로 480) 크게 보이게, 속도도 그만큼 천천히
-  const H = 300, SEA = 228, G = 2100, JUMP = 760;
-  let S;   // 상태
+  const W = 420, H = 560, BH = 28, DECK = 470, BASE_W = 200, DROP = 78;   // DROP: 크레인에서 꼭대기까지
+  const COLORS = [['#EE6A1F', '#C9531A'], ['#2F6FD6', '#2558AB'], ['#16A394', '#11847A'], ['#E5484D', '#BE3A3E'], ['#F2B417', '#CC960E'], ['#7C5CDB', '#6447B7'], ['#3E9B4F', '#2F7C3E']];
+  let S;
   function reset() {
-    S = { t: 0, run: false, over: false, speed: 300, dist: 0, score: 0, y: 0, vy: 0, ducking: false, obs: [], next: 1.2, clouds: [], waves: 0, flash: 0 };
-    for (let i = 0; i < 4; i++) S.clouds.push({ x: Math.random() * W, y: 20 + Math.random() * 70, s: 0.6 + Math.random() * 0.8 });
+    S = {
+      t: 0, state: 'ready', stack: [{ x: (W - BASE_W) / 2, w: BASE_W, c: -1 }], cur: null, dir: 1,
+      falls: [], parts: [], pops: [], cam: 0, camTo: 0, combo: 0, score: 0, shake: 0, sway: 0,
+    };
+    next();
     paintHud();
   }
-  function paintHud() {
-    scoreEl.textContent = String(Math.floor(S.score)).padStart(5, '0');
-    bestEl.textContent = `최고 ${String(best()).padStart(5, '0')}`;
+  const topOf = () => S.stack[S.stack.length - 1];
+  const yOf = (i) => DECK - i * BH;            // i층 컨테이너의 바닥 높이 (0 = 갑판)
+  function next() {
+    const top = topOf(), n = S.stack.length;
+    const from = n % 2 ? -1 : 1;
+    S.cur = { x: from < 0 ? -top.w * 0.6 : W - top.w * 0.4, w: top.w, c: (n - 1) % COLORS.length, drop: 0, vy: 0, y: 0 };
+    S.dir = from < 0 ? 1 : -1;
+    S.speed = Math.min(430, 160 + n * 9);
+    S.camTo = Math.max(0, (n - 6) * BH);
   }
-  function say(html) { msgEl.innerHTML = html; msgEl.style.display = html ? 'grid' : 'none'; }
-  function press() {
-    if (S.over) { if (S.t - S.overAt < 0.4) return; reset(); S.run = true; say(''); return; }
-    if (!S.run) { S.run = true; say(''); }
-    if (S.y === 0 && !S.ducking) S.vy = JUMP;
+  function paintHud() { scoreEl.textContent = `${S.score}층`; bestEl.textContent = `최고 ${best()}층`; }
+  function act() {
+    if (S.state === 'ready') { S.state = 'play'; say(''); return; }
+    if (S.state === 'over') { if (S.t - S.overAt > 0.5) { reset(); S.state = 'play'; say(''); } return; }
+    if (S.cur.drop) return;
+    S.cur.drop = 1;   // 떨어지는 중 (아래 step 에서 착지 판정)
   }
-  function duck(on) { if (!S || !S.run || S.over) { if (S) S.ducking = false; return; } S.ducking = on; if (on && S.y > 0) S.vy = Math.min(S.vy, -JUMP); }
-  function spawn() {
-    const lvl = Math.min(1, S.dist / 9000);
-    const r = Math.random();
-    if (r < 0.45) S.obs.push({ k: 'buoy', x: W + 20, w: 26, h: 40 });
-    else if (r < 0.7) S.obs.push({ k: 'rock', x: W + 20, w: 46 + Math.random() * 24, h: 26 });
-    else if (lvl > 0.15) S.obs.push({ k: 'gull', x: W + 20, w: 34, h: 18, y: Math.random() < 0.5 ? 58 : 30, f: 0 });
-    else S.obs.push({ k: 'buoy', x: W + 20, w: 26, h: 40 });
-    S.next = (0.9 + Math.random() * 1.1) * (1.15 - lvl * 0.45);
+  function land() {
+    const c = S.cur, top = topOf();
+    const l = Math.max(c.x, top.x), r = Math.min(c.x + c.w, top.x + top.w), ov2 = r - l;
+    const yTop = yOf(S.stack.length);
+    if (ov2 <= 0) {   // 완전히 빗나감 → 바다로
+      S.falls.push({ x: c.x, y: yTop - BH, w: c.w, c: c.c, vx: S.dir * 60, vy: 0, a: 0, va: (c.x < top.x ? -1 : 1) * 2.4 });
+      S.cur = null; over(); return;
+    }
+    const off = c.x - top.x;
+    let nx = l, nw = ov2;
+    if (Math.abs(off) <= 4) {   // PERFECT: 딱 맞춤
+      nx = top.x; nw = top.w; S.combo++;
+      let txt = 'PERFECT';
+      if (S.combo >= 3) { const grow = Math.min(12, BASE_W - nw); if (grow > 0) { nx -= grow / 2; nw += grow; txt = `PERFECT ×${S.combo} · 넓어짐!`; } else txt = `PERFECT ×${S.combo}`; }
+      else if (S.combo > 1) txt = `PERFECT ×${S.combo}`;
+      S.pops.push({ t: 0, txt, x: nx + nw / 2, y: yTop - BH - 8 });
+      for (let i = 0; i < 18; i++) S.parts.push({ x: nx + Math.random() * nw, y: yTop - BH / 2, vx: (Math.random() - 0.5) * 260, vy: -120 - Math.random() * 220, t: 0, c: Math.random() < 0.5 ? '#FFD43B' : '#fff' });
+    } else {
+      S.combo = 0;
+      // 삐져나온 조각은 잘려서 바다로
+      const cutX = off > 0 ? r : c.x, cutW = c.w - ov2;
+      S.falls.push({ x: cutX, y: yTop - BH, w: cutW, c: c.c, vx: (off > 0 ? 1 : -1) * 70, vy: 0, a: 0, va: (off > 0 ? 1 : -1) * 3 });
+      S.shake = 0.12;
+    }
+    S.stack.push({ x: nx, w: nw, c: c.c });
+    S.score = S.stack.length - 1;
+    S.sway = 1;
+    paintHud();
+    next();
   }
-  function hit(o) {
-    const bx = 92, bw = 46, bh = S.ducking ? 26 : 44, by = SEA - S.y - bh;   // 배+마스코트 상자 (조금 너그럽게)
-    const ox = o.x + 4, ow = o.w - 8;
-    const oy = o.k === 'gull' ? SEA - o.y - o.h : SEA - o.h + 4, oh = o.h - 4;
-    return bx < ox + ow && bx + bw > ox && by < oy + oh && by + bh > oy;
+  function over() {
+    S.state = 'over'; S.overAt = S.t; S.shake = 0.35;
+    const b = best(), sc = S.score;
+    if (sc > b) setBest(sc);
+    paintHud();
+    const line = sc >= 30 ? '전설의 선장' : sc >= 20 ? '노련한 갑판장' : sc >= 10 ? '든든한 항해사' : sc >= 5 ? '견습 갑판원' : '첫 출항';
+    say(`<div><div style="font-size:30px;font-weight:800">${sc}층</div><div style="font-weight:700">${line}${sc > b && sc > 0 ? ' · 🎉 최고 기록' : ''}</div><div style="margin-top:8px;opacity:.85">다시 하려면 누르거나 스페이스</div></div>`);
   }
   function step(dt) {
     S.t += dt;
-    if (S.flash > 0) S.flash -= dt;
-    S.waves += dt * (S.run && !S.over ? S.speed : 40);
-    S.clouds.forEach((c) => { c.x -= dt * 14 * c.s; if (c.x < -80) { c.x = W + 40; c.y = 20 + Math.random() * 70; } });
-    if (!S.run || S.over) return;
-    S.speed = Math.min(720, 300 + S.dist / 30) * K;
-    S.dist += S.speed / K * dt; S.score = S.dist / 10;
-    if (Math.floor(S.score / 100) !== Math.floor((S.score - S.speed / K * dt / 10) / 100)) S.flash = 0.35;
-    // 점프
-    S.vy -= G * dt * (S.ducking ? 2.2 : 1); S.y = Math.max(0, S.y + S.vy * dt); if (S.y === 0) S.vy = 0;
-    // 장애물
-    S.next -= dt; if (S.next <= 0) spawn();
-    S.obs.forEach((o) => { o.x -= (S.speed + (o.k === 'gull' ? 60 * K : 0)) * dt; if (o.k === 'gull') o.f += dt * 10; });
-    S.obs = S.obs.filter((o) => o.x > -100);
-    if (S.obs.some(hit)) {
-      S.over = true; S.overAt = S.t;
-      const sc = Math.floor(S.score), b = best();
-      if (sc > b) setBest(sc);
-      say(`<div><div style="font-size:22px;font-weight:800;margin-bottom:4px">좌초! ${sc > b ? '🎉 최고 기록' : ''}</div><div>${sc}점 · 다시 하려면 누르거나 스페이스</div></div>`);
+    S.cam += (S.camTo - S.cam) * Math.min(1, dt * 6);
+    S.shake = Math.max(0, S.shake - dt);
+    S.sway = Math.max(0, S.sway - dt * 1.6);
+    if (S.state === 'play' && S.cur) {
+      const c = S.cur;
+      if (!c.drop) {
+        c.x += S.dir * S.speed * dt;
+        const lo = -c.w * 0.6, hi = W - c.w * 0.4;
+        if (c.x < lo) { c.x = lo; S.dir = 1; } else if (c.x > hi) { c.x = hi; S.dir = -1; }
+      } else {
+        c.vy += 2600 * dt; c.y += c.vy * dt;
+        if (c.y >= DROP) land();   // 크레인 높이에서 쌓인 꼭대기까지
+      }
     }
-    paintHud();
+    S.falls.forEach((f) => { f.vy += 1500 * dt; f.x += f.vx * dt; f.y += f.vy * dt; f.a += f.va * dt; });
+    S.falls = S.falls.filter((f) => f.y - S.cam < H + 200);
+    S.parts.forEach((p) => { p.t += dt; p.vy += 700 * dt; p.x += p.vx * dt; p.y += p.vy * dt; });
+    S.parts = S.parts.filter((p) => p.t < 1.1);
+    S.pops.forEach((p) => { p.t += dt; }); S.pops = S.pops.filter((p) => p.t < 1.2);
+  }
+
+  /* ----- 그리기 ----- */
+  function box(c, x, y, w, ci, alpha) {
+    const [fill, dark] = ci < 0 ? ['#16181D', '#16181D'] : COLORS[ci];
+    c.globalAlpha = alpha == null ? 1 : alpha;
+    c.fillStyle = fill; c.fillRect(x, y, w, BH - 2);
+    c.fillStyle = dark;
+    for (let i = x + 6; i < x + w - 4; i += 7) c.fillRect(i, y + 4, 2, BH - 10);   // 골판 줄
+    c.fillRect(x, y, w, 3); c.fillRect(x, y + BH - 5, w, 3);
+    if (w > 70 && ci >= 0 && ci % 3 === 0) { c.fillStyle = 'rgba(255,255,255,.9)'; c.font = `800 11px ${FONT}`; c.textAlign = 'center'; c.fillText('BYPASS', x + w / 2, y + BH / 2 + 2); c.textAlign = 'left'; }
+    c.globalAlpha = 1;
   }
   function draw() {
-    const c = ctx;
+    const c = ctx, n = S.stack.length;
     c.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0);
-    // 하늘
-    const sky = c.createLinearGradient(0, 0, 0, SEA);
-    sky.addColorStop(0, '#FFE7C7'); sky.addColorStop(1, '#FFF8EE');
-    c.fillStyle = sky; c.fillRect(0, 0, W, H);
-    // 해
-    c.fillStyle = '#FFB36B'; c.beginPath(); c.arc(W - 120, 70, 34, 0, Math.PI * 2); c.fill();
-    // 구름
-    c.fillStyle = 'rgba(255,255,255,.9)';
-    S.clouds.forEach((k) => { c.beginPath(); c.ellipse(k.x, k.y, 34 * k.s, 11 * k.s, 0, 0, Math.PI * 2); c.ellipse(k.x + 18 * k.s, k.y - 6 * k.s, 20 * k.s, 10 * k.s, 0, 0, Math.PI * 2); c.fill(); });
-    // 바다
-    c.fillStyle = '#2B6CB0'; c.fillRect(0, SEA, W, H - SEA);
-    c.fillStyle = '#3B82C4';
-    for (let i = -1; i < W / 40 + 2; i++) { const x = i * 40 - (S.waves % 40); c.beginPath(); c.arc(x + 20, SEA + 2, 20, Math.PI, 0); c.fill(); }
-    c.fillStyle = 'rgba(255,255,255,.35)';
-    for (let i = 0; i < 12; i++) { const x = (i * 97 - S.waves * 0.6) % (W + 60); c.fillRect((x + W + 60) % (W + 60) - 30, SEA + 26 + (i % 3) * 18, 26, 2); }
-    // 장애물
-    S.obs.forEach((o) => {
-      if (o.k === 'buoy') {
-        c.fillStyle = '#E5484D'; c.beginPath(); c.moveTo(o.x + 13, SEA - o.h); c.lineTo(o.x + o.w, SEA - 8); c.lineTo(o.x, SEA - 8); c.closePath(); c.fill();
-        c.fillStyle = '#fff'; c.fillRect(o.x + 5, SEA - 22, o.w - 10, 5);
-        c.fillStyle = '#16181D'; c.fillRect(o.x - 2, SEA - 9, o.w + 4, 9);
-      } else if (o.k === 'rock') {
-        c.fillStyle = '#4B5563'; c.beginPath(); c.moveTo(o.x, SEA + 2); c.quadraticCurveTo(o.x + o.w * 0.3, SEA - o.h - 6, o.x + o.w * 0.55, SEA - o.h); c.quadraticCurveTo(o.x + o.w * 0.9, SEA - o.h + 6, o.x + o.w, SEA + 2); c.fill();
-      } else {
-        const y = SEA - o.y - o.h / 2, fl = Math.sin(o.f) * 7;
-        c.strokeStyle = '#16181D'; c.lineWidth = 3; c.lineCap = 'round';
-        c.beginPath(); c.moveTo(o.x, y - fl); c.quadraticCurveTo(o.x + o.w / 4, y - 8, o.x + o.w / 2, y); c.quadraticCurveTo(o.x + o.w * 3 / 4, y - 8, o.x + o.w, y - fl); c.stroke();
-      }
-    });
-    // 배 + 마스코트
-    const by = SEA - S.y, tilt = S.y > 0 ? -0.12 : Math.sin(S.t * 6) * 0.03;
-    c.save(); c.translate(115, by); c.rotate(tilt);
-    if (S.ducking) c.scale(1.12, 0.7);
-    c.fillStyle = '#16181D'; c.beginPath(); c.moveTo(-34, -14); c.lineTo(34, -14); c.lineTo(24, 0); c.lineTo(-26, 0); c.closePath(); c.fill();
-    c.fillStyle = '#EE6A1F'; c.fillRect(-30, -14, 60, 4);
-    if (LOGO.complete) c.drawImage(LOGO, -21, -54, 42, 42);
+    // 하늘: 높이 쌓을수록 낮 → 노을 → 밤
+    const k = Math.min(1, S.score / 40);
+    const mix = (a, b, t) => `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(',')})`;
+    const top = k < 0.5 ? mix([255, 231, 199], [255, 154, 120], k * 2) : mix([255, 154, 120], [28, 32, 64], (k - 0.5) * 2);
+    const bot = k < 0.5 ? mix([255, 248, 238], [255, 214, 170], k * 2) : mix([255, 214, 170], [60, 58, 96], (k - 0.5) * 2);
+    const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, top); g.addColorStop(1, bot);
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+    if (k > 0.6) { c.fillStyle = `rgba(255,255,255,${(k - 0.6) * 2})`; for (let i = 0; i < 40; i++) c.fillRect((i * 97) % W, (i * 53) % 260, 2, 2); }
+    const sh = S.shake > 0 ? (Math.random() - 0.5) * 10 * S.shake / 0.35 : 0;
+    c.save(); c.translate(sh, S.cam);
+    // 해/달
+    c.fillStyle = k > 0.6 ? '#F4F1DE' : '#FFB36B'; c.beginPath(); c.arc(360, 70 - S.cam * 0.7, 26, 0, Math.PI * 2); c.fill();
+    // 배 + 쌓인 컨테이너 (출렁임)
+    const bob = Math.sin(S.t * 1.6) * 3, tilt = Math.sin(S.t * 1.1) * 0.012 + Math.sin(S.t * 9) * 0.02 * S.sway;
+    c.save(); c.translate(W / 2, DECK + bob); c.rotate(tilt); c.translate(-W / 2, -DECK);
+    c.fillStyle = '#16181D'; c.beginPath(); c.moveTo(60, DECK); c.lineTo(W - 40, DECK); c.lineTo(W - 70, DECK + 46); c.lineTo(84, DECK + 46); c.closePath(); c.fill();
+    c.fillStyle = '#EE6A1F'; c.fillRect(64, DECK + 6, W - 108, 5);
+    c.fillStyle = '#fff'; c.font = `800 12px ${FONT}`; c.fillText('M/V BYPASS', 96, DECK + 32);
+    // 선교(브리지)
+    c.fillStyle = '#F3F4F6'; c.fillRect(W - 92, DECK - 34, 40, 34); c.fillStyle = '#16181D'; c.fillRect(W - 86, DECK - 26, 28, 7);
+    for (let i = 1; i < n; i++) box(c, S.stack[i].x, yOf(i) - BH, S.stack[i].w, S.stack[i].c);
     c.restore();
-    // 100점마다 반짝
-    if (S.flash > 0) { c.fillStyle = `rgba(238,106,31,${S.flash})`; c.font = '800 18px -apple-system, sans-serif'; c.textAlign = 'right'; c.fillText(`${Math.floor(S.score / 100) * 100}!`, W - 20, 34); c.textAlign = 'left'; }
+    // 바다 (앞)
+    c.fillStyle = '#2B6CB0'; c.fillRect(0, DECK + 30, W, 400);
+    c.fillStyle = '#3B82C4';
+    for (let i = -1; i < W / 34 + 2; i++) { const x = i * 34 - ((S.t * 30) % 34); c.beginPath(); c.arc(x + 17, DECK + 32, 17, Math.PI, 0); c.fill(); }
+    // 떨어지는 조각
+    S.falls.forEach((f) => { c.save(); c.translate(f.x + f.w / 2, f.y + BH / 2); c.rotate(f.a); box(c, -f.w / 2, -BH / 2, f.w, f.c, f.y > DECK + 30 ? 0.5 : 1); c.restore(); });
+    // 크레인 + 움직이는 컨테이너
+    if (S.cur && S.state !== 'over') {
+      const cy = yOf(n) - BH - DROP + S.cur.y;
+      if (!S.cur.drop) { c.strokeStyle = '#16181D'; c.lineWidth = 2; c.beginPath(); c.moveTo(S.cur.x + S.cur.w / 2, cy - 200); c.lineTo(S.cur.x + S.cur.w / 2, cy); c.stroke(); c.fillStyle = '#16181D'; c.fillRect(S.cur.x + S.cur.w / 2 - 8, cy - 6, 16, 6); }
+      box(c, S.cur.x, cy, S.cur.w, S.cur.c);
+      // 떨어질 자리 안내 (아주 옅게)
+      const t = topOf(); c.fillStyle = 'rgba(22,24,29,.06)'; c.fillRect(t.x, yOf(n) - BH, t.w, BH - 2);
+    }
+    // 반짝이
+    S.parts.forEach((p) => { c.globalAlpha = 1 - p.t / 1.1; c.fillStyle = p.c; c.fillRect(p.x, p.y, 4, 4); }); c.globalAlpha = 1;
+    S.pops.forEach((p) => { c.globalAlpha = 1 - p.t / 1.2; c.fillStyle = '#16181D'; c.font = `800 16px ${FONT}`; c.textAlign = 'center'; c.fillText(p.txt, p.x, p.y - p.t * 40); c.textAlign = 'left'; }); c.globalAlpha = 1;
+    c.restore();
   }
   let last = 0;
   function loop(ts) {
@@ -178,20 +218,16 @@
     step(dt); draw();
     raf = requestAnimationFrame(loop);
   }
-  function fit() {
-    W = innerWidth < 600 ? 480 : 760; K = W === 760 ? 1 : 0.78;
-    cv.style.aspectRatio = `${W}/${H}`;
-    const r = cv.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1); cv.width = Math.round(r.width * d); cv.height = Math.round(r.height * d); }
-  let prevFocus = null;
+  function fit() { const r = cv.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1); cv.width = Math.round(r.width * d); cv.height = Math.round(r.height * d); }
   function start() {
     if (open) return;
     open = true;
     if (!ov) { build(); ctx = cv.getContext('2d'); }
     prevFocus = document.activeElement;
     document.body.append(ov); fit(); reset();
-    say('<div><div style="font-size:24px;font-weight:800;margin-bottom:6px">⚓ 우회 항해</div><div>부표·암초는 <b>점프</b> (스페이스 · ↑ · 화면 누르기)<br>갈매기는 <b>숙이기</b> (↓ · 아래로 밀기)</div><div style="margin-top:10px;color:#6B7280">눌러서 출항</div></div>');
+    say('<div><div style="font-size:26px;font-weight:800;margin-bottom:6px">📦 컨테이너 쌓기</div><div>크레인이 옮기는 컨테이너를<br><b>눌러서</b> 떨어뜨려 쌓으세요 (스페이스도 됨)</div><div style="margin-top:8px;opacity:.85">딱 맞추면 PERFECT · 3번 연속이면 다시 넓어져요</div><div style="margin-top:12px;font-weight:700">눌러서 시작</div></div>');
     requestAnimationFrame(() => { ov.style.opacity = '1'; });
-    addEventListener('keydown', onKey, true); addEventListener('keyup', onKey, true); addEventListener('resize', fit);
+    addEventListener('keydown', onKey, true); addEventListener('resize', fit);
     document.documentElement.style.overflow = 'hidden';
     ov.querySelector('button').focus();
     last = 0; raf = requestAnimationFrame(loop);
@@ -199,7 +235,7 @@
   function stop() {
     if (!open) return;
     open = false; cancelAnimationFrame(raf);
-    removeEventListener('keydown', onKey, true); removeEventListener('keyup', onKey, true); removeEventListener('resize', fit);
+    removeEventListener('keydown', onKey, true); removeEventListener('resize', fit);
     document.documentElement.style.overflow = '';
     ov.style.opacity = '0';
     setTimeout(() => { if (!open) ov.remove(); }, 250);
