@@ -11,9 +11,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<!-- Pretendard (SIL OFL): 로고 글자를 커뮤니티와 같게 -->
+<link rel="preload" as="style" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"></noscript>
 <link rel="stylesheet" href="/assets/bypass.css">
 <link rel="stylesheet" href="/assets/dockets.css">
 <style>
+  /* 로고 글자: 커뮤니티와 같은 Pretendard */
+  .brand .brand-name { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; font-weight: 750; font-size: 20px; letter-spacing: -.02em; }
   :root { --head-h: 66px; }
   body { background: var(--ground); }
   .is-checking .hq, .is-checking .hq-tabs, .is-checking .hq-head .head-actions { visibility: hidden; }
