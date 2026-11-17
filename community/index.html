@@ -190,7 +190,23 @@ body[data-v="home"], body[data-v="showcase"] { background: var(--dash); }
 .mini.dark { background: var(--primary); color: var(--primary-fg); }
 .mini.dark:hover { background: var(--primary-hover); }
 .mini .plus { color: var(--accent); font-size: 17px; font-weight: 800; }
-.db-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.db-grid > .wg.solo { grid-column: 1 / -1; }
+.db-grid { position: relative; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: row dense; gap: 16px; align-items: stretch; }
+/* 넓은 화면: 날씨는 대시보드 오른쪽 빈 곳에 따로 (스크롤해도 따라옴) */
+.wx-rail { position: absolute; top: 0; bottom: 0; left: calc(100% + 28px); width: min(300px, calc((100vw - 1080px) / 2 - 44px)); }
+.wx-rail[hidden] { display: none; }
+.wx-rail > .wg { position: sticky; top: 84px; padding: 18px 18px 16px; gap: 12px; animation-delay: 200ms; }
+.wx-rail .wg-h h2 { font-size: 15px; }
+.wx-rail .wx-now { gap: 12px; }
+.wx-rail .wx-ico { font-size: 42px; }
+.wx-rail .wx-deg { font-size: 36px; }
+.wx-rail .wx-desc { font-size: 14px; margin-top: 4px; }
+.wx-rail .wx-sub { font-size: 12.5px; }
+.wx-rail .wx-stats { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+.wx-rail .wx-stats div { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 8px 12px; border-radius: 12px; }
+.wx-rail .wx-stats dd { margin: 0; font-size: 14px; justify-content: flex-end; }
+.wx-rail .wx-h { width: 50px; }
+.wx-rail .wx-foot { font-size: 11.5px; }
 .wg { position: relative; min-width: 0; background: var(--panel); border-radius: 24px; padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; animation: wgIn 700ms cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 70ms + 60ms); transition: box-shadow 250ms ease-out; }
 .wg:hover { box-shadow: 0 10px 30px rgba(16, 24, 40, .06); }
 @keyframes wgIn { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
@@ -877,6 +893,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       <button type="button" class="done" data-db-done>완료</button>
     </div>
     <div class="db-grid" data-db-grid>
+      <div class="wx-rail" data-wx-rail role="complementary" aria-label="날씨" hidden></div>
       <section class="wg wide" data-wg="market" aria-labelledby="t-hmk" data-mk>
       <div class="hsec-head wg-h">
         <h2 id="t-hmk">내 종목 · 미국 증시</h2>
@@ -3195,6 +3212,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       return b;
     }));
     renderDday();
+    placeWeather();
   }
   function dbMove(id, d) {
     const vis = dbPrefs.widgets.filter((x) => wgOn(x.id)), i = vis.findIndex((x) => x.id === id), o = vis[i + d];
@@ -3203,8 +3221,30 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     [dbPrefs.widgets[a], dbPrefs.widgets[b]] = [dbPrefs.widgets[b], dbPrefs.widgets[a]];
     dbSave(); dbLayout();
   }
+  // 날씨를 오른쪽 빈 곳으로: 화면이 충분히 넓고, 날씨를 켜 두었고, 편집 중이 아닐 때
+  const wxWide = matchMedia('(min-width: 1640px)');
+  function placeWeather() {
+    const sec = $('[data-wg="weather"]'), rail = $('[data-wx-rail]'), grid = $('[data-db-grid]');
+    if (!sec || !rail) return;
+    const side = wxWide.matches && !dbEditing && !sec.hidden;
+    if (side && sec.parentElement !== rail) rail.append(sec);
+    else if (!side && sec.parentElement === rail) grid.append(sec);
+    rail.hidden = !side;
+    // 반쪽 위젯이 한 줄에 혼자 남으면 그 줄을 꽉 채운다 (빈칸 없이)
+    const list = dbPrefs.widgets.filter((x) => wgOn(x.id) && !(side && x.id === 'weather'));
+    let open = null;
+    $$('[data-wg]').forEach((x) => x.classList.remove('solo'));
+    list.forEach((x) => {
+      const el2 = $(`[data-wg="${x.id}"]`);
+      if (!el2) return;
+      if (x.w === 2) { if (open) open.classList.add('solo'); open = null; } else if (open) open = null; else open = el2;
+    });
+    if (open) open.classList.add('solo');
+  }
+  wxWide.addEventListener('change', placeWeather);
   function dbEdit(on) {
     dbEditing = on;
+    placeWeather();
     $('[data-db-grid]').classList.toggle('editing', on);
     $('[data-db-editbar]').hidden = !on;
     const b = $('[data-db-edit]'); b.setAttribute('aria-pressed', String(on)); b.textContent = on ? '편집 끝내기' : '대시보드 편집';
