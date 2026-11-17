@@ -21,9 +21,10 @@
 <link rel="icon" href="/assets/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <script>
-  /* 로그인 기록이 없으면 그리기 전에 로그인으로 */
-  try { const s = JSON.parse(localStorage.getItem('sb-itzdjdgjqcpmxdfssfel-auth-token') || 'null'); if (!s || !s.refresh_token) location.replace('/login/?next=' + encodeURIComponent('/community/' + location.search + location.hash)); } catch (e) { /* 저장소를 못 쓰면 아래에서 다시 확인 */ }
+  /* 로그인 기록이 없으면 손님 화면 (community/guest.js) — 회원 화면이 잠깐 비치지 않게 미리 표시 */
+  try { const s = JSON.parse(localStorage.getItem('sb-itzdjdgjqcpmxdfssfel-auth-token') || 'null'); if (!s || !s.refresh_token) document.documentElement.classList.add('guest'); } catch (e) { document.documentElement.classList.add('guest'); }
 </script>
+<style>html.guest .top-r > :not(.g-top), html.guest #main > :not([data-gview]) { visibility: hidden; }</style>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <!-- Pretendard (SIL OFL): 화면에 쓰인 글자만 받아 오는 가변 글꼴 -->
 <link rel="preload" as="style" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" onload="this.onload=null;this.rel='stylesheet'">
@@ -1280,7 +1281,13 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
 
   if (!B || !B.sb) { setup(B ? B.unavailableText : '회원 기능을 불러오지 못했습니다. 새로고침해 주세요.'); return; }
   const { data: { session } } = await B.sb.auth.getSession();
-  if (!session) { toLogin(); return; }
+  // 로그인 안 한 손님: 결과물 둘러보기 화면 (community/guest.js, supabase/034_guest_showcase.sql)
+  if (!session) {
+    document.documentElement.classList.add('guest');
+    const g = document.createElement('script'); g.src = '/community/guest.js?v=1'; document.body.append(g);
+    return;
+  }
+  document.documentElement.classList.remove('guest');
   let leaving = false;
   B.sb.auth.onAuthStateChange((ev) => { if (ev === 'SIGNED_OUT' && !leaving) toLogin(); });
 
