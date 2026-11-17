@@ -1299,6 +1299,12 @@
             <div class="seg" role="radiogroup" aria-label="회원 구분" data-mem-role></div>
             <p class="hint" data-mem-hint></p>
           </fieldset>
+          <fieldset data-mem-name-set>
+            <legend>닉네임</legend>
+            <div style="display:flex;gap:8px;align-items:center"><input class="input" id="mem-name" maxlength="20" autocomplete="off" spellcheck="false" aria-label="닉네임" style="flex:1"><button type="button" class="mini-btn" data-mem-name-go>바꾸기</button></div>
+            <p class="hint" data-mem-name-hint>운영진이 바꾸면 기다리는 날 없이 바로 바뀌고, 이 회원이 쓴 글·댓글 이름도 함께 바뀝니다.</p>
+            <p class="hint" data-mem-name-hist hidden></p>
+          </fieldset>
           <fieldset data-mem-pw-set>
             <legend>비밀번호를 잊었을 때</legend>
             <p class="hint" style="margin-top:0">임시 비밀번호를 만들어 이 회원에게 직접 전해 주세요. 로그인하면 비밀번호를 바꾸라는 안내가 뜹니다. 운영진의 비밀번호는 여기서 바꿀 수 없습니다.</p>
@@ -3497,7 +3503,36 @@
     delBtn.hidden = true;
     openDrawer('member', m.display_name, '운영 · 회원');
     syncMemUI(); renderMembers();
+    loadNameHist(m);
   }
+  // 닉네임: supabase/032_nickname.sql (set_member_name · member_name_history)
+  const NM_ERR = { 'name taken': '이미 다른 회원이 쓰는 닉네임이거나 아이디입니다.', 'name chars': '한글, 영문, 숫자, 띄어쓰기와 . _ - 만 쓸 수 있습니다.', 'name length': '닉네임은 2~20자입니다.', 'name same': '지금 이름과 같습니다.' };
+  async function loadNameHist(m) {
+    $('#mem-name').value = m.display_name;
+    const box = $('[data-mem-name-hist]'); box.hidden = true;
+    const { data, error } = await B.sb.rpc('member_name_history', { p_user: m.id });
+    if (error || editing !== m || !Array.isArray(data) || !data.length) return;
+    box.textContent = '예전 이름: ' + data.map(h => `${h.name} (~${B.dateText(h.until)}${h.by === 'staff' ? ', 운영진이 바꿈' : ''})`).join(' · ');
+    box.hidden = false;
+  }
+  $('#mem-name').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); $('[data-mem-name-go]').click(); } });
+  $('[data-mem-name-go]').addEventListener('click', async () => {
+    const m = editing, btn = $('[data-mem-name-go]');
+    if (!m || busy) return;
+    const name = $('#mem-name').value.replace(/\s+/g, ' ').trim();
+    if (name === m.display_name) return;
+    B.setBusy(btn, true, '바꾸는 중…');
+    const { data, error } = await B.sb.rpc('set_member_name', { p_user: m.id, p_name: name });
+    B.setBusy(btn, false);
+    if (error) {
+      const k = Object.keys(NM_ERR).find(x => (error.message || '').includes(x));
+      return fail(k ? NM_ERR[k] : error.code === 'PGRST202' ? 'supabase/032_nickname.sql 을 먼저 실행해 주세요.' : '닉네임을 바꾸지 못했습니다. ' + (error.message || ''));
+    }
+    const before = m.display_name;
+    m.display_name = String(data || name);
+    renderMembers(); loadNameHist(m);
+    toast(`${before} 님의 닉네임을 ${m.display_name}(으)로 바꿨습니다.`);
+  });
   async function saveMember() {
     const m = editing;
     if (!m || busy) return;
