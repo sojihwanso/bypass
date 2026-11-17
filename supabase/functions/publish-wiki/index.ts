@@ -131,7 +131,7 @@ iframe{position:fixed;inset:0;width:100%;height:100%;border:0;display:block}
 // 올린 페이지에 og:image 가 없으면 사이트 공통 그림(HQ › 링크 미리보기 › 모든 페이지 공통 그림)을 붙인다.
 // 공통 그림은 site_settings 'share' 에서, 없으면 메인 페이지의 og:image 를 쓴다.
 const SITE = 'https://teambypass.vercel.app';
-type Share = { image: string; alt: string };
+type Share = { image: string; alt: string; thumb?: boolean };
 async function shareDefault(env: (k: string) => string | undefined, http: typeof fetch): Promise<Share | null> {
   try {
     const key = env('SUPABASE_ANON_KEY') || '';
@@ -144,6 +144,22 @@ async function shareDefault(env: (k: string) => string | undefined, http: typeof
     const alt = h.match(/<meta\s+property="og:image:alt"\s+content="([^"]*)"/i);
     if (img && img[1]) return { image: unesc(img[1]), alt: alt ? unesc(alt[1]) : '' };
   } catch { /* 없으면 그림 없이 */ }
+  return null;
+}
+// 이 페이지를 가리키는 결과물에 썸네일이 있으면 그 그림을 쓴다 (publish-meta 의 sync_thumbs 와 같은 규칙)
+async function thumbFor(env: (k: string) => string | undefined, http: typeof fetch, auth: string, page: string): Promise<Share | null> {
+  try {
+    const key = env('SUPABASE_ANON_KEY') || '';
+    const base = `${env('SUPABASE_URL')}/storage/v1/object/public/post-thumbs/`;
+    const r = await http(`${env('SUPABASE_URL')}/rest/v1/posts?kind=eq.showcase&hidden=eq.false&thumb_url=not.is.null&url=ilike.*${encodeURIComponent(page)}*&select=url,thumb_url,title&order=created_at.desc&limit=20`,
+      { headers: { apikey: key, Authorization: auth } });
+    if (!r.ok) return null;
+    for (const p of await r.json() as { url: string; thumb_url: string; title: string }[]) {
+      let path = String(p.url || '').trim().replace(/^https:\/\/(teambypass|bypass-three)\.vercel\.app/i, '').replace(/[?#].*$/, '').replace(/index\.html$/i, '');
+      if (!path.endsWith('/')) path += '/';
+      if (path === page && p.thumb_url.startsWith(base) && /^[A-Za-z0-9._\/-]+$/.test(p.thumb_url.slice(base.length))) return { image: p.thumb_url, alt: String(p.title || '').slice(0, 120), thumb: true };
+    }
+  } catch { /* 썸네일 없음 */ }
   return null;
 }
 // <head> 에 og:image 가 없을 때만 미리보기 태그 묶음을 넣는다 (있으면 그대로 둔다)
@@ -165,8 +181,10 @@ export function withShare(html: string, url: string, share: Share | null): strin
   put('property', 'og:title', /BYPASS/.test(title) ? title : `${title} | BYPASS`);
   put('property', 'og:description', d ? unesc(d[1]) : 'BYPASS 크루가 만든 것. 누구나, 무엇이든.');
   tags.push(`<meta property="og:image" content="${esc(share.image)}">`);
-  put('property', 'og:image:width', '1200');
-  put('property', 'og:image:height', '630');
+  if (!share.thumb) {   // 회원 썸네일은 크기가 제각각이라 크기 태그를 붙이지 않는다
+    put('property', 'og:image:width', '1200');
+    put('property', 'og:image:height', '630');
+  }
   put('property', 'og:image:alt', share.alt);
   put('name', 'twitter:card', 'summary_large_image');
   return html.slice(0, head) + tags.join('\n') + '\n' + html.slice(head);
@@ -274,7 +292,7 @@ export async function handle(req: Request, env: (k: string) => string | undefine
 
   const name = user?.user_metadata?.display_name || user?.user_metadata?.username || (staff ? '운영진' : '회원');
   // 링크 미리보기 그림이 없으면 사이트 공통 그림을 붙인다 (앱은 아래 껍데기에)
-  const share = await shareDefault(env, http);
+  const share = (await thumbFor(env, http, auth, `/${folder}/${slug}/`)) || await shareDefault(env, http);
   if (!shelled) content = withShare(content, `/${folder}/${slug}/`, share);
   const put = await gh(path, '', {
     method: 'PUT',

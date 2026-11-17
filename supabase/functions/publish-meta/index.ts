@@ -9,6 +9,11 @@
 //   GITHUB_REPO   : sojihwanso/bypass   (없으면 이 값을 씀)
 //   GITHUB_BRANCH : main                (없으면 이 값을 씀)
 // 'Verify JWT'(JWT 검증)는 꺼도 됩니다. 이 함수가 /auth/v1/user 로 직접 로그인과 운영진 여부를 확인합니다.
+//
+// 결과물 썸네일 (action: 'sync_thumbs')
+//   커뮤니티 결과물에 썸네일이 있고 그 주소가 사이트 안(/apps/·/tools/·/wiki/·/archive/ 아래)이면,
+//   그 페이지의 링크 미리보기 그림을 썸네일로 바꿉니다. 썸네일을 빼거나 글을 지우면 공통 그림으로 돌아갑니다.
+//   결과물을 저장·삭제할 때 커뮤니티가 부르므로 로그인한 회원이면 누구나 부를 수 있습니다. (DB 내용대로 맞추기만 함)
 
 const ALLOWED_ORIGINS = [
   'https://teambypass.vercel.app',
@@ -106,7 +111,8 @@ export function ensureName(html: string, name: string, value: string): string {
 const pageTitle = (html: string) => { const m = html.match(/<title[^>]*>([^<]*)<\/title>/i); return m ? m[1].trim() : ''; };
 const nameMeta = (html: string, name: string) => { const m = html.match(new RegExp(`<meta\\s+name="${name}"\\s+content="([^"]*)"`, 'i')); return m ? m[1] : ''; };
 // 모든 페이지 공통 그림: 그림·그림 설명은 바꾸고, 제목·설명 등은 없을 때만 페이지 제목·설명으로 채운다
-export function applyShare(html: string, page: string, image: string, alt: string): string {
+//   dims=false 이면 그림 크기 태그를 뺀다 (회원이 올린 썸네일은 1200×630 이 아니라서, 틀린 크기를 알려 주지 않게)
+export function applyShare(html: string, page: string, image: string, alt: string, dims = true): string {
   let next = html;
   const fill = (prop: string, value: string) => { if (value && readMeta(next, prop) === null) next = setMeta(next, prop, value); };
   fill('og:type', 'website');
@@ -117,12 +123,28 @@ export function applyShare(html: string, page: string, image: string, alt: strin
   fill('og:title', t ? (/BYPASS/.test(t) ? t : `${t} | BYPASS`) : 'BYPASS');
   fill('og:description', nameMeta(next, 'description').replace(/&amp;/g, '&') || 'BYPASS 크루가 만든 것. 누구나, 무엇이든.');
   next = setMeta(next, 'og:image', image);
-  next = setMeta(next, 'og:image:width', '1200');
-  next = setMeta(next, 'og:image:height', '630');
+  if (dims) {
+    next = setMeta(next, 'og:image:width', '1200');
+    next = setMeta(next, 'og:image:height', '630');
+  } else {
+    next = next.replace(/[ \t]*<meta\s+property="og:image:(width|height)"\s+content="[^"]*"\s*\/?>\n?/gi, '');
+  }
   if (alt) next = setMeta(next, 'og:image:alt', alt);
   next = ensureName(next, 'twitter:card', 'summary_large_image');
   return next;
 }
+// 결과물 주소 → 미리보기를 붙일 페이지 (/apps/이름/ 꼴). 사이트 밖 주소면 null
+export function pageOfUrl(u: unknown): string | null {
+  if (typeof u !== 'string' || !u) return null;
+  let path = u.trim();
+  const m = path.match(/^https:\/\/(teambypass|bypass-three)\.vercel\.app(\/.*)?$/i);
+  if (m) path = m[2] || '/';
+  if (!path.startsWith('/')) return null;
+  path = path.replace(/[?#].*$/, '').replace(/index\.html$/i, '');
+  if (!path.endsWith('/')) path += '/';
+  return SUB.test(path) ? path : null;
+}
+const unesc = (s: string) => s.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
 export function readMeta(html: string, prop: string): string | null {
   const m = html.match(new RegExp(`<meta\\s+property="${prop.replace(/[.:]/g, '\\$&')}"\\s+content="([^"]*)"`, 'i'));
   return m ? m[1] : null;
@@ -140,11 +162,11 @@ export async function handle(req: Request, env: (k: string) => string | undefine
   });
   if (!who.ok) return reply(req, 401, { error: '로그인 정보가 만료되었습니다. 다시 로그인해 주세요.' });
   const user = await who.json();
-  if (user?.app_metadata?.bypass_role !== 'staff') return reply(req, 403, { error: '운영진만 고칠 수 있습니다.' });
 
   // 2) 고칠 내용 확인
   let body: { action?: string; page?: string; title?: string; description?: string; image?: string; image_alt?: string };
   try { body = await req.json(); } catch { return reply(req, 400, { error: '보낸 내용을 읽지 못했습니다.' }); }
+  if (body.action !== 'sync_thumbs' && user?.app_metadata?.bypass_role !== 'staff') return reply(req, 403, { error: '운영진만 고칠 수 있습니다.' });
   const token = env('GITHUB_TOKEN');
   if (!token) return reply(req, 500, { error: '링크 미리보기 설정이 아직 끝나지 않았습니다. (GITHUB_TOKEN 없음)' });
   const repo = env('GITHUB_REPO') || 'sojihwanso/bypass';
@@ -162,6 +184,73 @@ export async function handle(req: Request, env: (k: string) => string | undefine
       .map((x: { path: string }) => ({ file: x.path, page: pageOf(x.path) }))
       .filter((x: { page: string | null }) => x.page) as { page: string; file: string }[];
   };
+  // 여러 파일을 한 번의 커밋으로 (배포도 한 번)
+  const commitAll = async (head: string, files: { path: string; text: string }[], message: string): Promise<Response | string> => {
+    const changes: { path: string; mode: string; type: string; sha: string }[] = [];
+    for (const f of files) {
+      const b = await api('/git/blobs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: toBase64(f.text), encoding: 'base64' }) });
+      if (!b.ok) return reply(req, 502, { error: `GitHub 에 저장하지 못했습니다. (${b.status})` });
+      changes.push({ path: f.path, mode: '100644', type: 'blob', sha: (await b.json()).sha });
+    }
+    const base = await api(`/git/commits/${head}`);
+    if (!base.ok) return reply(req, 502, { error: `GitHub 에서 커밋을 읽지 못했습니다. (${base.status})` });
+    const tree = await api('/git/trees', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base_tree: (await base.json()).tree.sha, tree: changes }) });
+    if (!tree.ok) return reply(req, 502, { error: `GitHub 에 저장하지 못했습니다. (${tree.status})` });
+    const commit = await api('/git/commits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, tree: (await tree.json()).sha, parents: [head] }) });
+    if (!commit.ok) return reply(req, 502, { error: `GitHub 에 저장하지 못했습니다. (${commit.status})` });
+    const c = await commit.json();
+    const move = await api(`/git/refs/heads/${encodeURIComponent(branch)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sha: c.sha }) });
+    if (!move.ok) return reply(req, move.status === 422 ? 409 : 502, { error: move.status === 422 ? '그사이 저장소가 바뀌었습니다. 다시 저장해 주세요.' : `GitHub 에 저장하지 못했습니다. (${move.status})` });
+    return String(c.html_url ?? '');
+  };
+  const headSha = async (): Promise<string | null> => {
+    const ref = await api(`/git/ref/heads/${encodeURIComponent(branch)}`);
+    return ref.ok ? (await ref.json())?.object?.sha ?? null : null;
+  };
+  const thumbBase = `${env('SUPABASE_URL')}/storage/v1/object/public/post-thumbs/`;
+  const isThumb = (u: string | null) => !!u && u.startsWith(thumbBase) && /^[A-Za-z0-9._\/-]+$/.test(u.slice(thumbBase.length));
+
+  // 결과물 썸네일을 그 페이지의 링크 미리보기 그림으로
+  if (body.action === 'sync_thumbs') {
+    const key = env('SUPABASE_ANON_KEY') || req.headers.get('apikey') || '';
+    const pr = await http(`${env('SUPABASE_URL')}/rest/v1/posts?kind=eq.showcase&hidden=eq.false&url=not.is.null&select=url,thumb_url,title,created_at&order=created_at.desc&limit=2000`,
+      { headers: { apikey: key, Authorization: auth } });
+    if (!pr.ok) return reply(req, 502, { error: '결과물 목록을 읽지 못했습니다.' });
+    const want = new Map<string, { image: string; alt: string }>();
+    for (const r of await pr.json() as { url: string; thumb_url: string | null; title: string }[]) {
+      const page = pageOfUrl(r.url);
+      if (page && !want.has(page) && r.thumb_url && isThumb(r.thumb_url)) want.set(page, { image: r.thumb_url, alt: clean(r.title, 120) });
+    }
+    let common: { image: string; alt: string } | null = null;
+    try {
+      const sr = await http(`${env('SUPABASE_URL')}/rest/v1/site_settings?key=eq.share&select=value`, { headers: { apikey: key, Authorization: `Bearer ${key}` } });
+      const v = sr.ok ? (await sr.json())?.[0]?.value : null;
+      if (v && typeof v.image === 'string' && v.image) common = { image: v.image, alt: clean(v.alt, 120) };
+    } catch { /* 공통 그림 없음 → 되돌리지 않음 */ }
+    const pages = await listPages();
+    const head = await headSha();
+    if (!pages || !head) return reply(req, 502, { error: 'GitHub 에서 페이지 목록을 읽지 못했습니다. 토큰 권한을 확인해 주세요.' });
+    const files: { path: string; text: string }[] = [];
+    for (const p of pages) {
+      if (!SUB.test(p.page)) continue;
+      const r = await api(`/contents/${p.file}?ref=${encodeURIComponent(head)}`, {}, 'application/vnd.github.raw');
+      if (!r.ok) continue;
+      const html = await r.text();
+      const cur = readMeta(html, 'og:image');
+      const w = want.get(p.page);
+      let next = html;
+      try {
+        if (w) next = applyShare(html, p.page, w.image, w.alt, false);
+        else if (cur && isThumb(unesc(cur)) && common) next = applyShare(html, p.page, common.image, common.alt, true);
+      } catch { continue; }
+      if (next !== html) files.push({ path: p.file, text: next });
+    }
+    if (!files.length) return reply(req, 200, { ok: true, changed: false, thumbs: want.size });
+    const out = await commitAll(head, files, `링크 미리보기 그림: 결과물 썸네일 ${files.length}곳 맞춤`);
+    if (out instanceof Response) return out;
+    return reply(req, 200, { ok: true, changed: true, count: files.length, thumbs: want.size, commit: out || null });
+  }
+
   if (body.action === 'list') {
     const pages = await listPages();
     if (!pages) return reply(req, 502, { error: 'GitHub 에서 페이지 목록을 읽지 못했습니다. 토큰 권한을 확인해 주세요.' });
@@ -181,35 +270,27 @@ export async function handle(req: Request, env: (k: string) => string | undefine
     if (!image) return reply(req, 400, { error: '그림을 골라 주세요.' });
     const pages = await listPages();
     if (!pages) return reply(req, 502, { error: 'GitHub 에서 페이지 목록을 읽지 못했습니다. 토큰 권한을 확인해 주세요.' });
-    const ref = await api(`/git/ref/heads/${encodeURIComponent(branch)}`);
-    if (!ref.ok) return reply(req, 502, { error: `GitHub 에서 브랜치를 읽지 못했습니다. (${ref.status})` });
-    const head = (await ref.json())?.object?.sha;
-    const changes: { path: string; mode: string; type: string; sha: string }[] = [];
+    const head = await headSha();
+    if (!head) return reply(req, 502, { error: 'GitHub 에서 브랜치를 읽지 못했습니다.' });
+    const files: { path: string; text: string }[] = [];
     const skipped: string[] = [];
+    let kept = 0;
     for (const p of pages) {
       // 1MB 넘는 파일도 읽히게 원문 그대로 받는다
       const r = await api(`/contents/${p.file}?ref=${encodeURIComponent(head)}`, {}, 'application/vnd.github.raw');
       if (!r.ok) { skipped.push(p.page); continue; }
       const html = await r.text();
+      // 결과물 썸네일을 쓰는 페이지는 그 그림을 그대로 둔다
+      const cur = readMeta(html, 'og:image');
+      if (cur && isThumb(unesc(cur))) { kept++; continue; }
       let next: string;
       try { next = applyShare(html, p.page, image, alt); } catch { skipped.push(p.page); continue; }
-      if (next === html) continue;
-      const b = await api('/git/blobs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: toBase64(next), encoding: 'base64' }) });
-      if (!b.ok) return reply(req, 502, { error: `GitHub 에 저장하지 못했습니다. (${b.status})` });
-      changes.push({ path: p.file, mode: '100644', type: 'blob', sha: (await b.json()).sha });
+      if (next !== html) files.push({ path: p.file, text: next });
     }
-    if (!changes.length) return reply(req, 200, { ok: true, changed: false, pages: pages.length, skipped });
-    const base = await api(`/git/commits/${head}`);
-    if (!base.ok) return reply(req, 502, { error: `GitHub 에서 커밋을 읽지 못했습니다. (${base.status})` });
-    const tree = await api('/git/trees', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base_tree: (await base.json()).tree.sha, tree: changes }) });
-    if (!tree.ok) return reply(req, 502, { error: `GitHub 에 저장하지 못했습니다. (${tree.status})` });
-    const commit = await api('/git/commits', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: `링크 미리보기 그림: 모든 페이지 ${changes.length}곳 (${name})`, tree: (await tree.json()).sha, parents: [head] }) });
-    if (!commit.ok) return reply(req, 502, { error: `GitHub 에 저장하지 못했습니다. (${commit.status})` });
-    const c = await commit.json();
-    const move = await api(`/git/refs/heads/${encodeURIComponent(branch)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sha: c.sha }) });
-    if (!move.ok) return reply(req, move.status === 422 ? 409 : 502, { error: move.status === 422 ? '그사이 저장소가 바뀌었습니다. 다시 저장해 주세요.' : `GitHub 에 저장하지 못했습니다. (${move.status})` });
-    return reply(req, 200, { ok: true, changed: true, count: changes.length, pages: pages.length, skipped, commit: c.html_url ?? null });
+    if (!files.length) return reply(req, 200, { ok: true, changed: false, pages: pages.length, kept, skipped });
+    const out = await commitAll(head, files, `링크 미리보기 그림: 모든 페이지 ${files.length}곳 (${name})`);
+    if (out instanceof Response) return out;
+    return reply(req, 200, { ok: true, changed: true, count: files.length, pages: pages.length, kept, skipped, commit: out || null });
   }
 
   // 2-2) 한 페이지

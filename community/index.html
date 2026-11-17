@@ -1846,6 +1846,9 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     } catch (x) { wFail(x.message); }
   });
   $('[data-w-thumb-clear]').addEventListener('click', () => { if (wThumb.preview) URL.revokeObjectURL(wThumb.preview); wThumb = { url: null, blob: null, preview: null, type: null }; wDirty = true; setThumbPreview(); });
+  // 결과물 썸네일 → 그 페이지(/apps/이름/ 등)의 카톡 링크 미리보기 그림. 함수: supabase/functions/publish-meta (sync_thumbs)
+  const sitePage = (u) => { const m = String(u || '').replace(/^https:\/\/(teambypass|bypass-three)\.vercel\.app/i, '').match(/^\/(apps|tools|wiki|archive)\/[a-z0-9][a-z0-9-]*\/?/); return m ? m[0] : null; };
+  function syncThumbs() { sb.functions.invoke('publish-meta', { body: { action: 'sync_thumbs' } }).catch(() => { /* 다음에 맞춰짐 */ }); }
   const myThumbPath = (u) => { const m = String(u || '').match(/\/post-thumbs\/(.+)$/); return m && m[1].startsWith(user.id + '/') ? m[1] : null; };
 
   async function publishHtml(slug, title, folder) {
@@ -1891,6 +1894,9 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       if (res.error) throw new Error(/upload not allowed|not your image/.test(res.error.message || '') ? '썸네일을 붙일 권한이 없습니다.' : errText(res.error, wEdit ? '저장' : '올리기'));
       // 바꾼 썸네일의 예전 그림은 지운다 (내 폴더 것만)
       if (prevThumb && prevThumb !== (row.thumb_url === undefined ? prevThumb : row.thumb_url)) { const old = myThumbPath(prevThumb); if (old) sb.storage.from('post-thumbs').remove([old]); }
+      const newThumb = row.thumb_url === undefined ? prevThumb : row.thumb_url;
+      if (wKind === 'showcase' && (sitePage(row.url) || (wEdit && sitePage(wEdit.url))) && (newThumb || prevThumb)
+          && (slug || newThumb !== prevThumb || (wEdit && wEdit.url !== row.url))) syncThumbs();
       if (wEdit) { byId.delete(wEdit.id); }
       wDirty = false;
       const newId = wEdit ? wEdit.id : res.data.id;
@@ -2035,6 +2041,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     toast('지웠습니다.');
     if (isListHash(arrivedFrom) && arrivedFrom !== '') history.back(); else location.replace(`#${listOf(r.kind)}`);
     const oldPic = myThumbPath(r.thumb_url); if (oldPic) sb.storage.from('post-thumbs').remove([oldPic]);
+    if (r.kind === 'showcase' && r.thumb_url && sitePage(r.url)) syncThumbs();
     byId.delete(r.id);
     refreshAll(r.kind);
   });
@@ -2046,6 +2053,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     if (error) { dErr(errText(error, '바꾸')); return; }
     r.hidden = next; paintDetail(); repaintLists();
     toast(next ? '숨겼습니다. 쓴 사람과 운영진에게만 보입니다.' : '다시 보이게 했습니다.');
+    if (r.kind === 'showcase' && r.thumb_url && sitePage(r.url)) syncThumbs();
   });
 
   /* ===== 공지 ===== */

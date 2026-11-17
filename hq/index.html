@@ -1101,7 +1101,11 @@
           <div class="share-all-txt">
             <h2>모든 페이지 공통 그림</h2>
             <p>사이트의 모든 페이지(HQ 빼고)에 같은 그림을 한 번에 붙입니다. 제목·설명은 페이지마다 그대로 두고, 없는 페이지는 페이지 제목으로 채웁니다. 앞으로 회원이 올리는 앱·위키에도 이 그림이 붙습니다.</p>
-            <button type="button" class="btn btn-primary btn-small" data-share-all-btn>그림 바꿔서 모든 페이지에 적용</button>
+            <p>단, 썸네일이 있는 결과물의 페이지는 그 <b>썸네일</b>이 미리보기 그림이 됩니다. 결과물을 저장하면 저절로 맞춰지고, 아래 버튼으로 한 번에 다시 맞출 수도 있습니다.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button type="button" class="btn btn-primary btn-small" data-share-all-btn>그림 바꿔서 모든 페이지에 적용</button>
+              <button type="button" class="mini-btn" data-share-thumbs>결과물 썸네일 다시 맞추기</button>
+            </div>
           </div>
         </div>
         <div class="share-grid" data-share-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
@@ -3045,6 +3049,19 @@
     syncShareUI(); renderShare();
   }
   $('[data-share-all-btn]').addEventListener('click', () => openShareForm({ path: ALL, name: '모든 페이지' }));
+  $('[data-share-thumbs]').addEventListener('click', async () => {
+    const btn = $('[data-share-thumbs]');
+    if (busy) return;
+    B.setBusy(btn, true, '맞추는 중…');
+    const { data, error } = await B.sb.functions.invoke('publish-meta', { body: { action: 'sync_thumbs' } });
+    B.setBusy(btn, false);
+    if (error) {
+      let text = '썸네일을 맞추지 못했습니다.';
+      try { const j = await error.context.json(); if (j && j.error) text = /운영진만|고칠 수 없는|제목을/.test(j.error) ? '링크 미리보기 함수를 새로 배포해야 합니다. (Edge Function publish-meta)' : j.error; } catch (x) { /* 기본 문구 */ }
+      return fail(text);
+    }
+    toast(data && data.changed === false ? `이미 맞춰져 있습니다. (썸네일 있는 결과물 페이지 ${data.thumbs || 0}곳)` : `페이지 ${(data && data.count) || ''}곳의 미리보기 그림을 썸네일로 맞췄습니다. 1~몇 분 뒤 배포됩니다.`);
+  });
   $('[data-share-keep]').addEventListener('click', () => { clearShareFile(); syncShareUI(); });
   // 고른 그림을 1200×630 으로 가운데 맞춰 자른다 (카톡·페이스북 권장 비율)
   function coverTo(file) {
@@ -3126,7 +3143,8 @@
     SHARE_PAGES.forEach(p => { const v = shareData[p.path]; if (v && !v.error) shareData[p.path] = { ...v, image, alt: d.alt || v.alt, pending: true }; });
     clearShareFile(); closeDrawer(); sharePage = null; renderShare();
     const n = data && data.count;
-    toast(data && data.changed === false ? '모든 페이지가 이미 이 그림입니다.' : `페이지 ${n || ''}개를 고쳤습니다. 1~몇 분 뒤 배포됩니다. 카톡에는 공유 디버거에서 캐시 초기화 후 반영됩니다.`);
+    const kept = data && data.kept ? ` 결과물 썸네일을 쓰는 ${data.kept}곳은 그대로 뒀습니다.` : '';
+    toast((data && data.changed === false ? '모든 페이지가 이미 이 그림입니다.' : `페이지 ${n || ''}개를 고쳤습니다. 1~몇 분 뒤 배포됩니다. 카톡에는 공유 디버거에서 캐시 초기화 후 반영됩니다.`) + kept);
   }
   async function saveShare() {
     if (busy) return;
