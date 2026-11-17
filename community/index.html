@@ -685,6 +685,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
 /* 프로필 사진: 사진이 있으면 첫 글자 위에 덮는다 */
 .ini, .wg-ini, .avatar { position: relative; overflow: hidden; }
 .ini > img, .wg-ini > img, .avatar > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.is-susp { opacity: .45; pointer-events: none; }
 .c-form { display: flex; gap: 8px; align-items: flex-end; }
 .c-form textarea { min-height: 44px; height: 44px; flex: 1 1 auto; }
 .d-sec { margin: 6px 0 0; font-size: 15px; font-weight: 700; }
@@ -906,6 +907,10 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
 </header>
 
 <main class="wrap" id="main">
+  <div class="banner warn" role="status" data-susp hidden>
+    <p data-susp-text></p>
+    <a class="btn btn-soft btn-sm" href="https://open.kakao.com/o/snJ3HuTi" target="_blank" rel="noopener">운영진에게 문의</a>
+  </div>
   <div class="banner warn" role="alert" data-mustchange hidden>
     <p>임시 비밀번호로 들어오셨습니다. 본인만 아는 비밀번호로 바로 바꿔 주세요.</p>
     <a class="btn btn-dark btn-sm" href="#me" data-mustchange-go>지금 바꾸기</a>
@@ -1395,9 +1400,11 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   let toastT = null;
   function toast(text) { const t = $('[data-toast]'); t.textContent = text; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3200); }
   const missing = (e) => e && (e.code === 'PGRST205' || e.code === '42P01' || /does not exist|Could not find the table/.test(e.message || ''));
+  let mySusp = null;
   function errText(e, what) {
     const m = (e && (e.message || '')) + ' ' + (e && e.code || '');
     if (missing(e)) return isStaff ? '커뮤니티 설정이 아직 끝나지 않았습니다. supabase/022_community.sql 을 실행해 주세요.' : '커뮤니티를 준비하고 있습니다. 조금만 기다려 주세요.';
+    if (/suspended/.test(m)) return `활동이 정지되어 지금은 ${what || '쓰기'}할 수 없습니다.${mySusp && mySusp.until ? ` (${new Date(mySusp.until).toLocaleDateString('ko-KR')}까지)` : ''}`;
     if (/too many posts/.test(m)) return '글을 너무 빨리 올리고 있습니다. 10분에 5개까지 올릴 수 있습니다.';
     if (/too many comments/.test(m)) return '댓글을 너무 빨리 남기고 있습니다. 잠시 후 다시 해 주세요.';
     if (/posts_url_check/.test(m)) return '주소는 https:// 로 시작하거나 /apps/이름/ 처럼 사이트 안의 주소여야 합니다.';
@@ -1881,6 +1888,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   }
   function lockText() {
     if (!up) return '올리기 권한 기능이 아직 준비되지 않았습니다.';
+    if (up.reason === 'suspended') return '활동이 정지되어 지금은 올릴 수 없습니다.';
     if (up.reason === 'blocked') return `운영진이 올리기를 막아 두었습니다.${up.note ? ` (${up.note})` : ''}`;
     if (up.reason === 'manual') return '올리기 권한은 운영진이 직접 허가합니다. 필요하면 운영진에게 말해 주세요.';
     const left = upLines().filter((x) => x[1] < x[2]).map((x) => `${x[0]} ${x[2] - x[1]}${x[3]} 더`);
@@ -3698,6 +3706,17 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   loadCounts();
   route(true);
   if (q0) runSearch(q0);
+  // 활동 정지 안내 (supabase/036_member_suspend.sql). 쓰기 버튼은 그대로 두고, 눌러도 서버가 막고 이 안내가 이유를 알려 줌
+  sb.rpc('my_suspension').then(({ data, error }) => {
+    if (error || !data) return;
+    mySusp = data;
+    const when = data.until ? `${new Date(data.until).toLocaleString('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}까지` : '운영진이 풀 때까지';
+    $('[data-susp-text]').textContent = `활동이 정지되었습니다 (${when}). 글·결과물·댓글을 쓰거나 고칠 수 없고, 읽기와 좋아요는 그대로 할 수 있습니다.${data.reason ? ` 사유: ${data.reason}` : ''}`;
+    $('[data-susp]').hidden = false;
+    $$('[data-write-top], [data-write], a[href^="#write"]').forEach((x) => { x.setAttribute('aria-disabled', 'true'); x.classList.add('is-susp'); x.title = '활동 정지 중'; });
+    const ci = $('#c-in'); if (ci) { ci.disabled = true; ci.placeholder = '활동 정지 중에는 댓글을 남길 수 없습니다'; }
+    const cg = $('[data-c-go]'); if (cg) cg.disabled = true;
+  });
   mkFngOn = homeSet.fng !== false;
   mkWtiOn = homeSet.wti !== false;
   dbLayout();
