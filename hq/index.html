@@ -1305,6 +1305,11 @@
             <p class="hint" data-mem-name-hint>운영진이 바꾸면 기다리는 날 없이 바로 바뀌고, 이 회원이 쓴 글·댓글 이름도 함께 바뀝니다.</p>
             <p class="hint" data-mem-name-hist hidden></p>
           </fieldset>
+          <fieldset data-mem-av-set hidden>
+            <legend>프로필 사진</legend>
+            <div style="display:flex;gap:12px;align-items:center"><img data-mem-av alt="이 회원의 프로필 사진" width="56" height="56" style="width:56px;height:56px;border-radius:16px;object-fit:cover;background:#EEF0F3;flex:none"><button type="button" class="mini-btn" data-mem-av-del>사진 지우기</button></div>
+            <p class="hint">부적절한 사진이면 지워 주세요. 이 회원은 첫 글자 동그라미로 돌아가고, 변경 기록에 남습니다. 회원은 다시 올릴 수 있습니다.</p>
+          </fieldset>
           <fieldset data-mem-pw-set>
             <legend>비밀번호를 잊었을 때</legend>
             <p class="hint" style="margin-top:0">임시 비밀번호를 만들어 이 회원에게 직접 전해 주세요. 로그인하면 비밀번호를 바꾸라는 안내가 뜹니다. 운영진의 비밀번호는 여기서 바꿀 수 없습니다.</p>
@@ -3503,8 +3508,32 @@
     delBtn.hidden = true;
     openDrawer('member', m.display_name, '운영 · 회원');
     syncMemUI(); renderMembers();
-    loadNameHist(m);
+    loadNameHist(m); loadMemAvatar(m);
   }
+  // 프로필 사진: supabase/033_replies_avatars.sql (member_avatars · staff_remove_avatar)
+  const memAvDel = $('[data-mem-av-del]');
+  async function loadMemAvatar(m) {
+    const set = $('[data-mem-av-set]'); set.hidden = true;
+    memAvDel.dataset.armed = ''; memAvDel.textContent = '사진 지우기'; memAvDel.classList.remove('is-armed'); memAvDel.disabled = false;
+    const { data, error } = await B.sb.from('member_avatars').select('updated_at').eq('user_id', m.id).maybeSingle();
+    if (error || !data || editing !== m) return;
+    $('[data-mem-av]').src = `${B.sb.storage.from('avatars').getPublicUrl(`${m.id}/a.webp`).data.publicUrl}?v=${Date.parse(data.updated_at) || 1}`;
+    set.hidden = false;
+  }
+  memAvDel.addEventListener('click', async () => {
+    const m = editing;
+    if (!m || busy) return;
+    if (memAvDel.dataset.armed !== '1') { memAvDel.dataset.armed = '1'; memAvDel.textContent = '한 번 더 누르면 지웁니다'; memAvDel.classList.add('is-armed'); return; }
+    memAvDel.disabled = true; memAvDel.textContent = '지우는 중…';
+    await B.sb.storage.from('avatars').remove([`${m.id}/a.webp`]);   // 파일이 이미 없어도 넘어감
+    const { error } = await B.sb.rpc('staff_remove_avatar', { p_user: m.id });
+    if (error) {
+      memAvDel.disabled = false; memAvDel.dataset.armed = ''; memAvDel.textContent = '사진 지우기'; memAvDel.classList.remove('is-armed');
+      return fail(error.code === 'PGRST202' ? 'supabase/033_replies_avatars.sql 을 먼저 실행해 주세요.' : '사진을 지우지 못했습니다. ' + (error.message || ''));
+    }
+    if (editing === m) $('[data-mem-av-set]').hidden = true;
+    toast(`${m.display_name} 님의 프로필 사진을 지웠습니다.`);
+  });
   // 닉네임: supabase/032_nickname.sql (set_member_name · member_name_history)
   const NM_ERR = { 'name taken': '이미 다른 회원이 쓰는 닉네임이거나 아이디입니다.', 'name chars': '한글, 영문, 숫자, 띄어쓰기와 . _ - 만 쓸 수 있습니다.', 'name length': '닉네임은 2~20자입니다.', 'name same': '지금 이름과 같습니다.' };
   async function loadNameHist(m) {
@@ -4512,6 +4541,7 @@
     dockets: { name: '처리 현황', menu: 'dockets', title: r => `제${r.no}호 ${r.title}`, cols: ['no', 'no_note', 'title', 'status', 'old_way', 'new_way', 'reason', 'route_id', 'report_id', 'sample', 'hidden'] },
     faqs: { name: '자주 묻는 질문', menu: 'faq', title: r => r.question, cols: ['question', 'answer', 'hidden'] },
     notices: { name: '공지', menu: 'notices', title: r => r.title, cols: ['title', 'body', 'pinned', 'audience', 'starts_at', 'ends_at'] },
+    member_avatars: { name: '프로필 사진', menu: 'members', title: r => `${r.name || '회원'} 님 사진`, cols: ['name'] },
     site_settings: { name: '사이트 설정', menu: 'status', title: r => ({ status: '사이트 상태', texts: '페이지 문구' })[r.key] || r.key, cols: ['value'] }
   };
   const FIELD = { title: '이름·제목', name: '이름', no: '번호', no_note: '번호 메모', type: '종류', line: '분류', status: '상태', url: '주소', description: '설명', subject: '과목',
