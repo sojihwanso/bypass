@@ -994,9 +994,17 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
           </div>
         </div>
         <div class="me-acts">
+          <button type="button" class="btn btn-soft btn-sm" data-nm-open>닉네임 바꾸기</button>
           <button type="button" class="btn btn-soft btn-sm" data-pw-open>비밀번호 바꾸기</button>
           <button type="button" class="btn btn-line btn-sm" data-logout>로그아웃</button>
         </div>
+        <p class="ok-line" data-nm-done hidden style="margin-top: 12px"></p>
+        <form class="inline-form" data-nm-form novalidate hidden>
+          <div class="field"><label for="nm-new">새 닉네임 <small>(2~20자 · 한글, 영문, 숫자)</small></label><input class="in" id="nm-new" maxlength="20" autocomplete="nickname" spellcheck="false"></div>
+          <p class="hint" data-nm-note>바꾸면 지금까지 쓴 글과 댓글의 이름도 함께 바뀝니다. 한 번 바꾸면 30일 동안 다시 바꿀 수 없습니다.</p>
+          <p class="err" role="alert" hidden></p>
+          <div class="foot-row"><button type="button" class="btn btn-soft btn-sm" data-nm-cancel>취소</button><button type="submit" class="btn btn-dark btn-sm">바꾸기</button></div>
+        </form>
         <p class="ok-line" data-pw-done hidden style="margin-top: 12px">비밀번호를 바꿨습니다. 다음 로그인부터 새 비밀번호를 쓰세요.</p>
         <form class="inline-form" data-pw-form novalidate hidden>
           <div class="field"><label for="pw-now">현재 비밀번호</label><input class="in" id="pw-now" type="password" autocomplete="current-password"></div>
@@ -1225,8 +1233,11 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   /* ===== 나 ===== */
   const today = new Date();
   $('[data-today]').textContent = `${today.getMonth() + 1}월 ${today.getDate()}일 ${'일월화수목금토'[today.getDay()]}요일`;
-  $$('[data-name], [data-me-name], [data-me-name2], [data-me-name3]').forEach((x) => { x.textContent = prof.name; });
-  $$('[data-avatar], [data-me-ini2]').forEach((a) => { a.textContent = initialOf(prof.name); });
+  function paintName() {
+    $$('[data-name], [data-me-name], [data-me-name2], [data-me-name3]').forEach((x) => { x.textContent = prof.name; });
+    $$('[data-avatar], [data-me-ini2]').forEach((a) => { a.textContent = initialOf(prof.name); });
+  }
+  paintName();
   $$('[data-me-role2]').forEach((r) => { r.textContent = role.label; r.classList.add(role.key); });
   $('[data-me-role3]').textContent = role.label;
   $('[data-me-id]').textContent = prof.username;
@@ -2229,10 +2240,61 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     $('[data-mine-n]').textContent = String(data.length);
     ul.replaceChildren(...(data.length ? data.map(postRow) : [el('li', 'state', '아직 올린 결과물이나 글이 없습니다.')]));
   }
+  // 닉네임 바꾸기: supabase/032_nickname.sql 의 change_my_name 으로만 바뀐다 (30일에 한 번, 운영진은 제한 없음)
+  const nmForm = $('[data-nm-form]'), nmErr = $('.err', nmForm), nmIn = document.getElementById('nm-new');
+  const nmDay = (d) => `${d.getMonth() + 1}월 ${d.getDate()}일`;
+  function nmNext() {
+    const at = Date.parse((user.app_metadata || {}).name_changed_at || '');
+    return !isStaff && at && at + 30 * 864e5 > Date.now() ? new Date(at + 30 * 864e5) : null;
+  }
+  function nmFail(text) { nmErr.textContent = text; nmErr.hidden = false; nmIn.setAttribute('aria-invalid', 'true'); nmIn.focus(); }
+  $('[data-nm-open]').addEventListener('click', () => {
+    pwForm.hidden = true; $('[data-pw-done]').hidden = true; $('[data-nm-done]').hidden = true;
+    nmForm.hidden = false; nmErr.hidden = true; nmIn.removeAttribute('aria-invalid');
+    const next = nmNext(), go = $('[type="submit"]', nmForm);
+    nmIn.value = prof.name; nmIn.disabled = go.disabled = !!next;
+    $('[data-nm-note]').textContent = next
+      ? `최근에 닉네임을 바꿔서 ${nmDay(next)}부터 다시 바꿀 수 있습니다. 급하면 운영진에게 말해 주세요.`
+      : isStaff ? '바꾸면 지금까지 쓴 글과 댓글의 이름도 함께 바뀝니다.'
+      : '바꾸면 지금까지 쓴 글과 댓글의 이름도 함께 바뀝니다. 한 번 바꾸면 30일 동안 다시 바꿀 수 없습니다.';
+    if (!next) { nmIn.focus(); nmIn.select(); }
+  });
+  $('[data-nm-cancel]').addEventListener('click', () => { nmForm.hidden = true; });
+  nmIn.addEventListener('input', () => { nmIn.removeAttribute('aria-invalid'); nmErr.hidden = true; });
+  nmForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = nmIn.value.replace(/\s+/g, ' ').trim();
+    if (name.length < 2 || name.length > 20) return nmFail('닉네임은 2~20자로 정해 주세요.');
+    if (!/^[가-힣ㄱ-ㅎㅏ-ㅣA-Za-z0-9 ._-]+$/.test(name) || !/[가-힣ㄱ-ㅎㅏ-ㅣA-Za-z0-9]/.test(name)) return nmFail('한글, 영문, 숫자, 띄어쓰기와 . _ - 만 쓸 수 있습니다.');
+    if (name === prof.name) return nmFail('지금 쓰는 닉네임과 같습니다.');
+    const go = $('[type="submit"]', nmForm);
+    B.setBusy(go, true, '바꾸는 중…');
+    const { data, error } = await sb.rpc('change_my_name', { p_name: name });
+    if (error) {
+      B.setBusy(go, false);
+      const m = error.message || '', w = /name wait (\S+)/.exec(m);
+      return nmFail(m.includes('name taken') ? '이미 다른 회원이 쓰는 닉네임입니다.'
+        : m.includes('name reserved') ? '운영진으로 오해할 수 있는 이름은 쓸 수 없습니다.'
+        : m.includes('name chars') ? '한글, 영문, 숫자, 띄어쓰기와 . _ - 만 쓸 수 있습니다.'
+        : m.includes('name length') ? '닉네임은 2~20자로 정해 주세요.'
+        : m.includes('name same') ? '지금 쓰는 닉네임과 같습니다.'
+        : w ? `최근에 닉네임을 바꿔서 ${nmDay(new Date(w[1]))}부터 다시 바꿀 수 있습니다.`
+        : missing(error) || error.code === 'PGRST202' ? '닉네임 바꾸기가 아직 준비되지 않았습니다. 운영진에게 알려 주세요.'
+        : '닉네임을 바꾸지 못했습니다. 잠시 후 다시 시도해 주세요.');
+    }
+    // 로그인 정보를 새로 받아야 다음에 열 때도 새 이름이 보인다
+    try { const r = await sb.auth.refreshSession(); if (r.data && r.data.user) { user.user_metadata = r.data.user.user_metadata; user.app_metadata = r.data.user.app_metadata; } } catch (x) { /* 다음 로그인 때 맞춰짐 */ }
+    B.setBusy(go, false);
+    prof.name = String(data || name); paintName();
+    nmForm.hidden = true;
+    const done = $('[data-nm-done]'); done.textContent = `닉네임을 ‘${prof.name}’(으)로 바꿨습니다.`; done.hidden = false;
+    loadMine();
+  });
+
   // 비밀번호 바꾸기: 현재 비밀번호로 한 번 더 로그인해 본 뒤에 바꾼다
   const pwForm = $('[data-pw-form]'), pwErr = $('.err', pwForm);
   const [pwNow, pwNew, pwNew2] = ['pw-now', 'pw-new', 'pw-new2'].map((id) => document.getElementById(id));
-  function openPw() { pwForm.hidden = false; $('[data-pw-done]').hidden = true; pwForm.reset(); pwErr.hidden = true; pwNow.focus(); }
+  function openPw() { nmForm.hidden = true; $('[data-nm-done]').hidden = true; pwForm.hidden = false; $('[data-pw-done]').hidden = true; pwForm.reset(); pwErr.hidden = true; pwNow.focus(); }
   function pwFail(text, f) { pwErr.textContent = text; pwErr.hidden = false; if (f) { f.setAttribute('aria-invalid', 'true'); f.focus(); } }
   $('[data-pw-open]').addEventListener('click', openPw);
   $('[data-pw-cancel]').addEventListener('click', () => { pwForm.hidden = true; });
