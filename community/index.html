@@ -2849,6 +2849,8 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   const params = new URLSearchParams(location.search);
   if (params.get('welcome') === '1') {
     $('[data-welcome]').hidden = false;
+    const cw = params.get('crew');
+    if (cw) $('[data-welcome] p').append(cw === '1' ? ' 크루 합류 신청도 접수됐어요. 운영진이 보고 연락드릴게요.' : ' 다만 합류 신청은 보내지 못했어요. 아래 바닥글의 크루 합류 신청에서 다시 내 주세요.');
     $('[data-welcome-close]').addEventListener('click', () => { $('[data-welcome]').hidden = true; });
     history.replaceState(null, '', location.pathname + location.hash);
   }

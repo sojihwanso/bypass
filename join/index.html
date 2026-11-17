@@ -83,12 +83,25 @@
                autocomplete="nickname" aria-describedby="f-name-hint">
         <p class="hint" id="f-name-hint">커뮤니티에서 이 이름으로 보여요. 20자 이내.</p>
 
+        <label class="crew-check">
+          <input type="checkbox" id="f-crew" aria-controls="crew-fields" aria-expanded="false">
+          <span><b>크루 합류 신청도 같이 할게요</b><small>국원이 되면 회의실·안건에 참여하고 같이 만들어요. 운영진이 보고 연락드려요.</small></span>
+        </label>
+        <div class="crew-fields" id="crew-fields" hidden>
+          <label class="field-label" for="f-contact">연락처</label>
+          <input class="in" id="f-contact" maxlength="100" type="text" autocomplete="email" placeholder="이메일 또는 전화번호" aria-describedby="f-contact-hint">
+          <p class="hint" id="f-contact-hint">합류 안내할 때만 써요.</p>
+          <label class="field-label" for="f-major">학과 <span class="opt">(선택)</span></label>
+          <input class="in" id="f-major" maxlength="60" type="text" autocomplete="organization-title">
+          <label class="field-label" for="f-want">만들어 보고 싶은 것</label>
+          <input class="in" id="f-want" maxlength="300" type="text" placeholder="예: 과제 마감 알림 / 아직 몰라요">
+        </div>
+
         <p class="form-error" role="alert" hidden></p>
         <div class="form-actions"><button type="submit" class="btn btn-dark">가입하기</button></div>
       </form>
     </section>
     <p class="auth-alt">이미 계정이 있어요? <a href="/login/">로그인</a></p>
-    <p class="auth-note">계정은 사이트를 쓰는 용도예요. 크루 합류는 <a href="/?join=1&amp;intro">합류 신청</a>에서 따로 해요.</p>
   </div>
 </main>
 
@@ -116,6 +129,15 @@
   const matchHint = form.querySelector('[data-pw-match]');
   const nameInput = document.getElementById('f-name');
   const errorBox = form.querySelector('.form-error');
+  // 크루 합류 신청 (체크하면 가입 뒤 submit_application 을 계정과 이어서 냄: supabase/001)
+  const crew = document.getElementById('f-crew'), crewBox = document.getElementById('crew-fields');
+  const contactInput = document.getElementById('f-contact'), majorInput = document.getElementById('f-major'), wantInput = document.getElementById('f-want');
+  const wantCrew = new URLSearchParams(location.search).get('crew') === '1';
+  function syncCrew() {
+    crewBox.hidden = !crew.checked; crew.setAttribute('aria-expanded', String(crew.checked));
+    submit.textContent = crew.checked ? '가입하고 합류 신청하기' : '가입하기';
+  }
+  crew.addEventListener('change', () => { syncCrew(); if (crew.checked) contactInput.focus(); });
   const submit = form.querySelector('[type="submit"]');
 
   B.bindPasswordToggles(form);
@@ -141,7 +163,8 @@
 
   // 이미 로그인한 사람은 커뮤니티로
   const { data: { session } } = await B.sb.auth.getSession();
-  if (session) { location.replace('/community/'); return; }
+  if (session) { location.replace(wantCrew ? '/?join=1&intro' : '/community/'); return; }   // 이미 회원이면 합류 신청만
+  crew.checked = wantCrew; syncCrew();
 
   // 아이디는 소문자로만
   idInput.addEventListener('input', () => {
@@ -156,7 +179,7 @@
   form.addEventListener('submit', async e => {
     e.preventDefault();
     errorBox.hidden = true;
-    [idInput, pwInput, pw2Input, nameInput].forEach(f => f.removeAttribute('aria-invalid'));
+    [idInput, pwInput, pw2Input, nameInput, contactInput, wantInput].forEach(f => f.removeAttribute('aria-invalid'));
 
     const id = B.normalizeId(idInput.value);
     const pw = pwInput.value;
@@ -170,6 +193,8 @@
     if (!pw2Input.value) problems.push({ field: pw2Input, empty: true, text: '비밀번호 확인 칸을 적어 주세요.' });
     else if (pw && pw2Input.value !== pw) problems.push({ field: pw2Input, text: '두 비밀번호가 달라요. 같은 걸 두 번 적어 주세요.' });
     if (!name) problems.push({ field: nameInput, empty: true, text: '이름이나 별명을 적어 주세요.' });
+    if (crew.checked && !contactInput.value.trim()) problems.push({ field: contactInput, empty: true, text: '합류 안내를 받을 연락처를 적어 주세요.' });
+    if (crew.checked && !wantInput.value.trim()) problems.push({ field: wantInput, empty: true, text: '만들어 보고 싶은 것을 적어 주세요. 아직 모르면 "아직 몰라요" 도 괜찮아요.' });
 
     if (problems.length) {
       problems.forEach(p => p.field.setAttribute('aria-invalid', 'true'));
@@ -207,7 +232,16 @@
       showError('계정은 만들어졌는데 바로 로그인이 안 됐어요. 운영진에게 알려 주세요. (메일 확인 설정)');
       return;
     }
-    location.replace('/community/?welcome=1');
+    // 합류 신청: 방금 만든 계정으로 로그인된 채라 신청이 계정과 이어진다. 실패해도 가입은 된 상태라 안내만
+    let crewQ = '';
+    if (crew.checked) {
+      B.setBusy(submit, true, '합류 신청 보내는 중…');
+      try {
+        const r = await B.sb.rpc('submit_application', { p_name: name, p_contact: contactInput.value.trim(), p_want: wantInput.value.trim(), p_major: majorInput.value.trim() || null });
+        crewQ = r.error ? '&crew=fail' : '&crew=1';
+      } catch (x) { crewQ = '&crew=fail'; }
+    }
+    location.replace('/community/?welcome=1' + crewQ);
   });
 })();
 </script>
