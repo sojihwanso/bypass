@@ -269,6 +269,27 @@ a.wg-row:hover { background: var(--panel-2); }
 .fav-grid .thumb .th-cat, .fav-grid .thumb .ring { display: none; }
 .fav-grid b { display: block; margin-top: 7px; font-size: 13.5px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .db-pin { margin-top: 4px; }
+/* 새로 올라온 결과물: 썸네일 작게 한 줄 */
+.new-strip { display: flex; align-items: center; gap: 12px; margin-top: 18px; padding: 10px 12px 10px 16px; border-radius: 16px; background: var(--panel); box-shadow: var(--ring); animation: wgIn 600ms 120ms cubic-bezier(.2,.8,.2,1) both; }
+.new-strip[hidden] { display: none; }
+.ns-h { flex: none; display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: var(--mid); white-space: nowrap; }
+.ns-list { flex: 1; min-width: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.ns-list::-webkit-scrollbar { display: none; }
+.ns-item { flex: none; display: flex; align-items: center; gap: 10px; max-width: 250px; padding: 5px 10px 5px 5px; border-radius: 12px; color: var(--ink); text-decoration: none; transition: background 160ms; }
+.ns-item:hover, .ns-item:focus-visible { background: var(--field); }
+.ns-th { flex: none; position: relative; width: 56px; height: 36px; border-radius: 8px; overflow: hidden; display: grid; place-items: center; font-size: 13px; font-weight: 800; box-shadow: var(--ring); }
+.ns-th img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ns-t { min-width: 0; display: grid; line-height: 1.3; }
+.ns-t b { font-size: 13.5px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-t small { font-size: 11.5px; color: var(--sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-x { flex: none; width: 28px; height: 28px; border: 0; border-radius: 8px; background: none; color: var(--sub); font-size: 14px; cursor: pointer; }
+.ns-x:hover { background: var(--field); color: var(--ink); }
+@media (max-width: 760px) {
+  .new-strip { flex-wrap: wrap; padding: 10px 8px 8px 14px; gap: 6px 8px; }
+  .ns-h { flex: 1; }
+  .ns-list { order: 3; flex-basis: 100%; margin: 0 -8px 0 -14px; padding: 0 8px 0 9px; }
+  .ns-item { max-width: 210px; }
+}
 /* 편집 */
 .db-editbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 14px 16px; border-radius: 18px; background: #16181D; color: #fff; }
 .db-editbar b { font-size: 15px; }
@@ -812,6 +833,11 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
         <button type="button" class="mini dark" data-db-edit aria-pressed="false">대시보드 편집</button>
       </div>
     </div>
+    <div class="new-strip" data-new-strip role="region" aria-label="새로 올라온 결과물" hidden>
+      <span class="ns-h"><span class="fresh" aria-hidden="true"></span>새로 올라온 결과물</span>
+      <div class="ns-list" data-new-list></div>
+      <button type="button" class="ns-x" data-new-x aria-label="새 결과물 알림 닫기">✕</button>
+    </div>
     <div class="db-editbar" data-db-editbar hidden>
       <b>대시보드 편집</b>
       <span class="hint">↑↓로 순서, ‘넓게/반’으로 크기, ✕로 빼기 · 나한테만 보여요</span>
@@ -1312,18 +1338,35 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   const listOf = (kind) => (kind === 'showcase' ? 'showcase' : 'board');
   // 결과물 탭 옆 작은 점: 지난번 이후 다른 회원이 올린 결과물이 있으면. 결과물 탭을 열면 사라짐
   let newDotOff = false;
+  // 결과물을 한 번 봤거나 알림을 닫으면: 점·한 줄을 끄고, 새로고침해도 다시 안 뜨게 (이번 화면의 카드 점들은 그대로)
+  function markSeen() {
+    newDotOff = true; paintNewDot(0);
+    try { const v = JSON.parse(localStorage.getItem(`bypass-seen-${user.id}`) || 'null'); if (v) { v.prev = Date.now(); localStorage.setItem(`bypass-seen-${user.id}`, JSON.stringify(v)); } } catch (x) { /* 기억 못 함 */ }
+  }
   function paintNewDot(n) {
     $$('[data-tab="showcase"]').forEach((a) => {
       let d = $('.fresh', a);
       if (n && !newDotOff) { if (!d) { d = el('span', 'fresh'); a.append(d); } d.setAttribute('aria-label', `새 결과물 ${n}개`); } else if (d) d.remove();
     });
+    paintNewStrip();
   }
+  function paintNewStrip() {
+    const box = $('[data-new-strip]'), s = Array.isArray(home.showcase) ? home.showcase.filter(isNew).slice(0, 6) : [];
+    box.hidden = newDotOff || !s.length;
+    if (box.hidden) return;
+    $('[data-new-list]').replaceChildren(...s.map((r) => {
+      const a = el('a', 'ns-item'); a.href = `#p-${r.id}`;
+      const art = artOf(r.category), th = el('span', 'ns-th', (r.title || '?').trim().slice(0, 1));
+      th.style.background = art.bg; th.style.color = art.fg; th.setAttribute('aria-hidden', 'true');
+      if (r.thumb_url) { const im = el('img'); im.src = r.thumb_url; im.alt = ''; im.loading = 'lazy'; im.decoding = 'async'; th.append(im); }
+      const t = el('span', 'ns-t'); t.append(el('b', null, r.title), el('small', null, `${r.author_name || '회원'} · ${ago(r.created_at)}`));
+      a.append(th, t);
+      return a;
+    }));
+  }
+  $('[data-new-x]').addEventListener('click', markSeen);
   function setTab(t) {
-    if (t === 'showcase' && !newDotOff) {
-      newDotOff = true; paintNewDot(0);
-      // 결과물을 한 번 봤으면 새로고침해도 점이 다시 뜨지 않게 (이번 화면의 점들은 그대로)
-      try { const v = JSON.parse(localStorage.getItem(`bypass-seen-${user.id}`) || 'null'); if (v) { v.prev = Date.now(); localStorage.setItem(`bypass-seen-${user.id}`, JSON.stringify(v)); } } catch (x) { /* 기억 못 함 */ }
-    }
+    if (t === 'showcase' && !newDotOff) markSeen();
     $$('[data-tab]').forEach((a) => { if (a.dataset.tab === t) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     if (t === 'me') $('[data-avatar]').setAttribute('aria-current', 'page'); else $('[data-avatar]').removeAttribute('aria-current');
     const curTab = $(`[data-tabs-sm] [data-tab="${t}"]`);
@@ -1537,8 +1580,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     const nSince = s ? s.filter(isNew).length : 0;
     paintNewDot(nSince);
     const parts = [];
-    if (nSince) parts.push(['지난번 이후 새 결과물 ', `${nSince}개`, '#showcase']);
-    else if (nNew) parts.push(['이번 주 새 결과물 ', `${nNew}개`]);
+    if (nNew) parts.push(['이번 주 새 결과물 ', `${nNew}개`, '#showcase']);
     if (nWait) parts.push(['답을 기다리는 질문 ', `${nWait}개`]);
     if (home.crew) parts.push(['처리 전 회의 안건 ', `${home.crew}개`]);
     if (!parts.length) { box.textContent = '새로 올라온 소식은 없어요. 만든 것이 있다면 먼저 올려 보세요.'; return; }
