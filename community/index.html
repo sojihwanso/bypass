@@ -163,6 +163,17 @@ main.wrap { padding-top: 44px; padding-bottom: 88px; display: flex; flex-directi
 .sc-chips { display: none; }
 .sc-cur { margin: -8px 0 0; font-size: 14px; color: var(--mid); }
 .sc-cur:empty { display: none; }
+.card-b h3 .ct { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 반쪽 위젯: 두 개만, 열기 버튼 없이 */
+@media (min-width: 761px) {
+  .wg:not(.wide) .home-show { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .wg:not(.wide) .home-show > .card:nth-child(n+3) { display: none; }
+  .wg:not(.wide) .home-show .card.sc .open { display: none; }
+  .wg:not(.wide) .home-show .card.sc .card-b { padding: 12px 14px 14px; }
+  .wg:not(.wide) .home-show .card.sc .card-b h3 { font-size: 15px; }
+  .wg:not(.wide) .home-show .card-b p { font-size: 13px; }
+  .wg:not(.wide) .home-show .card-m .lk { display: none; }
+}
 .card-b h3 .fresh { display: inline-block; vertical-align: middle; margin: 0 6px 2px 0; }
 .tabs a .fresh, .tabs-sm a .fresh { display: inline-block; vertical-align: top; margin-left: 3px; }
 .summary-new { color: inherit; text-decoration: none; }
@@ -1505,7 +1516,24 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     localStorage.setItem(SEEN_LS, JSON.stringify(keep));
     setInterval(() => { try { const cur = JSON.parse(localStorage.getItem(SEEN_LS) || 'null') || keep; cur.last = Date.now(); localStorage.setItem(SEEN_LS, JSON.stringify(cur)); } catch (x) { /* 기억 못 함 */ } }, 60000);
   } catch (x) { /* 기억 못 함 */ }
-  const isNew = (r) => r && r.author !== user.id && !r.hidden && Date.parse(r.created_at) > seenAt;
+  // 읽은 글: 한 번 열어 본 글은 점을 끈다 (이 기기 기준, 2주 지나면 잊음)
+  const READ_LS = `bypass-read-${user.id}`;
+  let readMap = {};
+  try { readMap = JSON.parse(localStorage.getItem(READ_LS) || '{}') || {}; } catch (x) { readMap = {}; }
+  const isRead = (r) => !!readMap[r.id];
+  function markRead(id) {
+    id = String(id);
+    if (readMap[id]) return;
+    readMap[id] = Date.now();
+    const old = Date.now() - 14 * 86400000;
+    Object.keys(readMap).forEach((k) => { if (readMap[k] < old) delete readMap[k]; });
+    try { localStorage.setItem(READ_LS, JSON.stringify(readMap)); } catch (x) { /* 기억 못 함 */ }
+    $$(`a[href="#p-${id}"] .fresh`).forEach((d) => d.remove());
+    $$(`.ns-item[href="#p-${id}"]`).forEach((a) => a.remove());
+    if (!$('.ns-item')) $('[data-new-strip]').hidden = true;
+    if (Array.isArray(home.showcase)) paintNewDot(home.showcase.filter(isNew).length);
+  }
+  const isNew = (r) => r && r.author !== user.id && !r.hidden && Date.parse(r.created_at) > seenAt && !isRead(r);
   async function loadHome() {
     const [s, p] = await Promise.all([
       sb.from('post_feed').select('*').eq('kind', 'showcase').order('created_at', { ascending: false }).limit(24),
@@ -1552,7 +1580,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   }
   function cardBody(r) {
     const body = el('div', 'card-b');
-    const h = el('h3', null, r.title);
+    const h = el('h3'); h.append(el('span', 'ct', r.title)); h.title = r.title;
     if (isNew(r)) { const d = el('span', 'fresh'); d.setAttribute('aria-label', '새로 올라옴'); h.prepend(d); }
     h.append(svgEl('<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>'));
     body.append(h);
@@ -1585,7 +1613,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     const b = el('a', 'post-row'); b.href = `#p-${r.id}`;
     const main = el('span', 'pr-main'), line = el('span', 'pr-line');
     // 하루 안에 올라온 글은 주황 점 하나
-    if (isNew(r) || Date.now() - Date.parse(r.created_at) < 86400000) { const d = el('span', 'fresh'); d.setAttribute('aria-label', '새 글'); line.append(d); }
+    if (isNew(r) || (r.author !== user.id && !isRead(r) && Date.now() - Date.parse(r.created_at) < 86400000)) { const d = el('span', 'fresh'); d.setAttribute('aria-label', '새 글'); line.append(d); }
     line.append(el('span', 'pr-t', (r.hidden ? '[숨김] ' : '') + r.title));
     if (waiting(r)) line.append(el('span', 'wait', '답변 대기'));
     main.append(line, el('span', 'pr-sub', `${r.category} · ${r.author_name || '회원'} · ${ago(r.created_at)} · 댓글 ${r.comments || 0}`));
@@ -2061,6 +2089,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   async function openDetail(id, boot) {
     const seq = ++dSeq;
     id = Number(id);
+    markRead(id);
     let r = byId.get(id);
     const again = cur && cur.id === id;
     show('post', boot, r ? listOf(r.kind) : undefined);
