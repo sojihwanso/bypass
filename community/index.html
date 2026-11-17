@@ -163,6 +163,10 @@ main.wrap { padding-top: 44px; padding-bottom: 88px; display: flex; flex-directi
 .sc-chips { display: none; }
 .sc-cur { margin: -8px 0 0; font-size: 14px; color: var(--mid); }
 .sc-cur:empty { display: none; }
+.card-b h3 .fresh { display: inline-block; vertical-align: middle; margin: 0 6px 2px 0; }
+.tabs a .fresh, .tabs-sm a .fresh { display: inline-block; vertical-align: top; margin-left: 3px; }
+.summary-new { color: inherit; text-decoration: none; }
+.summary-new:hover b { text-decoration: underline; text-underline-offset: 3px; }
 .thumb .pin { position: absolute; right: 14px; top: 14px; z-index: 1; padding: 3px 9px; border-radius: 999px; background: var(--ink); color: var(--on-ink); font-size: 12px; font-weight: 700; }
 
 /* ===== 내 대시보드 (홈) · 결과물 카드 ===== */
@@ -265,6 +269,27 @@ a.wg-row:hover { background: var(--panel-2); }
 .fav-grid .thumb .th-cat, .fav-grid .thumb .ring { display: none; }
 .fav-grid b { display: block; margin-top: 7px; font-size: 13.5px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .db-pin { margin-top: 4px; }
+/* 새로 올라온 결과물: 썸네일 작게 한 줄 */
+.new-strip { display: flex; align-items: center; gap: 12px; margin-top: 18px; padding: 10px 12px 10px 16px; border-radius: 16px; background: var(--panel); box-shadow: var(--ring); animation: wgIn 600ms 120ms cubic-bezier(.2,.8,.2,1) both; }
+.new-strip[hidden] { display: none; }
+.ns-h { flex: none; display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: var(--mid); white-space: nowrap; }
+.ns-list { flex: 1; min-width: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.ns-list::-webkit-scrollbar { display: none; }
+.ns-item { flex: none; display: flex; align-items: center; gap: 10px; max-width: 250px; padding: 5px 10px 5px 5px; border-radius: 12px; color: var(--ink); text-decoration: none; transition: background 160ms; }
+.ns-item:hover, .ns-item:focus-visible { background: var(--field); }
+.ns-th { flex: none; position: relative; width: 56px; height: 36px; border-radius: 8px; overflow: hidden; display: grid; place-items: center; font-size: 13px; font-weight: 800; box-shadow: var(--ring); }
+.ns-th img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ns-t { min-width: 0; display: grid; line-height: 1.3; }
+.ns-t b { font-size: 13.5px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-t small { font-size: 11.5px; color: var(--sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-x { flex: none; width: 28px; height: 28px; border: 0; border-radius: 8px; background: none; color: var(--sub); font-size: 14px; cursor: pointer; }
+.ns-x:hover { background: var(--field); color: var(--ink); }
+@media (max-width: 760px) {
+  .new-strip { flex-wrap: wrap; padding: 10px 8px 8px 14px; gap: 6px 8px; }
+  .ns-h { flex: 1; }
+  .ns-list { order: 3; flex-basis: 100%; margin: 0 -8px 0 -14px; padding: 0 8px 0 9px; }
+  .ns-item { max-width: 210px; }
+}
 /* 편집 */
 .db-editbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 14px 16px; border-radius: 18px; background: #16181D; color: #fff; }
 .db-editbar b { font-size: 15px; }
@@ -446,6 +471,7 @@ a.wg-row:hover { background: var(--panel-2); }
 .card-b p { margin: 0; font-size: 14px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card-m { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 12.5px; color: var(--sub); min-width: 0; }
 .card-m .who { color: var(--mid); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-m > span:not(.who) { white-space: nowrap; flex-shrink: 0; }
 .card-m .lk { margin-left: auto; display: inline-flex; align-items: center; gap: 3px; }
 .card-m .lk.on { color: var(--like-fg); }
 .card-m svg { width: 13px; height: 13px; }
@@ -807,6 +833,11 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
         <button type="button" class="mini dark" data-db-edit aria-pressed="false">대시보드 편집</button>
       </div>
     </div>
+    <div class="new-strip" data-new-strip role="region" aria-label="새로 올라온 결과물" hidden>
+      <span class="ns-h"><span class="fresh" aria-hidden="true"></span>새로 올라온 결과물</span>
+      <div class="ns-list" data-new-list></div>
+      <button type="button" class="ns-x" data-new-x aria-label="새 결과물 알림 닫기">✕</button>
+    </div>
     <div class="db-editbar" data-db-editbar hidden>
       <b>대시보드 편집</b>
       <span class="hint">↑↓로 순서, ‘넓게/반’으로 크기, ✕로 빼기 · 나한테만 보여요</span>
@@ -866,7 +897,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
         <div data-home-board aria-live="polite"></div>
       </section>
       <section class="wg wide" data-wg="showcase" aria-labelledby="t-hshow">
-        <div class="wg-h"><h2 id="t-hshow">새 결과물</h2><a class="link-more wg-r" href="#showcase">전체 보기</a></div>
+        <div class="wg-h"><h2 id="t-hshow">새 결과물</h2><span class="badge" data-home-show-n hidden></span><a class="link-more wg-r" href="#showcase">전체 보기</a></div>
         <div data-home-show aria-live="polite"></div>
       </section>
       <section class="wg" data-wg="meeting" aria-labelledby="t-wm">
@@ -1305,7 +1336,37 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   let view = null;
   const loaded = {}, scrollMem = {};
   const listOf = (kind) => (kind === 'showcase' ? 'showcase' : 'board');
+  // 결과물 탭 옆 작은 점: 지난번 이후 다른 회원이 올린 결과물이 있으면. 결과물 탭을 열면 사라짐
+  let newDotOff = false;
+  // 결과물을 한 번 봤거나 알림을 닫으면: 점·한 줄을 끄고, 새로고침해도 다시 안 뜨게 (이번 화면의 카드 점들은 그대로)
+  function markSeen() {
+    newDotOff = true; paintNewDot(0);
+    try { const v = JSON.parse(localStorage.getItem(`bypass-seen-${user.id}`) || 'null'); if (v) { v.prev = Date.now(); localStorage.setItem(`bypass-seen-${user.id}`, JSON.stringify(v)); } } catch (x) { /* 기억 못 함 */ }
+  }
+  function paintNewDot(n) {
+    $$('[data-tab="showcase"]').forEach((a) => {
+      let d = $('.fresh', a);
+      if (n && !newDotOff) { if (!d) { d = el('span', 'fresh'); a.append(d); } d.setAttribute('aria-label', `새 결과물 ${n}개`); } else if (d) d.remove();
+    });
+    paintNewStrip();
+  }
+  function paintNewStrip() {
+    const box = $('[data-new-strip]'), s = Array.isArray(home.showcase) ? home.showcase.filter(isNew).slice(0, 6) : [];
+    box.hidden = newDotOff || !s.length;
+    if (box.hidden) return;
+    $('[data-new-list]').replaceChildren(...s.map((r) => {
+      const a = el('a', 'ns-item'); a.href = `#p-${r.id}`;
+      const art = artOf(r.category), th = el('span', 'ns-th', (r.title || '?').trim().slice(0, 1));
+      th.style.background = art.bg; th.style.color = art.fg; th.setAttribute('aria-hidden', 'true');
+      if (r.thumb_url) { const im = el('img'); im.src = r.thumb_url; im.alt = ''; im.loading = 'lazy'; im.decoding = 'async'; th.append(im); }
+      const t = el('span', 'ns-t'); t.append(el('b', null, r.title), el('small', null, `${r.author_name || '회원'} · ${ago(r.created_at)}`));
+      a.append(th, t);
+      return a;
+    }));
+  }
+  $('[data-new-x]').addEventListener('click', markSeen);
   function setTab(t) {
+    if (t === 'showcase' && !newDotOff) markSeen();
     $$('[data-tab]').forEach((a) => { if (a.dataset.tab === t) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     if (t === 'me') $('[data-avatar]').setAttribute('aria-current', 'page'); else $('[data-avatar]').removeAttribute('aria-current');
     const curTab = $(`[data-tabs-sm] [data-tab="${t}"]`);
@@ -1372,6 +1433,19 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   });
 
   /* ===== 결과물 · 게시판 데이터 ===== */
+  // 지난번에 들어온 뒤로 다른 회원이 올린 것 = 새것 (이 기기 기준, 처음이면 사흘 안)
+  // 30분 안에 다시 열면(새로고침 등) 같은 방문으로 보고 NEW 를 그대로 둔다
+  const SEEN_LS = `bypass-seen-${user.id}`;
+  let seenAt = Date.now() - 3 * 86400000;
+  try {
+    const v = JSON.parse(localStorage.getItem(SEEN_LS) || 'null'), now = Date.now();
+    if (v && v.at > 0 && now - v.last < 30 * 60000) seenAt = v.prev || seenAt;
+    else if (v && v.at > 0) seenAt = v.last;
+    const keep = { at: now, prev: seenAt, last: now };
+    localStorage.setItem(SEEN_LS, JSON.stringify(keep));
+    setInterval(() => { try { const cur = JSON.parse(localStorage.getItem(SEEN_LS) || 'null') || keep; cur.last = Date.now(); localStorage.setItem(SEEN_LS, JSON.stringify(cur)); } catch (x) { /* 기억 못 함 */ } }, 60000);
+  } catch (x) { /* 기억 못 함 */ }
+  const isNew = (r) => r && r.author !== user.id && !r.hidden && Date.parse(r.created_at) > seenAt;
   async function loadHome() {
     const [s, p] = await Promise.all([
       sb.from('post_feed').select('*').eq('kind', 'showcase').order('created_at', { ascending: false }).limit(24),
@@ -1418,7 +1492,9 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   }
   function cardBody(r) {
     const body = el('div', 'card-b');
-    const h = el('h3', null, r.title); h.append(svgEl('<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>'));
+    const h = el('h3', null, r.title);
+    if (isNew(r)) { const d = el('span', 'fresh'); d.setAttribute('aria-label', '새로 올라옴'); h.prepend(d); }
+    h.append(svgEl('<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>'));
     body.append(h);
     if (r.body) body.append(el('p', null, r.body));
     const m = el('span', 'card-m');
@@ -1449,7 +1525,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     const b = el('a', 'post-row'); b.href = `#p-${r.id}`;
     const main = el('span', 'pr-main'), line = el('span', 'pr-line');
     // 하루 안에 올라온 글은 주황 점 하나
-    if (Date.now() - Date.parse(r.created_at) < 86400000) { const d = el('span', 'fresh'); d.setAttribute('aria-label', '새 글'); line.append(d); }
+    if (isNew(r) || Date.now() - Date.parse(r.created_at) < 86400000) { const d = el('span', 'fresh'); d.setAttribute('aria-label', '새 글'); line.append(d); }
     line.append(el('span', 'pr-t', (r.hidden ? '[숨김] ' : '') + r.title));
     if (waiting(r)) line.append(el('span', 'wait', '답변 대기'));
     main.append(line, el('span', 'pr-sub', `${r.category} · ${r.author_name || '회원'} · ${ago(r.created_at)} · 댓글 ${r.comments || 0}`));
@@ -1471,7 +1547,13 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     if (s) {
       if (s.error) sBox.replaceChildren(emptyBox('결과물을 불러오지 못했습니다', errText(s.error)));
       else if (!s.length) sBox.replaceChildren(emptyBox('아직 올라온 결과물이 없어요', '만든 앱·위키·도구를 처음으로 올려 보세요.', '결과물 올리기', () => { location.hash = '#write/showcase'; }));
-      else { const g = el('div', 'home-show'); s.slice(0, 3).forEach((r) => g.append(card(r))); sBox.replaceChildren(g); }
+      else {
+        // 새것을 먼저, 모자라면 최근 것으로 채워 3개
+        const fresh = s.filter(isNew), pick = fresh.slice(0, 3).concat(s.filter((r) => !isNew(r))).slice(0, 3);
+        const g = el('div', 'home-show'); pick.forEach((r) => g.append(card(r))); sBox.replaceChildren(g);
+      }
+      const n = Array.isArray(s) ? s.filter(isNew).length : 0, cnt = $('[data-home-show-n]');
+      cnt.textContent = n > 9 ? '9+' : String(n); cnt.hidden = !n; cnt.setAttribute('aria-label', `새 결과물 ${n}개`);
     }
     $('[data-home-chips]').replaceChildren(...['전체', ...POST_CATS].map((c) => {
       const b = el('button', 'chip', c); b.type = 'button'; b.setAttribute('aria-pressed', String(c === home.cat));
@@ -1495,13 +1577,18 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     const week = Date.now() - 7 * 86400000;
     const nNew = s ? s.filter((r) => Date.parse(r.created_at) >= week).length : 0;
     const nWait = p ? p.filter(waiting).length : 0;
+    const nSince = s ? s.filter(isNew).length : 0;
+    paintNewDot(nSince);
     const parts = [];
-    if (nNew) parts.push(['이번 주 새 결과물 ', `${nNew}개`]);
+    if (nNew) parts.push(['이번 주 새 결과물 ', `${nNew}개`, '#showcase']);
     if (nWait) parts.push(['답을 기다리는 질문 ', `${nWait}개`]);
     if (home.crew) parts.push(['처리 전 회의 안건 ', `${home.crew}개`]);
     if (!parts.length) { box.textContent = '새로 올라온 소식은 없어요. 만든 것이 있다면 먼저 올려 보세요.'; return; }
     box.replaceChildren();
-    parts.forEach(([t, n], i) => { if (i) box.append(', '); box.append(t, el('b', null, n)); });
+    parts.forEach(([t, n, href], i) => {
+      if (i) box.append(', ');
+      if (href) { const a = el('a', 'summary-new'); a.href = href; a.append(t, el('b', null, n)); box.append(a); } else box.append(t, el('b', null, n));
+    });
     box.append('가 있어요.');
   }
   function renderFeed(kind) {
@@ -2829,7 +2916,8 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     showcase: { name: '새 결과물', w: 2 }, meeting: { name: '회의 안건', w: 1, crew: true },
   };
   const DB_DEFAULT = () => ({ widgets: [{ id: 'market', w: 2 }, { id: 'weather', w: 1 }, { id: 'continue', w: 1 }, { id: 'news', w: 1 }, { id: 'board', w: 1 }, { id: 'favs', w: 1 }].concat(isCrew ? [{ id: 'meeting', w: 1 }] : []), ddays: [], favs: [], added: ['weather'] });
-  const NEW_WG = ['weather'];
+  // 새로 생긴 위젯과 넣을 자리
+  const NEW_WG = { weather: 1 };
   let dbPrefs = DB_DEFAULT(), dbHasTable = true, dbEditing = false, dbSaveT = null;
   const DB_LS = `bypass-dash-${user.id}`;
   function dbClean(v) {
@@ -2841,7 +2929,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     const fv = Array.isArray(v.favs) ? v.favs.filter((x) => Number.isInteger(x)).slice(0, 12) : [];
     // 새로 생긴 위젯은 예전에 저장한 회원에게도 한 번만 넣어 준다 (빼면 다시 안 넣음)
     const added = Array.isArray(v.added) ? v.added.filter((x) => WG[x]) : [];
-    NEW_WG.forEach((id) => { if (!added.includes(id)) { added.push(id); if (Array.isArray(v.widgets) && !ws.some((x) => x.id === id)) ws.splice(Math.min(1, ws.length), 0, { id, w: WG[id].w }); } });
+    Object.entries(NEW_WG).forEach(([id, at]) => { if (!added.includes(id)) { added.push(id); if (Array.isArray(v.widgets) && !ws.some((x) => x.id === id)) ws.splice(Math.min(at, ws.length), 0, { id, w: WG[id].w }); } });
     return { widgets: ws, ddays: dd, favs: fv, added };
   }
   async function dbLoad() {
