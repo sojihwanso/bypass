@@ -436,6 +436,27 @@
   .in-st-개통, .in-st-합류 { background: var(--green); color: #fff; border-color: var(--green); }
   .in-st-반려, .in-st-보류 { background: #fff; color: var(--orange-ink); border-style: dashed; border-color: var(--orange-ink); }
   .rrow.is-fresh .rrow-title::before { content: ""; display: inline-block; width: 8px; height: 8px; margin: 0 6px 2px 0; border-radius: 50%; background: var(--orange); vertical-align: middle; }
+  /* 회원: 사진 · 숫자 · 정지 */
+  .mav { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; overflow: hidden; background: #EEF0F3; color: #3B4250; font-weight: 800; font-size: 16px; }
+  .mav img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .mav.lg { width: 64px; height: 64px; border-radius: 18px; font-size: 24px; }
+  .rrow-main.has-av { padding-left: 12px !important; }
+  .mem-stats { display: inline-flex; flex-wrap: wrap; gap: 2px 8px; color: var(--muted); }
+  .mem-stats b { color: var(--ink); font-weight: 700; }
+  .flag-susp { background: #FDE8E8 !important; color: #B42318 !important; border-color: #F5B5B0 !important; }
+  .mem-head { display: flex; gap: 14px; align-items: center; margin: 14px 0 4px; }
+  .mem-head b { display: block; font-size: 19px; }
+  .mem-head span { color: var(--muted); font-size: 13.5px; }
+  .mem-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 12px 0 4px; }
+  .mem-grid div { padding: 10px 12px; border-radius: 10px; background: #F6F7F4; border: 1px solid var(--rule); }
+  .mem-grid dt { margin: 0; font-size: 12px; color: var(--muted); }
+  .mem-grid dd { margin: 2px 0 0; font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .mem-grid dd small { display: block; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .susp-now { padding: 12px 14px; border-radius: 10px; background: #FDE8E8; border: 1px solid #F5B5B0; color: #7A1A12; font-size: 14px; line-height: 1.6; }
+  .susp-now b { color: #B42318; }
+  .susp-days { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 8px; }
+  .susp-days button[aria-checked="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+  @media (max-width: 520px) { .mem-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .slip { margin: 16px 0 4px; padding: 14px 16px; border-radius: 12px; background: #FFFDF6; border: 1.5px dashed var(--post); }
   .slip-top { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; font-weight: 700; color: var(--muted); }
   .slip dl { margin: 10px 0 0; }
@@ -953,6 +974,7 @@
         <div class="toolbar">
           <div class="fchips" role="group" aria-label="회원 구분으로 거르기" data-mem-chips></div>
           <label class="sr-only" for="mem-find">회원 찾기</label>
+          <button type="button" class="mini-btn" data-mem-susp-only aria-pressed="false" hidden>정지 중</button>
           <input class="input" id="mem-find" type="search" placeholder="이름·아이디로 찾기" autocomplete="off">
         </div>
         <div data-mem-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
@@ -1317,7 +1339,20 @@
 
         <!-- 회원 -->
         <form data-form="member" novalidate hidden>
+          <div class="mem-head" data-mem-head></div>
+          <dl class="mem-grid" data-mem-grid></dl>
           <div class="slip" data-mem-slip></div>
+          <fieldset data-mem-susp-set>
+            <legend>활동 정지</legend>
+            <div data-mem-susp-now></div>
+            <div data-mem-susp-form>
+              <div class="susp-days" role="radiogroup" aria-label="정지 기간" data-mem-susp-days></div>
+              <label class="sr-only" for="mem-susp-reason">정지 사유</label>
+              <input class="input" id="mem-susp-reason" maxlength="200" autocomplete="off" placeholder="사유 (정지된 회원에게 보입니다. 예: 같은 글 반복 도배)">
+              <div style="margin-top:8px"><button type="button" class="mini-btn" data-mem-susp-go>정지하기</button></div>
+            </div>
+            <p class="hint">정지되면 글·결과물·댓글을 새로 쓰거나 고칠 수 없고, 페이지·썸네일도 못 올립니다. 읽기·좋아요·로그인은 그대로이고, 기간이 지나면 저절로 풀립니다.</p>
+          </fieldset>
           <fieldset data-mem-role-set>
             <legend>회원 구분</legend>
             <div class="seg" role="radiogroup" aria-label="회원 구분" data-mem-role></div>
@@ -3224,7 +3259,7 @@
       B.sb.from('report_memos').select('report_id, memo'),
       B.sb.from('applications').select('*').order('created_at', { ascending: false }).limit(500),
       B.sb.from('agenda_items').select('id, report_id, done').not('report_id', 'is', null),
-      B.sb.rpc('list_members')
+      B.sb.rpc('list_members_detail').then(r => (r.error ? B.sb.rpc('list_members') : r))
     ]);
     if (r.error) repList.replaceChildren(el('p', 'list-state', errText(r.error, '불러오기')));
     else inReports = r.data.slice().sort((x, y) => String(y.created_at).localeCompare(String(x.created_at)));
@@ -3504,18 +3539,100 @@
   const memList = $('[data-mem-list]');
   const MEM_ROLES = ['staff', 'member', 'general'];
   const memberArr = () => [...inMembers.values()];
+  let memSuspOnly = false;
+  $('[data-mem-susp-only]').addEventListener('click', () => { memSuspOnly = !memSuspOnly; renderMembers(); });
+  // 프로필 사진 (있으면 사진, 없으면 첫 글자)
+  const avUrl = m => m.avatar_at ? `${B.sb.storage.from('avatars').getPublicUrl(`${m.id}/a.webp`).data.publicUrl}?v=${Date.parse(m.avatar_at) || 1}` : null;
+  const firstChar = n => { const t = String(n || '?').trim(); return /^[A-Za-z0-9]/.test(t) ? t[0].toUpperCase() : t.slice(0, 1); };
+  function memAv(m, big) {
+    const d = el('span', `mav${big ? ' lg' : ''}`); d.setAttribute('aria-hidden', 'true');
+    const u = avUrl(m);
+    if (u) { const im = el('img'); im.src = u; im.alt = ''; im.loading = 'lazy'; im.onerror = () => { im.remove(); d.textContent = firstChar(m.display_name); }; d.append(im); }
+    else d.textContent = firstChar(m.display_name);
+    return d;
+  }
+  const UP_WHY = { staff: '운영진', granted: '직접 허가', blocked: '막음', manual: '허가 대기', rules: '요건', suspended: '정지 중' };
+  function paintMemDetail(m) {
+    const head = $('[data-mem-head]'), grid = $('[data-mem-grid]');
+    const txt = el('div'); txt.append(el('b', null, m.display_name), el('span', null, `@${m.username} · ${ROLE_NAME[m.role] || m.role}`));
+    head.replaceChildren(memAv(m, true), txt);
+    if (!('posts' in m)) { grid.hidden = true; return; }
+    grid.hidden = false;
+    const cell = (k, v, small) => { const d = el('div'); const dd = el('dd', null, String(v)); if (small) dd.append(el('small', null, ` ${small}`)); d.append(el('dt', null, k), dd); return d; };
+    const days = Math.max(0, Math.floor((Date.now() - Date.parse(m.created_at)) / 864e5));
+    grid.replaceChildren(
+      cell('게시판 글', m.posts || 0), cell('결과물', m.showcases || 0), cell('댓글', m.comments || 0),
+      cell('받은 좋아요', m.likes || 0), cell('올린 페이지', m.pages || 0), cell('올리기 권한', m.upload_ok ? '됨' : '안 됨', UP_WHY[m.upload_why] || ''),
+      cell('가입', `${days}일째`, B.dateText(m.created_at)), cell('최근 로그인', m.last_sign_in_at ? B.dateText(m.last_sign_in_at) : '없음'), cell('닉네임 바꾼 날', m.name_changed_at ? B.dateText(m.name_changed_at) : '안 바꿈'));
+  }
+  // 활동 정지: supabase/036_member_suspend.sql (suspend_member · unsuspend_member)
+  const SUSP_DAYS = [[1, '1일'], [3, '3일'], [7, '7일'], [30, '30일'], [0, '무기한']];
+  let suspDays = 3;
+  $('[data-mem-susp-days]').replaceChildren(...SUSP_DAYS.map(([d, t]) => { const b = el('button', 'mini-btn', t); b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.d = String(d); b.addEventListener('click', () => { suspDays = d; syncSusp(); }); return b; }));
+  const suspGo = $('[data-mem-susp-go]');
+  function syncSusp() {
+    const m = editing; if (!m) return;
+    const set = $('[data-mem-susp-set]');
+    set.hidden = m.id === user.id || m.role === 'staff' || !('suspended' in m);
+    $$('[data-mem-susp-days] button').forEach(b => b.setAttribute('aria-checked', String(Number(b.dataset.d) === suspDays)));
+    const now = $('[data-mem-susp-now]');
+    if (m.suspended) {
+      const box = el('div', 'susp-now');
+      box.append(el('b', null, m.suspend_until ? `${B.dateText(m.suspend_until)} ${new Date(m.suspend_until).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}까지 정지` : '무기한 정지'), el('br'),
+        `사유: ${m.suspend_reason || '(없음)'}`, el('br'), `${m.suspend_by || '운영진'} · ${B.dateText(m.suspend_at)}에 정지`);
+      const un = el('button', 'mini-btn', '정지 풀기'); un.type = 'button'; un.style.marginTop = '8px';
+      un.addEventListener('click', unsuspend);
+      box.append(el('br'), un);
+      now.replaceChildren(box);
+      suspGo.textContent = '기간·사유 바꿔서 다시 정지';
+    } else { now.replaceChildren(); suspGo.textContent = '정지하기'; }
+    suspGo.dataset.armed = ''; suspGo.classList.remove('is-armed'); suspGo.disabled = false;
+  }
+  const SUSP_ERR = { 'staff cannot be suspended': '운영진은 정지할 수 없습니다. 먼저 회원 구분을 바꿔 주세요.', 'not yourself': '자기 자신은 정지할 수 없습니다.' };
+  suspGo.addEventListener('click', async () => {
+    const m = editing; if (!m || busy) return;
+    const reason = $('#mem-susp-reason').value.trim();
+    if (suspGo.dataset.armed !== '1') { suspGo.dataset.armed = '1'; suspGo.classList.add('is-armed'); suspGo.textContent = `한 번 더 누르면 ${suspDays ? `${suspDays}일` : '무기한'} 정지합니다`; return; }
+    B.setBusy(suspGo, true, '정지하는 중…');
+    const { data, error } = await B.sb.rpc('suspend_member', { p_user: m.id, p_days: suspDays || null, p_reason: reason });
+    B.setBusy(suspGo, false);
+    if (error) { syncSusp(); const k = Object.keys(SUSP_ERR).find(x => (error.message || '').includes(x)); return fail(k ? SUSP_ERR[k] : error.code === 'PGRST202' ? 'supabase/036_member_suspend.sql 을 먼저 실행해 주세요.' : '정지하지 못했습니다. ' + (error.message || '')); }
+    Object.assign(m, { suspended: true, suspend_until: data && data.until, suspend_reason: data && data.reason, suspend_by: (user.user_metadata || {}).display_name || '운영진', suspend_at: new Date().toISOString(), upload_ok: false, upload_why: 'suspended' });
+    $('#mem-susp-reason').value = '';
+    syncSusp(); paintMemDetail(m); renderMembers();
+    toast(`${m.display_name} 님을 ${suspDays ? `${suspDays}일` : '무기한'} 정지했습니다.`);
+  });
+  async function unsuspend() {
+    const m = editing; if (!m || busy) return;
+    const { error } = await B.sb.rpc('unsuspend_member', { p_user: m.id });
+    if (error) return fail('정지를 풀지 못했습니다. ' + (error.message || ''));
+    Object.assign(m, { suspended: false });
+    syncSusp(); renderMembers();
+    toast(`${m.display_name} 님의 정지를 풀었습니다. 올리기 권한은 목록을 새로 불러오면 맞춰집니다.`);
+  }
   function renderMembers() {
     const all = memberArr();
     chips($('[data-mem-chips]'), MEM_ROLES, ROLE_NAME, all, 'role', memFilter, v => { memFilter = v; renderMembers(); });
     const q = $('#mem-find').value.trim().toLowerCase();
-    const rows = all.filter(m => (memFilter === 'all' || m.role === memFilter) && (!q || [m.display_name, m.username].join(' ').toLowerCase().includes(q)));
+    const rows = all.filter(m => (memFilter === 'all' || m.role === memFilter) && (!memSuspOnly || m.suspended) && (!q || [m.display_name, m.username].join(' ').toLowerCase().includes(q)));
+    const sb2 = $('[data-mem-susp-only]'), nS = all.filter(m => m.suspended).length;
+    sb2.hidden = !nS && !memSuspOnly; sb2.textContent = `정지 중 ${nS}`; sb2.setAttribute('aria-pressed', String(memSuspOnly));
     const sec = el('section', 'lgroup'); const ul = el('ul', 'rlist');
     if (!rows.length) ul.append(el('li', 'rempty', all.length ? '조건에 맞는 회원이 없습니다.' : '회원 목록을 불러오지 못했거나 아직 회원이 없습니다.'));
     rows.forEach(m => {
       const li = el('li'); li.dataset.id = m.id;
       const flags = [];
       if (m.id === user.id) flags.push(el('span', 'flag flag-feat', '나'));
-      inboxRow(li, m.display_name, [el('span', stClass(m.role === 'staff' ? '개통' : m.role === 'member' ? '연락함' : '접수'), ROLE_NAME[m.role] || m.role), el('span', 'in-no', m.username), el('span', null, `가입 ${B.dateText(m.created_at)}`), el('span', null, m.last_sign_in_at ? `· 최근 로그인 ${B.dateText(m.last_sign_in_at)}` : '· 로그인 기록 없음')], flags, () => openMember(m), false);
+      if (m.suspended) flags.push(el('span', 'flag flag-susp', m.suspend_until ? `정지 ~${B.dateText(m.suspend_until)}` : '정지 (무기한)'));
+      const meta = [el('span', stClass(m.role === 'staff' ? '개통' : m.role === 'member' ? '연락함' : '접수'), ROLE_NAME[m.role] || m.role), el('span', 'in-no', m.username)];
+      if ('posts' in m) {
+        const st = el('span', 'mem-stats');
+        [['글', m.posts], ['결과물', m.showcases], ['댓글', m.comments], ['♥', m.likes]].forEach(([k, v]) => { const x = el('span'); x.append(`${k} `, el('b', null, String(v || 0))); st.append(x); });
+        meta.push(st);
+      }
+      meta.push(el('span', null, m.last_sign_in_at ? `최근 로그인 ${B.dateText(m.last_sign_in_at)}` : '로그인 기록 없음'));
+      inboxRow(li, m.display_name, meta, flags, () => openMember(m), false);
+      const main = li.querySelector('.rrow-main'); main.classList.add('has-av'); main.prepend(memAv(m));
       if (mode === 'member' && editing && editing.id === m.id) li.classList.add('is-current');
       ul.append(li);
     });
@@ -3541,6 +3658,8 @@
     slip($('[data-mem-slip]'), [m.username, ROLE_NAME[m.role] || m.role], [
       ['이름', m.display_name], ['아이디', m.username], ['가입', B.dateText(m.created_at)], ['최근 로그인', m.last_sign_in_at ? B.dateText(m.last_sign_in_at) : '기록 없음']
     ]);
+    $('[data-mem-slip]').hidden = 'posts' in m;   // 자세히 보기가 있으면 위의 머리·숫자 칸으로 대신
+    paintMemDetail(m); suspDays = 3; $('#mem-susp-reason').value = ''; syncSusp();
     const pw = $('[data-mem-pw]'); pw.dataset.armed = ''; pw.textContent = '임시 비밀번호 만들기'; pw.disabled = false;
     $('[data-mem-pw-box]').hidden = true; $('[data-mem-pw-box]').replaceChildren();
     delBtn.hidden = true;
