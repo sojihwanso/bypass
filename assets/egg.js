@@ -29,6 +29,35 @@
     if (taps.length >= 5) { taps = []; e.preventDefault(); start(); }
   }, true);
 
+  /* ----- 크루 랭킹 (supabase/035_game_scores.sql) ----- */
+  const GAME = 'stack';
+  const esc = (t) => String(t).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  let sbP = null;
+  function getSb() {   // 랜딩처럼 회원 스크립트가 없는 페이지에서는 그때 불러온다
+    if (window.BYPASS && window.BYPASS.sb) return Promise.resolve(window.BYPASS.sb);
+    if (sbP) return sbP;
+    const load = (src) => new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = src; sc.onload = ok; sc.onerror = no; document.head.append(sc); });
+    sbP = (window.supabase ? Promise.resolve() : load('/assets/vendor/supabase-js-2.117.2.js'))
+      .then(() => (window.BYPASS ? null : load('/assets/auth.js')))
+      .then(() => (window.BYPASS && window.BYPASS.sb) || null)
+      .catch(() => null);
+    return sbP;
+  }
+  async function member() {
+    const sb = await getSb(); if (!sb) return null;
+    try { const { data } = await sb.auth.getSession(); return data && data.session ? sb : null; } catch (e) { return null; }
+  }
+  async function topList(sb, n) {
+    const { data, error } = await sb.rpc('game_top', { p_game: GAME, p_limit: n });
+    return error ? null : data || [];
+  }
+  function rankHtml(rows, n) {
+    if (!rows) return '<div style="opacity:.7;font-size:13px">랭킹을 불러오지 못했어요</div>';
+    if (!rows.length) return '<div style="opacity:.8;font-size:13px">아직 기록이 없어요. 첫 기록의 주인공이 되어 보세요!</div>';
+    const medal = (r) => (r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : `${r}`);
+    return `<div style="margin-top:4px;text-align:left;font-size:14px;min-width:220px">${rows.slice(0, n + 1).map((r) => `<div style="display:flex;gap:10px;align-items:center;padding:4px 8px;border-radius:8px;${r.me ? 'background:rgba(238,106,31,.28);' : ''}"><span style="width:26px;text-align:center;font-weight:800">${medal(Number(r.rank))}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.name)}${r.me ? ' (나)' : ''}</span><b style="font-variant-numeric:tabular-nums">${r.best}층</b></div>`).join('')}</div>`;
+  }
+
   /* ----- 저장 ----- */
   const BEST = 'bypass-egg-stack';
   const best = () => { try { return Number(localStorage.getItem(BEST)) || 0; } catch (e) { return 0; } };
@@ -132,7 +161,21 @@
     if (sc > b) setBest(sc);
     paintHud();
     const line = sc >= 30 ? '전설의 선장' : sc >= 20 ? '노련한 갑판장' : sc >= 10 ? '든든한 항해사' : sc >= 5 ? '견습 갑판원' : '첫 출항';
-    say(`<div><div style="font-size:30px;font-weight:800">${sc}층</div><div style="font-weight:700">${line}${sc > b && sc > 0 ? ' · 🎉 최고 기록' : ''}</div><div style="margin-top:8px;opacity:.85">다시 하려면 누르거나 스페이스</div></div>`);
+    const head = `<div style="font-size:30px;font-weight:800">${sc}층</div><div style="font-weight:700">${line}${sc > b && sc > 0 ? ' · 🎉 내 최고 기록' : ''}</div>`;
+    const tail = '<div style="margin-top:10px;opacity:.85">다시 하려면 누르거나 스페이스</div>';
+    const run = S.t;
+    say(`<div>${head}<div style="margin-top:10px;opacity:.7;font-size:13px">크루 랭킹 확인 중…</div>${tail}</div>`);
+    (async () => {
+      const sb = await member();
+      if (S.state !== 'over' || S.overAt !== run) return;   // 그사이 다시 시작함
+      if (!sb) { say(`<div>${head}<div style="margin-top:10px;font-size:13px;opacity:.85">로그인하면 크루 랭킹에 기록이 올라가요</div>${tail}</div>`); return; }
+      let res = null;
+      if (sc > 0) { const r = await sb.rpc('submit_game_score', { p_game: GAME, p_score: sc }); res = r.error ? null : r.data; }
+      const rows = await topList(sb, 5);
+      if (S.state !== 'over' || S.overAt !== run) return;
+      const mine = res ? `<div style="margin-top:6px;font-size:13px;opacity:.9">크루 ${res.total}명 중 <b>${res.rank}위</b>${res.new_best ? ' · 랭킹 기록 갱신!' : ` · 내 기록 ${res.best}층`}</div>` : '';
+      say(`<div>${head}${mine}<div style="margin-top:10px;font-weight:800;font-size:13px;opacity:.8">🏆 크루 랭킹</div>${rankHtml(rows, 5)}${tail}</div>`);
+    })();
   }
   function step(dt) {
     S.t += dt;
@@ -225,7 +268,14 @@
     if (!ov) { build(); ctx = cv.getContext('2d'); }
     prevFocus = document.activeElement;
     document.body.append(ov); fit(); reset();
-    say('<div><div style="font-size:26px;font-weight:800;margin-bottom:6px">📦 컨테이너 쌓기</div><div>크레인이 옮기는 컨테이너를<br><b>눌러서</b> 떨어뜨려 쌓으세요 (스페이스도 됨)</div><div style="margin-top:8px;opacity:.85">딱 맞추면 PERFECT · 3번 연속이면 다시 넓어져요</div><div style="margin-top:12px;font-weight:700">눌러서 시작</div></div>');
+    const intro = '<div style="font-size:26px;font-weight:800;margin-bottom:6px">📦 컨테이너 쌓기</div><div>크레인이 옮기는 컨테이너를<br><b>눌러서</b> 떨어뜨려 쌓으세요 (스페이스도 됨)</div><div style="margin-top:8px;opacity:.85">딱 맞추면 PERFECT · 3번 연속이면 다시 넓어져요</div>';
+    const go = '<div style="margin-top:12px;font-weight:700">눌러서 시작</div>';
+    say(`<div>${intro}${go}</div>`);
+    // 크루 1~3위를 시작 화면에 살짝
+    member().then((sb) => (sb ? topList(sb, 3) : null)).then((rows) => {
+      if (!open || S.state !== 'ready' || !rows || !rows.length) return;
+      say(`<div>${intro}<div style="margin-top:12px;font-weight:800;font-size:13px;opacity:.8">🏆 크루 랭킹</div>${rankHtml(rows, 3)}${go}</div>`);
+    });
     requestAnimationFrame(() => { ov.style.opacity = '1'; });
     addEventListener('keydown', onKey, true); addEventListener('resize', fit);
     document.documentElement.style.overflow = 'hidden';
