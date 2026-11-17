@@ -58,6 +58,15 @@
           "value": "public, max-age=31536000, immutable"
         }
       ]
+    },
+    {
+      "source": "/(apps|tools|wiki|archive)/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noai, noimageai"
+        }
+      ]
     }
   ]
 }
