@@ -1210,7 +1210,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       <div class="slug-row"><span class="pre" data-w-slug-pre>/apps/</span><input class="in" id="w-slug" maxlength="49" autocapitalize="none" spellcheck="false" placeholder="예: exam-planner"><span class="pre">/</span></div>
       <label class="drop" for="w-file" data-w-drop>
         <span class="ico" aria-hidden="true">&lt;/&gt;</span>
-        <span><b data-w-file-name>HTML 파일을 끌어다 놓거나 눌러서 고르기</b><small>그림·스크립트를 한 파일에 담은 .html · 5MB 이하</small></span>
+        <span><b data-w-file-name>HTML 파일을 끌어다 놓거나 눌러서 고르기</b><small>그림·스크립트를 한 파일에 담은 .html · 20MB 이하</small></span>
       </label>
       <input class="sr" id="w-file" type="file" accept=".html,.htm,text/html">
       <p class="hint">올리면 1~몇 분 뒤 teambypass.vercel.app<span data-w-slug-pre2>/apps/</span>주소이름/ 에서 열립니다. 내가 올린 페이지는 같은 주소로 다시 올려 고칠 수 있고, 남의 주소는 쓸 수 없습니다. 보안상 올린 페이지는 사이트 로그인 정보와 브라우저 저장소를 쓸 수 없습니다.</p>
@@ -1874,7 +1874,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
 
   /* ===== 쓰기 · 고치기 ===== */
   const wForm = $('[data-write-form]');
-  const SLUG_RULE = /^[a-z0-9][a-z0-9-]{1,48}$/, HTML_MAX = 5_000_000, IMG_MAX = 2_097_152;
+  const SLUG_RULE = /^[a-z0-9][a-z0-9-]{1,48}$/, HTML_MAX = 20_000_000, IMG_MAX = 2_097_152;
   let wKind = 'showcase', wCat = '앱', wBusy = false, wEdit = null, wSrc = 'link', wHtml = null, wOwnSlug = null, wOwnFolder = null;
   let wThumb = { url: null, blob: null, preview: null, type: null };
   let wDirty = false, wHash = '';
@@ -2031,7 +2031,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     $('#w-file').value = '';
     if (!file) return;
     if (!/\.html?$/i.test(file.name) && file.type !== 'text/html') return wFail('.html 파일만 올릴 수 있습니다.');
-    if (file.size > HTML_MAX) return wFail(`파일이 ${(file.size / 1e6).toFixed(1)}MB입니다. 5MB 이하로 줄여 주세요.`);
+    if (file.size > HTML_MAX) return wFail(`파일이 ${(file.size / 1e6).toFixed(1)}MB입니다. 20MB 이하로 줄여 주세요.`);
     const text = await file.text();
     if (!/<html[\s>]/i.test(text)) return wFail('HTML 파일이 아닌 것 같습니다. <html> 로 된 파일을 골라 주세요.');
     wHtml = text; $('[data-w-err]').hidden = true;
@@ -2085,7 +2085,11 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     const { data, error } = await sb.functions.invoke('publish-wiki', { body: { slug, folder, title, html: wHtml } });
     if (!error) return data;
     let text = 'HTML 파일을 올리지 못했습니다. 잠시 후 다시 해 주세요.';
-    try { const j = await error.context.json(); if (j && j.error) text = j.error; } catch (x) { if (error.context && error.context.status === 404) text = '파일 올리기 설정이 아직 끝나지 않았습니다. (publish-wiki 함수)'; }
+    try { const j = await error.context.json(); if (j && j.error) text = j.error; } catch (x) {
+      const st = error.context && error.context.status;
+      if (st === 404) text = '파일 올리기 설정이 아직 끝나지 않았습니다. (publish-wiki 함수)';
+      else if (st === 413) text = '파일이 서버가 한 번에 받을 수 있는 크기를 넘습니다. 파일 안의 큰 그림을 줄이거나 링크로 바꿔 주세요.';
+    }
     throw new Error(text);
   }
   wForm.addEventListener('submit', async (e) => {

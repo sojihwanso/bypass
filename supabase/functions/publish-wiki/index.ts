@@ -25,7 +25,7 @@ const ALLOWED_ORIGINS = [
 // 브랜치 미리보기 주소(https://bypass-git-<브랜치>-oojoo1.vercel.app)에서도 시험할 수 있게
 const PREVIEW_ORIGIN = /^https:\/\/bypass-git-[a-z0-9-]+-oojoo1\.vercel\.app$/;
 const SLUG_RULE = /^[a-z0-9][a-z0-9-]{1,48}$/;   // 주소에 쓰일 영문 이름: navigation-101
-const MAX_BYTES = 5_000_000;                      // 한 장 최대 약 5MB
+const MAX_BYTES = 20_000_000;                     // 한 장 최대 약 20MB (GitHub 한 파일 100MB, 함수 메모리 256MB 안에서 넉넉히)
 const FOLDERS = ['wiki', 'apps'];                 // 올릴 수 있는 폴더 (vercel.json 에서 둘 다 sandbox 로 열림)
 
 function cors(req: Request) {
@@ -48,11 +48,12 @@ function reply(req: Request, status: number, body: Record<string, unknown>) {
 // UTF-8 문자열 → base64 (GitHub API 는 파일 내용을 base64 로 받는다)
 function toBase64(text: string): string {
   const bytes = new TextEncoder().encode(text);
-  let bin = '';
+  // 조각을 모았다가 한 번에 잇는다 (+= 로 이으면 20MB 에서 1초 넘게 걸려 함수 CPU 한도 2초에 가까워짐)
+  const parts: string[] = [];
   for (let i = 0; i < bytes.length; i += 0x8000) {
-    bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    parts.push(String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000) as unknown as number[]));
   }
-  return btoa(bin);
+  return btoa(parts.join(''));
 }
 
 function fromBase64(b64: string): string {
@@ -229,7 +230,7 @@ export async function handle(req: Request, env: (k: string) => string | undefine
   if (!staff && folder !== 'apps') return reply(req, 403, { error: '회원은 /apps/ 에만 올릴 수 있습니다.' });
   if (!SLUG_RULE.test(slug)) return reply(req, 400, { error: '주소 이름은 영문 소문자·숫자·하이픈(-)으로 2~49자여야 합니다. 예: navigation-101' });
   if (!/<html[\s>]/i.test(html)) return reply(req, 400, { error: 'HTML 파일이 아닌 것 같습니다. <html> 로 된 파일을 올려 주세요.' });
-  if (new TextEncoder().encode(html).length > MAX_BYTES) return reply(req, 413, { error: '파일이 너무 큽니다. 5MB 이하로 올려 주세요.' });
+  if (new TextEncoder().encode(html).length > MAX_BYTES) return reply(req, 413, { error: '파일이 너무 큽니다. 20MB 이하로 올려 주세요.' });
 
   // 3) GitHub 에 저장 (있으면 고쳐 쓰기)
   const token = env('GITHUB_TOKEN');
@@ -257,6 +258,11 @@ export async function handle(req: Request, env: (k: string) => string | undefine
     const meta = await r.json();
     let text: string | undefined;
     try { text = fromBase64(meta.content ?? ''); } catch { text = undefined; }
+    // 1MB 넘는 파일은 GitHub 가 내용을 비워서 준다 → 원문으로 다시 받는다 (안 그러면 내 페이지인데 주인을 몰라 못 고침)
+    if (!text && meta.size > 0) {
+      const raw = await gh(file, `?ref=${encodeURIComponent(branch)}`, { headers: { Accept: 'application/vnd.github.raw' } });
+      if (raw.ok) text = await raw.text();
+    }
     return { sha: meta.sha, text };
   };
 
