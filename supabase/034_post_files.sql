@@ -6,8 +6,10 @@
 --   - 보기·받기: 그 글을 읽을 수 있는 회원 (숨긴 글은 쓴 사람과 운영진만). 로그인하지 않으면 못 받음
 --   - 빼기: 쓴 사람 또는 운영진
 -- 무엇을
---   - 사진(PNG·JPG·WebP·GIF) · PDF · 한글(hwp·hwpx) · 워드 · 엑셀 · 파워포인트 · ZIP · TXT · CSV
---   - HTML·SVG·실행 파일은 받지 않습니다. (열면 스크립트가 돌 수 있어서)
+--   - 사진(PNG·JPG·WebP·GIF) · PDF · 한글(hwp·hwpx) · 워드 · 엑셀 · 파워포인트 · ZIP · TXT · CSV · HTML
+--   - HTML 은 저장소에 application/octet-stream 으로 올려 브라우저에서 바로 열리지 않고 내려받아지게 합니다.
+--     (저장소 주소에서 남이 올린 스크립트가 돌지 않도록. 표에는 text/html 로 적음)
+--   - SVG·실행 파일은 받지 않습니다.
 -- 어디에
 --   - 저장소 post-files/<회원번호>/<글번호>/<무작위>.<확장자> (공개 아님. 화면이 1시간짜리 주소를 받아 보여 줌)
 --   - 원래 파일 이름 · 크기는 post_files 표에
@@ -21,14 +23,17 @@ create table if not exists public.post_files (
   path        text not null unique check (char_length(path) <= 200 and path ~ '^[0-9a-f-]{36}/[0-9]+/[A-Za-z0-9._-]+$'),
   name        text not null check (char_length(btrim(name)) between 1 and 120),
   size        int not null check (size > 0 and size < 3145728),
-  mime        text not null check (mime in (
-                'image/png', 'image/jpeg', 'image/webp', 'image/gif', 'application/pdf',
-                'application/x-hwp', 'application/vnd.hancom.hwpx',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                'application/zip', 'text/plain', 'text/csv'))
+  mime        text not null
 );
+-- 받는 종류 (나중에 늘릴 수 있게 따로)
+alter table public.post_files drop constraint if exists post_files_mime_check;
+alter table public.post_files add constraint post_files_mime_check check (mime in (
+  'image/png', 'image/jpeg', 'image/webp', 'image/gif', 'application/pdf',
+  'application/x-hwp', 'application/vnd.hancom.hwpx',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/zip', 'text/plain', 'text/csv', 'text/html'));
 create index if not exists post_files_post_idx on public.post_files (post_id, id);
 
 -- 붙일 때: 쓴 사람 적기 · 내 글인지 · 내 폴더인지 · 2개까지 · 올리기 권한
@@ -87,7 +92,7 @@ values ('post-files', 'post-files', false, 3145728, array[
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-  'application/zip', 'text/plain', 'text/csv'])
+  'application/zip', 'text/plain', 'text/csv', 'application/octet-stream'])   -- octet-stream: HTML (내려받기 전용)
 on conflict (id) do update set public = excluded.public,
   file_size_limit = excluded.file_size_limit,
   allowed_mime_types = excluded.allowed_mime_types;
