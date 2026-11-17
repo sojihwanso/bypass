@@ -32,7 +32,7 @@
 <style>
 /* BYPASS 커뮤니티 = 로그인한 회원의 첫 화면이자 회원 공간 (예전 '공사장'의 기능을 모두 옮겨 왔다)
    화면: #home 홈 · #showcase 결과물 · #board 게시판 · #meeting 회의실(국원) · #me 내 정보 · #search 찾기 · #p-번호 글 페이지 · #write/showcase·#write/board 쓰기 · #edit-번호 고치기 · #n-번호 공지
-   데이터: supabase/022_community.sql (posts · post_comments · post_likes · post_feed) · 033 (대댓글 parent_id · 프로필 사진 member_avatars) + 공지·제보·회의 안건·자료실·처리 현황·지름길 */
+   데이터: supabase/022_community.sql (posts · post_comments · post_likes · post_feed) · 033 (대댓글 parent_id · 프로필 사진 member_avatars) · 034 (첨부 파일 post_files) + 공지·제보·회의 안건·자료실·처리 현황·지름길 */
 /* ===== 바탕 값: 글자색 3단계 · 머리카락선 · 그림자 2겹 · 움직임 곡선 ===== */
 :root {
   color-scheme: light;
@@ -660,6 +660,25 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
 .comments .r-form textarea { min-height: 38px; height: 38px; flex: 1 1 auto; border-radius: 8px; box-shadow: none; padding: 7px 10px; font-size: 16px; }
 .comments .r-form textarea:focus { box-shadow: none; }
 .comments .r-form .btn { height: 38px; padding: 0 12px; }
+/* 결과물 첨부 파일 (034) */
+.d-files { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.d-files .f-pic { display: block; width: 168px; height: 126px; border-radius: 12px; overflow: hidden; background: var(--soft2); box-shadow: var(--ring); }
+.d-files .f-pic img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 220ms var(--ease); }
+.d-files .f-pic:hover img { transform: scale(1.03); }
+.d-files .f-doc { display: inline-flex; align-items: center; gap: 10px; max-width: 100%; box-sizing: border-box; padding: 10px 14px 10px 10px; border-radius: 12px; background: var(--soft2); box-shadow: var(--ring); color: var(--ink); text-decoration: none; transition: background-color 150ms ease-out; }
+.d-files .f-doc:hover { background: var(--line2); }
+.d-files .f-doc span { display: flex; flex-direction: column; min-width: 0; }
+.d-files .f-doc b { font-size: 14.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 260px; }
+.d-files .f-doc small { font-size: 12.5px; color: var(--sub); }
+.f-ext { flex: none; width: 36px; height: 36px; border-radius: 9px; background: var(--surface); box-shadow: var(--ring); display: grid; place-items: center; font-size: 10.5px; font-weight: 800; letter-spacing: .02em; color: var(--mid); }
+.w-files { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.w-files:empty { display: none; }
+.w-files li { display: flex; align-items: center; gap: 10px; padding: 7px 8px 7px 8px; border-radius: 12px; background: var(--soft2); font-size: 14px; }
+.w-files li .f-ext { width: 30px; height: 30px; font-size: 9.5px; border-radius: 8px; }
+.w-files li span { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.w-files li small { flex: none; color: var(--sub); font-variant-numeric: tabular-nums; }
+.w-files li button { flex: none; border: 0; background: none; color: var(--sub); font-size: 13px; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background-color 150ms ease-out, color 150ms ease-out; }
+.w-files li button:hover { color: var(--danger); background: var(--danger-bg); }
 /* 프로필 사진: 사진이 있으면 첫 글자 위에 덮는다 */
 .ini, .wg-ini, .avatar { position: relative; overflow: hidden; }
 .ini > img, .wg-ini > img, .avatar > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -1151,6 +1170,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       <h1 class="art-title" id="d-title" tabindex="-1" data-d-title>불러오는 중입니다</h1>
       <div class="d-meta" data-d-meta></div>
       <div class="d-body" data-d-body></div>
+      <div class="d-files" data-d-files hidden></div>
       <div class="d-acts" data-d-acts>
         <a class="btn btn-dark" data-d-open hidden>열어 보기 <svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
         <button type="button" class="btn btn-soft like" aria-pressed="false" data-d-like>
@@ -1226,6 +1246,13 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       </div>
       <input class="sr" id="w-thumb" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
       <p class="hint">PNG·JPG·WebP·GIF. 큰 그림은 가로·세로 1200px 안으로 줄여 2MB 이하로 올립니다. 카드에는 가운데 부분이 보입니다.</p>
+    </div>
+    <div class="field" data-w-files-field hidden>
+      <span class="lbl">첨부 파일 <small style="font-weight: 400; color: var(--sub)">(선택 · 2개까지)</small></span>
+      <ul class="w-files" data-w-files></ul>
+      <div><label class="btn btn-soft btn-sm" for="w-att" data-w-att-pick>파일 고르기</label></div>
+      <input class="sr" id="w-att" type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif,.pdf,.hwp,.hwpx,.docx,.xlsx,.pptx,.zip,.txt,.csv,.html,.htm">
+      <p class="hint">사진(PNG·JPG·WebP·GIF), PDF, 한글, 워드·엑셀·파워포인트, ZIP, TXT·CSV, HTML. 한 파일 3MB 미만. 로그인한 회원만 받을 수 있고, HTML 은 누르면 파일로 내려받아집니다.</p>
     </div>
     <p class="lock-note" data-w-lock hidden></p>
     <div class="field">
@@ -1877,6 +1904,77 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   const SLUG_RULE = /^[a-z0-9][a-z0-9-]{1,48}$/, HTML_MAX = 20_000_000, IMG_MAX = 2_097_152;
   let wKind = 'showcase', wCat = '앱', wBusy = false, wEdit = null, wSrc = 'link', wHtml = null, wOwnSlug = null, wOwnFolder = null;
   let wThumb = { url: null, blob: null, preview: null, type: null };
+  // 첨부 파일 (supabase/034_post_files.sql): 글마다 2개까지, 한 파일 3MB 미만, 결과물만
+  // keep: 이미 붙어 있는 것 · drop: 고치면서 뺀 것 · add: 새로 고른 것 (저장할 때 올린다)
+  const FILE_MAX = 2, FILE_SIZE = 3 * 1024 * 1024;
+  const FILE_TYPES = {
+    png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', gif: 'image/gif', pdf: 'application/pdf',
+    hwp: 'application/x-hwp', hwpx: 'application/vnd.hancom.hwpx',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    zip: 'application/zip', txt: 'text/plain', csv: 'text/csv', html: 'text/html', htm: 'text/html',
+  };
+  // HTML 은 저장소 주소에서 바로 열리지 않게(남의 스크립트가 돌지 않게) 내려받기 전용으로 올린다
+  const storeType = (mime) => (mime === 'text/html' ? 'application/octet-stream' : mime);
+  const extOf = (n) => { const m = /\.([A-Za-z0-9]{1,5})$/.exec(String(n || '')); return m ? m[1].toLowerCase() : ''; };
+  const sizeText = (b) => (b < 1024 * 1024 ? `${Math.max(1, Math.round(b / 1024))}KB` : `${(b / 1048576).toFixed(1)}MB`);
+  const extBadge = (n) => el('span', 'f-ext', (extOf(n) || 'FILE').toUpperCase().slice(0, 4));
+  let wFiles = { keep: [], drop: [], add: [] }, wFilesSeq = 0;
+  function paintFiles() {
+    const ul = $('[data-w-files]'), n = wFiles.keep.length + wFiles.add.length;
+    ul.replaceChildren(...[...wFiles.keep.map((f) => ({ f, name: f.name, size: f.size })), ...wFiles.add.map((f) => ({ f, name: f.name, size: f.size, isNew: true }))].map((x) => {
+      const li = el('li'), x2 = el('button', null, '빼기'); x2.type = 'button'; x2.setAttribute('aria-label', `${x.name} 빼기`);
+      x2.addEventListener('click', () => {
+        if (x.isNew) wFiles.add = wFiles.add.filter((y) => y !== x.f);
+        else { wFiles.keep = wFiles.keep.filter((y) => y !== x.f); wFiles.drop.push(x.f); }
+        wDirty = true; paintFiles();
+      });
+      li.append(extBadge(x.name), el('span', null, x.name), el('small', null, sizeText(x.size)), x2);
+      return li;
+    }));
+    $('[data-w-att-pick]').hidden = n >= FILE_MAX;
+  }
+  async function loadWriteFiles(post) {
+    const seq = ++wFilesSeq;
+    wFiles = { keep: [], drop: [], add: [] }; paintFiles();
+    if (!post || post.kind !== 'showcase') return;
+    const { data, error } = await sb.from('post_files').select('id, path, name, size, mime').eq('post_id', post.id).order('id');
+    if (seq !== wFilesSeq || error) return;   // 034 전이면 그냥 없음
+    wFiles.keep = data || []; paintFiles();
+  }
+  $('#w-att').addEventListener('change', (e) => {
+    const picked = [...(e.target.files || [])]; e.target.value = '';
+    const bad = [];
+    for (const f of picked) {
+      if (wFiles.keep.length + wFiles.add.length >= FILE_MAX) { bad.push('파일은 2개까지 붙일 수 있습니다.'); break; }
+      if (!FILE_TYPES[extOf(f.name)]) { bad.push(`${f.name}: 붙일 수 없는 종류입니다.`); continue; }
+      if (f.size >= FILE_SIZE) { bad.push(`${f.name}: 3MB 미만만 붙일 수 있습니다.`); continue; }
+      if (!f.size) { bad.push(`${f.name}: 빈 파일입니다.`); continue; }
+      wFiles.add.push(f);
+    }
+    wDirty = true; paintFiles();
+    if (bad.length) toast(bad[0]);
+  });
+  // 저장한 뒤에 뺀 것 지우고 새것 올리기. 못 한 파일 이름을 돌려준다
+  async function saveFiles(postId) {
+    const fails = [];
+    for (const f of wFiles.drop) {
+      const { error } = await sb.from('post_files').delete().eq('id', f.id);
+      if (error) fails.push(f.name); else sb.storage.from('post-files').remove([f.path]);
+    }
+    for (const file of wFiles.add) {
+      const ext = extOf(file.name), mime = FILE_TYPES[ext];
+      const path = `${user.id}/${postId}/${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const upl = await sb.storage.from('post-files').upload(path, file, { contentType: storeType(mime), upsert: false });
+      if (upl.error) { fails.push(file.name); continue; }
+      const name = file.name.replace(/[\\/]/g, '_').trim().slice(-120) || `파일.${ext}`;
+      const { error } = await sb.from('post_files').insert({ post_id: postId, path, name, size: file.size, mime });
+      if (error) { sb.storage.from('post-files').remove([path]); fails.push(file.name); }
+    }
+    wFiles = { keep: [], drop: [], add: [] };
+    return fails;
+  }
   let wDirty = false, wHash = '';
   function setThumbPreview() {
     const box = $('[data-w-thumb-prev]'); box.replaceChildren();
@@ -1910,9 +2008,10 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     $('[data-w-html]').hidden = !s || wSrc !== 'html';
     $('#w-slug').readOnly = !!wOwnSlug;
     $('[data-w-thumb-field]').hidden = !canUp();
+    $('[data-w-files-field]').hidden = !canUp() || !s;
     const lock = $('[data-w-lock]');
     lock.hidden = canUp();
-    if (!canUp()) { lock.replaceChildren(el('b', null, 'HTML 파일 올리기·썸네일은 올리기 권한이 있으면 열립니다. '), document.createTextNode(lockText())); }
+    if (!canUp()) { lock.replaceChildren(el('b', null, 'HTML 파일 올리기·썸네일·첨부 파일은 올리기 권한이 있으면 열립니다. '), document.createTextNode(lockText())); }
   }
   // 고치기: 내 글만. 목록에 없으면 불러와서
   async function openEdit(id, boot) {
@@ -1949,6 +2048,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     $('#w-slug').value = wOwnSlug || '';
     wThumb = { url: post ? post.thumb_url || null : null, blob: null, preview: null, type: null };
     setThumbPreview();
+    loadWriteFiles(post);
     $('[data-w-title]').textContent = post ? '고치기' : '글쓰기';
     $('[data-w-kinds]').hidden = !!post;
     $$('[data-w-kind]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.wKind === wKind)));
@@ -2134,9 +2234,12 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       if (wEdit) { byId.delete(wEdit.id); }
       wDirty = false;
       const newId = wEdit ? wEdit.id : res.data.id;
+      let fileFails = [];
+      if (s && (wFiles.add.length || wFiles.drop.length)) { B.setBusy(go, false); B.setBusy(go, true, '파일 올리는 중…'); fileFails = await saveFiles(newId); }
       // 다 쓰면 그 글 페이지로. 글 페이지에서 '고치기'로 왔으면 뒤로 돌아가 쓰기 페이지를 기록에 남기지 않는다
       if (wEdit && arrivedFrom === `p-${newId}`) history.back(); else location.replace(`#p-${newId}`);
-      toast(slug ? '올렸습니다. 페이지는 1~몇 분 뒤 열립니다.' : wEdit ? '고쳤습니다.' : s ? '결과물을 올렸습니다.' : '글을 올렸습니다.');
+      if (fileFails.length) toast(`글은 저장했지만 ${fileFails.join(', ')} 파일은 올리거나 빼지 못했습니다. 고치기에서 다시 해 주세요.`);
+      else toast(slug ? '올렸습니다. 페이지는 1~몇 분 뒤 열립니다.' : wEdit ? '고쳤습니다.' : s ? '결과물을 올렸습니다.' : '글을 올렸습니다.');
       refreshAll(wKind); loadUpload();
     } catch (x) { wFail(x.message || '저장하지 못했습니다.'); }
     finally { wBusy = false; B.setBusy(go, false); }
@@ -2178,6 +2281,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     $('[data-d-ccount]').textContent = '';
     $('[data-d-comments]').replaceChildren(el('li', null, '댓글을 불러오는 중입니다'));
     loadComments(r.id, seq);
+    loadFiles(r.id, seq);
   }
   function paintDetail() {
     const r = cur;
@@ -2213,6 +2317,33 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   }
   let rOpen = null;   // 지금 열려 있는 답글 칸 (한 번에 하나)
   const C_COLS = 'id, created_at, body, author, author_name, parent_id, deleted';
+  // 첨부 파일: 공개 저장소가 아니라서 1시간짜리 주소를 받아 붙인다. 사진은 작게 보여 주고 누르면 크게
+  let dFiles = { id: null, rows: [] };
+  async function loadFiles(id, seq) {
+    const box = $('[data-d-files]');
+    if (dFiles.id !== id) { box.replaceChildren(); box.hidden = true; }
+    dFiles = { id, rows: [] };
+    const { data, error } = await sb.from('post_files').select('id, path, name, size, mime').eq('post_id', id).order('id');
+    if (seq !== dSeq) return;
+    if (error || !data.length) { box.replaceChildren(); box.hidden = true; return; }
+    dFiles = { id, rows: data };
+    const sg = await sb.storage.from('post-files').createSignedUrls(data.map((f) => f.path), 3600);
+    if (seq !== dSeq) return;
+    const urls = new Map(((sg && sg.data) || []).map((x) => [x.path, x.signedUrl]));
+    box.replaceChildren(...data.filter((f) => urls.get(f.path)).map((f) => {
+      const u = urls.get(f.path);
+      if (f.mime.startsWith('image/')) {
+        const a = el('a', 'f-pic'); a.href = u; a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', `${f.name} 크게 보기 (새 창)`);
+        const im = el('img'); im.src = u; im.alt = f.name; im.loading = 'lazy'; im.decoding = 'async'; a.append(im);
+        return a;
+      }
+      const a = el('a', 'f-doc'); a.href = `${u}&download=${encodeURIComponent(f.name)}`; a.setAttribute('aria-label', `${f.name} 받기`);
+      const t = el('span'); t.append(el('b', null, f.name), el('small', null, `${sizeText(f.size)} · 받기`));
+      a.append(extBadge(f.name), t);
+      return a;
+    }));
+    box.hidden = !box.children.length;
+  }
   async function loadComments(id, seq) {
     let { data, error } = await sb.from('post_comments').select(C_COLS).eq('post_id', id).order('created_at');
     // 033 을 아직 안 돌렸으면 parent_id · deleted 가 없다 → 예전처럼 한 줄로
@@ -2349,6 +2480,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     toast('지웠습니다.');
     if (isListHash(arrivedFrom) && arrivedFrom !== '') history.back(); else location.replace(`#${listOf(r.kind)}`);
     const oldPic = myThumbPath(r.thumb_url); if (oldPic) sb.storage.from('post-thumbs').remove([oldPic]);
+    if (dFiles.id === r.id && dFiles.rows.length) sb.storage.from('post-files').remove(dFiles.rows.map((f) => f.path));
     if (r.kind === 'showcase' && r.thumb_url && sitePage(r.url)) syncThumbs();
     byId.delete(r.id);
     refreshAll(r.kind);
