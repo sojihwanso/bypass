@@ -1904,7 +1904,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   const SLUG_RULE = /^[a-z0-9][a-z0-9-]{1,48}$/, HTML_MAX = 20_000_000, IMG_MAX = 2_097_152;
   let wKind = 'showcase', wCat = '앱', wBusy = false, wEdit = null, wSrc = 'link', wHtml = null, wOwnSlug = null, wOwnFolder = null;
   let wThumb = { url: null, blob: null, preview: null, type: null };
-  // 첨부 파일 (supabase/034_post_files.sql): 글마다 2개까지, 한 파일 3MB 미만, 결과물만
+  // 첨부 파일 (supabase/034_post_files.sql): 글마다 2개까지, 한 파일 3MB 미만, 결과물 · 게시판 글 모두
   // keep: 이미 붙어 있는 것 · drop: 고치면서 뺀 것 · add: 새로 고른 것 (저장할 때 올린다)
   const FILE_MAX = 2, FILE_SIZE = 3 * 1024 * 1024;
   const FILE_TYPES = {
@@ -1938,7 +1938,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   async function loadWriteFiles(post) {
     const seq = ++wFilesSeq;
     wFiles = { keep: [], drop: [], add: [] }; paintFiles();
-    if (!post || post.kind !== 'showcase') return;
+    if (!post) return;
     const { data, error } = await sb.from('post_files').select('id, path, name, size, mime').eq('post_id', post.id).order('id');
     if (seq !== wFilesSeq || error) return;   // 034 전이면 그냥 없음
     wFiles.keep = data || []; paintFiles();
@@ -2011,7 +2011,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     $('[data-w-html]').hidden = !s || wSrc !== 'html';
     $('#w-slug').readOnly = !!wOwnSlug;
     $('[data-w-thumb-field]').hidden = !canUp();
-    $('[data-w-files-field]').hidden = !canUp() || !s;
+    $('[data-w-files-field]').hidden = !canUp();   // 결과물 · 게시판 글 모두
     const lock = $('[data-w-lock]');
     lock.hidden = canUp();
     if (!canUp()) { lock.replaceChildren(el('b', null, 'HTML 파일 올리기·썸네일·첨부 파일은 올리기 권한이 있으면 열립니다. '), document.createTextNode(lockText())); }
@@ -2238,7 +2238,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       wDirty = false;
       const newId = wEdit ? wEdit.id : res.data.id;
       let fileFails = [];
-      if (s && (wFiles.add.length || wFiles.drop.length)) { B.setBusy(go, false); B.setBusy(go, true, '파일 올리는 중…'); fileFails = await saveFiles(newId); }
+      if (wFiles.add.length || wFiles.drop.length) { B.setBusy(go, false); B.setBusy(go, true, '파일 올리는 중…'); fileFails = await saveFiles(newId); }
       // 다 쓰면 그 글 페이지로. 글 페이지에서 '고치기'로 왔으면 뒤로 돌아가 쓰기 페이지를 기록에 남기지 않는다
       if (wEdit && arrivedFrom === `p-${newId}`) history.back(); else location.replace(`#p-${newId}`);
       if (fileFails.length) toast(`글은 저장했지만 ${fileFails.join(', ')} 파일은 올리거나 빼지 못했습니다. 고치기에서 다시 해 주세요.`);
