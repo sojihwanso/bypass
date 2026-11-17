@@ -252,6 +252,11 @@
   .cm-form .acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
   .cm-set .check { margin-top: 12px; }
   .cm-syms { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .cm-acad { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+  .cm-acad-row { display: grid; grid-template-columns: 110px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 6px 6px 6px 12px; border-radius: 10px; background: var(--pave); font-size: 14px; }
+  .cm-acad-row .d { font-variant-numeric: tabular-nums; font-weight: 700; }
+  .cm-acad-row .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cm-acad-row.past { opacity: .5; }
   .cm-sym { display: inline-flex; align-items: center; gap: 4px; padding: 4px 6px 4px 12px; border-radius: 999px; background: var(--pave); font-size: 14px; font-weight: 700; }
   .cm-sym button { width: 24px; height: 24px; border: 0; border-radius: 50%; background: none; color: var(--muted); cursor: pointer; font: inherit; }
   .cm-sym button:hover { background: #fff; color: var(--ink); }
@@ -786,9 +791,19 @@
           <label class="check"><input type="checkbox" id="cs-market"> <span>미국 증시</span></label>
           <label class="check" style="margin-left: 26px"><input type="checkbox" id="cs-fng"> <span>CNN 공포·탐욕 지수 <small>(미국 증시 칸 맨 앞)</small></span></label>
           <label class="check" style="margin-left: 26px"><input type="checkbox" id="cs-wti"> <span>WTI 유가 <small>(공포·탐욕 지수 바로 옆, 뉴욕 원유 선물 CL=F)</small></span></label>
-          <label class="check"><input type="checkbox" id="cs-weather"> <span>목포 날씨 <small>(회원이 대시보드에서 직접 빼고 넣을 수 있음)</small></span></label>
+          <label class="check"><input type="checkbox" id="cs-weather"> <span>날씨 <small>(기본 목포, 회원이 위치를 바꾸거나 빼고 넣을 수 있음)</small></span></label>
           <label class="check"><input type="checkbox" id="cs-show"> <span>새 결과물</span></label>
           <label class="check"><input type="checkbox" id="cs-board"> <span>새 글</span></label>
+          <h2 style="margin-top: 26px">학사일정</h2>
+          <p class="hint" style="margin-top: 2px">여기 넣은 날짜가 모든 회원의 D-day 에 ‘학사’ 표시로 함께 뜹니다. 지난 일정은 저절로 안 보이고, 가까운 3개만 보입니다. 회원은 하나씩 숨기거나 통째로 끌 수 있습니다.</p>
+          <div class="cm-acad" data-cs-acad></div>
+          <div class="toolbar" style="margin: 12px 0 0; flex-wrap: wrap">
+            <label class="sr-only" for="cs-acad-name">일정 이름</label>
+            <input class="input" id="cs-acad-name" placeholder="일정 (예: 2학기 기말고사)" maxlength="30" autocomplete="off" style="max-width: 240px">
+            <label class="sr-only" for="cs-acad-date">날짜</label>
+            <input class="input" id="cs-acad-date" type="date" style="max-width: 170px">
+            <button type="button" class="mini-btn" data-cs-acad-add>추가</button>
+          </div>
           <h2 style="margin-top: 26px">미국 증시 기본 종목</h2>
           <p class="hint" style="margin-top: 2px">종목을 직접 고른 적 없는 회원에게 보이는 목록입니다(12개까지). 회원이 ‘기본으로 되돌리기’를 누르면 이 목록이 됩니다.</p>
           <div class="cm-syms" data-cs-syms></div>
@@ -4507,7 +4522,29 @@
   /* ===== 커뮤니티 › 홈 화면 설정 ===== (site_settings 'community', 010 표 그대로) */
   const CS_DEFAULT = { home: { market: true, fng: true, wti: true, weather: true, showcase: true, board: true }, market_defaults: ['^GSPC', '^IXIC', '^DJI'] };
   const CS_SYM = /^[A-Z0-9.^=-]{1,15}$/;
-  let csRow = null, csSyms = CS_DEFAULT.market_defaults.slice();
+  let csRow = null, csSyms = CS_DEFAULT.market_defaults.slice(), csAcad = [];
+  const CS_DATE = /^\d{4}-\d{2}-\d{2}$/;
+  function paintCsAcad() {
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' });
+    csAcad.sort((a, b) => a.date.localeCompare(b.date));
+    $('[data-cs-acad]').replaceChildren(...(csAcad.length ? csAcad.map((d, i) => {
+      const r = el('div', 'cm-acad-row' + (d.date < today ? ' past' : ''));
+      const x = el('button', 'mini-btn', '빼기'); x.type = 'button'; x.setAttribute('aria-label', `${d.name} 빼기`);
+      x.addEventListener('click', () => { csAcad.splice(i, 1); paintCsAcad(); });
+      r.append(el('span', 'd', d.date.replace(/-/g, '. ')), el('span', 'n', d.name + (d.date < today ? ' (지남)' : '')), x);
+      return r;
+    }) : [el('span', 'list-hint', '아직 없습니다. 시험기간·수강신청·방학 같은 날짜를 넣어 보세요.')]));
+  }
+  function csAcadAdd() {
+    const n = $('#cs-acad-name').value.trim(), d = $('#cs-acad-date').value, err = $('[data-cs-err]');
+    err.hidden = true;
+    if (!n || !CS_DATE.test(d)) { err.textContent = '일정 이름과 날짜를 넣어 주세요.'; err.hidden = false; return; }
+    if (csAcad.length >= 60) { err.textContent = '60개까지 넣을 수 있습니다. 지난 일정을 빼 주세요.'; err.hidden = false; return; }
+    csAcad.push({ name: n.slice(0, 30), date: d }); $('#cs-acad-name').value = ''; paintCsAcad(); $('#cs-acad-name').focus();
+  }
+  $('[data-cs-acad-add]').addEventListener('click', csAcadAdd);
+  $('#cs-acad-name').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); csAcadAdd(); } });
+  $('#cs-acad-date').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); csAcadAdd(); } });
   async function loadCmset() {
     const { data, error } = await B.sb.from('site_settings').select('*').eq('key', 'community').maybeSingle();
     if (error) { $('[data-cs-err]').textContent = cmErr(error, '불러오기'); $('[data-cs-err]').hidden = false; return; }
@@ -4516,6 +4553,8 @@
     const h = { ...CS_DEFAULT.home, ...(v.home || {}) };
     $('#cs-market').checked = h.market !== false; $('#cs-fng').checked = h.fng !== false; $('#cs-wti').checked = h.wti !== false; $('#cs-weather').checked = h.weather !== false; $('#cs-show').checked = h.showcase !== false; $('#cs-board').checked = h.board !== false;
     csSyms = Array.isArray(v.market_defaults) ? v.market_defaults.filter((x) => CS_SYM.test(x)).slice(0, 12) : CS_DEFAULT.market_defaults.slice();
+    csAcad = Array.isArray(v.academic) ? v.academic.filter((x) => x && typeof x.name === 'string' && CS_DATE.test(x.date || '')).map((x) => ({ name: x.name.slice(0, 30), date: x.date })) : [];
+    paintCsAcad();
     $('[data-cs-when]').textContent = data && data.updated_at ? `마지막 저장 ${cmDate(data.updated_at)}` : '아직 저장한 적 없음 (기본값)';
     paintCsSyms();
   }
@@ -4540,7 +4579,7 @@
   $('#cs-add').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); csAdd(); } });
   $('[data-cs-form]').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const value = { home: { market: $('#cs-market').checked, fng: $('#cs-fng').checked, wti: $('#cs-wti').checked, weather: $('#cs-weather').checked, showcase: $('#cs-show').checked, board: $('#cs-board').checked }, market_defaults: csSyms };
+    const value = { ...((csRow && csRow.value) || {}), home: { market: $('#cs-market').checked, fng: $('#cs-fng').checked, wti: $('#cs-wti').checked, weather: $('#cs-weather').checked, showcase: $('#cs-show').checked, board: $('#cs-board').checked }, market_defaults: csSyms, academic: csAcad };
     const btn = $('[data-cs-save]'); B.setBusy(btn, true, '저장 중…');
     const res = csRow
       ? await B.sb.from('site_settings').update({ value }).eq('key', 'community').select().single()

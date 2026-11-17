@@ -288,6 +288,20 @@ a.wg-row:hover { background: var(--panel-2); }
 .wx-h .hp { display: block; margin-top: 2px; font-size: 11.5px; font-weight: 650; color: var(--blue); min-height: 15px; }
 .wx-h.now .hp { color: inherit; }
 @keyframes wxIn { from { opacity: 0; transform: translateY(10px); } }
+.wx-loc { display: inline-flex; align-items: center; gap: 4px; margin: -4px -8px; padding: 4px 8px; border: 0; border-radius: 10px; background: none; color: inherit; font: inherit; cursor: pointer; }
+.wx-loc:hover, .wx-loc[aria-expanded="true"] { background: var(--panel-2); }
+.wx-loc svg { color: var(--sub); }
+.wx-pick { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 16px; background: var(--panel-2); }
+.wx-q { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.wx-q .in { height: 38px; padding: 0 12px; }
+.wx-res { display: flex; flex-wrap: wrap; gap: 6px; }
+.wx-res:empty { display: none; }
+.wx-res .state { margin: 0; font-size: 13px; }
+.wx-chip { display: inline-flex; align-items: baseline; gap: 5px; height: 32px; padding: 0 11px; border: 0; border-radius: 10px; background: var(--panel); color: var(--ink); font: inherit; font-size: 13.5px; font-weight: 650; cursor: pointer; box-shadow: var(--ring); align-items: center; }
+.wx-chip small { font-size: 11.5px; font-weight: 500; color: var(--sub); }
+.wx-chip:hover { background: var(--hover2); }
+.wx-chip.on { background: var(--ink); color: var(--on-ink); }
+.wx-chip.me { color: var(--blue); }
 .wx-foot { margin: 0; font-size: 12.5px; color: var(--faint); }
 .wx-retry { margin-left: 6px; border: 0; background: none; padding: 0; font: inherit; font-weight: 650; color: var(--sub); text-decoration: underline; cursor: pointer; }
 @media (max-width: 640px) { .wx-ico { font-size: 46px; } .wx-deg { font-size: 38px; } }
@@ -296,6 +310,11 @@ a.wg-row:hover { background: var(--panel-2); }
 .dd span { font-size: 13.5px; color: #B9C0CC; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dd b { font-size: 34px; font-weight: 800; letter-spacing: -.04em; color: var(--accent); line-height: 1.15; font-variant-numeric: tabular-nums; }
 .dd small { font-size: 12px; color: #8A919C; }
+.dd.acad { background: var(--panel-2); color: var(--ink); box-shadow: var(--ring); }
+.dd.acad span { color: var(--mid); }
+.dd.acad b { color: var(--blue); }
+.dd.acad small { color: var(--sub); }
+.dd-tag { display: inline-block; margin-right: 6px; padding: 1px 6px; border-radius: 6px; background: var(--soft); color: var(--blue); font-size: 11px; font-style: normal; font-weight: 750; vertical-align: 1px; }
 .dd-form { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; }
 .dd-form .in { height: 40px; padding: 0 12px; }
 .dd-edit { display: flex; align-items: center; gap: 8px; font-size: 14px; }
@@ -938,7 +957,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
         <div data-wg-dday></div>
       </section>
       <section class="wg" data-wg="weather" aria-labelledby="t-wx">
-        <div class="wg-h"><h2 id="t-wx">목포 날씨</h2><span class="wg-r hint" data-wx-when></span></div>
+        <div class="wg-h"><h2 id="t-wx"><button type="button" class="wx-loc" data-wx-loc aria-expanded="false" title="날씨 볼 곳 바꾸기">목포 날씨<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button></h2><span class="wg-r hint" data-wx-when></span></div>
         <div data-wx aria-live="polite"><p class="state">날씨 불러오는 중…</p></div>
       </section>
       <section class="wg" data-wg="favs" aria-labelledby="t-wf">
@@ -3069,9 +3088,13 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
 
 
   /* ===== 목포 날씨 ===== Open-Meteo (키 없이 쓰는 무료 예보, 비상업용) — 브라우저에서 바로 부르고 20분 동안 이 브라우저에 담아 둔다 */
-  const WX_AT = { lat: 34.79, lon: 126.38 };          // 목포해양대 근처
+  const WX_HOME = { name: '목포', lat: 34.79, lon: 126.38 };   // 기본: 목포해양대 근처
   const WX_SEA = { lat: 34.75, lon: 125.75 };         // 목포 앞바다(신안 서쪽 바깥 바다) — 파고용
-  const WX_LS = 'bypass-wx-v1', WX_TTL = 20 * 60 * 1000;
+  // 회원이 고른 곳 (대시보드 설정 wx). 바닷가가 아니면 파고 대신 비 올 확률
+  const WX_PICK = [['목포', 34.79, 126.38], ['서울', 37.566, 126.978], ['부산', 35.18, 129.075], ['인천', 37.456, 126.705], ['광주', 35.16, 126.852], ['여수', 34.76, 127.662],
+    ['완도', 34.311, 126.755], ['제주', 33.5, 126.531], ['대전', 36.351, 127.385], ['대구', 35.871, 128.601], ['울산', 35.538, 129.311], ['포항', 36.019, 129.343]];
+  const wxAt = () => dbPrefs.wx || WX_HOME;
+  const WX_LS = 'bypass-wx-v2', WX_TTL = 20 * 60 * 1000;
   let wxTimer = null, wxBusy = false;
   const WX_CODE = { 0: ['맑음', '☀️', '🌙'], 1: ['대체로 맑음', '🌤️', '🌙'], 2: ['구름 조금', '⛅', '☁️'], 3: ['흐림', '☁️', '☁️'], 45: ['안개', '🌫️'], 48: ['짙은 안개', '🌫️'],
     51: ['약한 이슬비', '🌦️'], 53: ['이슬비', '🌦️'], 55: ['강한 이슬비', '🌧️'], 56: ['어는 이슬비', '🌧️'], 57: ['어는 이슬비', '🌧️'],
@@ -3090,13 +3113,15 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     finally { clearTimeout(tm); }
   }
   async function wxFetch() {
-    const q = new URLSearchParams({ latitude: WX_AT.lat, longitude: WX_AT.lon, timezone: 'Asia/Seoul', wind_speed_unit: 'ms', forecast_days: '2',
+    const at = wxAt(), home = !dbPrefs.wx;
+    const q = new URLSearchParams({ latitude: at.lat, longitude: at.lon, timezone: 'Asia/Seoul', wind_speed_unit: 'ms', forecast_days: '2',
       current: 'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,is_day',
       hourly: 'temperature_2m,precipitation_probability,weather_code,is_day', daily: 'temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset' });
-    const m = new URLSearchParams({ latitude: WX_SEA.lat, longitude: WX_SEA.lon, timezone: 'Asia/Seoul', current: 'wave_height,wave_period' });
+    const sea = home ? WX_SEA : at;
+    const m = new URLSearchParams({ latitude: sea.lat, longitude: sea.lon, timezone: 'Asia/Seoul', current: 'wave_height,wave_period' });
     const [f, s] = await Promise.allSettled([wxGet(`https://api.open-meteo.com/v1/forecast?${q}`), wxGet(`https://marine-api.open-meteo.com/v1/marine?${m}`)]);
     if (f.status !== 'fulfilled' || !f.value || !f.value.current) throw new Error('weather');
-    return { at: Date.now(), f: f.value, sea: s.status === 'fulfilled' && s.value && s.value.current ? s.value.current : null };
+    return { at: Date.now(), loc: `${at.lat},${at.lon}`, f: f.value, sea: s.status === 'fulfilled' && s.value && s.value.current ? s.value.current : null };
   }
   function paintWeather(w, err) {
     const box = $('[data-wx]');
@@ -3117,7 +3142,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     const ar = el('span', 'wx-arrow', '↓'); ar.style.transform = `rotate(${Math.round(c.wind_direction_10m)}deg)`; ar.setAttribute('aria-hidden', 'true');
     add('바람', ar, `${c.wind_speed_10m.toFixed(1)}`, el('small', null, `m/s ${wxDir(c.wind_direction_10m)}풍`));
     add('습도', `${Math.round(c.relative_humidity_2m)}`, el('small', null, '%'));
-    if (w.sea && w.sea.wave_height != null) add('앞바다 파고', `${w.sea.wave_height.toFixed(1)}`, el('small', null, `m ${wxWave(w.sea.wave_height)}`));
+    if (w.sea && w.sea.wave_height != null) add(dbPrefs.wx ? '파고' : '앞바다 파고', `${w.sea.wave_height.toFixed(1)}`, el('small', null, `m ${wxWave(w.sea.wave_height)}`));
     else add('비 올 확률', `${d.precipitation_probability_max ? d.precipitation_probability_max[0] : 0}`, el('small', null, '% 오늘'));
     // 지금부터 12시간
     const hrs = el('div', 'wx-hours'); hrs.setAttribute('role', 'list'); hrs.setAttribute('aria-label', '앞으로 12시간');
@@ -3133,12 +3158,61 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     }
     const foot = el('p', 'wx-foot', `${d.sunrise ? `일출 ${wxHM(d.sunrise[0])} · 일몰 ${wxHM(d.sunset[0])} · ` : ''}예보 Open-Meteo`);
     box.replaceChildren(top, st, ...(hrs.childNodes.length ? [hrs] : []), foot);
+    paintWxName();
     $('[data-wx-when]').textContent = `${new Date(w.at).toLocaleTimeString('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false })} 기준`;
   }
+  // 위치 고르기
+  function paintWxName() { const b = $('[data-wx-loc]'); if (b) b.firstChild.textContent = `${wxAt().name} 날씨`; }
+  function wxSet(v) {
+    dbPrefs.wx = v && !(v.lat === WX_HOME.lat && v.lon === WX_HOME.lon) ? { name: String(v.name).slice(0, 20), lat: Math.round(v.lat * 1000) / 1000, lon: Math.round(v.lon * 1000) / 1000 } : null;
+    dbSave(); closeWxPick(); paintWxName(); paintWeather(null); loadWeather(true);
+  }
+  function closeWxPick() { const p = $('[data-wx-pick]'); if (p) p.remove(); $('[data-wx-loc]').setAttribute('aria-expanded', 'false'); }
+  function openWxPick() {
+    if ($('[data-wx-pick]')) { closeWxPick(); return; }
+    const box = el('div', 'wx-pick'); box.dataset.wxPick = '';
+    const f = el('form', 'wx-q'); f.noValidate = true;
+    const inp = el('input', 'in'); inp.placeholder = '지역 이름 (예: 해남)'; inp.maxLength = 30; inp.setAttribute('aria-label', '날씨 볼 곳 찾기');
+    const go = el('button', 'btn btn-dark btn-sm', '찾기'); go.type = 'submit';
+    f.append(inp, go);
+    const res = el('div', 'wx-res'); res.setAttribute('role', 'list');
+    const chip = (name, lat, lon, sub) => { const b = el('button', 'wx-chip'); b.type = 'button'; b.append(name); if (sub) b.append(el('small', null, sub)); b.addEventListener('click', () => wxSet({ name, lat, lon })); return b; };
+    const quick = el('div', 'wx-res');
+    quick.append(...WX_PICK.map(([n, la, lo]) => { const c = chip(n, la, lo); if (wxAt().name === n) c.classList.add('on'); return c; }));
+    if (navigator.geolocation) {
+      const me = el('button', 'wx-chip me', '📍 지금 내 위치'); me.type = 'button';
+      me.addEventListener('click', () => {
+        me.textContent = '위치 찾는 중…';
+        navigator.geolocation.getCurrentPosition((p) => wxSet({ name: '내 위치', lat: p.coords.latitude, lon: p.coords.longitude }),
+          () => { me.textContent = '📍 위치를 못 가져왔어요'; }, { timeout: 10000, maximumAge: 600000 });
+      });
+      quick.prepend(me);
+    }
+    f.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const q = inp.value.trim(); if (!q) return;
+      res.replaceChildren(el('p', 'state', '찾는 중…'));
+      try {
+        const r = await wxGet(`https://geocoding-api.open-meteo.com/v1/search?${new URLSearchParams({ name: q, count: '8', language: 'ko', format: 'json' })}`);
+        const list = (r && r.results) || [];
+        list.sort((a, b) => (b.country_code === 'KR') - (a.country_code === 'KR'));
+        res.replaceChildren(...(list.length ? list.map((x) => chip(x.name, x.latitude, x.longitude, [x.admin1, x.country_code !== 'KR' ? x.country : ''].filter(Boolean).join(' · ')))
+          : [el('p', 'state', '못 찾았어요. 시·군·구 이름으로 다시 찾아보세요.')]));
+      } catch (x) { res.replaceChildren(el('p', 'state', '지금은 찾을 수 없어요. 아래에서 골라 주세요.')); }
+    });
+    box.append(f, res, quick);
+    $('[data-wx]').before(box);
+    $('[data-wx-loc]').setAttribute('aria-expanded', 'true');
+    inp.focus();
+  }
+  $('[data-wx-loc]').addEventListener('click', openWxPick);
   async function loadWeather(force) {
+    paintWxName();
     if (wxBusy) return;
     let cached = null;
     try { cached = JSON.parse(localStorage.getItem(WX_LS) || 'null'); } catch (x) { /* 저장소 못 씀 */ }
+    const loc = `${wxAt().lat},${wxAt().lon}`;
+    if (cached && cached.loc !== loc) cached = null;
     if (cached && cached.f) paintWeather(cached);
     if (!force && cached && Date.now() - cached.at < WX_TTL) return wxTick();
     wxBusy = true;
@@ -3161,9 +3235,9 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     dday: { name: 'D-day', w: 1 }, favs: { name: '즐겨찾기', w: 1 }, board: { name: '새 글', w: 1 }, weather: { name: '날씨', w: 1 },
     showcase: { name: '새 결과물', w: 2 }, meeting: { name: '회의 안건', w: 1, crew: true },
   };
-  const DB_DEFAULT = () => ({ widgets: [{ id: 'market', w: 2 }, { id: 'weather', w: 1 }, { id: 'continue', w: 1 }, { id: 'news', w: 1 }, { id: 'board', w: 1 }, { id: 'favs', w: 1 }].concat(isCrew ? [{ id: 'meeting', w: 1 }] : []), ddays: [], favs: [], added: ['weather'] });
-  // 새로 생긴 위젯과 넣을 자리
-  const NEW_WG = { weather: 1 };
+  const DB_DEFAULT = () => ({ widgets: [{ id: 'market', w: 2 }, { id: 'weather', w: 1 }, { id: 'continue', w: 1 }, { id: 'news', w: 1 }, { id: 'dday', w: 1 }, { id: 'board', w: 1 }, { id: 'favs', w: 1 }].concat(isCrew ? [{ id: 'meeting', w: 1 }] : []), ddays: [], favs: [], added: ['weather', 'dday'], acad: true, acadHide: [], wx: null });
+  // 새로 생긴 위젯과 넣을 자리 (D-day 는 학사일정이 함께 떠서 모두에게 한 번 넣어 줌)
+  const NEW_WG = { weather: 1, dday: 3 };
   let dbPrefs = DB_DEFAULT(), dbHasTable = true, dbEditing = false, dbSaveT = null;
   const DB_LS = `bypass-dash-${user.id}`;
   function dbClean(v) {
@@ -3176,7 +3250,10 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     // 새로 생긴 위젯은 예전에 저장한 회원에게도 한 번만 넣어 준다 (빼면 다시 안 넣음)
     const added = Array.isArray(v.added) ? v.added.filter((x) => WG[x]) : [];
     Object.entries(NEW_WG).forEach(([id, at]) => { if (!added.includes(id)) { added.push(id); if (Array.isArray(v.widgets) && !ws.some((x) => x.id === id)) ws.splice(Math.min(at, ws.length), 0, { id, w: WG[id].w }); } });
-    return { widgets: ws, ddays: dd, favs: fv, added };
+    const acadHide = Array.isArray(v.acadHide) ? v.acadHide.filter((x) => typeof x === 'string' && x.length <= 60).slice(0, 60) : [];
+    const wx = v.wx && typeof v.wx.name === 'string' && Number.isFinite(v.wx.lat) && Number.isFinite(v.wx.lon) && Math.abs(v.wx.lat) <= 90 && Math.abs(v.wx.lon) <= 180
+      ? { name: v.wx.name.slice(0, 20), lat: Math.round(v.wx.lat * 1000) / 1000, lon: Math.round(v.wx.lon * 1000) / 1000 } : null;
+    return { widgets: ws, ddays: dd, favs: fv, added, acad: v.acad !== false, acadHide, wx };
   }
   async function dbLoad() {
     const { data, error } = await sb.from('dashboard_prefs').select('layout').eq('user_id', user.id).maybeSingle();
@@ -3355,14 +3432,34 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
 
   // D-day: 내가 정한 날짜 (여러 개)
   const ddOf = (date) => { const t = new Date(`${date}T00:00:00+09:00`), now = new Date(); const d0 = new Date(now.toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' }) + 'T00:00:00+09:00'); const n = Math.round((t - d0) / 86400000); return n === 0 ? 'D-day' : n > 0 ? `D-${n}` : `D+${-n}`; };
+  // 학사일정: 운영진이 HQ › 홈 화면 설정에서 넣음 (site_settings 'community'.academic). 지난 일정은 안 보이고, 가까운 3개만
+  let ACAD = [];
+  const todayKey = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' });
+  const acadKey = (d) => `${d.date}|${d.name}`;
+  function acadList() {
+    if (dbPrefs.acad === false) return [];
+    const t = todayKey();
+    return ACAD.filter((d) => d.date >= t && !dbPrefs.acadHide.includes(acadKey(d))).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3);
+  }
   function renderDday() {
     const box = $('[data-wg-dday]'); if (!box) return;
-    const list = dbPrefs.ddays.slice().sort((a, b) => a.date.localeCompare(b.date));
+    const list = dbPrefs.ddays.map((d) => ({ ...d, mine: true })).concat(acadList().map((d) => ({ ...d, acad: true })))
+      .sort((a, b) => a.date.localeCompare(b.date));
     const cards = el('div', 'dd-list');
     list.forEach((d) => {
-      const c = el('div', 'dd');
-      c.append(el('span', null, d.name), el('b', null, ddOf(d.date)), el('small', null, new Date(`${d.date}T00:00:00+09:00`).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })));
-      if (dbEditing) { const x = el('button', 'mini', '지우기'); x.type = 'button'; x.style.cssText = 'height:30px;margin-top:8px;align-self:flex-start;background:#2A2E36;color:#fff'; x.addEventListener('click', () => { dbPrefs.ddays = dbPrefs.ddays.filter((y) => y !== d); dbSave(); renderDday(); }); c.append(x); }
+      const c = el('div', `dd${d.acad ? ' acad' : ''}`);
+      const nm = el('span', null, d.name);
+      if (d.acad) { const tg = el('em', 'dd-tag', '학사'); nm.prepend(tg); }
+      c.append(nm, el('b', null, ddOf(d.date)), el('small', null, new Date(`${d.date}T00:00:00+09:00`).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })));
+      if (dbEditing) {
+        const x = el('button', 'mini', d.acad ? '숨기기' : '지우기'); x.type = 'button'; x.style.cssText = 'height:30px;margin-top:8px;align-self:flex-start;background:#2A2E36;color:#fff';
+        x.addEventListener('click', () => {
+          if (d.acad) dbPrefs.acadHide = dbPrefs.acadHide.concat(acadKey(d)).slice(-60);
+          else dbPrefs.ddays = dbPrefs.ddays.filter((y) => !(y.name === d.name && y.date === d.date));
+          dbSave(); renderDday();
+        });
+        c.append(x);
+      }
       cards.append(c);
     });
     const kids = [];
@@ -3381,6 +3478,12 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       });
       if (!list.length) kids.push(el('p', 'state', '시험·마감일을 넣으면 며칠 남았는지 보여 드려요.'));
       kids.push(f);
+    }
+    if (dbEditing && ACAD.length) {
+      const lb = el('label', 'dd-edit'); const cb = el('input'); cb.type = 'checkbox'; cb.checked = dbPrefs.acad !== false;
+      cb.addEventListener('change', () => { dbPrefs.acad = cb.checked; if (cb.checked) dbPrefs.acadHide = []; dbSave(); renderDday(); });
+      lb.append(cb, '학사일정 같이 보기');
+      kids.push(lb);
     }
     box.replaceChildren(...kids);
   }
@@ -3438,6 +3541,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   try {
     const v = (setRes && setRes.data && setRes.data.value) || {};
     homeSet = { ...homeSet, ...(v.home || {}) };
+    if (Array.isArray(v.academic)) ACAD = v.academic.filter((x) => x && typeof x.name === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x.date || '')).slice(0, 60).map((x) => ({ name: x.name.slice(0, 30), date: x.date }));
     if (Array.isArray(v.market_defaults)) MK_DEFAULT = v.market_defaults.filter((x) => typeof x === 'string' && /^[A-Z0-9.^=-]{1,15}$/.test(x)).slice(0, MK_MAX);
   } catch (x) { /* 설정을 못 읽으면 기본값 */ }
   paintChips('showcase');
