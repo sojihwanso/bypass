@@ -164,6 +164,13 @@ body.has-mnav .top { display: none; }
 .auth-alt { margin: 22px 0 0; text-align: center; font-size: 14.5px; color: var(--sub); }
 .auth-alt a { color: var(--ink); font-weight: 650; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line); }
 .auth-alt a:hover { text-decoration-color: var(--ink); }
+.crew-check { display: flex; gap: 12px; align-items: flex-start; margin: 22px 0 0; padding: 14px 16px; border-radius: 14px; background: var(--panel-2, #F5F6F8); box-shadow: inset 0 0 0 1px var(--line); cursor: pointer; }
+.crew-check:has(input:checked) { box-shadow: inset 0 0 0 1.5px var(--accent, #EE6A1F); background: color-mix(in srgb, var(--accent, #EE6A1F) 7%, var(--card, #fff)); }
+.crew-check input { flex: none; width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--accent, #EE6A1F); cursor: pointer; }
+.crew-check b { display: block; font-size: 15px; }
+.crew-check small { display: block; margin-top: 3px; font-size: 13px; line-height: 1.5; color: var(--sub); }
+.crew-fields { margin-top: 4px; padding: 2px 2px 0; }
+.crew-fields .opt { font-weight: 500; color: var(--sub); }
 .auth-note { margin: 16px 0 0; text-align: center; font-size: 13px; color: var(--faint); }
 .auth-note a { color: var(--sub); }
 @keyframes markIn { from { opacity: 0; transform: scale(.4) rotate(-30deg); } }
