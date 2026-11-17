@@ -195,7 +195,17 @@ body[data-v="home"], body[data-v="showcase"] { background: var(--dash); }
 /* 넓은 화면: 날씨는 대시보드 오른쪽 빈 곳에 따로 (스크롤해도 따라옴) */
 .wx-rail { position: absolute; top: 0; bottom: 0; left: calc(100% + 28px); width: min(300px, calc((100vw - 1080px) / 2 - 44px)); }
 .wx-rail[hidden] { display: none; }
-.wx-rail > .wg { position: sticky; top: 84px; padding: 18px 18px 16px; gap: 12px; animation-delay: 200ms; }
+.wx-rail .wg-ctl button:not(.x) { display: none; }
+.wg-row.unread::after { content: ''; flex: none; width: 6px; height: 6px; margin-left: auto; border-radius: 50%; background: var(--accent); }
+.rail-in { position: sticky; top: 84px; display: flex; flex-direction: column; gap: 14px; }
+.wx-rail .wg { padding: 18px 18px 16px; gap: 12px; animation-delay: 200ms; }
+.wx-rail .dd-list { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.wx-rail .dd-form { grid-template-columns: minmax(0, 1fr); }
+.wx-rail .dd { flex-direction: row; flex-wrap: wrap; align-items: baseline; column-gap: 10px; padding: 12px 14px; border-radius: 14px; }
+.wx-rail .dd span { flex: 1; min-width: 0; color: #DDE2EA; font-weight: 650; }
+.wx-rail .dd b { font-size: 24px; }
+.wx-rail .dd small { flex-basis: 100%; }
+.wx-rail .dd .mini { margin-top: 6px !important; }
 .wx-rail .wg-h h2 { font-size: 15px; }
 .wx-rail .wx-now { gap: 12px; }
 .wx-rail .wx-ico { font-size: 42px; }
@@ -893,7 +903,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       <button type="button" class="done" data-db-done>완료</button>
     </div>
     <div class="db-grid" data-db-grid>
-      <div class="wx-rail" data-wx-rail role="complementary" aria-label="날씨" hidden></div>
+      <div class="wx-rail" data-wx-rail role="complementary" aria-label="날씨 · D-day" hidden><div class="rail-in" data-rail-in></div></div>
       <section class="wg wide" data-wg="market" aria-labelledby="t-hmk" data-mk>
       <div class="hsec-head wg-h">
         <h2 id="t-hmk">내 종목 · 미국 증시</h2>
@@ -1540,8 +1550,9 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   const isRead = (r) => !!readMap[r.id];
   function markRead(id) {
     id = String(id);
-    if (readMap[id]) return;
-    readMap[id] = Date.now();
+    const first = !readMap[id];
+    readMap[id] = Date.now();   // 마지막으로 연 때 (그 뒤에 달린 댓글은 다시 '새 소식')
+    if (!first) { try { localStorage.setItem(READ_LS, JSON.stringify(readMap)); } catch (x) { /* 기억 못 함 */ } paintNewsN(); return; }
     const old = Date.now() - 14 * 86400000;
     Object.keys(readMap).forEach((k) => { if (readMap[k] < old) delete readMap[k]; });
     try { localStorage.setItem(READ_LS, JSON.stringify(readMap)); } catch (x) { /* 기억 못 함 */ }
@@ -1549,6 +1560,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     $$(`.ns-item[href="#p-${id}"]`).forEach((a) => a.remove());
     if (!$('.ns-item')) $('[data-new-strip]').hidden = true;
     if (Array.isArray(home.showcase)) paintNewDot(home.showcase.filter(isNew).length);
+    paintNewsN();
   }
   const isNew = (r) => r && r.author !== user.id && !r.hidden && Date.parse(r.created_at) > seenAt && !isRead(r);
   async function loadHome() {
@@ -3221,17 +3233,20 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     [dbPrefs.widgets[a], dbPrefs.widgets[b]] = [dbPrefs.widgets[b], dbPrefs.widgets[a]];
     dbSave(); dbLayout();
   }
-  // 날씨를 오른쪽 빈 곳으로: 화면이 충분히 넓고, 날씨를 켜 두었고, 편집 중이 아닐 때
+  // 날씨·D-day 를 오른쪽 빈 곳으로: 화면이 충분히 넓고, 그 위젯을 켜 두었을 때 (편집할 때도 그대로, ✕ 만)
   const wxWide = matchMedia('(min-width: 1640px)');
+  const SIDE_WG = ['weather', 'dday'];
   function placeWeather() {
-    const sec = $('[data-wg="weather"]'), rail = $('[data-wx-rail]'), grid = $('[data-db-grid]');
-    if (!sec || !rail) return;
-    const side = wxWide.matches && !dbEditing && !sec.hidden;
-    if (side && sec.parentElement !== rail) rail.append(sec);
-    else if (!side && sec.parentElement === rail) grid.append(sec);
-    rail.hidden = !side;
+    const rail = $('[data-wx-rail]'), inner = $('[data-rail-in]'), grid = $('[data-db-grid]');
+    if (!rail || !inner) return;
+    const sideIds = dbPrefs.widgets.map((x) => x.id).filter((id) => { const sec = $(`[data-wg="${id}"]`); return SIDE_WG.includes(id) && sec && wxWide.matches && !sec.hidden; });
+    // 이미 그 자리에 있으면 옮기지 않는다 (옮기면 등장 애니메이션이 다시 돎)
+    const now = [...inner.children].map((x) => x.dataset.wg);
+    if (now.join() !== sideIds.join()) sideIds.forEach((id) => inner.append($(`[data-wg="${id}"]`)));
+    SIDE_WG.forEach((id) => { const sec = $(`[data-wg="${id}"]`); if (sec && !sideIds.includes(id) && sec.parentElement === inner) grid.append(sec); });
+    rail.hidden = !sideIds.length;
     // 반쪽 위젯이 한 줄에 혼자 남으면 그 줄을 꽉 채운다 (빈칸 없이)
-    const list = dbPrefs.widgets.filter((x) => wgOn(x.id) && !(side && x.id === 'weather'));
+    const list = dbPrefs.widgets.filter((x) => wgOn(x.id) && !sideIds.includes(x.id));
     let open = null;
     $$('[data-wg]').forEach((x) => x.classList.remove('solo'));
     list.forEach((x) => {
@@ -3244,7 +3259,6 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   wxWide.addEventListener('change', placeWeather);
   function dbEdit(on) {
     dbEditing = on;
-    placeWeather();
     $('[data-db-grid]').classList.toggle('editing', on);
     $('[data-db-editbar]').hidden = !on;
     const b = $('[data-db-edit]'); b.setAttribute('aria-pressed', String(on)); b.textContent = on ? '편집 끝내기' : '대시보드 편집';
@@ -3290,6 +3304,15 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   }
 
   // 내 소식: 내 글에 남이 단 댓글 · 내 댓글에 남이 단 답글(033 my_reply_news) · 누른 좋아요 (최근 2주)
+  // 숫자 = 하루 안에 온 소식 중, 그 글을 연 뒤에 온 것만
+  let newsItems = [];
+  const newsUnread = (x) => Date.now() - Date.parse(x.t) < 86400000 && !((readMap[String(x.r.post_id)] || 0) > Date.parse(x.t));
+  function paintNewsN() {
+    const n = $('[data-wg-news-n]'); if (!n) return;
+    const k = newsItems.filter(newsUnread).length;
+    n.textContent = String(k); n.hidden = !k;
+    $$('[data-wg-news] .wg-row').forEach((a) => { const x = newsItems.find((y) => a.dataset.k === y.key); a.classList.toggle('unread', !!x && newsUnread(x)); });
+  }
   async function loadNews() {
     const box = $('[data-wg-news]'), since = new Date(Date.now() - 14 * 86400000).toISOString();
     const [c, l, rp] = await Promise.all([
@@ -3307,11 +3330,12 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     (l.data || []).forEach((r) => { const g = byPost.get(r.post_id) || { t: r.created_at, kind: 'l', r, n: 0 }; g.n += 1; byPost.set(r.post_id, g); });
     byPost.forEach((g) => items.push(g));
     items.sort((a, b) => String(b.t).localeCompare(String(a.t)));
-    const fresh = items.filter((x) => Date.now() - Date.parse(x.t) < 86400000).length;
-    const n = $('[data-wg-news-n]'); n.textContent = String(fresh); n.hidden = !fresh;
+    items.forEach((x) => { x.key = `${x.kind}-${x.kind === 'l' ? x.r.post_id : x.r.id}`; });
+    newsItems = items;
+    paintNewsN();
     if (!items.length) { box.replaceChildren(el('p', 'state', '최근 2주 동안 새 소식이 없어요.')); return; }
     box.replaceChildren(...items.slice(0, 5).map((x) => {
-      const a = el('a', 'wg-row'); a.href = `#p-${x.r.post_id}`;
+      const a = el('a', 'wg-row'); a.href = `#p-${x.r.post_id}`; a.dataset.k = x.key;
       const t = el('span', 't');
       if (x.kind === 'c' || x.kind === 'r') {
         const ini = faceEl('wg-ini', x.r.author, x.r.author_name);
@@ -3326,6 +3350,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       }
       return a;
     }));
+    paintNewsN();
   }
 
   // D-day: 내가 정한 날짜 (여러 개)
