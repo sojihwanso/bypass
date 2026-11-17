@@ -1966,7 +1966,10 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     for (const file of wFiles.add) {
       const ext = extOf(file.name), mime = FILE_TYPES[ext];
       const path = `${user.id}/${postId}/${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const upl = await sb.storage.from('post-files').upload(path, file, { contentType: storeType(mime), upsert: false });
+      // supabase-js 는 File 을 넘기면 contentType 을 무시하고 브라우저가 붙인 종류(file.type)로 보낸다
+      // → 종류를 다시 붙인 Blob 으로 감싸서 보낸다 (HTML 은 내려받기 전용, hwp·csv 처럼 브라우저마다 다른 것도 맞춤)
+      const blob = new Blob([file], { type: storeType(mime) });
+      const upl = await sb.storage.from('post-files').upload(path, blob, { contentType: storeType(mime), upsert: false });
       if (upl.error) { fails.push(file.name); continue; }
       const name = file.name.replace(/[\\/]/g, '_').trim().slice(-120) || `파일.${ext}`;
       const { error } = await sb.from('post_files').insert({ post_id: postId, path, name, size: file.size, mime });
