@@ -31,7 +31,7 @@
 <style>
 /* BYPASS 커뮤니티 = 로그인한 회원의 첫 화면이자 회원 공간 (예전 '공사장'의 기능을 모두 옮겨 왔다)
    화면: #home 홈 · #showcase 결과물 · #board 게시판 · #meeting 회의실(국원) · #me 내 정보 · #search 찾기 · #p-번호 글 페이지 · #write/showcase·#write/board 쓰기 · #edit-번호 고치기 · #n-번호 공지
-   데이터: supabase/022_community.sql (posts · post_comments · post_likes · post_feed) + 공지·제보·회의 안건·자료실·처리 현황·지름길 */
+   데이터: supabase/022_community.sql (posts · post_comments · post_likes · post_feed) · 033 (대댓글 parent_id · 프로필 사진 member_avatars) + 공지·제보·회의 안건·자료실·처리 현황·지름길 */
 /* ===== 바탕 값: 글자색 3단계 · 머리카락선 · 그림자 2겹 · 움직임 곡선 ===== */
 :root {
   color-scheme: light;
@@ -587,6 +587,25 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
 .comments .c-h button { margin-left: auto; border: 0; background: none; color: var(--sub); font-size: 12.5px; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background-color 150ms ease-out, color 150ms ease-out; }
 .comments .c-h button:hover { color: var(--danger); background: var(--danger-bg); }
 .comments p { margin: 2px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 15.5px; line-height: 1.7; color: var(--text-body); text-wrap: pretty; }
+/* 대댓글: 한 단계만 들여 씀 */
+.comments .c-act { margin-top: 2px; }
+.comments .c-act button { border: 0; background: none; color: var(--sub); font-size: 12.5px; font-weight: 600; cursor: pointer; padding: 4px 8px; margin-left: -8px; border-radius: 6px; transition: background-color 150ms ease-out, color 150ms ease-out; }
+.comments .c-act button:hover { color: var(--ink); background: var(--soft2); }
+.comments .replies { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; }
+.comments .replies li { padding: 10px 0; }
+.comments .replies .ini { width: 26px; height: 26px; font-size: 11px; }
+.comments .c-to { color: var(--blue); font-weight: 600; }
+.comments .c-gone .c-h b { color: var(--sub); font-weight: 500; }
+.comments .c-gone p { color: var(--sub); font-size: 14.5px; }
+.comments .ini.gone { background: var(--soft2); box-shadow: var(--ring); }
+.comments .r-form { margin-top: 8px; display: flex; gap: 6px; align-items: flex-end; padding: 5px 5px 5px 4px; border-radius: 12px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); transition: box-shadow 150ms ease-out; }
+.comments .r-form:focus-within { box-shadow: inset 0 0 0 1px var(--blue), 0 0 0 4px var(--blue-glow); }
+.comments .r-form textarea { min-height: 38px; height: 38px; flex: 1 1 auto; border-radius: 8px; box-shadow: none; padding: 7px 10px; font-size: 16px; }
+.comments .r-form textarea:focus { box-shadow: none; }
+.comments .r-form .btn { height: 38px; padding: 0 12px; }
+/* 프로필 사진: 사진이 있으면 첫 글자 위에 덮는다 */
+.ini, .wg-ini, .avatar { position: relative; overflow: hidden; }
+.ini > img, .wg-ini > img, .avatar > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .c-form { display: flex; gap: 8px; align-items: flex-end; }
 .c-form textarea { min-height: 44px; height: 44px; flex: 1 1 auto; }
 .d-sec { margin: 6px 0 0; font-size: 15px; font-weight: 700; }
@@ -1025,6 +1044,9 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
           </div>
         </div>
         <div class="me-acts">
+          <button type="button" class="btn btn-soft btn-sm" data-av-pick>프로필 사진 바꾸기</button>
+          <input type="file" accept="image/*" data-av-in hidden>
+          <button type="button" class="btn btn-line btn-sm" data-av-del hidden>사진 지우기</button>
           <button type="button" class="btn btn-soft btn-sm" data-nm-open>닉네임 바꾸기</button>
           <button type="button" class="btn btn-soft btn-sm" data-pw-open>비밀번호 바꾸기</button>
           <button type="button" class="btn btn-line btn-sm" data-logout>로그아웃</button>
@@ -1236,6 +1258,44 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   const TINTS = ['var(--t1)', 'var(--t2)', 'var(--t3)', 'var(--t4)', 'var(--t5)', 'var(--t6)'];
   const tintOf = (s) => TINTS[hash(s) % TINTS.length];
   const initialOf = (name) => { const n = String(name || '?').trim(); return /^[A-Za-z0-9]/.test(n) ? n[0].toUpperCase() : n.slice(0, 1); };
+  // 프로필 사진: member_avatars 에 바꾼 시각이 있으면 avatars/<회원번호>/a.webp?v=시각 을 첫 글자 위에 덮는다
+  // 한 화면에서 필요한 회원을 모아 한 번에 묻고, 답은 AV 에 기억한다 (0 = 사진 없음)
+  const AV = new Map();
+  let avWait = [], avT = 0;
+  const avUrl = (uid, v) => `${sb.storage.from('avatars').getPublicUrl(`${uid}/a.webp`).data.publicUrl}?v=${v}`;
+  function avPut(span, uid) {
+    const v = AV.get(uid) || 0;
+    span.querySelectorAll(':scope > img').forEach((x) => x.remove());
+    if (uid === user.id) { const d = $('[data-av-del]'); if (d) d.hidden = !v; }
+    if (!v) return;
+    const im = document.createElement('img'); im.alt = ''; im.loading = 'lazy'; im.decoding = 'async';
+    im.onerror = () => im.remove();
+    im.src = avUrl(uid, v);
+    span.append(im);
+  }
+  function avQueue(span, uid) {
+    if (!uid) return;
+    span.dataset.uid = uid;
+    if (AV.has(uid)) { avPut(span, uid); return; }
+    avWait.push(span); clearTimeout(avT); avT = setTimeout(avFlush, 0);
+  }
+  async function avFlush() {
+    const list = avWait; avWait = [];
+    const ids = [...new Set(list.map((x) => x.dataset.uid))].filter((u) => !AV.has(u));
+    for (let i = 0; i < ids.length; i += 100) {
+      const { data, error } = await sb.from('member_avatars').select('user_id, updated_at').in('user_id', ids.slice(i, i + 100));
+      if (error) break;   // 033 을 아직 안 돌렸으면 첫 글자만
+      data.forEach((r) => AV.set(r.user_id, Date.parse(r.updated_at) || 1));
+    }
+    ids.forEach((u) => { if (!AV.has(u)) AV.set(u, 0); });
+    list.forEach((x) => avPut(x, x.dataset.uid));
+  }
+  function avSet(uid, v) { AV.set(uid, v); $$(`[data-uid="${uid}"]`).forEach((x) => avPut(x, uid)); }
+  function faceEl(cls, uid, name) {
+    const s = el('span', cls, initialOf(name)); s.style.background = tintOf(uid || name);
+    avQueue(s, uid);
+    return s;
+  }
   const receiptNo = (row) => `BYP-${new Date(row.created_at).getUTCFullYear()}-${String(row.id).padStart(3, '0')}`;
   let toastT = null;
   function toast(text) { const t = $('[data-toast]'); t.textContent = text; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3200); }
@@ -1250,10 +1310,10 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     return `${what || '불러오기'}하지 못했습니다. 잠시 후 다시 해 주세요.`;
   }
   // 두 번 눌러야 실행 (지우기)
-  function armButton(btn, label, run) {
+  function armButton(btn, label, run, armText) {
     btn.addEventListener('click', async () => {
       if (btn.dataset.armed !== '1') {
-        btn.dataset.armed = '1'; btn.textContent = '한 번 더 누르면 지웁니다'; btn.classList.add('armed');
+        btn.dataset.armed = '1'; btn.textContent = armText || '한 번 더 누르면 지웁니다'; btn.classList.add('armed');
         setTimeout(() => { if (btn.isConnected && btn.dataset.armed === '1') { btn.dataset.armed = ''; btn.textContent = label; btn.classList.remove('armed'); } }, 4000);
         return;
       }
@@ -1266,7 +1326,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   $('[data-today]').textContent = `${today.getMonth() + 1}월 ${today.getDate()}일 ${'일월화수목금토'[today.getDay()]}요일`;
   function paintName() {
     $$('[data-name], [data-me-name], [data-me-name2], [data-me-name3]').forEach((x) => { x.textContent = prof.name; });
-    $$('[data-avatar], [data-me-ini2]').forEach((a) => { a.textContent = initialOf(prof.name); });
+    $$('[data-avatar], [data-me-ini2]').forEach((a) => { a.textContent = initialOf(prof.name); avQueue(a, user.id); });
   }
   paintName();
   $$('[data-me-role2]').forEach((r) => { r.textContent = role.label; r.classList.add(role.key); });
@@ -1498,7 +1558,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     body.append(h);
     if (r.body) body.append(el('p', null, r.body));
     const m = el('span', 'card-m');
-    const ini = el('span', 'ini', initialOf(r.author_name)); ini.style.background = tintOf(r.author || r.author_name);
+    const ini = faceEl('ini', r.author, r.author_name);
     const lk = el('span', `lk${r.liked ? ' on' : ''}`); lk.append(icon('heart'), document.createTextNode(String(r.likes || 0))); lk.setAttribute('aria-label', `좋아요 ${r.likes || 0}`);
     m.append(ini, el('span', 'who', r.author_name || '회원'), el('span', null, `· ${ago(r.created_at)}`), lk);
     body.append(m);
@@ -2037,7 +2097,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     $('[data-d-title]').textContent = r.title;
     document.title = `${r.title} | BYPASS`;
     const meta = $('[data-d-meta]'); meta.replaceChildren();
-    const ini = el('span', 'ini', initialOf(r.author_name)); ini.style.background = tintOf(r.author || r.author_name);
+    const ini = faceEl('ini', r.author, r.author_name);
     const when = el('time', null, `· ${ago(r.created_at)}`); when.dateTime = r.created_at; when.title = new Date(r.created_at).toLocaleString('ko-KR');
     meta.append(ini, el('b', null, r.author_name || '회원'), when);
     if (r.updated_at && Date.parse(r.updated_at) - Date.parse(r.created_at) > 60000) meta.append(el('span', null, '· 고침'));
@@ -2063,31 +2123,104 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     $('[data-d-hide]').textContent = r.hidden ? '다시 보이기' : '숨기기';
     $('[data-c-form]').hidden = !!r.hidden;
   }
+  let rOpen = null;   // 지금 열려 있는 답글 칸 (한 번에 하나)
+  const C_COLS = 'id, created_at, body, author, author_name, parent_id, deleted';
   async function loadComments(id, seq) {
-    const { data, error } = await sb.from('post_comments').select('id, created_at, body, author, author_name').eq('post_id', id).order('created_at');
+    let { data, error } = await sb.from('post_comments').select(C_COLS).eq('post_id', id).order('created_at');
+    // 033 을 아직 안 돌렸으면 parent_id · deleted 가 없다 → 예전처럼 한 줄로
+    if (error && /parent_id|deleted/.test(error.message || '')) ({ data, error } = await sb.from('post_comments').select('id, created_at, body, author, author_name').eq('post_id', id).order('created_at'));
     if (seq !== dSeq) return;
     const ul = $('[data-d-comments]');
+    rOpen = null;
     if (error) { ul.replaceChildren(el('li', null, errText(error, '댓글을 불러오기'))); return; }
-    $('[data-d-ccount]').textContent = data.length ? String(data.length) : '';
-    if (!data.length) { ul.replaceChildren(el('li', null, '아직 댓글이 없습니다.')); return; }
-    ul.replaceChildren(...data.map((c) => {
-      const li = el('li');
-      const ini = el('span', 'ini', initialOf(c.author_name)); ini.style.background = tintOf(c.author || c.author_name);
-      const b = el('div', 'c-b'); const h = el('div', 'c-h');
+    const live = data.filter((c) => !c.deleted).length;   // '삭제된 댓글'은 세지 않는다
+    $('[data-d-ccount]').textContent = live ? String(live) : '';
+    if (cur && cur.id === id && (cur.comments || 0) !== live) { cur.comments = live; repaintLists(); }
+    const ids = new Set(data.map((c) => c.id)), kids = new Map();
+    data.forEach((c) => { if (c.parent_id && ids.has(c.parent_id)) { if (!kids.has(c.parent_id)) kids.set(c.parent_id, []); kids.get(c.parent_id).push(c); } });
+    const roots = data.filter((c) => !(c.parent_id && ids.has(c.parent_id)) && !(c.deleted && !kids.has(c.id)));
+    if (!roots.length) { ul.replaceChildren(el('li', null, '아직 댓글이 없습니다.')); return; }
+    const names = [...new Set(data.map((c) => c.author_name).filter(Boolean))].sort((x, y) => y.length - x.length);
+    const canReply = !!cur && !cur.hidden;
+    const row = (c, root, rootBox) => {
+      const li = el('li'), b = el('div', 'c-b'), h = el('div', 'c-h'), box = rootBox || b;
+      // 답글이 달린 채 지워진 댓글: 자리만 남긴다
+      if (c.deleted) {
+        li.classList.add('c-gone');
+        const face = el('span', 'ini gone');
+        h.append(el('b', null, '삭제된 댓글'));
+        b.append(h, el('p', null, '삭제된 댓글입니다'));
+        li.append(face, b);
+        return { li, b };
+      }
       h.append(el('b', null, c.author_name || '회원'), el('span', null, ago(c.created_at)));
       if (c.author === user.id || isStaff) {
         const del = el('button', null, '지우기'); del.type = 'button'; del.setAttribute('aria-label', '이 댓글 지우기');
         armButton(del, '지우기', async () => {
-          const { error: e2 } = await sb.from('post_comments').delete().eq('id', c.id);
+          let { error: e2 } = await sb.rpc('delete_comment', { p_id: c.id });
+          if (e2 && e2.code === 'PGRST202') ({ error: e2 } = await sb.from('post_comments').delete().eq('id', c.id));   // 033 전
           if (e2) { dErr(errText(e2, '지우기')); return; }
-          bump(-1); loadComments(id, dSeq);
+          loadComments(id, dSeq);
         });
         h.append(del);
       }
-      b.append(h, el('p', null, c.body));
-      li.append(ini, b);
+      const p = el('p');
+      const to = c !== root && names.find((nm) => c.body.startsWith(`@${nm} `));
+      if (to) p.append(el('span', 'c-to', `@${to}`), document.createTextNode(c.body.slice(to.length + 1)));
+      else p.textContent = c.body;
+      b.append(h, p);
+      if (canReply) {
+        const act = el('div', 'c-act'), re = el('button', null, '답글'); re.type = 'button';
+        re.setAttribute('aria-label', `${c.author_name || '회원'}님 댓글에 답글 달기`);
+        re.addEventListener('click', () => openReply(id, root, box, c));
+        act.append(re); b.append(act);
+      }
+      li.append(faceEl('ini', c.author, c.author_name), b);
+      return { li, b };
+    };
+    ul.replaceChildren(...roots.map((c) => {
+      const { li, b } = row(c, c, null), ks = kids.get(c.id);
+      if (ks) { const rl = el('ul', 'replies'); rl.append(...ks.map((k) => row(k, c, b).li)); b.append(rl); }
       return li;
     }));
+  }
+  // 답글 칸: 원댓글 아래(답글 목록 끝)에 연다
+  // 서버에는 '답글을 누른 댓글'(to)을 parent_id 로 보낸다 → 원댓글로 옮기고 그 사람에게 알림(reply_to)
+  // 답글의 답글이면 @이름 을 미리 넣는다
+  function openReply(postId, root, box, to) {
+    let f = rOpen && rOpen.isConnected && rOpen.parentNode === box ? rOpen : null;
+    if (!f) {
+      if (rOpen) rOpen.remove();
+      f = el('form', 'r-form'); f.noValidate = true;
+      const ta = el('textarea', 'in'); ta.maxLength = 1000; ta.rows = 1; ta.placeholder = '답글 남기기';
+      const no = el('button', 'btn btn-soft btn-sm', '취소'); no.type = 'button';
+      const go = el('button', 'btn btn-dark btn-sm', '남기기'); go.type = 'submit';
+      no.addEventListener('click', () => { f.remove(); rOpen = null; });
+      ta.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); f.requestSubmit(); }
+        if (e.key === 'Escape') no.click();
+      });
+      f.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const body = ta.value.trim();
+        if (!body || body === (f.dataset.pre || '').trim()) { ta.focus(); return; }
+        go.disabled = true;
+        const { error } = await sb.from('post_comments').insert({ post_id: postId, body, parent_id: f._to.id });
+        go.disabled = false;
+        if (error) {
+          const m = error.message || '';
+          dErr(/bad parent/.test(m) ? '지워진 댓글에는 답글을 달 수 없습니다.' : /parent_id/.test(m) ? '답글 기능이 아직 준비되지 않았습니다. 운영진에게 알려 주세요.' : errText(error, '답글을 남기'));
+          return;
+        }
+        dErr(''); loadComments(postId, dSeq);
+      });
+      f.append(ta, no, go); box.append(f); rOpen = f;
+    }
+    const ta = $('textarea', f), pre = to === root ? '' : `@${to.author_name || '회원'} `;
+    f._to = to;
+    ta.setAttribute('aria-label', `${to.author_name || '회원'}님 댓글에 답글`);
+    if (!ta.value.trim() || ta.value === f.dataset.pre) { ta.value = pre; f.dataset.pre = pre; }
+    ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
   }
   function repaintLists() { renderHome(); if (loaded.showcase) renderFeed('showcase'); if (loaded.board) renderFeed('post'); }
   function bump(d) { if (!cur) return; cur.comments = Math.max(0, (cur.comments || 0) + d); repaintLists(); }
@@ -2335,6 +2468,61 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     $('[data-mine-n]').textContent = String(data.length);
     ul.replaceChildren(...(data.length ? data.map(postRow) : [el('li', 'state', '아직 올린 결과물이나 글이 없습니다.')]));
   }
+  // 프로필 사진: supabase/033_replies_avatars.sql (avatars 저장소 + member_avatars)
+  // 가운데를 정사각형으로 잘라 256×256 으로 줄인 뒤 올린다 (WebP, 안 되는 브라우저는 JPG)
+  const avIn = $('[data-av-in]'), avPick = $('[data-av-pick]'), avDel = $('[data-av-del]');
+  avPick.addEventListener('click', () => avIn.click());
+  function squareImage(file, size) {
+    return new Promise((ok, no) => {
+      const url = URL.createObjectURL(file), im = new Image();
+      im.onload = () => {
+        URL.revokeObjectURL(url);
+        const w = im.naturalWidth, h = im.naturalHeight, s = Math.min(w, h);
+        if (!s) { no(new Error('decode')); return; }
+        const c = document.createElement('canvas'); c.width = c.height = size;
+        const g = c.getContext('2d'); g.imageSmoothingQuality = 'high';
+        g.drawImage(im, (w - s) / 2, (h - s) / 2, s, s, 0, 0, size, size);
+        c.toBlob((bl) => {
+          if (bl && bl.type === 'image/webp') { ok(bl); return; }
+          c.toBlob((j) => (j ? ok(j) : no(new Error('decode'))), 'image/jpeg', 0.88);
+        }, 'image/webp', 0.86);
+      };
+      im.onerror = () => { URL.revokeObjectURL(url); no(new Error('decode')); };
+      im.src = url;
+    });
+  }
+  const avErr = (e) => {
+    const m = (e && e.message) || '';
+    if (m === 'decode') return '이 사진은 열 수 없습니다. JPG나 PNG 사진을 골라 주세요.';
+    if (missing(e) || /bucket not found/i.test(m)) return '프로필 사진 기능이 아직 준비되지 않았습니다. 운영진에게 알려 주세요.';
+    return errText(e, '사진을 올리');
+  };
+  avIn.addEventListener('change', async () => {
+    const f = avIn.files && avIn.files[0]; avIn.value = '';
+    if (!f) return;
+    if (f.type && !f.type.startsWith('image/')) { toast('사진 파일만 올릴 수 있습니다.'); return; }
+    if (f.size > 25 * 1024 * 1024) { toast('25MB 이하 사진을 골라 주세요.'); return; }
+    B.setBusy(avPick, true, '올리는 중…');
+    try {
+      const blob = await squareImage(f, 256);
+      const up = await sb.storage.from('avatars').upload(`${user.id}/a.webp`, blob, { upsert: true, contentType: blob.type, cacheControl: '3600' });
+      if (up.error) throw up.error;
+      const { data, error } = await sb.from('member_avatars').upsert({ user_id: user.id, updated_at: new Date().toISOString() }).select('updated_at').single();
+      if (error) throw error;
+      avSet(user.id, Date.parse(data.updated_at) || Date.now());
+      toast('프로필 사진을 바꿨습니다.');
+    } catch (e) { toast(avErr(e)); }
+    B.setBusy(avPick, false);
+  });
+  armButton(avDel, '사진 지우기', async () => {
+    const { error } = await sb.from('member_avatars').delete().eq('user_id', user.id);
+    avDel.dataset.armed = ''; avDel.textContent = '사진 지우기'; avDel.classList.remove('armed');
+    if (error) { toast(errText(error, '사진을 지우')); return; }
+    await sb.storage.from('avatars').remove([`${user.id}/a.webp`]);
+    avSet(user.id, 0);
+    toast('프로필 사진을 지웠습니다.');
+  });
+
   // 닉네임 바꾸기: supabase/032_nickname.sql 의 change_my_name 으로만 바뀐다 (30일에 한 번, 운영진은 제한 없음)
   const nmForm = $('[data-nm-form]'), nmErr = $('.err', nmForm), nmIn = document.getElementById('nm-new');
   const nmDay = (d) => `${d.getMonth() + 1}월 ${d.getDate()}일`;
@@ -3032,29 +3220,34 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     }));
   }
 
-  // 내 소식: 내 글에 남이 단 댓글 · 누른 좋아요 (최근 2주)
+  // 내 소식: 내 글에 남이 단 댓글 · 내 댓글에 남이 단 답글(033 my_reply_news) · 누른 좋아요 (최근 2주)
   async function loadNews() {
     const box = $('[data-wg-news]'), since = new Date(Date.now() - 14 * 86400000).toISOString();
-    const [c, l] = await Promise.all([
+    const [c, l, rp] = await Promise.all([
       sb.from('post_comments').select('id, created_at, body, author, author_name, post_id, posts!inner(title, author)').eq('posts.author', user.id).neq('author', user.id).gte('created_at', since).order('created_at', { ascending: false }).limit(10),
       sb.from('post_likes').select('created_at, post_id, user_id, posts!inner(title, author)').eq('posts.author', user.id).neq('user_id', user.id).gte('created_at', since).order('created_at', { ascending: false }).limit(40),
+      sb.rpc('my_reply_news', { p_since: since }),
     ]);
     if (c.error && l.error) { box.replaceChildren(el('p', 'state', '소식을 불러오지 못했어요.')); return; }
     const items = [];
-    (c.data || []).forEach((r) => items.push({ t: r.created_at, kind: 'c', r }));
+    // 내 글에서 내 댓글에 단 답글은 두 번 뜨지 않게 '답글'로만
+    const replies = rp.error ? [] : (rp.data || []), rIds = new Set(replies.map((r) => r.id));
+    replies.forEach((r) => items.push({ t: r.created_at, kind: 'r', r }));
+    (c.data || []).forEach((r) => { if (!rIds.has(r.id)) items.push({ t: r.created_at, kind: 'c', r }); });
     const byPost = new Map();
     (l.data || []).forEach((r) => { const g = byPost.get(r.post_id) || { t: r.created_at, kind: 'l', r, n: 0 }; g.n += 1; byPost.set(r.post_id, g); });
     byPost.forEach((g) => items.push(g));
     items.sort((a, b) => String(b.t).localeCompare(String(a.t)));
     const fresh = items.filter((x) => Date.now() - Date.parse(x.t) < 86400000).length;
     const n = $('[data-wg-news-n]'); n.textContent = String(fresh); n.hidden = !fresh;
-    if (!items.length) { box.replaceChildren(el('p', 'state', '최근 2주 동안 내 글에 새 소식이 없어요.')); return; }
+    if (!items.length) { box.replaceChildren(el('p', 'state', '최근 2주 동안 새 소식이 없어요.')); return; }
     box.replaceChildren(...items.slice(0, 5).map((x) => {
       const a = el('a', 'wg-row'); a.href = `#p-${x.r.post_id}`;
       const t = el('span', 't');
-      if (x.kind === 'c') {
-        const ini = el('span', 'wg-ini', initialOf(x.r.author_name)); ini.style.background = tintOf(x.r.author || x.r.author_name);
-        t.append(el('b', null, x.r.author_name || '회원'), '님이 ', el('b', null, x.r.posts.title), '에 댓글을 남겼어요');
+      if (x.kind === 'c' || x.kind === 'r') {
+        const ini = faceEl('wg-ini', x.r.author, x.r.author_name);
+        if (x.kind === 'r') t.append(el('b', null, x.r.author_name || '회원'), '님이 ', el('b', null, x.r.title), '에서 내 댓글에 답글을 남겼어요');
+        else t.append(el('b', null, x.r.author_name || '회원'), '님이 ', el('b', null, x.r.posts.title), '에 댓글을 남겼어요');
         const sub = el('span'); sub.style.display = 'block'; sub.textContent = `“${x.r.body.slice(0, 40)}${x.r.body.length > 40 ? '…' : ''}” · ${ago(x.t)}`;
         t.append(sub); a.append(ini, t);
       } else {
