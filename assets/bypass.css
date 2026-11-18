@@ -438,7 +438,7 @@ a { color: var(--green); text-underline-offset: 3px; }
   .is-typing .desk-tabs { transform: translateY(110%); }
 }
 @media (prefers-reduced-motion: reduce) { .desk-tabs { transition: none; } }
-/* 회의실 탭에서는 국원 전용 칸을 넓게 */
+/* 회의실 탭에서는 크루원 전용 칸을 넓게 */
 .has-tabs .card-crew:not(.card-locked) { grid-column: 1 / -1; }
 @media (min-width: 1000px) {
   .has-tabs .card-crew:not(.card-locked) [data-crew-open] { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 32px; align-items: start; }

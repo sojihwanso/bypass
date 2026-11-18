@@ -31,7 +31,7 @@
 <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"></noscript>
 <style>
 /* BYPASS 커뮤니티 = 로그인한 회원의 첫 화면이자 회원 공간 (예전 '공사장'의 기능을 모두 옮겨 왔다)
-   화면: #home 홈 · #showcase 결과물 · #board 게시판 · #meeting 회의실(국원) · #me 내 정보 · #search 찾기 · #p-번호 글 페이지 · #write/showcase·#write/board 쓰기 · #edit-번호 고치기 · #n-번호 공지
+   화면: #home 홈 · #showcase 결과물 · #board 게시판 · #meeting 회의실(크루원) · #me 내 정보 · #search 찾기 · #p-번호 글 페이지 · #write/showcase·#write/board 쓰기 · #edit-번호 고치기 · #n-번호 공지
    데이터: supabase/022_community.sql (posts · post_comments · post_likes · post_feed) · 033 (대댓글 parent_id · 프로필 사진 member_avatars) · 034 (첨부 파일 post_files) + 공지·제보·회의 안건·자료실·처리 현황·지름길 */
 /* ===== 바탕 값: 글자색 3단계 · 머리카락선 · 그림자 2겹 · 움직임 곡선 ===== */
 :root {
@@ -1056,12 +1056,12 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     <div class="panel" data-search-board-wrap hidden style="padding-top: 8px; padding-bottom: 8px"><ul class="posts" data-search-board></ul></div>
   </section>
 
-  <!-- ===== 회의실 (국원) ===== -->
+  <!-- ===== 회의실 (크루원) ===== -->
   <section class="view" data-view="meeting" aria-labelledby="t-meeting" hidden>
     <div><p class="kick">CREW ONLY</p><h1 class="view-title" id="t-meeting" tabindex="-1">회의실</h1></div>
     <div class="panel locked" data-meet-locked hidden>
-      <b>국원 전용 공간입니다</b>
-      <p>회의 안건, 자료실, 접수된 불편 제보는 국원으로 합류하면 볼 수 있습니다.</p>
+      <b>크루원 전용 공간입니다</b>
+      <p>회의 안건, 자료실, 접수된 불편 제보는 크루원으로 합류하면 볼 수 있습니다.</p>
       <a class="btn btn-dark" href="/?join=1&amp;intro">합류 신청하기</a>
     </div>
     <div class="two" data-meet-open hidden>
@@ -1750,7 +1750,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     }
     paintSummary();
   }
-  // 인사 아래 한 줄: 이번 주 새 결과물 · 답을 기다리는 질문 · (국원) 처리 전 안건
+  // 인사 아래 한 줄: 이번 주 새 결과물 · 답을 기다리는 질문 · (크루원) 처리 전 안건
   function paintSummary() {
     const s = Array.isArray(home.showcase) ? home.showcase : null, p = Array.isArray(home.post) ? home.post : null;
     const box = $('[data-summary]');
@@ -2559,7 +2559,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     setCrewCount(count || 0);
   }
 
-  /* ===== 회의실 (국원·운영진) ===== */
+  /* ===== 회의실 (크루원·운영진) ===== */
   let agenda = [], reports = [], resources = [], repFilter = '전체';
   async function loadMeeting() {
     if (!isCrew) { $('[data-meet-locked]').hidden = false; return; }
@@ -3680,7 +3680,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     box.replaceChildren(g);
   }
 
-  // 회의 안건 (국원)
+  // 회의 안건 (크루원)
   async function loadWgMeeting() {
     const box = $('[data-wg-meeting]');
     if (!isCrew) return;
