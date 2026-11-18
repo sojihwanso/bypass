@@ -586,6 +586,9 @@ footer { box-shadow: 0 -1px 0 var(--line2); background: var(--bg); }
 .foot-links { display: flex; flex-wrap: wrap; gap: 6px 22px; }
 footer .foot-links a { color: var(--text-2); text-decoration: none; transition: color 150ms ease-out; }
 footer .foot-links a:hover { color: var(--ink); }
+footer .foot-links a.foot-kakao { display: inline-flex; align-items: center; gap: 6px; margin: -3px 0; padding: 3px 10px 3px 8px; border-radius: 8px; background: #FEE500; color: #191600; font-weight: 650; }
+footer .foot-links a.foot-kakao::before { content: ''; width: 14px; height: 13px; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 22'%3E%3Cpath d='M12 0C5.4 0 0 4.2 0 9.4c0 3.4 2.3 6.3 5.7 8l-1.2 4.3c-.1.4.3.7.6.5l5.1-3.4c.6.1 1.2.1 1.8.1 6.6 0 12-4.2 12-9.4S18.6 0 12 0z'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 22'%3E%3Cpath d='M12 0C5.4 0 0 4.2 0 9.4c0 3.4 2.3 6.3 5.7 8l-1.2 4.3c-.1.4.3.7.6.5l5.1-3.4c.6.1 1.2.1 1.8.1 6.6 0 12-4.2 12-9.4S18.6 0 12 0z'/%3E%3C/svg%3E") center / contain no-repeat; }
+footer .foot-links a.foot-kakao:hover { color: #191600; background: #F5DC00; }
 footer .wrap { padding-top: 28px; padding-bottom: 36px; display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; font-size: 13px; color: var(--sub); }
 
 /* ---------- 입력칸: 파란 초점 테두리 + 옅은 4px 번짐 ---------- */
@@ -682,6 +685,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
 /* 프로필 사진: 사진이 있으면 첫 글자 위에 덮는다 */
 .ini, .wg-ini, .avatar { position: relative; overflow: hidden; }
 .ini > img, .wg-ini > img, .avatar > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.is-susp { opacity: .45; pointer-events: none; }
 .c-form { display: flex; gap: 8px; align-items: flex-end; }
 .c-form textarea { min-height: 44px; height: 44px; flex: 1 1 auto; }
 .d-sec { margin: 6px 0 0; font-size: 15px; font-weight: 700; }
@@ -903,6 +907,10 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
 </header>
 
 <main class="wrap" id="main">
+  <div class="banner warn" role="status" data-susp hidden>
+    <p data-susp-text></p>
+    <a class="btn btn-soft btn-sm" href="https://open.kakao.com/o/snJ3HuTi" target="_blank" rel="noopener">운영진에게 문의</a>
+  </div>
   <div class="banner warn" role="alert" data-mustchange hidden>
     <p>임시 비밀번호로 들어오셨습니다. 본인만 아는 비밀번호로 바로 바꿔 주세요.</p>
     <a class="btn btn-dark btn-sm" href="#me" data-mustchange-go>지금 바꾸기</a>
@@ -1287,6 +1295,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       <a href="/?report=1&amp;intro">아이디어 남기기</a>
       <a href="/?join=1&amp;intro" data-joinus hidden>크루 합류 신청</a>
       <a href="/?intro">BYPASS 소개</a>
+      <a class="foot-kakao" href="https://open.kakao.com/o/snJ3HuTi" target="_blank" rel="noopener">카카오톡 문의<span class="sr"> (새 창)</span></a>
     </nav>
     <span>목포해양대 학생들이 자유롭게 만드는 바이브 코딩 크루</span>
   </div>
@@ -1391,9 +1400,11 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   let toastT = null;
   function toast(text) { const t = $('[data-toast]'); t.textContent = text; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3200); }
   const missing = (e) => e && (e.code === 'PGRST205' || e.code === '42P01' || /does not exist|Could not find the table/.test(e.message || ''));
+  let mySusp = null;
   function errText(e, what) {
     const m = (e && (e.message || '')) + ' ' + (e && e.code || '');
     if (missing(e)) return isStaff ? '커뮤니티 설정이 아직 끝나지 않았습니다. supabase/022_community.sql 을 실행해 주세요.' : '커뮤니티를 준비하고 있습니다. 조금만 기다려 주세요.';
+    if (/suspended/.test(m)) return `활동이 정지되어 지금은 ${what || '쓰기'}할 수 없습니다.${mySusp && mySusp.until ? ` (${new Date(mySusp.until).toLocaleDateString('ko-KR')}까지)` : ''}`;
     if (/too many posts/.test(m)) return '글을 너무 빨리 올리고 있습니다. 10분에 5개까지 올릴 수 있습니다.';
     if (/too many comments/.test(m)) return '댓글을 너무 빨리 남기고 있습니다. 잠시 후 다시 해 주세요.';
     if (/posts_url_check/.test(m)) return '주소는 https:// 로 시작하거나 /apps/이름/ 처럼 사이트 안의 주소여야 합니다.';
@@ -1877,6 +1888,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   }
   function lockText() {
     if (!up) return '올리기 권한 기능이 아직 준비되지 않았습니다.';
+    if (up.reason === 'suspended') return '활동이 정지되어 지금은 올릴 수 없습니다.';
     if (up.reason === 'blocked') return `운영진이 올리기를 막아 두었습니다.${up.note ? ` (${up.note})` : ''}`;
     if (up.reason === 'manual') return '올리기 권한은 운영진이 직접 허가합니다. 필요하면 운영진에게 말해 주세요.';
     const left = upLines().filter((x) => x[1] < x[2]).map((x) => `${x[0]} ${x[2] - x[1]}${x[3]} 더`);
@@ -1904,7 +1916,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   const SLUG_RULE = /^[a-z0-9][a-z0-9-]{1,48}$/, HTML_MAX = 20_000_000, IMG_MAX = 2_097_152;
   let wKind = 'showcase', wCat = '앱', wBusy = false, wEdit = null, wSrc = 'link', wHtml = null, wOwnSlug = null, wOwnFolder = null;
   let wThumb = { url: null, blob: null, preview: null, type: null };
-  // 첨부 파일 (supabase/034_post_files.sql): 글마다 2개까지, 한 파일 3MB 미만, 결과물만
+  // 첨부 파일 (supabase/034_post_files.sql): 글마다 2개까지, 한 파일 3MB 미만, 결과물 · 게시판 글 모두
   // keep: 이미 붙어 있는 것 · drop: 고치면서 뺀 것 · add: 새로 고른 것 (저장할 때 올린다)
   const FILE_MAX = 2, FILE_SIZE = 3 * 1024 * 1024;
   const FILE_TYPES = {
@@ -1938,7 +1950,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   async function loadWriteFiles(post) {
     const seq = ++wFilesSeq;
     wFiles = { keep: [], drop: [], add: [] }; paintFiles();
-    if (!post || post.kind !== 'showcase') return;
+    if (!post) return;
     const { data, error } = await sb.from('post_files').select('id, path, name, size, mime').eq('post_id', post.id).order('id');
     if (seq !== wFilesSeq || error) return;   // 034 전이면 그냥 없음
     wFiles.keep = data || []; paintFiles();
@@ -1966,7 +1978,10 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     for (const file of wFiles.add) {
       const ext = extOf(file.name), mime = FILE_TYPES[ext];
       const path = `${user.id}/${postId}/${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const upl = await sb.storage.from('post-files').upload(path, file, { contentType: storeType(mime), upsert: false });
+      // supabase-js 는 File 을 넘기면 contentType 을 무시하고 브라우저가 붙인 종류(file.type)로 보낸다
+      // → 종류를 다시 붙인 Blob 으로 감싸서 보낸다 (HTML 은 내려받기 전용, hwp·csv 처럼 브라우저마다 다른 것도 맞춤)
+      const blob = new Blob([file], { type: storeType(mime) });
+      const upl = await sb.storage.from('post-files').upload(path, blob, { contentType: storeType(mime), upsert: false });
       if (upl.error) { fails.push(file.name); continue; }
       const name = file.name.replace(/[\\/]/g, '_').trim().slice(-120) || `파일.${ext}`;
       const { error } = await sb.from('post_files').insert({ post_id: postId, path, name, size: file.size, mime });
@@ -2008,7 +2023,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     $('[data-w-html]').hidden = !s || wSrc !== 'html';
     $('#w-slug').readOnly = !!wOwnSlug;
     $('[data-w-thumb-field]').hidden = !canUp();
-    $('[data-w-files-field]').hidden = !canUp() || !s;
+    $('[data-w-files-field]').hidden = !canUp();   // 결과물 · 게시판 글 모두
     const lock = $('[data-w-lock]');
     lock.hidden = canUp();
     if (!canUp()) { lock.replaceChildren(el('b', null, 'HTML 파일 올리기·썸네일·첨부 파일은 올리기 권한이 있으면 열립니다. '), document.createTextNode(lockText())); }
@@ -2235,7 +2250,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       wDirty = false;
       const newId = wEdit ? wEdit.id : res.data.id;
       let fileFails = [];
-      if (s && (wFiles.add.length || wFiles.drop.length)) { B.setBusy(go, false); B.setBusy(go, true, '파일 올리는 중…'); fileFails = await saveFiles(newId); }
+      if (wFiles.add.length || wFiles.drop.length) { B.setBusy(go, false); B.setBusy(go, true, '파일 올리는 중…'); fileFails = await saveFiles(newId); }
       // 다 쓰면 그 글 페이지로. 글 페이지에서 '고치기'로 왔으면 뒤로 돌아가 쓰기 페이지를 기록에 남기지 않는다
       if (wEdit && arrivedFrom === `p-${newId}`) history.back(); else location.replace(`#p-${newId}`);
       if (fileFails.length) toast(`글은 저장했지만 ${fileFails.join(', ')} 파일은 올리거나 빼지 못했습니다. 고치기에서 다시 해 주세요.`);
@@ -2834,6 +2849,8 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   const params = new URLSearchParams(location.search);
   if (params.get('welcome') === '1') {
     $('[data-welcome]').hidden = false;
+    const cw = params.get('crew');
+    if (cw) $('[data-welcome] p').append(cw === '1' ? ' 크루 합류 신청도 접수됐어요. 운영진이 보고 연락드릴게요.' : ' 다만 합류 신청은 보내지 못했어요. 아래 바닥글의 크루 합류 신청에서 다시 내 주세요.');
     $('[data-welcome-close]').addEventListener('click', () => { $('[data-welcome]').hidden = true; });
     history.replaceState(null, '', location.pathname + location.hash);
   }
@@ -3691,6 +3708,17 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
   loadCounts();
   route(true);
   if (q0) runSearch(q0);
+  // 활동 정지 안내 (supabase/036_member_suspend.sql). 쓰기 버튼은 그대로 두고, 눌러도 서버가 막고 이 안내가 이유를 알려 줌
+  sb.rpc('my_suspension').then(({ data, error }) => {
+    if (error || !data) return;
+    mySusp = data;
+    const when = data.until ? `${new Date(data.until).toLocaleString('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}까지` : '운영진이 풀 때까지';
+    $('[data-susp-text]').textContent = `활동이 정지되었습니다 (${when}). 글·결과물·댓글을 쓰거나 고칠 수 없고, 읽기와 좋아요는 그대로 할 수 있습니다.${data.reason ? ` 사유: ${data.reason}` : ''}`;
+    $('[data-susp]').hidden = false;
+    $$('[data-write-top], [data-write], a[href^="#write"]').forEach((x) => { x.setAttribute('aria-disabled', 'true'); x.classList.add('is-susp'); x.title = '활동 정지 중'; });
+    const ci = $('#c-in'); if (ci) { ci.disabled = true; ci.placeholder = '활동 정지 중에는 댓글을 남길 수 없습니다'; }
+    const cg = $('[data-c-go]'); if (cg) cg.disabled = true;
+  });
   mkFngOn = homeSet.fng !== false;
   mkWtiOn = homeSet.wti !== false;
   dbLayout();

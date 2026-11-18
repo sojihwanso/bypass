@@ -675,8 +675,8 @@ a7 39 11 7c 82 b5 62 e4 0a e1 3a 0a f9 38 25 84 5e 4c 94 c2 49 80 89 e3 07 0c af
           <span class="slot" style="color: #FF5A1F"><span><b>셔틀 시간표</b><b>과제 마감 알림</b><b>동아리 출석부</b><b>아무 게임</b><b>셔틀 시간표</b></span></span><span>정도는 금방이야.</span>
         </p>
         <div class="sr" style="display: flex; justify-content: center; gap: 12px; margin-top: 56px; flex-wrap: wrap">
-          <button type="button" class="btn" data-open="join">크루 합류하기<span class="ar" aria-hidden="true"><i>→</i></span></button>
-          <a class="btn ghost" href="/join/">일단 써 볼래<span class="ar" aria-hidden="true"><i>↗</i></span></a>
+          <a class="btn" href="/join/">가입하기<span class="ar" aria-hidden="true"><i>→</i></span></a>
+          <a class="btn ghost" href="/community/">일단 써 볼래<span class="ar" aria-hidden="true"><i>↗</i></span></a>
         </div>
         <p class="sr" style="margin: 30px 0 0; font-size: 17px; font-weight: 500">처음엔 다 몰랐어. 같이 하면 돼. <button type="button" class="idea-link" data-open="report">아이디어만 남겨 둬도 좋고 →</button></p>
       </div>
@@ -883,6 +883,11 @@ a7 39 11 7c 82 b5 62 e4 0a e1 3a 0a f9 38 25 84 5e 4c 94 c2 49 80 89 e3 07 0c af
     dlg.querySelector('.receipt').hidden = true;
   }
 
+  // 크루 합류: 로그인 안 했으면 가입 화면(합류 체크된 채)으로, 이미 회원이면 이 대화상자로 (계정과 이어서 냄)
+  const hasLogin = () => { try { const s = JSON.parse(localStorage.getItem(SB_SESSION) || 'null'); return !!(s && s.refresh_token); } catch (e) { return false; } };
+  document.querySelectorAll('[data-open]').forEach(btn => {
+    if (btn.dataset.open === 'join') btn.addEventListener('click', e => { if (!hasLogin()) { e.stopImmediatePropagation(); location.href = '/join/?crew=1'; } }, true);
+  });
   document.querySelectorAll('[data-open]').forEach(btn => {
     btn.addEventListener('click', () => {
       const dlg = document.getElementById(btn.dataset.open + '-dialog');
@@ -947,7 +952,8 @@ a7 39 11 7c 82 b5 62 e4 0a e1 3a 0a f9 38 25 84 5e 4c 94 c2 49 80 89 e3 07 0c af
   /* ===== 주소로 대화상자 열기: /?report=1, /?join=1 ===== */
   const openParams = new URLSearchParams(location.search);
   const openKey = ['report', 'join'].find(k => openParams.get(k) === '1');
-  if (openKey) {
+  if (openKey === 'join' && !hasLogin()) location.replace('/join/?crew=1');
+  else if (openKey) {
     const dlg = document.getElementById(openKey + '-dialog');
     resetDialog(dlg);
     dlg.showModal();

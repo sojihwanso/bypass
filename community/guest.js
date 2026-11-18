@@ -14,7 +14,7 @@
   const HEART = '<svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>';
   const GO = '<svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>';
   const NEXT = encodeURIComponent('/community/');
-  const LOGIN = `/login/?next=${NEXT}`, JOIN = '/?join=1';
+  const LOGIN = `/login/?next=${NEXT}`, JOIN = '/join/';
 
   /* ----- 도움 함수 (회원 화면과 같은 모양) ----- */
   const hash = (s) => { let h = 0; for (const c of String(s || '')) h = (h * 31 + c.codePointAt(0)) >>> 0; return h; };
