@@ -799,7 +799,7 @@
           <div class="toolbar"><button type="button" class="btn btn-primary btn-small" data-rs-new>+ 자료</button></div>
           <div class="card" style="max-width: none; padding: 8px 18px" data-rs-list aria-live="polite"><p class="list-state">불러오는 중…</p></div>
         </div>
-        <p class="list-hint">회의실은 국원·운영진만 봅니다. 국원은 올리기와 자기 것 지우기만, 운영진은 완료 표시·고치기·지우기를 모두 할 수 있습니다.</p>
+        <p class="list-hint">회의실은 크루원·운영진만 봅니다. 크루원은 올리기와 자기 것 지우기만, 운영진은 완료 표시·고치기·지우기를 모두 할 수 있습니다.</p>
       </section>
 
       <!-- 커뮤니티 › 홈 화면 설정 -->
@@ -1301,7 +1301,7 @@
             <p class="hint" data-nt-pv-note style="margin-top:8px"></p>
           </div>
           <label class="field-label" for="n-title">제목</label>
-          <input class="input" id="n-title" maxlength="200" required placeholder="예: 11월 국원 공개 모집 설명회 안내">
+          <input class="input" id="n-title" maxlength="200" required placeholder="예: 11월 크루원 공개 모집 설명회 안내">
           <label class="field-label" for="n-body">내용 <span class="opt">(선택)</span></label>
           <textarea class="input" id="n-body" maxlength="2000" rows="5" placeholder="메인에서 공지를 누르면 보입니다. 줄바꿈은 그대로 보입니다."></textarea>
           <fieldset data-nt-needs>
@@ -1415,7 +1415,7 @@
           <fieldset>
             <legend>회원 계정</legend>
             <p class="hint" style="margin-top:0" data-app-account></p>
-            <button type="button" class="mini-btn mini-go" data-app-promote hidden>국원으로 등록</button>
+            <button type="button" class="mini-btn mini-go" data-app-promote hidden>크루원으로 등록</button>
           </fieldset>
         </form>
 
@@ -3245,7 +3245,7 @@
   const REP_ST = ['접수', '심의', '개통', '반려'];
   const REP_LABEL = { 접수: '접수', 심의: '심의', 개통: '준공', 반려: '반려' };
   const APP_ST = ['새 신청', '연락함', '합류', '보류'];
-  const ROLE_NAME = { general: '일반 회원', member: '국원', staff: '운영진' };
+  const ROLE_NAME = { general: '일반 회원', member: '크루원', staff: '운영진' };
   const stClass = v => 'in-st in-st-' + String(v).replace(/\s/g, '');
   const noOf = (pre, r) => `${pre}-${new Date(r.created_at).getFullYear()}-${String(r.id).padStart(3, '0')}`;
   let inReports = [], inContacts = new Map(), inMemos = new Map(), inApps = [], inAgenda = new Map(), inMembers = new Map();
@@ -3479,8 +3479,8 @@
     $$('[data-app-status] button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === appStatus)));
     const a = editing; if (!a) return;
     const m = a.applicant && inMembers.get(a.applicant);
-    $('[data-app-hint]').textContent = appStatus === '합류' && m && m.role === 'general' ? '합류로 바꾸면 아래 ‘국원으로 등록’도 눌러 주세요. 커뮤니티 회의실이 열립니다.' : '';
-    $('[data-app-account]').textContent = m ? `${m.display_name} (${m.username}) · 지금 ${ROLE_NAME[m.role] || m.role}` : a.applicant ? '로그인한 회원이 냈지만 회원 목록에서 찾지 못했습니다.' : '로그인하지 않고 신청했습니다. 회원가입을 안내한 뒤 HQ › 회원에서 국원으로 바꿔 주세요.';
+    $('[data-app-hint]').textContent = appStatus === '합류' && m && m.role === 'general' ? '합류로 바꾸면 아래 ‘크루원으로 등록’도 눌러 주세요. 커뮤니티 회의실이 열립니다.' : '';
+    $('[data-app-account]').textContent = m ? `${m.display_name} (${m.username}) · 지금 ${ROLE_NAME[m.role] || m.role}` : a.applicant ? '로그인한 회원이 냈지만 회원 목록에서 찾지 못했습니다.' : '로그인하지 않고 신청했습니다. 회원가입을 안내한 뒤 HQ › 회원에서 크루원으로 바꿔 주세요.';
     $('[data-app-promote]').hidden = !(m && m.role === 'general');
   }
   function openApp(a) {
@@ -3527,10 +3527,10 @@
     B.setBusy(btn, true, '등록 중…');
     const { error } = await B.sb.rpc('set_member_role', { p_user: m.id, p_role: 'member' });
     B.setBusy(btn, false);
-    if (error) return fail('국원으로 등록하지 못했습니다. ' + (error.message || ''));
+    if (error) return fail('크루원으로 등록하지 못했습니다. ' + (error.message || ''));
     m.role = 'member';
     syncAppUI(); renderApps();
-    toast(`${m.display_name} 님을 국원으로 등록했습니다. 다시 로그인하면 적용됩니다.`);
+    toast(`${m.display_name} 님을 크루원으로 등록했습니다. 다시 로그인하면 적용됩니다.`);
   });
   $$('[data-inbox-reload]').forEach(b => b.addEventListener('click', () => { B.setBusy(b, true, '불러오는 중…'); loadInbox().finally(() => B.setBusy(b, false)); }));
 
@@ -3642,7 +3642,7 @@
   $('[data-mem-role]').replaceChildren(...['general', 'member', 'staff'].map(v => { const b = el('button', null, ROLE_NAME[v]); b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.v = v; b.addEventListener('click', () => { if (editing && editing.id !== user.id) { memRole = v; syncMemUI(); } }); return b; }));
   const ROLE_HINT = {
     general: '회원가입만 한 상태. 커뮤니티에서 결과물·글·공지와 내 제보를 봅니다.',
-    member: '국원. 커뮤니티 회의실(안건·자료)과 접수된 제보를 봅니다.',
+    member: '크루원. 커뮤니티 회의실(안건·자료)과 접수된 제보를 봅니다.',
     staff: '운영진. HQ와 모든 관리 권한을 갖습니다. 꼭 필요한 사람에게만 주세요.'
   };
   function syncMemUI() {
@@ -4847,7 +4847,7 @@
   /* ===== 올리기 권한 (supabase/023_member_uploads.sql) ===== */
   let upRows = null, upFilter = 'all', upLoaded = false;
   const UP_REASON = { staff: '운영진', granted: '허가', blocked: '막음', manual: '직접 허가만', rules: '요건' };
-  const UP_ROLE = { general: '일반 회원', member: '국원', staff: '운영진' };
+  const UP_ROLE = { general: '일반 회원', member: '크루원', staff: '운영진' };
   async function loadUploads() {
     upLoaded = true;
     $('[data-up-err]').hidden = true;

@@ -8,7 +8,7 @@
     mode: 'normal',
     texts: {
       normal: '본 국은 현재 정상 운영 중입니다. 제보는 상시 접수합니다.',
-      recruiting: '2026학년도 BYPASS 국원 공개 모집 중 (~ {마감})',
+      recruiting: '2026학년도 BYPASS 크루원 공개 모집 중 (~ {마감})',
       exam: '시험 기간 중 본 국의 심의 업무가 일시 정지됩니다. 접수는 계속됩니다.'
     },
     recruit_start: null,
