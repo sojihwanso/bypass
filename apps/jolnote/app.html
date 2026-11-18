@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="bypass-owner" content="100173a2-be3e-4534-897d-fdc1dc62e584">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>졸아도 노트</title>
+<meta name="theme-color" content="#0e6e6b">
+<meta name="description" content="수업을 녹음하고 실시간으로 받아 적어 주는 노트">
+<link rel="icon" href="data:image/png;base64,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">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAQAElEQVR4AeydCXgT1RbHmybpvtN0CdBSZN8fiAtYFMSnKLKJLCoKFimLn+yb7LuITwEBkY99B1EB4bE8FqXsihv7Vih2pZTSkoSm2d6p4fVla5JJJjP3zhy+2+HOnXPPPed/fkkmmWnqf1+t4qyZ8J/gFPD3w3+ogBcKIEBeiIdT/fwQIKTAKwUQIK/kw8kIEDLglQIIkFfy4WSPAULpUIEKBRCgChXwx2MFECCPpcOJFQogQBUq4I/HCiBAHkuHEysUQIAqVMAfjxVAgDyWDidWKMA9QBWr4o9gFECABFNKfhJBgPjRXTCrIkCCKSU/iSBA/OgumFURIMGUkp9EECB+dBfMqhQBJBjNBZUIAiSocnKfDALEveaCWhEBElQ5uU8GAeJec0GtiAAJqpzcJ4MAca+5oFYUA0CCKhgkc7Ow8GpBAbSsoiLY5bchQPzq78nqhy5f2n/h/Krjx7797VdP5rM6BwFiVU5OnKW3e75zs+Y6g6Fr8xacLOhsEQTImTpkHlNpy1afyPhno8ZPKBS8R4gA8V4CxgGsOXEiNiy8U5OmjGf6YAIC5ANRfemyWKO5cbfg9r3C4Vs3QzOaTL5czbVvBMi1RkRZRIeELOrzVmXzl0j4DQ8BcqI/HnKtgH90SChnzXU4aEGbAvgMRFvFCIsXASKsILSFgwARVLFFhw/N3runsh25eoWg4KoIBQGqQhg+hpf9eHTBwf2V7di1q3xEwWxNBIiZXj61vjprTsmiJZdnzo4KDg6Wy/u0fsqny7HiHAGyldFQVKi9fkVzJqN0387iTSuhQUdz9jgMwiFba8f7no/CFa5eX3/14NGjr97u1yAh0XNHXM0UO0D6/JyS3dtzJ32U9W6Xm53bXGtb/2aX57L6d80eNTB/9vjCZQugQSd7ZBoMwqEKg85twBimwESYzm6lRmzbej4nZ1Bqu+7/aMmuZx95EyNAJp0OnmAKF8293bdT5hsdCuZPUf14QHvzqqHYrdtrwAyMYUrB/CkwHZwULp6nOXsC3HpZpK0/n9145lSrpORPevT00hVn08UF0MNDe3PGDrrx8pPwBFO8fV35nUzvhQYnxdvWZo98H9zmjE1/eGSfZz7zSko+3LIJ5jZSKuft+ze8F1t69AjsEt7EApAq4/Dtfp3zpo1Sn/zJpC3zRVXArfrkj3lTRmSlvaH++STTJYrUKjgBglkbTp8yvxFbkfET7BLehA/Qowu/3xnUK3fC0PLM69wUQ3vlQs6IAdnD+5ddPu/+ik2U1eEtmGX7Y+oM96fzZSlkgMpv3YDXlL/Se5dd/IN7fTW/nLozsGfu5OG6O7e4X52zFQULUMkP39zu3w1eUziT0uFCqqP7b/V7HYJxeNRukL4BAQJk1Jblz5tU8MlkP72OiILodRAMhGTSlRMRD6tB+LPqjX9nuvwcOOMp3bOD/1CsI4CQ/hr2jv7eXeth6vcEBZDm3OmsAT3KbxB6CQlOxbLe7wEn9dRTY5GAcAAq3rwqe8QAY+kDi+yI68LFEHgeEtIpkRAAgpOe3CkjCpd+6mc0EoeMfUDCOiUSAkBwUULl6ee/9vXlZgROie5+MZubtXy6CvUAlXy/pWTXNp9q5CPnEDYEz5Jz3tzQDdCjP88V0Pw4huAf/XGOt+KzsTDFAOkK8nInDvMz6NnQgScfBn3ux8MgEZ6WZ2FZWgEyqFW54wYbHhSzoAGvLiCF3PFD4H0Ar1F4vjiVAJmMxrzJw7U3KLjn3J3KaK9fzp89AZJyx5g0GyoBerhvp+bscdKk9CYeeBcJSXnjga+59AFk1GrvrV7Cl16+W/femiWQmu/8+8gzfQA92L6W9TuRfSQuI7f6vBxIjdEUNoy99UEZQHDufH/9194mTer8+xtWGFQPSY3OcVyUAVS8frlRo3acCv2jRrWqeANlDw+aANLlZRdvX0c/J84ygAT19+85syDsGE0AFa360lQuwHuyLJGABItWLrYcIbxPDUDazGulB3YTriYr4ZX88I32JqG3NNknSA1A6hNH6bhbw15jpiNGI++3crsfMjUAqY4dcj8r2i1pSPaxxnQApL93t+zSn49DFsF/kCwt7+fpAEhzRlAXLtx5CGhOH3PHjHcbOgBSn8ngXSmOA6DlVYwCgEy6cvUpCn5LnF3C1KePQeLs+vSFNwoA0pw7LeBPn6sqKnwqDYlXdZSccQoAKuPjN9tJqBAViVMAkL6okIRych8DFYkzB4hzIQ1UXRtiUR4qEqcAIF1eDotVocgVFYlTAVA2RVVnMVR8CWNBTFO5Ft6PeOBIIpfHvJueOGthcLNWbk4Pbt5KOWdxTL90P5ncfgrrDu2XsBkxlJaYCPmGGpvILHZJfwby+FEYN3xSbPqo8A6dai7bFN27v0XKjrvRbw+suXRT2Asvxw4eFffRRHsj1h3aL2E7YtDrCwtsBwnbJx4gj06A4Nkiskuvx1JLJIqPJsaNmeYnlT4esflPKosfP0sxdKzf//54W1S3PuDB0gp22XVo6dxJX+9R+k4csn6IdIA8O5E06XRq69/7ier+VtKKbfIayTYKypNSklft+D8cfx9WnTgKHv7uPt7ALrsOH/t19R/5dydyCJArsRwe9w+PcDjucrBw2QJD8X1Ls6AGTVO2HYSznMhufUKeTo3s3lc5d0nKlv2BdRtamhmKi+4t/5fliLnPukOzW+dbSUCgcwPej5IOkCwm1jONyjOvZw3sqcuzfQcHZznxY2fU+Hxl/JjpYc+/ZONcl3MnK61neZaDLyBn3aHN0g535YnVHY6TM0g6QNJqHgIEEuvzc7L6d3v4nz3Qd6eVHth1u383fUFuVcasO6xqocpxjx8/lR583SEdIJki3k8q81gFo+ph3vTROeOHGJ1+9R282OWM/iB/5jiTq98ZYt2hs9SkUv/IaGcGBBwjHSCJTC6NiPRSKPXxIzd7tC9YME17/bKNK+21SwWfTs18o72ayQ1crDu0icq8K42Iksg8f/CYnfh6SzpAkL+smgK2XjbTI03Jzq3winbjpZa3+r5yJ70PbKGfNaB7ya5tJuZ/PYN1h/YJspK4vVt2RygASOrpebRDpYwate7OrbILv8EW+g5tGA2CE3DFosPK1dlNvNItux0KAJJ5cR7Nrlgce5PRkDgFAAU3bsFx5QhZjorEKQAo5JlUQirKcRihqS9yvKIHy1EAkDyxBlxw8CA3qqcE1mkgi40jPwUKAAIRw9t1hK2oWiglz7t0ABSWKjqAaEmZDoACGzeX0vB8ztZzpLSaAlJmy5tP/dABkEQiCWvbnrEQ1E4Ie64DpExF+HQABFKGPtMOtiJpYfSc89EDUNv2MuLvbWCFb1lC9ZDWbVlxxYETagCSSKWKwaM5UIT3JRRDRkOyvIfhZgDUAAT5hHd8LaB2PegIuAWk1IU0KUqQJoBAVsWwsbAVcFN8OI6u7CgDCE6lg1u0pkti96OF1CBB9+1JsKQMIJAsdtBI2Pq28eQ9dvAonlb2fFn6AApu3iqMhquMTGsS/uKrwU1bMp3Fuz19AIFkihGTpVEx0BFMk0ZFxw6j7OzHLD6VAMkTlIlzFvtJSb9f2Cyx661Uppy7VB6f6NqSPAsqAQIZQ1q0jh85GToCaJAIvC5TmgitAIHckd37RnbtDR2qG6QAidCbAsUAgehxo6YEN38SOpS2oGYtIQVKgzeHTTdAEpkcToZk5Jw9mEV1byuLS4BTH0jBPXNCregGCESVRVdTzlsqCQyCPkVNEhConP+VLJr695LUAwTQBNVvXHP5FriIDX0qmixembx2Z1C9RlRE6zxIIQAEGUIxkld/G9TkH9AnvAW3fDp5zXcBybUJj9PN8AQCEGQrjYyuuWR9ZLc+0Ce2RXTuWWPhGgiV2AiZBiYcgCBziTwgfuyMuDHT/fzJy0smj58wO2HiHIru9QFJXTbyhHYZsiuDqO59q3++yj8iypUhd8chmJpLN0a+/iZ3S3K1kgABAulCW7dJ2byv4gO6qr5YE4y4aVIpvKpCMMFNnP6CNjfB+GAVYQIEQkmjY+LHTE/ZuBeucsMuLy28QycIAF5VIRheAuBgUcECZNZOnpSSOPOLpJU7gri9UwKWg0UTZy2EAMyRCHUrcIDMZQtq2DRp+Rb4vJGDcgbUrlf9sxWwHCxqXl3YW1EAZC5hWLuOcC6S9PXWmH7pASl1zINsbcFhzDuDwHmt9btDn32eLbfk+xERQBXFkEjgw8bYwaNqbdxb+9sjcSMmhbR61vP7iqQymK4Y/jG4AoexQ0aD88qvu69YTgQ/IgPIoqJw6SPqzXdrLF5b9/DvKVsPmL85OvrtgWHtXwms39g/3OqbPWEXBsNeeDn6rTQ4NwfjlC37YSJMj+71HriycCyurngBqqyzRC6X16xl/u56xdCxytmLkld/V2f/2ToHz8EVK2jQgV0YVM5ZrBg2Dj4dAGM4nYKJlU546/C9MAJUZQX8Q8MC6zaEBp0qjUR/AAESPQLeCYAAeaef6GcjQKJHwDsBECDv9BP9bARI9Ah4JwAC5J1+9M5mKXIEiCUhxeoGARJr5VnKGwFiSUixukGAxFp5lvJGgFgSUqxuECCxVp6lvBEgloQUjxvrTBEgaz1wj6ECCBBDwdDcWgEEyFoP3GOoAALEUDA0t1YAAbLWA/cYKkA6QJfz8jb/fObLo4edNDAAM5vED1662OHzzyKHf0hvazN/7uazZ2zyIm2XdIBOZt4oUqmcqwYGp27dtLH5ZP++c1m3bQbp2r2Ymzv9h10mk4nksBkAxH0a+aUlmvJyd9ZVa7VgXGlZUFpKOz3mXCCRX8h+GBANUEJEZFKMW98iCGZgbBYdtvEREQPaUPM32yDgqtqLDRq2rpVS1VESxokGCAR6tUmzV5s2ezqltpMGBmAGxpZtYe++OwYPndjptQmvdKK0bUz7YEPaB5ZJEdgnHSC5VPpErOKpWilOGhiAmb24LzVsBOgAQ5S215s1Dw0IsM+LqBHSASJKLAzGXgEEyF4THGGgAALEQCw0tVeAC4DsV8URwSiAAAmmlPwkQgFAZTpddnGxk/ZI5/jDRph4KTf3In/takF+uUHPT2G5WpV0gDKuX1t5IuP733910lYezwAzG8X2nv/zvTWrZuzZPZO/NnXXzrR1a09l2l5msQmV6l2iATIYjRfzct25GHQpPw+MLStx6PIly12++uV6/dErV/hanYN1iQYI8pdIJLB12dyBzKUTNPBAAaIBkvr7N0pIlEhcM9Q4UQnGlvl3bEjEH1MKkMnaN2hgGZjA+kQDBFqn1q03sG1q9xYtnbSBz6WCGRhbtteaNls3IG1a5y5T+Wszu3Zb9V7/Z2s/YRmYwPqkAwRyB8nlNaKjnbRgueMLRkFyeSOlsjF/rX58QoBUBikIuFEAkIDVF0BqCJAAishnCggQn+oLYG0ESABF5DMFBIhP9QWwtjABEkBhaEkBAaKlUoTGiQARWhhawkKAF7Z5gAAAAJBJREFUaKkUoXEiQIQWhpawECBaKkVonAgQoYWhJSwEyKpSuMNUAQSIqWJob6UAAmQlB+4wVQABYqoY2lspgABZyYE7TBVAgJgqhvZWCiBAVnLgDlMFECCmijm2F+0oAiTa0rOTOALEjo6i9YIAibb07CSOALGjo2i9IECiLT07iSNA7OgoWi8IEM+lp335/wIAAP//y1ZEqQAAAAZJREFUAwAqNVzI2PxblQAAAABJRU5ErkJggg==">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="졸아도 노트">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:#ffffff;--ink:#121a21;--sub:#5b6870;--line:#e3e8ea;--mist:#eef5f4;--teal:#0e6e6b;--onteal:#ffffff;--red:#d93a26;--starbg:#fff3ef}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1416;--ink:#e7eded;--sub:#97a5aa;--line:#243034;--mist:#162124;--teal:#4fc2b9;--onteal:#06201e;--starbg:#2a1a16}}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;overflow-x:hidden;-webkit-tap-highlight-color:transparent;padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)}
+.wrap{max-width:760px;margin:0 auto;padding:0 max(4vw,16px) 140px}
+header{display:flex;align-items:center;justify-content:space-between;padding:18px 0 10px;gap:12px}
+.brand{font-weight:700;font-size:20px;display:flex;align-items:center;gap:8px}
+.brand i{width:10px;height:10px;border-radius:50%;background:var(--red);display:inline-block}
+button,.btn{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--line);background:var(--bg);border-radius:12px;min-height:44px;padding:0 16px;font-weight:500;-webkit-appearance:none;appearance:none;touch-action:manipulation;white-space:nowrap;flex:none;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+button:focus-visible,input:focus-visible,textarea:focus-visible,.btn:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.pri{background:var(--teal)!important;border-color:var(--teal)!important;color:var(--onteal)!important}
+.ghost{border-color:transparent!important;background:transparent!important}
+button:disabled{opacity:.45;cursor:default}
+input,textarea{font:inherit;font-size:16px;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;width:100%}
+textarea{min-height:160px;resize:vertical}
+.hide{display:none!important}
+.deck{background:var(--mist);border-radius:22px;padding:22px 20px 20px;margin-top:6px}
+.meta{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:8px}
+.meta input{border-color:transparent}
+.clock{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:22px}
+.time{font-size:clamp(44px,13vw,64px);font-weight:500;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.state{color:var(--sub);font-size:14px;margin-top:8px}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.badge{font-size:12px;border-radius:99px;padding:2px 10px;background:var(--bg);color:var(--sub)}
+.badge.on{color:var(--red)}
+.rec{width:84px;height:84px;border-radius:50%;border:3px solid var(--red);background:var(--bg);padding:0}
+.rec b{width:34px;height:34px;border-radius:50%;background:var(--red);transition:all .2s;display:block}
+.rec.on b{border-radius:8px;width:28px;height:28px}
+.rec.on{animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(217,58,38,.45)}70%{box-shadow:0 0 0 16px rgba(217,58,38,0)}100%{box-shadow:0 0 0 0 rgba(217,58,38,0)}}
+@media(prefers-reduced-motion:reduce){.rec.on{animation:none}}
+.alert{margin-top:14px;border-radius:14px;padding:12px 14px;background:var(--bg);border:1px solid var(--red);font-size:15px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.alert span{flex:1 1 220px}
+.note{font-size:14px;color:var(--sub);margin:12px 2px 0}
+.tabs{display:flex;gap:4px;margin:22px 0 6px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;border-radius:0;background:none;border-bottom:3px solid transparent;color:var(--sub);padding:0 14px}
+.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--teal);font-weight:700}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.log{list-style:none;margin:0;padding:0}
+.log li{display:grid;grid-template-columns:4.2em minmax(0,1fr);gap:10px;padding:7px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.log li .t{color:var(--sub);font-size:13px;font-variant-numeric:tabular-nums;padding-top:3px;white-space:nowrap}
+.log li.star{background:var(--starbg)}
+.log li.star .t::after{content:" ★";color:var(--red)}
+.log li.part{color:var(--sub);font-style:italic;cursor:default}
+.log li.gap{color:var(--red);font-size:13px;cursor:default}
+.log li.playing{outline:2px solid var(--teal);outline-offset:-2px}
+.empty,.log li.empty,.list li.empty{color:var(--sub);text-align:center;padding:36px 12px;display:block}
+.md h2{font-size:18px;margin:26px 0 8px;color:var(--teal)}
+.md h3{font-size:16px;margin:16px 0 4px}
+.md ul{margin:0;padding-left:1.2em}.md li{margin:3px 0}.md p{margin:6px 0}
+.md .ts{color:var(--sub);font-size:13px;white-space:nowrap}
+.player{display:flex;gap:8px;align-items:center;margin-top:12px}
+.player audio{flex:1;height:40px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:10px max(4vw,16px) calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;justify-content:center;z-index:5}
+.bar button{flex:1;max-width:240px}
+.bar .mini{flex:none;width:52px;padding:0;border-radius:50%;border-color:var(--red);color:var(--red);font-size:20px}
+.list{list-style:none;margin:10px 0 0;padding:0}
+.list li{border-bottom:1px solid var(--line)}
+.list button{width:100%;text-align:left;border:0;border-radius:0;padding:14px 4px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;background:none;white-space:normal}
+.list .s{font-size:13px;color:var(--teal);font-weight:700}
+.list .n{font-size:17px;font-weight:500;grid-column:1}
+.list .d{font-size:13px;color:var(--sub);grid-column:2;grid-row:1/3;align-self:center;text-align:right;white-space:nowrap}
+.dlg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:grid;place-items:end center;z-index:10;padding:12px}
+.dlg>div{background:var(--bg);border-radius:20px;padding:20px;width:100%;max-width:640px}
+.dlg h3{margin:0 0 8px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:20;max-width:90vw;text-align:center}
+.desk,.ph{display:none}
+kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:6px;padding:0 5px;color:var(--sub)}
+.steps{margin:6px 0 0;padding-left:1.3em;color:var(--sub);font-size:14px}
+@media(max-width:600px){.meta{grid-template-columns:minmax(0,1fr)}.rec{width:76px;height:76px}}
+@media(min-width:1000px){
+  .wrap{max-width:1240px;padding-bottom:48px}
+  #vLec:not(.hide){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:start}
+  .colB{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow-y:auto;padding-right:4px}
+  .tabs,.bar{display:none!important}
+  #tLog,#tSum{display:block!important}
+  #tLog{margin-top:18px}
+  .desk{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}
+  .ph{display:block;font-size:18px;margin:6px 0 0}
+  .dlg{place-items:center}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><i></i>졸아도 노트</div>
+    <div style="display:flex;gap:4px">
+      <button id="installBtn" class="ghost hide">앱 설치</button>
+      <button id="toList" class="ghost">수업 목록</button>
+    </div>
+  </header>
+
+  <section id="vLec">
+   <div class="colA">
+    <div class="deck">
+      <div class="meta">
+        <input id="fSub" placeholder="과목 (예: 해사법규)" aria-label="과목">
+        <input id="fTitle" placeholder="수업 제목 (예: 3주차 충돌예방규칙)" aria-label="수업 제목">
+      </div>
+      <div class="clock">
+        <div>
+          <div class="time" id="time">00:00</div>
+          <div class="state" id="state">대기 중 · 버튼을 눌러 녹음 시작</div>
+          <div class="badges"><span class="badge" id="bAudio">녹음 파일</span><span class="badge" id="bStt">실시간 받아쓰기</span></div>
+        </div>
+        <button class="rec" id="recBtn" aria-label="녹음 시작"><b></b></button>
+      </div>
+      <div class="alert hide" id="alert"><span id="alertMsg"></span><span style="display:flex;gap:8px;flex:none" id="alertBtns"></span></div>
+      <div class="desk">
+        <button id="starBtn2">★ 중요 표시 <kbd>S</kbd></button>
+        <span class="note" style="margin:0">녹음 시작·멈춤 <kbd>R</kbd></span>
+      </div>
+      <p class="note" id="envNote"></p>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="log" aria-selected="true">받아쓰기</button>
+      <button role="tab" data-tab="sum" aria-selected="false">정리 노트</button>
+    </div>
+
+    <div id="tLog">
+      <div class="player hide" id="player"><audio id="audio" controls preload="none"></audio></div>
+      <div class="tools">
+        <button id="imp">불러오기</button>
+        <button id="dlTxt">텍스트 저장</button>
+        <button id="dlAudio">녹음 파일 저장</button>
+        <button id="del" class="ghost">삭제</button>
+      </div>
+      <ul class="log" id="log"></ul>
+      <p class="note">줄을 누르면 그 시점의 녹음이 재생돼요. 길게 누르면(PC는 우클릭) ★중요 표시가 붙어요.</p>
+    </div>
+   </div>
+   <div class="colB">
+    <div id="tSum" class="hide">
+      <h2 class="ph">정리 노트</h2>
+      <ol class="steps">
+        <li>[AI 정리용 복사]를 눌러요.</li>
+        <li>ChatGPT나 Claude에 붙여넣고 보내요.</li>
+        <li>받은 답을 아래 칸에 붙여넣고 [노트 저장]을 눌러요.</li>
+      </ol>
+      <div class="tools">
+        <button id="cpPrompt" class="pri">AI 정리용 복사</button>
+        <a class="btn" href="https://chatgpt.com/" target="_blank" rel="noopener">ChatGPT 열기</a>
+        <a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener">Claude 열기</a>
+      </div>
+      <textarea id="notesIn" placeholder="AI가 정리해 준 내용을 여기에 붙여넣기" aria-label="정리 노트 붙여넣기"></textarea>
+      <div class="tools"><button id="saveNotes">노트 저장</button><button id="cpNotes">노트 복사</button></div>
+      <div class="md" id="sum"></div>
+    </div>
+   </div>
+  </section>
+
+  <section id="vList" class="hide">
+    <div class="tools" style="flex-wrap:nowrap">
+      <input id="q" placeholder="과목·제목·내용 검색" aria-label="검색">
+      <button class="pri" id="newLec">새 수업</button>
+    </div>
+    <ul class="list" id="list"></ul>
+    <p class="note" id="where">노트와 녹음은 이 기기의 브라우저에만 저장돼요. 브라우저 데이터를 지우면 함께 지워지니, 중요한 건 [텍스트 저장]으로 따로 받아 두세요.</p>
+  </section>
+</div>
+
+<div class="bar" id="bar">
+  <button class="mini" id="starBtn" aria-label="방금 내용 중요 표시">★</button>
+  <button id="barSum">정리 노트</button>
+</div>
+
+<div class="dlg hide" id="dlg"><div>
+  <h3>받아쓰기 원문 불러오기</h3>
+  <p class="note" style="margin-top:0">텍스트를 붙여넣거나 .txt 파일을 고르세요. 줄 앞의 00:00 시간은 자동으로 인식해요.</p>
+  <textarea id="pasteIn" placeholder="여기에 붙여넣기"></textarea>
+  <div class="tools"><input type="file" id="file" accept=".txt,.srt,.vtt,text/plain"></div>
+  <div class="tools" style="justify-content:flex-end"><button id="dlgX" class="ghost">취소</button><button id="dlgOk" class="pri">추가</button></div>
+</div></div>
+
+<script>
+/* 졸아도 노트 — 녹음 + 실시간 받아쓰기 + 기기 저장 (외부 서버 없음) */
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const mmss = t => { t = Math.max(0, Math.round(t)); const h = Math.floor(t/3600), m = Math.floor(t%3600/60), s = t%60;
+  return (h ? h + ':' + String(m).padStart(2,'0') : String(m).padStart(2,'0')) + ':' + String(s).padStart(2,'0'); };
+const toast = m => { const d = document.createElement('div'); d.className = 'toast'; d.textContent = m; document.body.appendChild(d); setTimeout(() => d.remove(), 2600); };
+const newLec = () => ({ id: 'l' + Date.now().toString(36), sub: '', title: '', created: Date.now(), updated: Date.now(), dur: 0, lines: [], notes: '', segs: [] });
+
+// ---------- 환경
+const ua = navigator.userAgent;
+const isIOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 0);
+const isAndroid = /Android/.test(ua);
+const isTouch = navigator.maxTouchPoints > 0 || matchMedia('(pointer:coarse)').matches;
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const canRecord = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+const MIME = !window.MediaRecorder ? '' : ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'].find(m => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) || '';
+
+// ---------- IndexedDB
+let dbp = null;
+function db() {
+  if (dbp) return dbp;
+  dbp = new Promise((res, rej) => {
+    const r = indexedDB.open('jolnote', 1);
+    r.onupgradeneeded = () => { const d = r.result; d.createObjectStore('lecs', { keyPath: 'id' }); d.createObjectStore('chunks'); };
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+  return dbp;
+}
+async function tx(store, mode, fn) {
+  const d = await db();
+  return new Promise((res, rej) => { const t = d.transaction(store, mode); const s = t.objectStore(store); const out = fn(s);
+    t.oncomplete = () => res(out && out.result !== undefined ? out.result : out); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error); });
+}
+const store = {
+  list: () => tx('lecs', 'readonly', s => s.getAll()),
+  put: l => tx('lecs', 'readwrite', s => s.put(l)),
+  del: async id => { await tx('lecs', 'readwrite', s => s.delete(id)); await tx('chunks', 'readwrite', s => s.delete(IDBKeyRange.bound(id + '|', id + '|￿'))); },
+  chunk: (id, seg, n, blob) => tx('chunks', 'readwrite', s => s.put(blob, `${id}|${String(seg).padStart(3,'0')}|${String(n).padStart(6,'0')}`)),
+  segBlob: async (id, seg, mime) => { const k = `${id}|${String(seg).padStart(3,'0')}|`;
+    const parts = await tx('chunks', 'readonly', s => s.getAll(IDBKeyRange.bound(k, k + '￿'))); return parts.length ? new Blob(parts, { type: mime || 'audio/webm' }) : null; }
+};
+try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
+
+// ---------- 상태
+let lecs = [], cur = newLec();
+let rec = false, startedAt = 0, partial = '', partialT = null, starNext = false, tab = 'log';
+let useAudio = canRecord, useStt = !!SR;
+let stream = null, mr = null, segIdx = -1, chunkN = 0;
+let sr = null, srWanted = false, srQuick = 0, srLastStart = 0, srGotResult = false;
+let wake = null, hiddenAt = 0;
+
+let saving = Promise.resolve(), dirty = false, saveTimer = null;
+function touch(soon) { dirty = true; cur.updated = Date.now(); clearTimeout(saveTimer); saveTimer = setTimeout(save, soon ? 500 : 3000); }
+function save() { if (!dirty) return saving; dirty = false; const snap = JSON.parse(JSON.stringify(cur));
+  const i = lecs.findIndex(x => x.id === snap.id); i < 0 ? lecs.unshift(snap) : lecs[i] = snap;
+  saving = saving.then(() => store.put(snap)).catch(() => { dirty = true; toast('저장 공간이 부족하거나 저장에 실패했어요'); }); return saving; }
+
+const elapsed = () => cur.dur + (rec ? (Date.now() - startedAt) / 1000 : 0);
+setInterval(() => { $('#time').textContent = mmss(elapsed()); }, 500);
+
+// ---------- 렌더
+function renderLog() {
+  let h = cur.lines.map((l, i) => l.gap
+    ? `<li class="gap"><span class="t">${mmss(l.t)}</span><span>— ${esc(l.x || '받아쓰기 끊김')} —</span></li>`
+    : `<li data-i="${i}" class="${l.s ? 'star' : ''}"><span class="t">${mmss(l.t)}</span><span>${esc(l.x)}</span></li>`).join('');
+  if (partial) h += `<li class="part"><span class="t">${mmss(partialT ?? elapsed())}</span><span>${esc(partial)}</span></li>`;
+  $('#log').innerHTML = h || `<li class="empty">아직 기록이 없어요.<br>빨간 버튼을 누르면 녹음과 함께 교수님 말씀이 시간별로 적혀요.</li>`;
+}
+function md(s) {
+  const out = []; let ul = false;
+  for (let ln of esc(s).split('\n')) {
+    ln = ln.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\[(\d{1,2}:\d{2}(?::\d{2})?)\]/g, '<span class="ts">[$1]</span>');
+    const m = ln.match(/^\s*[-*•]\s+(.*)/);
+    if (m) { if (!ul) { out.push('<ul>'); ul = true; } out.push('<li>' + m[1] + '</li>'); continue; }
+    if (ul) { out.push('</ul>'); ul = false; }
+    if (/^###\s/.test(ln)) out.push('<h3>' + ln.replace(/^###\s*/, '') + '</h3>');
+    else if (/^#{1,2}\s/.test(ln)) out.push('<h2>' + ln.replace(/^#{1,2}\s*/, '') + '</h2>');
+    else if (ln.trim()) out.push('<p>' + ln + '</p>');
+  }
+  if (ul) out.push('</ul>'); return out.join('');
+}
+function renderSum() { $('#notesIn').value = cur.notes; $('#sum').innerHTML = cur.notes ? md(cur.notes) : ''; }
+function renderMeta() { $('#fSub').value = cur.sub; $('#fTitle').value = cur.title; }
+function renderRec() {
+  $('#recBtn').classList.toggle('on', rec); $('#recBtn').setAttribute('aria-label', rec ? '녹음 멈춤' : '녹음 시작');
+  $('#bAudio').classList.toggle('hide', !canRecord); $('#bStt').classList.toggle('hide', !SR);
+  $('#bAudio').classList.toggle('on', rec && !!mr && mr.state === 'recording'); $('#bStt').classList.toggle('on', rec && srWanted);
+  $('#bAudio').textContent = '녹음 파일 ' + (useAudio ? '켜짐' : '꺼짐'); $('#bStt').textContent = '받아쓰기 ' + (useStt ? '켜짐' : '꺼짐');
+  $('#state').textContent = rec ? '기록 중 · 화면을 켜 둔 채로 두세요' : cur.lines.length || cur.segs.length ? '일시정지 · 다시 누르면 이어서 기록' : '대기 중 · 버튼을 눌러 녹음 시작';
+  $('#dlAudio').classList.toggle('hide', !cur.segs.length);
+}
+function setTab(t) { tab = t; document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t));
+  $('#tLog').classList.toggle('hide', t !== 'log'); $('#tSum').classList.toggle('hide', t !== 'sum'); }
+function renderList() {
+  const q = $('#q').value.trim().toLowerCase();
+  const a = lecs.slice().sort((x, y) => y.updated - x.updated).filter(l => !q || (l.sub + ' ' + l.title + ' ' + l.notes + ' ' + l.lines.map(x => x.x).join(' ')).toLowerCase().includes(q));
+  $('#list').innerHTML = a.map(l => { const d = new Date(l.created);
+    return `<li><button data-id="${esc(l.id)}"><span class="s">${esc(l.sub || '과목 미정')}${l.notes ? ' · 정리됨' : ''}${l.segs && l.segs.length ? ' · 녹음' : ''}</span><span class="n">${esc(l.title || '제목 없는 수업')}</span><span class="d">${d.getMonth()+1}/${d.getDate()}<br>${mmss(l.dur)}</span></button></li>`; }).join('')
+    || `<li class="empty">${q ? '검색 결과가 없어요.' : '저장된 수업이 없어요.'}</li>`;
+}
+function show(v) { $('#vLec').classList.toggle('hide', v !== 'lec'); $('#vList').classList.toggle('hide', v !== 'list'); $('#bar').classList.toggle('hide', v !== 'lec');
+  $('#toList').textContent = v === 'lec' ? '수업 목록' : '돌아가기'; if (v === 'list') renderList(); }
+function open(l) { cur = JSON.parse(JSON.stringify(l)); cur.segs = cur.segs || []; partial = ''; stopAudio();
+  renderMeta(); renderLog(); renderSum(); setTab('log'); hideAlert(); renderRec(); show('lec'); }
+function alertBox(msg, btns) { $('#alertMsg').textContent = msg; $('#alertBtns').innerHTML = '';
+  for (const [label, fn, pri] of btns || []) { const b = document.createElement('button'); b.textContent = label; if (pri) b.className = 'pri'; b.onclick = fn; $('#alertBtns').appendChild(b); }
+  $('#alert').classList.remove('hide'); try { navigator.vibrate && navigator.vibrate([300, 150, 300]); } catch (e) {} }
+function hideAlert() { $('#alert').classList.add('hide'); }
+
+// ---------- 받아쓰기 (Web Speech API, 끊기면 자동 재시작)
+function addLine(x, t) { x = String(x).trim(); if (!x) return;
+  cur.lines.push({ t: Math.round(t ?? partialT ?? elapsed()), x, s: starNext ? 1 : 0 }); starNext = false; partialT = null; touch(); }
+function srStart() {
+  if (!SR || !useStt) return;
+  srWanted = true;
+  if (!sr) {
+    sr = new SR(); sr.lang = 'ko-KR'; sr.interimResults = true; sr.maxAlternatives = 1;
+    sr.continuous = !isAndroid; // 안드로이드는 continuous에서 결과가 중복되는 문제가 있어 한 문장씩 받고 다시 시작
+    sr.onresult = e => { srGotResult = true; let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) { const r = e.results[i];
+        if (r.isFinal) { if (partialT == null) partialT = elapsed(); addLine(r[0].transcript); } else interim += r[0].transcript; }
+      if (interim && partialT == null) partialT = elapsed(); partial = interim.trim(); renderLog(); autoScroll(); };
+    sr.onerror = e => {
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { srWanted = false; useStt = false; renderRec();
+        alertBox('받아쓰기 권한이 거부됐어요. 녹음 파일만 저장돼요. 브라우저 설정에서 마이크를 허용하면 받아쓰기도 돼요.', [['확인', hideAlert]]); }
+      else if (e.error === 'audio-capture' && useAudio && canRecord) srConflict();
+    };
+    sr.onend = () => {
+      if (partial) { addLine(partial); partial = ''; renderLog(); }
+      if (!srWanted || !rec || document.hidden) return;
+      const quick = Date.now() - srLastStart < 1500 && !srGotResult;
+      srQuick = quick ? srQuick + 1 : 0;
+      if (srQuick >= 4) { if (mr) return srConflict(); srWanted = false; renderRec(); alertBox('받아쓰기가 계속 끊겨요. 인터넷 연결을 확인해 주세요.', [['다시 시도', () => { hideAlert(); srQuick = 0; srStart(); }, true]]); return; }
+      setTimeout(() => { if (srWanted && rec && !document.hidden) srKick(); }, quick ? 600 : 150);
+    };
+  }
+  srKick();
+}
+function srKick() { srLastStart = Date.now(); srGotResult = false; try { sr.start(); } catch (e) { /* 이미 실행 중 */ } }
+function srStop() { srWanted = false; if (sr) { try { sr.stop(); } catch (e) {} } }
+function srConflict() {
+  srWanted = false; renderRec();
+  alertBox('이 기기는 녹음 파일 저장과 받아쓰기를 동시에 못 해요. 하나만 골라 주세요.', [
+    ['받아쓰기만', () => { hideAlert(); useAudio = false; audioStop(); srQuick = 0; srStart(); renderRec(); toast('녹음 파일은 끄고 받아쓰기만 해요'); }, true],
+    ['녹음 파일만', () => { hideAlert(); useStt = false; renderRec(); toast('받아쓰기는 끄고 녹음 파일만 저장해요'); }]
+  ]);
+}
+
+// ---------- 녹음 파일 (MediaRecorder, 10초마다 기기에 조각 저장)
+async function audioStart() {
+  if (!canRecord || !useAudio) return true;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: true, autoGainControl: true } }); }
+  catch (e) { useAudio = false; renderRec(); toast('마이크를 쓸 수 없어 녹음 파일은 저장하지 않아요'); return false; }
+  segIdx = cur.segs.length; chunkN = 0;
+  cur.segs.push({ offset: Math.round(cur.dur), dur: 0, mime: MIME || 'audio/webm' });
+  const id = cur.id, seg = segIdx;
+  mr = new MediaRecorder(stream, MIME ? { mimeType: MIME, audioBitsPerSecond: 32000 } : undefined);
+  mr.ondataavailable = e => { if (e.data && e.data.size) store.chunk(id, seg, chunkN++, e.data).catch(() => toast('저장 공간이 부족해요')); };
+  mr.onstop = () => { if (stream) stream.getTracks().forEach(t => t.stop()); stream = null; };
+  mr.start(10000);
+  return true;
+}
+function audioStop() { if (mr && mr.state !== 'inactive') { try { mr.stop(); } catch (e) {} }
+  if (segIdx >= 0 && cur.segs[segIdx]) cur.segs[segIdx].dur = Math.max(1, Math.round(elapsed() - cur.segs[segIdx].offset)); mr = null; segIdx = -1; }
+
+// ---------- 시작 / 멈춤
+async function lockScreen() { try { wake = await navigator.wakeLock?.request('screen'); } catch (e) { wake = null; } }
+async function startRec() {
+  if (!canRecord && !SR) { alertBox('이 브라우저는 녹음도 받아쓰기도 지원하지 않아요. Chrome·Edge·삼성 인터넷으로 열어 주세요.', [['확인', hideAlert]]); return; }
+  hideAlert(); stopAudio();
+  // 받아쓰기는 사용자 터치 직후 바로 시작해야 하는 브라우저가 있어서 먼저 켬
+  rec = true; startedAt = Date.now();
+  if (useStt) { srQuick = 0; srStart(); }
+  renderRec(); lockScreen();
+  await audioStart();
+  renderRec(); touch(true);
+}
+function stopRec() {
+  const d = elapsed(); rec = false; cur.dur = d; srStop(); audioStop();
+  if (partial) { addLine(partial); partial = ''; }
+  try { wake && wake.release(); } catch (e) {} wake = null;
+  renderLog(); renderRec(); touch(true);
+}
+const toggleRec = () => rec ? stopRec() : startRec();
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { hiddenAt = Date.now(); save(); return; }
+  if (rec) {
+    lockScreen();
+    if (hiddenAt && Date.now() - hiddenAt > 4000 && useStt) {
+      cur.lines.push({ t: Math.round((hiddenAt - startedAt) / 1000 + cur.dur), gap: 1, x: '화면이 꺼져 받아쓰기 멈춤' + (mr ? ' · 녹음은 계속됨' : '') }); touch(true); renderLog();
+    }
+    if (srWanted) srKick();
+  }
+  hiddenAt = 0;
+});
+window.addEventListener('pagehide', () => { if (rec) { cur.dur = elapsed(); startedAt = Date.now(); } save(); });
+
+// ---------- 재생
+let playUrl = null;
+function stopAudio() { const a = $('#audio'); a.pause(); if (playUrl) URL.revokeObjectURL(playUrl); playUrl = null; a.removeAttribute('src'); $('#player').classList.add('hide');
+  document.querySelectorAll('.log li.playing').forEach(x => x.classList.remove('playing')); }
+async function playAt(t, li) {
+  if (rec) { toast('녹음 중에는 재생할 수 없어요'); return; }
+  const si = cur.segs.findIndex((s, i) => t >= s.offset && (t < s.offset + (s.dur || 1e9) || i === cur.segs.length - 1));
+  if (si < 0) { toast('이 부분은 녹음 파일이 없어요'); return; }
+  const s = cur.segs[si]; const b = await store.segBlob(cur.id, si, s.mime);
+  if (!b) { toast('녹음 파일을 찾지 못했어요'); return; }
+  stopAudio(); playUrl = URL.createObjectURL(b); const a = $('#audio'); a.src = playUrl; $('#player').classList.remove('hide');
+  li && li.classList.add('playing');
+  const seek = Math.max(0, t - s.offset - 2);
+  const go = () => { try { a.currentTime = seek; } catch (e) {} a.play().catch(() => {}); };
+  // 브라우저 녹음 파일(webm)은 길이 정보가 없어 건너뛰기가 안 됨 → 끝까지 한 번 훑어 길이를 알아낸 뒤 이동
+  const ready = () => {
+    if (isFinite(a.duration)) return go();
+    const fix = () => { if (!isFinite(a.duration)) return; a.removeEventListener('durationchange', fix); a.removeEventListener('timeupdate', fix); a.currentTime = 0; setTimeout(go, 50); };
+    a.addEventListener('durationchange', fix); a.addEventListener('timeupdate', fix);
+    try { a.currentTime = 1e101; } catch (e) { go(); }
+  };
+  a.addEventListener('loadedmetadata', ready, { once: true });
+  a.load();
+}
+
+// ---------- 로그 줄: 누르면 재생, 길게 누르면 ★
+let pressT = null, pressed = false;
+$('#log').addEventListener('pointerdown', e => { const li = e.target.closest('li[data-i]'); if (!li) return; pressed = false;
+  pressT = setTimeout(() => { pressed = true; toggleStar(+li.dataset.i); try { navigator.vibrate && navigator.vibrate(30); } catch (x) {} }, 550); });
+['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => $('#log').addEventListener(ev, () => clearTimeout(pressT)));
+$('#log').addEventListener('contextmenu', e => { const li = e.target.closest('li[data-i]'); if (!li) return; e.preventDefault(); if (!pressed) toggleStar(+li.dataset.i); pressed = true; });
+$('#log').addEventListener('click', e => { const li = e.target.closest('li[data-i]'); if (!li) return; if (pressed) { pressed = false; return; }
+  const l = cur.lines[+li.dataset.i]; if (cur.segs.length) playAt(l.t, li); else toggleStar(+li.dataset.i); });
+function toggleStar(i) { const l = cur.lines[i]; if (!l) return; l.s = l.s ? 0 : 1; touch(); renderLog(); }
+function starNow() { if (partial) { starNext = true; toast('지금 말하는 문장에 ★'); return; }
+  const l = [...cur.lines].reverse().find(x => !x.gap); if (l && rec) { l.s = 1; touch(); renderLog(); toast('방금 문장에 ★'); }
+  else if (l) { toast('줄을 길게 누르면 ★를 붙일 수 있어요'); } else { starNext = true; toast('다음 문장에 ★'); } }
+function autoScroll() { if ((tab === 'log' || innerWidth >= 1000) && innerHeight + scrollY > document.body.scrollHeight - 260) scrollTo(0, document.body.scrollHeight); }
+
+// ---------- AI 정리용 복사
+function transcript() { return cur.lines.filter(l => !l.gap).map(l => `[${mmss(l.t)}]${l.s ? ' ★' : ''} ${l.x}`).join('\n'); }
+function aiPrompt() {
+  return `너는 대학 강의 필기 도우미다. 아래는 '${cur.sub || '과목 미상'}' 수업${cur.title ? ` ('${cur.title}')` : ''}의 자동 음성인식 기록이다.
+음성인식 오류(동음이의어, 전문용어 오인식)가 많으니 문맥과 해당 분야 지식으로 바로잡아 해석하되, 기록에 없는 내용을 지어내지 마라.
+★ 표시는 학생이 직접 중요하다고 표시한 부분이니 반드시 반영하라. 각 항목 끝에 근거 시간을 [mm:ss]로 붙여라.
+아래 형식의 한국어 마크다운으로만 답하라:
+## 한 줄 요약
+## 핵심 내용
+(개념별로 ### 소제목과 - 불릿. 정의·공식·예시를 빠짐없이)
+## 시험·강조 포인트
+## 과제·공지
+## 용어 정리
+(- **용어**: 쉬운 설명)
+## 복습 질문
+(3~5개, 답은 괄호로 짧게)
+해당 내용이 없으면 "- 해당 없음"이라고 써라.
+
+[기록]
+${transcript()}`;
+}
+async function copy(t, m) {
+  try { await navigator.clipboard.writeText(t); toast(m); }
+  catch (e) { const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); toast(m); } catch (x) { toast('복사하지 못했어요'); } ta.remove(); }
+}
+function download(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
+const baseName = () => (cur.sub ? cur.sub + '_' : '') + (cur.title || new Date(cur.created).toISOString().slice(0, 10)).replace(/[\\/:*?"<>|]/g, '');
+
+// ---------- 불러오기
+function parseText(txt) {
+  const out = []; let last = cur.lines.length ? cur.lines[cur.lines.length - 1].t : 0;
+  for (let ln of txt.replace(/\r/g, '').split('\n')) {
+    ln = ln.trim(); if (!ln || /^\d+$/.test(ln) || /^WEBVTT/.test(ln)) continue;
+    const srt = ln.match(/^(\d{2}):(\d{2}):(\d{2})[,.]\d+\s*-->/); if (srt) { last = +srt[1]*3600 + +srt[2]*60 + +srt[3]; continue; }
+    const m = ln.match(/^(?:[^\d\n]{0,12}?\s)?\[?(\d{1,2}):(\d{2})(?::(\d{2}))?\]?\s*(.*)$/);
+    if (m) { last = m[3] != null ? +m[1]*3600 + +m[2]*60 + +m[3] : +m[1]*60 + +m[2]; if (m[4]) out.push({ t: last, x: m[4], s: 0 }); continue; }
+    out.push({ t: last, x: ln, s: 0 });
+  }
+  return out;
+}
+
+// ---------- 이벤트
+$('#recBtn').onclick = toggleRec;
+$('#starBtn').onclick = starNow; $('#starBtn2').onclick = starNow;
+$('#barSum').onclick = () => { setTab(tab === 'sum' ? 'log' : 'sum'); $('#barSum').textContent = tab === 'sum' ? '받아쓰기' : '정리 노트'; };
+document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { setTab(b.dataset.tab); $('#barSum').textContent = tab === 'sum' ? '받아쓰기' : '정리 노트'; });
+$('#fSub').oninput = e => { cur.sub = e.target.value; touch(); };
+$('#fTitle').oninput = e => { cur.title = e.target.value; touch(); };
+$('#cpPrompt').onclick = () => cur.lines.some(l => !l.gap) ? copy(aiPrompt(), '복사했어요. ChatGPT나 Claude에 붙여넣으세요') : toast('정리할 받아쓰기가 없어요');
+$('#saveNotes').onclick = () => { cur.notes = $('#notesIn').value.trim(); touch(true); renderSum(); toast(cur.notes ? '노트를 저장했어요' : '노트를 비웠어요'); };
+$('#cpNotes').onclick = () => cur.notes ? copy(cur.notes, '노트를 복사했어요') : toast('아직 정리 노트가 없어요');
+$('#dlTxt').onclick = () => { const t = (cur.sub ? cur.sub + ' · ' : '') + (cur.title || '') + '\n\n' + transcript() + (cur.notes ? '\n\n=== 정리 노트 ===\n' + cur.notes : '');
+  download(new Blob([t], { type: 'text/plain;charset=utf-8' }), baseName() + '.txt'); };
+$('#dlAudio').onclick = async () => { if (rec) { toast('녹음을 멈춘 뒤 저장해 주세요'); return; }
+  for (let i = 0; i < cur.segs.length; i++) { const s = cur.segs[i]; const b = await store.segBlob(cur.id, i, s.mime); if (!b) continue;
+    const ext = /mp4/.test(s.mime) ? 'm4a' : /ogg/.test(s.mime) ? 'ogg' : 'webm'; download(b, baseName() + (cur.segs.length > 1 ? `_${i + 1}` : '') + '.' + ext); } };
+$('#file').onchange = async e => { const f = e.target.files[0]; if (f) $('#pasteIn').value = await f.text(); };
+$('#imp').onclick = () => { $('#pasteIn').value = ''; $('#file').value = ''; $('#dlg').classList.remove('hide'); $('#pasteIn').focus(); };
+$('#dlgX').onclick = () => $('#dlg').classList.add('hide');
+$('#dlgOk').onclick = () => { const a = parseText($('#pasteIn').value); if (!a.length) { toast('불러올 내용이 없어요'); return; }
+  cur.lines.push(...a); cur.dur = Math.max(cur.dur, a[a.length - 1].t); touch(true); renderLog(); $('#dlg').classList.add('hide'); toast(a.length + '줄을 불러왔어요'); };
+let delArm = 0;
+$('#del').onclick = async () => { if (Date.now() - delArm > 3000) { delArm = Date.now(); $('#del').textContent = '한 번 더 누르면 삭제'; setTimeout(() => $('#del').textContent = '삭제', 3000); return; }
+  if (rec) stopRec(); clearTimeout(saveTimer); dirty = false; await saving; lecs = lecs.filter(x => x.id !== cur.id);
+  try { await store.del(cur.id); } catch (e) {} $('#del').textContent = '삭제'; toast('삭제했어요'); open(newLec()); };
+$('#toList').onclick = async () => { if ($('#vList').classList.contains('hide')) { if (rec) { toast('녹음 중에는 이동할 수 없어요'); return; }
+  if (cur.lines.length || cur.sub || cur.title || cur.segs.length) await save(); stopAudio(); show('list'); } else show('lec'); };
+$('#newLec').onclick = () => open(newLec());
+$('#list').onclick = e => { const b = e.target.closest('button[data-id]'); if (!b) return; const l = lecs.find(x => x.id === b.dataset.id); if (l) open(l); };
+$('#q').oninput = renderList;
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+  const t = e.target; if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+  if ($('#vLec').classList.contains('hide') || !$('#dlg').classList.contains('hide')) return;
+  const k = e.key.toLowerCase(); if (k === 'r') { e.preventDefault(); toggleRec(); } else if (k === 's') { e.preventDefault(); starNow(); }
+});
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', async e => { e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files[0]; if (!f) return;
+  if (!/text|srt|vtt/.test(f.type) && !/\.(txt|srt|vtt)$/i.test(f.name)) { toast('.txt 파일만 불러올 수 있어요'); return; }
+  show('lec'); $('#pasteIn').value = await f.text(); $('#dlg').classList.remove('hide'); });
+
+// ---------- 설치(PWA)
+let installEvt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; $('#installBtn').classList.remove('hide'); });
+$('#installBtn').onclick = async () => { if (installEvt) { installEvt.prompt(); await installEvt.userChoice.catch(() => {}); installEvt = null; $('#installBtn').classList.add('hide'); } };
+window.addEventListener('appinstalled', () => { $('#installBtn').classList.add('hide'); toast('설치했어요. 홈 화면에서 열 수 있어요'); });
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+
+// ---------- 환경 안내
+(function envNote() {
+  const msgs = [];
+  if (!SR && canRecord) msgs.push('이 브라우저는 실시간 받아쓰기를 지원하지 않아 녹음 파일만 저장돼요. 받아쓰기는 Chrome·Edge·삼성 인터넷에서 돼요.');
+  if (SR && isIOS) msgs.push('아이폰·아이패드는 받아쓰기가 자주 끊길 수 있어요.');
+  if (SR && isAndroid) msgs.push('받아쓰기가 다시 시작될 때마다 효과음이 날 수 있어요. 수업 중엔 미디어 볼륨을 줄여 두세요.');
+  msgs.push(isTouch ? '화면이 꺼지면 받아쓰기가 멈춰요. 수업 중엔 화면을 켜 두세요.' : '이 창을 최소화하거나 다른 탭으로 옮기면 받아쓰기가 멈출 수 있어요.');
+  $('#envNote').textContent = msgs.join(' ');
+  if (isIOS && !navigator.standalone) setTimeout(() => toast('Safari 공유 버튼 → 홈 화면에 추가로 설치할 수 있어요'), 1500);
+})();
+
+// ---------- 시작
+renderMeta(); renderLog(); renderSum(); renderRec();
+store.list().then(a => { lecs = a || []; }).catch(() => toast('이 브라우저에서는 저장을 쓸 수 없어요 (사생활 보호 모드인지 확인해 주세요)'));
+})();
+
+</script>
+</body>
+</html>
