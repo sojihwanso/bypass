@@ -18,4 +18,16 @@ head=head.replace(old, old+'''
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="누구나 무엇이든. BYPASS">''')
 doc='<!doctype html>\n<html lang="ko">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>\n'+head+'\n<meta name="twitter:card" content="summary_large_image">\n</head>\n<body>\n'+rest+'\n</body>\n</html>\n'
+# 다른 작업(사이트 공통 도구)이 배포본에 직접 넣는 것은 그대로 이어받습니다:
+#  - 링크 미리보기 그림(og:image…) 줄: 배포본에 있으면 그 값을 씀
+#  - 맨 아래 'BYPASS 커뮤니티로' 버튼(<!-- bp-home … </button>)
+import os, re
+if os.path.exists(out):
+    old = open(out).read()
+    og_old = re.findall(r'<meta property="og:image[^>]*>', old)
+    if og_old:
+        doc = re.sub(r'(?:<meta property="og:image[^>]*>\n?)+', '\n'.join(og_old) + '\n', doc, count=1)
+    m = re.search(r'\n?<!-- bp-home.*?</button>\n', old, re.S)
+    if m and '<!-- bp-home' not in doc:
+        doc = doc.replace('\n</body>', m.group(0).rstrip('\n') + '\n</body>', 1)
 open(out,'w').write(doc)
