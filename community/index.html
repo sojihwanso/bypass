@@ -162,8 +162,18 @@ main.wrap { padding-top: 44px; padding-bottom: 88px; display: flex; flex-directi
 .sc-cat .n { flex: none; font-size: 12.5px; color: var(--mid); font-variant-numeric: tabular-nums; }
 .sc-desc { margin: 2px 10px 6px 30px; font-size: 12.5px; line-height: 1.5; color: var(--mid); }
 .sc-chips { display: none; }
-.sc-cur { margin: -8px 0 0; font-size: 14px; color: var(--mid); }
-.sc-cur:empty { display: none; }
+.sc-cur { margin: 0; font-size: 14px; color: var(--mid); min-width: 0; }
+/* 목록 위 줄: 왼쪽 분류 설명 · 오른쪽 정렬 (최신순 / 추천순) */
+.list-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: -8px; }
+.list-bar .sort { margin-left: auto; }
+.sort { flex: none; display: inline-flex; padding: 3px; gap: 2px; border-radius: 999px; background: var(--field); }
+.sort button { height: 28px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: var(--mid); font: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer; transition: background-color 150ms ease-out, color 150ms ease-out; }
+.sort button:hover { color: var(--ink); }
+.sort button[aria-checked="true"] { background: var(--card); color: var(--ink); font-weight: 650; box-shadow: 0 1px 2px rgba(0,0,0,.08), inset 0 0 0 1px var(--hair-3); }
+.sort button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.board-bar { display: flex; align-items: flex-start; gap: 12px; }
+.board-bar .chips { flex: 1 1 auto; min-width: 0; }
+@media (max-width: 640px) { .board-bar { flex-direction: column-reverse; align-items: flex-end; } .board-bar .chips { align-self: stretch; } }
 .card-b h3 .ct { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* 반쪽 위젯: 두 개만, 열기 버튼 없이 */
 @media (min-width: 761px) {
@@ -1025,7 +1035,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       <nav class="sc-side" aria-label="결과물 분류" data-show-side></nav>
       <div class="sc-main">
         <div class="chips sc-chips" role="group" aria-label="분류로 거르기" data-show-chips></div>
-        <p class="sc-cur" data-show-cur></p>
+        <div class="list-bar"><p class="sc-cur" data-show-cur></p><div class="sort" role="radiogroup" aria-label="결과물 정렬" data-sort="showcase"></div></div>
         <div class="grid" data-show-list aria-live="polite"></div>
         <div class="more-row" data-show-more-row hidden><button type="button" class="btn btn-line pill" data-show-more>결과물 더 보기</button></div>
       </div>
@@ -1038,7 +1048,7 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       <div><p class="kick">BOARD</p><h1 class="view-title" id="t-board" tabindex="-1">게시판</h1></div>
       <button type="button" class="btn btn-dark" data-write="post">글쓰기</button>
     </div>
-    <div class="chips" role="group" aria-label="말머리로 거르기" data-board-chips></div>
+    <div class="board-bar"><div class="chips" role="group" aria-label="말머리로 거르기" data-board-chips></div><div class="sort" role="radiogroup" aria-label="게시판 정렬" data-sort="post"></div></div>
     <ul class="posts" data-board-list aria-live="polite"><li class="state">불러오는 중입니다</li></ul>
     <div class="more-row" data-board-more-row hidden><button type="button" class="btn btn-line pill" data-board-more>글 더 보기</button></div>
   </section>
@@ -1468,7 +1478,10 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
     return { bg: `var(--c-${k}-bg)`, fg: `var(--c-${k}-fg)`, ring: `var(--c-${k}-ring)` };
   };
   const PAGE = { showcase: 12, post: 15 };
-  const feed = { showcase: { rows: [], cat: '전체', more: false }, post: { rows: [], cat: '전체', more: false } };
+  // 정렬: new = 최신순, top = 추천순(좋아요 많은 순). 고른 것은 이 기기에 기억한다
+  const SORTS = [['new', '최신순'], ['top', '추천순']];
+  const sortSaved = (kind) => { try { const v = localStorage.getItem(`bypass-sort-${kind}`); return v === 'top' ? 'top' : 'new'; } catch (e) { return 'new'; } };
+  const feed = { showcase: { rows: [], cat: '전체', more: false, sort: sortSaved('showcase') }, post: { rows: [], cat: '전체', more: false, sort: sortSaved('post') } };
   const home = { showcase: null, post: null, cat: '전체', crew: 0 };
   const byId = new Map();
   const remember = (rows) => rows.forEach((r) => byId.set(r.id, r));
@@ -1645,7 +1658,9 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       let q = sb.from('post_feed').select('*').eq('kind', kind);
       // 결과물은 운영진이 고른 추천을 맨 위에 (027 전에는 pin_rank 가 없다)
       if (kind === 'showcase' && hasPin) q = q.order('pin_rank', { ascending: true, nullsFirst: false });
-      q = q.order('created_at', { ascending: false }).range(from, from + PAGE[kind]);
+      // 추천순: 좋아요 많은 순, 같으면 최신 글 먼저
+      if (f.sort === 'top') q = q.order('likes', { ascending: false });
+      q = q.order('created_at', { ascending: false }).order('id', { ascending: false }).range(from, from + PAGE[kind]);
       return f.cat !== '전체' ? q.eq('category', f.cat) : q;
     };
     let { data, error } = await make();
@@ -1845,6 +1860,29 @@ textarea.in { resize: vertical; min-height: 120px; line-height: 1.7; }
       if (l < box.scrollLeft + 24 || r > box.scrollLeft + box.clientWidth - 36) box.scrollTo({ left: Math.max(0, l - 24), behavior: 'smooth' });
     }
   }
+  function paintSort(kind) {
+    const f = feed[kind], box = $(`[data-sort="${kind}"]`);
+    box.replaceChildren(...SORTS.map(([k, name]) => {
+      const b = el('button', null, name); b.type = 'button'; b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', String(f.sort === k)); b.tabIndex = f.sort === k ? 0 : -1;
+      b.addEventListener('click', () => pickSort(kind, k, b));
+      b.addEventListener('keydown', (e) => {
+        if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
+        e.preventDefault();
+        const i = SORTS.findIndex(([x]) => x === f.sort), n = SORTS[(i + 1) % SORTS.length][0];
+        pickSort(kind, n); box.querySelector('[aria-checked="true"]').focus();
+      });
+      return b;
+    }));
+  }
+  function pickSort(kind, k) {
+    const f = feed[kind];
+    if (f.sort === k) return;
+    f.sort = k; paintSort(kind);
+    try { localStorage.setItem(`bypass-sort-${kind}`, k); } catch (e) { /* 기억 못 함 */ }
+    loadFeed(kind);
+  }
+  paintSort('showcase'); paintSort('post');
   paintChips('showcase'); paintChips('post');
   $('[data-show-more]').addEventListener('click', () => loadFeed('showcase', true));
   $('[data-board-more]').addEventListener('click', () => loadFeed('post', true));
