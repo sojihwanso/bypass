@@ -766,7 +766,7 @@
         <div class="stats-mini-card">
           <div class="flex-between">
             <span class="rail-label">현재 창 학습 통계</span>
-            <span class="badge badge-gray" style="font-size:var(--fs-micro);">저장 안 함</span>
+            <span class="badge badge-gray" id="store-badge" style="font-size:var(--fs-micro);">저장 안 됨</span>
           </div>
           <div class="stats-grid-2">
             <div class="stat-tile">
@@ -986,13 +986,7 @@ const LANGUAGE_PACKS = {"ja":{"code":"ja","speechLang":"ja-JP","name":"일본어
 const state = {
   lang: 'ja',
   courseMode: 7,
-  completedLessons: new Set(),
-  completedLabels: [],
   wrongReviewCount: 0,
-  wrongNotebook: {
-    ja: { phrases: {}, chars: {} },
-    zh: { phrases: {}, chars: {} }
-  },
   noteFilter: 'all',
   xp: 0,
   charTab: 'hiragana',
@@ -1006,6 +1000,49 @@ const state = {
   timerRunning: false,
   timerHandle: null,
 };
+
+/* ===== 기기 저장 (localStorage) — 언어별 기록 ===== */
+const STORE_KEY = 'passportsnap.v1';
+let store = null;
+let storageOk = false;
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function emptyStore() { return { version: 1, lang: 'ja', courseMode: 7, showKoPron: true, phraseDensity: null, langs: {} }; }
+function langData(code = state.lang) {
+  if (!store.langs[code] || typeof store.langs[code] !== 'object') store.langs[code] = {};
+  const d = store.langs[code];
+  if (!d.completed || typeof d.completed !== 'object') d.completed = {};
+  if (!Array.isArray(d.usable)) d.usable = [];
+  if (!Array.isArray(d.favorites)) d.favorites = [];
+  if (!d.notebook || typeof d.notebook !== 'object') d.notebook = {};
+  if (!d.notebook.phrases || typeof d.notebook.phrases !== 'object') d.notebook.phrases = {};
+  if (!d.notebook.chars || typeof d.notebook.chars !== 'object') d.notebook.chars = {};
+  return d;
+}
+function loadStore() {
+  store = emptyStore();
+  try { localStorage.setItem(STORE_KEY + '.probe', '1'); localStorage.removeItem(STORE_KEY + '.probe'); storageOk = true; } catch (e) { storageOk = false; }
+  if (storageOk) {
+    try {
+      const raw = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+      if (raw && typeof raw === 'object' && raw.version === 1 && raw.langs && typeof raw.langs === 'object') store = Object.assign(emptyStore(), raw);
+    } catch (e) { /* 깨진 저장값은 버리고 빈 기록으로 시작 */ }
+  }
+  if (!LANGUAGE_PACKS[store.lang] || LANGUAGE_PACKS[store.lang].status !== 'active') store.lang = 'ja';
+  if (store.courseMode !== 7 && store.courseMode !== 14) store.courseMode = 7;
+  state.lang = store.lang; state.courseMode = store.courseMode; state.showKoPron = store.showKoPron !== false;
+  if (state.lang === 'zh') state.charTab = 'katakana';
+}
+function saveStore() {
+  if (!storageOk) return;
+  store.lang = state.lang; store.courseMode = state.courseMode; store.showKoPron = state.showKoPron;
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) {}
+}
+function isLessonDone(key, code = state.lang) { return Object.prototype.hasOwnProperty.call(langData(code).completed, key); }
+function markLessonDone(key) { const c = langData().completed; if (!c[key]) c[key] = todayStr(); saveStore(); }
+function completedLessonList() { return getLessons().filter(l => isLessonDone(l.key)); }
 
 let currentShowPhrase = null;
 let ttsVoices = [];
@@ -1194,10 +1231,10 @@ function shuffle(arr) {
 }
 function updateStatsUI() {
   document.getElementById('stat-xp').textContent = state.xp;
-  document.getElementById('stat-done').textContent = state.completedLessons.size;
+  document.getElementById('stat-done').textContent = completedLessonList().length;
 
   const totalLessons = getLessons().length || 7;
-  const doneCount = state.completedLessons.size;
+  const doneList = completedLessonList(), doneCount = doneList.length;
   const rate = Math.min(100, Math.round((doneCount / totalLessons) * 100));
 
   const elDone = document.getElementById('card-stat-done');
@@ -1212,11 +1249,13 @@ function updateStatsUI() {
   if (elWrong) elWrong.textContent = `${state.wrongReviewCount}회`;
   if (elRate) elRate.textContent = `${rate}%`;
   if (elBar) elBar.style.width = `${rate}%`;
+  const badge = document.getElementById('store-badge');
+  if (badge) { badge.textContent = storageOk ? '이 기기에 저장' : '저장 안 됨'; badge.className = `badge ${storageOk ? 'badge-green' : 'badge-gray'}`; badge.title = storageOk ? '기록은 이 브라우저에만 남습니다.' : '이 브라우저에서는 저장할 수 없어 새로고침하면 기록이 사라집니다.'; }
   if (elTags) {
-    if (!state.completedLabels.length) {
+    if (!doneList.length) {
       elTags.innerHTML = `<span class="muted" style="font-size:var(--fs-micro);">아직 완료한 강의가 없습니다.</span>`;
     } else {
-      elTags.innerHTML = state.completedLabels.map(t => `<span class="session-tag">${t}</span>`).join('');
+      elTags.innerHTML = doneList.map(l => `<span class="session-tag">DAY ${l.day} · ${l.title}</span>`).join('');
     }
   }
 }
@@ -1242,7 +1281,7 @@ function selectLanguage(code) {
   const pack = LANGUAGE_PACKS[code];
   document.getElementById('lang-dropdown').classList.remove('open');
   if (!pack || pack.status !== 'active') { showToast(`${pack ? pack.name : '해당'} 팩은 추후 확장 예정입니다.`); return; }
-  state.lang = code;
+  state.lang = code; saveStore();
   if (code === 'zh' && state.charTab === 'hiragana') state.charTab = 'katakana';
   if (code === 'ja' && !['hiragana', 'katakana', 'kanji'].includes(state.charTab)) state.charTab = 'hiragana';
   document.getElementById('current-lang-flag').textContent = pack.flag;
@@ -1312,16 +1351,16 @@ function getLessons() {
 }
 function startNextOrFirstLesson() {
   const lessons = getLessons();
-  const next = lessons.find(l => !state.completedLessons.has(l.key)) || lessons[0];
+  const next = lessons.find(l => !isLessonDone(l.key)) || lessons[0];
   if (next) startLesson(next.key);
 }
-function setCourseMode(mode) { state.courseMode = mode; document.getElementById('mode-7').classList.toggle('active', mode === 7); document.getElementById('mode-14').classList.toggle('active', mode === 14); renderCourseGrid(); updateStatsUI(); }
+function setCourseMode(mode) { state.courseMode = mode; saveStore(); document.getElementById('mode-7').classList.toggle('active', mode === 7); document.getElementById('mode-14').classList.toggle('active', mode === 14); renderCourseGrid(); updateStatsUI(); }
 function renderCourseGrid() {
   const lessons = getLessons();
   document.getElementById('course-heading').textContent = state.courseMode === 7 ? '7일 코스 · 총 7일 (하루 30문장)' : '14일 코스 · 총 14일 (하루 15문장)';
   document.getElementById('lesson-grid').innerHTML = lessons.map(l => {
-    const done = state.completedLessons.has(l.key);
-    return `<div class="lesson-card ${done ? 'done' : ''}">
+    const done = isLessonDone(l.key);
+    return `<div class="lesson-card ${done ? 'done' : ''}" data-lesson="${l.key}">
       <div><div class="flex-between"><span class="day-tag">DAY ${l.day}</span><span class="muted" style="font-size:var(--fs-label);font-weight:700;">${done ? '완료' : `${l.phrases.length}문장`}</span></div>
       <h3 style="margin:10px 0 4px;font-size:var(--fs-body);line-height:1.4;">${l.title}</h3><p class="muted" style="margin:0;font-size:var(--fs-label);">${l.subtitle}</p></div>
       <button class="btn ${done ? 'btn-outline' : 'btn-primary'} btn-sm" style="width:100%;" onclick="startLesson('${l.key}')">${done ? '다시 복습' : '학습 시작'}</button>
@@ -1411,7 +1450,7 @@ function renderCharContent() {
 }
 function handleKanaClick(ch) { const item = LANGUAGE_PACKS[state.lang][state.charTab].find(x => x.char === ch); if (item) selectCharItem(item, true); }
 function handleKanjiClick(idx) { const item = LANGUAGE_PACKS[state.lang].kanji[idx]; if (item) selectCharItem(item, true); }
-function toggleKoPron() { state.showKoPron = !state.showKoPron; const t = document.getElementById('toggle-ko-pron'); t.classList.toggle('on', state.showKoPron); t.setAttribute('aria-checked', String(state.showKoPron)); renderPhraseList(); }
+function toggleKoPron() { state.showKoPron = !state.showKoPron; saveStore(); const t = document.getElementById('toggle-ko-pron'); t.classList.toggle('on', state.showKoPron); t.setAttribute('aria-checked', String(state.showKoPron)); renderPhraseList(); }
 function renderPhraseCatChips() {
   const pack = LANGUAGE_PACKS[state.lang];
   const cats = pack.categories;
@@ -1687,10 +1726,7 @@ function renderQuizFooter(q) {
   }
 }
 function ensureLangNotebook(langCode = state.lang) {
-  if (!state.wrongNotebook[langCode]) {
-    state.wrongNotebook[langCode] = { phrases: {}, chars: {} };
-  }
-  return state.wrongNotebook[langCode];
+  return langData(langCode).notebook;
 }
 function getWrongCounts(langCode = state.lang) {
   const nb = ensureLangNotebook(langCode);
@@ -1729,12 +1765,14 @@ function recordWrongItem(q) {
       lastWrongAt: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
     };
   }
+  saveStore();
   renderWrongNotebookBadges();
 }
 function removeWrongItem(kind, itemKey) {
   const nb = ensureLangNotebook(state.lang);
   if (kind === 'phrase') delete nb.phrases[String(itemKey)];
   else if (kind === 'char') delete nb.chars[String(itemKey)];
+  saveStore();
   renderWrongNotebook();
   showToast('오답노트에서 항목을 삭제했습니다.');
 }
@@ -1750,7 +1788,7 @@ function clearWrongNotebook() {
   }).then(ok => { if (ok) doClearWrongNotebook(); });
 }
 function doClearWrongNotebook() {
-  state.wrongNotebook[state.lang] = { phrases: {}, chars: {} };
+  langData().notebook = { phrases: {}, chars: {} }; saveStore();
   renderWrongNotebook();
   showToast('현재 언어의 오답노트를 비웠습니다.');
 }
@@ -1873,10 +1911,7 @@ function nextQuizQuestion() {
   if (quiz.queue.length === 0) {
     quiz.stage = 'done'; state.xp += quiz.initialTotal * 10;
     if (quiz.lessonKey) {
-      if (!state.completedLessons.has(quiz.lessonKey)) {
-        state.completedLessons.add(quiz.lessonKey);
-        state.completedLabels.push(quiz.title);
-      }
+      markLessonDone(quiz.lessonKey);
     }
     updateStatsUI(); renderCourseGrid(); playTone('complete');
   }
@@ -1944,6 +1979,15 @@ function renderLanguageHeadings() {
     if (specsTab) specsTab.textContent = '일본 제원·꿀팁';
   }
 }
+function syncSettingsUI() {
+  const pack = LANGUAGE_PACKS[state.lang];
+  document.getElementById('current-lang-flag').textContent = pack.flag;
+  document.getElementById('current-lang-name').textContent = pack.name;
+  document.getElementById('mode-7').classList.toggle('active', state.courseMode === 7);
+  document.getElementById('mode-14').classList.toggle('active', state.courseMode === 14);
+  const t = document.getElementById('toggle-ko-pron');
+  if (t) { t.classList.toggle('on', state.showKoPron); t.setAttribute('aria-checked', String(state.showKoPron)); }
+}
 function renderAll() { renderHelp(); renderVoiceControls(); renderLanguageHeadings(); renderLangDropdown(); renderDailyTip(); renderCourseGrid(); switchCharTab(state.charTab); renderPhraseCatChips(); renderPhraseList(); renderWrongNotebook(); renderSpecs(); renderTimer();
   renderMiniPhrase(); updateStatsUI(); }
 // Tag every target-language node with the active pack's language so the matching system face (and Han glyph forms) apply.
@@ -1957,6 +2001,8 @@ new MutationObserver(records => {
   if (records.every(r => r.target.closest && r.target.closest(LANG_TAG_SKIP))) return;
   tagTargetLang();
 }).observe(document.body, { childList: true, subtree: true });
+loadStore();
+syncSettingsUI();
 renderAll();
 tagTargetLang();
 
