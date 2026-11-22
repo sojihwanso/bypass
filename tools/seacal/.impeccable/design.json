@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-23T00:00:00+09:00",
+  "title": "Design System: 바다생활 계산기",
+  "extensions": {
+    "colorMeta": {
+      "pri": { "role": "primary", "displayName": "선실 소나무 초록", "canonical": "#2D6A4C", "tonalRamp": ["#0F2419", "#173826", "#204D35", "#2D6A4C", "#4A8A69", "#78AE90", "#B0D3BE", "#E3F1E8"] },
+      "acc": { "role": "primary", "displayName": "잎새 초록", "canonical": "#2B744F", "tonalRamp": ["#123020", "#1B4A31", "#256544", "#2B744F", "#56A77D", "#86C3A2", "#BADFCA", "#E6F5EC"] },
+      "pri-dark": { "role": "primary", "displayName": "밤 벚꽃 분홍", "canonical": "#F0A5C7", "tonalRamp": ["#3A1328", "#5C2141", "#83325D", "#B0517F", "#D67CA6", "#F0A5C7", "#F7CCDF", "#FCEDF4"] },
+      "acc-dark": { "role": "primary", "displayName": "형광 분홍", "canonical": "#FF8DBE", "tonalRamp": ["#3F0E24", "#661A3B", "#912956", "#C43D77", "#EE609E", "#FF8DBE", "#FFBCD9", "#FFE8F2"] },
+      "paper": { "role": "neutral", "displayName": "파스텔 종이", "canonical": "#F1F7EE" },
+      "surface": { "role": "neutral", "displayName": "흰 갑판", "canonical": "#FBFEF9" },
+      "ink": { "role": "neutral", "displayName": "먹", "canonical": "#1D2A21" },
+      "muted": { "role": "neutral", "displayName": "흐린 먹", "canonical": "#56705E" },
+      "rule": { "role": "neutral", "displayName": "선", "canonical": "#D2E4CE" },
+      "soft": { "role": "neutral", "displayName": "옅은 칸", "canonical": "#E4F0DF" },
+      "paper-dark": { "role": "neutral", "displayName": "밤 선실", "canonical": "#160D13" },
+      "surface-dark": { "role": "neutral", "displayName": "밤 갑판", "canonical": "#20131C" },
+      "sea": { "role": "tertiary", "displayName": "승선 (자료 색)", "canonical": "#3F8F68" },
+      "leave": { "role": "tertiary", "displayName": "휴가 (자료 색)", "canonical": "#8FCBA2" },
+      "edu": { "role": "tertiary", "displayName": "군사교육소집 (자료 색)", "canonical": "#C6E3AE" },
+      "inj": { "role": "tertiary", "displayName": "업무상 휴직 (자료 색)", "canonical": "#6FB3A0" },
+      "ok": { "role": "status", "displayName": "완료·연결", "canonical": "#1E7A3C" },
+      "bad": { "role": "status", "displayName": "오류", "canonical": "#B3261E" },
+      "warn": { "role": "status", "displayName": "주의·오프라인", "canonical": "#8A5A00" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "처음 화면 앱 이름 한 곳." },
+      "headline": { "displayName": "Headline", "purpose": "계산기 화면 제목." },
+      "title": { "displayName": "Title", "purpose": "섹션 제목, 메뉴 카드 제목." },
+      "body": { "displayName": "Body", "purpose": "설명·도움말. keep-all 줄바꿈." },
+      "label": { "displayName": "Label", "purpose": "입력칸 라벨, 결과 칸 이름." },
+      "figure": { "displayName": "Figure", "purpose": "핵심 결과 숫자(남은 날, ETA)." },
+      "data": { "displayName": "Data", "purpose": "입력값·날짜·표·복구 코드." }
+    },
+    "shadows": [
+      { "name": "lift", "value": "0 1px 2px rgba(30,70,40,.06), 0 10px 28px rgba(30,70,40,.10)", "purpose": "메뉴 카드 호버, 창, 시간대 목록, 토스트. 다크: 0 1px 2px rgba(0,0,0,.35), 0 10px 28px rgba(0,0,0,.45)." },
+      { "name": "press-lip", "value": "0 2px 0 color-mix(in srgb, var(--pri) 55%, #000)", "purpose": "주 버튼·메뉴 아이콘·켜진 세그먼트의 두께." }
+    ],
+    "motion": [
+      { "name": "state", "value": ".15s", "purpose": "버튼·카드 호버와 누름(1px 내려감)." },
+      { "name": "fade", "value": ".18s ease", "purpose": "창·토스트·이스터에그 나타남." },
+      { "name": "eggpop", "value": ".35s ease-out scale(.85→1)", "purpose": "이스터에그 카드. reduced-motion에서 끔." }
+    ],
+    "breakpoints": [
+      { "name": "tiny", "value": "380px" },
+      { "name": "hide-top-version", "value": "520px" },
+      { "name": "legend-1col", "value": "560px" },
+      { "name": "phone", "value": "620px" },
+      { "name": "container", "value": "880px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "주 행동. 아래 2px 누름 턱, 누르면 1px 내려감.",
+      "html": "<button class=\"ds-btn-pri\">계산하기</button>",
+      "css": ".ds-btn-pri{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:16px;padding:12px 22px;font-weight:600;font-size:15.5px;background:#2D6A4C;color:#fff;box-shadow:0 2px 0 #19392A;cursor:pointer;transition:filter .15s,transform .15s}.ds-btn-pri:hover{filter:brightness(1.1)}.ds-btn-pri:active{transform:translateY(1px)}.ds-btn-pri:focus-visible{outline:2px solid #2B744F;outline-offset:2px}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "보조 행동. 흰 바탕, 진한 1.5px 테두리.",
+      "html": "<button class=\"ds-btn-ghost\">줄 추가</button>",
+      "css": ".ds-btn-ghost{display:inline-flex;align-items:center;gap:8px;border-radius:16px;padding:12px 22px;font-weight:600;font-size:15.5px;background:#FBFEF9;border:1.5px solid #A3B3A6;color:#1D2A21;cursor:pointer;transition:background .15s,border-color .15s,transform .15s}.ds-btn-ghost:hover{border-color:#1D2A21;background:#E4F0DF}.ds-btn-ghost:active{transform:translateY(1px)}.ds-btn-ghost:focus-visible{outline:2px solid #2B744F;outline-offset:2px}"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "46px 입력칸, 숫자는 Mono. 포커스 시 테두리 잎새 초록.",
+      "html": "<label class=\"ds-lb\">속력 (노트)<input class=\"ds-inp\" value=\"14\"></label>",
+      "css": ".ds-lb{display:block;font-size:13px;font-weight:600;color:#56705E}.ds-inp{display:block;width:100%;margin-top:5px;height:46px;border:1.5px solid #D2E4CE;border-radius:12px;background:#F1F7EE;padding:0 12px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:15px;color:#1D2A21;box-sizing:border-box}.ds-inp:focus{border-color:#2B744F;outline:none;background:#FBFEF9}"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "알약형 꼬리표. 기본·ok·warn 변형.",
+      "html": "<span class=\"ds-chip\">외항선</span> <span class=\"ds-chip ds-ok\">완료</span> <span class=\"ds-chip ds-warn\">오프라인</span>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;border-radius:999px;padding:2px 10px;font-size:12.5px;font-weight:600;background:#DAEFDF;color:#2B744F}.ds-ok{background:#E1F3E4;color:#1E7A3C}.ds-warn{background:#FCF0D6;color:#8A5A00}"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "평평한 정보 카드. 그림자 없음.",
+      "html": "<div class=\"ds-card\"><b>남은 날</b><div class=\"ds-big\">412<small> 일</small></div></div>",
+      "css": ".ds-card{background:#FBFEF9;border:1px solid #D2E4CE;border-radius:18px;padding:18px;color:#1D2A21}.ds-big{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:36px;font-weight:600;line-height:1.1;margin-top:6px}.ds-big small{font-size:16px;color:#56705E;font-weight:500}"
+    },
+    {
+      "name": "Menu Card",
+      "kind": "custom",
+      "refersTo": "menu-card",
+      "description": "처음 화면 계산기 선택지. 호버 시 테두리 강조와 떠오름.",
+      "html": "<button class=\"ds-mcard\"><span class=\"ds-ic\"><svg viewBox=\"0 0 24 24\" width=\"28\" height=\"28\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/></svg></span><span><b>ETA 계산기</b><small>시차·일광절약시까지 따진 도착 시각</small></span></button>",
+      "css": ".ds-mcard{display:flex;align-items:center;gap:16px;width:100%;text-align:left;background:#FBFEF9;border:1.5px solid #D2E4CE;border-radius:22px;padding:18px;color:#1D2A21;cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .15s}.ds-mcard:hover{border-color:#2B744F;box-shadow:0 1px 2px rgba(30,70,40,.06),0 10px 28px rgba(30,70,40,.10)}.ds-mcard:active{transform:translateY(1px)}.ds-mcard:focus-visible{outline:2px solid #2B744F;outline-offset:2px}.ds-ic{display:grid;place-items:center;width:56px;height:56px;border-radius:16px;background:#2D6A4C;color:#fff;flex:none;box-shadow:0 2px 0 #19392A}.ds-mcard b{display:block;font-size:20px;font-weight:800}.ds-mcard small{display:block;color:#56705E;font-size:14px}"
+    },
+    {
+      "name": "Segmented Switch",
+      "kind": "custom",
+      "refersTo": "segmented",
+      "description": "ETA 기준 전환. 켜진 쪽은 주색+누름 턱.",
+      "html": "<div class=\"ds-seg\"><button class=\"on\">출항 기준</button><button>현재 선박 시간</button></div>",
+      "css": ".ds-seg{display:flex;gap:6px;background:#E4F0DF;border-radius:999px;padding:4px}.ds-seg button{flex:1;border:0;background:none;border-radius:999px;padding:9px 12px;font-weight:600;font-size:14.5px;color:#56705E;cursor:pointer}.ds-seg button.on{background:#2D6A4C;color:#fff;box-shadow:0 2px 0 #19392A}.ds-seg button:focus-visible{outline:2px solid #2B744F;outline-offset:2px}"
+    },
+    {
+      "name": "Note",
+      "kind": "custom",
+      "refersTo": "note",
+      "description": "한계·가정 알림. 왼쪽 4px 상태색 띠.",
+      "html": "<p class=\"ds-note\"><b>참고</b> ETA는 속력이 끝까지 같다고 가정한 값입니다.</p>",
+      "css": ".ds-note{border-radius:14px;border:1px solid #DCC79A;border-left:4px solid #8A5A00;background:#FCF0D6;padding:10px 14px;font-size:14px;color:#1D2A21;margin:0}.ds-note b{color:#8A5A00}"
+    }
+  ],
+  "narrative": {
+    "northStar": "조용한 선실 도구 (The Quiet Cabin Tool)",
+    "overview": "당직을 마치고 선실에서 휴대폰을 꺼내 쓰는, 손에 익은 도구. 화면은 조용하고 부드럽지만 손에 닿는 부분은 단단하다. 라이트는 초록 파스텔 종이, 다크는 그 보색인 분홍·자주 밤빛이다. 어느 쪽이든 색은 낮은 채도의 바탕 위에 진한 주색 하나가 버튼과 강조를 맡는다.\n\n정보 밀도는 중간이다. 한 화면에 입력 묶음과 결과 묶음이 카드로 나뉘고, 결과 숫자는 고정폭 글꼴로 크게 보여 준다. 장식은 거의 없다. 둥근 모서리, 아래로 2px 떨어지는 버튼 그림자, 꼬리표(chip)와 법령 표기(law) 정도가 성격의 전부다. 디자인 규칙(모서리·버튼·글꼴)은 형제 앱인 해기사 시험 문제 풀이(cbttest)를 따르고, 색만 바꿨다.",
+    "keyCharacteristics": [
+      "라이트 = 초록 파스텔, 다크 = 분홍·자주 보색. 테마는 시스템 설정을 따르고 상단 버튼으로 바꾸며 기기에 기억한다.",
+      "숫자·날짜·코드는 모두 IBM Plex Mono, 제목은 Nanum Gothic 800, 본문은 IBM Plex Sans KR.",
+      "평평한 카드와 1~1.5px 테두리, 그림자는 상태와 떠 있는 층에만.",
+      "누르는 것은 크고 단단하다: 46px 입력칸, 2px 아래 그림자가 있는 주 버튼, 누르면 1px 내려간다."
+    ],
+    "rules": [
+      { "name": "The Complement Rule", "body": "다크 테마는 라이트의 보색이다. 새 색을 넣을 때는 라이트 초록 계열 값과 다크 분홍·자주 계열 값을 반드시 한 쌍으로 정의한다. 한쪽만 있는 색은 없다.", "section": "colors" },
+      { "name": "The Fixed Meaning Rule", "body": "상태색(ok·bad·warn)과 자료 색(sea·leave·edu·inj)은 뜻이 고정이다. 장식이나 브랜드 강조에 쓰지 않는다.", "section": "colors" },
+      { "name": "The Numbers Are Mono Rule", "body": "사용자가 읽고 옮겨 적을 수 있는 모든 숫자·날짜·시각·코드는 IBM Plex Mono로 쓴다. 입력칸도 숫자를 받으면 Mono, 글(지명 검색·선택)을 받으면 본문 글꼴.", "section": "typography" },
+      { "name": "The Small Eyebrow Rule", "body": "대문자 Mono 꼬리 글(SEA SERVICE, letter-spacing .1em)은 처음 화면 hero 한 곳에만 쓴다.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "평소에 떠 있는 카드는 없다. --shadow는 호버·창·목록·토스트에만 쓴다.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do 새 색은 라이트 초록·다크 분홍 한 쌍으로 :root와 :root[data-theme=\"dark\"]에 함께 정의한다.",
+      "Do 사용자가 읽고 옮기는 숫자·날짜·시각·코드는 IBM Plex Mono로 쓴다.",
+      "Do 누르는 것은 크게: 입력칸 46px, 아이콘 버튼 36~38px 이상, 주 버튼에는 2px 누름 턱.",
+      "Do 기존 클래스(.btn, .card, .inp, .chip, .note, .kv, .seg2)를 다시 쓴다. 새 계산기도 복무완료 계산기와 같은 부품으로 만든다.",
+      "Do 법령·규정 근거는 law 꼬리로, 한계·가정은 note로 화면에 보여 준다.",
+      "Do 640px 이하 휴대폰과 safe-area(노치, 홈 막대)를 기준으로 먼저 확인한다."
+    ],
+    "donts": [
+      "Don't 카드에 평소 그림자를 주지 않는다. 그림자는 호버·창·목록·토스트뿐이다.",
+      "Don't 각진 모서리나 1px보다 얇은 테두리를 쓰지 않는다.",
+      "Don't 상태색·자료 색을 장식이나 강조에 빌려 쓰지 않는다.",
+      "Don't 다크 테마 상태색(초록·빨강·노랑)을 분홍 계열로 바꾸지 않는다.",
+      "Don't 이스터에그 카드에 테마 색을 적용하지 않는다. 흰 카드로 고정이다."
+    ]
+  }
+}

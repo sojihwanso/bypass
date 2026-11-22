@@ -13,7 +13,7 @@
    색은 라이트 = 초록 파스텔, 다크 = 그 보색(분홍·자주 계열)으로 바꿨습니다. */
 :root{
   --paper:#F1F7EE; --surface:#FBFEF9; --ink:#1D2A21; --muted:#56705E; --rule:#D2E4CE; --soft:#E4F0DF;
-  --pri:#2D6A4C; --pri-ink:#FFFFFF; --acc:#378E62; --acc-bg:#DAEFDF;
+  --pri:#2D6A4C; --pri-ink:#FFFFFF; --acc:#2B744F; --acc-bg:#DAEFDF;
   --sea:#3F8F68; --leave:#8FCBA2; --edu:#C6E3AE; --inj:#6FB3A0; --left:#E8F1E4;
   --ok:#1E7A3C; --ok-bg:#E1F3E4; --bad:#B3261E; --bad-bg:#FBE6E1; --warn:#8A5A00; --warn-bg:#FCF0D6;
   --scrim:rgba(24,48,32,.36); --shadow:0 1px 2px rgba(30,70,40,.06),0 10px 28px rgba(30,70,40,.10);
@@ -40,6 +40,7 @@ a{color:var(--acc)}
 .mono{font-family:var(--f-mono)}
 .wrap{max-width:880px;margin:0 auto;padding:0 16px}
 [hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
 /* 상단 막대 */
 .mast{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:saturate(1.2) blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--rule);padding-top:env(safe-area-inset-top,0px)}
@@ -48,7 +49,7 @@ a{color:var(--acc)}
 .brand svg{width:28px;height:28px;flex:none;color:var(--acc)}
 .brand b{overflow:hidden;text-overflow:ellipsis}
 .sp{flex:1 1 0;min-width:4px}
-.net{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);border-radius:999px;padding:4px 11px;font-size:12.5px;font-weight:600;background:var(--surface);white-space:nowrap}
+.net{display:inline-flex;align-items:center;gap:6px;min-height:34px;border:1px solid var(--rule);border-radius:999px;padding:4px 11px;font-size:12.5px;font-weight:600;background:var(--surface);white-space:nowrap}
 .net i{width:8px;height:8px;border-radius:50%;background:var(--ok)}
 .net.off i{background:var(--warn)}
 .net.off{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,var(--rule))}
@@ -58,7 +59,7 @@ a{color:var(--acc)}
 .home-logo{display:inline-flex;flex:none;border-radius:6px;padding:2px}
 .home-logo img{display:block;width:30px;height:30px;transition:transform .15s}
 .home-logo:hover img{transform:scale(1.08)}
-.mver{border:1px solid var(--rule);border-radius:999px;background:none;padding:3px 10px;color:var(--muted);font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.04em;white-space:nowrap;cursor:default;-webkit-tap-highlight-color:transparent}
+.mver{min-height:34px;border:1px solid var(--rule);border-radius:999px;background:none;padding:3px 10px;color:var(--muted);font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.04em;white-space:nowrap;cursor:default;-webkit-tap-highlight-color:transparent}
 @media (max-width:520px){ .mver{display:none} }
 
 /* 버튼 */
@@ -118,14 +119,15 @@ a{color:var(--acc)}
 /* 계산기 */
 .vh{display:flex;align-items:center;gap:10px;padding:18px 0 4px}
 .vh h2{font-size:clamp(22px,4.5vw,28px)}
-.back{display:inline-flex;align-items:center;gap:4px;border-radius:12px;padding:7px 12px 7px 9px;border:1.5px solid var(--rule);background:var(--surface);font-size:14px;font-weight:600}
+.back{display:inline-flex;align-items:center;gap:4px;min-height:40px;border-radius:12px;padding:7px 12px 7px 9px;border:1.5px solid var(--rule);background:var(--surface);font-size:14px;font-weight:600}
 .back svg{width:17px;height:17px}
-.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end}
 .f label,.f .lb{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:5px}
-.f label small{font-weight:500}
+.f label small{font-size:12px;font-weight:500}
 .inp{width:100%;height:46px;border:1.5px solid var(--rule);border-radius:12px;background:var(--paper);padding:0 12px;font-family:var(--f-mono);font-size:15px;min-width:0}
 select.inp{font-family:var(--f-body)}
 .inp:focus{border-color:var(--acc);outline:none;background:var(--surface)}
+.inp::placeholder,.sy-in::placeholder{color:var(--muted);opacity:1}
 .inp.err{border-color:var(--bad);background:var(--bad-bg)}
 .f.full{grid-column:1/-1}
 .more{margin-top:14px;border-top:1px dashed var(--rule);padding-top:12px}
@@ -264,7 +266,8 @@ table.lv tr.fut td{color:var(--muted)}
 .faq .body ul{margin:6px 0;padding-left:18px}
 .faq .body li{margin:3px 0}
 .law{font-size:12.5px;font-family:var(--f-mono);color:var(--acc);background:var(--acc-bg);border-radius:6px;padding:1px 6px;white-space:nowrap}
-.foot{margin:34px 0 0;padding:18px 0 calc(28px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--rule);color:var(--muted);font-size:13px}
+.foot p{max-width:68ch}
+.foot{margin:34px 0 0;padding:18px 0 calc(72px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--rule);color:var(--muted);font-size:13px}
 .foot .ver{display:block;margin:10px auto 0;border:0;background:none;padding:4px 8px;color:inherit;font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;cursor:default;-webkit-tap-highlight-color:transparent}
 
 /* 창 */
@@ -323,12 +326,21 @@ table.lv tr.fut td{color:var(--muted)}
   .card{padding:15px}
   .mast .brand b{font-size:15.5px}
   .net span{display:none}
-  .net{padding:4px 8px}
+  .net{padding:4px 11px}
   .btn-big{padding:16px 26px;font-size:18px}
 }
 @media (max-width:380px){ .fgrid{grid-template-columns:1fr} .brand{font-size:14.5px;gap:7px} .brand svg{width:24px;height:24px} }
 @media print{ .mast,.addrow,.xbtn,#syncCard,.foot,.back{display:none!important} body{background:#fff} }
 </style>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="BYPASS">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:url" content="https://teambypass.vercel.app/apps/seacal/">
+<meta property="og:title" content="바다생활 계산기 | BYPASS">
+<meta property="og:description" content="BYPASS 크루가 만든 것. 누구나, 무엇이든.">
+<meta property="og:image" content="https://itzdjdgjqcpmxdfssfel.supabase.co/storage/v1/object/public/post-thumbs/c79f3d81-36c2-4afb-986e-9aed7eaac357/mwijvth2-n4yr1k.webp">
+<meta property="og:image:alt" content="바다생활 계산기">
+<meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
 <header class="mast"><div class="wrap">
@@ -344,6 +356,7 @@ table.lv tr.fut td{color:var(--muted)}
 </div></header>
 
 <main class="wrap" id="view"></main>
+<div id="srLive" class="sr" role="status" aria-live="polite"></div>
 
 <div class="wrap"><footer class="foot">
   <p style="margin:0 0 6px" class="foot-dis" id="foot1"><span id="footLead"></span>계산 결과는 법령과 공휴일 규정을 바탕으로 한 참고용 추정입니다. 실제 복무만료일은 소속 해운업체 복무관리 담당자나 관할 지방병무청(병무청 1588-9090)에 확인하세요.</p>
@@ -354,8 +367,16 @@ table.lv tr.fut td{color:var(--muted)}
 
 <script>
 'use strict';
-const VERSION = '2.3.1';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '2.3.2';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  { v: '2.3.2', d: '2026. 11. 23', i: [
+    '라이트 화면의 초록 강조 글자를 조금 더 진하게 바꿔 꼬리표·링크·단계 번호가 잘 읽히게 함',
+    '승선일·하선일·선박 시간대·지명 검색 칸에 화면 읽기 프로그램용 이름을 붙이고, 계산 기준 버튼이 고른 쪽을 알려 주게 함',
+    '"기록을 지웠습니다" 같은 알림을 화면 읽기 프로그램도 읽게 함',
+    '입력칸 안내 글자와 라벨 속 작은 글자를 더 잘 보이게 키움',
+    '상단 연결 상태·버전 표시와 [처음] 버튼을 누르기 쉽게 키우고, 화면 맨 아래 문구가 커뮤니티 버튼에 가리지 않게 여백을 둠',
+    '라벨이 두 줄로 넘어가도 나란한 입력칸 높이가 맞게 함',
+  ] },
   { v: '2.3.1', d: '2026. 11. 16', i: [
     '이스터에그 그림을 선원 도도새 캐릭터로 교체(해기사 시험 문제 풀이와 같은 크기·해상도)',
   ] },
@@ -451,7 +472,7 @@ function dur(n){
 }
 const durP = n => { const s = dur(n); return s ? ` (${s})` : ''; };
 
-function toast(msg){ const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); }
+function toast(msg){ const t = document.createElement('div'); t.className = 'toast'; t.setAttribute('aria-hidden', 'true'); t.textContent = msg; document.body.appendChild(t); const sr = $('#srLive'); sr.textContent = ''; setTimeout(() => { sr.textContent = msg; }, 60); setTimeout(() => t.remove(), 2600); }
 const X_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 function closeLayer(){ document.querySelectorAll('.modal').forEach(m => m.remove()); }
 function modal(html, onOpen){
@@ -556,6 +577,7 @@ function setNet(on){
   const was = net; net = on;
   const c = $('#netChip'); c.classList.toggle('off', !on);
   $('#netTxt').textContent = on ? '온라인' : '오프라인';
+  c.setAttribute('aria-label', '연결 상태: ' + (on ? '온라인' : '오프라인'));
   c.title = on ? '온라인: 공휴일 자료·지명 검색·기록 백업을 씁니다' : '오프라인: 공휴일은 양력 고정 공휴일만, ETA는 지명 검색 대신 시간대 직접 고르기';
   if (on && !was){ loadHolidays(); syncSoon(800); }
   if (on !== was && route() === 'eta') document.querySelectorAll('.place').forEach(b => { if (!b.querySelector('.pchip')){ b.outerHTML = placeHTML(b.dataset.key, b.querySelector('.lb').textContent); bindPlace(document.querySelector(`.place[data-key="${b.dataset.key}"]`)); } });
@@ -842,8 +864,8 @@ function drawRows(){
         <select data-k="kind" aria-label="선박 구분">${Object.entries(KINDS).map(([k, o]) => `<option value="${k}" ${r.kind === k ? 'selected' : ''}>${o.nm}</option>`).join('')}</select>
         <button class="xbtn" type="button" data-del aria-label="${i + 1}차 기록 지우기">${X_SVG}</button></div>
       <div class="fgrid">
-        <div class="f"><label>승선일</label><input class="inp" type="date" data-k="on" value="${esc(r.on)}"></div>
-        <div class="f"><label>${r.kind === 'injury' ? '휴직 끝' : '하선일'}</label><input class="inp" type="date" data-k="off" value="${esc(r.off)}"></div>
+        <div class="f"><label for="rd${r.id}on">승선일</label><input class="inp" id="rd${r.id}on" type="date" data-k="on" value="${esc(r.on)}"></div>
+        <div class="f"><label for="rd${r.id}off">${r.kind === 'injury' ? '휴직 끝' : '하선일'}</label><input class="inp" id="rd${r.id}off" type="date" data-k="off" value="${esc(r.off)}"></div>
       </div>
       <div class="rs"></div><div class="rerr"></div>
       <label class="lvo">휴가일수 직접 입력 <input class="inp" type="number" min="0" inputmode="numeric" data-k="lv" value="${esc(r.lv)}" placeholder="자동"></label>
@@ -1061,8 +1083,8 @@ function zoneAll(){
   cities.sort((a, b) => offOrder(a.o) - offOrder(b.o) || a.c.localeCompare(b.c, 'ko'));
   return (zoneItems = it.concat(cities));
 }
-function zonePickHTML(key){
-  return `<div class="zpick" data-for="${key}"><input class="inp zq" type="text" autocomplete="off" placeholder="시간대 직접 고르기 (도시·나라·UTC+9로 찾기)"><div class="zlist" role="listbox" hidden></div></div>`;
+function zonePickHTML(key, label){
+  return `<div class="zpick" data-for="${key}"><input class="inp zq" type="text" autocomplete="off" aria-label="${label} 시간대 직접 고르기" placeholder="시간대 직접 고르기 (도시·나라·UTC+9로 찾기)"><div class="zlist" role="listbox" hidden></div></div>`;
 }
 function bindZonePick(box, onPick, opt = {}){
   const q = box.querySelector('.zq'), list = box.querySelector('.zlist');
@@ -1084,9 +1106,9 @@ function placeHTML(key, label){
   const p = ET[key], now = Date.now();
   return `<div class="f full place" data-key="${key}"><span class="lb">${label}</span>
     ${p ? `<div class="pchip"><div><b>${esc(p.name || zoneName(p))}</b>${p.country ? ` <span class="sub">· ${esc([p.admin, p.country].filter(Boolean).join(', '))}</span>` : ''}<div class="sub">${esc(zoneName(p))} · ${zoneLine(p, now)}</div></div><button class="btn btn-ghost btn-sm" type="button" data-pclear>바꾸기</button></div>`
-    : `<div class="psearch"><input class="inp" type="text" data-pq placeholder="${net ? '항구·도시 이름 (예: 부산, Rotterdam)' : '오프라인: 아래에서 시간대를 고르세요'}" ${net ? '' : 'disabled'} autocomplete="off"><button class="btn btn-pri btn-sm" type="button" data-pgo ${net ? '' : 'disabled'}>검색</button></div>
+    : `<div class="psearch"><input class="inp" type="text" data-pq aria-label="${label} 이름으로 검색" placeholder="${net ? '항구·도시 이름 (예: 부산, Rotterdam)' : '오프라인: 아래에서 시간대를 고르세요'}" ${net ? '' : 'disabled'} autocomplete="off"><button class="btn btn-pri btn-sm" type="button" data-pgo ${net ? '' : 'disabled'}>검색</button></div>
        <div class="pres" data-pres></div>
-       <div style="margin-top:8px">${zonePickHTML(key)}</div>`}
+       <div style="margin-top:8px">${zonePickHTML(key, label)}</div>`}
   </div>`;
 }
 /* 지명 검색: 실제 도시·항구만 남김
@@ -1172,9 +1194,9 @@ function drawEta(v){
   <div class="vh"><button class="back" type="button" data-go="home">${IC.back}처음</button><h2>ETA 계산기</h2></div>
   <div class="sec-t"><h3>${IC.gear}계산 기준</h3></div>
   <div class="card">
-    <div class="seg2" role="tablist">
-      <button type="button" data-mode="dep" class="${ET.mode !== 'ship' ? 'on' : ''}">출항 기준</button>
-      <button type="button" data-mode="ship" class="${ET.mode === 'ship' ? 'on' : ''}">현재 선박 시간 기준</button>
+    <div class="seg2" role="group" aria-label="계산 기준">
+      <button type="button" data-mode="dep" aria-pressed="${ET.mode !== 'ship'}" class="${ET.mode !== 'ship' ? 'on' : ''}">출항 기준</button>
+      <button type="button" data-mode="ship" aria-pressed="${ET.mode === 'ship'}" class="${ET.mode === 'ship' ? 'on' : ''}">현재 선박 시간 기준</button>
     </div>
     <p class="sub" style="margin:10px 0 0">${ET.mode === 'ship' ? '지금 배의 시계와 남은 거리로 목적지 도착 시각과 남은 시간을 계산합니다.' : '출항 시각(출항지 현지 시각)과 거리로 목적지 도착 시각을 계산합니다.'}</p>
   </div>
@@ -1182,7 +1204,7 @@ function drawEta(v){
   <div class="card"><div class="fgrid">
     ${ET.mode === 'ship' ? `
       <div class="f"><label for="eShipAt">현재 선박 시각</label><input class="inp" id="eShipAt" type="datetime-local" value="${esc(ET.shipAt)}"></div>
-      <div class="f"><label>선박 시간대</label><div class="zpick" id="eShipPick"><input class="inp zq" type="text" autocomplete="off" value="${esc(offLabel(+ET.shipOff))}" placeholder="UTC+9처럼 찾기"><div class="zlist" role="listbox" hidden></div></div></div>
+      <div class="f"><label for="eShipZone">선박 시간대</label><div class="zpick" id="eShipPick"><input class="inp zq" id="eShipZone" type="text" autocomplete="off" value="${esc(offLabel(+ET.shipOff))}" placeholder="UTC+9처럼 찾기"><div class="zlist" role="listbox" hidden></div></div></div>
       <div class="f full"><button class="btn btn-ghost btn-sm" type="button" id="eNow">지금 시각으로 채우기</button></div>`
     : `<div class="f full"><label for="eDepAt">출항 일시 <small>(출항지 현지 시각)</small></label><input class="inp" id="eDepAt" type="datetime-local" value="${esc(ET.depAt)}"></div>
       ${placeHTML('dep', '출항지')}`}
@@ -1556,5 +1578,8 @@ render();
 loadHolidays();
 if (SYNC_AVAIL && syncCfg().code) setTimeout(() => syncNow(), 700);
 </script>
+<!-- bp-home: 어느 결과물에서든 커뮤니티로 (assets/app-shell.js, publish-wiki 와 같은 모양) -->
+<style>.bp-home{appearance:none;border:0;margin:0;cursor:pointer;position:fixed;left:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:2147483000;display:flex;align-items:center;height:40px;padding:0 9px;border-radius:12px;background:rgba(22,24,29,.86);color:#fff;font:700 13px/1 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;letter-spacing:-.01em;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.2);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent}.bp-home svg{flex:none;display:block}.bp-home span{max-width:0;overflow:hidden;white-space:nowrap;padding-left:0;transition:max-width .25s,padding .25s;animation:bpHint 4s .8s both}.bp-home:hover span,.bp-home:focus-visible span{max-width:90px;padding-left:7px;animation:none}.bp-home:focus-visible{outline:2px solid #EE6A1F;outline-offset:2px}@keyframes bpHint{0%,100%{max-width:0;padding-left:0}12%,80%{max-width:90px;padding-left:7px}}@media (prefers-reduced-motion:reduce){.bp-home span{animation:none}}@media print{.bp-home{display:none}}</style>
+<button type="button" class="bp-home" aria-label="BYPASS 커뮤니티로 가기" onclick="var u='/community/';try{top.location.href=u}catch(e){location.href=u}"><svg width="22" height="22" viewBox="1 1 130 130" aria-hidden="true"><path d="M66 4 L128 66 L66 128 L4 66 Z" fill="#EE6A1F" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/><path d="M66 15 L117 66 L66 117 L15 66 Z" fill="none" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/><g transform="translate(34 32) scale(0.64)" fill="#1C211E"><ellipse cx="44" cy="60" rx="27" ry="23"/><path d="M51 45 C55 37 58 31 61 25 L72 30 C68 36 66 44 64 53 Z"/><circle cx="66" cy="26" r="10"/><path d="M72 20 C83 19 93 24 95 32 C96 38 91 41 88 37 C86 34 82 33 74 33 Z"/><path d="M19 52 C10 47 7 40 11 34 C14 43 20 46 23 46 Z"/><path d="M37 80 L35 92 L27 95 L41 95 L42 81 Z"/><path d="M51 80 L51 92 L44 95 L58 95 L56 81 Z"/></g></svg><span>커뮤니티</span></button>
 </body>
 </html>
