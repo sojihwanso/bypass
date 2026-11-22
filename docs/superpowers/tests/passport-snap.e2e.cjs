@@ -191,6 +191,70 @@ test('timer-autostart', async () => {
   eq(await page.evaluate(() => state.timerRunning), true, 'timer running');
 });
 
+// ---------- Task 4: 치트시트 현지 모드 ----------
+const toPhrases = page => page.evaluate(() => switchView('phrases'));
+test('fav-persist', async () => {
+  const page = await open();
+  await toPhrases(page);
+  await page.click('.fav-btn[data-id="3"]');
+  eq(await page.getAttribute('.fav-btn[data-id="3"]', 'aria-pressed'), 'true', 'pressed');
+  await reload(page); await toPhrases(page);
+  eq((await page.textContent('#chip-fav')).trim(), '★ 고정 (1)', 'fav chip');
+  await page.click('#chip-fav');
+  eq(await page.$$eval('#phrase-list .phrase-item', els => els.length), 1, 'one favourite listed');
+  assert(await page.$('#phrase-list .fav-btn[data-id="3"]'), 'it is #3');
+});
+test('fav-empty', async () => {
+  const page = await open();
+  await toPhrases(page);
+  await page.click('#chip-fav');
+  assert((await page.textContent('#phrase-empty')).includes('고정한 문장이 없습니다'), 'fav empty text');
+});
+test('search-empty', async () => {
+  const page = await open();
+  await toPhrases(page);
+  await page.fill('#phrase-search', 'zzzz');
+  const t = await page.textContent('#phrase-empty');
+  assert(t.includes('‘zzzz’에 맞는 문장이 없습니다'), `empty text: ${t}`);
+  assert((await page.$$('#phrase-empty .chip')).length >= 3, 'scene chips offered');
+  await page.click('#phrase-empty .search-clear');
+  eq(await page.$$eval('#phrase-list .phrase-item', els => els.length), 210, 'all back');
+});
+test('compact-default', async () => {
+  const m = await open({ width: 390 });
+  await toPhrases(m);
+  eq(await m.$eval('#phrase-list .phrase-item', el => !!el.querySelector('.phrase-tip') && el.querySelector('.phrase-tip').checkVisibility()), false, 'mobile hides tip');
+  const d = await open({ width: 1280, height: 900 });
+  await toPhrases(d);
+  eq(await d.$eval('#phrase-list .phrase-item .phrase-tip', el => el.checkVisibility()), true, 'desktop shows tip');
+  await d.click('#density-toggle [data-density="compact"]');
+  await reload(d); await toPhrases(d);
+  eq(await d.$eval('#phrase-list .phrase-item', el => !!el.querySelector('.phrase-tip') && el.querySelector('.phrase-tip').checkVisibility()), false, 'choice persists');
+});
+test('sticky-search', async () => {
+  const page = await open({ width: 390 });
+  await toPhrases(page);
+  await page.evaluate(() => scrollTo(0, 2000)); await page.waitForTimeout(300);
+  const top = await page.$eval('#phrase-search', el => el.getBoundingClientRect().top);
+  assert(top < 120 && top > 0, `search top ${top}`);
+});
+test('mobile-first-screen', async () => {
+  const page = await open({ width: 390, height: 844 });
+  await toPhrases(page); await page.waitForTimeout(300);
+  const n = await page.evaluate(() => { const bar = document.querySelector('.tabbar').getBoundingClientRect().top; return [...document.querySelectorAll('#phrase-list .phrase-item')].filter(el => el.getBoundingClientRect().bottom <= bar).length; });
+  assert(n >= 3, `fully visible items: ${n}`);
+});
+test('chip-counts', async () => {
+  const page = await open({ width: 1280, height: 900 });
+  await toPhrases(page);
+  await page.fill('#phrase-search', '화장실');
+  const nums = await page.$$eval('#phrase-cat-chips .chip', els => els.map(e => (e.textContent.match(/\((\d+)\)/) || [])[1]).filter(Boolean).map(Number));
+  const listed = await page.$$eval('#phrase-list .phrase-item', els => els.length);
+  // 칩 순서: ★, 전체, 카테고리 7개. 전체 칩 숫자 = 목록 개수, 카테고리 합 = 전체
+  eq(nums[1], listed, 'all chip equals results');
+  eq(nums.slice(2).reduce((a, b) => a + b, 0), listed, 'categories sum to results');
+});
+
 (async () => {
   browser = await chromium.launch({ channel: 'chrome' });
   let pass = 0, fail = 0;

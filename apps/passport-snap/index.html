@@ -406,7 +406,7 @@
   .search-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
   .search-input { flex: 1; min-width: 210px; padding: 10px 15px; border-radius: 13px; border: 1.5px solid var(--border); background: var(--surface); font-size: var(--fs-body); outline: none; -webkit-appearance: none; appearance: none; }
   .search-input:focus { border-color: var(--pastel-sky); box-shadow: 0 0 0 3px var(--pastel-sky-soft); }
-  @media (max-width: 640px) { .search-input { flex-basis: 100%; min-height: 48px; } .search-row #phrase-count-badge { margin-left: auto; } }
+  @media (max-width: 640px) { .search-input { min-height: 44px; min-width: 0; } }
 
   .chip-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 12px; scrollbar-width: none; }
   .chip-row::-webkit-scrollbar { display: none; }
@@ -424,7 +424,31 @@
   .phrase-mean { font-size: var(--fs-body); font-weight: 700; margin-top: 4px; }
   .phrase-tip { font-size: var(--fs-small); color: var(--text-muted); margin-top: 6px; background: var(--surface-2); padding: 7px 11px; border-radius: 9px; display: block; line-height: 1.5; }
   .phrase-actions { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
-  @media (max-width: 640px) { .phrase-item { flex-direction: column; align-items: stretch; } .phrase-actions { justify-content: flex-end; } }
+  @media (max-width: 640px) { .phrase-item:not(.compact) { flex-direction: column; align-items: stretch; } .phrase-item:not(.compact) .phrase-actions { justify-content: flex-end; } }
+  /* 치트시트 현지 모드: 검색·칩 고정, ★ 고정, 촘촘히 보기 */
+  .phrase-bar { position: sticky; top: var(--topbar-h, 64px); z-index: 30; background: var(--bg); margin: 0 -4px; padding: 8px 4px 2px; }
+  .phrase-bar .search-row { margin-bottom: 8px; }
+  .phrase-bar .chip-row { margin-bottom: 6px; }
+  .density-toggle { display: inline-flex; gap: 3px; padding: 3px; border-radius: 11px; background: var(--surface-2); border: 1.5px solid var(--border); }
+  .density-toggle button { min-height: 32px; padding: 4px 12px; border-radius: 8px; font-size: var(--fs-label); font-weight: 700; color: var(--text-muted); }
+  .density-toggle button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(45, 52, 54, 0.1); }
+  .density-toggle button:focus-visible, .fav-btn:focus-visible, .phrase-main:focus-visible, .search-clear:focus-visible { outline: 2px solid var(--pastel-sky-dark); outline-offset: 2px; }
+  .fav-btn { color: var(--text-muted); }
+  .fav-btn[aria-pressed="true"] { color: var(--pastel-apricot-dark); background: var(--pastel-apricot-soft); border-color: var(--pastel-apricot-border); }
+  .fav-btn[aria-pressed="true"] .ico { fill: currentColor; }
+  .chip-fav.active { background: var(--pastel-apricot-soft); color: var(--pastel-apricot-dark); border-color: var(--pastel-apricot); }
+  .phrase-item.compact { padding: 10px 10px 10px 14px; gap: 8px; align-items: center; }
+  .phrase-main { flex: 1; min-width: 0; text-align: left; border-radius: 10px; padding: 2px 0; display: block; }
+  .phrase-item.compact .phrase-jp { font-size: var(--fs-strong); line-height: 1.35; }
+  .phrase-item.compact .phrase-ko { margin-top: 1px; }
+  .phrase-item.compact .phrase-mean { font-size: var(--fs-small); margin-top: 1px; }
+  .phrase-item.compact .phrase-actions { flex-direction: column; gap: 6px; }
+  .phrase-empty { text-align: center; padding: 30px 20px; display: grid; gap: 10px; justify-items: center; }
+  .phrase-empty-title { font-size: var(--fs-body); font-weight: 800; margin: 0; }
+  .phrase-empty p { margin: 0; font-size: var(--fs-small); color: var(--text-muted); }
+  .phrase-empty .row { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+  .search-clear { font-size: var(--fs-small); font-weight: 700; color: var(--pastel-sky-dark); text-decoration: underline; text-underline-offset: 3px; padding: 8px 6px; }
+  @media (max-width: 640px) { #view-phrases .view-sub { display: none; } }
 
   .toggle-wrap {
     min-height: 40px; color: var(--text);
@@ -869,10 +893,14 @@
     <div class="flex-between" style="margin-bottom:12px;">
       <div>
         <h2 style="margin:0;font-size:var(--fs-title);">실전 회화 210문장</h2>
-        <p class="muted" style="margin:2px 0 0;font-size:var(--fs-small);">검색하거나 크게 보기로 화면을 바로 보여주세요.</p>
+        <p class="muted view-sub" style="margin:2px 0 0;font-size:var(--fs-small);">문장을 누르면 크게 보여요. 자주 쓸 문장은 ★로 고정하세요.</p>
       </div>
       <div class="phrase-tools">
         <div class="voice-slot" data-voice-slot="phrases"></div>
+        <div class="density-toggle" id="density-toggle" role="group" aria-label="보기 방식">
+          <button type="button" data-density="compact" aria-pressed="false" onclick="setPhraseDensity('compact')">촘촘히</button>
+          <button type="button" data-density="detail" aria-pressed="false" onclick="setPhraseDensity('detail')">자세히</button>
+        </div>
         <button type="button" class="toggle-wrap on" id="toggle-ko-pron" role="switch" aria-checked="true" onclick="toggleKoPron()">
           <span>한글 발음</span>
           <span class="toggle-dot" aria-hidden="true"></span>
@@ -880,11 +908,13 @@
       </div>
     </div>
     <p class="voice-hint" id="voice-hint" hidden></p>
-    <div class="search-row">
-      <input type="search" class="search-input" id="phrase-search" aria-label="회화 문장 검색" enterkeyhint="search" autocomplete="off" placeholder="화장실, 얼마, 2인분, 면세 등 검색" oninput="renderPhraseList()" />
-      <span class="badge badge-blue" id="phrase-count-badge" style="padding:8px 12px;font-size:var(--fs-label);">210문장</span>
+    <div class="phrase-bar">
+      <div class="search-row">
+        <input type="search" class="search-input" id="phrase-search" aria-label="회화 문장 검색" enterkeyhint="search" autocomplete="off" placeholder="화장실, 얼마, 2인분, 면세 등 검색" oninput="renderPhraseCatChips(); renderPhraseList()" />
+        <span class="badge badge-blue" id="phrase-count-badge" style="padding:8px 12px;font-size:var(--fs-label);">210문장</span>
+      </div>
+      <div class="chip-row" id="phrase-cat-chips"></div>
     </div>
-    <div class="chip-row" id="phrase-cat-chips"></div>
     <div class="phrase-list" id="phrase-list"></div>
   </section>
 
@@ -936,7 +966,8 @@
   <div class="showcard-box" role="dialog" aria-modal="true" aria-labelledby="sc-jp">
     <div class="sc-top">
       <span class="badge badge-blue" id="sc-cat">카테고리</span>
-      <button class="btn-icon" id="sc-close-top" onclick="closeShowCard()" aria-label="크게 보기 닫기" title="닫기"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <span class="flex-center" style="gap:6px;"><button class="btn-icon fav-btn" id="sc-fav" type="button" aria-pressed="false" aria-label="이 문장 고정" onclick="currentShowPhrase && toggleFavorite(currentShowPhrase.id)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg></button>
+      <button class="btn-icon" id="sc-close-top" onclick="closeShowCard()" aria-label="크게 보기 닫기" title="닫기"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></span>
     </div>
     <div class="sc-stage">
       <div class="showcard-jp" id="sc-jp" lang="ja">トイレはどこですか？</div>
@@ -1031,6 +1062,7 @@ const state = {
   timerHandle: null,
 };
 
+function escHtml(t) { return String(t).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])); }
 /* ===== 기기 저장 (localStorage) — 언어별 기록 ===== */
 const STORE_KEY = 'passportsnap.v1';
 let store = null;
@@ -1518,26 +1550,61 @@ function renderCharContent() {
 function handleKanaClick(ch) { const item = LANGUAGE_PACKS[state.lang][state.charTab].find(x => x.char === ch); if (item) selectCharItem(item, true); }
 function handleKanjiClick(idx) { const item = LANGUAGE_PACKS[state.lang].kanji[idx]; if (item) selectCharItem(item, true); }
 function toggleKoPron() { state.showKoPron = !state.showKoPron; saveStore(); const t = document.getElementById('toggle-ko-pron'); t.classList.toggle('on', state.showKoPron); t.setAttribute('aria-checked', String(state.showKoPron)); renderPhraseList(); }
+function phraseQuery() { return (document.getElementById('phrase-search').value || '').trim().toLowerCase(); }
+function matchesQuery(p, q) { return !q || [p.jp, p.kana, p.ko, p.mean, p.tip].some(t => String(t).toLowerCase().includes(q)); }
+function isFavorite(id) { return langData().favorites.includes(id); }
+function toggleFavorite(id) {
+  const favs = langData().favorites, i = favs.indexOf(id);
+  if (i >= 0) favs.splice(i, 1); else favs.push(id);
+  saveStore();
+  const on = i < 0;
+  document.querySelectorAll(`.fav-btn[data-id="${id}"]`).forEach(b => { b.setAttribute('aria-pressed', String(on)); b.setAttribute('aria-label', on ? '고정 해제' : '이 문장 고정'); });
+  if (currentShowPhrase && currentShowPhrase.id === id) syncShowCardFav();
+  renderPhraseCatChips();
+  if (state.phraseCat === 'fav') renderPhraseList();
+  showToast(on ? '★ 고정 문장에 넣었어요.' : '고정을 풀었어요.');
+}
+function syncShowCardFav() {
+  const b = document.getElementById('sc-fav'), on = !!currentShowPhrase && isFavorite(currentShowPhrase.id);
+  b.setAttribute('aria-pressed', String(on)); b.setAttribute('aria-label', on ? '고정 해제' : '이 문장 고정');
+}
+function phraseDensity() { return store.phraseDensity === 'compact' || store.phraseDensity === 'detail' ? store.phraseDensity : (innerWidth <= 640 ? 'compact' : 'detail'); }
+function setPhraseDensity(d) { store.phraseDensity = d; saveStore(); renderPhraseList(); }
 function renderPhraseCatChips() {
-  const pack = LANGUAGE_PACKS[state.lang];
-  const cats = pack.categories;
-  const totalCount = pack.phrases.length;
-  document.getElementById('phrase-cat-chips').innerHTML = `<button class="chip ${state.phraseCat === 'all' ? 'active' : ''}" onclick="setPhraseCat('all')">전체 (${totalCount})</button>` + cats.map(c => {
-    const cCount = pack.phrases.filter(p => p.cat === c.id).length;
-    return `<button class="chip ${state.phraseCat === c.id ? 'active' : ''}" onclick="setPhraseCat(${c.id})">${c.name} (${cCount})</button>`;
-  }).join('');
+  const pack = LANGUAGE_PACKS[state.lang], q = phraseQuery();
+  const hits = pack.phrases.filter(p => matchesQuery(p, q));
+  const favCount = hits.filter(p => isFavorite(p.id)).length;
+  const chip = (key, label, n, extra = '') => `<button class="chip ${extra} ${state.phraseCat === key ? 'active' : ''}" ${key === 'fav' ? 'id="chip-fav"' : ''} aria-pressed="${state.phraseCat === key}" onclick="setPhraseCat(${typeof key === 'number' ? key : `'${key}'`})">${label} (${n})</button>`;
+  document.getElementById('phrase-cat-chips').innerHTML = chip('fav', '★ 고정', favCount, 'chip-fav') + chip('all', '전체', hits.length)
+    + pack.categories.map(c => chip(c.id, c.name, hits.filter(p => p.cat === c.id).length)).join('');
 }
 function setPhraseCat(cat) { state.phraseCat = cat; renderPhraseCatChips(); renderPhraseList(); }
+function clearPhraseSearch() { const el = document.getElementById('phrase-search'); el.value = ''; state.phraseCat = 'all'; renderPhraseCatChips(); renderPhraseList(); el.focus(); }
 function renderPhraseList() {
-  const pack = LANGUAGE_PACKS[state.lang];
-  const totalCount = pack.phrases.length;
-  const q = (document.getElementById('phrase-search').value || '').trim().toLowerCase();
-  const filtered = pack.phrases.filter(p => (state.phraseCat === 'all' || p.cat === state.phraseCat) && (!q || p.jp.toLowerCase().includes(q) || p.kana.toLowerCase().includes(q) || p.ko.toLowerCase().includes(q) || p.mean.toLowerCase().includes(q) || p.tip.toLowerCase().includes(q)));
+  const pack = LANGUAGE_PACKS[state.lang], totalCount = pack.phrases.length, q = phraseQuery();
+  const inCat = p => state.phraseCat === 'all' || (state.phraseCat === 'fav' ? isFavorite(p.id) : p.cat === state.phraseCat);
+  const filtered = pack.phrases.filter(p => inCat(p) && matchesQuery(p, q));
+  const density = phraseDensity();
+  document.querySelectorAll('#density-toggle button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.density === density)));
   document.getElementById('phrase-count-badge').textContent = `${filtered.length} / ${totalCount}문장`;
-  document.getElementById('phrase-list').innerHTML = filtered.length ? filtered.map(p => {
+  const favBtn = p => `<button class="btn-icon fav-btn" type="button" data-id="${p.id}" aria-pressed="${isFavorite(p.id)}" aria-label="${isFavorite(p.id) ? '고정 해제' : '이 문장 고정'}" onclick="toggleFavorite(${p.id})"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg></button>`;
+  const reading = p => readingOf(p) ? `<div class="phrase-kana">${readingOf(p)}</div>` : '';
+  const ko = p => state.showKoPron ? `<div class="phrase-ko">${p.ko}</div>` : '';
+  if (!filtered.length) {
+    const emptyFav = state.phraseCat === 'fav' && !langData().favorites.length;
+    const scenes = pack.categories.slice(0, 4).map(c => `<button class="chip" onclick="document.getElementById('phrase-search').value=''; setPhraseCat(${c.id})">${c.name}</button>`).join('');
+    document.getElementById('phrase-list').innerHTML = emptyFav
+      ? `<div class="card phrase-empty" id="phrase-empty"><p class="phrase-empty-title">고정한 문장이 없습니다</p><p>현지에서 자주 쓸 문장 옆의 ★를 누르면 여기에 모여요.</p><button class="search-clear" type="button" onclick="setPhraseCat('all')">전체 문장 보기</button></div>`
+      : `<div class="card phrase-empty" id="phrase-empty"><p class="phrase-empty-title">‘${escHtml(q)}’에 맞는 문장이 없습니다</p><p>장면으로 찾아보세요.</p><div class="row">${scenes}</div><button class="search-clear" type="button" onclick="clearPhraseSearch()">검색어 지우기</button></div>`;
+    return;
+  }
+  document.getElementById('phrase-list').innerHTML = filtered.map(p => {
     const cat = pack.categories[p.cat];
-    return `<div class="phrase-item"><div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap;"><span class="badge badge-gray">#${p.id}</span><span class="badge badge-blue">${cat.name}</span></div><div class="phrase-jp">${p.jp}</div>${readingOf(p) ? `<div class="phrase-kana">${readingOf(p)}</div>` : ''}${state.showKoPron ? `<div class="phrase-ko">${p.ko}</div>` : ''}<div class="phrase-mean">${p.mean}</div><div class="phrase-tip">${p.tip}</div></div><div class="phrase-actions"><button class="btn btn-outline btn-sm" onclick="speakPhraseById(${p.id}, 1.0)">듣기</button><button class="btn btn-outline btn-sm" onclick="speakPhraseById(${p.id}, 0.65)">천천히</button><button class="btn btn-outline btn-sm" onclick="openShowCard(${p.id})">크게 보기</button></div></div>`;
-  }).join('') : `<div class="card" style="text-align:center;padding:34px;">검색 결과가 없습니다.</div>`;
+    if (density === 'compact') {
+      return `<div class="phrase-item compact"><button class="phrase-main" type="button" onclick="openShowCard(${p.id})" aria-label="크게 보기: ${escHtml(p.mean)}"><div class="phrase-jp">${p.jp}</div>${ko(p)}<div class="phrase-mean">${p.mean}</div></button><div class="phrase-actions">${favBtn(p)}<button class="btn-icon" type="button" onclick="speakPhraseById(${p.id}, 1.0)" aria-label="듣기"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></button></div></div>`;
+    }
+    return `<div class="phrase-item"><div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap;"><span class="badge badge-gray">#${p.id}</span><span class="badge badge-blue">${cat.name}</span></div><div class="phrase-jp">${p.jp}</div>${reading(p)}${ko(p)}<div class="phrase-mean">${p.mean}</div><div class="phrase-tip">${p.tip}</div></div><div class="phrase-actions">${favBtn(p)}<button class="btn btn-outline btn-sm" onclick="speakPhraseById(${p.id}, 1.0)">듣기</button><button class="btn btn-outline btn-sm" onclick="speakPhraseById(${p.id}, 0.65)">천천히</button><button class="btn btn-outline btn-sm" onclick="openShowCard(${p.id})">크게 보기</button></div></div>`;
+  }).join('');
 }
 // Kana-only phrases would repeat themselves on the reading line; show it only when it adds something.
 function readingOf(p) {
@@ -1554,6 +1621,7 @@ function openShowCard(id) {
   document.getElementById('sc-tip').textContent = p.tip;
   const jpEl = document.getElementById('sc-jp');
   fitShowText(jpEl, p.jp);
+  syncShowCardFav();
   showCardOpener = document.activeElement;
   document.getElementById('showcard-overlay').classList.add('open');
   document.body.classList.add('sc-open');
@@ -2087,6 +2155,8 @@ new MutationObserver(records => {
   if (records.every(r => r.target.closest && r.target.closest(LANG_TAG_SKIP))) return;
   tagTargetLang();
 }).observe(document.body, { childList: true, subtree: true });
+function syncTopbarHeight() { document.documentElement.style.setProperty('--topbar-h', `${document.querySelector('.topbar').offsetHeight}px`); }
+syncTopbarHeight(); addEventListener('resize', syncTopbarHeight);
 loadStore();
 syncSettingsUI();
 renderAll();
@@ -2109,7 +2179,6 @@ const PATCH_NOTES = [
     '대비 AA, 화면 확대 허용, 키보드·화면 낭독기, 터치 대상 44px, 동작 줄이기 대응',
   ] },
 ];
-const escHtml = t => String(t).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 document.getElementById('ver-top').textContent = 'v' + VERSION;
 document.getElementById('ver-foot').textContent = 'v' + VERSION + ' · TEAM BYPASS';
 let eggTaps = 0, eggTimer = null;
