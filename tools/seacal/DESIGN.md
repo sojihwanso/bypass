@@ -13,9 +13,9 @@ colors:
   acc: "#2B744F"
   acc-bg: "#DAEFDF"
   sea: "#3F8F68"
-  leave: "#8FCBA2"
-  edu: "#C6E3AE"
-  inj: "#6FB3A0"
+  leave: "#A5741C"
+  edu: "#8C76C8"
+  inj: "#3E8FAA"
   left: "#E8F1E4"
   ok: "#1E7A3C"
   ok-bg: "#E1F3E4"
@@ -42,8 +42,8 @@ colors:
   ok-bg-dark: "#132219"
   bad-dark: "#FF8A7A"
   bad-bg-dark: "#35171A"
-  warn-dark: "#F2D266"
-  warn-bg-dark: "#2B2513"
+  warn-dark: "#DDE86E"
+  warn-bg-dark: "#24260F"
 typography:
   display:
     fontFamily: "Nanum Gothic, Apple SD Gothic Neo, Malgun Gothic, sans-serif"
@@ -188,7 +188,7 @@ components:
 - `ok`/`ok-bg` 완료·연결됨, `bad`/`bad-bg` 오류·삭제, `warn`/`warn-bg` 주의·오프라인. 다크에서도 상태색은 초록·빨강·노랑 그대로 남는다(호박색 주색과 섞지 않는다).
 
 ### Named Rules
-**The Night Watch Rule.** 다크 테마는 밤 당직 모드다. 바탕은 거의 검은 따뜻한 색, 빛은 호박색 하나로 낮춘다. 새 색은 라이트 값과 다크 값을 반드시 한 쌍으로 정의하고, 다크 쪽은 눈부시지 않은 따뜻한 색으로 고른다(2.4.0에서 분홍·자주 보색을 대체). 자료 색(sea·leave·edu·inj)은 다크에서 호박·산호·보라·청록으로 색상 자체가 달라야 한다.
+**The Night Watch Rule.** 다크 테마는 밤 당직 모드다. 바탕은 거의 검은 따뜻한 색, 빛은 호박색 하나로 낮춘다. 새 색은 라이트 값과 다크 값을 반드시 한 쌍으로 정의하고, 다크 쪽은 눈부시지 않은 따뜻한 색으로 고른다(2.4.0에서 분홍·자주 보색을 대체). 자료 색(sea·leave·edu·inj)은 두 테마 모두 색상 자체가 달라야 한다(라이트 초록·황토·보라·청색, 다크 호박·산호·보라·청록). 다크 경고색은 주색 호박과 섞이지 않게 연두빛 노랑으로 둔다.
 
 **The Fixed Meaning Rule.** 상태색(ok·bad·warn)과 자료 색(sea·leave·edu·inj)은 뜻이 고정이다. 장식이나 브랜드 강조에 쓰지 않는다.
 
@@ -274,6 +274,11 @@ components:
 
 ### Verdict (signature, 2.4.0~)
 결과 카드 맨 위의 판정 칸. 완료일을 Figure 크기 Mono로, 아래 한 줄에 "편입 5년 기한 2030. 2. 28(목)까지 701일 여유"처럼 기한까지의 여유를 쓴다. 60일 넘게 남으면 `ok`, 60일 이내 `warn`, 넘기면 `bad` 바탕·테두리(옆 띠 없이 전체 테두리). 아직 1,095일에 못 미치면 중립(`soft`)으로 남은 일수를 보여 준다.
+
+아직 1,095일 전이면 "지금 배에서 계속 승선하면" 예상 완료일로 같은 판정을 하고, 둘째 줄에 지금까지 일수와 남은 일수를 적는다(2.5.0~). 빠듯함·초과 판정에는 원 안의 느낌표를 붙인다.
+
+### Summary Bar (2.5.0~)
+휴대폰 화면 아래 고정 알약(44px, Mono 14px). 판정을 짧게("2028. 3. 29 완료 예정 · 기한 안 ↓") ok/warn/bad 색으로 보여 주고, 누르면 결과로 이동한다. 결과 카드가 화면에 보이거나 입력 중일 때는 숨긴다. 왼쪽 아래 커뮤니티 버튼(64px) 옆에서 시작한다.
 
 ### Result Figure (signature)
 복무 결과: 150px 진행 링(가운데 Mono 퍼센트) + 큰 Mono 숫자 + 2열 결과 칸(`soft`, 14px). 그 아래 16px 알약 막대를 자료 색으로 나누고 범례를 붙인다. 완료되면 `ok-bg` 띠에 체크 아이콘. ETA 결과는 `soft` 바탕 큰 칸(eta-big)에 Figure 숫자.

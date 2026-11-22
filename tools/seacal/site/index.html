@@ -14,7 +14,7 @@
 :root{
   --paper:#F1F7EE; --surface:#FBFEF9; --ink:#1D2A21; --muted:#56705E; --rule:#D2E4CE; --soft:#E4F0DF;
   --pri:#2D6A4C; --pri-ink:#FFFFFF; --acc:#2B744F; --acc-bg:#DAEFDF;
-  --sea:#3F8F68; --leave:#8FCBA2; --edu:#C6E3AE; --inj:#6FB3A0; --left:#E8F1E4;
+  --sea:#3F8F68; --leave:#A5741C; --edu:#8C76C8; --inj:#3E8FAA; --left:#E8F1E4;
   --ok:#1E7A3C; --ok-bg:#E1F3E4; --bad:#B3261E; --bad-bg:#FBE6E1; --warn:#8A5A00; --warn-bg:#FCF0D6;
   --scrim:rgba(24,48,32,.36); --shadow:0 1px 2px rgba(30,70,40,.06),0 10px 28px rgba(30,70,40,.10);
   --f-disp:"Nanum Gothic","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
@@ -27,7 +27,7 @@
   --paper:#0D0B0A; --surface:#16120F; --ink:#F2E6D8; --muted:#B8A592; --rule:#352B23; --soft:#211B16;
   --pri:#EE9A3F; --pri-ink:#1C1005; --acc:#F4AE58; --acc-bg:#33240F;
   --sea:#EE9A3F; --leave:#DD6B5B; --edu:#9D8BDB; --inj:#4FB3A4; --left:#2A221C;
-  --ok:#8EDCA9; --ok-bg:#132219; --bad:#FF8A7A; --bad-bg:#35171A; --warn:#F2D266; --warn-bg:#2B2513;
+  --ok:#8EDCA9; --ok-bg:#132219; --bad:#FF8A7A; --bad-bg:#35171A; --warn:#DDE86E; --warn-bg:#24260F;
   --scrim:rgba(6,4,2,.66); --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.45); color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -116,6 +116,13 @@ a{color:var(--acc)}
 .helpbox>summary::after{content:'펼치기';margin-left:auto;font-family:var(--f-body);font-size:13px;font-weight:600;color:var(--acc)}
 .helpbox[open]>summary::after{content:'접기'}
 body.typing .bp-home{opacity:0;pointer-events:none}
+.sumbar{position:fixed;z-index:40;left:64px;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));max-width:560px;margin-left:auto;display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:8px 16px;border-radius:999px;border:1.5px solid var(--rule);background:var(--surface);color:var(--ink);font-family:var(--f-mono);font-size:14px;font-weight:600;box-shadow:var(--shadow)}
+.sumbar.ok{border-color:var(--ok);color:var(--ok);background:var(--ok-bg)}.sumbar.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-bg)}.sumbar.bad{border-color:var(--bad);color:var(--bad);background:var(--bad-bg)}
+.sumbar::after{content:'↓';font-family:var(--f-body)}
+body.typing .sumbar{display:none}
+.sum-on .bp-home span{animation:none;max-width:0;padding-left:0}
+.verdict .vd-s{margin-top:6px;font-size:13px;color:var(--muted)}
+.verdict.warn .vd-k::before,.verdict.bad .vd-k::before{content:'!';display:inline-grid;place-items:center;width:16px;height:16px;margin-right:6px;border-radius:50%;background:currentColor;color:var(--surface);font-weight:800;font-size:11px;vertical-align:1px}
 
 /* 처음 화면 */
 .hero{padding:34px 0 8px}
@@ -272,7 +279,7 @@ table.lv tr.fut td{color:var(--muted)}
 .sy-msg{min-height:22px;font-size:13.5px;color:var(--bad);margin:8px 0 0}
 
 /* 도움말 */
-.help{counter-reset:st}
+.help,.steps{counter-reset:st}
 .steps{margin:0;padding:0;list-style:none;display:grid;gap:10px}
 .steps li{position:relative;padding-left:40px;font-size:15px}
 .steps li::before{counter-increment:st;content:counter(st);position:absolute;left:0;top:1px;display:grid;place-items:center;width:28px;height:28px;border-radius:999px;background:var(--acc-bg);color:var(--acc);font-weight:700;font-family:var(--f-mono);font-size:13.5px}
@@ -348,6 +355,7 @@ table.lv tr.fut td{color:var(--muted)}
   .mast .brand b{font-size:15.5px}
   .net span{display:none}
   .net.off span{display:inline}
+  .vrow .rh [data-okd]{margin-left:auto}
   .net{padding:4px 11px}
   .btn-big{padding:16px 26px;font-size:18px}
 }
@@ -390,8 +398,16 @@ table.lv tr.fut td{color:var(--muted)}
 
 <script>
 'use strict';
-const VERSION = '2.4.0';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '2.5.0';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  { v: '2.5.0', d: '2026. 11. 23', i: [
+    '아직 복무 중이어도 계산 결과 맨 위에 \'이대로 계속 승선하면\' 완료 예정일과 기한까지 여유(여유·빠듯·초과)를 보여 줌',
+    '휴대폰 화면 아래에 결과 요약 막대(완료 예정일 · 기한 안)를 띄우고, 누르면 결과로 이동(결과가 보이거나 입력 중일 때는 숨김)',
+    '\'남은 일수\' 칸을 \'기한까지\'로 바꿔 같은 숫자가 겹치지 않게 함',
+    '처음 화면 안내 번호가 1, 1, 1로 나오던 문제 수정',
+    '다크 화면 경고색을 주색(호박)과 구분되는 연두빛 노랑으로 바꾸고, 빠듯함·초과 판정에 느낌표 표시를 붙임',
+    '라이트 화면의 승선·휴가·교육소집·휴직 색을 초록·황토·보라·청색으로 나눠 막대에서 잘 구분되게 함',
+  ] },
   { v: '2.4.0', d: '2026. 11. 23', i: [
     '계산 결과 맨 위에 복무 완료일과 기한까지 남은 날(여유·빠듯함·초과)을 한 줄로 보여 줌',
     '승선 기간을 추가할 때 미리 채운 날짜를 \'날짜 확인 필요\'로 표시하고, 고치거나 [맞음]을 누르기 전까지 결과에 알림',
@@ -785,6 +801,7 @@ document.addEventListener('click', e => { const g = e.target.closest('[data-go]'
 
 function render(){
   const r = route();
+  document.body.classList.remove('sum-on');
   // 하단 안내: 처음 화면은 두 계산기 모두, 각 계산기 화면은 그 계산기 것만
   $('#foot1').hidden = $('#foot2').hidden = r === 'eta';
   $('#foot3').hidden = r === 'calc';
@@ -875,13 +892,26 @@ function drawCalc(v){
   <div class="card" id="syncCard"></div>
   </div>
 
-  <details class="helpbox"><summary>${IC.help}사용 방법 · 도움말 · 관련 법령</summary>${helpHTML()}</details>`;
+  <details class="helpbox"><summary>${IC.help}사용 방법 · 도움말 · 관련 법령</summary>${helpHTML()}</details>
+  <button class="sumbar" id="sumBar" type="button" hidden aria-label="계산 결과로 이동"><span id="sumTxt"></span>${IC.down || ''}</button>`;
 
   const bind = (id, key) => { const el = $('#' + id); el.addEventListener('input', () => { S[key] = el.value.trim(); save(); refresh(); }); };
   bind('fEnlist', 'enlist'); bind('fBirth', 'birth'); bind('fTrS', 'trS'); bind('fTrE', 'trE'); bind('fExtra', 'extra');
   $('#fSub').addEventListener('change', e => { S.noSub = e.target.value === 'off'; $('#subHint').textContent = SUB_HINT[e.target.value]; save(); refresh(); });
   $('#addRow').onclick = addRow;
   drawRows(); drawSyncBox(); refresh();
+  resVisible = false;
+  $('#sumBar').onclick = () => $('#resCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (sumObs) sumObs.disconnect();
+  if ('IntersectionObserver' in window){ sumObs = new IntersectionObserver(es => { resVisible = es.some(e => e.isIntersecting); updateSum(); }); sumObs.observe($('#resCard')); }
+}
+let sumObs = null, resVisible = false, sumState = { t: '', c: '' };
+function updateSum(t, c){
+  if (t !== undefined) sumState = { t, c };
+  const b = $('#sumBar'); if (!b) return;
+  $('#sumTxt').textContent = sumState.t; b.className = 'sumbar' + (sumState.c ? ' ' + sumState.c : '');
+  b.hidden = !sumState.t || resVisible;
+  document.body.classList.toggle('sum-on', !b.hidden);
 }
 
 function addRow(){
@@ -963,7 +993,7 @@ function drawResults(){
   $('#moreSec').hidden = empty;
   if (!syncShown) $('#syncSec').hidden = empty && !S.rows.length && !syncCfg().code;
   if (empty){
-    lastDone = undefined;
+    lastDone = undefined; updateSum('', '');
     res.innerHTML = `<ol class="steps guide">
       <li>위 <b>기본 설정</b>에 승선근무예비역 <b>편입일</b>을 넣습니다.</li>
       <li><b>승선 기간 추가</b>를 눌러 첫 승선 기간을 넣습니다.</li>
@@ -983,17 +1013,28 @@ function drawResults(){
   const futureIncl = base.lastDay != null && base.lastDay > today;
   const dlName = deadline30 != null && deadline30 < deadline5 ? '30세 기한' : '편입 5년 기한';
   const unc = S.rows.filter(r => r.auto).length;
-  let verdict;
+  const proj = base.done == null && P.valid.length ? project(P, base, today) : null;
+  let verdict, sumTxt = '', sumCls = '';
   if (base.done != null){
     const m = deadline - base.done, cls = m < 0 ? 'bad' : m <= 60 ? 'warn' : 'ok';
     const line = m < 0 ? `${dlName} ${fmt(deadline)}보다 <b>${num(-m)}일</b> 늦습니다`
       : m === 0 ? `${dlName} ${fmt(deadline)} 당일에 끝납니다`
       : `${dlName} ${fmt(deadline)}까지 <b>${num(m)}일</b>${dur(m) ? ` (${dur(m)})` : ''} 여유${m <= 60 ? ' · 빠듯합니다' : ''}`;
     verdict = `<div class="verdict ${cls}"><span class="vd-k">${base.done <= today ? '복무 완료' : '복무 완료 예정'} · 1,095일 도달</span><div class="vd-d">${fmt(base.done)}</div><div class="vd-l">${line}</div></div>`;
+    sumTxt = `${fmt(base.done, false)} ${base.done <= today ? '완료' : '완료 예정'} · ${m < 0 ? '기한 초과' : m <= 60 ? '기한 빠듯' : '기한 안'}`; sumCls = cls;
+  } else if (proj && proj.contDone != null){
+    const m = deadline - proj.contDone, cls = m < 0 ? 'bad' : m <= 60 ? 'warn' : 'ok';
+    const line = m < 0 ? `${dlName} ${fmt(deadline)}보다 <b>${num(-m)}일</b> 늦습니다`
+      : m === 0 ? `${dlName} ${fmt(deadline)} 당일에 끝납니다`
+      : `${dlName} ${fmt(deadline)}까지 <b>${num(m)}일</b>${dur(m) ? ` (${dur(m)})` : ''} 여유${m <= 60 ? ' · 빠듯합니다' : ''}`;
+    verdict = `<div class="verdict ${cls}"><span class="vd-k">${proj.aboard ? '지금 배에서 계속 승선하면' : `${fmt(proj.contStart, false)}부터 다시 승선하면`} · 1,095일 도달 예정</span><div class="vd-d">${fmt(proj.contDone)}</div><div class="vd-l">${line}</div><div class="vd-s">지금까지 ${num(credit)}일 · ${num(left)}일 남음 · 다른 경우는 아래 <b>만료 예상</b></div></div>`;
+    sumTxt = `${fmt(proj.contDone, false)} 완료 예정 · ${m < 0 ? '기한 초과' : m <= 60 ? '기한 빠듯' : '기한 안'}`; sumCls = cls;
   } else {
     const m = deadline - today;
-    verdict = `<div class="verdict"><span class="vd-k">입력한 기록으로는 1,095일에 못 미칩니다</span><div class="vd-d">${num(left)}<small>일 남음</small></div><div class="vd-l">${dlName} ${fmt(deadline)}까지 ${m >= 0 ? `<b>${num(m)}일</b>` : '<b>이미 지났습니다</b>'} · 아래 <b>만료 예상</b>에서 앞으로 승선했을 때의 날짜를 보세요</div></div>`;
+    verdict = `<div class="verdict"><span class="vd-k">입력한 기록으로는 1,095일에 못 미칩니다</span><div class="vd-d">${num(left)}<small>일 남음</small></div><div class="vd-l">${dlName} ${fmt(deadline)}까지 ${m >= 0 ? `<b>${num(m)}일</b>` : '<b>이미 지났습니다</b>'}</div></div>`;
+    sumTxt = `${num(left)}일 남음`; sumCls = '';
   }
+  updateSum(sumTxt, sumCls);
   if (lastDone !== undefined && lastDone !== base.done){ const sr = $('#srLive'); sr.textContent = ''; setTimeout(() => { sr.textContent = base.done != null ? `복무 완료일이 ${fmt(base.done)}로 바뀌었습니다` : '아직 1,095일에 못 미칩니다'; }, 60); }
   lastDone = base.done;
 
@@ -1010,7 +1051,7 @@ function drawResults(){
         ${dur(credit) ? `<div class="bigd">${dur(credit)} / 3년</div>` : ''}
         <div class="sub">${futureIncl ? '입력한 기록 기준(하선 뒤 휴가 예정 포함)' : '입력한 기록 기준'}</div>
         <div class="kv">
-          <div><span>남은 일수</span><b>${num(left)}<small>일</small></b>${dur(left) ? `<em>${dur(left)}</em>` : ''}</div>
+          <div><span>기한까지</span><b>${num(Math.max(0, deadline - today))}<small>일</small></b><em>${fmt(deadline, false)}</em></div>
           <div><span>오늘까지 인정</span><b>${num(base.todayCredit)}<small>일</small></b><em>${fmt(today, false)} 기준</em></div>
           <div><span>승선일수</span><b>${num(by.sea)}<small>일</small></b>${dur(by.sea) ? `<em>${dur(by.sea)}</em>` : ''}<em>1,095일의 ${p1(pct(by.sea, TARGET))}</em></div>
           <div><span>휴가 인정</span><b>${num(by.leave)}<small>일</small></b>${dur(by.leave) ? `<em>${dur(by.leave)}</em>` : ''}<em>1,095일의 ${p1(pct(by.leave, TARGET))}</em></div>
@@ -1036,7 +1077,7 @@ function drawResults(){
   } else if (!P.valid.length){
     pj.innerHTML = '<p class="sub" style="margin:0">승선 기록을 1건 이상 넣으면 만료 예상일이 나옵니다.</p>';
   } else {
-    const o = project(P, base, today);
+    const o = proj;
     const warn = d => d != null && d > deadline ? ` <span class="chip bad">기한 초과</span>` : d != null ? ` <span class="chip ok">기한 안</span>` : '';
     let h = '<div class="pj">';
     h += `<div class="pjc"><h4>${IC.ship}이대로 계속 승선하면</h4>

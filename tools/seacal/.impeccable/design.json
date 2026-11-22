@@ -91,18 +91,18 @@
       },
       "leave": {
         "role": "tertiary",
-        "displayName": "휴가 (자료 색)",
-        "canonical": "#8FCBA2"
+        "displayName": "휴가 (자료 색, 황토)",
+        "canonical": "#A5741C"
       },
       "edu": {
         "role": "tertiary",
-        "displayName": "군사교육소집 (자료 색)",
-        "canonical": "#C6E3AE"
+        "displayName": "군사교육소집 (자료 색, 보라)",
+        "canonical": "#8C76C8"
       },
       "inj": {
         "role": "tertiary",
-        "displayName": "업무상 휴직 (자료 색)",
-        "canonical": "#6FB3A0"
+        "displayName": "업무상 휴직 (자료 색, 청색)",
+        "canonical": "#3E8FAA"
       },
       "ok": {
         "role": "status",
