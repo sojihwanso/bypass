@@ -217,12 +217,24 @@
     background: var(--surface); border: 1.5px solid var(--pastel-sage-border);
     border-radius: var(--radius); padding: 24px 24px; box-shadow: var(--shadow);
   }
-  .hero-main-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
-  .hero-headline-group { flex: 1 1 360px; min-width: 240px; }
-  .hero-title { margin: 8px 0 6px; font-size: clamp(22px, 2.5vw, 27px); font-weight: 800; line-height: 1.32; letter-spacing: -0.02em; }
+  .hero-title { margin: 8px 0 4px; font-size: clamp(22px, 2.5vw, 27px); font-weight: 800; line-height: 1.32; letter-spacing: -0.02em; }
   .hero-sub { margin: 0; font-size: var(--fs-small); color: var(--text-muted); line-height: 1.6; }
-  .hero-action-group { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex-shrink: 0; }
-  @media (max-width: 700px) { .hero-action-group { align-items: stretch; width: 100%; } }
+  /* 오늘 한 페이지: 왼쪽 오늘 할 일, 오른쪽 타이머·코스 선택 */
+  .today { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 24px; align-items: start; }
+  @media (max-width: 760px) { .today { grid-template-columns: 1fr; gap: 18px; } }
+  .today-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .today-meta { font-size: var(--fs-label); font-weight: 700; color: var(--text-muted); }
+  .today-progress { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+  .today-progress .bar-track { flex: 1; margin-top: 0; }
+  .today-count { font-size: var(--fs-label); font-weight: 700; color: var(--text-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .today-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; align-items: center; }
+  .today-link { font-size: var(--fs-small); font-weight: 700; color: var(--pastel-sky-dark); text-decoration: underline; text-underline-offset: 3px; padding: 8px 4px; }
+  .today-side { display: grid; gap: 12px; padding-left: 22px; border-left: 1.5px dashed var(--border-strong); }
+  @media (max-width: 760px) { .today-side { padding-left: 0; border-left: 0; padding-top: 16px; border-top: 1.5px dashed var(--border-strong); } }
+  .today-timer-row { display: flex; align-items: center; gap: 8px; }
+  .today-timer-row .timer-num { margin: 0; flex: 1; }
+  .today-side .course-toggle { display: flex; width: 100%; }
+  .today-side .course-opt { flex: 1 1 0; white-space: normal; text-align: center; line-height: 1.35; display: inline-flex; align-items: center; justify-content: center; }
 
   .course-toggle {
     display: inline-flex; background: var(--surface-2); border: 1.5px solid var(--border);
@@ -234,21 +246,29 @@
   .course-opt.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(45, 52, 54, 0.08); }
 
   .section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
-  .lesson-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; align-items: stretch; }
-  @media (max-width: 600px) { .lesson-grid { grid-template-columns: 1fr; } }
-  .lesson-card {
-    background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 15px 16px;
-    display: flex; flex-direction: column; justify-content: space-between; gap: 12px;
-    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
-  }
-  .lesson-card:hover { transform: translateY(-2px); border-color: var(--pastel-sky); box-shadow: var(--shadow); }
-  .lesson-card.done { border-color: var(--pastel-sage-border); background: #fafdfb; }
   .day-tag {
     font-size: var(--fs-micro); font-weight: 800; color: var(--pastel-sky-dark);
     background: var(--pastel-sky-soft); border: 1px solid var(--pastel-sky-border);
     padding: 2px 8px; border-radius: 7px; white-space: nowrap;
   }
-  .lesson-card.done .day-tag { color: var(--pastel-sage-dark); background: var(--pastel-sage-soft); border-color: var(--pastel-sage-border); }
+  .course-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+  .course-row {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 12px;
+    background: var(--surface); border: 1.5px solid var(--border); border-radius: 15px; padding: 11px 14px; min-height: 60px;
+  }
+  .course-row.done { border-color: var(--pastel-sage-border); }
+  .course-row.done .day-tag { color: var(--pastel-sage-dark); background: var(--pastel-sage-soft); border-color: var(--pastel-sage-border); }
+  .course-row.is-today { border-color: var(--pastel-sky); }
+  .course-row-title { font-size: var(--fs-body); font-weight: 700; line-height: 1.4; }
+  .course-row-sub { font-size: var(--fs-label); color: var(--text-muted); line-height: 1.45; }
+  .course-status { display: inline-flex; align-items: center; gap: 4px; font-size: var(--fs-label); font-weight: 700; color: var(--text-muted); white-space: nowrap; }
+  .course-row.done .course-status { color: var(--pastel-sage-dark); }
+  @media (max-width: 560px) {
+    .course-row { grid-template-columns: auto minmax(0, 1fr) auto; row-gap: 4px; }
+    .course-row-sub { display: none; }
+    .course-row .course-status { grid-column: 2; grid-row: 2; }
+    .course-row > .btn { grid-column: 3; grid-row: 1 / span 2; }
+  }
 
   .side-rail { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 76px; }
   @media (max-width: 960px) { .side-rail { position: static; display: grid; grid-template-columns: repeat(2, 1fr); } }
@@ -380,7 +400,7 @@
     background: var(--surface); border: 1.5px solid var(--border); border-radius: 15px; padding: 14px; cursor: pointer;
     transition: background-color 0.14s ease, border-color 0.14s ease, transform 0.14s ease, box-shadow 0.14s ease; display: flex; flex-direction: column; justify-content: space-between;
   }
-  .kanji-card:focus-visible, .toggle-wrap:focus-visible, .kana-cell:focus-visible, .chip:focus-visible, .btn:focus-visible, .btn-icon:focus-visible, .nav-tab:focus-visible, .sub-tab:focus-visible, .course-opt:focus-visible, .lesson-card .btn:focus-visible, .option-btn:focus-visible { outline: 2px solid var(--pastel-sky-dark); outline-offset: 2px; }
+  .kanji-card:focus-visible, .toggle-wrap:focus-visible, .kana-cell:focus-visible, .chip:focus-visible, .btn:focus-visible, .btn-icon:focus-visible, .nav-tab:focus-visible, .sub-tab:focus-visible, .course-opt:focus-visible, .option-btn:focus-visible { outline: 2px solid var(--pastel-sky-dark); outline-offset: 2px; }
   .kanji-card:hover { border-color: var(--pastel-sky); transform: translateY(-2px); box-shadow: var(--shadow); }
 
   .search-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
@@ -597,7 +617,7 @@
   }
   /* Touch devices: no sticky hover lift after a tap */
   @media (hover: none) {
-    .lesson-card:hover, .kana-cell:hover, .kanji-card:hover { transform: none; }
+    .kana-cell:hover, .kanji-card:hover { transform: none; }
   }
   /* Reduce motion: keep every state change (fades, colour, progress) but drop movement */
   @keyframes fadeInStill { from { opacity: 0; } to { opacity: 1; } }
@@ -605,7 +625,7 @@
     html { scroll-behavior: auto; }
     .view { animation: fadeInStill 0.15s ease; }
     .btn:active:not(:disabled), .btn-icon:active { transform: none; }
-    .lesson-card:hover, .kana-cell:hover, .kanji-card:hover { transform: none; }
+    .kana-cell:hover, .kanji-card:hover { transform: none; }
     .toast, .toast.show { transform: translateX(-50%); transition: opacity 0.2s ease; }
     .toggle-dot::after { transition: none; }
     .progress-fill, .bar-fill { transition-duration: 0.01s; }
@@ -709,51 +729,45 @@
   <section id="view-home" class="view active">
     <div class="pc-home-grid">
       <div>
-        <div class="hero-3s">
-          <div class="hero-main-row">
-            <div class="hero-headline-group">
-              <span class="badge badge-green">매일 1회 · 하루 20분 루틴</span>
-              <h1 class="hero-title" id="hero-main-title">오늘 20분 일본어 학습을 시작하세요</h1>
-              <p class="hero-sub">
-                하루 한 번씩 돌아와 문자·실전 210문장·현지 제원·오답노트를 부담 없이 이어가세요.
-              </p>
-            </div>
-            <div class="hero-action-group">
-              <div class="course-toggle" role="group" aria-label="학습 기간 선택">
-                <button class="course-opt active" id="mode-7" onclick="setCourseMode(7)">7일 코스 (하루 30문장)</button>
-                <button class="course-opt" id="mode-14" onclick="setCourseMode(14)">14일 코스 (하루 15문장)</button>
+        <section class="hero-3s today" id="today" aria-labelledby="today-title">
+          <div class="today-main">
+            <div class="today-head"><span class="badge badge-green" id="today-badge">DAY 1 / 총 7</span><span class="today-meta" id="today-meta"></span></div>
+            <h2 class="hero-title" id="today-title"></h2>
+            <p class="hero-sub" id="today-sub"></p>
+            <div class="today-progress"><div class="bar-track" role="progressbar" aria-label="코스 진행" aria-valuemin="0" id="today-track"><div class="bar-fill" id="today-bar"></div></div><span class="today-count" id="today-count"></span></div>
+            <div class="today-actions" id="today-actions"></div>
+          </div>
+          <div class="today-side">
+            <div class="flex-between">
+              <span class="rail-label">20분 루틴 타이머</span>
+              <div class="timer-mode-pill">
+                <button class="timer-mode-btn active" id="tmode-down" onclick="setTimerMode('countdown')">20분</button>
+                <button class="timer-mode-btn" id="tmode-up" onclick="setTimerMode('stopwatch')">스톱워치</button>
               </div>
-              <button class="btn btn-primary" onclick="startNextOrFirstLesson()">오늘 학습 바로 시작 →</button>
+            </div>
+            <div class="today-timer-row">
+              <div class="timer-num" id="timer-display">20:00</div>
+              <button class="btn btn-outline btn-sm" id="timer-toggle-btn" onclick="toggleTimer()">시작</button>
+              <button class="btn-icon" onclick="resetTimer()" aria-label="타이머 초기화" title="초기화"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.5"/><path d="M4 4v4.5h4.5"/></svg></button>
+            </div>
+            <div class="course-toggle" role="group" aria-label="학습 기간 선택">
+              <button class="course-opt active" id="mode-7" onclick="setCourseMode(7)">7일 코스 (하루 30문장)</button>
+              <button class="course-opt" id="mode-14" onclick="setCourseMode(14)">14일 코스 (하루 15문장)</button>
             </div>
           </div>
-        </div>
+        </section>
 
         <div class="section-head">
-          <h2 style="margin:0;font-size:var(--fs-strong);line-height:1.35;" id="course-heading">7일 코스 · 총 7일 (하루 30문장)</h2>
+          <h2 style="margin:0;font-size:var(--fs-strong);line-height:1.35;" id="course-heading">전체 코스 · 7일 (하루 30문장)</h2>
           <div class="flex-center">
             <button class="btn btn-outline btn-sm" onclick="switchView('notes')"><span>오답노트 (<span id="home-notes-badge">0</span>)</span></button>
             <button class="btn btn-blue btn-sm" onclick="startRandomSprint()">랜덤 10문장 퀴즈</button>
           </div>
         </div>
-        <div class="lesson-grid" id="lesson-grid"></div>
+        <ol class="course-list" id="lesson-grid"></ol>
       </div>
 
       <aside class="side-rail">
-        <div class="rail-card">
-          <div class="flex-between">
-            <span class="rail-label">오늘 20분 루틴 타이머</span>
-            <div class="timer-mode-pill">
-              <button class="timer-mode-btn active" id="tmode-down" onclick="setTimerMode('countdown')">20분</button>
-              <button class="timer-mode-btn" id="tmode-up" onclick="setTimerMode('stopwatch')">스톱워치</button>
-            </div>
-          </div>
-          <div class="timer-num" id="timer-display">20:00</div>
-          <div class="flex-center">
-            <button class="btn btn-outline btn-sm" style="flex:1;" id="timer-toggle-btn" onclick="toggleTimer()">시작</button>
-            <button class="btn-icon" onclick="resetTimer()" aria-label="타이머 초기화" title="초기화"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.5"/><path d="M4 4v4.5h4.5"/></svg></button>
-          </div>
-        </div>
-
         <div class="rail-card tip-rail">
           <div class="flex-between">
             <span class="rail-label" style="color:var(--pastel-apricot-dark);">현지 제원 노트 (<span id="tip-idx">1</span>/8)</span>
@@ -1366,22 +1380,58 @@ function getLessons() {
   }
   return lessons;
 }
-function startNextOrFirstLesson() {
-  const lessons = getLessons();
-  const next = lessons.find(l => !isLessonDone(l.key)) || lessons[0];
-  if (next) startLesson(next.key);
+function homeState() {
+  const lessons = getLessons(), today = todayStr();
+  const done = lessons.filter(l => isLessonDone(l.key));
+  const firstOpen = lessons.find(l => !isLessonDone(l.key)) || null;
+  const doneToday = done.some(l => langData().completed[l.key] === today);
+  const kind = !firstOpen ? 'courseDone' : doneToday ? 'doneToday' : 'todo';
+  return { kind, lesson: firstOpen, nextLesson: firstOpen, doneCount: done.length, total: lessons.length, doneToday };
 }
-function setCourseMode(mode) { state.courseMode = mode; saveStore(); document.getElementById('mode-7').classList.toggle('active', mode === 7); document.getElementById('mode-14').classList.toggle('active', mode === 14); renderCourseGrid(); updateStatsUI(); }
-function renderCourseGrid() {
-  const lessons = getLessons();
-  document.getElementById('course-heading').textContent = state.courseMode === 7 ? '7일 코스 · 총 7일 (하루 30문장)' : '14일 코스 · 총 14일 (하루 15문장)';
-  document.getElementById('lesson-grid').innerHTML = lessons.map(l => {
-    const done = isLessonDone(l.key);
-    return `<div class="lesson-card ${done ? 'done' : ''}" data-lesson="${l.key}">
-      <div><div class="flex-between"><span class="day-tag">DAY ${l.day}</span><span class="muted" style="font-size:var(--fs-label);font-weight:700;">${done ? '완료' : `${l.phrases.length}문장`}</span></div>
-      <h3 style="margin:10px 0 4px;font-size:var(--fs-body);line-height:1.4;">${l.title}</h3><p class="muted" style="margin:0;font-size:var(--fs-label);">${l.subtitle}</p></div>
-      <button class="btn ${done ? 'btn-outline' : 'btn-primary'} btn-sm" style="width:100%;" onclick="startLesson('${l.key}')">${done ? '다시 복습' : '학습 시작'}</button>
-    </div>`;
+function startTodayLesson() {
+  const st = homeState();
+  if (!st.lesson) return;
+  if (!state.timerRunning && state.timerMode === 'countdown') toggleTimer();
+  startLesson(st.lesson.key);
+}
+function startNextOrFirstLesson() { startTodayLesson(); }
+function setCourseMode(mode) { state.courseMode = mode; saveStore(); document.getElementById('mode-7').classList.toggle('active', mode === 7); document.getElementById('mode-14').classList.toggle('active', mode === 14); renderHome(); updateStatsUI(); }
+function renderHome() {
+  const st = homeState(), lessons = getLessons(), per = state.courseMode === 7 ? 30 : 15;
+  const other = state.courseMode === 7 ? 14 : 7;
+  const $ = id => document.getElementById(id);
+  $('course-heading').textContent = `전체 코스 · ${st.total}일 (하루 ${per}문장)`;
+  $('today-count').textContent = `${st.doneCount}/${st.total} 완료`;
+  $('today-bar').style.width = `${Math.round((st.doneCount / st.total) * 100)}%`;
+  const track = $('today-track'); track.setAttribute('aria-valuemax', String(st.total)); track.setAttribute('aria-valuenow', String(st.doneCount));
+  const badge = $('today-badge');
+  if (st.kind === 'todo') {
+    const l = st.lesson;
+    badge.hidden = false; badge.className = 'badge badge-blue'; badge.textContent = `DAY ${l.day} / 총 ${st.total}`;
+    $('today-meta').textContent = `${l.phrases.length}문장 · 약 20분`;
+    $('today-title').textContent = l.title;
+    $('today-sub').textContent = l.subtitle.replace(/ · \d+문장$/, '');
+    $('today-actions').innerHTML = `<button class="btn btn-primary" id="today-primary" onclick="startTodayLesson()">DAY ${l.day} 시작 →</button>`;
+  } else if (st.kind === 'doneToday') {
+    const n = st.nextLesson;
+    badge.hidden = true;
+    $('today-meta').textContent = '';
+    $('today-title').textContent = '오늘 분량 완료';
+    $('today-sub').textContent = `내일 DAY ${n.day} · ${n.title}. 남는 시간엔 틀린 문장을 다시 보거나 랜덤 퀴즈를 풀어 보세요.`;
+    $('today-actions').innerHTML = `<button class="btn btn-outline" onclick="startLesson('${n.key}')">내일 DAY ${n.day} 미리 보기</button><button class="btn btn-blue" onclick="startRandomSprint()">랜덤 10문장 퀴즈</button>`;
+  } else {
+    badge.hidden = true;
+    $('today-meta').textContent = '';
+    $('today-title').textContent = `${st.total}일 코스 완료`;
+    $('today-sub').textContent = st.doneToday ? '오늘 마지막 DAY까지 끝냈어요. 현지에서는 치트시트의 ★ 고정 문장부터 꺼내 보세요.' : `${st.total}일 코스를 모두 끝냈어요. 틀린 문장을 다시 보거나 다른 코스로 한 번 더 익혀 보세요.`;
+    const hasNotes = getWrongCounts().totalCount > 0;
+    $('today-actions').innerHTML = `${hasNotes ? '<button class="btn btn-outline" onclick="startWrongNotebookQuiz()">틀린 문장 복습</button>' : ''}<button class="btn btn-blue" onclick="startRandomSprint()">랜덤 10문장 퀴즈</button><button class="today-link" type="button" onclick="setCourseMode(${other})">${other}일 코스로 다시 보기</button>`;
+  }
+  $('lesson-grid').innerHTML = lessons.map(l => {
+    const done = isLessonDone(l.key), isToday = st.kind === 'todo' && st.lesson && st.lesson.key === l.key;
+    const status = done ? `<span class="course-status"><svg class="ico ico-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>완료</span>` : isToday ? '<span class="course-status"><span class="badge badge-blue">오늘</span></span>' : '<span class="course-status"></span>';
+    const btn = isToday ? '' : `<button class="btn btn-outline btn-sm" onclick="startLesson('${l.key}')" aria-label="DAY ${l.day} ${done ? '복습' : '미리 하기'}">${done ? '복습' : '미리 하기'}</button>`;
+    return `<li class="course-row ${done ? 'done' : ''} ${isToday ? 'is-today' : ''}" data-lesson="${l.key}"><span class="day-tag">DAY ${l.day}</span><div class="course-row-text"><div class="course-row-title">${l.title}</div><div class="course-row-sub">${l.subtitle}</div></div>${status}${btn}</li>`;
   }).join('');
 }
 function syncCharSubTabs() {
@@ -1952,7 +2002,7 @@ function nextQuizQuestion() {
     if (quiz.lessonKey) {
       markLessonDone(quiz.lessonKey);
     }
-    updateStatsUI(); renderCourseGrid(); playTone('complete');
+    updateStatsUI(); renderHome(); playTone('complete');
   }
   renderQuizScreen();
 }
@@ -1996,21 +2046,18 @@ function renderHelp() {
 function renderLanguageHeadings() {
   document.title = `여권스냅 — 매일 20분 여행 ${LANGUAGE_PACKS[state.lang].name} 루틴`;
   const pack = LANGUAGE_PACKS[state.lang];
-  const heroTitle = document.getElementById('hero-main-title');
   const charsHeading = document.getElementById('chars-heading');
   const charsSub = document.getElementById('chars-sub');
   const specsHeading = document.getElementById('specs-heading');
   const specsSub = document.getElementById('specs-sub');
   const specsTab = document.querySelector('.nav-tab[data-view="specs"]');
   if (state.lang === 'zh') {
-    if (heroTitle) heroTitle.textContent = '오늘 20분 중국어 학습을 시작하세요';
     if (charsHeading) charsHeading.textContent = '중국어 문자·성조 입문';
     if (charsSub) charsSub.textContent = '기초 문자와 여행 필수 간체자를 눌러 원어민 발음과 성조·암기 팁을 확인하세요.';
     if (specsHeading) specsHeading.textContent = '중국 제원 및 현지 안내';
     if (specsSub) specsSub.textContent = '결제·전압·교통·안내·긴급 연락처를 한눈에 확인하세요.';
     if (specsTab) specsTab.textContent = '중국 제원·꿀팁';
   } else {
-    if (heroTitle) heroTitle.textContent = '오늘 20분 일본어 학습을 시작하세요';
     if (charsHeading) charsHeading.textContent = '일본어 문자 입문';
     if (charsSub) charsSub.textContent = '문자를 눌러 원어민 발음과 암기 팁을 확인하세요.';
     if (specsHeading) specsHeading.textContent = '일본 제원 및 현지 안내';
@@ -2027,7 +2074,7 @@ function syncSettingsUI() {
   const t = document.getElementById('toggle-ko-pron');
   if (t) { t.classList.toggle('on', state.showKoPron); t.setAttribute('aria-checked', String(state.showKoPron)); }
 }
-function renderAll() { renderHelp(); renderVoiceControls(); renderLanguageHeadings(); renderLangDropdown(); renderDailyTip(); renderCourseGrid(); switchCharTab(state.charTab); renderPhraseCatChips(); renderPhraseList(); renderWrongNotebook(); renderSpecs(); renderTimer();
+function renderAll() { renderHelp(); renderVoiceControls(); renderLanguageHeadings(); renderLangDropdown(); renderDailyTip(); renderHome(); switchCharTab(state.charTab); renderPhraseCatChips(); renderPhraseList(); renderWrongNotebook(); renderSpecs(); renderTimer();
   renderMiniPhrase(); updateStatsUI(); }
 // Tag every target-language node with the active pack's language so the matching system face (and Han glyph forms) apply.
 const TARGET_TEXT_SEL = '.t-target, .phrase-jp, .phrase-kana, .kana-char, #sc-jp, #sc-kana, #mini-phrase-jp, #cd-char';

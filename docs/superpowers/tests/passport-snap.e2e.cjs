@@ -142,6 +142,55 @@ test('all-correct', async () => {
   eq((await page.textContent('#result-primary')).trim(), '코스로 돌아가기', 'primary when all correct');
 });
 
+// ---------- Task 3: 홈 = 오늘 한 페이지 ----------
+const visiblePrimaries = page => page.evaluate(() => [...document.querySelectorAll('.btn-primary')].filter(b => b.checkVisibility()).map(b => b.textContent.trim()));
+const seed = (completed, extra = {}) => ({ version: 1, lang: 'ja', courseMode: 7, showKoPron: true, phraseDensity: null, langs: { ja: { completed, usable: [], favorites: [], notebook: { phrases: {}, chars: {} } } }, ...extra });
+test('one-green', async () => {
+  for (const width of [1280, 390]) {
+    const page = await open({ width });
+    const greens = await visiblePrimaries(page);
+    eq(greens.length, 1, `primaries at ${width}`);
+    eq(greens[0], 'DAY 1 시작 →', 'primary label');
+  }
+});
+test('done-today', async () => {
+  const page = await open();
+  await page.evaluate(() => startLesson('7-1'));
+  await answerAll(page);
+  await page.evaluate(() => closeQuizScreen());
+  const t = await page.textContent('#today');
+  assert(t.includes('오늘 분량 완료') && t.includes('내일 DAY 2'), `today text: ${t.slice(0, 80)}`);
+  eq((await visiblePrimaries(page)).length, 0, 'no primary when done today');
+});
+test('review-not-today', async () => {
+  const page = await open({ storage: seed({ '7-1': '2000-01-01' }) });
+  assert((await page.textContent('#today')).includes('DAY 2'), 'today is DAY 2');
+  await page.evaluate(() => startLesson('7-1'));
+  await answerAll(page);
+  await page.evaluate(() => closeQuizScreen());
+  eq((await stored(page)).langs.ja.completed['7-1'], '2000-01-01', 'date kept');
+  assert(!(await page.textContent('#today')).includes('오늘 분량 완료'), 'review does not count as today');
+  eq((await visiblePrimaries(page))[0], 'DAY 2 시작 →', 'still todo DAY 2');
+});
+test('course-14', async () => {
+  const page = await open();
+  await page.evaluate(() => { setCourseMode(14); startLesson('14-1'); });
+  await answerAll(page);
+  await page.evaluate(() => { closeQuizScreen(); setCourseMode(7); });
+  eq((await visiblePrimaries(page))[0], 'DAY 1 시작 →', '7-day course untouched');
+});
+test('course-done', async () => {
+  const all = {}; for (let i = 1; i <= 7; i++) all[`7-${i}`] = '2000-01-01';
+  const page = await open({ storage: seed(all) });
+  assert((await page.textContent('#today')).includes('코스 완료'), 'course done');
+  eq((await visiblePrimaries(page)).length, 0, 'no primary');
+});
+test('timer-autostart', async () => {
+  const page = await open();
+  await page.click('#today-primary');
+  eq(await page.evaluate(() => state.timerRunning), true, 'timer running');
+});
+
 (async () => {
   browser = await chromium.launch({ channel: 'chrome' });
   let pass = 0, fail = 0;
