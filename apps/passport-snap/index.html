@@ -25,6 +25,7 @@
     --pastel-sky-dark: #36698a;
     --pastel-sky-soft: #ebf5fb;
     --pastel-sky-border: #c5e2f3;
+    --pastel-sky-hover: #dceefa;
 
     --pastel-apricot: #e8a86b;
     --pastel-apricot-dark: #8a5a2b;
@@ -51,6 +52,9 @@
     --fs-strong: 17.5px;  /* card and item titles */
     --fs-title: 21px;     /* view and section headings */
     --fs-target: 21px;    /* target-language sentence in lists */
+    --fs-glyph: 28px;     /* timer, kana cells, glyphs in notebook/kanji cards */
+    --fs-glyph-lg: 38px;  /* character detail, flashcard sentence cap */
+    --fs-glyph-xl: 56px;  /* character quiz prompt */
     --pron-ink: var(--pastel-sky-dark);  /* Korean pronunciation line */
 
     /* Filled actions: deep enough for white label text (≥4.5:1) while staying in the sage / rose families */
@@ -111,7 +115,7 @@
     background: var(--pastel-sky-soft); color: var(--pastel-sky-dark);
     border: 1.5px solid var(--pastel-sky-border);
   }
-  .btn-blue:hover:not(:disabled) { background: #dceefa; border-color: var(--pastel-sky); }
+  .btn-blue:hover:not(:disabled) { background: var(--pastel-sky-hover); border-color: var(--pastel-sky); }
 
   .btn-rose {
     background: var(--danger); color: #ffffff;
@@ -220,8 +224,9 @@
   .hero-title { margin: 8px 0 4px; font-size: clamp(22px, 2.5vw, 27px); font-weight: 800; line-height: 1.32; letter-spacing: -0.02em; }
   .hero-sub { margin: 0; font-size: var(--fs-small); color: var(--text-muted); line-height: 1.6; }
   /* 오늘 한 페이지: 왼쪽 오늘 할 일, 오른쪽 타이머·코스 선택 */
-  .today { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 24px; align-items: start; }
-  @media (max-width: 760px) { .today { grid-template-columns: 1fr; gap: 18px; } }
+  .today { display: grid; grid-template-columns: minmax(0, 1fr) auto 280px; gap: 22px; align-items: stretch; }
+  .today-divider { width: 0; border-left: 1.5px dashed var(--border-strong); }
+  @media (max-width: 760px) { .today { grid-template-columns: 1fr; gap: 16px; } .today-divider { width: auto; height: 0; border-left: 0; border-top: 1.5px dashed var(--border-strong); } }
   .today-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .today-meta { font-size: var(--fs-label); font-weight: 700; color: var(--text-muted); }
   .today-progress { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
@@ -229,8 +234,7 @@
   .today-count { font-size: var(--fs-label); font-weight: 700; color: var(--text-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .today-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; align-items: center; }
   .today-link { font-size: var(--fs-small); font-weight: 700; color: var(--pastel-sky-dark); text-decoration: underline; text-underline-offset: 3px; padding: 8px 4px; }
-  .today-side { display: grid; gap: 12px; padding-left: 22px; border-left: 1.5px dashed var(--border-strong); }
-  @media (max-width: 760px) { .today-side { padding-left: 0; border-left: 0; padding-top: 16px; border-top: 1.5px dashed var(--border-strong); } }
+  .today-side { display: grid; gap: 12px; align-content: start; }
   .today-timer-row { display: flex; align-items: center; gap: 8px; }
   .today-timer-row .timer-num { margin: 0; flex: 1; }
   .today-side .course-toggle { display: flex; width: 100%; }
@@ -362,7 +366,7 @@
   }
 
   .rail-label { font-size: var(--fs-label); font-weight: 700; color: var(--text-muted); }
-  .timer-num { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.2; margin: 8px 0 10px; }
+  .timer-num { font-size: var(--fs-glyph); font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.2; margin: 8px 0 10px; }
   .timer-mode-pill { display: inline-flex; background: var(--surface-2); padding: 2px; border-radius: 8px; gap: 2px; }
   .timer-mode-btn { padding: 4px 8px; border-radius: 6px; font-size: var(--fs-micro); font-weight: 700; color: var(--text-muted); white-space: nowrap; }
   .timer-mode-btn.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(45, 52, 54, 0.08); }
@@ -386,7 +390,7 @@
   .kana-cell:hover { border-color: var(--pastel-sky); background: var(--pastel-sky-soft); transform: translateY(-1px); }
   .kana-cell.selected { border-color: var(--pastel-sage); background: var(--pastel-sage-soft); }
   .kana-cell.empty { visibility: hidden; pointer-events: none; }
-  .kana-char { font-size: 25px; font-weight: 800; line-height: 1.2; }
+  .kana-char { font-size: var(--fs-glyph); font-weight: 800; line-height: 1.2; }
   .kana-ko { font-size: var(--fs-small); font-weight: 700; color: var(--pastel-sky-dark); margin-top: 2px; }
   .kana-ro { font-size: var(--fs-micro); color: var(--text-muted); font-weight: 400; }
 
@@ -472,7 +476,6 @@
     border: 1.5px solid var(--border); border-radius: 22px; padding: 26px 24px; box-shadow: 0 20px 50px rgba(45, 52, 54, 0.18);
   }
   .showcard-box { text-align: center; }
-  .showcard-jp { font-size: clamp(28px, 5.5vw, 44px); font-weight: 800; line-height: 1.3; margin: 16px 0 8px; }
   .help-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-top: 10px; }
   .help-card h4 { margin: 0 0 4px; font-size: var(--fs-small); font-weight: 800; }
   .help-card p { margin: 0; font-size: var(--fs-small); color: var(--text-muted); line-height: 1.55; }
@@ -582,7 +585,7 @@
   .sc-stage { padding: 22px 4px 18px; }
   .showcard-jp {
     font-size: var(--sc-size, 44px); font-weight: 800; line-height: 1.22; letter-spacing: -0.01em; margin: 0;
-    word-break: normal; line-break: strict; text-wrap: balance;
+    word-break: keep-all; overflow-wrap: anywhere; line-break: strict; text-wrap: balance;
   }
   .sc-kana { font-size: var(--fs-strong); font-weight: 400; color: var(--text-muted); margin-top: 12px; word-break: normal; line-break: strict; text-wrap: balance; }
   .sc-mine { background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; text-align: left; }
@@ -761,6 +764,7 @@
             <div class="today-progress"><div class="bar-track" role="progressbar" aria-label="코스 진행" aria-valuemin="0" id="today-track"><div class="bar-fill" id="today-bar"></div></div><span class="today-count" id="today-count"></span></div>
             <div class="today-actions" id="today-actions"></div>
           </div>
+          <div class="today-divider" aria-hidden="true"></div>
           <div class="today-side">
             <div class="flex-between">
               <span class="rail-label">20분 루틴 타이머</span>
@@ -872,7 +876,7 @@
     </div>
     <div class="char-detail-bar" id="char-detail-bar">
       <div class="flex-center" style="gap:14px;flex:1;min-width:240px;">
-        <div id="cd-char" style="font-size:38px;font-weight:800;min-width:54px;text-align:center;">あ</div>
+        <div id="cd-char" style="font-size:var(--fs-glyph-lg);font-weight:800;min-width:54px;text-align:center;">あ</div>
         <div style="flex:1;">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <span id="cd-ko" style="font-size:var(--fs-strong);font-weight:800;color:var(--pastel-sky-dark);">아</span>
@@ -1525,7 +1529,7 @@ function renderCharContent() {
     const list = pack.katakana;
     wrap.innerHTML = `<div class="kanji-grid">${list.map(item => {
       const isSel = state.selectedChar && state.selectedChar.char === item.char;
-      return `<div class="kanji-card ${isSel ? 'selected' : ''}" role="button" tabindex="0" aria-pressed="${isSel}" data-focus-key="c-${item.char}" style="${isSel ? 'border-color:var(--pastel-sage);background:var(--pastel-sage-soft);' : ''}" onclick="handleKanaClick('${item.char}')"><div><div class="flex-between"><span class="badge badge-blue">#${item.id || ''}</span><span class="muted" style="font-size:var(--fs-label);font-weight:700;">듣기</span></div><div class="t-target" style="font-size:32px;font-weight:800;margin:10px 0 4px;">${item.char}</div><div style="font-size:var(--fs-body);font-weight:800;color:var(--pastel-sky-dark);">${item.ko} <span class="muted" style="font-weight: 400;font-size:var(--fs-label);">(${item.romaji})</span></div></div><div class="muted" style="font-size:var(--fs-label);margin-top:10px;background:var(--surface-2);padding:6px 9px;border-radius:9px;">${item.tip}</div></div>`;
+      return `<div class="kanji-card ${isSel ? 'selected' : ''}" role="button" tabindex="0" aria-pressed="${isSel}" data-focus-key="c-${item.char}" style="${isSel ? 'border-color:var(--pastel-sage);background:var(--pastel-sage-soft);' : ''}" onclick="handleKanaClick('${item.char}')"><div><div class="flex-between"><span class="badge badge-blue">#${item.id || ''}</span><span class="muted" style="font-size:var(--fs-label);font-weight:700;">듣기</span></div><div class="t-target" style="font-size:var(--fs-glyph-lg);font-weight:800;margin:10px 0 4px;">${item.char}</div><div style="font-size:var(--fs-body);font-weight:800;color:var(--pastel-sky-dark);">${item.ko} <span class="muted" style="font-weight: 400;font-size:var(--fs-label);">(${item.romaji})</span></div></div><div class="muted" style="font-size:var(--fs-label);margin-top:10px;background:var(--surface-2);padding:6px 9px;border-radius:9px;">${item.tip}</div></div>`;
     }).join('')}</div>`;
   } else if (state.charTab === 'hiragana' || state.charTab === 'katakana') {
     const list = pack[state.charTab], map = {};
@@ -1544,7 +1548,7 @@ function renderCharContent() {
     }
     wrap.innerHTML = html + `</div>`;
   } else {
-    wrap.innerHTML = `<div class="kanji-grid">${pack.kanji.map((k, i) => `<div class="kanji-card" role="button" tabindex="0" data-focus-key="k-${i}" onclick="handleKanjiClick(${i})"><div><div class="flex-between"><span class="badge badge-blue">${k.category}</span><span class="muted" style="font-size:var(--fs-label);font-weight:700;">듣기</span></div><div class="t-target" style="font-size:30px;font-weight:800;margin:10px 0 4px;">${k.char}</div><div style="font-size:var(--fs-body);font-weight:700;">${k.meaning}</div><div style="font-size:var(--fs-label);font-weight:700;color:var(--pastel-sky-dark);margin-top:2px;">${k.ko} <span class="muted" style="font-weight: 400;">(${k.reading})</span></div></div><div class="muted" style="font-size:var(--fs-label);margin-top:10px;background:var(--surface-2);padding:6px 9px;border-radius:9px;">${k.tip}</div></div>`).join('')}</div>`;
+    wrap.innerHTML = `<div class="kanji-grid">${pack.kanji.map((k, i) => `<div class="kanji-card" role="button" tabindex="0" data-focus-key="k-${i}" onclick="handleKanjiClick(${i})"><div><div class="flex-between"><span class="badge badge-blue">${k.category}</span><span class="muted" style="font-size:var(--fs-label);font-weight:700;">듣기</span></div><div class="t-target" style="font-size:var(--fs-glyph);font-weight:800;margin:10px 0 4px;">${k.char}</div><div style="font-size:var(--fs-body);font-weight:700;">${k.meaning}</div><div style="font-size:var(--fs-label);font-weight:700;color:var(--pastel-sky-dark);margin-top:2px;">${k.ko} <span class="muted" style="font-weight: 400;">(${k.reading})</span></div></div><div class="muted" style="font-size:var(--fs-label);margin-top:10px;background:var(--surface-2);padding:6px 9px;border-radius:9px;">${k.tip}</div></div>`).join('')}</div>`;
   }
 }
 function handleKanaClick(ch) { const item = LANGUAGE_PACKS[state.lang][state.charTab].find(x => x.char === ch); if (item) selectCharItem(item, true); }
@@ -1616,7 +1620,7 @@ function openShowCard(id) {
   const pack = LANGUAGE_PACKS[state.lang], p = pack.phrases.find(x => x.id === id);
   if (!p) return; currentShowPhrase = p;
   document.getElementById('sc-cat').textContent = `${pack.categories[p.cat].name} · #${p.id}`;
-  document.getElementById('sc-jp').textContent = p.jp; const scKana = document.getElementById('sc-kana'); scKana.textContent = readingOf(p); scKana.hidden = !scKana.textContent;
+  document.getElementById('sc-jp').innerHTML = segmentedHTML(p.jp, state.lang); const scKana = document.getElementById('sc-kana'); scKana.textContent = readingOf(p); scKana.hidden = !scKana.textContent;
   document.getElementById('sc-ko').textContent = p.ko; document.getElementById('sc-mean').textContent = p.mean;
   document.getElementById('sc-tip').textContent = p.tip;
   const jpEl = document.getElementById('sc-jp');
@@ -1629,6 +1633,15 @@ function openShowCard(id) {
   requestScreenAwake();
 }
 // Size the target sentence so it fills the screen in at most a few balanced lines.
+// 단어(어절) 사이에서만 줄이 바뀌도록 <wbr>를 넣는다. Intl.Segmenter가 없으면 원문 그대로.
+function segmentedHTML(text, lang) {
+  const t = String(text || '');
+  try {
+    if (typeof Intl === 'undefined' || !Intl.Segmenter) return escHtml(t);
+    const seg = new Intl.Segmenter(lang, { granularity: 'word' });
+    return [...seg.segment(t)].map(x => escHtml(x.segment)).join('<wbr>');
+  } catch (e) { return escHtml(t); }
+}
 function fitShowText(el, text) {
   const n = Math.max(1, [...text].length);
   const lines = n <= 6 ? 1 : n <= 16 ? 2 : n <= 30 ? 3 : 4;
@@ -1775,7 +1788,7 @@ function renderQuizScreen() {
     const p = quiz.previewPhrases[quiz.previewIdx], total = quiz.previewPhrases.length;
     document.getElementById('quiz-progress').style.width = `${((quiz.previewIdx + 1) / total) * 30}%`;
     document.getElementById('quiz-counter').textContent = `카드 ${quiz.previewIdx + 1}/${total}`;
-    body.innerHTML = `<div style="text-align:center;margin-bottom:14px;"><span class="badge badge-blue">1단계 · 표현 미리보기</span><h2 style="margin:6px 0 0;font-size:var(--fs-strong);">${quiz.title}</h2></div><div class="flashcard"><div class="muted" style="font-size:var(--fs-label);font-weight:700;">#${p.id}</div><div class="t-target" style="font-size:clamp(28px, 1.2vw + 24px, 38px);font-weight:800;line-height:1.3;margin:10px 0 6px;word-break:normal;line-break:strict;text-wrap:balance;">${p.jp}</div><div class="muted t-target" style="font-size:var(--fs-small);font-weight: 400;">${p.kana}</div><div style="font-size:var(--fs-body);font-weight:700;color:var(--pron-ink);margin-top:6px;">${p.ko}</div><div style="font-size:var(--fs-strong);font-weight:700;margin-top:14px;padding-top:14px;border-top:1.5px dashed var(--border);">${p.mean}</div><div class="muted" style="margin-top:10px;font-size:var(--fs-small);background:var(--surface-2);padding:8px 12px;border-radius:10px;display:inline-block;">${p.tip}</div><div class="flex-center" style="justify-content:center;margin-top:18px;"><button class="btn btn-blue btn-sm" onclick="speakPhraseById(${p.id}, 1.0)">듣기</button><button class="btn btn-outline btn-sm" onclick="speakPhraseById(${p.id}, 0.65)">천천히</button></div></div>`;
+    body.innerHTML = `<div style="text-align:center;margin-bottom:14px;"><span class="badge badge-blue">1단계 · 표현 미리보기</span><h2 style="margin:6px 0 0;font-size:var(--fs-strong);">${quiz.title}</h2></div><div class="flashcard"><div class="muted" style="font-size:var(--fs-label);font-weight:700;">#${p.id}</div><div class="t-target" style="font-size:clamp(var(--fs-glyph), 1.2vw + 24px, var(--fs-glyph-lg));font-weight:800;line-height:1.3;margin:10px 0 6px;word-break:keep-all;overflow-wrap:anywhere;line-break:strict;text-wrap:balance;">${segmentedHTML(p.jp, state.lang)}</div><div class="muted t-target" style="font-size:var(--fs-small);font-weight: 400;">${p.kana}</div><div style="font-size:var(--fs-body);font-weight:700;color:var(--pron-ink);margin-top:6px;">${p.ko}</div><div style="font-size:var(--fs-strong);font-weight:700;margin-top:14px;padding-top:14px;border-top:1.5px dashed var(--border);">${p.mean}</div><div class="muted" style="margin-top:10px;font-size:var(--fs-small);background:var(--surface-2);padding:8px 12px;border-radius:10px;display:inline-block;">${p.tip}</div><div class="flex-center" style="justify-content:center;margin-top:18px;"><button class="btn btn-blue btn-sm" onclick="speakPhraseById(${p.id}, 1.0)">듣기</button><button class="btn btn-outline btn-sm" onclick="speakPhraseById(${p.id}, 0.65)">천천히</button></div></div>`;
     footerInner.innerHTML = `<div class="flex-center"><button class="btn btn-outline btn-sm" ${quiz.previewIdx === 0 ? 'disabled' : ''} onclick="stepPreview(-1)">이전</button><button class="btn btn-outline btn-sm" onclick="skipToQuiz()">퀴즈로 이동</button></div><button class="btn btn-primary" onclick="stepPreview(1)">${quiz.previewIdx === total - 1 ? '반복 퀴즈 시작 →' : '다음 카드 →'}</button>`;
     speakText(p.jp, 1.0); return;
   }
@@ -1814,7 +1827,7 @@ function skipToQuiz() { quiz.stage = 'quiz'; renderQuizScreen(); }
 function prepareCharQuestion(q) { if (!quiz.currentOptions.length) { const pool = LANGUAGE_PACKS[state.lang][q.charTab]; quiz.currentOptions = shuffle([q.item, ...shuffle(pool.filter(x => x.char !== q.item.char)).slice(0, 3)]); } }
 function renderCharQuestion(q) {
   const isKanji = q.charTab === 'kanji';
-  document.getElementById('quiz-body').innerHTML = `<div><div class="flex-center" style="margin-bottom:8px;"><span class="badge ${q.isRetry || quiz.mode === 'review' ? 'badge-rose' : 'badge-purple'}">${q.isRetry || quiz.mode === 'review' ? '오답 복습' : '문자 퀴즈'}</span></div><h2 style="margin:0;font-size:var(--fs-title);">${isKanji ? '이 여행 한자의 뜻과 발음은?' : '이 문자의 발음을 고르세요'}</h2><div class="card mt-16" style="text-align:center;padding:24px;"><div style="font-size:56px;font-weight:800;">${q.item.char}</div><div class="mt-12"><button class="btn btn-blue btn-sm" onclick="speakCurrentCharQuiz(0.9)">발음 힌트 듣기</button></div></div><div class="option-grid">${quiz.currentOptions.map((opt, idx) => {
+  document.getElementById('quiz-body').innerHTML = `<div><div class="flex-center" style="margin-bottom:8px;"><span class="badge ${q.isRetry || quiz.mode === 'review' ? 'badge-rose' : 'badge-purple'}">${q.isRetry || quiz.mode === 'review' ? '오답 복습' : '문자 퀴즈'}</span></div><h2 style="margin:0;font-size:var(--fs-title);">${isKanji ? '이 여행 한자의 뜻과 발음은?' : '이 문자의 발음을 고르세요'}</h2><div class="card mt-16" style="text-align:center;padding:24px;"><div style="font-size:var(--fs-glyph-xl);font-weight:800;">${q.item.char}</div><div class="mt-12"><button class="btn btn-blue btn-sm" onclick="speakCurrentCharQuiz(0.9)">발음 힌트 듣기</button></div></div><div class="option-grid">${quiz.currentOptions.map((opt, idx) => {
     let cls = '', mark = '';
     if (quiz.answered) { if (opt.char === q.item.char) { cls = 'correct'; mark = '<span class="option-mark ok">정답</span>'; } else if (opt.char === quiz.selectedVal) { cls = 'wrong'; mark = '<span class="option-mark no">선택함</span>'; } }
     else if (opt.char === quiz.selectedVal) cls = 'selected';
@@ -1996,7 +2009,7 @@ function renderWrongNotebook() {
       const cat = pack.categories[item.cat] || { name: '회화' };
       return `<div class="phrase-item"><div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap;"><span class="badge badge-rose">오답 ${item.wrongTimes}회</span><span class="badge badge-gray">#${item.id}</span><span class="badge badge-blue">${cat.name}</span><span class="muted" style="font-size:var(--fs-micro);">${item.lastWrongAt || ''}</span></div><div class="phrase-jp">${item.jp}</div>${readingOf(item) ? `<div class="phrase-kana">${readingOf(item)}</div>` : ''}${state.showKoPron ? `<div class="phrase-ko">${item.ko}</div>` : ''}<div class="phrase-mean">${item.mean}</div><div class="phrase-tip">${item.tip}</div></div><div class="phrase-actions"><button class="btn btn-outline btn-sm" onclick="speakPhraseById(${item.id}, 1.0)">듣기</button><button class="btn btn-outline btn-sm" onclick="openShowCard(${item.id})">크게 보기</button><button class="btn btn-outline btn-sm" onclick="removeWrongItem('phrase', ${item.id})">삭제</button></div></div>`;
     } else {
-      return `<div class="phrase-item"><div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap;"><span class="badge badge-rose">오답 ${item.wrongTimes}회</span><span class="badge badge-purple">문자·한자</span><span class="muted" style="font-size:var(--fs-micro);">${item.lastWrongAt || ''}</span></div><div class="phrase-jp" style="font-size:24px;">${item.char}</div><div class="phrase-ko">${item.title} · <span class="muted" style="font-weight: 400;">${item.sub}</span></div><div class="phrase-tip">${item.tip}</div></div><div class="phrase-actions"><button class="btn btn-outline btn-sm" onclick="speakText('${(item.char || '').split('/')[0].trim()}', 0.9)">듣기</button><button class="btn btn-outline btn-sm" onclick="removeWrongItem('char', '${item.key.replace(/'/g, "\'")}')">삭제</button></div></div>`;
+      return `<div class="phrase-item"><div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap;"><span class="badge badge-rose">오답 ${item.wrongTimes}회</span><span class="badge badge-purple">문자·한자</span><span class="muted" style="font-size:var(--fs-micro);">${item.lastWrongAt || ''}</span></div><div class="phrase-jp" style="font-size:var(--fs-glyph);">${item.char}</div><div class="phrase-ko">${item.title} · <span class="muted" style="font-weight: 400;">${item.sub}</span></div><div class="phrase-tip">${item.tip}</div></div><div class="phrase-actions"><button class="btn btn-outline btn-sm" onclick="speakText('${(item.char || '').split('/')[0].trim()}', 0.9)">듣기</button><button class="btn btn-outline btn-sm" onclick="removeWrongItem('char', '${item.key.replace(/'/g, "\'")}')">삭제</button></div></div>`;
     }
   }).join('');
 }

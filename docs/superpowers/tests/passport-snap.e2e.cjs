@@ -255,6 +255,39 @@ test('chip-counts', async () => {
   eq(nums.slice(2).reduce((a, b) => a + b, 0), listed, 'categories sum to results');
 });
 
+// ---------- Task 5: 크게 보기 줄바꿈과 글자 토큰 ----------
+const charTops = (page, sel) => page.$eval(sel, el => {
+  const out = []; const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) for (let i = 0; i < n.length; i++) {
+    const r = document.createRange(); r.setStart(n, i); r.setEnd(n, i + 1);
+    const rect = r.getClientRects()[0]; if (rect) out.push([n.data[i], Math.round(rect.top)]);
+  }
+  return out;
+});
+test('wrap-dokoka', async () => {
+  for (const [w, h] of [[1280, 900], [1024, 768], [390, 844]]) {
+    const page = await open({ width: w, height: h });
+    await page.evaluate(() => openShowCard(LANGUAGE_PACKS.ja.phrases.find(p => p.jp.startsWith('トイレはどこ')).id));
+    await page.waitForTimeout(150);
+    const cs = await charTops(page, '#sc-jp');
+    const i = cs.findIndex((c, k) => c[0] === 'ど' && cs[k + 1] && cs[k + 1][0] === 'こ');
+    assert(i >= 0, 'found どこ');
+    eq(cs[i][1], cs[i + 1][1], `ど and こ on the same line at ${w}px`);
+  }
+});
+test('wrap-zh', async () => {
+  const page = await open({ width: 1280, height: 900, storage: { version: 1, lang: 'zh', courseMode: 7, showKoPron: true, phraseDensity: null, langs: {} } });
+  await page.evaluate(() => openShowCard(LANGUAGE_PACKS.zh.phrases.find(p => p.jp.length > 5).id));
+  assert((await page.$eval('#sc-jp', el => el.innerHTML)).includes('<wbr>'), 'zh segmented');
+});
+test('detect-clean', async () => {
+  const { spawnSync } = require('child_process');
+  const r = spawnSync('/Users/turo/.claude/skills/impeccable/scripts/impeccable', ['detect', '--json', 'index.html'], { cwd: require('path').join(__dirname, '../../../apps/passport-snap'), encoding: 'utf8' });
+  const found = JSON.parse(r.stdout || '[]');
+  const bad = found.filter(f => ['design-system-font-size', 'design-system-color'].includes(f.antipattern || f.rule || f.id));
+  eq(bad.length, 0, `font-size/color advisories: ${bad.map(b => (b.antipattern || b.rule) + '@' + b.line).join(', ')}`);
+});
+
 (async () => {
   browser = await chromium.launch({ channel: 'chrome' });
   let pass = 0, fail = 0;

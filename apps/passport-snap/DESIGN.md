@@ -17,6 +17,7 @@ colors:
   sky-dark: "#36698a"
   sky-soft: "#ebf5fb"
   sky-border: "#c5e2f3"
+  sky-hover: "#dceefa"
   apricot: "#e8a86b"
   apricot-dark: "#8a5a2b"
   apricot-soft: "#fdf3e7"
@@ -57,6 +58,18 @@ typography:
     fontSize: "21px"
     fontWeight: 800
     lineHeight: 1.35
+  glyph-xl:
+    fontSize: "56px"
+    fontWeight: 800
+    lineHeight: 1.2
+  glyph-lg:
+    fontSize: "38px"
+    fontWeight: 800
+    lineHeight: 1.25
+  glyph:
+    fontSize: "28px"
+    fontWeight: 800
+    lineHeight: 1.2
   title:
     fontSize: "17.5px"
     fontWeight: 800
@@ -77,9 +90,15 @@ typography:
     fontSize: "11.5px"
     fontWeight: 700
 rounded:
+  micro: "6px"
   tag: "7px"
+  thumb: "8px"
+  mark: "9px"
   control-sm: "10px"
+  tab: "11px"
   control: "12px"
+  field: "13px"
+  panel: "14px"
   item: "15px"
   card-sm: "16px"
   card: "18px"
@@ -216,13 +235,14 @@ components:
 - **Title** (800, 17.5px): 카드와 항목 제목, 브랜드 이름.
 - **Body** (400~700, 16px, 1.65): 뜻·본문. 뜻은 700으로 강조한다.
 - **Small** (400~700, 14px, 1.6): 보조 설명, 버튼, 한글 발음(700, sky-dark).
+- **Glyph** (800, 28px / 38px / 56px — `--fs-glyph`, `--fs-glyph-lg`, `--fs-glyph-xl`): 타이머 숫자·가나 칸·한자 카드(28), 문자 상세·학습 카드 원문 상한(38), 문자 퀴즈 문제(56). 이 세 단계 밖의 큰 글자를 새로 만들지 않는다.
 - **Label** (700, 12.5px): 칩·작은 버튼·필드 라벨.
 - **Micro** (700~800, 11.5px): 배지, 개수, 로마자.
 
 ### Named Rules
 **The Source-First Rule.** 원문이 위, 그 아래 가나/병음(muted), 한글 발음(sky-dark 700), 뜻(700) 순서로 쌓는다. 이 순서와 크기 차이를 바꾸지 않는다.
 
-**The Keep-All Rule.** 한국어는 `word-break: keep-all`로 어절 단위로 줄을 바꾸고, 일본어·중국어 원문은 `word-break: normal; line-break: strict`로 바꾼다. 제목은 `text-wrap: balance`, 문단은 `pretty`.
+**The Keep-All Rule.** 한국어는 `word-break: keep-all`로 어절 단위로 줄을 바꾼다. 크게 보기와 학습 카드의 일본어·중국어 원문은 `segmentedHTML()`(Intl.Segmenter)로 단어 사이에 `<wbr>`를 넣고 `word-break: keep-all; line-break: strict`로 둬서 단어 중간에서 끊기지 않게 한다. 목록 원문은 `word-break: normal; line-break: strict`. 제목은 `text-wrap: balance`, 문단은 `pretty`.
 
 ## Layout
 

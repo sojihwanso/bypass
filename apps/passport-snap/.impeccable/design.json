@@ -354,6 +354,17 @@
           "#f8f7f4",
           "#ffffff"
         ]
+      },
+      "sky-hover": {
+        "role": "secondary",
+        "displayName": "Sky Hover",
+        "tonalRamp": [
+          "#36698a",
+          "#74b3d8",
+          "#c5e2f3",
+          "#dceefa",
+          "#ebf5fb"
+        ]
       }
     },
     "typographyMeta": {
@@ -392,6 +403,18 @@
       "micro": {
         "displayName": "Micro",
         "purpose": "배지·개수·로마자"
+      },
+      "glyph-xl": {
+        "displayName": "Glyph Xl",
+        "purpose": "문자 퀴즈 문제"
+      },
+      "glyph-lg": {
+        "displayName": "Glyph Lg",
+        "purpose": "문자 상세·학습 카드 원문 상한"
+      },
+      "glyph": {
+        "displayName": "Glyph",
+        "purpose": "타이머·가나 칸·한자 카드"
       }
     },
     "shadows": [
