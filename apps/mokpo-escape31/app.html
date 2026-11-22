@@ -1,0 +1,2221 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="bypass-owner" content="8b67395b-2e25-4866-ae97-88566d20c691">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<script>/* 휴대폰(짧은 변 768px 미만)은 기본 80% 축소 화면으로 시작 — 브라우저에서 80%로 줄인 것과 같은 효과 */
+(function(){try{if(Math.min(screen.width,screen.height)<768){document.querySelector('meta[name=viewport]').setAttribute('content','width=device-width,initial-scale=0.8,minimum-scale=0.8,maximum-scale=0.8,user-scalable=no');}}catch(e){}})();</script>
+<title>목포항 해상교통 시뮬레이터 — 3단계</title>
+<style>
+  :root{--bg:rgba(8,18,30,.78);--line:rgba(140,190,230,.28);--txt:#e6f1fa;--dim:#8fb0c8;--acc:#4fd1ff;--warn:#ffb347;--bad:#ff5a5a;--ok:#5be38c}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#000;color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+    -webkit-user-select:none;user-select:none;touch-action:none}
+  #view,#fallback{position:fixed;inset:0;width:100%;height:100%;display:block}
+  #fallback{display:none;background:#0b2233}
+  .panel{position:fixed;background:var(--bg);border:1px solid var(--line);border-radius:10px;backdrop-filter:blur(4px)}
+  #hud{top:10px;left:10px;padding:8px 10px;font-size:12px;line-height:1.5;min-width:210px}
+  #hud .big{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.5px}
+  #hud .row{display:flex;justify-content:space-between;gap:10px;font-variant-numeric:tabular-nums}
+  #hud .k{color:var(--dim)}
+  #hud .grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;margin:4px 0}
+  .gauge{position:relative;height:10px;background:rgba(255,255,255,.08);border-radius:5px;margin:3px 0 6px}
+  .gauge .mid{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:#fff6}
+  .gauge .cmd{position:absolute;top:0;bottom:0;width:3px;background:var(--warn);transform:translateX(-50%)}
+  .gauge .act{position:absolute;top:2px;bottom:2px;width:9px;border-radius:4px;background:var(--acc);transform:translateX(-50%)}
+  #telegraph{display:flex;gap:2px;flex-wrap:wrap;margin-top:2px}
+  #telegraph span{font-size:10px;padding:1px 4px;border-radius:4px;background:rgba(255,255,255,.06);color:var(--dim)}
+  #telegraph span.on{background:var(--acc);color:#002;font-weight:700}
+  #zoneTag{display:inline-block;padding:1px 6px;border-radius:4px;background:rgba(79,209,255,.15);color:var(--acc)}
+  #zoneTag.out{background:rgba(255,179,71,.18);color:var(--warn)}
+  #hud{min-width:250px;max-height:calc(100vh - 215px);overflow-y:auto}
+  #scen{display:grid;gap:4px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  #scen label{display:flex;flex-direction:column;gap:1px;font-size:10px;color:var(--dim)}
+  #scen select{width:100%;background:#0d2234;color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:4px 5px;font-size:12px}
+  #scen .btn{height:30px;font-size:12px;margin-top:2px}
+  #risk{display:none;margin:6px 0 2px;padding:6px 8px;border-radius:8px;border:1px solid var(--bad);background:rgba(255,60,60,.25);animation:rk 1s infinite;font-size:12px}
+  @keyframes rk{50%{background:rgba(255,60,60,.55)}}
+  #cmpBar{display:block;width:100%;height:30px;margin:3px 0 2px;border-radius:6px;background:rgba(0,0,0,.35)}
+  #tgtList{margin-top:6px;font-size:10px;font-variant-numeric:tabular-nums}
+  #tgtList table{width:100%;border-collapse:collapse}
+  #tgtList th{color:var(--dim);font-weight:400;text-align:right;padding:1px 2px}
+  #tgtList td{text-align:right;padding:1px 2px;white-space:nowrap}
+  #tgtList th:first-child,#tgtList td:first-child{text-align:left;max-width:78px;overflow:hidden;text-overflow:ellipsis}
+  #tgtList tr.warn td{color:var(--warn)} #tgtList tr.danger td{color:var(--bad);font-weight:700}
+  #cnt{font-size:10px;font-weight:400;color:var(--dim);white-space:nowrap}
+  #cnt b{font-variant-numeric:tabular-nums;margin:0 2px 0 1px}
+  #cnt .co{color:var(--ok)} #cnt .cw{color:var(--warn)} #cnt .cb{color:var(--bad)}
+  #scenBar{display:flex;gap:4px}
+  #scenBar #btnRestart{flex:1}
+  #btnScen{min-width:34px;padding:0;font-size:14px}
+  #scen.collapsed label{display:none}
+  #scen.collapsed #btnRestart{height:38px;font-size:14px;border-color:var(--acc);color:var(--acc)}
+  #scen.collapsed #btnScen{height:38px}
+  #logWrap{top:10px;right:10px;width:330px;max-height:46vh;display:flex;flex-direction:column}
+  #logHead{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-bottom:1px solid var(--line);font-size:12px;font-weight:700}
+  #logHead{flex-wrap:wrap;gap:4px 6px}
+  #bgmBtn{white-space:nowrap;padding:2px 7px}
+  #logHead button{background:none;border:1px solid var(--line);color:var(--txt);border-radius:6px;font-size:11px;padding:2px 8px}
+  #rulesNow{padding:6px 10px;font-size:11px;color:var(--dim);border-bottom:1px solid var(--line)}
+  #rulesNow b{color:var(--txt)}
+  #log{overflow:auto;padding:6px 10px;font-size:11px;line-height:1.45}
+  #log .e{margin-bottom:6px;padding-left:7px;border-left:3px solid var(--line)}
+  #log .e.info{border-color:var(--acc)} #log .e.warn{border-color:var(--warn)} #log .e.bad{border-color:var(--bad)} #log .e.ok{border-color:var(--ok)}
+  #log .t{color:var(--dim);font-size:10px} #log .ti{font-weight:700} #log .d{color:#c3d6e4}
+  #logWrap.collapsed #rulesNow,#logWrap.collapsed #log{display:none}
+  #mini{right:10px;bottom:10px;width:180px;height:180px;padding:0;overflow:hidden}
+  #mini canvas{width:100%;height:100%;display:block}
+  #mini .lbl{position:absolute;left:6px;top:4px;font-size:10px;color:var(--dim);pointer-events:none}
+  #controls{left:50%;bottom:10px;transform:translateX(-50%);display:flex;gap:10px;padding:8px;align-items:flex-end}
+  .cg{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .cg .cap{font-size:10px;color:var(--dim)}
+  .cg .btns{display:flex;gap:4px}
+  .btn{min-width:46px;height:42px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.07);color:var(--txt);
+    font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 8px;cursor:pointer}
+  .btn:active,.btn.press{background:var(--acc);color:#002}
+  .btn.small{font-size:12px;min-width:40px}
+  .btn.red{border-color:#ff5a5a88}
+  #banner{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);padding:14px 22px;border-radius:12px;font-size:20px;font-weight:800;
+    background:rgba(120,0,0,.82);border:1px solid #ff8a8a;display:none;text-align:center}
+  #banner small{display:block;font-size:12px;font-weight:400;margin-top:6px}
+  #help{position:fixed;left:10px;bottom:10px;font-size:10px;color:var(--dim);max-width:260px;line-height:1.45;padding:6px 8px}
+  #notice{position:fixed;left:50%;top:10px;transform:translateX(-50%);padding:8px 14px;font-size:12px;background:rgba(120,70,0,.9);border-radius:8px;display:none;max-width:90vw;text-align:center}
+  #hudToggle{display:none}
+  #modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,10,20,.6);z-index:50;padding:12px}
+  #modal .card{width:min(380px,100%);background:rgba(8,18,30,.96);border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;text-align:center}
+  #mTitle{font-size:20px;font-weight:800;margin-bottom:12px;line-height:1.3}
+  #modal .mrow{display:flex;justify-content:space-between;gap:10px;padding:7px 2px;border-bottom:1px solid var(--line);font-size:14px}
+  #modal .mrow .k2{color:var(--dim)}
+  #modal .mgrade{margin:14px 0 4px;font-size:14px;color:var(--dim)}
+  #mGrade{display:block;font-size:56px;line-height:1.1;font-weight:900}
+  #mNote{font-size:11px;color:var(--dim);margin:6px 0 12px;line-height:1.5}
+  #btnRetry{height:46px;font-size:16px;border-color:var(--acc);color:var(--acc);margin-top:4px}
+  .g-S{color:#ffd34f}.g-A{color:var(--ok)}.g-B{color:var(--acc)}.g-C{color:var(--warn)}.g-F{color:var(--bad)}
+  .co{color:var(--ok)} .cw{color:var(--warn)} .cb{color:var(--bad)}
+  #controls .btn{-webkit-touch-callout:none}
+  #recBar{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:6px}
+  #recBar .btn{height:36px;font-size:11px;min-width:0;padding:0 4px;text-align:center}
+  #btnDaily{grid-column:1/3} #btnDaily.cleared{border-color:var(--ok);color:var(--ok)}
+  #modeTag{grid-column:1/3;font-size:10px;color:var(--dim);text-align:center}
+  #modal .card{max-height:92vh;overflow-y:auto}
+  #mReviewHead{margin-top:10px;font-size:13px;font-weight:800;text-align:left}
+  #mReview{max-height:34vh;overflow:auto;margin:6px 0 8px;text-align:left}
+  .rv{padding:6px 8px;margin:4px 0;border-left:3px solid var(--line);font-size:11.5px;line-height:1.45;background:rgba(255,255,255,.04);border-radius:0 6px 6px 0}
+  .rv.ok{border-color:var(--ok)} .rv.warn{border-color:var(--warn)} .rv.bad{border-color:var(--bad)}
+  .rv .rh{font-weight:700} .rv .rd{color:#c3d6e4}
+  .mbtns{display:flex;gap:6px;margin-top:6px} .mbtns .btn{flex:1;height:44px;font-size:14px}
+  #modal #btnRetry{margin-top:0}
+  #recModal,#dlg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,10,20,.6);padding:12px}
+  #recModal{z-index:60} #dlg{z-index:90}
+  #recModal .card,#dlg .card{width:min(430px,100%);max-height:92vh;overflow:auto;background:rgba(8,18,30,.97);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:left;font-size:13px;line-height:1.5}
+  #recModal h3{margin:0 0 8px;font-size:17px} #recModal .sec{margin:10px 0;padding-top:8px;border-top:1px solid var(--line)}
+  #recModal .sec>b{display:block;margin-bottom:4px;color:var(--acc)} #recModal .kv{display:flex;justify-content:space-between;gap:8px}
+  .bar{height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;margin:2px 0 6px} .bar i{display:block;height:100%;background:var(--ok)}
+  #dlg textarea{width:100%;height:120px;background:#06121c;color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12px;margin:8px 0}
+  #dlgBtns{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+  .tg{display:inline-flex;margin:2px 4px 2px 0;height:34px;font-size:12px}
+  #startScr{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,10,20,.72);z-index:85;padding:12px}
+  #startScr .card{width:min(460px,100%);max-height:94vh;overflow:auto;background:rgba(8,18,30,.97);border:1px solid var(--line);border-radius:16px;padding:18px}
+  #startScr .st-title{font-size:21px;font-weight:900;text-align:center} #startScr .st-sub{text-align:center;color:var(--dim);font-size:12px;margin:4px 0 12px}
+  #stList{display:flex;flex-direction:column;gap:8px}
+  #startScr .stItem{height:auto;min-height:56px;flex-direction:column;align-items:flex-start;padding:8px 12px;text-align:left;font-size:14px}
+  #startScr .stItem small{display:block;font-size:11px;font-weight:400;color:var(--dim);margin-top:3px}
+  #stDaily{height:46px;margin-top:10px;border-color:var(--acc);color:var(--acc);font-size:14px}
+  #startScr .st-foot{font-size:11px;color:var(--dim);text-align:center;margin-top:10px;line-height:1.5}
+  #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(10,30,45,.96);border:1px solid var(--acc);padding:8px 14px;border-radius:20px;font-size:12px;display:none;z-index:120;max-width:90vw;text-align:center}
+  @media (max-width:760px){
+    #hud{font-size:11px;min-width:170px;padding:6px 8px;max-height:calc(100vh - 240px)} #hud .big{font-size:16px}
+    #hudToggle{display:flex;width:100%;height:32px;font-size:11px;margin-bottom:6px}
+    #hud.compact .hx,#hud.compact #scen,#hud.compact #telegraph,#hud.compact #tgtList{display:none}
+    #logWrap{width:min(300px,56vw);max-height:40vh}
+    #mini{width:110px;height:110px;right:10px;bottom:calc(164px + env(safe-area-inset-bottom,0px))}
+    #help{display:none}
+    #controls{left:10px;right:10px;transform:none;width:auto;bottom:calc(8px + env(safe-area-inset-bottom,0px));gap:6px 10px;padding:6px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+    #controls .cg{flex:1 1 0;min-width:0}
+    #controls .cg.sig{flex:1 1 100%}
+    #controls .cg .btns{width:100%}
+    #controls .btn{flex:1 1 0;min-width:44px;height:48px;font-size:15px;padding:0 4px}
+    #controls .btn.small{font-size:12px}
+    #mGrade{font-size:48px}
+  }
+</style>
+<!-- Three.js (UMD) : jsDelivr → unpkg 순으로 시도, 둘 다 실패 시 2D Canvas 폴백 -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+<script>window.THREE||document.write('<script src="https://unpkg.com/three@0.149.0/build/three.min.js"><\/script>')</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<canvas id="fallback"></canvas>
+<div id="notice"></div>
+
+<div id="hud" class="panel">
+  <div class="btn" id="hudToggle">계기 접기/펼치기</div>
+  <div id="recBar"><div class="btn" id="btnDaily">📅 TODAY</div><div class="btn" id="btnRec">🏆 기록</div><div class="btn" id="btnEnd">■ 종료·결과</div><div id="modeTag">자유 플레이</div></div>
+  <div id="scen">
+    <label>수역/시나리오<select id="selZone"></select></label>
+    <label>기상<select id="selWx"></select></label>
+    <label>자선 선종<select id="selOwn"></select></label>
+    <div id="scenBar"><div class="btn" id="btnRestart">재시작 (R)</div><div class="btn" id="btnScen" title="시나리오 옵션 다시 열기">⚙</div></div>
+  </div>
+  <div class="row"><span class="k">HDG</span><span class="big" id="hHdg">090.0°</span><span class="k">STW</span><span class="big" id="hStw">0.0</span></div>
+  <canvas id="cmpBar" title="나침반: 가운데 노란 표시 = 선수 방위, 청록 ▼ = 목표 방향"></canvas>
+  <div class="grid">
+    <div class="row hx"><span class="k">COG</span><span id="hCog">-</span></div>
+    <div class="row"><span class="k">SOG</span><span id="hSog">-</span></div>
+    <div class="row hx"><span class="k">ROT</span><span id="hRot">-</span></div>
+    <div class="row hx"><span class="k">조류</span><span id="hTide">-</span></div>
+  </div>
+  <div class="row"><span class="k">타각</span><span id="hRud">-</span></div>
+  <div class="gauge" id="rudGauge"><div class="mid"></div><div class="cmd" id="gCmd"></div><div class="act" id="gAct"></div></div>
+  <div class="row"><span class="k">기관</span><span id="hEng">-</span></div>
+  <div id="telegraph"></div>
+  <div class="row" id="rowGoal" style="display:none;margin-top:4px"><span class="k" id="hGoalK">탈출 목표</span><b id="hGoal" style="color:#5ff7dc">-</b></div>
+  <div id="berthHint" style="display:none;font-size:11px;color:#7dffc8;margin-top:2px"></div>
+  <div class="row hx" style="margin-top:4px"><span class="k">시정</span><span id="hVis">-</span></div>
+  <div class="row hx"><span class="k">수역</span><span id="zoneTag">-</span></div>
+  <div class="row hx"><span class="k">항로 위치</span><span id="hXte">-</span></div>
+  <div class="row hx"><span class="k">시각</span><span id="hTime">-</span></div>
+  <div id="risk"></div>
+  <div id="tgtList"></div>
+</div>
+
+<div id="logWrap" class="panel">
+  <div id="logHead"><span>⚓ 항법·법규 로그</span><span id="cnt">준수<b class="co" id="cOk">0</b>주의<b class="cw" id="cWarn">0</b>위반<b class="cb" id="cBad">0</b></span><button id="bgmBtn" title="군가 음악 켜기/끄기">♪ ON</button><button id="logToggle">접기</button></div>
+  <div id="rulesNow">-</div>
+  <div id="log"></div>
+</div>
+
+<div id="mini" class="panel"><canvas id="miniCv"></canvas><div class="lbl" id="miniLbl">레이더 3km · N-up</div></div>
+
+<div id="controls" class="panel">
+  <div class="cg"><div class="cap">타 (A/D)</div><div class="btns">
+    <div class="btn" data-act="rudL">◀</div><div class="btn small" data-act="rudMid">중앙</div><div class="btn" data-act="rudR">▶</div></div></div>
+  <div class="cg"><div class="cap">기관 (W/S)</div><div class="btns">
+    <div class="btn" data-act="engDn">▼</div><div class="btn small red" data-act="stop">정지</div><div class="btn" data-act="engUp">▲</div></div></div>
+  <div class="cg sig"><div class="cap">신호·시점</div><div class="btns">
+    <div class="btn small" data-act="horn">기적</div><div class="btn small" data-act="warn5">경고</div><div class="btn small" data-act="fog">무중</div>
+    <div class="btn small" data-act="cam">백뷰</div><div class="btn small" data-act="hornMute">경적ON</div><div class="btn small" data-act="time">×2</div></div></div>
+</div>
+
+<div id="modal"><div class="card">
+  <div id="mTitle">-</div>
+  <div class="mrow"><span class="k2">총 소요 시간</span><b id="mTime">-</b></div>
+  <div class="mrow"><span class="k2">법규 준수 / 주의 / 위반</span><b><span class="co" id="mOk">0</span> / <span class="cw" id="mWarn">0</span> / <span class="cb" id="mBad">0</span></b></div>
+  <div class="mrow"><span class="k2">점수</span><b id="mScore">-</b></div>
+  <div class="mrow"><span class="k2">정답(준수) · 최고 콤보</span><b id="mHits">-</b></div>
+  <div class="mrow" id="mDailyRow" style="display:none"><span class="k2">📅 일일 챌린지</span><b id="mDaily">-</b></div>
+  <div class="mgrade">종합 등급<b id="mGrade">-</b></div>
+  <div id="mNote">등급 기준 — S: 위반 0·주의 0 / A: 위반 0·주의 3 이하 / B: 위반 2 이하 / C: 그 외 (좌초·충돌은 실패)<br>점수 = 진행도×500 + 클리어 500 + 등급 보너스(S300·A200·B100) + 준수×20 − 주의×30 − 위반×100</div>
+  <div id="mReviewHead">📝 전체 답안 복기</div><div id="mReview"></div>
+  <div class="mbtns"><div class="btn" id="btnShare">📋 크루 공유</div><div class="btn" id="btnRec2">🏆 기록</div></div>
+  <div class="mbtns"><div class="btn" id="btnClose">닫기</div><div class="btn" id="btnRetry">다시 도전</div></div>
+</div></div>
+<div id="recModal"><div class="card"><div id="recBody"></div><div class="btn" id="btnRecClose" style="margin-top:10px;height:44px;justify-content:center">닫기</div></div></div>
+<div id="dlg"><div class="card"><div id="dlgBody"></div><div id="dlgBtns"></div></div></div>
+<div id="toast"></div>
+<div id="startScr"><div class="card">
+  <div class="st-title">⚓ 목포 탈출 시뮬레이터</div>
+  <div class="st-sub">시나리오를 선택하세요</div>
+  <div id="stList"></div>
+  <div class="btn" id="stDaily">📅 오늘의 일일 챌린지</div>
+  <div class="st-foot">시작한 뒤에도 좌측 계기판의 ⚙ 메뉴에서 시나리오·기상·선종을 바꿀 수 있습니다.</div>
+</div></div>
+<div id="banner"></div>
+<div id="help" class="panel">
+  W/S·↑/↓ 기관 · A/D·←/→ 타 5° · Space 정지/타중앙 · H 기적(단음) · Shift+H 경고(5단음) · F 무중신호(장음)<br>
+  마우스 드래그 시점회전 · 휠 줌 · J/L·I/K 시점 · U/O 줌 · C 백뷰복귀 · T 배속 · G 항로선 · R 재시작
+</div>
+
+<script>
+"use strict";
+/* =====================================================================
+   목포항 해상교통 시뮬레이터 (mokpo-traffic-sim.html)
+   ※ 지형·항로는 교육용 개략도이며 실제 항해용 해도가 아닙니다.
+   좌표계: 월드 2D (x=동, y=북, 단위 m). Three.js 변환 = (x, 높이, -y)
+   방위: 0°=북, 시계방향(+)
+   ===================================================================== */
+
+// =====================================================================
+// --- 1. SCENARIOS & RULES ---
+// =====================================================================
+const KN = 0.514444;                       // 1 kn = m/s
+const NM = 1852;
+const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+
+const CONFIG = {
+  own: { name: 'MOKPO STAR', length: 110, beam: 18, draft: 6.5,
+         maxRudder: 35, rudderRate: 2.5,       // °/s (타기 회전속도)
+         turnRateAt35: 1.7, refSpeed: 6.2,     // 타각 35°, 12kn 기준 정상선회 각속도(°/s)
+         T: 12,                                // Nomoto 시정수(s)
+         accTau: 55, decTau: 95 },             // 가속/관성 감속 시정수(s)
+  tide: { setDeg: 75, kn: 0.6 },               // 조류 (유향·유속) — 2단계에서 시나리오별 변경
+  start: { x: -11500, y: -1300, hdg: 90, kn: 8, eng: 6 }
+};
+
+const ENGINE_ORDERS = [
+  { n: '전속후진', s: 'FA', kn: -6 }, { n: '반속후진', s: 'HA', kn: -4 }, { n: '미속후진', s: 'SA', kn: -2 },
+  { n: '정지', s: 'STOP', kn: 0 },
+  { n: '극미속전진', s: 'DSA', kn: 3 }, { n: '미속전진', s: 'SLA', kn: 5.5 }, { n: '반속전진', s: 'HA', kn: 8.5 },
+  { n: '전속전진', s: 'FA', kn: 12 }, { n: '항해전속', s: 'NFA', kn: 15 }
+];
+const ENG_STOP = 3;
+
+// ---------- 기하 유틸 ----------
+function ellipse(cx, cy, rx, ry, n = 40, rot = 0, wob = 0.06) {
+  const p = [];
+  for (let i = 0; i < n; i++) {
+    const a = i / n * Math.PI * 2;
+    const k = 1 + wob * Math.sin(a * 3 + cx) + wob * 0.6 * Math.cos(a * 5 + cy);   // 해안선 불규칙성
+    const ex = Math.cos(a) * rx * k, ey = Math.sin(a) * ry * k;
+    p.push([cx + ex * Math.cos(rot) - ey * Math.sin(rot), cy + ex * Math.sin(rot) + ey * Math.cos(rot)]);
+  }
+  return p;
+}
+function pointInPoly(x, y, poly) {
+  let ins = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i], [xj, yj] = poly[j];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) ins = !ins;
+  }
+  return ins;
+}
+function normDeg(a) { return ((a % 360) + 360) % 360; }
+function angDiff(a, b) { return ((a - b + 540) % 360) - 180; }   // a-b, -180..180
+
+// ---------- 목포항 개략 지도 데이터 ----------
+const MAP = {
+  land: [
+    { id: 'mainN', name: '목포 시내(본토)', h: 18, color: 0x6d8a5a, poly: [
+      [-5600, 1600], [-4600, 1150], [-3800, 820], [-3000, 600], [-2000, 610], [-1000, 640], [0, 660], [800, 730],
+      [1500, 900], [2600, 880], [3600, 1000], [6000, 1100], [6000, 8000], [-4000, 8000], [-4500, 3000]] },
+    { id: 'south', name: '영암·해남(남측 육지)', h: 20, color: 0x627f50, poly: [
+      [-16000, -2700], [-9000, -2400], [-6500, -2300], [-5200, -2100], [-4200, -1900], [-3000, -1550], [-1500, -1330],
+      [0, -1230], [1500, -950], [3000, -760], [6000, -650], [6000, -8000], [-16000, -8000]] },
+    { id: 'goha', name: '고하도', h: 14, color: 0x6f9158, poly: ellipse(-1300, -480, 1900, 380, 48, 0.02) },
+    { id: 'dali', name: '달리도', h: 12, color: 0x6f9158, poly: ellipse(-7600, 0, 1100, 700, 40, 0.15) },
+    { id: 'yul', name: '율도', h: 10, color: 0x6f9158, poly: ellipse(-6000, -480, 400, 290, 28, 0.3) },
+    { id: 'apae', name: '압해도', h: 14, color: 0x6f9158, poly: ellipse(-8000, 3500, 2600, 1600, 56, -0.1) },
+    { id: 'samhak', name: '삼학도', h: 8, color: 0x7a9a62, poly: ellipse(3200, 520, 280, 170, 24, 0.3) },
+    { id: 'oedal', name: '외달도', h: 10, color: 0x6f9158, poly: ellipse(-11200, 1500, 520, 380, 28, 0.5) }
+  ],
+  hills: [   // [x, y, 반경, 높이]
+    [-600, 1550, 700, 228], [-1500, -480, 330, 77], [-7600, 0, 600, 90], [-8000, 3500, 1300, 120],
+    [-6500, -3900, 1500, 250], [-1000, -2700, 1100, 180], [2500, 3200, 1600, 160], [-11200, 1500, 300, 50]
+  ],
+  // 지정항로 중심선 (서→동 = 입항 방향). 만곡부: -5600 ~ -3600 구간
+  channel: { halfW: 220, center: [
+    [-13500, -1300], [-8500, -1300], [-5600, -1300], [-4300, -700], [-3600, -150], [-2500, 240], [-500, 250], [1500, 300], [2400, 350]] },
+  bridge: { name: '목포대교', a: [-3300, -1720], b: [-3650, 950], deckH: 52, pylonH: 165 },
+  labels: [
+    ['목포 시내', 200, 2000], ['유달산', -600, 1550], ['고하도', -1300, -480], ['달리도', -7600, 0], ['율도', -6000, -480],
+    ['압해도', -8000, 3500], ['삼학도', 3200, 520], ['외달도', -11200, 1500], ['목포신항', -3600, -2000],
+    ['목포대교', -3600, 215], ['목포 내항', 900, 500], ['목포구(만곡부)', -4900, -1050], ['영암 삼호', -1000, -2700]
+  ],
+  quays: [ // [x1,y1,x2,y2] 부두 안벽
+    [-1500, 625, 700, 690], [-4300, -1830, -3000, -1500]
+  ],
+  cranes: [[-4050, -1820], [-3800, -1755], [-3550, -1690], [-3300, -1620]]
+};
+
+// 항로 보조 데이터 (누적거리, 좌우 경계선)
+(function prepChannel() {
+  const c = MAP.channel.center; const cum = [0];
+  for (let i = 1; i < c.length; i++) cum.push(cum[i - 1] + Math.hypot(c[i][0] - c[i - 1][0], c[i][1] - c[i - 1][1]));
+  MAP.channel.cum = cum; MAP.channel.length = cum[cum.length - 1];
+  const off = (sgn) => c.map((p, i) => {
+    const a = c[Math.max(0, i - 1)], b = c[Math.min(c.length - 1, i + 1)];
+    let dx = b[0] - a[0], dy = b[1] - a[1]; const L = Math.hypot(dx, dy); dx /= L; dy /= L;
+    // 우측 법선 (dy,-dx); 마이터 보정
+    let k = 1;
+    if (i > 0 && i < c.length - 1) {
+      const d1 = norm2(c[i][0] - c[i - 1][0], c[i][1] - c[i - 1][1]), d2 = norm2(c[i + 1][0] - c[i][0], c[i + 1][1] - c[i][1]);
+      const cosh = Math.max(0.5, (1 + d1[0] * d2[0] + d1[1] * d2[1]) / 2) ** 0.5; k = 1 / cosh;
+    }
+    return [p[0] + sgn * dy * MAP.channel.halfW * k, p[1] - sgn * dx * MAP.channel.halfW * k];
+  });
+  MAP.channel.right = off(1);   // 입항 시 우현측(남측) — IALA B: 홍색 표지
+  MAP.channel.left = off(-1);   // 입항 시 좌현측 — 녹색 표지
+})();
+function norm2(x, y) { const L = Math.hypot(x, y) || 1; return [x / L, y / L]; }
+
+function channelPointAt(s) {
+  const c = MAP.channel.center, cum = MAP.channel.cum;
+  for (let i = 1; i < c.length; i++) if (s <= cum[i] || i === c.length - 1) {
+    const t = (s - cum[i - 1]) / (cum[i] - cum[i - 1]);
+    const d = norm2(c[i][0] - c[i - 1][0], c[i][1] - c[i - 1][1]);
+    return { x: c[i - 1][0] + (c[i][0] - c[i - 1][0]) * t, y: c[i - 1][1] + (c[i][1] - c[i - 1][1]) * t, dx: d[0], dy: d[1] };
+  }
+}
+// 부표 배치 (IALA B: 입항 기준 우현=홍색, 좌현=녹색)
+MAP.buoys = (function () {
+  const out = []; let n = 1;
+  out.push({ x: MAP.channel.center[0][0] + 600, y: MAP.channel.center[0][1], type: 'safe', name: '안전수역표지' });
+  for (let s = 500; s < MAP.channel.length - 200; s += 750, n++) {
+    const p = channelPointAt(s), off = MAP.channel.halfW + 25;
+    out.push({ x: p.x + p.dy * off, y: p.y - p.dx * off, type: 'red', name: 'R' + n });
+    out.push({ x: p.x - p.dy * off, y: p.y + p.dx * off, type: 'green', name: 'G' + n });
+  }
+  return out;
+})();
+
+/** 회전 사각형 겹침 (분리축 판정). r = { x, y, hdg(선수 방위°), hl(반길이), hw(반폭) } */
+function obbOverlap(a, b) {
+  const ax = r => { const h = r.hdg * D2R, f = [Math.sin(h), Math.cos(h)]; return [f, [f[1], -f[0]]]; };
+  const A = ax(a), B = ax(b), d = [b.x - a.x, b.y - a.y], dot = (u, v) => u[0] * v[0] + u[1] * v[1];
+  for (const n of [...A, ...B]) {
+    const ra = a.hl * Math.abs(dot(A[0], n)) + a.hw * Math.abs(dot(A[1], n)), rb = b.hl * Math.abs(dot(B[0], n)) + b.hw * Math.abs(dot(B[1], n));
+    if (Math.abs(dot(d, n)) > ra + rb) return false;
+  }
+  return true;
+}
+/** 목포대교 교각·주탑 (MAP.bridge 양 끝 좌표는 그대로 두고, 주경간을 지정항로가 다리를 지나는 지점 중앙에 배치) — 3D 모델·충돌 판정 공용 */
+const BRIDGE_PIERS = (function () {
+  const B = MAP.bridge, dx = B.b[0] - B.a[0], dy = B.b[1] - B.a[1], c = MAP.channel.center;
+  let fc = 0.5;
+  for (let i = 1; i < c.length; i++) {
+    const ex = c[i][0] - c[i - 1][0], ey = c[i][1] - c[i - 1][1], den = dx * ey - dy * ex; if (Math.abs(den) < 1e-9) continue;
+    const t = ((c[i - 1][0] - B.a[0]) * ey - (c[i - 1][1] - B.a[1]) * ex) / den, u = ((c[i - 1][0] - B.a[0]) * dy - (c[i - 1][1] - B.a[1]) * dx) / den;
+    if (t >= 0 && t <= 1 && u >= 0 && u <= 1) { fc = t; break; }
+  }
+  const hdg = normDeg(Math.atan2(dx, dy) * R2D), out = [];
+  const at = (f, hl, hw, kind) => out.push({ f, x: B.a[0] + dx * f, y: B.a[1] + dy * f, hdg, hl, hw, kind });
+  at(fc - 0.14, 3.5, 16.5, 'pylon'); at(fc + 0.14, 3.5, 16.5, 'pylon');   // 주탑 2기: 항로 중심에서 약 380m씩 떨어짐
+  for (let f = 0.05; f < 1; f += 0.1) if (Math.abs(f - fc) > 0.2) at(f, 3, 5, 'pier');
+  out.fc = fc; return out;
+})();
+/** 해당 지점의 육지 판정 (좌초) */
+function landAt(x, y) {
+  for (const L of MAP.land) if (pointInPoly(x, y, L.poly)) return L;
+  return null;
+}
+/** 항로 정보: 중심선까지 거리, 진행방향, 우/좌측 편위 */
+function channelInfo(x, y) {
+  const c = MAP.channel.center; let best = { dist: 1e12 };
+  for (let i = 1; i < c.length; i++) {
+    const ax = c[i - 1][0], ay = c[i - 1][1], bx = c[i][0], by = c[i][1];
+    const vx = bx - ax, vy = by - ay, L2 = vx * vx + vy * vy;
+    let t = ((x - ax) * vx + (y - ay) * vy) / L2; t = Math.max(0, Math.min(1, t));
+    const px = ax + vx * t, py = ay + vy * t, d = Math.hypot(x - px, y - py);
+    if (d < best.dist) {
+      const L = Math.sqrt(L2);
+      const side = ((x - ax) * vy - (y - ay) * vx) / L;   // +: 입항방향 기준 우측
+      best = { dist: d, seg: i, dir: normDeg(Math.atan2(vx, vy) * R2D), side, s: MAP.channel.cum[i - 1] + t * L };
+    }
+  }
+  best.inside = best.dist <= MAP.channel.halfW;
+  best.bend = best.seg >= 3 && best.seg <= 4;   // 만곡부 구간
+  return best;
+}
+
+// ---------- 시나리오 (2단계에서 확장) ----------
+const SCENARIO = {
+  zone: 'escape',      // 'escape' 근해 탈출 미션 | 'port' 목포항 항로 | 'narrow' 협수로/만곡부 | 'fishing' 어선군 밀집
+  weather: 'clear',    // 'clear' | 'rain' | 'snow' | 'fog'
+  ownType: 'power',    // 'power' | 'draft' | 'giveway'
+  traffic: 'none'      // 2단계: 'fishing' | 'crossing' | 'overtake'
+};
+const ZONES = { escape: '목포 근해 탈출 (출항)', cadet: '승선사관부 추격 (출항)', port: '목포항 항로 (입항·내항 접안)', narrow: '협수로/만곡부 조우 (입항·내항 접안)', fishing: '어선군 밀집 해역 (입항·신항 접안)' };
+const WEATHER = {   // visNM 시정(해리), tint 하늘 밝기, light 조명 세기, wave 파랑 진폭(m), precip 강수 효과
+  clear: { n: '맑음(상호시계)', visNM: 10, tint: 1.0, light: 1.0, wave: 0.45, precip: null },
+  rain: { n: '비', visNM: 2, tint: 0.78, light: 0.75, wave: 0.8, precip: 'rain' },
+  snow: { n: '눈', visNM: 1, tint: 1.0, light: 0.85, wave: 0.6, precip: 'snow' },
+  fog: { n: '극도 제한시계(안개)', visNM: 0.15, tint: 0.95, light: 0.7, wave: 0.2, precip: null },
+  night: { n: '맑음 (야간·항해등)', visNM: 8, tint: 0.14, light: 0.18, wave: 0.4, precip: null }
+};
+const OWN_TYPES = { power: '일반 동력선', draft: '흘수제약선', giveway: '우선피항선' };
+
+// ---------- 수역 시나리오 / 자선 선종 / 타선 프리셋 (2단계) ----------
+const GATE = { x: -13000, y1: -1520, y2: -1080 };   // 탈출 게이트: 서쪽 외해 안전수역표지 바깥 (x ≤ -13000)
+const MISSION_ZONES = ['escape', 'cadet', 'port', 'narrow', 'fishing'];   // 모든 시나리오가 목표·결과 리포트를 가진 미션
+const GOALS = { escape: 'gate', cadet: 'gate', port: 'inner', narrow: 'inner', fishing: 'newport' };   // gate=탈출 게이트, 그 외=접안 구역
+/** 부두 접안 구역: MAP.quays 안벽 바로 앞 수면 (안벽 좌표는 그대로, 방향만 안벽에 맞춤) */
+const BERTHS = (function () {
+  const ang = q => Math.atan2(q[3] - q[1], q[2] - q[0]) * R2D;
+  return {
+    inner: { n: '목포 내항', x: -450, y: 530, L: 320, W: 110, ang: ang(MAP.quays[0]) },
+    newport: { n: '목포신항', x: -3650, y: -1520, L: 300, W: 110, ang: ang(MAP.quays[1]) }
+  };
+})();
+function berthLocal(b, x, y) { const a = b.ang * D2R, dx = x - b.x, dy = y - b.y; return [dx * Math.cos(a) + dy * Math.sin(a), -dx * Math.sin(a) + dy * Math.cos(a)]; }
+function inBerth(b, x, y) { const [u, v] = berthLocal(b, x, y); return Math.abs(u) <= b.L / 2 && Math.abs(v) <= b.W / 2; }
+const ZONE_UI = {
+  escape: { n: '목포 근해 탈출 (출항)', goal: '서쪽 외해 탈출 게이트 통과', desc: '내항 앞바다에서 서쪽 탈출 게이트(x≤-13000, 게이트 폭 안)까지 출항. 마주 입항 화물선 · 목포대교 부근 횡단 페리 · 대교 서측 조종제한선(준설) · 외해 입구 어로종사선 3척' },
+  cadet: { n: '승선사관부 추격 (출항)', goal: '서쪽 외해 탈출 게이트 통과', desc: '목포대교 동측에서 서쪽 탈출 게이트까지 출항. 뒤에서 승선사관부 생도(사람, 11.5kn) 또는 북한군 경비정(12.5kn, 포격)이 무작위로 추격 — 400m 이내에서 경고신호(Shift+H)를 울리면 사관부는 25초간 경례하며 감속(경비정은 감속 안 함). 만곡부 어로종사선 2척 · 직선 항로를 비스듬히 횡단하는 범선 1척' },
+  port: { n: '목포항 항로 (입항·내항 접안)', goal: '목포 내항 접안 구역에 2.0kn 이하로 접안', desc: '지정항로 남측 외곽에서 시작 — 항로 진입 구간의 예인선열(예인선+부선 160m) · 마주 오는 출항 화물선 · 내항 앞바다 표류 중인 조종불능선' },
+  narrow: { n: '협수로/만곡부 조우 (입항·내항 접안)', goal: '목포 내항 접안 구역에 2.0kn 이하로 접안', desc: '만곡부 진입 직전에서 시작 — 만곡부에서 마주 오는 출항 대형선 · 우현에서 항로를 횡단하는 소형선(Rule 15 피항 테스트) · 목포대교 부근 조종제한선' },
+  fishing: { n: '어선군 밀집 해역 (입항·신항 접안)', goal: '목포신항 접안 구역에 2.0kn 이하로 접안', desc: '외달도 남측 어선군 진입 직전에서 시작 — 어로종사선 6척 · 항로를 교차하는 범선 2척 · 항로 입구의 출항 예인선열' }
+};
+const ZONE_TRAFFIC = { escape: 'escape', cadet: 'chase', port: 'overtake', narrow: 'crossing', fishing: 'fishing' };
+const OWN_SPECS = {
+  power: { name: 'MOKPO STAR', length: 110, beam: 18, color: 0x9c2b2b },
+  draft: { name: 'DEEP LADEN', length: 185, beam: 30, color: 0x1d3c78 },
+  giveway: { name: 'SAEHAN 예선', length: 34, beam: 10, color: 0x2f7d4f }
+};
+const ZONE_START = {
+  escape: { x: 1200, y: 300, hdg: 270, kn: 5.5, eng: 5 },        // 목포 내항 앞바다 → 서쪽 출항
+  cadet: { x: -1500, y: 330, hdg: 270, kn: 7.5, eng: 6 },        // 목포대교 동측 우측 차선 → 서쪽 출항
+  port: { x: -9500, y: -1680, hdg: 75, kn: 7, eng: 6 },          // 지정항로 남측 외곽 → 항로 진입 후 입항
+  narrow: { x: -6400, y: -1200, hdg: 85, kn: 8, eng: 6 },        // 만곡부 진입 직전
+  fishing: { x: -10600, y: -1390, hdg: 90, kn: 7, eng: 6 }       // 외달도 남측 어선군 진입 직전 · 항로 우측(남측) 차선
+};
+function buildTargetSpecs(zone) {
+  const sp = [];
+  const fp = (sv, off) => { const p = channelPointAt(sv); return [p.x + off * p.dy, p.y - off * p.dx]; };   // 항로 거리 sv, 입항 기준 우측 off(m) 지점
+  // COLREG 특수 선박 프리셋 (cls: nuc 조종불능선 · ram 조종제한선 · sail 범선 · tow 예인선 · barge 부선 · fish 어로종사선)
+  const NUC = (name, x, y) => ({ name, kind: '조종불능선(기관 고장)', cls: 'nuc', tag: '조종불능선', mode: 'drift', x, y, cx: x, cy: y, leash: 150, kn: 0.8, length: 46, beam: 10, color: 0x6b6f75 });
+  const RAM = (name, x, y) => ({ name, kind: '조종제한선(준설 작업)', cls: 'ram', tag: '조종제한선', mode: 'drift', x, y, cx: x, cy: y, leash: 110, kn: 0.9, length: 58, beam: 14, color: 0x8a6d3b });
+  const SAIL = (name, x, y, hdg, waitRange) => ({ name, kind: '범선', cls: 'sail', tag: '범선', mode: 'cross', x, y, hdg, kn: 4, length: 16, beam: 5, color: 0xf6f6f2, waitRange });
+  const TOW = (name, dir, sv, kn) => [
+    { name, kind: '예인선(예인선열)', cls: 'tow', tag: '예인선열', mode: 'channel', dir, s: sv, off: 90, kn, length: 32, beam: 9, color: 0xb8322a, avoidRange: 1200, avoidCpa: 250, towLen: 160 },
+    { name: name + ' 부선', kind: '부선(피예인선)', cls: 'barge', tag: '부선(피예인)', mode: 'barge', tugName: name, length: 70, beam: 18, color: 0x5d4a36, towLen: 160 }];
+  if (zone === 'port') {
+    sp.push(...TOW('대양2호', 1, 4800, 5));
+    sp.push({ name: '씨파이오니어호', kind: '화물선(출항)', mode: 'channel', dir: -1, s: 8000, off: 90, kn: 9, length: 160, beam: 25, color: 0x2b4a7c, avoidRange: 1800, avoidCpa: 400 });
+    sp.push(NUC('해진7호', ...fp(12700, -150)));
+  } else if (zone === 'narrow') {
+    sp.push({ name: '그랜드트레이더호', kind: '대형선(출항)', mode: 'channel', dir: -1, s: 11600, off: 90, kn: 9, length: 200, beam: 32, color: 0x3a3f47, avoidRange: 2000, avoidCpa: 400 });
+    const p = channelPointAt(9000), nx = p.dy, ny = -p.dx;   // 입항선의 우현(남동측) 900m에서 북서쪽으로 항로 횡단 — 자선이 2km 이내로 오면 출발
+    sp.push({ name: '신안페리호', kind: '소형선(횡단)', mode: 'cross', x: p.x + nx * 900, y: p.y + ny * 900, hdg: normDeg(Math.atan2(-nx, -ny) * R2D), kn: 3.5, length: 38, beam: 9, color: 0xf1f1f1, avoidRange: 900, avoidCpa: 200, waitRange: 2000 });
+    sp.push(RAM('한라준설호', ...fp(10800, 120)));
+  } else if (zone === 'cadet') {
+    // 후방 추격자: 선박이 아닌 사람(승선사관부 생도) — 자선 뒤 900m에서 11.5kn로 질주
+    if (rnd() < 0.5) sp.push({ name: '승선사관부', kind: '사관부 생도', mode: 'cadet', x: -600, y: 250, hdg: 270, kn: 11.5, length: 10, beam: 6, labelH: 45.6, color: 0x14284b });   // 케이스 A (50%)
+    else sp.push({ name: '북한군 경비정', kind: '군함(적대)', mode: 'navy', x: 300, y: 250, hdg: 270, kn: 12.5, length: 48, beam: 9, color: 0x7a8089 });   // 케이스 B (50%): 포격 추격
+    // 전방 변수: 목포대교 서쪽 만곡부 부근 저속 조업 어선 2척
+    const fp = (sv, off) => { const p = channelPointAt(sv); return [p.x + off * p.dy, p.y - off * p.dx]; };
+    [fp(8500, -120), fp(9300, 90)].forEach((f, i) => sp.push({ name: `제${i + 1}동진호`, kind: '어선(조업)', mode: 'fisher', x: f[0], y: f[1], cx: f[0], cy: f[1], leash: 220, kn: 2, length: 18 + i * 2, beam: 5, color: [0xf4f4f0, 0x3a78b5][i], avoidRange: 500, avoidCpa: 120 }));
+    sp.push(SAIL('바다누리호', -8300, -2200, 340, 2600));   // 직선 항로를 비스듬히 횡단하는 범선
+  } else if (zone === 'escape') {
+    sp.push({ name: '씨파이오니어호', kind: '화물선(입항)', mode: 'channel', dir: 1, s: 11000, off: 90, kn: 9, length: 160, beam: 25, color: 0x2b4a7c, avoidRange: 1800, avoidCpa: 400 });
+    const p = channelPointAt(10300), nx = p.dy, ny = -p.dx;   // 목포대교 부근: 항로 북측 600m에서 남쪽으로 횡단 (자선이 1800m 이내로 접근하면 출발)
+    sp.push({ name: '압해페리호', kind: '소형선(횡단)', mode: 'cross', x: p.x - nx * 600, y: p.y - ny * 600, hdg: normDeg(Math.atan2(nx, ny) * R2D), kn: 3.5, length: 38, beam: 9, color: 0xf1f1f1, avoidRange: 900, avoidCpa: 200, waitRange: 1800 });
+    [[-12000, -1750, 400], [-12600, -950, 400], [-11600, -1250, 350]].forEach((f, i) => sp.push({ name: `제${i + 1}해성호`, kind: '어선(조업)', mode: 'fisher', x: f[0], y: f[1], cx: f[0], cy: f[1], leash: f[2], kn: 2.5, length: 17 + i * 2, beam: 5, color: [0xf4f4f0, 0x3a78b5, 0xe8e0c8][i], avoidRange: 500, avoidCpa: 120 }));
+    sp.push(RAM('목포준설1호', ...fp(9500, -130)));   // 목포대교 서측 만곡부: 출항선 쪽(북측) 차선에서 준설 작업
+  } else {
+    const F = [[-9900, -950, 400], [-9400, -1750, 400], [-9100, -1350, 350], [-8500, -1200, 350], [-9000, -300, 400], [-10100, -1750, 350]];
+    const cols = [0xf4f4f0, 0x3a78b5, 0xe8e0c8, 0x4aa07a, 0xf0d060, 0xd0d8e0];
+    F.forEach((f, i) => sp.push({ name: `제${i + 1}대성호`, kind: '어선(조업)', mode: 'fisher', x: f[0], y: f[1], cx: f[0], cy: f[1], leash: f[2], kn: 2.5, length: 16 + (i % 3) * 3, beam: 5, color: cols[i], avoidRange: 500, avoidCpa: 120 }));
+    sp.push(SAIL('바다누리호', -8200, -2200, 345, 2600), SAIL('한빛요트', -6900, -880, 205, 2400));
+    sp.push(...TOW('신항예인3호', -1, 3600, 4));   // 항로 입구: 마주 오는(출항) 예인선열
+  }
+  return sp;
+}
+
+// ---------- 법규 (3단계에서 판정 엔진 통합) ----------
+const RULES = {
+  priority: ['선박입출항법', '해사안전법', 'COLREG(국제규칙)'],
+  ref: {
+    horn1: { t: '조종신호(단음 1회)', b: '해사안전법 제92조 / COLREG Rule 34(a): 단음 1회 = 침로를 오른쪽으로 변경 중' },
+    horn5: { t: '경고신호(단음 5회 이상)', b: '해사안전법 제92조 제5항 / COLREG Rule 34(d): 타선의 의도·동작이 불분명하거나 충돌회피 동작이 의심될 때' },
+    channelKeep: { t: '지정항로 준수', b: '선박입출항법 제10조 제2항: 우선피항선 외의 선박은 관리청이 지정·고시한 항로를 따라 항행' },
+    channelRight: { t: '항로 내 우측 항행', b: '선박입출항법 제12조 제1항 제3호: 항로에서 마주칠 우려가 있으면 오른쪽으로 항행' },
+    grounding: { t: '좌초', b: '안전한 속력·경계 의무(해사안전법 제63·64조 / COLREG Rule 5·6) 및 항로 이탈 여부 검토' }
+  }
+};
+
+// =====================================================================
+// --- 2. 3D WORLD & CAMERA ---
+// =====================================================================
+const toV3 = (x, y, h = 0) => new THREE.Vector3(x, h, -y);
+
+const World3D = {
+  ok: false,
+  init(canvas) {
+    const r = this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    r.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    r.setSize(innerWidth, innerHeight);
+    const sc = this.scene = new THREE.Scene();
+    this.sky = new THREE.Color(0x9cc6e8);
+    sc.background = this.sky.clone();
+    sc.fog = new THREE.Fog(this.sky.getHex(), 3000, 26000);
+    this.camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 1, 70000);
+    this.hemi = new THREE.HemisphereLight(0xdfefff, 0x3a4a3a, 0.75); sc.add(this.hemi);
+    this.sun = new THREE.DirectionalLight(0xfff3dc, 0.85); this.sun.position.set(-4000, 6000, 2500); sc.add(this.sun);
+    this.buildWater(); this.buildLand(); this.buildChannel(); this.buildBridge(); this.buildPort(); this.buildLabels(); this.buildGate(); this.buildBerths();
+    this.setOwnShip(OWN_SPECS[SCENARIO.ownType]);
+    this.buildWake(); this.buildPrecip();
+    this.ok = true;
+  },
+
+  buildWater() {
+    const base = new THREE.Mesh(new THREE.PlaneGeometry(90000, 90000),
+      new THREE.MeshPhongMaterial({ color: 0x1b4d6b, shininess: 40, specular: 0x335566 }));
+    base.rotation.x = -Math.PI / 2; base.position.set(-3000, -0.6, 0); this.scene.add(base); this.water = base;
+    // 자선 주변 파랑 메시
+    const SEG = 90, SIZE = 2400;
+    const g = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG); g.rotateX(-Math.PI / 2);
+    this.wave = new THREE.Mesh(g, new THREE.MeshPhongMaterial({ color: 0x1f5878, shininess: 70, specular: 0x6688aa, transparent: true, opacity: 0.92 }));
+    this.wave.userData = { step: SIZE / SEG, base: Float32Array.from(g.attributes.position.array) };
+    this.scene.add(this.wave);
+  },
+  updateWater(t, cx, cy) {
+    const w = this.wave, st = w.userData.step * 4;
+    const ox = Math.round(cx / st) * st, oz = Math.round(-cy / st) * st;
+    w.position.set(ox, 0, oz);
+    const pos = w.geometry.attributes.position.array, b = w.userData.base;
+    const amp = this.waveAmp ?? 0.45;
+    for (let i = 0; i < pos.length; i += 3) {
+      const X = b[i] + ox, Z = b[i + 2] + oz;
+      pos[i + 1] = amp * (Math.sin(X * 0.021 + t * 1.1) * 0.6 + Math.sin(Z * 0.017 - t * 0.9) * 0.5 + Math.sin((X + Z) * 0.043 + t * 1.7) * 0.25);
+    }
+    w.geometry.attributes.position.needsUpdate = true;
+    if ((this._nf = (this._nf || 0) + 1) % 3 === 0) w.geometry.computeVertexNormals();
+  },
+
+  buildLand() {
+    for (const L of MAP.land) {
+      const sh = new THREE.Shape(L.poly.map(p => new THREE.Vector2(p[0], p[1])));
+      const g = new THREE.ExtrudeGeometry(sh, { depth: L.h, bevelEnabled: false }); g.rotateX(-Math.PI / 2);
+      const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color: L.color }));
+      m.position.y = -2; this.scene.add(m);
+      // 해안 모래띠
+      const g2 = new THREE.ExtrudeGeometry(sh, { depth: 2.6, bevelEnabled: true, bevelSize: 22, bevelThickness: 1, bevelSegments: 1 });
+      g2.rotateX(-Math.PI / 2);
+      const s = new THREE.Mesh(g2, new THREE.MeshLambertMaterial({ color: 0xcdbb8e })); s.position.y = -1.2; this.scene.add(s);
+    }
+    const hm = new THREE.MeshLambertMaterial({ color: 0x4f6e40, flatShading: true });
+    for (const [x, y, r, h] of MAP.hills) {
+      const c = new THREE.Mesh(new THREE.ConeGeometry(r, h, 9, 2), hm);
+      c.position.copy(toV3(x, y, 12 + h / 2)); c.rotation.y = x; this.scene.add(c);
+    }
+    // 시가지 건물 (InstancedMesh)
+    const N = 420, box = new THREE.BoxGeometry(1, 1, 1); box.translate(0, 0.5, 0);
+    const im = new THREE.InstancedMesh(box, new THREE.MeshLambertMaterial({ color: 0xd8d4cc }), N);
+    const mtx = new THREE.Matrix4(), q = new THREE.Quaternion(), col = new THREE.Color(); let k = 0, guard = 0;
+    while (k < N && guard++ < 8000) {
+      const x = -3400 + Math.random() * 7000, y = 700 + Math.random() * 2600;
+      if (!pointInPoly(x, y, MAP.land[0].poly) || Math.hypot(x + 600, y - 1550) < 620) continue;
+      const w = 18 + Math.random() * 30, h = 8 + Math.random() * (y < 1300 ? 55 : 30);
+      mtx.compose(toV3(x, y, 16), q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.random() * 0.4), new THREE.Vector3(w, h, w * (0.6 + Math.random() * 0.8)));
+      im.setMatrixAt(k, mtx); im.setColorAt(k, col.setHSL(0.08, 0.08, 0.6 + Math.random() * 0.3)); k++;
+    }
+    im.count = k; this.scene.add(im);
+  },
+
+  buildChannel() {
+    // 항로 경계 가이드선 (G 키 토글)
+    const grp = this.channelGuide = new THREE.Group();
+    const mk = (pts, color) => {
+      const g = new THREE.BufferGeometry().setFromPoints(pts.map(p => toV3(p[0], p[1], 1.2)));
+      const l = new THREE.Line(g, new THREE.LineDashedMaterial({ color, dashSize: 60, gapSize: 50, transparent: true, opacity: 0.75 }));
+      l.computeLineDistances(); grp.add(l);
+    };
+    mk(MAP.channel.right, 0xff6b6b); mk(MAP.channel.left, 0x6bff9a); mk(MAP.channel.center, 0xffffff);
+    this.scene.add(grp);
+    // 부표
+    this.buoyLights = [];
+    const mats = {
+      red: new THREE.MeshLambertMaterial({ color: 0xd42a2a }), green: new THREE.MeshLambertMaterial({ color: 0x1f9a45 }),
+      safe: new THREE.MeshLambertMaterial({ color: 0xffffff }), dark: new THREE.MeshLambertMaterial({ color: 0x222222 })
+    };
+    MAP.buoys.forEach((b, i) => {
+      const g = new THREE.Group(), S = 2.6;
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(1.6 * S, 1.9 * S, 3.2 * S, 12), mats[b.type]); body.position.y = 1.0 * S; g.add(body);
+      const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.35 * S, 0.5 * S, 3.4 * S, 6), mats[b.type]); tower.position.y = 4.2 * S; g.add(tower);
+      let top;
+      if (b.type === 'red') top = new THREE.Mesh(new THREE.ConeGeometry(0.9 * S, 1.4 * S, 10), mats.red);       // IALA B 우현표지: 원추형
+      else if (b.type === 'green') top = new THREE.Mesh(new THREE.CylinderGeometry(0.8 * S, 0.8 * S, 1.2 * S, 10), mats.green); // 좌현표지: 원통형
+      else top = new THREE.Mesh(new THREE.SphereGeometry(0.8 * S, 12, 8), mats.red);
+      top.position.y = 6.6 * S; g.add(top);
+      if (b.type === 'safe') { const st = new THREE.Mesh(new THREE.CylinderGeometry(1.62 * S, 1.75 * S, 1 * S, 12), mats.red); st.position.y = 1.1 * S; g.add(st); }
+      const lc = b.type === 'red' ? 0xff3030 : b.type === 'green' ? 0x30ff70 : 0xffffff;
+      const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.7 * S, 10, 8), new THREE.MeshBasicMaterial({ color: lc }));
+      lamp.position.y = 5.9 * S; g.add(lamp); this.addGlow(lamp, lc, 9);
+      this.buoyLights.push({ lamp, phase: (i * 0.37) % 4, period: b.type === 'safe' ? 8 : 4 });
+      g.position.copy(toV3(b.x, b.y, 0)); b.mesh = g; this.scene.add(g);
+    });
+  },
+
+  buildBridge() {
+    const B = MAP.bridge, dx = B.b[0] - B.a[0], dy = B.b[1] - B.a[1], L = Math.hypot(dx, dy);
+    const grp = new THREE.Group(), mat = new THREE.MeshLambertMaterial({ color: 0xe9ecef });
+    const deck = new THREE.Mesh(new THREE.BoxGeometry(L, 4, 24), mat); deck.position.y = B.deckH; grp.add(deck);
+    const cable = new THREE.LineBasicMaterial({ color: 0xffffff });
+    BRIDGE_PIERS.filter(q => q.kind === 'pylon').map(q => q.f).forEach(f => {
+      const px = (f - 0.5) * L;
+      [-14, 14].forEach(z => { const p = new THREE.Mesh(new THREE.BoxGeometry(7, B.pylonH, 5), mat); p.position.set(px, B.pylonH / 2, z); grp.add(p); });
+      const top = new THREE.Vector3(px, B.pylonH - 8, 0); const pts = [];
+      for (let k = 1; k <= 9; k++) { const o = k * L * 0.032; pts.push(top, new THREE.Vector3(px + o, B.deckH, 0), top, new THREE.Vector3(px - o, B.deckH, 0)); }
+      grp.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), cable));
+    });
+    for (const q of BRIDGE_PIERS) { if (q.kind !== 'pier') continue; const f = q.f; const p = new THREE.Mesh(new THREE.BoxGeometry(6, B.deckH, 10), mat); p.position.set((f - 0.5) * L, B.deckH / 2, 0); grp.add(p); }
+    grp.position.copy(toV3((B.a[0] + B.b[0]) / 2, (B.a[1] + B.b[1]) / 2, 0));
+    grp.rotation.y = Math.atan2(dy, dx);
+    this.scene.add(grp);
+  },
+
+  buildPort() {
+    const qm = new THREE.MeshLambertMaterial({ color: 0x9a9a92 });
+    for (const [x1, y1, x2, y2] of MAP.quays) {
+      const L = Math.hypot(x2 - x1, y2 - y1); const q = new THREE.Mesh(new THREE.BoxGeometry(L, 6, 40), qm);
+      q.position.copy(toV3((x1 + x2) / 2, (y1 + y2) / 2, 1)); q.rotation.y = Math.atan2(y2 - y1, x2 - x1); this.scene.add(q);
+    }
+    const cr = new THREE.MeshLambertMaterial({ color: 0xc8402c }), cw = new THREE.MeshLambertMaterial({ color: 0xeeeeee });
+    for (const [x, y] of MAP.cranes) {
+      const g = new THREE.Group();
+      [[-10, -10], [10, -10], [-10, 10], [10, 10]].forEach(([a, b]) => { const l = new THREE.Mesh(new THREE.BoxGeometry(2.5, 48, 2.5), cr); l.position.set(a, 24, b); g.add(l); });
+      const top = new THREE.Mesh(new THREE.BoxGeometry(26, 8, 26), cw); top.position.y = 50; g.add(top);
+      const boom = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 110), cr); boom.position.set(0, 54, 45); g.add(boom);
+      g.position.copy(toV3(x, y, 2)); g.rotation.y = -0.33; this.scene.add(g);
+    }
+  },
+
+  /** 탈출 게이트: 청록색 빛기둥 2개 + 반투명 막 + 라벨 (탈출 미션에서만 표시) */
+  buildGate() {
+    const g = this.gate = new THREE.Group(), beamMat = new THREE.MeshBasicMaterial({ color: 0x2ef2d0, transparent: true, opacity: 0.38, depthWrite: false });
+    for (const y of [GATE.y1, GATE.y2]) {
+      const beam = new THREE.Mesh(new THREE.CylinderGeometry(20, 20, 700, 14, 1, true), beamMat); beam.position.copy(toV3(GATE.x, y, 350)); g.add(beam);
+      const buoy = new THREE.Mesh(new THREE.SphereGeometry(16, 14, 10), new THREE.MeshBasicMaterial({ color: 0x38ffd9 })); buoy.position.copy(toV3(GATE.x, y, 8)); g.add(buoy);
+    }
+    const sheet = new THREE.Mesh(new THREE.PlaneGeometry(Math.abs(GATE.y2 - GATE.y1), 160), new THREE.MeshBasicMaterial({ color: 0x2ef2d0, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
+    sheet.rotation.y = Math.PI / 2; sheet.position.copy(toV3(GATE.x, (GATE.y1 + GATE.y2) / 2, 90)); g.add(sheet);
+    const lab = this.makeLabel('▼ 탈출 게이트', '#5ff7dc', 1800); lab.position.copy(toV3(GATE.x, (GATE.y1 + GATE.y2) / 2, 520)); g.add(lab);
+    g.visible = false; this.scene.add(g);
+  },
+  makeLabel(text, color = '#ffffff', w = 760) {
+    const c = document.createElement('canvas'); c.width = 512; c.height = 112; const x = c.getContext('2d');
+    x.font = 'bold 54px "Apple SD Gothic Neo","Malgun Gothic",sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.lineWidth = 9; x.strokeStyle = 'rgba(0,20,40,.85)'; x.strokeText(text, 256, 56); x.fillStyle = color; x.fillText(text, 256, 56);
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false, fog: false }));
+    s.scale.set(w, w * 112 / 512, 1); return s;
+  },
+  buildLabels() {
+    this.labels = [];
+    for (const [t, x, y] of MAP.labels) { const s = this.makeLabel(t); s.position.copy(toV3(x, y, 260)); this.scene.add(s); this.labels.push(s); }
+  },
+
+  /** 승선사관부 생도(사람) 3D 모델 — 기본 도형(Box/Cylinder/Sphere)만 사용, 키 약 28m. 정면 = -Z, 오른쪽 = +X */
+  buildCadet() {
+    const g = new THREE.Group(), body = new THREE.Group(); body.position.y = 0.5; g.add(body);
+    const M = c => new THREE.MeshLambertMaterial({ color: c });
+    const navy = M(0x14284b), white = M(0xf5f5f0), gold = M(0xd4af37), skin = M(0xf0c8a0), black = M(0x111111);
+    const add = (parent, geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); parent.add(m); return m; };
+    const torso = new THREE.Group(); torso.position.y = 12.4; body.add(torso);
+    add(torso, new THREE.BoxGeometry(7.2, 9.2, 3.8), navy, 0, 4.6, 0);                  // 감색 정복 상의
+    add(torso, new THREE.BoxGeometry(1.8, 5.2, 0.25), white, 0, 5.8, -1.95);            // 흰 셔츠
+    for (const x of [-1.5, 1.5]) for (const y of [3.2, 5.0, 6.8]) add(torso, new THREE.SphereGeometry(0.28, 8, 6), gold, x, y, -2.0);   // 금단추
+    add(torso, new THREE.BoxGeometry(7.3, 0.8, 3.9), white, 0, 0.5, 0);                 // 허리띠
+    for (const x of [-1, 1]) add(torso, new THREE.BoxGeometry(2.6, 0.5, 3.4), gold, x * 3.4, 9.3, 0);   // 금색 견장
+    add(torso, new THREE.SphereGeometry(2.2, 14, 10), skin, 0, 11.7, 0);                // 머리
+    for (const x of [-0.8, 0.8]) add(torso, new THREE.BoxGeometry(0.35, 0.35, 0.2), black, x, 11.9, -2.1);
+    add(torso, new THREE.CylinderGeometry(2.8, 2.9, 2.0, 16), white, 0, 14.2, 0);       // 흰색 정모
+    add(torso, new THREE.CylinderGeometry(2.95, 2.95, 0.5, 16), navy, 0, 13.3, 0);      // 모자 띠
+    add(torso, new THREE.BoxGeometry(3.8, 0.25, 2.1), navy, 0, 13.1, -2.7);             // 모자 챙
+    add(torso, new THREE.SphereGeometry(0.45, 8, 6), gold, 0, 13.4, -2.95);             // 금색 마크
+    const arm = sx => {
+      const sh = new THREE.Group(); sh.position.set(sx * 3.9, 8.8, 0); torso.add(sh);
+      add(sh, new THREE.CylinderGeometry(1.0, 0.9, 4.6, 10), navy, 0, -2.3, 0);
+      const el = new THREE.Group(); el.position.y = -4.6; sh.add(el);
+      add(el, new THREE.CylinderGeometry(0.9, 0.8, 4.6, 10), navy, 0, -2.3, 0);
+      add(el, new THREE.CylinderGeometry(0.95, 0.95, 0.5, 10), gold, 0, -3.7, 0);       // 금색 소매 줄
+      add(el, new THREE.SphereGeometry(0.95, 10, 8), white, 0, -4.9, 0);                // 흰 장갑
+      return { sh, el };
+    };
+    const leg = sx => {
+      const hip = new THREE.Group(); hip.position.set(sx * 1.8, 12.4, 0); body.add(hip);
+      add(hip, new THREE.CylinderGeometry(1.6, 1.4, 6.2, 10), navy, 0, -3.1, 0);
+      const knee = new THREE.Group(); knee.position.y = -6.2; hip.add(knee);
+      add(knee, new THREE.CylinderGeometry(1.3, 1.1, 6.2, 10), navy, 0, -3.1, 0);
+      add(knee, new THREE.BoxGeometry(2.1, 1.0, 3.6), black, 0, -6.4, -0.8);            // 구두
+      return { hip, knee };
+    };
+    const arms = [arm(-1), arm(1)], legs = [leg(-1), leg(1)];   // [0]=왼쪽, [1]=오른쪽
+    const rm = o => new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: o, side: THREE.DoubleSide, depthWrite: false });
+    const rings = [6, 10].map((r, i) => { const m = new THREE.Mesh(new THREE.RingGeometry(r, r + 2.2, 36), rm(0.5 - i * 0.15)); m.rotation.x = -Math.PI / 2; m.position.y = 0.6; g.add(m); return m; });   // 물보라 링
+    g.scale.set(1.2, 1.2, 1.2);   // 전체 1.2배 확대
+    g.userData = { body, torso, legs, arms, rings, ph: 0, salW: 0 };
+    return g;
+  },
+  /** 달리기(팔다리 교차·상하 바운스) / 거수경례(오른팔) 애니메이션 */
+  animateCadet(g, dt, u, salute) {
+    const d = g.userData, k = Math.max(0.35, Math.min(1.1, u / 6.5));
+    d.ph += dt * (5 + u * 1.1);
+    d.salW += ((salute ? 1 : 0) - d.salW) * Math.min(1, dt * 5);
+    const w = d.salW;
+    d.body.position.y = 0.5 + Math.abs(Math.sin(d.ph)) * 1.1 * k;   // 상하 바운스
+    d.torso.rotation.x = -0.28 * k;                                  // 앞으로 숙인 자세
+    d.legs.forEach((L, i) => { const p = d.ph + i * Math.PI; L.hip.rotation.x = Math.sin(p) * 0.95 * k; L.knee.rotation.x = -(0.25 + 0.9 * Math.max(0, Math.sin(p + 1.6))) * k; });
+    d.arms.forEach((A, i) => {
+      const sw = Math.sin(d.ph + (i ? 0 : Math.PI)) * 0.9 * k, bend = 1.1 * k + 0.2;
+      if (i === 1) { A.sh.rotation.x = sw * (1 - w); A.sh.rotation.z = 0.12 + 1.88 * w; A.el.rotation.x = bend * (1 - w); A.el.rotation.z = 2.3 * w; }   // 오른팔: 거수경례
+      else { A.sh.rotation.x = sw; A.sh.rotation.z = -0.12; A.el.rotation.x = bend; }
+    });
+    d.rings.forEach((r, i) => { const sc = 1 + 0.12 * Math.sin(d.ph * 0.5 + i * 2); r.scale.set(sc, sc, 1); });
+  },
+  /** 북한군 경비정: 회색 선체 + 선수 쪽 회전 포탑·포신 */
+  buildNavy(spec) {
+    const g = this.buildShip(spec, 0x7a8089, false), L = spec.length, B = spec.beam;
+    g.traverse(m => { if (m.material && m.material.color && !m.material.isMeshBasicMaterial) { const h = m.material.color.getHex(); if (h === 0xf2f2f0) m.material.color.setHex(0x9aa0a8); else if (h === 0x1f3d7a) m.material.color.setHex(0x4b4f55); else if (h === 0x5d6b5f) m.material.color.setHex(0x666c72); } });
+    const hullH = Math.max(4, L * 0.09), deckY = hullH * 0.55 + 0.6, dark = new THREE.MeshLambertMaterial({ color: 0x4a4f55 });
+    const turret = new THREE.Group(); turret.position.set(0, deckY, -L * 0.22); g.add(turret);
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.26, B * 0.3, 1.6, 14), dark); base.position.y = 0.8; turret.add(base);
+    const house = new THREE.Mesh(new THREE.BoxGeometry(B * 0.34, 1.8, B * 0.5), new THREE.MeshLambertMaterial({ color: 0x5b6168 })); house.position.set(0, 2.2, 0.3); turret.add(house);
+    const bg = new THREE.CylinderGeometry(0.32, 0.4, 9, 8); bg.rotateX(Math.PI / 2);
+    const barrel = new THREE.Mesh(bg, new THREE.MeshLambertMaterial({ color: 0x2f3338 })); barrel.position.set(0, 2.3, -5.4); turret.add(barrel);
+    const muz = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.8, 8), dark); muz.rotation.x = Math.PI / 2; muz.position.set(0, 2.3, -9.7); turret.add(muz);
+    g.userData.turret = turret;
+    return g;
+  },
+  makeShell() {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(2.4, 8, 6), new THREE.MeshBasicMaterial({ color: 0xff3a2a })); this.scene.add(m); return m;
+  },
+  makeSplash() {
+    const g = new THREE.Group();
+    const col = new THREE.Mesh(new THREE.CylinderGeometry(3, 7, 1, 12, 1, true), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85, side: THREE.DoubleSide, depthWrite: false }));
+    col.position.y = 0.5; g.add(col);
+    const fl = new THREE.Mesh(new THREE.SphereGeometry(5, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffa030, transparent: true, opacity: 0.9 })); fl.position.y = 3; g.add(fl);
+    g.userData = { col, fl }; this.scene.add(g); return g;
+  },
+  /** 선박 3D 모델 (선수 = -Z). 2단계 타선도 이 함수를 재사용 */
+  buildShip(spec, hullColor = 0x9c2b2b, own = false) {
+    const L = spec.length, B = spec.beam, g = new THREE.Group();
+    const sh = new THREE.Shape();
+    sh.moveTo(-B / 2, -L / 2); sh.lineTo(B / 2, -L / 2); sh.lineTo(B / 2, L * 0.22);
+    sh.quadraticCurveTo(B / 2, L * 0.42, 0, L / 2); sh.quadraticCurveTo(-B / 2, L * 0.42, -B / 2, L * 0.22); sh.closePath();
+    const hullH = Math.max(4, L * 0.09);
+    const hg = new THREE.ExtrudeGeometry(sh, { depth: hullH, bevelEnabled: false }); hg.rotateX(-Math.PI / 2); hg.translate(0, -hullH * 0.45, 0);
+    const hull = new THREE.Mesh(hg, new THREE.MeshLambertMaterial({ color: hullColor })); g.add(hull);
+    const dg = new THREE.ExtrudeGeometry(sh, { depth: 0.6, bevelEnabled: false }); dg.rotateX(-Math.PI / 2); dg.translate(0, hullH * 0.55, 0); dg.scale(0.96, 1, 0.97);
+    g.add(new THREE.Mesh(dg, new THREE.MeshLambertMaterial({ color: 0x5d6b5f })));
+    const deckY = hullH * 0.55 + 0.6, white = new THREE.MeshLambertMaterial({ color: 0xf2f2f0 });
+    const plain = spec.cls === 'sail' || spec.cls === 'barge';   // 범선·부선은 선교/연돌 없음
+    // 선교(후방 거주구)
+    if (!plain) {
+    const sup = new THREE.Mesh(new THREE.BoxGeometry(B * 0.86, L * 0.12, L * 0.13), white); sup.position.set(0, deckY + L * 0.06, L * 0.33); g.add(sup);
+    const brg = new THREE.Mesh(new THREE.BoxGeometry(B * 1.08, L * 0.035, L * 0.06), white); brg.position.set(0, deckY + L * 0.135, L * 0.30); g.add(brg);
+    const win = new THREE.Mesh(new THREE.BoxGeometry(B * 0.9, L * 0.015, 0.4), new THREE.MeshBasicMaterial({ color: 0x1a2a3a })); win.position.set(0, deckY + L * 0.137, L * 0.27 - 0.2); g.add(win);
+    const fun = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.16, B * 0.2, L * 0.09, 12), new THREE.MeshLambertMaterial({ color: 0x1f3d7a })); fun.position.set(0, deckY + L * 0.17, L * 0.41); g.add(fun);
+    // 마스트
+    const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, L * 0.2, 6), white); mast.position.set(0, deckY + L * 0.1, -L * 0.3); g.add(mast);
+    }
+    if (spec.cls === 'barge') { const pile = new THREE.Mesh(new THREE.BoxGeometry(B * 0.8, 4, L * 0.7), new THREE.MeshLambertMaterial({ color: 0x9c8462 })); pile.position.set(0, deckY + 2, 0); g.add(pile); }
+    if (L > 60) {   // 화물(컨테이너)
+      const cols = [0xc0392b, 0x2471a3, 0xd4ac0d, 0x239b56, 0x7d3c98, 0xe67e22];
+      for (let z = -L * 0.33; z < L * 0.2; z += L * 0.075) for (let x = -1; x <= 1; x++) {
+        const hh = 2.6 * (1 + Math.floor(Math.random() * 3));
+        const c = new THREE.Mesh(new THREE.BoxGeometry(B * 0.27, hh, L * 0.065), new THREE.MeshLambertMaterial({ color: cols[(Math.random() * cols.length) | 0] }));
+        c.position.set(x * B * 0.29, deckY + hh / 2, z); g.add(c);
+      }
+    }
+    // 항해등 (마스트등·현등·선미등)
+    const lamp = (c, x, y, z) => { const m = new THREE.Mesh(new THREE.SphereGeometry(Math.max(0.6, L * 0.007), 8, 6), new THREE.MeshBasicMaterial({ color: c })); m.position.set(x, y, z); g.add(m); this.addGlow(m, c, Math.max(5, L * 0.05)); return m; };
+    g.userData.lights = {
+      mast: lamp(0xffffff, 0, deckY + L * 0.2, -L * 0.3),
+      port: lamp(0xff2a2a, -B * 0.54, deckY + L * 0.135, L * 0.30),
+      stbd: lamp(0x2aff5a, B * 0.54, deckY + L * 0.135, L * 0.30),
+      stern: lamp(0xffffff, 0, deckY + 1.5, L * 0.5)
+    };
+    g.userData.bridgeEye = new THREE.Vector3(0, deckY + L * 0.15, L * 0.27);
+    if (spec.cls) this.addDayShapes(g, spec, deckY, L);
+    return g;
+  },
+  /** COLREG 주간 형상물(Rule 24·26·27): 마스트 위 기둥에 흑색 구·마름모·원뿔, 범선은 흰 삼각돛 */
+  addDayShapes(g, spec, deckY, L) {
+    const blk = new THREE.MeshBasicMaterial({ color: 0x0b0b0b });
+    if (spec.cls === 'sail') {
+      const mh = Math.max(14, L * 1.1);
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, mh, 6), new THREE.MeshLambertMaterial({ color: 0xdddddd })); m.position.set(0, deckY + mh / 2, -L * 0.05); g.add(m);
+      const sh = new THREE.Shape(); sh.moveTo(0, 0); sh.lineTo(L * 0.42, 0); sh.lineTo(0, mh * 0.92); sh.closePath();
+      const sail = new THREE.Mesh(new THREE.ShapeGeometry(sh), new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide }));
+      sail.rotation.y = -Math.PI / 2; sail.position.set(0, deckY + 1.2, -L * 0.05); g.add(sail);   // 돛: 마스트에서 선미 방향으로 펼침
+      return;
+    }
+    if (spec.cls === 'barge') return;
+    const top = deckY + L * 0.2, z = -L * 0.3, sz = Math.max(3, Math.min(5, L * 0.08));
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(sz * 0.08, sz * 0.08, sz * 5.6, 6), blk); pole.position.set(0, top + sz * 2.8, z); g.add(pole);
+    const at = k => top + sz * (1.1 + k * 1.5);
+    const ball = y => { const m = new THREE.Mesh(new THREE.SphereGeometry(sz * 0.5, 14, 10), blk); m.position.set(0, y, z); g.add(m); };
+    const cone = (y, down) => { const m = new THREE.Mesh(new THREE.ConeGeometry(sz * 0.5, sz * 0.6, 14), blk); m.position.set(0, y, z); if (down) m.rotation.x = Math.PI; g.add(m); };
+    const diamond = y => { cone(y + sz * 0.3, false); cone(y - sz * 0.3, true); };     // 마름모 = 밑면을 맞댄 원뿔 2개
+    if (spec.cls === 'nuc') { ball(at(0)); ball(at(1)); }                               // ● ●
+    else if (spec.cls === 'ram') { ball(at(0)); diamond(at(1)); ball(at(2)); }           // ● ◆ ●
+    else if (spec.cls === 'tow') diamond(at(0.6));                                       // ◆
+    else if (spec.cls === 'fish') { cone(at(0.6) - sz * 0.3, false); cone(at(0.6) + sz * 0.3, true); }   // 꼭짓점을 맞댄 원뿔 2개(모래시계)
+  },
+  /** 예인줄(예인선 선미 ↔ 부선 선수) */
+  buildTowLine() {
+    const geo = new THREE.CylinderGeometry(1.1, 1.1, 1, 6); geo.rotateX(Math.PI / 2);
+    return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xffd34f }));
+  },
+  /** 부두 접안 구역: 반투명 청록 바닥 + 빛나는 테두리 + 모서리 빛기둥 + 라벨 */
+  buildBerths() {
+    this.berths = {};
+    for (const k of Object.keys(BERTHS)) {
+      const b = BERTHS[k], g = new THREE.Group(), edge = new THREE.MeshBasicMaterial({ color: 0x3dffb4, transparent: true, opacity: 0.9, depthWrite: false });
+      for (const sz of [1, -1]) {
+        const e1 = new THREE.Mesh(new THREE.BoxGeometry(b.L, 3, 4), edge); e1.position.set(0, 2, sz * b.W / 2); g.add(e1);
+        const e2 = new THREE.Mesh(new THREE.BoxGeometry(4, 3, b.W), edge); e2.position.set(sz * b.L / 2, 2, 0); g.add(e2);
+        for (const sx of [1, -1]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 90, 10, 1, true), new THREE.MeshBasicMaterial({ color: 0x3dffb4, transparent: true, opacity: 0.35, depthWrite: false })); p.position.set(sx * b.L / 2, 45, sz * b.W / 2); g.add(p); }
+      }
+      const fill = new THREE.Mesh(new THREE.PlaneGeometry(b.L, b.W), new THREE.MeshBasicMaterial({ color: 0x2ef2c0, transparent: true, opacity: 0.18, depthWrite: false, side: THREE.DoubleSide }));
+      fill.rotation.x = -Math.PI / 2; fill.position.y = 1; g.add(fill);
+      const c = document.createElement('canvas'); c.width = 1024; c.height = 112; const x = c.getContext('2d');
+      x.font = 'bold 54px "Apple SD Gothic Neo","Malgun Gothic",sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+      x.lineWidth = 9; x.strokeStyle = 'rgba(0,20,40,.85)'; x.strokeText('▼ 접안 구역 (2kn 이하 정지)', 512, 56); x.fillStyle = '#7dffc8'; x.fillText('▼ 접안 구역 (2kn 이하 정지)', 512, 56);
+      const lab = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false, fog: false }));
+      lab.scale.set(520, 57, 1); lab.position.set(0, 150, 0); g.add(lab);
+      g.position.copy(toV3(b.x, b.y, 0)); g.rotation.y = b.ang * D2R; g.userData.fill = fill; g.visible = false;
+      this.scene.add(g); this.berths[k] = g;
+    }
+  },
+
+  buildWake() {
+    const N = this.wakeN = 360;
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(N * 3), 3));
+    g.setAttribute('color', new THREE.BufferAttribute(new Float32Array(N * 3), 3));
+    this.wakePts = []; this.wake = new THREE.Points(g, new THREE.PointsMaterial({ size: 7, vertexColors: true, transparent: true, opacity: 0.85, depthWrite: false }));
+    this.wake.frustumCulled = false; this.scene.add(this.wake);
+  },
+  pushWake(x, y, spread) { this.wakePts.push({ x, y, a: 0, s: spread }); if (this.wakePts.length > this.wakeN) this.wakePts.shift(); },
+  updateWake(dt) {
+    const pos = this.wake.geometry.attributes.position.array, col = this.wake.geometry.attributes.color.array;
+    const wc = [0.12, 0.33, 0.47];
+    this.wakePts.forEach((p, i) => {
+      p.a += dt; const f = Math.min(1, p.a / 70);
+      pos[i * 3] = p.x + p.s * (1 + p.a * 0.12) ; pos[i * 3 + 1] = 0.9; pos[i * 3 + 2] = -p.y;
+      col[i * 3] = 1 - (1 - wc[0]) * f; col[i * 3 + 1] = 1 - (1 - wc[1]) * f; col[i * 3 + 2] = 1 - (1 - wc[2]) * f;
+    });
+    for (let i = this.wakePts.length; i < this.wakeN; i++) pos[i * 3 + 1] = -50;
+    this.wake.geometry.attributes.position.needsUpdate = true; this.wake.geometry.attributes.color.needsUpdate = true;
+  },
+
+  placeShip(mesh, x, y, hdg, t, roll = 0) {
+    mesh.position.set(x, Math.sin(t * 0.8 + x * 0.01) * 0.25, -y);
+    mesh.rotation.set(Math.sin(t * 0.6) * 0.004, -hdg * D2R, Math.sin(t * 0.7 + 1) * 0.012 + roll, 'YXZ');
+  },
+
+  /** 자선 모델 교체 (선종 변경 시) */
+  setOwnShip(spec) {
+    if (this.ship) this.scene.remove(this.ship);
+    const m = this.buildShip(spec, spec.color, true);
+    m.traverse(o => { if (o.material && !Array.isArray(o.material)) o.material.fog = false; });   // 안개 속에서도 자선은 선명하게
+    this.ship = m; this.scene.add(m);
+  },
+  /** 야간 등화 빛번짐: 등 색의 둥근 빛(가산 혼합, 안개 무시). 야간에만 표시하고 등 자체도 키움 */
+  addGlow(lampMesh, color, size) {
+    if (!this.glowTex) {
+      const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+      gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.18, 'rgba(255,255,255,.85)'); gr.addColorStop(0.45, 'rgba(255,255,255,.25)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+      x.fillStyle = gr; x.fillRect(0, 0, 64, 64); this.glowTex = new THREE.CanvasTexture(c);
+    }
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: this.glowTex, color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+    const r = (lampMesh.geometry.parameters && lampMesh.geometry.parameters.radius) || 1; sp.scale.setScalar(size / r); sp.visible = !!this.night;
+    lampMesh.add(sp); lampMesh.userData.glow = sp; lampMesh.userData.gSize = size; lampMesh.userData.gR = r;
+    if (this.night) lampMesh.scale.setScalar(2);
+    if ((this.glows || []).length > 300) this.glows = this.glows.filter(m => { let p = m; for (let i = 0; i < 12 && p.parent; i++) p = p.parent; return p === this.scene; });
+    (this.glows || (this.glows = [])).push(lampMesh);
+  },
+  setNight(on) {
+    this.night = on;
+    this.glows = (this.glows || []).filter(m => { let p = m; for (let i = 0; i < 12 && p.parent; i++) p = p.parent; return p === this.scene; });   // 제거된 선박 정리
+    for (const m of this.glows) { m.userData.glow.visible = on; m.scale.setScalar(on ? 2 : 1); }
+    for (const w of [this.water, this.wave]) if (w && w.material && w.material.color) { w.userData.c0 = w.userData.c0 || w.material.color.getHex(); w.material.color.setHex(on ? 0x0a2236 : w.userData.c0); }
+  },
+  /** 시정(해리) → 안개 거리·하늘색·조명. tint/light는 기상별 보정 */
+  setVisibility(visNM, tint = 1, light = 1) {
+    const far = Math.min(26000, Math.max(450, visNM * NM * 1.1)), near = Math.min(3000, far * 0.08);
+    this.scene.fog.near = near; this.scene.fog.far = far;
+    const k = Math.max(0, Math.min(1, Math.log10(visNM / 0.15) / Math.log10(10 / 0.15)));   // 0=짙은 안개, 1=맑음
+    const c = new THREE.Color(0x9aa6ad).lerp(new THREE.Color(0x9cc6e8), k).multiplyScalar(tint);
+    this.scene.background.copy(c); this.scene.fog.color.copy(c);
+    this.hemi.intensity = 0.75 * light; this.sun.intensity = 0.85 * light;
+  },
+  setWeather(key) {
+    const W = WEATHER[key]; this.visM = W.visNM * NM;
+    this.setVisibility(W.visNM, W.tint, W.light);
+    this.waveAmp = W.wave; this.precipKind = W.precip; this.setNight(key === 'night');
+    this.rain.visible = W.precip === 'rain'; this.snow.visible = W.precip === 'snow';
+    const showLabel = W.visNM >= 1.5; this.labels.forEach(s => { s.visible = showLabel; });
+  },
+  /** 빗줄기(선분)·눈송이(점) — 카메라 주변 박스 안에서 순환 */
+  buildPrecip() {
+    const N = this.pN = 1800, L = this.pLocal = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) { L[i * 3] = (Math.random() - 0.5) * 320; L[i * 3 + 1] = Math.random() * 120; L[i * 3 + 2] = (Math.random() - 0.5) * 320; }
+    const rg = new THREE.BufferGeometry(); rg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(N * 6), 3));
+    this.rain = new THREE.LineSegments(rg, new THREE.LineBasicMaterial({ color: 0xb9c9d9, transparent: true, opacity: 0.5, fog: false, depthWrite: false }));
+    const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(N * 3), 3));
+    this.snow = new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xffffff, size: 0.7, transparent: true, opacity: 0.9, fog: false, depthWrite: false }));
+    for (const o of [this.rain, this.snow]) { o.frustumCulled = false; o.visible = false; this.scene.add(o); }
+    this.precipKind = null; this._pt = 0;
+  },
+  updatePrecip(dt) {
+    const kind = this.precipKind; if (!kind) return;
+    const d = Math.min(dt, 0.05), cam = this.camera.position, N = this.pN, L = this.pLocal, rain = kind === 'rain';
+    const vy = rain ? -48 : -5, wind = rain ? 7 : 2, arr = (rain ? this.rain : this.snow).geometry.attributes.position.array;
+    this._pt += d;
+    for (let i = 0; i < N; i++) {
+      let lx = L[i * 3] + wind * d + (rain ? 0 : Math.sin(this._pt * 1.3 + i) * 0.8 * d), ly = L[i * 3 + 1] + vy * d;
+      if (ly < 0) ly += 120; if (lx > 160) lx -= 320;
+      L[i * 3] = lx; L[i * 3 + 1] = ly;
+      const px = cam.x + lx, py = ly, pz = cam.z + L[i * 3 + 2];
+      if (rain) { arr[i * 6] = px; arr[i * 6 + 1] = py; arr[i * 6 + 2] = pz; arr[i * 6 + 3] = px - 0.25; arr[i * 6 + 4] = py + 2.4; arr[i * 6 + 5] = pz; }
+      else { arr[i * 3] = px; arr[i * 3 + 1] = py; arr[i * 3 + 2] = pz; }
+    }
+    (rain ? this.rain : this.snow).geometry.attributes.position.needsUpdate = true;
+  },
+  /** 타선 위 라벨(선명/속력) — 캔버스 텍스처 스프라이트 */
+  makeDynLabel() {
+    const c = document.createElement('canvas'); c.width = 384; c.height = 96; const x = c.getContext('2d'), tex = new THREE.CanvasTexture(c);
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, fog: false }));
+    return {
+      sprite, last: '',
+      set(l1, l2, color) {
+        const k = l1 + '|' + l2 + '|' + color; if (k === this.last) return; this.last = k;
+        x.clearRect(0, 0, 384, 96); x.textAlign = 'center'; x.textBaseline = 'middle'; x.lineWidth = 7; x.strokeStyle = 'rgba(0,20,40,.9)';
+        x.font = 'bold 36px "Apple SD Gothic Neo","Malgun Gothic",sans-serif'; x.strokeText(l1, 192, 28); x.fillStyle = color; x.fillText(l1, 192, 28);
+        x.font = 'bold 30px sans-serif'; x.strokeText(l2, 192, 68); x.fillText(l2, 192, 68); tex.needsUpdate = true;
+      },
+      dispose() { tex.dispose(); sprite.material.dispose(); }
+    };
+  },
+  updateTargets(list, own, t, dt = 0) {
+    const cam = this.camera.position, vis = (this.visM ?? 18520) * 1.5;
+    for (const tg of list) {
+      if (!tg.mesh) continue;
+      const d = Math.hypot(tg.x - own.x, tg.y - own.y), on = d < vis;   // 시정 밖의 타선은 육안으로 보이지 않음(레이더로만 확인)
+      tg.mesh.visible = on; tg.label.sprite.visible = on;
+      if (tg.towMesh && tg.barge) {   // 예인줄 갱신
+        const b = tg.barge, h1 = tg.hdg * D2R, h2 = b.hdg * D2R;
+        const ax = tg.x - Math.sin(h1) * tg.length / 2, ay = tg.y - Math.cos(h1) * tg.length / 2, bx = b.x + Math.sin(h2) * b.length / 2, by = b.y + Math.cos(h2) * b.length / 2;
+        tg.towMesh.visible = on; tg.towMesh.position.set((ax + bx) / 2, 2.2, -(ay + by) / 2); tg.towMesh.lookAt(bx, 2.2, -by); tg.towMesh.scale.set(1, 1, Math.max(1, Math.hypot(bx - ax, by - ay)));
+      }
+      if (!on) continue;
+      this.placeShip(tg.mesh, tg.x, tg.y, tg.hdg, t);
+      if (tg.mode === 'cadet') this.animateCadet(tg.mesh, dt, tg.u, tg.saluting);
+      if (tg.mode === 'navy' && tg.mesh.userData.turret) tg.mesh.userData.turret.rotation.y = -(tg.turretRel || 0) * D2R;
+      const hy = tg.labelH ?? tg.length * 0.3, dc = Math.hypot(tg.x - cam.x, hy - cam.y, -tg.y - cam.z), w = Math.max(80, Math.min(1100, dc * 0.2));
+      tg.label.sprite.scale.set(w, w * 96 / 384, 1); tg.label.sprite.position.set(tg.x, hy + 20 + w * 0.12, -tg.y);
+      tg.label.set(tg.name, `${tg.tag ? tg.tag + ' · ' : ''}${(tg.u / KN).toFixed(1)}kn`, tg.level === 'danger' ? '#ff7a5a' : tg.level === 'warn' ? '#ffb347' : '#ffffff');
+    }
+  },
+  update(t, dt, ship) {
+    this.placeShip(this.ship, ship.x, ship.y, ship.hdg, t, -ship.r * 0.012);
+    this.updateWater(t, ship.x, ship.y); this.updateWake(dt);
+    for (const b of this.buoyLights) b.lamp.visible = ((t + b.phase) % b.period) < 0.6;
+    CameraRig.apply(this.camera, ship, dt);
+    this.updateTargets(Sim.targets, ship, t, dt); this.updatePrecip(dt);
+    if (this.night && this.glows) {   // 야간: 멀리 있는 등화도 화면에서 일정 크기 이상으로 보이게
+      const cam = this.camera.position, wp = this._gv || (this._gv = new THREE.Vector3());
+      for (const m of this.glows) { m.getWorldPosition(wp); const d = wp.distanceTo(cam), want = Math.max(m.userData.gSize * 2, d * 0.011); m.userData.glow.scale.setScalar(want / (m.userData.gR * 2)); }
+    }
+    for (const k in this.berths || {}) { const g = this.berths[k]; if (g.visible) g.userData.fill.material.opacity = 0.14 + 0.1 * (0.5 + 0.5 * Math.sin(t * 2.5)); }
+    this.renderer.render(this.scene, this.camera);
+  },
+  resize() { if (!this.ok) return; this.camera.aspect = innerWidth / innerHeight; this.camera.updateProjectionMatrix(); this.renderer.setSize(innerWidth, innerHeight); }
+};
+
+/** 카메라: 백뷰(기본) / 선교 시점. 드래그·휠·핀치·키보드 조절 */
+const CameraRig = {
+  mode: 'back', yawOff: 0, pitch: 13, dist: 300, baseDist: 300, _pos: null, _tgt: null,
+  reset() { this.yawOff = 0; this.pitch = this.mode === 'back' ? 13 : 0; this.dist = this.baseDist; },
+  toggleMode() { this.mode = this.mode === 'back' ? 'bridge' : 'back'; this.reset(); this._pos = null; },
+  apply(cam, s, dt) {
+    const h = (s.hdg + this.yawOff) * D2R, fx = Math.sin(h), fy = Math.cos(h);
+    let pos, tgt;
+    if (this.mode === 'back') {
+      const p = this.pitch * D2R, hd = this.dist * Math.cos(p), vd = this.dist * Math.sin(p) + 14;
+      pos = new THREE.Vector3(s.x - fx * hd, vd, -(s.y - fy * hd));
+      tgt = new THREE.Vector3(s.x + fx * this.dist * 0.22, 12, -(s.y + fy * this.dist * 0.22));
+    } else {
+      const e = World3D.ship.userData.bridgeEye.clone().applyEuler(World3D.ship.rotation).add(World3D.ship.position);
+      pos = e; const p = this.pitch * D2R;
+      tgt = new THREE.Vector3(e.x + fx * 500 * Math.cos(p), e.y + 500 * Math.sin(p), e.z - fy * 500 * Math.cos(p));
+    }
+    if (!this._pos || this.mode === 'bridge') { this._pos = pos.clone(); this._tgt = tgt.clone(); }
+    else { const k = 1 - Math.exp(-dt * 6); this._pos.lerp(pos, k); this._tgt.lerp(tgt, k); }
+    cam.position.copy(this._pos); cam.lookAt(this._tgt);
+  },
+  rotate(dx, dy) {
+    this.yawOff = normDeg(this.yawOff + dx + 180) - 180;
+    this.pitch = Math.max(this.mode === 'back' ? 2 : -20, Math.min(this.mode === 'back' ? 85 : 30, this.pitch + dy));
+  },
+  zoom(f) { this.dist = Math.max(70, Math.min(3500, this.dist * f)); },
+  bind(el) {
+    const pts = new Map(); let pinch0 = 0;
+    el.addEventListener('pointerdown', e => { document.activeElement?.blur?.(); el.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); });
+    el.addEventListener('pointermove', e => {
+      if (!pts.has(e.pointerId)) return; const p = pts.get(e.pointerId);
+      if (pts.size === 1) this.rotate((e.clientX - p.x) * 0.3, (e.clientY - p.y) * 0.2);
+      else if (pts.size === 2) {
+        p.x = e.clientX; p.y = e.clientY; const [a, b] = [...pts.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (pinch0) this.zoom(pinch0 / d); pinch0 = d; return;
+      }
+      p.x = e.clientX; p.y = e.clientY;
+    });
+    const up = e => { pts.delete(e.pointerId); pinch0 = 0; };
+    el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+    el.addEventListener('wheel', e => { e.preventDefault(); this.zoom(e.deltaY > 0 ? 1.12 : 1 / 1.12); }, { passive: false });
+  }
+};
+
+/** 2D 해도 렌더 (레이더 미니맵 + Three.js 실패 시 전체화면 폴백 공용) */
+function drawChart(ctx, W, H, cx, cy, s, ship, opt = {}) {
+  const X = x => W / 2 + (x - cx) * s, Y = y => H / 2 - (y - cy) * s;
+  ctx.fillStyle = opt.sea || '#0c2a3d'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = opt.land || '#5d7a4c'; ctx.strokeStyle = '#c9b98a'; ctx.lineWidth = 1;
+  for (const L of MAP.land) { ctx.beginPath(); L.poly.forEach((p, i) => i ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1]))); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+  const line = (pts, c, dash) => { ctx.setLineDash(dash || []); ctx.strokeStyle = c; ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1]))); ctx.stroke(); ctx.setLineDash([]); };
+  line(MAP.channel.right, 'rgba(255,110,110,.8)', [5, 4]); line(MAP.channel.left, 'rgba(110,255,150,.8)', [5, 4]); line(MAP.channel.center, 'rgba(255,255,255,.35)', [2, 5]);
+  const B = MAP.bridge; ctx.strokeStyle = '#ddd'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(X(B.a[0]), Y(B.a[1])); ctx.lineTo(X(B.b[0]), Y(B.b[1])); ctx.stroke(); ctx.lineWidth = 1;
+  for (const h of (Sim.shells || [])) {   // 포탄(붉은 점) / 착탄 물기둥(흰 원)
+    if (!h.landed && h.x !== undefined) { ctx.fillStyle = '#ff3a2a'; ctx.beginPath(); ctx.arc(X(h.x), Y(h.y), 3, 0, 7); ctx.fill(); }
+    else if (h.landed) { ctx.strokeStyle = `rgba(255,255,255,${Math.max(0, 1 - h.la / 1.6)})`; ctx.beginPath(); ctx.arc(X(h.x1), Y(h.y1), 4 + h.la * 8, 0, 7); ctx.stroke(); }
+  }
+  for (const b of MAP.buoys) { ctx.fillStyle = b.type === 'red' ? '#ff4040' : b.type === 'green' ? '#40ff80' : '#fff'; ctx.beginPath(); ctx.arc(X(b.x), Y(b.y), Math.max(1.5, 3 * s * 20), 0, 7); ctx.fill(); }
+  if (opt.labels) { ctx.fillStyle = '#e8f2f8'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center'; for (const [t, x, y] of MAP.labels) ctx.fillText(t, X(x), Y(y)); }
+  if (opt.rings) { ctx.strokeStyle = 'rgba(79,209,255,.25)'; for (const r of opt.rings) { ctx.beginPath(); ctx.arc(W / 2, H / 2, r * s, 0, 7); ctx.stroke(); } }
+  if (opt.targets) for (const t of opt.targets) {
+    const tx = X(t.x), ty = Y(t.y), c = t.color || '#ffd34f';
+    if (t.tow) { ctx.strokeStyle = '#ffd34f'; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(X(t.tow[0]), Y(t.tow[1])); ctx.stroke(); ctx.setLineDash([]); }   // 예인줄
+    if (t.vec) { ctx.strokeStyle = c; ctx.globalAlpha = 0.6; ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(tx + t.vec[0] * 360 * s, ty - t.vec[1] * 360 * s); ctx.stroke(); ctx.globalAlpha = 1; }   // 6분 벡터
+    if (t.person) { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(tx, ty, 5, 0, 7); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(tx, ty, 8, 0, 7); ctx.stroke(); ctx.lineWidth = 1; }   // 사람 = 원형 표지
+    else drawShipIcon(ctx, tx, ty, t.hdg, c, Math.max(5, t.length * s));
+    if (t.ring) { ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(tx, ty, 11, 0, 7); ctx.stroke(); ctx.lineWidth = 1; }
+  }
+  if (opt.gate) {   // 탈출 게이트(청록색 선) + 화면 밖이면 방향 화살표
+    const g = opt.gate, gx = X(g.x), ya = Y(g.y1), yb = Y(g.y2), gy = (ya + yb) / 2;
+    ctx.save(); ctx.strokeStyle = '#2ef2d0'; ctx.fillStyle = '#2ef2d0'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(gx, ya); ctx.lineTo(gx, yb); ctx.stroke();
+    for (const yy of [ya, yb]) { ctx.beginPath(); ctx.arc(gx, yy, 4, 0, 7); ctx.fill(); }
+    if (gx < 6 || gx > W - 6 || gy < 6 || gy > H - 6) {
+      const ang = Math.atan2(gy - H / 2, gx - W / 2), r = Math.min(W, H) / 2 - 12;
+      ctx.translate(W / 2 + Math.cos(ang) * r, H / 2 + Math.sin(ang) * r); ctx.rotate(ang);
+      ctx.beginPath(); ctx.moveTo(9, 0); ctx.lineTo(-6, -6); ctx.lineTo(-6, 6); ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+  }
+  if (opt.berth) {   // 접안 구역(녹색 사각형) + 화면 밖이면 방향 화살표
+    const b = opt.berth, a = b.ang * D2R, ca = Math.cos(a), sa = Math.sin(a), bx = X(b.x), by = Y(b.y);
+    ctx.save(); ctx.strokeStyle = '#3dffb4'; ctx.fillStyle = 'rgba(61,255,180,.25)'; ctx.lineWidth = 2; ctx.beginPath();
+    [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([u, v], i) => { const wx = b.x + u * b.L / 2 * ca - v * b.W / 2 * sa, wy = b.y + u * b.L / 2 * sa + v * b.W / 2 * ca; i ? ctx.lineTo(X(wx), Y(wy)) : ctx.moveTo(X(wx), Y(wy)); });
+    ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#3dffb4';
+    if (bx < 6 || bx > W - 6 || by < 6 || by > H - 6) {
+      const ang = Math.atan2(by - H / 2, bx - W / 2), rr = Math.min(W, H) / 2 - 12;
+      ctx.translate(W / 2 + Math.cos(ang) * rr, H / 2 + Math.sin(ang) * rr); ctx.rotate(ang);
+      ctx.beginPath(); ctx.moveTo(9, 0); ctx.lineTo(-6, -6); ctx.lineTo(-6, 6); ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+  }
+  if (ship) {
+    const sx = X(ship.x), sy = Y(ship.y), hr = ship.hdg * D2R;
+    ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + Math.sin(hr) * 2000 * s, sy - Math.cos(hr) * 2000 * s); ctx.stroke();
+    const v = ship.sogVec; ctx.strokeStyle = '#4fd1ff'; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + v[0] * 360 * s, sy - v[1] * 360 * s); ctx.stroke();  // 6분 벡터
+    drawShipIcon(ctx, sx, sy, ship.hdg, '#4fd1ff', Math.max(7, CONFIG.own.length * s));
+  }
+}
+function drawShipIcon(ctx, x, y, hdg, c, len) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(hdg * D2R); ctx.fillStyle = c; ctx.beginPath();
+  ctx.moveTo(0, -len / 2); ctx.lineTo(len * 0.22, len * 0.1); ctx.lineTo(len * 0.18, len / 2); ctx.lineTo(-len * 0.18, len / 2); ctx.lineTo(-len * 0.22, len * 0.1); ctx.closePath(); ctx.fill(); ctx.restore();
+}
+const Fallback2D = {
+  scale: 0.06, pan: { x: 0, y: 0 },
+  init(cv) {
+    this.cv = cv; cv.style.display = 'block'; this.resize();
+    cv.addEventListener('wheel', e => { e.preventDefault(); this.zoom(e.deltaY > 0 ? 0.88 : 1.14); }, { passive: false });
+    const pts = new Map(); let pinch0 = 0;   // 한 손가락(또는 마우스) 드래그 = 이동, 두 손가락 = 핀치 줌
+    cv.addEventListener('pointerdown', e => { document.activeElement?.blur?.(); cv.setPointerCapture?.(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); pinch0 = 0; });
+    cv.addEventListener('pointermove', e => {
+      const p = pts.get(e.pointerId); if (!p) return;
+      if (pts.size === 1) { this.pan.x -= (e.clientX - p.x) / this.scale; this.pan.y += (e.clientY - p.y) / this.scale; }
+      else if (pts.size === 2) {
+        p.x = e.clientX; p.y = e.clientY; const [a, b] = [...pts.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (pinch0) this.zoom(d / pinch0); pinch0 = d; return;
+      }
+      p.x = e.clientX; p.y = e.clientY;
+    });
+    const up = e => { pts.delete(e.pointerId); pinch0 = 0; };
+    cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  },
+  zoom(f) { this.scale = Math.max(0.004, Math.min(0.6, this.scale * f)); },
+  recenter() { this.pan.x = 0; this.pan.y = 0; },
+  resize() { if (!this.cv) return; const d = Math.min(devicePixelRatio, 2); this.cv.width = innerWidth * d; this.cv.height = innerHeight * d; this.d = d; },
+  update(t, dt, ship) {
+    const c = this.cv.getContext('2d'); c.setTransform(this.d, 0, 0, this.d, 0, 0);
+    drawChart(c, innerWidth, innerHeight, ship.x + this.pan.x, ship.y + this.pan.y, this.scale, ship, { labels: true, rings: [500, 1000, 2000], targets: Sim.radarTargets(), gate: Sim.gateData(), berth: Sim.berthData() });
+  }
+};
+
+// =====================================================================
+// --- 3. SIMULATION & HUD ---
+// =====================================================================
+const $ = id => document.getElementById(id);
+
+/** 자선 운동모델: 1차 Nomoto 선회 + 1차 속력 응답 + 조류 */
+class OwnShip {
+  constructor() { this.reset(); }
+  reset(st) {
+    const s = st || CONFIG.start;
+    Object.assign(this, { x: s.x, y: s.y, hdg: s.hdg, u: s.kn * KN, r: 0, rudCmd: 0, rud: 0, eng: s.eng, grounded: null, sogVec: [0, 0] });
+  }
+  step(dt) {
+    const C = CONFIG.own;
+    // 타기
+    const dr = this.rudCmd - this.rud; this.rud += Math.sign(dr) * Math.min(Math.abs(dr), C.rudderRate * dt);
+    if (this.grounded) { this.u = 0; this.r = 0; this.sogVec = [0, 0]; return; }
+    // 속력 (가속/관성감속 시정수 차등)
+    const tgt = ENGINE_ORDERS[this.eng].kn * KN;
+    const tau = Math.abs(tgt) > Math.abs(this.u) && Math.sign(tgt || 1) === Math.sign(this.u || tgt || 1) ? C.accTau : C.decTau;
+    this.u += (tgt - this.u) / tau * dt;
+    // 선회: 정상선회 각속도 ∝ 타각 × 타효속력 (전진 기관 시 프로펠러 후류로 최소 타효 보장)
+    const ueff = ENGINE_ORDERS[this.eng].kn > 0 ? Math.max(this.u, 1.6) : this.u;
+    const rss = (this.rud / C.maxRudder) * C.turnRateAt35 * (ueff / C.refSpeed);
+    this.r += (rss - this.r) / C.T * dt;
+    this.hdg = normDeg(this.hdg + this.r * dt);
+    // 대지 이동 = 대수속력 벡터 + 조류
+    const h = this.hdg * D2R, cs = CONFIG.tide.setDeg * D2R, ck = CONFIG.tide.kn * KN;
+    this.sogVec = [Math.sin(h) * this.u + Math.sin(cs) * ck, Math.cos(h) * this.u + Math.cos(cs) * ck];
+    this.x += this.sogVec[0] * dt; this.y += this.sogVec[1] * dt;
+  }
+  get sogKn() { return Math.hypot(...this.sogVec) / KN; }
+  get cog() { return normDeg(Math.atan2(this.sogVec[0], this.sogVec[1]) * R2D); }
+  hullPoints() {   // 선수·선체중앙·선미 + 양현 (좌초 판정)
+    const h = this.hdg * D2R, L = CONFIG.own.length / 2, B = CONFIG.own.beam / 2, fx = Math.sin(h), fy = Math.cos(h);
+    return [[this.x + fx * L, this.y + fy * L], [this.x, this.y], [this.x - fx * L, this.y - fy * L], [this.x + fy * B, this.y - fx * B], [this.x - fy * B, this.y + fx * B]];
+  }
+}
+
+/** 타선(AI): channel=지정항로 추종, cross=항로 횡단, fisher=조업(불규칙 변침) */
+class TargetShip {
+  constructor(sp) {
+    Object.assign(this, sp);
+    this.u0 = sp.kn * KN; this.u = this.u0; this.f = 1; this.avoid = false;
+    this.range = 1e9; this.cpa = 1e9; this.tcpa = Infinity; this.brg = 0; this.level = ''; this.vx = 0; this.vy = 0; this.timer = 0;
+    if (this.mode === 'channel') {
+      this.off0 = sp.off; this.offc = sp.off; this.sPos = sp.s; this._place();
+      const p = channelPointAt(this.sPos); this.hdg = normDeg(Math.atan2(this.dir * p.dx, this.dir * p.dy) * R2D);
+    } else if (this.mode === 'cross') { this.hdg0 = sp.hdg; this.hdg = sp.hdg; }
+    else if ((this.mode === 'cadet' || this.mode === 'navy')) {   // 자선의 항적(빵부스러기)을 따라가며 추격 — 육지를 가로지르지 않음
+      this.hdg = sp.hdg; this.saluteUntil = -1; this.saluting = false; this.crumbs = [];
+      const o = Sim.ship, d = Math.hypot(o.x - sp.x, o.y - sp.y), n = Math.max(1, Math.round(d / 25));
+      for (let i = 1; i <= n; i++) this.crumbs.push([sp.x + (o.x - sp.x) * i / n, sp.y + (o.y - sp.y) * i / n]);
+    }
+    else if (this.mode === 'drift') { this.hdg = rnd() * 360; this.hdgT = this.hdg; this.timer = 10 + rnd() * 30; }
+    else if (this.mode === 'barge') { this.hdg = 0; }
+    else { this.hdg = rnd() * 360; this.hdgT = this.hdg; this.timer = 5 + rnd() * 25; }
+    if (this.mode === 'fisher' && !this.cls) { this.cls = 'fish'; this.tag = '어로종사선'; this.kind = '어로종사선(조업)'; }
+  }
+  _place() { const p = channelPointAt(this.sPos); this.x = p.x + this.dir * this.offc * p.dy; this.y = p.y - this.dir * this.offc * p.dx; }
+  _turn(target, rate, dt) { const d = angDiff(target, this.hdg); this.hdg = normDeg(this.hdg + Math.max(-rate * dt, Math.min(rate * dt, d))); }
+  step(dt) {
+    let px = this.x, py = this.y;
+    // 회피 판단: 가까워지고(TCPA>0) 최근접거리가 좁으면 감속 + 우현 변침(어선은 감속만)
+    const trig = this.range < (this.avoidRange || 0) && this.tcpa > 0 && this.tcpa < 600 && this.cpa < (this.avoidCpa || 0);
+    this.hold = trig ? 40 : Math.max(0, (this.hold || 0) - dt);   // 회피를 시작하면 40초간 유지 (경계값에서 떨림 방지)
+    this.avoid = trig || this.hold > 0;
+    const fT = this.avoid ? (this.mode === 'fisher' ? 0.35 : 0.55) : 1;
+    this.f += (fT - this.f) * Math.min(1, dt / 6);
+    if (this.mode === 'channel') {
+      this.u = this.u0 * this.f;
+      const offT = this.off0 + (this.avoid ? 60 : 0);   // 자기 우측으로 60m 더 붙음
+      this.offc += Math.max(-1.5 * dt, Math.min(1.5 * dt, offT - this.offc));
+      this.sPos += this.dir * this.u * dt;
+      const Lc = MAP.channel.length; let wrapped = false;
+      if (this.sPos < 0) { this.sPos += Lc; wrapped = true; } else if (this.sPos > Lc) { this.sPos -= Lc; wrapped = true; }   // 항로 끝에 닿으면 반대편 끝에서 재등장
+      this._place();
+      if (wrapped) { px = this.x; py = this.y; const p = channelPointAt(this.sPos); this.hdg = normDeg(Math.atan2(this.dir * p.dx, this.dir * p.dy) * R2D); }
+      else { const dx = this.x - px, dy = this.y - py; if (dx * dx + dy * dy > 1e-8) this._turn(Math.atan2(dx, dy) * R2D, 15, dt); }
+    } else if (this.mode === 'cross') {
+      if (this.waiting === undefined) this.waiting = !!this.waitRange;
+      if (this.waiting && this.range < this.waitRange) this.waiting = false;   // 자선이 가까워지면 횡단 시작
+      this._turn(this.hdg0 + (this.avoid && !this.waiting ? 35 : 0), 6, dt);
+      this.u = this.waiting ? 0 : this.u0 * this.f; const h = this.hdg * D2R, nx = this.x + Math.sin(h) * this.u * dt, ny = this.y + Math.cos(h) * this.u * dt;
+      if (landAt(nx, ny)) { this.u0 = 0; this.u = 0; } else { this.x = nx; this.y = ny; }
+    } else if (this.mode === 'cadet' || this.mode === 'navy') {
+      const o = Sim.ship, lc = this.crumbs[this.crumbs.length - 1];
+      if (!lc || Math.hypot(o.x - lc[0], o.y - lc[1]) > 25) this.crumbs.push([o.x, o.y]);
+      while (this.crumbs.length > 1 && Math.hypot(this.crumbs[0][0] - this.x, this.crumbs[0][1] - this.y) < 25) this.crumbs.shift();
+      const goal = this.crumbs.length > 1 ? this.crumbs[0] : [o.x, o.y];   // 따라잡으면 자선을 직접 노림
+      this._turn(Math.atan2(goal[0] - this.x, goal[1] - this.y) * R2D, this.mode === 'navy' ? 22 : 160, dt);
+      this.saluting = this.mode === 'cadet' && Sim.t < this.saluteUntil;
+      if (this.mode === 'navy') this.turretRel = angDiff(Math.atan2(o.x - this.x, o.y - this.y) * R2D, this.hdg);
+      this.u += ((this.saluting ? 5.5 : this.kn) * KN - this.u) * Math.min(1, dt / 1.5);
+      const h = this.hdg * D2R; this.x += Math.sin(h) * this.u * dt; this.y += Math.cos(h) * this.u * dt;
+    } else if (this.mode === 'drift') {   // 조종불능선(표류) · 조종제한선(작업): 0.5~1kn로 느리게 움직이며 구역 이탈 시 복귀, 회피 동작 없음
+      this.timer -= dt;
+      if (this.timer <= 0) { this.timer = 30 + rnd() * 40; this.hdgT = this.hdg + (rnd() - 0.5) * 140; }
+      if (Math.hypot(this.x - this.cx, this.y - this.cy) > this.leash) this.hdgT = Math.atan2(this.cx - this.x, this.cy - this.y) * R2D;
+      this._turn(this.hdgT, 2, dt);
+      this.u = this.kn * KN * (0.7 + 0.3 * Math.sin(Sim.t * 0.05 + this.cx * 0.01));
+      const h = this.hdg * D2R, nx = this.x + Math.sin(h) * this.u * dt, ny = this.y + Math.cos(h) * this.u * dt;
+      if (landAt(nx, ny)) this.hdgT = this.hdg + 150; else { this.x = nx; this.y = ny; }
+    } else if (this.mode === 'barge') {   // 부선: 예인선 뒤 160m에서 예인줄에 끌려감
+      const g = this.tug;
+      if (g) {
+        let dx = this.x - g.x, dy = this.y - g.y, d = Math.hypot(dx, dy);
+        if (!isFinite(d) || d > this.towLen * 2.5 || d < 1) {   // 처음 배치 또는 예인선이 항로 끝에서 재등장한 경우: 예인선 바로 뒤로
+          const h = g.hdg * D2R; this.x = g.x - Math.sin(h) * this.towLen; this.y = g.y - Math.cos(h) * this.towLen; px = this.x; py = this.y;
+        } else if (d > this.towLen) { this.x = g.x + dx / d * this.towLen; this.y = g.y + dy / d * this.towLen; }
+        this.hdg = normDeg(Math.atan2(g.x - this.x, g.y - this.y) * R2D); this.u = g.u;
+      }
+    } else {
+      this.timer -= dt;
+      if (this.timer <= 0) { this.timer = 20 + rnd() * 40; this.hdgT = this.hdg + (rnd() < 0.5 ? -1 : 1) * (40 + rnd() * 110); this.u0 = (1.5 + rnd() * 2) * KN; }
+      if (Math.hypot(this.x - this.cx, this.y - this.cy) > this.leash) this.hdgT = Math.atan2(this.cx - this.x, this.cy - this.y) * R2D;   // 조업구역 이탈 시 복귀
+      this._turn(this.hdgT, 5, dt);
+      this.u = this.u0 * this.f; const h = this.hdg * D2R, nx = this.x + Math.sin(h) * this.u * dt, ny = this.y + Math.cos(h) * this.u * dt;
+      if (landAt(nx, ny)) { this.hdgT = this.hdg + 150; this.u = 0; } else { this.x = nx; this.y = ny; }
+    }
+    const rvx = (this.x - px) / dt, rvy = (this.y - py) / dt;
+    if ((this.mode === 'fisher' || this.mode === 'drift') && this._vInit) {   // 불규칙 변침선: 속도를 약 30초 평균으로 (CPA 경고 깜빡임 방지)
+      const a = Math.min(1, dt / 30); this.vx += (rvx - this.vx) * a; this.vy += (rvy - this.vy) * a;
+    } else { this.vx = rvx; this.vy = rvy; this._vInit = true; }
+  }
+}
+/** CPA(최근접거리, m) / TCPA(최근접시간, 초) — 상대위치·상대속도(대지속도 기준) */
+function computeCPA(o, tg) {
+  const rx = tg.x - o.x, ry = tg.y - o.y, vx = tg.vx - o.sogVec[0], vy = tg.vy - o.sogVec[1];
+  const v2 = vx * vx + vy * vy, range = Math.hypot(rx, ry);
+  tg.range = range; tg.brg = normDeg(Math.atan2(rx, ry) * R2D);
+  if (v2 < 1e-6) { tg.tcpa = Infinity; tg.cpa = range; return; }
+  const t = -(rx * vx + ry * vy) / v2; tg.tcpa = t;
+  tg.cpa = t > 0 ? Math.hypot(rx + vx * t, ry + vy * t) : range;   // TCPA<0 이면 이미 멀어지는 중
+}
+function fmtDist(m) { return m < NM ? Math.round(m) + ' m' : (m / NM).toFixed(2) + ' NM'; }
+
+const Sim = {
+  t: 0, clock: 9 * 3600, timeScale: 2, wakeAcc: 0, lastChannelIn: null,
+  ship: new OwnShip(),
+  targets: [], top: null, paused: false,
+  use3D: false,
+
+  log(level, title, detail = '') {
+    const e = document.createElement('div'); e.className = 'e ' + level;
+    e.innerHTML = `<div class="t">${fmtClock(this.clock)}</div><div class="ti">${title}</div>${detail ? `<div class="d">${detail}</div>` : ''}`;
+    const L = $('log'); L.prepend(e); while (L.children.length > 60) L.lastChild.remove();
+  },
+
+  step(dt) {
+    const s = this.ship; s.step(dt); this.t += dt; this.clock += dt;
+    for (const tg of this.targets) tg.step(dt);
+    this.updateShells(dt);
+    this.assess();
+    // 좌초 판정
+    if (!s.grounded) for (const [px, py] of s.hullPoints()) {
+      const L = landAt(px, py);
+      if (L) { s.grounded = L; s.eng = ENG_STOP; this.log('bad', `좌초 — ${L.name}`, RULES.ref.grounding.b); showBanner(`⚠ 좌초 (${L.name})`, 'R 키 또는 [재시작]으로 초기화'); break; }
+    }
+    if (!s.grounded) {   // 목포대교 교각·주탑 충돌
+      const me = { x: s.x, y: s.y, hdg: s.hdg, hl: CONFIG.own.length / 2 * 0.94, hw: CONFIG.own.beam / 2 * 0.9 };
+      const q = BRIDGE_PIERS.find(p => Math.hypot(p.x - s.x, p.y - s.y) < CONFIG.own.length && obbOverlap(me, p));
+      if (q) { s.grounded = { name: `목포대교 ${q.kind === 'pylon' ? '주탑' : '교각'}`, pier: true }; s.eng = ENG_STOP; this.log('bad', `충돌 — ${s.grounded.name}`, '교량 통과 시에는 주경간(두 주탑 사이) 항로 중앙으로 지나가세요. 경계 의무(해사안전법 제63조) · 안전한 속력(제64조)'); showBanner(`⚠ 충돌 (${s.grounded.name})`, 'R 키 또는 [재시작]으로 초기화'); }
+    }
+    // 항로 출입 알림 (3단계에서 판정 엔진으로 이관)
+    const ci = channelInfo(s.x, s.y);
+    if (this.lastChannelIn !== null && ci.inside !== this.lastChannelIn)
+      this.log(ci.inside ? 'ok' : 'warn', ci.inside ? '지정항로 진입' : '지정항로 이탈', ci.inside ? RULES.ref.channelRight.b : RULES.ref.channelKeep.b);
+    this.lastChannelIn = ci.inside; this.ci = ci;
+    Rules.update(dt); Mission.update(dt);
+    // 항적
+    this.wakeAcc += dt;
+    if (this.use3D && this.wakeAcc > 0.35 && Math.abs(s.u) > 0.5) {
+      this.wakeAcc = 0; const h = s.hdg * D2R, L = CONFIG.own.length * 0.5;
+      const bx = s.x - Math.sin(h) * L, by = s.y - Math.cos(h) * L;
+      for (const k of [-1, 0, 1]) World3D.pushWake(bx + Math.cos(h) * k * 6, by - Math.sin(h) * k * 6, 0);
+    }
+  },
+
+  /** 모든 타선과의 CPA/TCPA 갱신, 위험 타선 선정 (위험: TCPA 0~20분 & CPA ≤ 300m) */
+  assess() {
+    let top = null;
+    for (const tg of this.targets) {
+      computeCPA(this.ship, tg);
+      const was = tg.level, live = tg.tcpa > 0 && tg.tcpa <= 1200;
+      let lv = live && tg.cpa <= (was === 'danger' ? 360 : 300) ? 'danger' : live && tg.cpa <= 600 ? 'warn' : '';
+      if (lv === 'danger' && was !== 'danger' && this.t < (tg.noDangerUntil || 0)) lv = 'warn';   // 통과 직후 재경보 방지
+      tg.level = lv;
+      if (tg.level === 'danger') {
+        if (!top || tg.tcpa < top.tcpa) top = tg;
+        if (was !== 'danger') this.log('bad', `위험 타선: ${tg.name} (${tg.kind})`, `CPA ${fmtDist(tg.cpa)} · TCPA ${(tg.tcpa / 60).toFixed(1)}분 · 거리 ${fmtDist(tg.range)} · 방위 ${pad3(tg.brg)}°<br>※ 항법 위반 여부는 법규 판정 로그를 확인하세요.`);
+      } else if (was === 'danger') { tg.noDangerUntil = this.t + 20; this.log('ok', `위험 해소: ${tg.name}`, `CPA ${fmtDist(tg.cpa)} · 거리 ${fmtDist(tg.range)}`); }
+    }
+    this.top = top;
+  },
+  gateData() { return GOALS[SCENARIO.zone] === 'gate' ? GATE : null; },
+  berthData() { return BERTHS[GOALS[SCENARIO.zone]] || null; },
+  applyZoneVisuals() { if (this.use3D) { World3D.gate.visible = GOALS[SCENARIO.zone] === 'gate'; for (const k in World3D.berths) World3D.berths[k].visible = GOALS[SCENARIO.zone] === k; } },
+  /** 경고신호(단음 5회): 사관부가 400m 이내면 25초간 5.5kn로 감속하며 거수경례 */
+  cadetSalute() {
+    if (this.targets.some(g => g.mode === 'navy')) { this.log('info', '경고신호 — 북한군 경비정은 응하지 않습니다', '경고신호로는 감속시킬 수 없습니다. 전속력으로 탈출 게이트까지 도주하세요!'); return; }
+    for (const g of this.targets) {
+      if (g.mode !== 'cadet' || this.t < g.saluteUntil) continue;
+      if (g.range <= 400) {
+        g.saluteUntil = this.t + 25; Rules.cnt.ok++; Run.rec('ok', 'salute', '경고신호 이행 — 승선사관부 감속 유도', '400m 이내에서 경고신호(단음 5회)를 울려 승선사관부를 감속시켰습니다.'); Rules.render();
+        this.log('ok', '승선사관부가 경고신호를 듣고 거수경례 후 속도를 늦췄습니다!', `거리 ${fmtDist(g.range)} · 약 25초간 5.5kn로 감속합니다. (해사안전법 제92조 / COLREG Rule 34(d): 경고신호) 준수 +1`);
+      } else this.log('info', '경고신호 — 사관부 반응 없음', `사관부가 ${fmtDist(g.range)} 밖에 있습니다. 400m 이내로 좁혀졌을 때 다시 울리세요.`);
+    }
+  },
+  radarTargets() {
+    const blink = Math.floor(this.t * 2) % 2;
+    return this.targets.map(t => ({
+      x: t.x, y: t.y, hdg: t.hdg, length: t.length, vec: [t.vx, t.vy], ring: t.level === 'danger', person: t.mode === 'cadet', tow: t.barge ? [t.barge.x, t.barge.y] : null,
+      color: t === this.top ? (blink ? '#ff2a2a' : '#ff7a3a') : t.level === 'danger' ? '#ff7a3a' : t.level === 'warn' ? '#ffb347' : '#ffd34f'
+    }));
+  },
+  spawnTargets() {
+    if (this.use3D) for (const t of this.targets) { World3D.scene.remove(t.mesh); World3D.scene.remove(t.label.sprite); t.label.dispose(); }
+    if (this.use3D) for (const t of this.targets) if (t.towMesh) World3D.scene.remove(t.towMesh);
+    this.targets = buildTargetSpecs(SCENARIO.zone).map(sp => new TargetShip(sp));
+    for (const b of this.targets) if (b.mode === 'barge') { b.tug = this.targets.find(g => g.name === b.tugName); if (b.tug) { b.tug.barge = b; b.step(0.05); } }   // 예인선열 연결
+    if (this.use3D) for (const t of this.targets) { t.mesh = t.mode === 'cadet' ? World3D.buildCadet() : t.mode === 'navy' ? World3D.buildNavy(t) : World3D.buildShip(t, t.color, false); World3D.scene.add(t.mesh); t.label = World3D.makeDynLabel(); World3D.scene.add(t.label.sprite); if (t.barge) { t.towMesh = World3D.buildTowLine(); World3D.scene.add(t.towMesh); } }
+    this.top = null; this.assess();
+    this.shellsClear(); this.fireT = 2; this.bannerUntil = 0;
+    if (this.targets.some(g => g.mode === 'navy')) {
+      const m = '⚠ 경보! 후방에서 북한군 경비정이 대포를 쏘며 추격해 옵니다! 전속력으로 탈출 게이트까지 도주하세요!';
+      showBanner(m); this.bannerUntil = this.t + 9; this.log('bad', m, '북한군 경비정(12.5kn)은 1,200m 이내에서 약 4초마다 포격합니다. 경고신호에 감속하지 않으며, 직격되거나 따라잡히면 미션 실패입니다. 변침으로 포탄을 피하세요.');
+    }
+  },
+  /** 포탄 비행·착탄·피격 판정 (북한군 경비정 케이스) */
+  shellsClear() {
+    for (const h of (this.shells || [])) { if (h.mesh) World3D.scene.remove(h.mesh); if (h.spl) World3D.scene.remove(h.spl); }
+    this.shells = [];
+  },
+  updateShells(dt) {
+    if (this.bannerUntil && this.t > this.bannerUntil) { hideBanner(); this.bannerUntil = 0; }
+    const n = this.targets.find(g => g.mode === 'navy'), o = this.ship;
+    if (n && !o.grounded && n.range <= 1200) {
+      this.fireT -= dt;
+      if (this.fireT <= 0) {
+        this.fireT = 4; const fl = 2.2, ux = Math.sin(o.hdg * D2R) * o.u, uy = Math.cos(o.hdg * D2R) * o.u;
+        let tx = o.x + ux * fl, ty = o.y + uy * fl;
+        const lucky = rnd() < (n.range < 600 ? 0.002 : 0.0005);   // 직격 조준탄은 드물게 — 비행 중 변침하면 피할 수 있음
+        if (!lucky) { const a = rnd() * 6.283, r = 40 + rnd() * (30 + n.range * 0.15); tx += Math.cos(a) * r; ty += Math.sin(a) * r; }
+        const sh = { x0: n.x + Math.sin(n.hdg * D2R) * 14, y0: n.y + Math.cos(n.hdg * D2R) * 14, x1: tx, y1: ty, age: 0, dur: fl, landed: false, la: 0 };
+        if (this.use3D) { sh.mesh = World3D.makeShell(); }
+        this.shells.push(sh); Sfx.cannon(0.34);
+      }
+    }
+    for (let i = this.shells.length - 1; i >= 0; i--) {
+      const h = this.shells[i]; h.age += dt;
+      if (!h.landed) {
+        const k = Math.min(1, h.age / h.dur), x = h.x0 + (h.x1 - h.x0) * k, y = h.y0 + (h.y1 - h.y0) * k;
+        h.x = x; h.y = y; if (h.mesh) h.mesh.position.set(x, 6 + 70 * 4 * k * (1 - k), -y);
+        if (k >= 1) {
+          h.landed = true; h.la = 0; Sfx.cannon(0.16, true);
+          if (h.mesh) { World3D.scene.remove(h.mesh); h.mesh = null; h.spl = World3D.makeSplash(); h.spl.position.set(x, 0, -y); }
+          if (Math.hypot(x - o.x, y - o.y) <= 25 && !Rules.st.caught) {
+            const m = '⚠ 북한군 포격에 피격되었습니다!';
+            if (Rules.emit('shot', 'bad', m, '포탄이 자선 중심 25m 이내에 직격했습니다.')) Rules.st.caught = m;
+          }
+        }
+      } else {
+        h.la += dt; const a = h.la;
+        if (h.spl) {
+          const u = h.spl.userData; u.col.scale.set(1 + a * 0.8, 6 + 40 * Math.min(1, a / 0.6), 1 + a * 0.8); u.col.material.opacity = Math.max(0, 0.85 * (1 - a / 1.6));
+          u.fl.scale.setScalar(1 + a * 2.5); u.fl.material.opacity = Math.max(0, 0.9 * (1 - a / 0.5));
+        }
+        if (a > 1.6) { if (h.spl) World3D.scene.remove(h.spl); this.shells.splice(i, 1); }
+      }
+    }
+  },
+  applyWeather(announce) {
+    const W = WEATHER[SCENARIO.weather];
+    if (this.use3D) World3D.setWeather(SCENARIO.weather);
+    if (announce) this.log(W.visNM <= 1 ? 'warn' : 'info', `기상 변경: ${W.n}`,
+      `시정 ${W.visNM >= 1 ? W.visNM + ' NM' : Math.round(W.visNM * NM) + ' m'}. ` +
+      (W.visNM <= 1 ? '제한시계 — 3D 시야가 짧아졌으니 우측 하단 레이더와 타선 CPA 표시를 활용하세요.' : W.visNM < 5 ? '시정 저하 — 안전한 속력으로 감속하세요.' : '상호시계 — 육안으로 타선을 식별할 수 있습니다.'));
+  },
+  applyOwnType(announce) {
+    const sp = OWN_SPECS[SCENARIO.ownType];
+    Object.assign(CONFIG.own, { name: sp.name, length: sp.length, beam: sp.beam });
+    if (this.use3D) { World3D.setOwnShip(sp); CameraRig.baseDist = Math.max(130, sp.length * 2.7); CameraRig.dist = CameraRig.baseDist; CameraRig._pos = null; }
+    if (announce) this.log('info', `자선 선종 변경: ${OWN_TYPES[SCENARIO.ownType]}`, `${sp.name} (길이 ${sp.length}m). 적용 법규 요약은 우측 패널의 '현재 적용 법규'에 표시됩니다.`);
+  },
+  restart(reason) {
+    if (Run.mode === 'daily') { GAME_RNG = mulberry32(Run.dkey * 31 + 7); this.timeScale = 2; const tb = $('controls').querySelector('[data-act=time]'); if (tb) tb.textContent = '×2'; } else GAME_RNG = Math.random;
+    this.ship.reset(ZONE_START[SCENARIO.zone]); this.lastChannelIn = null; hideBanner();
+    if (this.use3D) World3D.wakePts.length = 0;
+    this.spawnTargets(); CameraRig._pos = null; Rules.reset(); Mission.reset(); Run.begin(); this.applyZoneVisuals();
+    const z = ZONE_UI[SCENARIO.zone];
+    this.log('info', reason || '시나리오 재시작', `${z.n} — ${z.desc}`);
+  }
+};
+
+// ---------- 법규 판정 엔진 (3단계) ----------
+/** 두 선박의 선체(중심선 5점 × 반폭)가 겹치는지 — 충돌 판정 */
+function hullOverlap(o, tg) {
+  if (Math.hypot(tg.x - o.x, tg.y - o.y) > (CONFIG.own.length + tg.length) / 2 + 15) return false;
+  return obbOverlap({ x: o.x, y: o.y, hdg: o.hdg, hl: CONFIG.own.length / 2 * 0.94, hw: CONFIG.own.beam / 2 * 0.9 },
+                    { x: tg.x, y: tg.y, hdg: tg.hdg, hl: tg.length / 2 * 0.94, hw: tg.beam / 2 * 0.9 });
+}
+/** 두 선분(p1-p2, q1-q2)의 교차 여부 */
+function segCross(p1, p2, q1, q2) {
+  const cr = (a, b, c) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+  const d1 = cr(q1, q2, p1), d2 = cr(q1, q2, p2), d3 = cr(p1, p2, q1), d4 = cr(p1, p2, q2);
+  return d1 * d2 < 0 && d3 * d4 < 0;
+}
+/** 사관부 포획: 추격자가 자선 선체(선수~선미 중심선 + 반폭)에 닿았는가 */
+function cadetCaught(o, g) {
+  const h = o.hdg * D2R, L = CONFIG.own.length / 2, fx = Math.sin(h), fy = Math.cos(h);
+  const dx = g.x - o.x, dy = g.y - o.y, along = Math.max(-L, Math.min(L, dx * fx + dy * fy));
+  return Math.hypot(dx - fx * along, dy - fy * along) < CONFIG.own.beam / 2 + 5;
+}
+/** 적용 순서: 선박입출항법(1) → 해사안전법(2) → COLREG(3). 같은 경고는 15초 쿨타임. warn=주의, bad=위반 */
+const Rules = {
+  COOL: 15, cnt: { ok: 0, warn: 0, bad: 0 }, last: {}, sig: [], acc: 0,
+  st: { lastOutT: -1e9, fogSince: null, fogSafeSince: null, rightSince: null, dng: {}, enc: {}, collided: null, caught: null },
+  reset() {
+    this.cnt = { ok: 0, warn: 0, bad: 0 }; this.last = {}; this.sig = []; this.acc = 0;
+    this.st = { lastOutT: -1e9, fogSince: null, fogSafeSince: null, rightSince: null, dng: {}, enc: {}, collided: null, caught: null };
+    this.render();
+  },
+  render() { $('cOk').textContent = this.cnt.ok; $('cWarn').textContent = this.cnt.warn; $('cBad').textContent = this.cnt.bad; },
+  gate(key) { const t = Sim.t; if (t - (this.last[key] ?? -1e9) < this.COOL) return false; this.last[key] = t; return true; },
+  emit(key, level, title, detail) { if (!this.gate(key)) return false; this.cnt[level === 'bad' ? 'bad' : 'warn']++; Run.rec(level === 'bad' ? 'bad' : 'warn', key, title, detail); Sim.log(level, title, detail); this.render(); return true; },
+  comply(key, title, detail) { if (!this.gate(key)) return false; this.cnt.ok++; Run.rec('ok', key, title, detail); Sim.log('ok', title, detail); this.render(); return true; },
+  noteSignal(kind) {
+    this.sig.push({ t: Sim.t, k: kind }); if (this.sig.length > 30) this.sig.shift();
+    if (kind === '5') Sim.cadetSalute();
+    if (WEATHER[SCENARIO.weather].visNM < 1) this.comply('fogsig-ok', '무중신호 이행', '제한시계 중 기적 신호를 울렸습니다. (해사안전법 제93조: 2분을 넘지 않는 간격으로 장음 1회)');
+  },
+  statusHTML() {
+    const s = Sim.ship, ci = Sim.ci, bad = t => `<span style="color:#ff5a5a">${t}</span>`;
+    return `<br><b>상태</b> 좌초 ${s.grounded ? bad('발생') : '없음'} · 충돌 ${this.st.collided ? bad('발생(' + this.st.collided + ')') : '없음'} · 수역 ${ci && ci.inside ? '항로 내' : bad('항로 밖')}`;
+  },
+  update(dt) {
+    this.acc += dt; if (this.acc < 0.25) return; this.acc = 0;
+    const s = Sim.ship, ci = Sim.ci, t = Sim.t; if (!ci || s.grounded) return;
+    const stw = s.u / KN, sog = s.sogKn, vis = WEATHER[SCENARIO.weather].visNM, T = Sim.targets, st = this.st;
+    const tag = '[적용 순서: 선박입출항법 → 해사안전법 → COLREG]';
+    const dOwn = angDiff(s.hdg, ci.dir), inbound = Math.abs(dOwn) < 90, along = Math.min(Math.abs(dOwn), 180 - Math.abs(dOwn)) < 55;
+    const side = inbound ? ci.side : -ci.side;                       // + 우측 / - 좌측 (자선 진행방향 기준)
+    const h = s.hdg * D2R, right = [Math.cos(h), -Math.sin(h)];
+
+    // ① 항로 내 좌측 통항 / 우현 대 우현 마주침 (선박입출항법 제12조 제1항 제3호)
+    const leftBias = ci.inside && along && sog > 1 && side < -30 && t - Mission.t0 > 40;   // 시작 직후 40초는 차선 정리 유예
+    if (leftBias) {
+      const oncoming = T.some(g => g.range < 3000 && Math.abs(angDiff(g.hdg, s.hdg + 180)) < 45);
+      this.emit('left', oncoming ? 'bad' : 'warn', '항로 내 좌측 통항 (우측 통항 위반)',
+        `${tag}<br>중심선 좌측 ${Math.abs(side).toFixed(0)}m(기준 30m). 선박입출항법 제12조 제1항 제3호(1순위): 항로에서 마주칠 우려가 있으면 오른쪽으로 항행. 해사안전법 제67조 / COLREG Rule 9(a)도 우측 통항 원칙.` + (oncoming ? '<br>마주 오는 선박이 있어 위험합니다.' : ''));
+      st.rightSince = null;
+    } else if (ci.inside && along && sog > 1) {
+      if (st.rightSince === null) st.rightSince = t;
+      else if (t - st.rightSince >= 120) { st.rightSince = t; this.comply('right-ok', '항로 내 우측 통항 유지', '2분간 중심선 우측으로 항행했습니다. (선박입출항법 제12조 제1항 제3호)'); }
+    } else st.rightSince = null;
+    if (ci.inside) for (const g of T) {
+      if (g.mode === 'channel' && Math.abs(angDiff(g.hdg, s.hdg + 180)) < 30 && g.range < 1500 && g.tcpa > 0 && g.tcpa < 600 && g.cpa < 300) {
+        const lat = (g.x - s.x) * right[0] + (g.y - s.y) * right[1];   // 마주 오는 평행 항적: 타선의 횡방향 위치 (+ = 자선 우현쪽으로 통과)
+        if (lat > 20) this.emit('ss:' + g.name, 'bad', `우현 대 우현 마주침: ${g.name}`,
+          `${tag}<br>CPA ${fmtDist(g.cpa)} · 타선이 자선 우현쪽으로 통과할 예정입니다. 마주치는 상태에서는 서로 우현 변침하여 좌현 대 좌현으로 통과해야 합니다 — 선박입출항법 제12조 제1항 제3호 / 해사안전법 제72조 / COLREG Rule 14.`);
+      }
+    }
+
+    // ② 만곡부 추월 금지 (선박입출항법 제12조 제1항 제4호 / 해사안전법 제67조·제71조)
+    if (ci.bend) for (const g of T) {
+      const gs = Math.hypot(g.vx, g.vy) / KN;
+      if (g.range > 5 && g.range < 400 && Math.abs(angDiff(g.brg, s.hdg)) < 45 && Math.abs(angDiff(g.hdg, s.hdg)) < 60 && sog > gs + 0.3)
+        this.emit('ot:' + g.name, 'bad', `만곡부 추월 시도: ${g.name}`,
+          `${tag}<br>거리 ${fmtDist(g.range)} · 자선 ${sog.toFixed(1)}kn > 타선 ${gs.toFixed(1)}kn. 목포구 만곡부에서는 선박입출항법 제12조 제1항 제4호(항로 내 추월 원칙적 금지)와 해사안전법 제67조(만곡부 특별한 경계)·제71조(추월선의 피항)가 적용됩니다. 추월을 중단하고 감속하세요.`);
+    }
+
+    // ③ 항로 출입 시 항로 항행선의 진로 방해 (선박입출항법 제12조 제1항 제1호)
+    if (!ci.inside) st.lastOutT = t;
+    const d = [Math.sin(ci.dir * D2R), Math.cos(ci.dir * D2R)], vside = s.sogVec[0] * d[1] - s.sogVec[1] * d[0];   // + = 항로 진행방향 기준 우측으로 이동
+    const toward = (ci.side > 0 && vside < -0.3) || (ci.side < 0 && vside > 0.3);
+    const entering = ci.inside ? (t - st.lastOutT < 90) : (ci.dist < MAP.channel.halfW + 500 && toward);
+    if (entering) for (const g of T) if (g.mode === 'channel' && ((g.tcpa > 0 && g.cpa < 250 && g.range < 3000) || g.range < 250))
+      this.emit('enter:' + g.name, 'bad', `항로 진입 시 진로 방해: ${g.name}`,
+        `${tag}<br>CPA ${fmtDist(g.cpa)}(기준 250m)${g.tcpa > 0 && isFinite(g.tcpa) ? ' · TCPA ' + (g.tcpa / 60).toFixed(1) + '분' : ''}. 선박입출항법 제12조 제1항 제1호: 항로 밖에서 항로로 들어오는 선박은 항로를 항행하는 다른 선박의 진로를 피해야 합니다.`);
+
+    // ④ 제한시계 안전속력 (해사안전법 제64조·제77조 / COLREG Rule 6·19)
+    if (vis < 1) {
+      st.fogSafeSince = stw >= 8 ? null : (st.fogSafeSince ?? t);
+      if (stw >= 8) this.emit('fogspeed', 'bad', '제한시계 안전속력 위반',
+        `${tag}<br>대수속력 ${stw.toFixed(1)}kn ≥ 8kn. 해사안전법 제64조(안전한 속력)·제77조(제한된 시계의 항법) / COLREG Rule 6·19: 시계 상태에 적합한 안전한 속력으로 감속하고 기관을 즉시 사용할 수 있게 준비하세요.`);
+      else if (t - st.fogSafeSince >= 120) { st.fogSafeSince = t; this.comply('fogspeed-ok', '제한시계 안전속력 유지', `2분간 8kn 미만(${stw.toFixed(1)}kn)으로 항행했습니다. (해사안전법 제64조·제77조)`); }
+    } else st.fogSafeSince = null;
+
+    // ⑤ 기적 신호 (해사안전법 제92조·제93조 / COLREG Rule 34·35)
+    if (vis >= 1) {
+      st.fogSince = null;
+      for (const g of T) {
+        if (g.mode === 'cadet' || g.mode === 'navy' || g.mode === 'barge') continue;   // 사관부는 선박이 아님 · 부선은 예인선과 함께 판정 — 경고신호는 거수경례 로직에서 별도 처리
+        const r = st.dng[g.name];
+        if (g.level === 'danger' && g.range < 3000) {
+          const dn = r || (st.dng[g.name] = { t0: t, ok: false, warned: false }); dn.out = null;
+          if (!dn.ok && this.sig.some(x => (x.k === '1' || x.k === '5') && x.t >= dn.t0 - 120)) { dn.ok = true; this.comply('sigok:' + g.name, `신호 이행: ${g.name}`, '위험 상황에서 조종신호/경고신호를 울렸습니다. (해사안전법 제92조 / COLREG Rule 34)'); }
+          else if (!dn.ok && !dn.warned && t - dn.t0 > 20 && (dn.warned = true)) this.emit('sig:' + g.name, 'warn', `기적 신호 미이행: ${g.name}`,
+            `${tag}<br>상호시계에서 CPA ${fmtDist(g.cpa)} · TCPA ${(g.tcpa / 60).toFixed(1)}분의 위험 상황입니다. 해사안전법 제92조 / COLREG Rule 34: 변침 시 조종신호(단음 1회, H), 상대 의도가 불분명하면 경고신호(단음 5회, Shift+H)를 울려야 합니다.`);
+        } else if (r) { r.out = r.out ?? t; if (t - r.out > 90 || g.range > 3000) delete st.dng[g.name]; }
+      }
+    } else {
+      st.dng = {};
+      if (Math.abs(stw) > 0.5) {
+        if (st.fogSince === null) st.fogSince = t;
+        const lastSig = Math.max(st.fogSince, ...this.sig.map(x => x.t));
+        if (t - lastSig > 120 && t - (st.fogWarnT ?? -1e9) >= 120 && (st.fogWarnT = t)) this.emit('fogsig', 'warn', '무중신호 미이행 (2분 경과)',
+          `${tag}<br>제한시계에서 대수속력이 있는 동력선은 2분을 넘지 않는 간격으로 장음 1회(F 키 / [무중] 버튼)를 울려야 합니다 — 해사안전법 제93조 / COLREG Rule 35(a).`);
+      } else st.fogSince = null;
+    }
+
+    // ⑥ 특수 선박 우선 피항 (해사안전법 제76조 / COLREG Rule 18) — 자선이 일반 동력선일 때
+    const SPC = { nuc: '조종불능선', ram: '조종제한선', fish: '어로종사선', sail: '범선' };
+    // ⑦ 우현 횡단선 피항 (해사안전법 제73조 / COLREG Rule 15) — 우현(상대방위 5°~112.5°)에서 횡단해 오는 선박
+    for (const g of T) {
+      if (g.mode === 'cadet' || g.mode === 'navy' || g.mode === 'barge') continue;
+      const nm = SPC[g.cls], isSpc = nm && SCENARIO.ownType === 'power';
+      const rel = normDeg(g.brg - s.hdg), hd = Math.abs(angDiff(g.hdg, s.hdg)), gs = Math.hypot(g.vx, g.vy) / KN;
+      const k = (isSpc ? 'r18:' : 'r15:') + g.name; let e = st.enc[k];
+      if (!e) {
+        const start = isSpc ? (g.range < 1500 && g.tcpa > 0 && g.tcpa < 900)
+          : (!nm && gs > 0.5 && rel >= 5 && rel <= 112.5 && hd >= 20 && hd <= 160 && g.range < 2000 && g.tcpa > 0 && g.tcpa < 900 && g.cpa < 600);
+        if (!start) continue;
+        e = st.enc[k] = { min: g.range, warned: false, done: false };
+      }
+      if (e.done) { if (g.range > 2200) delete st.enc[k]; continue; }
+      e.min = Math.min(e.min, g.range);
+      const lim = isSpc ? 200 : 250;
+      // 한 척과의 조우마다 1회만 기록: 3분·1km 안에서 CPA 기준 이내로 예측되면 주의 1회, 실제로 기준 거리 안까지 들어오면 위반 1회
+      const law = isSpc ? '해사안전법 제76조 / COLREG Rule 18: 항행 중인 동력선은 조종불능선·조종제한선·어로에 종사하고 있는 선박·범선의 진로를 피해야 합니다. 일찍 크게 변침하거나 감속하세요.'
+        : `타선이 자선 우현(상대방위 ${rel.toFixed(0)}°)에서 횡단 중. 해사안전법 제73조 / COLREG Rule 15: 다른 선박을 우현 쪽에 두고 횡단하는 선박이 피항선입니다. 우현 변침 또는 감속으로 그 선박의 선미 쪽을 지나가세요.`;
+      if (!e.warned && g.tcpa > 0 && g.tcpa < 180 && g.range < 1000 && g.cpa <= lim) {
+        e.warned = true;
+        this.emit(k, 'warn', isSpc ? `특수선 피항 위반: ${g.name} (${nm})` : `우현 횡단선 피항 의무: ${g.name}`,
+          `${tag}<br>CPA ${fmtDist(g.cpa)}(기준 ${lim}m) · TCPA ${(g.tcpa / 60).toFixed(1)}분 · 거리 ${fmtDist(g.range)}. ${law}`);
+      }
+      if (!e.bad && g.range <= lim) {
+        e.bad = true; e.warned = true;
+        this.emit(k + ':bad', 'bad', isSpc ? `특수선 근접 위반: ${g.name} (${nm})` : `우현 횡단선 근접 위반: ${g.name}`,
+          `${tag}<br>거리 ${fmtDist(g.range)}까지 근접했습니다(기준 ${lim}m). ${law}`);
+      }
+      if ((g.tcpa <= 0 && g.range > Math.max(300, e.min + 150)) || g.range > 2000) {
+        e.done = true;
+        if (!e.warned && e.min >= lim) this.comply((isSpc ? 'r18ok:' : 'r15ok:') + g.name, isSpc ? `특수선 안전 피항: ${g.name} (${nm})` : `우현 횡단선 안전 피항: ${g.name}`,
+          `최근접 ${fmtDist(e.min)}로 안전하게 비켜 지나갔습니다. (${isSpc ? '해사안전법 제76조 / COLREG Rule 18' : '해사안전법 제73조 / COLREG Rule 15'})`);
+      }
+    }
+
+    // ⑧ 예인선열 사이(예인줄) 횡단 금지 — 즉시 미션 실패
+    if (!st.caught) {
+      const hh = s.hdg * D2R, Lo = CONFIG.own.length / 2, o1 = [s.x + Math.sin(hh) * Lo, s.y + Math.cos(hh) * Lo], o2 = [s.x - Math.sin(hh) * Lo, s.y - Math.cos(hh) * Lo];
+      for (const g of T) if (g.barge) {
+        const b = g.barge, h1 = g.hdg * D2R, h2 = b.hdg * D2R;
+        const a1 = [g.x - Math.sin(h1) * g.length / 2, g.y - Math.cos(h1) * g.length / 2], a2 = [b.x + Math.sin(h2) * b.length / 2, b.y + Math.cos(h2) * b.length / 2];
+        if (segCross(o1, o2, a1, a2)) {
+          const m = '충돌/예인줄 절단 — 예인선과 부선 사이를 횡단했습니다!';
+          if (this.emit('tow:' + g.name, 'bad', `⚠ ${m}`, `${tag}<br>${g.name}과 부선을 잇는 예인줄(160m)을 가로질렀습니다. 예인선열 사이로는 절대 지나가지 말고, 부선 뒤쪽으로 충분히 떨어져 통과하세요. (해사안전법 제63조 경계 / COLREG Rule 24 예인선열 형상물)`)) { st.caught = m; showBanner(`⚠ ${m}`); }
+          break;
+        }
+      }
+    }
+
+    // 충돌 판정 (선체 겹침)
+    for (const g of T) if (g.mode === 'cadet' ? cadetCaught(s, g) : hullOverlap(s, g)) {
+      if (g.mode === 'navy') {
+        if (this.emit('shot', 'bad', '⚠ 북한군 포격에 피격되었습니다!', `${tag}<br>북한군 경비정에게 따라잡혀 피격되었습니다.`)) st.caught = '⚠ 북한군 포격에 피격되었습니다!';
+        continue;
+      }
+      if (g.mode === 'cadet') {
+        if (this.emit('catch', 'bad', '⚠ 승선사관부에게 따라잡혔습니다!', `${tag}<br>추격 중이던 ${g.name}(${g.kind})에게 접촉(포획)되었습니다. 경고신호(단음 5회, Shift+H)는 사관부가 400m 이내일 때 효과가 있습니다.`)) st.caught = '⚠ 승선사관부에게 따라잡혔습니다!';
+        continue;
+      }
+      if (this.emit('col:' + g.name, 'bad', `충돌: ${g.name}`, `${tag}<br>자선과 ${g.name}의 선체가 접촉했습니다. 경계(해사안전법 제63조)·충돌을 피하기 위한 동작(제66조) 의무를 검토하세요.`)) {
+        st.collided = g.name; showBanner(`⚠ 충돌 (${g.name})`, 'R 키 또는 [재시작]으로 초기화');
+      }
+    }
+  }
+};
+
+// ---------- 탈출 미션 (출항 미션: 서쪽 게이트 x ≤ -13000 통과) ----------
+function fmtDur(sec) { sec = Math.floor(sec); return Math.floor(sec / 60) + '분 ' + String(sec % 60).padStart(2, '0') + '초'; }
+const Mission = {
+  active: false, state: 'idle', t0: 0,
+  reset() { this.active = MISSION_ZONES.includes(SCENARIO.zone); this.state = this.active ? 'run' : 'idle'; this.t0 = Sim.t; this.hold = 0; this.goalBanner = false; this.passWarn = false; this.goal = GOALS[SCENARIO.zone]; this.d0 = Math.max(1, this.goalDist()); Sim.paused = false; $('modal').style.display = 'none'; },
+  elapsed() { return Sim.t - this.t0; },
+  berth() { return BERTHS[this.goal] || null; },
+  goalDist() { const s = Sim.ship, b = BERTHS[GOALS[SCENARIO.zone]]; return b ? Math.hypot(s.x - b.x, s.y - b.y) : Math.max(0, s.x - GATE.x); },
+  remaining() { return this.goalDist(); },
+  progress() { const s = Sim.ship, sx = ZONE_START[SCENARIO.zone].x; return Math.max(0, Math.min(1, this.berth() ? 1 - this.goalDist() / this.d0 : (sx - s.x) / (sx - GATE.x))); },
+  inGateWidth() { const y = Sim.ship.y; return y >= GATE.y1 - 60 && y <= GATE.y2 + 60; },
+  grade(c) { return c.bad === 0 && c.warn === 0 ? 'S' : c.bad === 0 && c.warn <= 3 ? 'A' : c.bad <= 2 ? 'B' : 'C'; },
+  update(dt = 0) {
+    if (this.state !== 'run') return;
+    const s = Sim.ship;
+    if (s.grounded) return this.finish(false, s.grounded.pier ? `충돌 (${s.grounded.name})` : `좌초 (${s.grounded.name})`);
+    if (Rules.st.caught) return this.finish(false, Rules.st.caught);
+    if (Rules.st.collided) return this.finish(false, `충돌 (${Rules.st.collided})`);
+    const b = this.berth();
+    if (b) {   // 접안: 구역 안에서 대지속력 2.0kn 이하를 3초 유지
+      this.hold = inBerth(b, s.x, s.y) && s.sogKn <= 2.2 ? this.hold + dt : 0;   // 화면 기준 2.0kn, 판정은 관성 감안 2.2kn까지 인정
+      if (this.hold >= 3) this.finish(true, '');
+    } else if (s.x <= GATE.x && this.inGateWidth()) return this.finish(true, '');
+    this.goalWarn(s, b);
+  },
+  /** 목표를 놓치거나 이탈했을 때 중앙 배너 안내 (다시 정상 범위로 들어오면 숨김) */
+  goalWarn(s, b) {
+    let m = null, sub = '';
+    if (!b && s.x <= GATE.x && !this.inGateWidth()) {
+      m = '⚠ 탈출 게이트 이탈! 선회하여 청록색 게이트 사이로 통과하세요';
+      sub = `게이트는 현재 위치의 ${s.y < GATE.y1 ? '북쪽' : '남쪽'} ${fmtDist(s.y < GATE.y1 ? GATE.y1 - s.y : s.y - GATE.y2)} — 레이더의 청록색 선을 확인하세요`;
+    } else if (b && (s.x > b.x + 350 || (this.passWarn && s.x > b.x + 320))) {   // 350m 넘게 지나치면 표시, 320m 안으로 돌아오면 해제
+      m = '⚠ 접안 구역을 지나쳤습니다! 감속 후 선회하여 녹색 접안 구역으로 진입하세요';
+      sub = `${b.n} 접안 구역까지 ${fmtDist(this.goalDist())} — 레이더의 녹색 상자 방향(서쪽)`;
+    }
+    this.passWarn = !!(m && b);
+    if (m) { const bn = $('banner'); if (!this.goalBanner || bn.style.display === 'none') showBanner(m, sub); else bn.querySelector('small') && (bn.querySelector('small').textContent = sub); this.goalBanner = true; }
+    else if (this.goalBanner) { hideBanner(); this.goalBanner = false; }
+  },
+  finish(ok, why, kind) {
+    this.state = kind === 'end' ? 'end' : ok ? 'success' : 'fail'; Sim.paused = true; hideBanner();
+    const c = Rules.cnt, g = (ok || kind === 'end') ? this.grade(c) : '실패';
+    const title = kind === 'end' ? '종료 & 결과' : ok ? (this.berth() ? `부두 접안 성공! (${this.berth().n})` : '목포 근해 탈출 성공!') : `미션 실패 — ${why}`;
+    Sim.log(kind === 'end' ? 'info' : ok ? 'ok' : 'bad', title, `소요 ${fmtDur(this.elapsed())} · 준수 ${c.ok} / 주의 ${c.warn} / 위반 ${c.bad}` + (ok ? ` · 등급 ${g}` : ''));
+    $('mTitle').textContent = title;
+    $('mTime').textContent = fmtDur(this.elapsed());
+    $('mOk').textContent = c.ok; $('mWarn').textContent = c.warn; $('mBad').textContent = c.bad;
+    const gr = $('mGrade'); gr.textContent = g; gr.className = 'g-' + ((ok || kind === 'end') ? g : 'F');
+    Results.fill(Run.finalize(ok, why, kind, g));
+    $('modal').style.display = 'flex';
+  }
+};
+
+// ---------- 입력 ----------
+const Controls = {
+  rud(d) { const s = Sim.ship; s.rudCmd = Math.max(-35, Math.min(35, s.rudCmd + d)); },
+  eng(d) { const s = Sim.ship; s.eng = Math.max(0, Math.min(ENGINE_ORDERS.length - 1, s.eng + d)); },
+  stop() { Sim.ship.eng = ENG_STOP; Sim.ship.rudCmd = 0; Sim.log('info', '기관 정지 · 타 중앙', '관성으로 서서히 감속합니다. 긴급 정지는 후진 기관(S 연타)을 사용하세요.'); },
+  horn(n) {
+    Horn.blast(n);
+    const r = n >= 5 ? RULES.ref.horn5 : RULES.ref.horn1; Sim.log('info', `기적: ${r.t}`, r.b);
+    Rules.noteSignal(n >= 5 ? '5' : '1');
+  },
+  fog() {
+    Horn.blast(1, true);
+    Sim.log('info', '기적: 무중신호(장음 1회)', '해사안전법 제93조 / COLREG Rule 35(a): 대수속력이 있는 동력선은 2분을 넘지 않는 간격으로 장음 1회');
+    Rules.noteSignal('L');
+  },
+  time() { if (Run.mode === 'daily') { toast('일일 챌린지는 공정성을 위해 ×2 고정입니다'); return; } const ts = [1, 2, 4, 8, 16]; Sim.timeScale = ts[(ts.indexOf(Sim.timeScale) + 1) % ts.length]; $('controls').querySelector('[data-act=time]').textContent = '×' + Sim.timeScale; },
+  act(a) {
+    ({ rudL: () => this.rud(-5), rudR: () => this.rud(5), rudMid: () => (Sim.ship.rudCmd = 0), engUp: () => this.eng(1), engDn: () => this.eng(-1),
+       stop: () => this.stop(), horn: () => this.horn(1), warn5: () => this.horn(5), fog: () => this.fog(), cam: () => { CameraRig.reset(); CameraRig._pos = null; Fallback2D.recenter(); },
+       hornMute: () => Horn.toggle(), time: () => this.time() })[a]?.();
+  }
+};
+addEventListener('keydown', e => {
+  if (e.target && e.target.tagName === 'SELECT') return;   // 메뉴 조작 중에는 선박 조종 키 무시
+  if (typeof StartUI !== 'undefined' && StartUI.open) return;   // 시나리오 선택 화면에서는 조종 키 무시
+  const k = e.key.toLowerCase(), code = e.code;
+  if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(k)) e.preventDefault();
+  if (k === 'w' || k === 'arrowup') { if (!e.repeat) Controls.eng(1); }
+  else if (k === 's' || k === 'arrowdown') { if (!e.repeat) Controls.eng(-1); }
+  else if (k === 'a' || k === 'arrowleft') Controls.rud(-5);
+  else if (k === 'd' || k === 'arrowright') Controls.rud(5);
+  else if (code === 'Space') Controls.stop();
+  else if (k === 'h' && !e.repeat) Controls.horn(e.shiftKey ? 5 : 1);
+  else if (k === 'f' && !e.repeat) Controls.fog();
+  else if (k === 'j') CameraRig.rotate(-5, 0); else if (k === 'l') CameraRig.rotate(5, 0);
+  else if (k === 'i') CameraRig.rotate(0, 3); else if (k === 'k') CameraRig.rotate(0, -3);
+  else if (k === 'u') CameraRig.zoom(1 / 1.15); else if (k === 'o') CameraRig.zoom(1.15);
+  else if (k === 'c') Controls.act('cam');
+  else if (k === 't') Controls.time(); else if (k === 'r') Sim.restart();
+  else if (k === 'g' && World3D.channelGuide) World3D.channelGuide.visible = !World3D.channelGuide.visible;
+});
+const REPEAT_MS = { rudL: 120, rudR: 120, engUp: 450, engDn: 450 };   // 길게 누르면 연속 조작
+const buzz = ms => { try { navigator.vibrate?.(ms); } catch (e) { } };
+const isMobile = () => innerWidth <= 760;
+document.querySelectorAll('#controls .btn').forEach(b => {
+  let t1 = null, t2 = null;
+  const stop = () => { clearTimeout(t1); clearInterval(t2); t1 = t2 = null; b.classList.remove('press'); };
+  b.addEventListener('contextmenu', e => e.preventDefault());
+  b.addEventListener('pointerdown', e => {
+    e.preventDefault(); b.classList.add('press'); Horn.unlock(); buzz(15); Controls.act(b.dataset.act);
+    const iv = REPEAT_MS[b.dataset.act];
+    if (iv) { clearTimeout(t1); clearInterval(t2); t1 = setTimeout(() => { t2 = setInterval(() => { if (!b.classList.contains('press')) return stop(); Controls.act(b.dataset.act); buzz(8); }, iv); }, 350); }
+  });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, stop));
+});
+$('btnRetry').addEventListener('pointerdown', e => { e.preventDefault(); Sim.restart('다시 도전'); });
+function collapseLog() { const w = $('logWrap'); if (!w.classList.contains('collapsed')) { w.classList.add('collapsed'); $('logToggle').textContent = '펼치기'; } }
+['view', 'fallback'].forEach(id => $(id).addEventListener('pointerdown', () => { if (isMobile()) collapseLog(); }));   // 모바일: 배경(화면) 터치 시 로그 닫기
+/** 슬림 나침반 바: 선수 방위 ±60° 눈금, 8방위, 목표 방향 화살표 */
+const DIR8 = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+const relTxt = rel => { rel = normDeg(rel); const a = Math.round(rel) % 360; return a === 0 ? '선수000°' : a === 180 ? '선미180°' : a < 180 ? `우${pad3(a)}°` : `좌${pad3(360 - a)}°`; };
+const Compass = {
+  goal() {
+    const b = BERTHS[GOALS[SCENARIO.zone]]; if (b) return { x: b.x, y: b.y, n: '접안' };
+    return GOALS[SCENARIO.zone] === 'gate' ? { x: GATE.x, y: (GATE.y1 + GATE.y2) / 2, n: '게이트' } : null;
+  },
+  draw(s) {
+    const c = $('cmpBar'); if (!c || !c.getContext) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1), W = c.clientWidth || 200, H = c.clientHeight || 30;
+    if (c.width !== Math.round(W * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
+    const x = c.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W, H);
+    const span = 60, px = W / (2 * span), cx = W / 2, hdg = s.hdg;
+    x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+    for (let d = Math.ceil((hdg - span) / 5) * 5; d <= hdg + span; d += 5) {
+      const xx = cx + (d - hdg) * px, a = normDeg(d), major = a % 45 === 0;
+      x.strokeStyle = major ? '#cfe3f0' : 'rgba(207,227,240,.45)'; x.lineWidth = major ? 1.5 : 1;
+      x.beginPath(); x.moveTo(xx, H); x.lineTo(xx, H - (major ? 9 : a % 15 === 0 ? 6 : 3)); x.stroke();
+      if (major) { x.fillStyle = a === 0 ? '#ff6b6b' : '#e6f2fa'; x.font = 'bold 11px sans-serif'; x.fillText(DIR8[a / 45], xx, H - 11); }
+      else if (a % 30 === 0) { x.fillStyle = 'rgba(230,242,250,.6)'; x.font = '9px sans-serif'; x.fillText(pad3(a), xx, H - 11); }
+    }
+    const g = this.goal();
+    if (g) {   // 목표 방향
+      const brg = normDeg(Math.atan2(g.x - s.x, g.y - s.y) * R2D), rel = angDiff(brg, hdg);
+      x.fillStyle = '#38ffd9'; x.font = 'bold 10px sans-serif';
+      if (Math.abs(rel) <= span) { const gx = cx + rel * px; x.beginPath(); x.moveTo(gx - 6, 1); x.lineTo(gx + 6, 1); x.lineTo(gx, 10); x.closePath(); x.fill(); }
+      else { const left = rel < 0; x.textAlign = left ? 'left' : 'right'; x.fillText(left ? `◀ ${g.n} ${relTxt(brg - hdg)}` : `${g.n} ${relTxt(brg - hdg)} ▶`, left ? 3 : W - 3, 10); }
+    }
+    // 가운데: 현재 선수 방위
+    x.fillStyle = '#ffd34f'; x.beginPath(); x.moveTo(cx - 5, H); x.lineTo(cx + 5, H); x.lineTo(cx, H - 7); x.closePath(); x.fill();
+    const lab = `${pad3(hdg)}° ${DIR8[Math.round(normDeg(hdg) / 45) % 8]}`; x.font = 'bold 11px sans-serif'; x.textAlign = 'center';
+    const tw = x.measureText(lab).width + 8; x.fillStyle = 'rgba(0,0,0,.65)'; x.fillRect(cx - tw / 2, 0, tw, 13); x.fillStyle = '#ffd34f'; x.fillText(lab, cx, 11);
+  }
+};
+const HudUI = {
+  init() {
+    const hud = $('hud'), tg = $('hudToggle'), mq = window.matchMedia ? window.matchMedia('(max-width:760px)') : null;
+    const set = c => { hud.classList.toggle('compact', c); tg.textContent = c ? '계기 펼치기 ▾' : '계기 접기 ▴'; };
+    set(mq ? mq.matches : false);   // 모바일 기본: 핵심 수치만 (compact)
+    tg.addEventListener('pointerdown', e => { e.preventDefault(); buzz(10); set(!hud.classList.contains('compact')); });
+    if (mq) { const f = ev => set(ev.matches); mq.addEventListener ? mq.addEventListener('change', f) : mq.addListener(f); }
+  }
+};
+$('logToggle').onclick = () => { const w = $('logWrap'); w.classList.toggle('collapsed'); $('logToggle').textContent = w.classList.contains('collapsed') ? '펼치기' : '접기'; };
+
+// ---------- 기적 (WebAudio) ----------
+const Horn = {
+  ctx: null,
+  unlock() { if (!this.ctx) try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { } this.ctx?.resume?.(); },
+  live: [],
+  get on() { return typeof Store === 'undefined' || Store.data.settings.horn !== false; },
+  blast(n = 1, long = false) {
+    this.unlock(); const c = this.ctx; if (!c || !Store.data.settings.sfx || !this.on) return;   // 소리만 끔 — 법규 판정·로그는 Controls에서 그대로 처리
+    this.live = this.live.filter(v => v.end > c.currentTime);
+    for (let i = 0; i < n; i++) {
+      const t0 = c.currentTime + i * (long ? 6 : 1.6), dur = long ? 5.0 : 1.0;          // 단음 ≈ 1초, 장음 ≈ 4~6초
+      const g = c.createGain(); g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(0.25, t0 + 0.05); g.gain.setValueAtTime(0.25, t0 + dur - 0.1); g.gain.linearRampToValueAtTime(0, t0 + dur);
+      const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 900; f.connect(g); g.connect(c.destination);
+      const oscs = [140, 210, 280].map(fr => { const o = c.createOscillator(); o.type = 'sawtooth'; o.frequency.value = fr; o.connect(f); o.start(t0); o.stop(t0 + dur); return o; });
+      this.live.push({ g, oscs, end: t0 + dur });   // 재생 중(예약 포함) 노드 추적
+    }
+  },
+  /** 울리고 있는(예약된) 기적·경고신호·무중신호를 즉시 중단 */
+  stopAll() {
+    const c = this.ctx; if (!c) { this.live = []; return; } const now = c.currentTime;
+    for (const v of this.live) {
+      try { v.g.gain.cancelScheduledValues(now); v.g.gain.setValueAtTime(0, now); } catch (e) { }
+      for (const o of v.oscs) try { o.stop(now); } catch (e) { }
+      try { v.g.disconnect(); } catch (e) { }
+    }
+    this.live = [];
+  },
+  toggle() {
+    this.stopAll(); Store.data.settings.horn = !this.on; Store.save(); this.syncBtn();
+    toast(this.on ? '📯 경적 소리 켜짐' : '🔇 경적 소리 꺼짐 — 신호 판정·로그는 그대로 기록됩니다');
+  },
+  syncBtn() { const b = $('controls').querySelector('[data-act=hornMute]'); if (b) { b.textContent = this.on ? '경적ON' : '경적OFF'; b.style.opacity = this.on ? 1 : 0.6; } }
+};
+addEventListener('pointerdown', () => Horn.unlock(), { once: true });
+
+// ---------- 대포 효과음 (WebAudio 합성) ----------
+const Sfx = {
+  noise: null,
+  cannon(vol = 0.3, far = false) {
+    const c = Horn.ctx; if (!c || c.state === 'suspended' || !Store.data.settings.sfx) return;
+    const t0 = c.currentTime + (far ? 0 : 0.01), dur = far ? 0.5 : 0.9;
+    if (!this.noise) { const b = c.createBuffer(1, c.sampleRate, c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; this.noise = b; }
+    const n = c.createBufferSource(); n.buffer = this.noise; const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(far ? 500 : 1400, t0); f.frequency.exponentialRampToValueAtTime(90, t0 + dur);
+    const g = c.createGain(); g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + dur); n.connect(f); f.connect(g); g.connect(c.destination); n.start(t0); n.stop(t0 + dur);
+    const o = c.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(far ? 90 : 150, t0); o.frequency.exponentialRampToValueAtTime(35, t0 + dur * 0.8);
+    const g2 = c.createGain(); g2.gain.setValueAtTime(vol * 1.1, t0); g2.gain.exponentialRampToValueAtTime(0.001, t0 + dur * 0.8); o.connect(g2); g2.connect(c.destination); o.start(t0); o.stop(t0 + dur);
+  }
+};
+
+// ---------- 8비트 해군 행진곡 BGM (WebAudio 사각파·삼각파 합성, 외부 음원 없음) ----------
+const BGM = {
+  on: true, started: false, master: null, timer: null, step: 0, nextT: 0, VOL: 0.07, BPM: 132,
+  // 선율: [MIDI 음높이(0=쉼), 8분음표 길이] — 4/4박자 16마디 (C장조)
+  mel: [
+    [[67,1],[72,1],[72,1],[76,1],[79,2],[76,2]], [[77,1],[77,1],[76,1],[74,1],[72,4]], [[74,1],[74,1],[76,1],[77,1],[79,2],[77,2]], [[76,1],[74,1],[72,1],[74,1],[67,4]],
+    [[67,1],[72,1],[72,1],[76,1],[79,2],[84,2]], [[81,1],[81,1],[79,1],[77,1],[76,2],[72,2]], [[74,1],[77,1],[79,1],[77,1],[74,2],[71,2]], [[72,2],[76,2],[79,2],[72,2]],
+    [[76,1],[76,1],[81,1],[81,1],[79,2],[76,2]], [[77,1],[77,1],[81,1],[81,1],[79,2],[77,2]], [[76,1],[76,1],[79,1],[79,1],[84,2],[79,2]], [[77,1],[76,1],[74,1],[71,1],[74,4]],
+    [[76,1],[76,1],[81,1],[81,1],[84,2],[81,2]], [[84,1],[81,1],[77,1],[81,1],[79,4]], [[79,1],[77,1],[74,1],[77,1],[71,2],[74,2]], [[72,4],[76,2],[72,2]]
+  ],
+  bass: [48,48,43,43,48,41,43,48,45,41,48,43,45,41,43,48],   // 마디별 근음
+  hz(m) { return 440 * Math.pow(2, (m - 69) / 12); },
+  tone(type, m, t, dur, vol) {
+    const c = Horn.ctx, o = c.createOscillator(), g = c.createGain(); o.type = type; o.frequency.value = this.hz(m);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + 0.01); g.gain.setValueAtTime(vol, t + Math.max(0.02, dur - 0.05)); g.gain.linearRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(this.master); o.start(t); o.stop(t + dur + 0.02);
+  },
+  drum(kind, t) {
+    const c = Horn.ctx;
+    if (kind === 'k') { const o = c.createOscillator(), g = c.createGain(); o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12); g.gain.setValueAtTime(0.55, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.15); o.connect(g); g.connect(this.master); o.start(t); o.stop(t + 0.16); }
+    else { if (!Sfx.noise) { const b = c.createBuffer(1, c.sampleRate, c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; Sfx.noise = b; }
+      const n = c.createBufferSource(); n.buffer = Sfx.noise; const f = c.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 1800; const g = c.createGain(); g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.09); n.connect(f); f.connect(g); g.connect(this.master); n.start(t); n.stop(t + 0.1); }
+  },
+  schedule() {
+    const c = Horn.ctx; if (!c) return; const e8 = 60 / this.BPM / 2;
+    while (this.nextT < c.currentTime + 0.35) {
+      const bar = Math.floor(this.step / 8) % 16, pos = this.step % 8, t = this.nextT;
+      // 선율 (사각파)
+      let acc = 0; for (const [m, len] of this.mel[bar]) { if (acc === pos && m) this.tone('square', m, t, len * e8 * 0.92, 0.5); acc += len; }
+      // 베이스 (삼각파): 근음 - 5도 교대
+      const r = this.bass[bar]; if (pos % 2 === 0) this.tone('triangle', pos % 4 === 0 ? r : r + 7, t, e8 * 1.7, 0.85);
+      // 드럼: 1·3박 킥, 2·4박 스네어 (행진 리듬)
+      if (pos === 0 || pos === 4) this.drum('k', t); if (pos === 2 || pos === 6) this.drum('s', t);
+      this.nextT += e8; this.step++;
+    }
+  },
+  start() {
+    if (this.started) return; Horn.unlock(); const c = Horn.ctx; if (!c) return; this.started = true;
+    this.master = c.createGain(); this.master.gain.value = this.on ? this.VOL : 0; this.master.connect(c.destination);
+    this.nextT = c.currentTime + 0.1; this.step = 0; this.schedule(); this.timer = setInterval(() => this.schedule(), 100);
+  },
+  set(on) {
+    this.on = on; if (typeof Store !== 'undefined') { Store.data.settings.bgm = on; Store.save(); } const b = $('bgmBtn'); if (b) { b.textContent = on ? '♪ ON' : '♪ OFF'; b.style.opacity = on ? 1 : 0.55; }
+    if (this.master) this.master.gain.setTargetAtTime(on ? this.VOL : 0, Horn.ctx.currentTime, 0.05);
+    if (on) Horn.ctx?.resume?.();
+  }
+};
+const bgmFirst = () => BGM.start();
+addEventListener('pointerdown', bgmFirst, { once: true }); addEventListener('keydown', bgmFirst, { once: true });
+$('bgmBtn').addEventListener('click', e => { e.stopPropagation(); BGM.start(); BGM.set(!BGM.on); });
+
+// ---------- 시작 화면: 시나리오 선택 후 시뮬레이션 진입 ----------
+const StartUI = {
+  open: false,
+  init() {
+    const nums = ['①', '②', '③', '④', '⑤'];
+    $('stList').innerHTML = Object.keys(ZONE_UI).map((k, i) => `<div class="btn stItem" data-z="${k}"><b>${nums[i] || ''} ${ZONE_UI[k].n}</b><small>목표: ${ZONE_UI[k].goal}</small></div>`).join('');
+    $('stList').querySelectorAll('.stItem').forEach(el => el.addEventListener('click', () => this.go(el.dataset.z)));
+    $('stDaily').addEventListener('click', () => { this.hide(); BGM.start(); Daily.start(); });
+  },
+  show() { this.open = true; Sim.paused = true; $('startScr').style.display = 'flex'; },
+  hide() { this.open = false; $('startScr').style.display = 'none'; },
+  go(z) {
+    this.hide(); BGM.start(); Run.mode = 'free';
+    SCENARIO.zone = z; SCENARIO.traffic = ZONE_TRAFFIC[z]; $('selZone').value = z; $('scen').classList.add('collapsed');
+    Sim.restart(`시나리오 시작: ${ZONE_UI[z].n}`);
+  }
+};
+
+// ---------- 기록 · 일일 챌린지 · 전체 답안 복기 (localStorage) ----------
+const STORE_KEY = 'mokpoEscape.v1';
+const STORE_DEFAULT = () => ({ v: 1, daily: {}, streak: { cur: 0, best: 0, lastClear: 0 },
+  all: { high: 0, bestCombo: 0, curCombo: 0, runs: 0, clears: 0 }, cat: {}, zones: {}, settings: { bgm: true, sfx: true, hint: true, horn: true } });
+const num = (v, d = 0) => (typeof v === 'number' && isFinite(v) ? v : d);
+/** 구버전·일부 누락·손상 데이터를 기본값과 병합해 항상 안전한 구조로 만든다 */
+function normalize(raw) {
+  const d = STORE_DEFAULT(); if (!raw || typeof raw !== 'object') return d;
+  const sk = raw.streak && typeof raw.streak === 'object' ? raw.streak : {}, al = raw.all && typeof raw.all === 'object' ? raw.all : {}, st = raw.settings && typeof raw.settings === 'object' ? raw.settings : {};
+  d.streak = { cur: num(sk.cur), best: Math.max(num(sk.best), num(sk.cur)), lastClear: num(sk.lastClear) };
+  d.all = { high: num(al.high), bestCombo: num(al.bestCombo), curCombo: num(al.curCombo), runs: num(al.runs), clears: num(al.clears) };
+  for (const k of Object.keys(d.settings)) if (typeof st[k] === 'boolean') d.settings[k] = st[k];
+  if (raw.daily && typeof raw.daily === 'object') for (const k of Object.keys(raw.daily).filter(k => /^\d{8}$/.test(k)).sort().slice(-120)) {
+    const e = raw.daily[k]; if (!e || typeof e !== 'object') continue;
+    d.daily[k] = { done: !!e.done, score: num(e.score), hits: num(e.hits), total: num(e.total), combo: num(e.combo), tries: num(e.tries, 1),
+      marks: Array.isArray(e.marks) ? e.marks.filter(x => x === '🟩' || x === '🟥').slice(0, 60) : [] };
+  }
+  if (raw.cat && typeof raw.cat === 'object') for (const k of Object.keys(raw.cat).slice(0, 40)) { const e = raw.cat[k]; if (e && typeof e === 'object') d.cat[k] = { n: num(e.n), ok: Math.min(num(e.ok), num(e.n)) }; }
+  if (raw.zones && typeof raw.zones === 'object') for (const k of Object.keys(raw.zones).slice(0, 40)) { const e = raw.zones[k]; if (e && typeof e === 'object') d.zones[k] = { runs: num(e.runs), clears: num(e.clears), best: num(e.best) }; }
+  return d;
+}
+/** 사설 브라우징·저장소 제한에서도 예외 없이 동작 (실패 시 이번 세션 메모리만 사용) */
+function loadStore() { try { const t = window.localStorage.getItem(STORE_KEY); return normalize(t ? JSON.parse(t) : null); } catch (e) { Store.memOnly = true; return normalize(null); } }
+function saveStore(data) { try { window.localStorage.setItem(STORE_KEY, JSON.stringify(data)); return true; } catch (e) { Store.memOnly = true; return false; } }
+const Store = {
+  memOnly: false, data: null,
+  save() { return saveStore(this.data); },
+  commit(r) {
+    const d = this.data, a = d.all;
+    a.runs++; if (r.ok) a.clears++; a.high = Math.max(a.high, r.score); a.bestCombo = Math.max(a.bestCombo, r.combo); a.curCombo = Run.combo;
+    for (const e of Run.ev) { const c = d.cat[e.cat] || (d.cat[e.cat] = { n: 0, ok: 0 }); c.n++; if (e.lvl === 'ok') c.ok++; }
+    const z = d.zones[r.zone] || (d.zones[r.zone] = { runs: 0, clears: 0, best: 0 }); z.runs++; if (r.ok) z.clears++; z.best = Math.max(z.best, r.score);
+    if (r.daily) {
+      const e = d.daily[String(r.key)] || (d.daily[String(r.key)] = { done: false, score: 0, hits: 0, total: 0, combo: 0, tries: 0, marks: [] });
+      e.tries++;
+      if (r.ok && !e.done) {   // 오늘 첫 클리어 → 연속 일수 갱신
+        e.done = true; const sk = d.streak;
+        if (sk.lastClear !== r.key) { sk.cur = sk.lastClear === prevKey(r.key) ? sk.cur + 1 : 1; sk.lastClear = r.key; sk.best = Math.max(sk.best, sk.cur); }
+        e.score = -1;   // 아래에서 클리어 기록으로 덮어쓰기
+      }
+      if (r.score >= e.score && (!e.done || r.ok)) { e.score = r.score; e.hits = r.hits; e.total = r.total; e.combo = r.combo; e.marks = r.marks.slice(0, 60); }
+      for (const k of Object.keys(d.daily).sort().slice(0, Math.max(0, Object.keys(d.daily).length - 120))) delete d.daily[k];
+    }
+    this.save();
+  }
+};
+Store.data = loadStore();
+
+/** 결정론적 PRNG (Mulberry32) + 로컬 날짜 키(YYYYMMDD) */
+const mulberry32 = a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+const dateKey = (d = new Date()) => d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+const prevKey = k => dateKey(new Date(k / 10000 | 0, (k / 100 | 0) % 100 - 1, k % 100 - 1));
+const fmtKey = k => `${k / 10000 | 0}.${String((k / 100 | 0) % 100).padStart(2, '0')}.${String(k % 100).padStart(2, '0')}`;
+let GAME_RNG = Math.random; const rnd = () => GAME_RNG();   // 게임플레이 난수(일일 챌린지에서는 날짜 시드로 고정)
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const plain = h => String(h || '').replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').trim();
+const streakNow = () => { const sk = Store.data.streak, t = dateKey(); return sk.lastClear === t || sk.lastClear === prevKey(t) ? sk.cur : 0; };
+let _toastT = 0;
+function toast(m) { const t = $('toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(_toastT); _toastT = setTimeout(() => { t.style.display = 'none'; }, 2400); }
+
+/** 판정 유형별 정답(올바른 조치) 안내 — 복기·정답률 집계에 사용 */
+const CATS = {
+  left: { n: '항로 내 우측 통항', ans: '항로 중심선의 우측으로 항행합니다. (선박입출항법 제12조)' },
+  ss: { n: '마주칠 때 통과 방법', ans: '서로 우현 쪽으로 침로를 바꿔 좌현 대 좌현으로 통과합니다.' },
+  ot: { n: '만곡부 추월 금지', ans: '항로가 굽은 곳에서는 앞선 배를 추월하지 않고 뒤따릅니다. (선박입출항법 제12조)' },
+  enter: { n: '항로 진입 시 진로 방해 금지', ans: '항로 안 선박의 진로를 방해하지 않도록 기다렸다가 안전하게 진입합니다.' },
+  fogspeed: { n: '제한시계 안전속력', ans: '시정이 나쁠 때는 8kn 미만의 안전한 속력으로 항행합니다. (해사안전법 제71조)' },
+  sig: { n: '기적·조종신호 이행', ans: '위험 상황에서는 기적 단음(H) 또는 경고 5단음(Shift+H)을 울립니다. (해사안전법 제92조 / COLREG Rule 34)' },
+  fogsig: { n: '무중신호', ans: '제한시계에서는 2분을 넘지 않는 간격으로 장음 1회(F)를 울립니다. (해사안전법 제93조 / Rule 35)' },
+  catch: { n: '추격자 대응', ans: '승선사관부는 400m 이내에서 경고신호로 감속시키고, 계속 전속으로 게이트까지 도주합니다.' },
+  salute: { n: '추격자 대응', ans: '승선사관부 400m 이내에서 경고신호(5단음)를 울립니다.' },
+  shot: { n: '포격 회피', ans: '전속으로 거리를 벌리고, 포탄이 날아올 때 변침해 피합니다.' },
+  r18: { n: '특수선 우선 피항', ans: '조종불능선·조종제한선·어로종사선·범선은 일찍 크게 변침·감속해 CPA 200m 이상을 확보합니다. (해사안전법 제76조 / COLREG Rule 18)' },
+  r15: { n: '우현 횡단선 피항', ans: '우현에서 횡단해 오는 선박이 있으면 피항선으로서 일찍 우현 변침·감속해 그 선박의 선미 쪽으로 지나갑니다. (해사안전법 제73조 / COLREG Rule 15)' },
+  tow: { n: '예인선열 횡단 금지', ans: '예인선과 부선 사이(예인줄)를 가로지르지 말고 부선 뒤쪽으로 충분히 떨어져 지나갑니다.' },
+  col: { n: '충돌 회피', ans: '경계를 철저히 하고 충돌을 피하기 위한 동작을 일찍 취합니다. (해사안전법 제63조·제66조)' }
+};
+const catOf = key => { const b = String(key).split(':')[0].replace(/-ok$/, ''); const m = { right: 'left', sigok: 'sig', r18ok: 'r18', r15ok: 'r15' }[b] || b; const c = CATS[m]; return c ? (m === 'salute' ? 'catch' : m) : 'etc'; };
+const catName = k => (CATS[k] || { n: '기타' }).n;
+
+/** 한 판의 판정 기록 · 콤보 · 점수 */
+const Run = {
+  mode: 'free', dkey: 0, ev: [], combo: 0, maxCombo: 0, committed: false, result: null,
+  begin() { this.ev = []; this.combo = 0; this.maxCombo = 0; this.committed = false; this.result = null; RecUI.refresh(); },
+  rec(lvl, key, title, detail) {
+    if (this.ev.length < 300) this.ev.push({ t: Mission.elapsed(), lvl, cat: catOf(key), title: plain(title), detail: plain(detail) });
+    if (lvl === 'ok') { this.combo++; this.maxCombo = Math.max(this.maxCombo, this.combo); } else this.combo = 0;
+  },
+  finalize(ok, why, kind, grade) {
+    const c = Rules.cnt, zone = SCENARIO.zone;
+    const prog = Mission.progress(), bonus = ok ? ({ S: 300, A: 200, B: 100, C: 0 }[grade] || 0) : 0;
+    const score = Math.max(0, Math.round(prog * 500 + (ok ? 500 : 0) + bonus + c.ok * 20 - c.warn * 30 - c.bad * 100));
+    const r = { ok, why, kind, grade, score, hits: c.ok, total: c.ok + c.warn + c.bad, combo: this.maxCombo, marks: this.ev.map(e => e.lvl === 'ok' ? '🟩' : '🟥'),
+      daily: this.mode === 'daily', key: this.mode === 'daily' ? this.dkey : 0, zone, time: Mission.elapsed() };
+    this.result = r; if (!this.committed) { this.committed = true; Store.commit(r); RecUI.refresh(); }
+    return r;
+  }
+};
+
+/** 종료 후 결과·복기 화면 / 공유 */
+const Results = {
+  fill(r) {
+    $('mScore').textContent = r.score.toLocaleString();
+    $('mHits').textContent = `${r.hits}/${r.total} · 콤보 ${r.combo}`;
+    $('mDailyRow').style.display = r.daily ? 'flex' : 'none';
+    if (r.daily) $('mDaily').textContent = `${fmtKey(r.key)} · 🔥 ${streakNow()}일 (최장 ${Store.data.streak.best}일)`;
+    $('mReview').innerHTML = Run.ev.length ? Run.ev.map(e => {
+      const c = CATS[e.cat] || { n: '기타', ans: '' };
+      return `<div class="rv ${e.lvl}"><div class="rh">${e.lvl === 'ok' ? '🟩' : '🟥'} ${fmtDur(e.t)} · ${esc(c.n)}</div><div>내 행동: ${esc(e.title)}</div>` +
+        (e.lvl === 'ok' ? '' : `<div>정답: ${esc(c.ans)}</div>`) + `<div class="rd">해설: ${esc(e.detail)}</div></div>`;
+    }).join('') : '<div class="rv">이번 판에는 기록된 법규 판정이 없습니다.</div>';
+    $('mReview').scrollTop = 0;
+  },
+  endNow() {
+    if (Mission.state === 'run' || Mission.state === 'idle') Mission.finish(false, '사용자 종료', 'end');
+    else $('modal').style.display = 'flex';
+  },
+  text(r) {
+    const rows = []; for (let i = 0; i < r.marks.length; i += 10) rows.push(r.marks.slice(i, i + 10).join(''));
+    return [r.daily ? `⚓ 목포 탈출 일일 챌린지 ${fmtKey(r.key)}` : `⚓ 목포 탈출 시뮬레이터 · ${ZONES[r.zone]}`,
+      `${r.ok ? '✅ 클리어' : '❌ 미클리어'} · 점수 ${r.score.toLocaleString()} · 준수 ${r.hits}/${r.total} · 최고 콤보 ${r.combo}`,
+      r.daily ? `🔥 연속 ${streakNow()}일 (최장 ${Store.data.streak.best}일)` : `🏆 최고 점수 ${Store.data.all.high.toLocaleString()} · 최고 콤보 ${Store.data.all.bestCombo}`,
+      rows.join('\n')].filter(Boolean).join('\n');
+  },
+  async share() {
+    const r = Run.result; if (!r) return; const t = this.text(r);
+    try { if (!navigator.clipboard || !navigator.clipboard.writeText) throw 0; await navigator.clipboard.writeText(t); toast('📋 복사 완료! 크루에게 붙여넣어 공유하세요'); }
+    catch (e) {
+      Dlg.show(`<b>아래 글을 복사해서 크루에게 공유하세요</b><textarea id="shTa" readonly>${esc(t)}</textarea>`, [{ label: '닫기' }]);
+      const ta = $('shTa'); try { ta.focus(); ta.select(); } catch (e2) { }
+    }
+  }
+};
+
+/** 확인·안내용 커스텀 모달 (window.confirm 대체) */
+const Dlg = {
+  show(html, btns) {
+    $('dlgBody').innerHTML = html; const b = $('dlgBtns'); b.innerHTML = '';
+    for (const x of btns) { const el = document.createElement('div'); el.className = 'btn ' + (x.cls || ''); el.textContent = x.label; el.addEventListener('click', () => { Dlg.hide(); if (x.fn) x.fn(); }); b.appendChild(el); }
+    $('dlg').style.display = 'flex';
+  },
+  hide() { $('dlg').style.display = 'none'; }
+};
+
+/** 일일 챌린지: 같은 날짜 = 같은 수역·기상·선종·추격자·어선 움직임, 배속 ×2 고정 */
+const Daily = {
+  conf(key) { const rr = mulberry32(key), pick = a => a[Math.floor(rr() * a.length)]; return { zone: pick(['escape', 'cadet', 'port', 'narrow', 'fishing']), weather: pick(['clear', 'clear', 'rain', 'snow', 'fog']), own: pick(Object.keys(OWN_TYPES)) }; },
+  start() {
+    const key = dateKey(), c = this.conf(key); Run.mode = 'daily'; Run.dkey = key;
+    SCENARIO.zone = c.zone; SCENARIO.traffic = ZONE_TRAFFIC[c.zone]; SCENARIO.weather = c.weather; SCENARIO.ownType = c.own;
+    $('selZone').value = c.zone; $('selWx').value = c.weather; $('selOwn').value = c.own; $('scen').classList.add('collapsed');
+    Sim.applyWeather(false); Sim.applyOwnType(false); Sim.restart(`📅 일일 챌린지 ${fmtKey(key)}`);
+    toast(`📅 오늘의 챌린지 — ${ZONES[c.zone]} · ${WEATHER[c.weather].n} · ${OWN_TYPES[c.own]}`);
+  }
+};
+
+/** 기록·설정 화면 + 메뉴 상태 표시 */
+const RecUI = {
+  init() {
+    BGM.set(Store.data.settings.bgm); Horn.syncBtn();
+    $('btnDaily').addEventListener('click', () => Daily.start());
+    $('btnRec').addEventListener('click', () => this.open()); $('btnRec2').addEventListener('click', () => this.open());
+    $('btnEnd').addEventListener('click', () => Results.endNow());
+    $('btnShare').addEventListener('click', () => Results.share());
+    $('btnClose').addEventListener('click', () => { $('modal').style.display = 'none'; });
+    $('btnRecClose').addEventListener('click', () => { $('recModal').style.display = 'none'; });
+    this.refresh(); setInterval(() => this.refresh(), 60000);
+    if (Store.memOnly) toast('저장소를 쓸 수 없는 환경입니다 — 기록은 이번 접속 동안만 유지됩니다');
+  },
+  refresh() {
+    const b = $('btnDaily'); if (!b) return; const e = Store.data.daily[String(dateKey())];
+    if (e && e.done) { b.innerHTML = `📅 <b>CLEARED</b> ${e.score.toLocaleString()}점 · 🔥${streakNow()}일`; b.className = 'btn cleared'; }
+    else { b.innerHTML = `📅 <b>TODAY</b> 오늘의 챌린지${e ? ` (최고 ${e.score.toLocaleString()})` : ''}`; b.className = 'btn'; }
+    $('modeTag').textContent = Run.mode === 'daily' ? `📅 일일 챌린지 ${fmtKey(Run.dkey)} · ×2 고정` : '자유 플레이';
+  },
+  open() {
+    const D = Store.data, t = dateKey(), te = D.daily[String(t)], sk = D.streak, a = D.all;
+    let days = ''; for (let i = 0, k = t; i < 7; i++, k = prevKey(k)) { const e = D.daily[String(k)]; days += `<div class="kv"><span>${fmtKey(k)}</span><span>${e ? (e.done ? '✅' : '🟥') + ' ' + e.score.toLocaleString() + '점 · ' + e.hits + '/' + e.total : '—'}</span></div>`; }
+    const catRows = Object.keys(D.cat).filter(k => D.cat[k].n > 0).sort().map(k => { const c = D.cat[k], p = Math.round(c.ok / c.n * 100); return `<div class="kv"><span>${esc(catName(k))}</span><span>${c.ok}/${c.n} (${p}%)</span></div><div class="bar"><i style="width:${p}%"></i></div>`; }).join('') || '<div style="color:var(--dim)">아직 기록이 없습니다.</div>';
+    const zoneRows = Object.keys(D.zones).map(k => { const z = D.zones[k]; return `<div class="kv"><span>${esc(ZONES[k] || k)}</span><span>${z.clears}/${z.runs} 클리어 · 최고 ${z.best.toLocaleString()}</span></div>`; }).join('') || '<div style="color:var(--dim)">아직 기록이 없습니다.</div>';
+    const tg = (id, on, txt) => `<div class="btn tg" id="${id}">${txt} ${on ? 'ON' : 'OFF'}</div>`;
+    $('recBody').innerHTML = `<h3>🏆 기록 · 크루 경쟁</h3>
+      <div class="sec"><b>📅 일일 챌린지 — ${fmtKey(t)} ${te && te.done ? '(CLEARED)' : '(TODAY)'}</b>
+        <div class="kv"><span>오늘 상태</span><span>${te ? (te.done ? '✅ 클리어' : '도전 중') + ' · ' + te.score.toLocaleString() + '점 · ' + te.hits + '/' + te.total : '아직 도전 전'}</span></div>
+        <div class="kv"><span>현재 연속 / 최장 연속</span><span>🔥 ${streakNow()}일 / ${sk.best}일</span></div>
+        <div class="kv"><span>마지막 클리어</span><span>${sk.lastClear ? fmtKey(sk.lastClear) : '-'}</span></div>
+        <div style="margin-top:6px;color:var(--dim)">최근 7일</div>${days}</div>
+      <div class="sec"><b>전체 모드 누적</b>
+        <div class="kv"><span>최고 점수 (High Score)</span><span>${a.high.toLocaleString()}</span></div>
+        <div class="kv"><span>최고 연속 정답 (Max Combo)</span><span>${a.bestCombo}</span></div>
+        <div class="kv"><span>현재 연속 정답</span><span>${a.curCombo}</span></div>
+        <div class="kv"><span>플레이 / 클리어</span><span>${a.runs} / ${a.clears}</span></div></div>
+      <div class="sec"><b>규칙(유형)별 정답률</b>${catRows}</div>
+      <div class="sec"><b>시나리오별</b>${zoneRows}</div>
+      <div class="sec"><b>설정</b>${tg('tgBgm', D.settings.bgm, '♪ 군가 BGM')}${tg('tgHorn', D.settings.horn, '📯 경적')}${tg('tgSfx', D.settings.sfx, '🔊 기적·대포 효과음')}${tg('tgHint', D.settings.hint, '💡 추격자 힌트')}</div>
+      <div class="btn red" id="btnWipe" style="height:40px;justify-content:center;margin-top:8px">🗑 기록 초기화</div>`;
+    $('recModal').style.display = 'flex';
+    const flip = (k) => { D.settings[k] = !D.settings[k]; if (k === 'bgm') BGM.set(D.settings.bgm); Store.save(); this.open(); };
+    $('tgBgm').addEventListener('click', () => { BGM.start(); flip('bgm'); }); $('tgSfx').addEventListener('click', () => flip('sfx')); $('tgHorn').addEventListener('click', () => { Horn.stopAll(); flip('horn'); Horn.syncBtn(); }); $('tgHint').addEventListener('click', () => flip('hint'));
+    $('btnWipe').addEventListener('click', () => Dlg.show('<b>정말 기록을 초기화할까요?</b><br>일일 챌린지 기록, 최고 점수, 연속 기록, 정답률이 모두 지워지며 되돌릴 수 없습니다.', [
+      { label: '기록만 초기화 (설정 유지)', cls: 'red', fn: () => this.wipe(false) },
+      { label: '기록 + 설정 모두 초기화', cls: 'red', fn: () => this.wipe(true) },
+      { label: '취소' }]));
+  },
+  wipe(withSettings) {
+    const keep = Store.data.settings; Store.data = normalize(null); if (!withSettings) Store.data.settings = keep;
+    Store.save(); BGM.set(Store.data.settings.bgm); Horn.syncBtn(); this.refresh(); this.open(); toast('기록을 초기화했습니다');
+  }
+};
+
+
+// ---------- HUD ----------
+function fmtClock(s) { s = Math.floor(s) % 86400; return [s / 3600 | 0, (s / 60 | 0) % 60, s % 60].map(v => String(v).padStart(2, '0')).join(':'); }
+const pad3 = v => String(Math.round(v) % 360).padStart(3, '0');
+function showBanner(t, sub) { const b = $('banner'); b.innerHTML = t + (sub ? `<small>${sub}</small>` : ''); b.style.display = 'block'; }
+function hideBanner() { $('banner').style.display = 'none'; }
+
+$('telegraph').innerHTML = ENGINE_ORDERS.map((o, i) => `<span data-i="${i}">${o.s}</span>`).join('');
+function ruleNotes() {
+  const own = { power: '', draft: '<br><b>자선=흘수제약선</b> — 항로 내 타선은 진로 방해 금지(입출항법 §12①5)', giveway: '<br><b>자선=우선피항선</b> — 다른 선박의 진로를 방해하지 말고 피항(입출항법 §16①)' }[SCENARIO.ownType];
+  const v = WEATHER[SCENARIO.weather].visNM;
+  const wx = v <= 1 ? '<br><b>제한시계</b> — 안전한 속력·레이더 경계, 제한된 시계 항법(해사안전법 §77)' : v < 5 ? '<br><b>시정 저하</b> — 안전한 속력 유지, 레이더 병용 경계' : '';
+  return own + wx + Rules.statusHTML();
+}
+function updateTargetsHUD() {
+  const top = Sim.top, box = $('risk');
+  if (top) {
+    box.style.display = 'block';
+    box.innerHTML = `⚠ <b>위험 타선</b> ${top.name}<br>CPA <b>${fmtDist(top.cpa)}</b> · TCPA <b>${(top.tcpa / 60).toFixed(1)}분</b><br><span style="font-size:11px;color:#ffd0d0">거리 ${fmtDist(top.range)} · 방위 ${pad3(top.brg)}°</span>`;
+  } else box.style.display = 'none';
+  const nav = Sim.targets.find(g => g.mode === 'navy');
+  if (nav && Store.data.settings.hint && nav.range <= 1500) { if (!top) box.innerHTML = ''; box.style.display = 'block'; box.innerHTML += `<div style="margin-top:4px;color:#ff9a8a;font-size:11px">⚠ 북한군 경비정 ${fmtDist(nav.range)} — ${nav.range <= 1200 ? '포격 중! 변침·전속 도주' : '곧 포격 사정권'}</div>`; }
+  const cad = Sim.targets.find(g => g.mode === 'cadet');
+  if (cad && Store.data.settings.hint) {
+    const msg = cad.saluting ? '사관부 거수경례 · 감속 중' : cad.range <= 400 ? `⚠ 사관부 ${fmtDist(cad.range)} — 경고신호(Shift+H)로 감속시키세요!` : '';
+    if (msg) { if (!top) box.innerHTML = ''; box.style.display = 'block'; box.innerHTML += `<div style="margin-top:4px;color:#ffe08a;font-size:11px">${msg}</div>`; }
+  }
+  const list = Sim.targets.slice().sort((a, b) => a.range - b.range);
+  $('tgtList').innerHTML = list.length ? '<table><tr><th>타선</th><th title="자선 선수 기준 상대방위 (우=우현, 좌=좌현)">상대방위</th><th>거리</th><th>CPA</th><th>TCPA</th></tr>' +
+    list.map(t => `<tr class="${t.level}"><td>${t.name}</td><td>${relTxt(t.brg - Sim.ship.hdg)}${(rr => rr >= 5 && rr <= 112.5 ? '<span style="color:#7dffa8" title="우현 횡단 구역(5°~112.5°): 횡단 관계면 자선이 피항선 (Rule 15)">●</span>' : '')(normDeg(t.brg - Sim.ship.hdg))}</td><td>${fmtDist(t.range)}</td><td>${fmtDist(t.cpa)}</td><td>${t.tcpa > 0 && isFinite(t.tcpa) ? (t.tcpa / 60).toFixed(1) + '분' : '-'}</td></tr>`).join('') + '</table>' : '';
+}
+const UI = {
+  init() {
+    const fill = (id, obj, f) => { const el = $(id); el.innerHTML = Object.keys(obj).map(k => `<option value="${k}">${f(obj[k])}</option>`).join(''); return el; };
+    const z = fill('selZone', ZONE_UI, v => v.n), w = fill('selWx', WEATHER, v => v.n), o = fill('selOwn', OWN_TYPES, v => v);
+    z.value = SCENARIO.zone; w.value = SCENARIO.weather; o.value = SCENARIO.ownType;
+    const box = $('scen'), fold = () => box.classList.add('collapsed');   // 선택 후 옵션을 접고 [재시작]만 남김
+    z.onchange = () => { Run.mode = 'free'; SCENARIO.zone = z.value; SCENARIO.traffic = ZONE_TRAFFIC[z.value]; z.blur(); fold(); Sim.restart('수역/시나리오 변경'); };
+    w.onchange = () => { Run.mode = 'free'; SCENARIO.weather = w.value; w.blur(); fold(); Sim.applyWeather(true); };
+    o.onchange = () => { Run.mode = 'free'; SCENARIO.ownType = o.value; o.blur(); fold(); Sim.applyOwnType(true); };
+    $('btnRestart').addEventListener('pointerdown', e => { e.preventDefault(); fold(); Sim.restart(); });
+    $('btnScen').addEventListener('pointerdown', e => { e.preventDefault(); box.classList.toggle('collapsed'); });
+  }
+};
+function updateHUD() {
+  const s = Sim.ship, ci = Sim.ci || channelInfo(s.x, s.y);
+  $('hHdg').textContent = s.hdg.toFixed(1).padStart(5, '0') + '°'; Compass.draw(s);
+  $('rowGoal').style.display = Mission.active ? 'flex' : 'none';
+  const bth = Mission.active ? Mission.berth() : null;
+  if (Mission.active && !bth) { const rem = Mission.remaining(), vx = -s.sogVec[0]; $('hGoalK').textContent = '탈출 목표'; $('hGoal').textContent = rem <= 0 ? (Mission.inGateWidth() ? '게이트 통과' : '게이트 폭 밖 — 게이트 사이로') : fmtDist(rem) + (vx > 0.3 ? ` · 약 ${Math.max(1, Math.round(rem / vx / 60))}분` : ''); }
+  if (bth) { const rem = Mission.remaining(); $('hGoalK').textContent = '접안 목표'; $('hGoal').textContent = `${bth.n} · ${fmtDist(rem)}`; }
+  const bh = $('berthHint'); if (bth && Mission.state === 'run' && Mission.remaining() <= 600) { const inn = inBerth(bth, s.x, s.y); bh.style.display = 'block'; bh.textContent = `접안 준비: 감속 후 구역 진입, 2.0kn 이하 3초 유지 (${Mission.hold.toFixed(1)} / 3.0초)` + (inn ? (s.sogKn <= 2.2 ? ' ✔' : ` · 지금 ${s.sogKn.toFixed(1)}kn — 감속!`) : ' · 구역 밖 (안벽과 나란히 진입)'); } else bh.style.display = 'none';
+  $('hStw').textContent = (s.u / KN).toFixed(1) + 'kn';
+  $('hCog').textContent = pad3(s.cog) + '°'; $('hSog').textContent = s.sogKn.toFixed(1) + ' kn';
+  $('hRot').textContent = (s.r * 60 >= 0 ? 'R ' : 'L ') + Math.abs(s.r * 60).toFixed(0) + '°/min';
+  $('hTide').textContent = `${pad3(CONFIG.tide.setDeg)}° ${CONFIG.tide.kn.toFixed(1)}kn`;
+  const rs = v => (Math.abs(v) < 0.5 ? '중앙 0°' : (v > 0 ? '우현 ' : '좌현 ') + Math.abs(v).toFixed(0) + '°');
+  $('hRud').textContent = `${rs(s.rud)}  (명령 ${rs(s.rudCmd)})`;
+  $('gCmd').style.left = (50 + s.rudCmd / 35 * 50) + '%'; $('gAct').style.left = (50 + s.rud / 35 * 50) + '%';
+  const o = ENGINE_ORDERS[s.eng]; $('hEng').textContent = `${o.n} (${o.kn > 0 ? '+' : ''}${o.kn} kn)`;
+  document.querySelectorAll('#telegraph span').forEach(sp => sp.classList.toggle('on', +sp.dataset.i === s.eng));
+  const W = WEATHER[SCENARIO.weather]; $('hVis').textContent = `${W.visNM >= 1 ? W.visNM.toFixed(1) + ' NM' : Math.round(W.visNM * NM) + ' m'} · ${W.n}`;
+  const zt = $('zoneTag'); zt.textContent = ZONES[SCENARIO.zone].split(' (')[0] + (ci.inside ? ' · 항로 내' : ' · 항로 밖'); zt.classList.toggle('out', !ci.inside);
+  // 진행방향 기준 좌/우 편위 (입항=항로방향, 출항=반대)
+  const inbound = Math.abs(angDiff(s.hdg, ci.dir)) < 90, side = inbound ? ci.side : -ci.side;
+  $('hXte').textContent = ci.dist < 3000 ? `중심선 ${side >= 0 ? '우측' : '좌측'} ${Math.abs(side).toFixed(0)}m · ${inbound ? '입항' : '출항'}${ci.bend ? ' · 만곡부' : ''}` : `항로에서 ${(ci.dist / NM).toFixed(1)} NM`;
+  $('hTime').textContent = `${fmtClock(Sim.clock)}  ×${Sim.timeScale}`;
+  $('rulesNow').innerHTML = `<b>적용 순서</b> ${RULES.priority.join(' → ')}<br><b>수역</b> ${ZONES[SCENARIO.zone]} · <b>자선</b> ${OWN_TYPES[SCENARIO.ownType]}`
+    + (ci.inside ? `<br><b>현재</b> 지정항로 내 — 우측 항행·나란히 항행/추월 원칙 금지(입출항법 §12)` : `<br><b>현재</b> 항로 밖 — 항로 출입 시 항로 항행선 진로 회피(입출항법 §12①1)`) + ruleNotes();
+}
+
+// ---------- 레이더 미니맵 ----------
+const Mini = {
+  ranges: [1500, 3000, 6000], ri: 1,
+  init() {
+    this.cv = $('miniCv'); this.resize();
+    this.cv.parentElement.addEventListener('pointerdown', () => { this.ri = (this.ri + 1) % this.ranges.length; $('miniLbl').textContent = `레이더 ${this.ranges[this.ri] / 1000}km · N-up`; });
+  },
+  resize() { const r = this.cv.getBoundingClientRect(), d = Math.min(devicePixelRatio, 2); this.cv.width = r.width * d; this.cv.height = r.height * d; this.d = d; this.w = r.width; this.h = r.height; },
+  draw() {
+    const c = this.cv.getContext('2d'); c.setTransform(this.d, 0, 0, this.d, 0, 0);
+    const R = this.ranges[this.ri], s = (this.w / 2) / R;
+    drawChart(c, this.w, this.h, Sim.ship.x, Sim.ship.y, s, Sim.ship, { rings: [R / 3, R * 2 / 3, R], sea: '#071b28', land: '#3d5a34', targets: Sim.radarTargets(), gate: Sim.gateData(), berth: Sim.berthData() });
+  }
+};
+
+// ---------- 메인 루프 ----------
+function boot() {
+  try {
+    if (!window.THREE) throw new Error('Three.js 로드 실패');
+    World3D.init($('view')); CameraRig.bind($('view')); Sim.use3D = true;
+  } catch (err) {
+    console.warn(err); $('view').style.display = 'none'; Fallback2D.init($('fallback'));
+    const n = $('notice'); n.style.display = 'block';
+    n.innerHTML = '⚠ 3D 엔진(Three.js CDN)을 불러오지 못해 <b>2D 해도 모드</b>로 실행 중입니다. 인터넷 연결 또는 CDN 차단 여부를 확인 후 새로고침하세요. (휠·두 손가락 핀치: 축척 / 드래그: 이동 / [백뷰]: 내 배로 복귀)';
+  }
+  Mini.init();
+  addEventListener('resize', () => { World3D.resize(); Fallback2D.resize(); Mini.resize(); });
+  HudUI.init(); UI.init(); RecUI.init(); StartUI.init(); Sim.applyWeather(false); Sim.restart('시나리오 시작'); StartUI.show();
+  Sim.log('info', '3단계: 법규 판정 엔진', `좌측 HUD 맨 위 메뉴에서 시나리오를 고르면 옵션이 접히고 [재시작]만 남습니다(⚙로 다시 열기). 현재: ${ZONE_UI[SCENARIO.zone].n} — ${ZONE_UI[SCENARIO.zone].desc}`);
+  Sim.log('info', '법규 적용 체계', `${RULES.priority.join(' → ')} (특별법 우선). 항로 우측통항·만곡부 추월·항로 진입·제한시계 속력·기적 신호를 실시간 판정하며, 같은 경고는 15초에 한 번만 기록합니다.`);
+  let last = performance.now(), hudAcc = 0;
+  function frame(now) {
+    const rdt = Math.min(0.1, (now - last) / 1000); last = now;
+    let sdt = Sim.paused ? 0 : rdt * Sim.timeScale; while (sdt > 1e-6 && !Sim.paused) { const h = Math.min(0.05, sdt); Sim.step(h); sdt -= h; }
+    if (Sim.use3D) World3D.update(Sim.t, Sim.paused ? 0 : rdt * Sim.timeScale, Sim.ship); else Fallback2D.update(Sim.t, rdt, Sim.ship);
+    if ((hudAcc += rdt) > 0.1) { hudAcc = 0; updateHUD(); updateTargetsHUD(); Mini.draw(); }
+    requestAnimationFrame(frame);
+  }
+  if (isMobile()) collapseLog();
+  requestAnimationFrame(frame);
+}
+boot();
+</script>
+</body>
+</html>
