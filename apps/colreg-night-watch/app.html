@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="bypass-owner" content="8b67395b-2e25-4866-ae97-88566d20c691">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#14213a">
+<title>COLREG 야간 당직 &amp; 기적 리듬</title>
+<style>
+:root{
+  --paper:#f4f7f8; --panel:#ffffff; --ink:#14213a; --magenta:#a3246f; --night:#0b1526;
+  --port:#d2302c; --stbd:#16924a; --light-white:#ffffff; --light-yellow:#f2b705;
+  --line:#c5d3da; --soft:#51627c; --sea:#dbe8ee; --gong:#3f6fb0;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{
+  font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  background:var(--paper);color:var(--ink);
+  -webkit-user-select:none;user-select:none;overscroll-behavior:none;touch-action:manipulation;
+  font-size:15px;line-height:1.45;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;opacity:.45;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:30px 30px;
+}
+.hidden{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer}
+#app{max-width:600px;margin:0 auto;padding:12px 12px calc(28px + env(safe-area-inset-bottom))}
+
+.card{
+  background:var(--panel);border:2px solid var(--ink);border-radius:16px;
+  box-shadow:3px 3px 0 var(--ink);padding:12px 14px;margin-bottom:12px;position:relative;
+}
+.btn{
+  background:var(--panel);border:2px solid var(--ink);border-radius:10px;
+  padding:8px 14px;font-weight:700;box-shadow:2px 2px 0 var(--ink);
+  transition:transform .06s,box-shadow .06s,background .12s;
+}
+.btn:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--ink)}
+.btn.primary{background:var(--magenta);border-color:var(--ink);color:#fff}
+.btn.big{padding:12px 20px;font-size:16px}
+.btn.sm{padding:5px 10px;font-size:12.5px;box-shadow:1px 1px 0 var(--ink)}
+.btn.on{background:var(--ink);color:#fff}
+.btn:disabled{opacity:.48;cursor:default}
+:focus-visible{outline:3px solid var(--magenta);outline-offset:2px}
+
+/* 아케이드 타이틀 히어로 */
+.hero{
+  background:linear-gradient(180deg,#0b1526 0%,#142847 64%,#1c385e 100%);
+  color:#eef5ff;border:2px solid var(--ink);border-radius:18px;
+  box-shadow:4px 4px 0 var(--ink);padding:14px 16px 12px;margin-bottom:12px;
+  position:relative;overflow:hidden;
+}
+.heroTop{display:flex;align-items:center;gap:12px}
+.rose{width:62px;height:62px;flex:none}
+.hero h1{margin:0;font-size:22px;letter-spacing:-.4px;line-height:1.2}
+.hero h1 span{color:var(--light-yellow)}
+.hero p{margin:3px 0 0;color:#b7cbe6;font-size:12.5px}
+.heroStrip{
+  margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.16);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;
+}
+.rankBadge{
+  background:var(--magenta);color:#fff;font-weight:800;border-radius:999px;
+  padding:2px 10px;font-size:11.5px;letter-spacing:.2px;
+}
+.beaconRow{display:flex;align-items:center;gap:6px;color:#dbe8f7;font-weight:700}
+.bDot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.bDot.p{background:var(--port);box-shadow:0 0 8px var(--port)}
+.bDot.g{background:var(--stbd);box-shadow:0 0 8px var(--stbd)}
+.bDot.y{background:var(--light-yellow);box-shadow:0 0 8px var(--light-yellow)}
+
+/* 모드 그리드 */
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.mode{
+  text-align:left;background:var(--panel);border:2px solid var(--ink);border-radius:14px;
+  padding:12px;box-shadow:3px 3px 0 var(--ink);display:flex;flex-direction:column;gap:4px;min-height:94px;
+  transition:transform .07s,box-shadow .07s;
+}
+.mode:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink)}
+.mode:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.mode b{font-size:15px}
+.mode small{color:var(--soft);font-size:12px}
+.mode.daily{grid-column:1/-1;background:var(--ink);color:#fff;min-height:82px}
+.mode.daily small{color:#c9d6dc}
+.mode.surv{grid-column:1/-1;background:#fff8fb;border-color:var(--ink)}
+.mode .tag{
+  display:inline-block;background:var(--light-yellow);color:var(--ink);
+  border-radius:6px;padding:1px 7px;font-size:11px;font-weight:800;align-self:flex-start;
+}
+.mode.surv .tag{background:var(--magenta);color:#fff}
+
+.card h3{margin:0 0 8px;font-size:14px;color:var(--magenta);letter-spacing:.2px}
+.seg{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.seg:last-child{margin-bottom:0}
+.seg label{font-size:12px;color:var(--soft);min-width:56px;font-weight:700}
+select{font:inherit;font-size:13px;border:2px solid var(--ink);border-radius:8px;padding:4px 8px;background:#fff;color:var(--ink);font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.stat{background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:7px 4px}
+.stat b{display:block;font-size:17px}
+.stat span{font-size:11px;color:var(--soft)}
+.foot{display:flex;gap:8px;justify-content:center;margin-top:6px}
+
+/* 상단 HUD */
+.hud{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.hud .mid{flex:1;text-align:center;font-weight:800;font-size:13px;line-height:1.25}
+.hud .mid small{display:block;font-weight:600;color:var(--soft)}
+.spdPill{
+  display:inline-block;background:var(--ink);color:#fff;border-radius:999px;
+  padding:1px 7px;font-size:11px;margin-left:4px;vertical-align:1px;
+}
+.spdPill.fast{background:var(--magenta)}
+.hud .sc{font-weight:800;text-align:right;font-size:14px;min-width:74px}
+.hud2{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.hud2 .sp{flex:1}
+
+/* 리듬 스테이지 */
+.badge{display:inline-block;background:var(--ink);color:#fff;border-radius:999px;padding:3px 12px;font-weight:700;font-size:12.5px;margin-bottom:6px}
+.sceneSvg{display:block;width:100%;height:auto;border-radius:10px;border:1.5px solid var(--ink)}
+#comboBig{
+  position:absolute;right:18px;top:14px;font-weight:900;color:var(--magenta);
+  font-size:21px;text-shadow:0 2px 0 #fff,0 0 12px rgba(255,255,255,.95);
+  pointer-events:none;opacity:0;z-index:5;
+}
+#comboBig.pop{animation:cpop .72s cubic-bezier(.18,.89,.32,1.28) forwards}
+#comboBig.fever{color:#d88a00;font-size:24px}
+@keyframes cpop{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.55) rotate(-8deg)}
+  20%{opacity:1;transform:translate(-50%,-50%) scale(1.16) rotate(4deg)}
+  75%{opacity:1;transform:translate(-50%,-62%) scale(1) rotate(0deg)}
+  100%{opacity:0;transform:translate(-50%,-78%) scale(.92)}
+}
+.card.shake{animation:shk .18s linear}
+@keyframes shk{
+  0%{transform:translate(0,0)}25%{transform:translate(-3px,2px)}
+  50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,-1px)}100%{transform:translate(0,0)}
+}
+
+.guide{font-weight:800;font-size:17px;text-align:center;margin-bottom:8px;min-height:28px;letter-spacing:-.2px}
+.guide .gn{display:inline-block;color:var(--soft);transition:transform .12s,color .12s}
+.guide .gn.done{color:var(--magenta);transform:scale(1.08)}
+.guide.blind{color:var(--soft);font-size:13.5px;font-weight:700}
+
+.trackWrap{position:relative;border-radius:10px;overflow:hidden;border:2px solid var(--ink);background:#14213a}
+#trackCanvas{display:block;width:100%}
+.judge{
+  position:absolute;left:0;right:0;top:5px;text-align:center;font-weight:900;
+  font-size:21px;pointer-events:none;opacity:0;text-shadow:0 2px 0 rgba(0,0,0,.65);
+}
+.judge.show{animation:jp .65s ease-out forwards}
+.judge.P{color:var(--light-yellow)} .judge.G{color:#7fe3a2} .judge.M{color:#ff8b86} .judge.C{color:#fff;opacity:1;animation:none}
+@keyframes jp{0%{opacity:0;transform:scale(.75)}18%{opacity:1;transform:scale(1.14)}100%{opacity:0;transform:translateY(-8px) scale(1)}}
+
+.ovl{
+  position:absolute;inset:0;background:rgba(11,21,38,.72);
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;
+}
+.ovl .ovlBtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.ovl .ovlHint{color:#dbe8ee;font-size:12px;margin-top:8px}
+
+/* 통합 기적 버튼 + 타종 버튼 */
+.controls{display:flex;gap:10px;margin-top:10px}
+.pad{
+  flex:1;min-height:108px;border:3px solid var(--ink);border-radius:18px;
+  background:#fff;box-shadow:0 5px 0 var(--ink);font-weight:900;font-size:19px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  touch-action:none;-webkit-touch-callout:none;transition:transform .05s,box-shadow .05s,background .08s;
+}
+.pad small{font-size:11px;font-weight:700;color:var(--soft)}
+.pad.whistleMain{flex:2.2;background:#fbeaf3}
+.pad.whistleMain.fever{background:linear-gradient(180deg,#fff4cc 0%,#ffe184 100%)}
+.pad.bell{background:#fff6d6}
+.pad.gong{background:#e4eefb}
+.pad.on{transform:translateY(4px);box-shadow:0 1px 0 var(--ink);background:var(--magenta);color:#fff}
+.pad.on small{color:#fff}
+.pad.bell.on{background:var(--light-yellow);color:var(--ink)}
+.pad.gong.on{background:var(--gong);color:#fff}
+.ripple{fill:none;stroke-width:2.5;transform-box:fill-box;transform-origin:center;animation:rip .9s ease-out forwards}
+@keyframes rip{from{transform:scale(.3);opacity:.9}to{transform:scale(4.6);opacity:0}}
+
+/* 야간 등화 스테이지 */
+.nightCard{background:var(--night);color:#dbe8ee;border-color:var(--ink)}
+.nightPrompt{font-weight:700;font-size:14px;margin-bottom:8px;color:#fff}
+.nsvg{display:block;width:100%;height:auto;border-radius:10px;border:1.5px solid #27406b}
+.nsvg .sil{opacity:0;transition:opacity .75s;fill:#1d2f52;stroke:#3a5486;stroke-width:1.2}
+.nsvg.reveal .sil{opacity:1}
+.nsvg .lb{opacity:0;transition:opacity .5s .2s}
+.nsvg.reveal .lb{opacity:1}
+.flash{animation:fl .55s steps(1) infinite}
+@keyframes fl{50%{opacity:0}}
+.nightNote{font-size:11px;color:#8fa6c8;margin-top:6px}
+.opts{display:grid;gap:8px;margin-top:10px}
+.opt{
+  text-align:left;background:#fff;border:2px solid var(--ink);border-radius:12px;
+  padding:11px 12px;font-weight:700;box-shadow:2px 2px 0 var(--ink);
+  display:flex;gap:8px;align-items:center;
+}
+.opt i{
+  font-style:normal;background:var(--ink);color:#fff;border-radius:6px;
+  width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;flex:none;
+}
+.opt.ok{background:#d9f3e3;border-color:var(--stbd)}
+.opt.no{background:#fbdcda;border-color:var(--port)}
+.opt:disabled{cursor:default}
+
+/* 1초 컷 전환 플래시 배너 */
+.roundFlash{
+  position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:45;
+  background:rgba(11,21,38,.94);color:#fff;border:2px solid #fff;border-radius:16px;
+  padding:14px 22px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.45);
+  min-width:250px;max-width:90vw;pointer-events:none;
+}
+.roundFlash.ok{border-color:#5ce08c}
+.roundFlash.no{border-color:#ff7a74}
+.roundFlash b{display:block;font-size:21px;margin-bottom:4px}
+.roundFlash.ok b{color:#7fe3a2}
+.roundFlash.no b{color:#ff8b86}
+.roundFlash span{font-size:13px;color:#dce8f7}
+
+/* 모달 & 결과 복기 */
+.mback{position:fixed;inset:0;background:rgba(11,21,38,.66);z-index:60;display:flex;align-items:center;justify-content:center;padding:14px}
+.modal{background:#fff;border:2px solid var(--ink);border-radius:16px;box-shadow:5px 5px 0 var(--ink);padding:16px;max-width:520px;width:100%;max-height:88vh;overflow:auto}
+.modal h2{margin:0 0 8px;font-size:19px}
+.modal .mbody{font-size:14px}
+.modal .mbody p{margin:6px 0}
+.modal .mbody ul{margin:6px 0;padding-left:18px}
+.mbtns{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px}
+.marks{font-size:19px;letter-spacing:1px;word-break:break-all;margin:8px 0}
+pre.share{background:var(--paper);border:1.5px solid var(--line);border-radius:8px;padding:8px;white-space:pre-wrap;font-size:12.5px;user-select:text;-webkit-user-select:text}
+
+.reviewList{margin-top:12px;text-align:left;display:grid;gap:8px}
+.revItem{border:1.5px solid var(--line);border-left:4px solid var(--stbd);border-radius:10px;padding:8px 10px;background:var(--paper);font-size:12.5px}
+.revItem.bad{border-left-color:var(--port);background:#fff6f6}
+.revTop{display:flex;justify-content:space-between;gap:8px;font-weight:800;margin-bottom:3px}
+.revRule{background:var(--ink);color:#fff;border-radius:4px;padding:0 6px;font-size:11px}
+.revAns{font-weight:700;color:var(--ink);margin-bottom:2px}
+.revDesc{color:var(--soft);line-height:1.4}
+
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;font-weight:700;z-index:90;opacity:0;pointer-events:none;transition:opacity .25s}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ 아케이드 메뉴 ============ -->
+  <section id="screenMenu">
+    <header class="hero">
+      <div class="heroTop">
+        <svg class="rose" viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="32" r="28" fill="#10213b" stroke="#7ea2d4" stroke-width="1.8"/>
+          <circle cx="32" cy="32" r="20" fill="none" stroke="#486996" stroke-width="1" stroke-dasharray="2 3"/>
+          <path d="M32 4 L37 32 L32 60 L27 32Z" fill="#e0489e"/>
+          <path d="M4 32 L32 27 L60 32 L32 37Z" fill="#f2b705"/>
+          <circle cx="32" cy="32" r="3.5" fill="#fff" stroke="#14213a" stroke-width="1.5"/>
+          <text x="32" y="13" font-size="7" text-anchor="middle" fill="#fff" font-weight="800">N</text>
+        </svg>
+        <div>
+          <h1>COLREG 야간 당직 <span>&amp;</span> 기적 리듬</h1>
+          <p>8bit 해군 군가 박자 · 야간 등화 식별 · 종료 시 전체 답안 복기</p>
+        </div>
+      </div>
+      <div class="heroStrip">
+        <span class="rankBadge" id="rankBadge">견습 당직사관</span>
+        <div class="beaconRow">
+          <span class="bDot p"></span>홍(좌)
+          <span class="bDot g"></span>녹(우)
+          <span class="bDot y"></span>황(예선)
+        </div>
+      </div>
+    </header>
+
+    <div class="modes">
+      <button class="mode daily" data-mode="daily">
+        <span class="tag" id="dailyTag">TODAY</span>
+        <b>오늘의 일일 챌린지 (1.50x 고정)</b>
+        <small id="dailySub"></small>
+      </button>
+      <button class="mode" data-mode="rhythm">
+        <b>🎺 8bit 기적 리듬</b>
+        <small>종료 시까지 무한 · 최대 3.00x 가속</small>
+      </button>
+      <button class="mode" data-mode="night">
+        <b>🌙 야간 등화 관측</b>
+        <small>종료 시까지 무한 · 등화/항법 판별</small>
+      </button>
+      <button class="mode surv" data-mode="survival">
+        <span class="tag">SURVIVAL</span>
+        <b>⚓ 종합 서바이벌 (리듬 + 등화 교차 · 생명 3개)</b>
+        <small>라운드마다 점진적 가속(최대 3.00x) · 오답 시 생명 감소</small>
+      </button>
+    </div>
+
+    <div class="card">
+      <h3>⚙ 당직 설정</h3>
+      <div class="seg"><label>리듬 힌트</label>
+        <button class="btn sm js-diff" data-diff="guide">초급: 장·단 노트 표시</button>
+        <button class="btn sm js-diff" data-diff="blind">숙련: 상황 보고 암기</button>
+      </div>
+      <div class="seg"><label>8bit 군가</label>
+        <select class="js-song" aria-label="8bit BGM 선택"></select>
+        <button class="btn sm js-mute">🔊 BGM 켬</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🏅 당직 기록 (localStorage)</h3>
+      <div class="stats" id="statsBox"></div>
+    </div>
+
+    <div class="foot">
+      <button class="btn sm" id="btnHow">❓ 조작·규칙 안내</button>
+      <button class="btn sm" id="btnReset">🗑 기록 초기화</button>
+    </div>
+  </section>
+
+  <!-- ============ 게임 화면 ============ -->
+  <section id="screenGame" class="hidden">
+    <div class="hud">
+      <button class="btn sm" id="btnExit">⏹ 당직 종료 &amp; 결과</button>
+      <div class="mid"><span id="hudMode"></span><small id="hudStage"></small></div>
+      <div class="sc"><span id="hudScore">0</span>점<br><span id="hudLives"></span></div>
+    </div>
+    <div class="hud2">
+      <button class="btn sm js-diffT">초급</button>
+      <select class="js-song" aria-label="BGM 선택"></select>
+      <button class="btn sm js-mute">🔊</button>
+      <span class="sp"></span>
+      <span style="font-size:11.5px;color:var(--soft);font-weight:700">1초 후 자동 다음 라운드</span>
+    </div>
+
+    <!-- 리듬 스테이지 -->
+    <div id="stageRhythm" class="hidden">
+      <div class="card" id="sceneCard">
+        <span class="badge" id="sceneBadge"></span>
+        <div id="sceneBox"></div>
+        <div id="comboBig"></div>
+      </div>
+      <div class="card" style="padding:10px">
+        <div class="guide" id="guideRow"></div>
+        <div class="trackWrap">
+          <canvas id="trackCanvas"></canvas>
+          <div class="judge" id="judgeText"></div>
+          <div class="ovl" id="trackOverlay">
+            <div>
+              <div class="ovlBtns">
+                <button class="btn primary big" id="btnStart">▶ 박자 맞춰 시작</button>
+                <button class="btn" id="btnDemo">🎧 신호 미리듣기</button>
+              </div>
+              <div class="ovlHint" id="ovlHint">시작 후부터는 매 라운드 1초 뒤 자동으로 이어집니다.</div>
+            </div>
+          </div>
+        </div>
+        <div class="controls" id="controls">
+          <button class="pad whistleMain" data-key="whistle">
+            📯 기적 (WHISTLE)
+            <small>짧게 탭 = 단음 · 길게 홀드 = 장음 · Space/D/F</small>
+          </button>
+          <button class="pad bell hidden" data-key="bell">🔔 호종<small>탭/홀드 · J</small></button>
+          <button class="pad gong hidden" data-key="gong">🥁 징<small>홀드 · K</small></button>
+        </div>
+        <button class="btn" id="btnPause" style="width:100%;margin-top:10px">⏸ 일시정지 <small style="font-weight:700">(P)</small></button>
+      </div>
+    </div>
+
+    <!-- 야간 등화 스테이지 -->
+    <div id="stageNight" class="hidden">
+      <div class="card nightCard">
+        <div class="nightPrompt" id="nightPrompt"></div>
+        <div id="nightBox"></div>
+        <div class="nightNote">※ COLREG Part C(제20~31조) 및 Part B(제13~17조) 기반 식별 시뮬레이션입니다.</div>
+      </div>
+      <div class="opts" id="nightOpts"></div>
+    </div>
+  </section>
+</div>
+
+<div class="roundFlash hidden" id="roundFlash"></div>
+<div id="modalRoot"></div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+const $=(s,el=document)=>el.querySelector(s);
+const $$=(s,el=document)=>Array.from(el.querySelectorAll(s));
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const pad2=n=>String(n).padStart(2,'0');
+function mulberry32(a){
+  return function(){
+    a|=0;a=a+0x6D2B79F5|0;
+    let t=Math.imul(a^a>>>15,1|a);
+    t=t+Math.imul(t^t>>>7,61|t)^t;
+    return((t^t>>>14)>>>0)/4294967296;
+  };
+}
+function shuffle(arr,rng){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+function dateKey(d=new Date()){return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();}
+function dateStr(k){return `${Math.floor(k/10000)}-${pad2(Math.floor(k/100)%100)}-${pad2(k%100)}`;}
+function prevKey(k){const y=Math.floor(k/10000),m=Math.floor(k/100)%100,d=k%100;return dateKey(new Date(y,m-1,d-1));}
+
+/* =====================================================================
+   localStorage 저장소
+===================================================================== */
+const STORE_KEY='colreg_watch_rhythm_v3';
+const defStore=()=>({
+  streak:0,maxStreak:0,lastClear:0,high:0,maxCombo:0,ans:0,bestAns:0,
+  part:{rhythm:[0,0],night:[0,0]},daily:{},set:{diff:'guide',song:'auto',mute:false}
+});
+function loadStore(){
+  const d=defStore();
+  try{
+    const r=JSON.parse(localStorage.getItem(STORE_KEY));
+    if(r&&typeof r==='object'){
+      Object.assign(d,r);
+      d.part=Object.assign(defStore().part,r.part||{});
+      d.set=Object.assign(defStore().set,r.set||{});
+      d.daily=r.daily||{};
+    }
+  }catch(e){}
+  return d;
+}
+let store=loadStore();
+function saveStore(){try{localStorage.setItem(STORE_KEY,JSON.stringify(store));}catch(e){}}
+function curStreak(){const k=dateKey();return(store.lastClear===k||store.lastClear===prevKey(k))?store.streak:0;}
+function rankTitle(high){
+  if(high>=2000)return '★ 함대 당직사령';
+  if(high>=1000)return '⚓ 선임 항해사';
+  if(high>=400)return '🧭 정식 당직사관';
+  return '🔰 견습 당직사관';
+}
+
+/* =====================================================================
+   오디오 엔진: 8bit 해군 군가 BGM + 실시간 기적·호종·징 합성
+===================================================================== */
+const Aud=(()=>{
+  const BPM=120,BEAT=60/BPM,STEP=BEAT/2,PAT=64,BAR=BEAT*4;
+  let ctx=null,bgmG=null,bgmFilter=null,sfxG=null,noise=null;
+  let bgmStart=0,step=0,songStep0=0,cur=0,pending=null,timer=null,muted=false,nightMode=false;
+  const t0=performance.now()/1000;
+  const NOTE={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+  const midi=n=>{
+    const m=/^([A-G])([#b]?)(\d)$/.exec(n);
+    if(!m)throw new Error('bad note '+n);
+    return 12*(+m[3]+1)+NOTE[m[1]]+(m[2]==='#'?1:m[2]==='b'?-1:0);
+  };
+  const mtof=m=>440*Math.pow(2,(m-69)/12);
+
+  const RAW=[
+    {
+      name:'1. 항구의 아침 (Harbor Morning)',
+      mel:['E5 - G5 E5 C5 - E5 -','D5 - F5 D5 B4 - D5 -','E5 - G5 - C6 - G5 -','A5 - G5 - E5 - - -','F5 - A5 F5 C5 - F5 -','E5 - G5 E5 C5 - E5 -','D5 - F5 - G5 - B5 -','C6 - - - G5 - - -'],
+      ch:[['C3','G3'],['G2','D3'],['C3','G3'],['A2','E3'],['F2','C3'],['C3','G3'],['G2','D3'],['C3','G3']]
+    },
+    {
+      name:'2. 야간 순찰 (Night Patrol)',
+      mel:['A4 - C5 - E5 - A5 -','G5 - E5 - C5 - E5 -','F5 - A5 - C6 - A5 -','E5 - - - r r E5 -','D5 - F5 - A5 - F5 -','C5 - E5 - G5 - E5 -','B4 - D5 - F5 E5 D5 B4','A4 - - - E4 - A4 -'],
+      ch:[['A2','E3'],['A2','E3'],['F2','C3'],['E2','B2'],['D3','A3'],['C3','G3'],['G2','D3'],['A2','E3']]
+    },
+    {
+      name:'3. 폭풍 속 돌파 (Storm Breaker)',
+      mel:['D5 D5 F5 D5 A5 - F5 -','D5 D5 F5 D5 G5 - E5 -','C5 C5 E5 C5 G5 - E5 -','A4 A4 C#5 A4 E5 - A5 -','D5 D5 F5 D5 A5 - F5 -','A#5 - A5 - G5 - F5 -','E5 E5 G5 E5 C6 - G5 -','D5 - - - A4 - D5 -'],
+      ch:[['D3','A3'],['A#2','F3'],['C3','G3'],['A2','E3'],['D3','A3'],['A#2','F3'],['C3','G3'],['D3','A3']]
+    }
+  ];
+  const SONGS=RAW.map(s=>{
+    const toks=s.mel.join(' ').split(/\s+/);
+    const mel=new Array(PAT).fill(null),bass=new Array(PAT).fill(null);
+    for(let i=0;i<PAT;i++){
+      const t=toks[i];if(t==='r'||t==='-')continue;
+      let len=1;while(toks[i+len]==='-')len++;
+      mel[i]={f:mtof(midi(t)),len};
+    }
+    s.ch.forEach((c,bar)=>{
+      for(let b=0;b<4;b++)bass[bar*8+b*2]={f:mtof(midi(c[b%2])),len:2};
+    });
+    return {name:s.name,mel,bass};
+  });
+
+  function ensure(){
+    if(!ctx){
+      const AC=window.AudioContext||window.webkitAudioContext;
+      if(!AC)return false;
+      ctx=new AC();
+      const master=ctx.createGain();master.gain.value=.92;
+      const comp=ctx.createDynamicsCompressor();
+      master.connect(comp);comp.connect(ctx.destination);
+      bgmFilter=ctx.createBiquadFilter();
+      bgmFilter.type='lowpass';
+      bgmFilter.frequency.value=nightMode?680:9500;
+      bgmG=ctx.createGain();bgmG.gain.value=muted?0:.48;
+      bgmFilter.connect(bgmG);bgmG.connect(master);
+      sfxG=ctx.createGain();sfxG.gain.value=1;sfxG.connect(master);
+      noise=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);
+      const d=noise.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+      bgmStart=ctx.currentTime+.12;step=0;songStep0=0;
+      timer=setInterval(sched,25);
+    }
+    if(ctx.state==='suspended')ctx.resume();
+    return true;
+  }
+  const lat=()=>clamp(ctx?(ctx.outputLatency||ctx.baseLatency||0):0,0,.25);
+  const time=()=>ctx?ctx.currentTime:performance.now()/1000-t0;
+  const now=()=>ctx?ctx.currentTime-lat():performance.now()/1000-t0;
+  function nextBarTime(minLead){
+    if(!ctx)return time()+Math.ceil(minLead/BAR)*BAR;
+    const k=Math.ceil((ctx.currentTime+minLead-bgmStart)/BAR);
+    return bgmStart+k*BAR;
+  }
+  function setSong(i){if(i===cur&&pending===null)return;pending=i;}
+  function setMute(m){muted=m;if(ctx)bgmG.gain.setTargetAtTime(m?0:.48,ctx.currentTime,.04);}
+  function setNightAmbience(isNight){
+    nightMode=!!isNight;
+    if(ctx&&bgmFilter)bgmFilter.frequency.setTargetAtTime(nightMode?680:9500,ctx.currentTime,.12);
+  }
+
+  function osc(type,f,t,d,vol,dest,att=.008){
+    const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.value=f;
+    g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol,t+att);
+    g.gain.setValueAtTime(vol*.8,t+Math.max(att+.005,d*.55));g.gain.exponentialRampToValueAtTime(.0001,t+d*.97);
+    o.connect(g);g.connect(dest);o.start(t);o.stop(t+d+.02);
+  }
+  function nz(t,d,vol,type,freq,dest){
+    const s=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();
+    s.buffer=noise;f.type=type;f.frequency.value=freq;
+    g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    s.connect(f);f.connect(g);g.connect(dest);s.start(t,Math.random()*.5);s.stop(t+d+.02);
+  }
+  function kick(t){
+    const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';
+    o.frequency.setValueAtTime(135,t);o.frequency.exponentialRampToValueAtTime(42,t+.12);
+    g.gain.setValueAtTime(.55,t);g.gain.exponentialRampToValueAtTime(.0001,t+.16);
+    o.connect(g);g.connect(bgmFilter);o.start(t);o.stop(t+.2);
+  }
+  function sched(){
+    if(!ctx||ctx.state!=='running')return;
+    while(bgmStart+step*STEP<ctx.currentTime+.25){
+      const t=bgmStart+step*STEP;
+      if(pending!==null&&step%8===0){cur=pending;pending=null;songStep0=step;}
+      if(t>=ctx.currentTime-.03){
+        const S=SONGS[cur],pos=(step-songStep0)%PAT,inBar=pos%8;
+        const m=S.mel[pos];if(m)osc('square',m.f,t,m.len*STEP,nightMode?.06:.105,bgmFilter);
+        const b=S.bass[pos];if(b)osc('triangle',b.f,t,b.len*STEP*.9,nightMode?.34:.28,bgmFilter,.008);
+        if(inBar===0||inBar===4)kick(t);
+        if(inBar===2||inBar===6||(pos>=56&&inBar===7)){
+          nz(t,.13,nightMode?.12:.22,'highpass',1800,bgmFilter);
+          osc('triangle',190,t,.07,.12,bgmFilter,.002);
+        }
+        if(inBar%2===1&&inBar!==7)nz(t,.035,.05,'highpass',7000,bgmFilter);
+      }
+      step++;
+    }
+  }
+  function tick(t,accent){if(!ctx)return;osc('square',accent?1760:1175,t,.065,.17,sfxG,.002);}
+
+  function whistle(t,dur){
+    if(!ctx)return{release(){}};
+    const out=ctx.createGain();out.gain.setValueAtTime(.0001,t);out.gain.linearRampToValueAtTime(.52,t+.045);
+    const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1180;lp.Q.value=3;
+    const vib=ctx.createOscillator(),vg=ctx.createGain();vib.frequency.value=5.2;vg.gain.value=9;vib.connect(vg);
+    const oscs=[];
+    [[220,'sawtooth',.5],[330,'triangle',.75],[110,'sawtooth',.22],[221.6,'sawtooth',.28]].forEach(([f,ty,gv])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();o.type=ty;o.frequency.value=f;g.gain.value=gv;
+      o.connect(g);g.connect(lp);vg.connect(o.detune);o.start(t);oscs.push(o);
+    });
+    vib.start(t);lp.connect(out);out.connect(sfxG);
+    let done=false;
+    function release(t2){
+      if(done)return;done=true;const g=out.gain;
+      if(g.cancelAndHoldAtTime)g.cancelAndHoldAtTime(t2);
+      else{g.cancelScheduledValues(t2);g.setValueAtTime(Math.max(g.value,.0001),t2);}
+      g.setTargetAtTime(.0001,t2,.065);
+      oscs.forEach(o=>o.stop(t2+.65));vib.stop(t2+.65);
+    }
+    if(dur){
+      out.gain.setValueAtTime(.52,t+dur);done=true;
+      out.gain.setTargetAtTime(.0001,t+dur,.065);
+      oscs.forEach(o=>o.stop(t+dur+.65));vib.stop(t+dur+.65);
+    }
+    return {release};
+  }
+  function bell(t,o={}){
+    if(!ctx)return;
+    const base=o.base||820,dec=o.dec||1.3,vol=o.vol||.52;
+    [[1,1,1],[2.01,.45,.6],[2.76,.5,.45],[4.07,.25,.3],[5.43,.2,.2],[8.93,.1,.12]].forEach(([r,g,d])=>{
+      const os=ctx.createOscillator(),e=ctx.createGain();os.type='sine';os.frequency.value=base*r;
+      e.gain.setValueAtTime(.0001,t);e.gain.linearRampToValueAtTime(vol*g*.38,t+.003);
+      e.gain.exponentialRampToValueAtTime(.0001,t+dec*d);
+      os.connect(e);e.connect(sfxG);os.start(t);os.stop(t+dec*d+.05);
+    });
+  }
+  function gong(t,dur){
+    if(!ctx)return{release(){}};
+    dur=dur||5;const out=ctx.createGain();out.gain.value=1;out.connect(sfxG);
+    [[1,1,1],[1.47,.6,.8],[2.0,.55,.7],[2.76,.35,.5],[3.4,.25,.4],[1.003,.9,1]].forEach(([r,g,d])=>{
+      const o=ctx.createOscillator(),e=ctx.createGain();o.type='sine';o.frequency.value=78*r;
+      e.gain.setValueAtTime(.0001,t);e.gain.linearRampToValueAtTime(.42*g,t+.02);
+      e.gain.exponentialRampToValueAtTime(.0001,t+dur*d);
+      o.connect(e);e.connect(out);o.start(t);o.stop(t+dur*d+.05);
+    });
+    nz(t,.45,.32,'bandpass',420,out);
+    function release(t2){
+      const g=out.gain;
+      if(g.cancelAndHoldAtTime)g.cancelAndHoldAtTime(t2);
+      else{g.cancelScheduledValues(t2);g.setValueAtTime(Math.max(g.value,.0001),t2);}
+      g.setTargetAtTime(.0001,t2,.45);
+    }
+    return {release};
+  }
+  function demoNote(kind,t,spd=1){
+    if(kind==='S')whistle(t,.35/spd);
+    else if(kind==='s')whistle(t,.22/spd);
+    else if(kind==='L')whistle(t,.95/spd);
+    else if(kind==='b')bell(t);
+    else if(kind==='B'){for(let x=0;x<1.5/spd;x+=.13)bell(t+x,{dec:.4,vol:.38,base:800+(Math.round(x/.13)%2)*30});}
+    else if(kind==='G'){gong(t,4).release(t+1.5/spd);}
+  }
+  function suspend(){if(ctx&&ctx.state==='running')ctx.suspend();}
+  function resume(){if(ctx&&ctx.state==='suspended')ctx.resume();}
+  return {ensure,suspend,resume,time,now,nextBarTime,setSong,setMute,setNightAmbience,tick,whistle,bell,gong,demoNote,SONGS,get ok(){return !!ctx;}};
+})();
+
+/* =====================================================================
+   리듬 스테이지 채보 데이터 (8bit 120BPM 4/4박자 그리드 동기화: 1박=0.5s, 1마디=2.0s)
+===================================================================== */
+const KINDS={
+  S:{lane:'whistle',vis:.42,hold:false,label:'단',maxHold:.68},
+  s:{lane:'whistle',vis:.28,hold:false,label:'단',maxHold:.55},
+  L:{lane:'whistle',vis:1.0,hold:true,label:'장',dur:1.0},
+  b:{lane:'bell',vis:.35,hold:false,label:'🔔',maxHold:.65},
+  B:{lane:'bell',vis:1.5,hold:true,label:'🔔 급속',dur:1.5},
+  G:{lane:'gong',vis:1.5,hold:true,label:'🥁 징',dur:1.5}
+};
+const LANE_COL={whistle:'#d6468f',bell:'#f2b705',gong:'#5a8ed6'};
+const LANE_NAME={whistle:'기적',bell:'호종',gong:'징'};
+const LSS=[['L',0],['S',1.5],['S',2.0]];
+const TXT_35C='장음(prolonged blast, 4~6초) 1회 + 단음(short blast, 약 1초) 2회를 2분 이내 간격으로 울립니다. NUC·RAM·CBD·범선·어로종사선·예인/압항선(복합체 제외)이 사용합니다.';
+
+const R_STAGES=[
+ {id:'fog_way',g:'under',scene:'fog_way',badge:'안개 속 항해 중 · 기관 사용',title:'대수속력 있는 동력선',guide:['장'],chart:[['L',0]],rule:'제35조(a)',
+  desc:'대수속력이 있는 동력선은 2분을 넘지 않는 간격으로 장음(prolonged blast, 4~6초) 1회를 울립니다. ("long blast" 오답 주의)'},
+ {id:'fog_stop',g:'under',scene:'fog_stop',badge:'안개 속 항해 중 · 기관 정지',title:'정선 중인 동력선 (대수속력 없음)',guide:['장','장'],chart:[['L',0],['L',1.5]],rule:'제35조(b)',
+  desc:'항행 중이지만 대수속력이 없는 동력선은 약 2초 간격으로 장음 2회를 2분 이내 간격으로 울립니다.'},
+ {id:'fog_nuc',g:'special',scene:'fog_nuc',badge:'안개 속 · 조종불능선(NUC)',title:'조종불능선 무중신호',guide:['장','단','단'],chart:LSS,rule:'제35조(c)',desc:TXT_35C},
+ {id:'fog_ram',g:'special',scene:'fog_ram',badge:'안개 속 · 조종제한선(RAM)',title:'조종제한선 무중신호',guide:['장','단','단'],chart:LSS,rule:'제35조(c)',desc:TXT_35C},
+ {id:'fog_cbd',g:'special',scene:'fog_cbd',badge:'안개 속 · 흘수제약선(CBD)',title:'흘수제약선 무중신호',guide:['장','단','단'],chart:LSS,rule:'제35조(c)',desc:TXT_35C},
+ {id:'fog_sail',g:'special',scene:'fog_sail',badge:'안개 속 · 항행 중인 범선',title:'범선 무중신호',guide:['장','단','단'],chart:LSS,rule:'제35조(c)',desc:TXT_35C},
+ {id:'fog_fish',g:'special',scene:'fog_fish',badge:'안개 속 · 그물을 끄는 어로종사선',title:'어로종사선 무중신호',guide:['장','단','단'],chart:LSS,rule:'제35조(c)',desc:TXT_35C},
+ {id:'fog_tow',g:'special',scene:'fog_tow',badge:'안개 속 · 예인선 (예인 중)',title:'예인선 무중신호',guide:['장','단','단'],chart:LSS,rule:'제35조(c)',
+  desc:'예인 또는 압항(복합체 제외) 중인 선박은 장·단·단을 울립니다. 단단히 결합된 복합체는 단일 동력선 신호를 따릅니다.'},
+ {id:'fog_towed',g:'special',scene:'fog_towed',badge:'안개 속 · 피예인선 (최후단 유인선)',title:'피예인선 무중신호',guide:['장','단','단','단'],chart:[['L',0],['S',1.5],['S',2.0],['S',2.5]],rule:'제35조(e)',
+  desc:'피예인선이 여러 척이면 최후단 유인선이 장 1회 + 단 3회를 2분 이내 간격으로 울립니다.'},
+ {id:'fog_pilot',g:'special',scene:'fog_pilot',badge:'안개 속 · 도선선 (도선 업무 중)',title:'도선선 식별신호 추가',guide:['장','단','단','단','단'],chart:[['L',0],['S',1.5],['S',2.0],['S',2.5],['S',3.0]],rule:'제35조(j)',
+  desc:'도선 업무 중인 도선선은 기본 신호에 더해 단음 4회의 식별신호를 추가로 울릴 수 있습니다.'},
+ {id:'anc_s',g:'anchor',scene:'anc_s',badge:'안개 속 · 닻 내린 정박선 (100m 미만)',title:'정박선 (100m 미만)',guide:['🔔 급속'],chart:[['B',0]],bells:true,rule:'제35조(g)',
+  desc:'정박선은 1분을 넘지 않는 간격으로 호종을 약 5초간 급속히 울립니다.'},
+ {id:'anc_l',g:'anchor',scene:'anc_l',badge:'안개 속 · 정박선 (100m 이상)',title:'정박선 (100m 이상)',guide:['🔔 급속','🥁 징'],chart:[['B',0],['G',2.0]],bells:true,rule:'제35조(g)',
+  desc:'길이 100m 이상 정박선은 선수에서 호종을 약 5초 급속히 울린 직후 선미에서 징을 약 5초 울립니다.'},
+ {id:'anc_w',g:'anchor',scene:'anc_w',badge:'정박 중 · 접근선에 위치·충돌 위험 경고',title:'정박선 기적 경고신호',guide:['단','장','단'],chart:[['S',0],['L',.5],['S',2.0]],rule:'제35조(g)',
+  desc:'정박선은 접근 선박에 위치와 충돌 가능성을 알리기 위해 단·장·단 기적 신호를 추가로 울릴 수 있습니다.'},
+ {id:'gnd_s',g:'anchor',scene:'gnd_s',badge:'안개 속 좌초 (100m 미만)',title:'좌초선 타종 신호',guide:['🔔🔔🔔','🔔 급속','🔔🔔🔔'],
+  chart:[['b',0],['b',.5],['b',1.0],['B',1.5],['b',3.5],['b',4.0],['b',4.5]],bells:true,rule:'제35조(h)',
+  desc:'좌초선은 급속 타종 직전과 직후에 각각 분리된 호종 3타를 울립니다(3타 → 급속 → 3타).'},
+ {id:'gnd_l',g:'anchor',scene:'gnd_l',badge:'안개 속 좌초 (100m 이상)',title:'좌초선 호종 + 징 신호',guide:['🔔🔔🔔','🔔 급속','🔔🔔🔔','🥁 징'],
+  chart:[['b',0],['b',.5],['b',1.0],['B',1.5],['b',3.5],['b',4.0],['b',4.5],['G',5.0]],bells:true,rule:'제35조(h)',
+  desc:'길이 100m 이상 좌초선은 호종 3타 → 급속 타종 → 3타에 더해 선미에서 징을 약 5초 울립니다.'},
+ {id:'man_stbd',g:'man',scene:'man_stbd',badge:'상호 시계 · 우현 변침 중',title:'우현 변침 조종신호',guide:['단'],chart:[['S',0]],rule:'제34조(a)(i)',desc:'서로 시계 안에서 침로를 우현으로 변경할 때는 단음 1회를 울립니다.'},
+ {id:'man_port',g:'man',scene:'man_port',badge:'상호 시계 · 좌현 변침 중',title:'좌현 변침 조종신호',guide:['단','단'],chart:[['S',0],['S',.5]],rule:'제34조(a)(ii)',desc:'서로 시계 안에서 침로를 좌현으로 변경할 때는 단음 2회를 울립니다.'},
+ {id:'man_astern',g:'man',scene:'man_astern',badge:'상호 시계 · 기관 후진 중',title:'기관 후진 조종신호',guide:['단','단','단'],chart:[['S',0],['S',.5],['S',1.0]],rule:'제34조(a)(iii)',desc:'기관을 후진할 때는 단음 3회를 울립니다.'},
+ {id:'man_warn',g:'man',scene:'man_warn',badge:'상호 시계 · 상대 의도 불명 (의문·경고)',title:'의문/경고 신호 (단음 5회)',guide:['단','단','단','단','단'],chart:[['s',0],['s',.5],['s',1.0],['s',1.5],['s',2.0]],rule:'제34조(d)',
+  desc:'상대의 의도·동작이 불명확하거나 충돌 회피 조치가 충분한지 의심스러울 때 단음 5회 이상을 급속히 울립니다.'},
+ {id:'ovt_s',g:'man',scene:'ovt_s',badge:'좁은 수로 · 상대 우현 쪽 추월 시도',title:'우현 추월 의도 신호',guide:['장','장','단'],chart:[['L',0],['L',1.5],['S',3.0]],rule:'제34조(c)(i)',
+  desc:'좁은 수로에서 상대 우현 쪽으로 추월하려 할 때는 장·장·단 신호를 울립니다.'},
+ {id:'ovt_p',g:'man',scene:'ovt_p',badge:'좁은 수로 · 상대 좌현 쪽 추월 시도',title:'좌현 추월 의도 신호',guide:['장','장','단','단'],chart:[['L',0],['L',1.5],['S',3.0],['S',3.5]],rule:'제34조(c)(i)',
+  desc:'좁은 수로에서 상대 좌현 쪽으로 추월하려 할 때는 장·장·단·단 신호를 울립니다.'},
+ {id:'ovt_ok',g:'man',scene:'ovt_ok',badge:'좁은 수로 · 추월에 동의 (피추월선 응답)',title:'추월 동의 신호',guide:['장','단','장','단'],chart:[['L',0],['S',1.5],['L',2.0],['S',3.5]],rule:'제34조(c)(ii)',
+  desc:'피추월선이 추월에 동의할 때는 장·단·장·단 순서로 응답합니다.'},
+ {id:'man_bend',g:'man',scene:'man_bend',badge:'좁은 수로 만곡부 접근',title:'만곡부 접근 신호',guide:['장'],chart:[['L',0]],rule:'제34조(e)',
+  desc:'장애물로 가려질 수 있는 만곡부에 접근하는 선박은 장음 1회를 울리고, 반대편 접근선도 장음 1회로 응답합니다.'}
+];
+
+/* =====================================================================
+   SVG 상황 일러스트
+===================================================================== */
+const INK='#14213a',GRAYSH='#7b8aa0',MAG='#a3246f';
+const txt=(x,y,s,sz=10,anc='middle',fill=INK,w=700)=>`<text x="${x}" y="${y}" font-size="${sz}" text-anchor="${anc}" fill="${fill}" font-weight="${w}" font-family="inherit">${s}</text>`;
+const ball=(x,y)=>`<circle cx="${x}" cy="${y}" r="5" fill="${INK}"/>`;
+const diamond=(x,y)=>`<path d="M${x} ${y-6}L${x+6} ${y}L${x} ${y+6}L${x-6} ${y}Z" fill="${INK}"/>`;
+const cyl=(x,y)=>`<rect x="${x-4}" y="${y-8}" width="8" height="16" rx="1" fill="${INK}"/>`;
+const arrow=(d,dash)=>`<path d="${d}" fill="none" stroke="${INK}" stroke-width="2.6" ${dash?'stroke-dasharray="6 5"':''} marker-end="url(#arr)"/>`;
+const ship=(x,y,deg=0,len=80,fill=INK)=>{const k=len/80;return `<g transform="translate(${x} ${y}) rotate(${deg}) scale(${k})"><path d="M-35 -9 L24 -9 Q40 -7 46 0 Q40 7 24 9 L-35 9 Z" fill="${fill}" stroke="${INK}" stroke-width="1.5"/><rect x="-22" y="-5" width="18" height="10" rx="2" fill="#f4f7f8" opacity=".92"/></g>`;};
+const anchor=(x,y)=>`<g transform="translate(${x} ${y})" stroke="${INK}" fill="none" stroke-width="2.4" stroke-linecap="round"><circle cy="-12" r="3.5"/><path d="M0 -8 V14 M-8 -3 H8 M-12 6 Q-10 15 0 15 Q10 15 12 6"/></g>`;
+const FOG=`<g><path d="M-10 18 Q30 2 70 16 T150 14 T230 18 T320 12 T380 18 V44 H-10Z" fill="#fff" fill-opacity=".5" stroke="#8aa3b3" stroke-dasharray="6 5"/>
+<path d="M-10 70 Q40 52 90 68 T190 66 T290 70 T380 64 V92 H-10Z" fill="#fff" fill-opacity=".28" stroke="#8aa3b3" stroke-dasharray="6 5"/>
+<path d="M-10 128 Q40 112 90 126 T190 124 T290 128 T380 122 V170 H-10Z" fill="#fff" fill-opacity=".5" stroke="#8aa3b3" stroke-dasharray="6 5"/></g>`;
+function svgWrap(inner,fog,src){
+  return `<svg viewBox="0 0 360 170" class="sceneSvg" role="img" aria-label="항해 상황 일러스트">
+<defs><linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8f1f5"/><stop offset="1" stop-color="#cde0e9"/></linearGradient>
+<pattern id="waveP" width="40" height="18" patternUnits="userSpaceOnUse"><path d="M0 9 Q10 1 20 9 T40 9" fill="none" stroke="#9fbccb" stroke-width="1" stroke-dasharray="3 3"/></pattern>
+<pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#e6d9b8"/><line x1="0" y1="0" x2="0" y2="7" stroke="#a98f4f" stroke-width="2"/></pattern>
+<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${INK}"/></marker></defs>
+<rect width="360" height="170" fill="url(#seaG)"/><rect width="360" height="170" fill="url(#waveP)"/>
+${inner}${fog?FOG:''}<g id="waveG" transform="translate(${src[0]} ${src[1]})"></g></svg>`;
+}
+const channel=()=>`<rect x="0" y="0" width="360" height="50" fill="#cbd8c4"/><rect x="0" y="130" width="360" height="40" fill="#cbd8c4"/><path d="M0 50H360M0 130H360" stroke="#6f8a68" stroke-width="2" stroke-dasharray="7 4"/>`;
+const SCENES={
+ fog_way:()=>({fog:1,src:[150,100],inner:ship(150,100,0,92)+arrow('M222 100 L310 100')+txt(268,88,'전진',11)}),
+ fog_stop:()=>({fog:1,src:[180,108],inner:ship(180,108,0,92)+`<rect x="148" y="36" width="64" height="26" rx="6" fill="${MAG}"/>`+txt(180,55,'STOP',15,'middle','#fff',800)+txt(180,148,'대수속력 0',11)}),
+ fog_nuc:()=>({fog:1,src:[180,112],inner:ship(180,112,0,92)+ball(180,50)+ball(180,68)+txt(180,32,'NUC',12)}),
+ fog_ram:()=>({fog:1,src:[180,112],inner:ship(180,112,0,92)+ball(180,44)+diamond(180,60)+ball(180,76)+txt(180,28,'RAM',12)}),
+ fog_cbd:()=>({fog:1,src:[180,108],inner:ship(180,108,0,92)+cyl(180,56)+txt(180,32,'CBD',12)+`<path d="M236 124 V150 M228 124 H244 M228 150 H244" stroke="${INK}" stroke-width="2"/>`+txt(256,141,'흘수',10,'start')}),
+ fog_sail:()=>({fog:1,src:[180,112],inner:`<g transform="translate(180 112)"><path d="M-46 0 L46 0 L34 14 L-34 14Z" fill="${INK}"/><path d="M-3 -4 L-3 -66 L32 -8Z" fill="#fff" stroke="${INK}" stroke-width="2"/><path d="M-9 -4 L-9 -52 L-40 -8Z" fill="#fff" stroke="${INK}" stroke-width="2"/></g>`+arrow('M300 30 L250 52')+txt(300,24,'바람',11)}),
+ fog_fish:()=>({fog:1,src:[160,100],inner:ship(160,100,0,86)+`<path d="M118 94 L50 68 L50 132 L118 106" fill="#fff" fill-opacity=".55" stroke="${INK}" stroke-width="1.6" stroke-dasharray="4 3"/><path d="M80 80 V120 M65 74 V126" stroke="${INK}" stroke-width="1" stroke-dasharray="2 3"/>`+txt(76,104,'🐟',16)+`<path d="M153 38 L167 38 L160 50Z M153 62 L167 62 L160 50Z" fill="${INK}"/>`+arrow('M222 100 L300 100')}),
+ fog_tow:()=>({fog:1,src:[256,100],inner:ship(110,100,0,90,GRAYSH)+ship(256,100,0,64)+`<path d="M226 100 L162 100" stroke="${INK}" stroke-width="2.4" stroke-dasharray="2 3"/>`+txt(256,76,'예인선',11)+txt(110,76,'피예인선',11)+arrow('M300 100 L346 100')}),
+ fog_towed:()=>({fog:1,src:[110,100],inner:ship(110,100,0,90,GRAYSH)+ship(256,100,0,64)+`<path d="M226 100 L162 100" stroke="${INK}" stroke-width="2.4" stroke-dasharray="2 3"/><circle cx="110" cy="100" r="34" fill="none" stroke="${MAG}" stroke-width="2.2" stroke-dasharray="5 4"/>`+txt(256,76,'예인선',11)+txt(110,56,'최후단 유인선',11,'middle',MAG)+arrow('M300 100 L346 100')}),
+ fog_pilot:()=>({fog:1,src:[170,108],inner:ship(170,108,0,92)+`<path d="M170 44 V76" stroke="${INK}" stroke-width="2"/><rect x="170" y="44" width="26" height="9" fill="#fff" stroke="${INK}"/><rect x="170" y="53" width="26" height="9" fill="#d2302c" stroke="${INK}"/>`+txt(170,32,'PILOT',11)+ship(290,60,200,40,GRAYSH)+arrow('M240 108 L300 108')}),
+ anc_s:()=>({fog:1,src:[180,102],inner:`<circle cx="180" cy="102" r="62" fill="none" stroke="#5f7d8f" stroke-dasharray="4 4"/>`+ship(180,102,0,76)+anchor(232,102)+txt(180,44,'🔔',22)+txt(180,148,'100m 미만',11)}),
+ anc_l:()=>({fog:1,src:[150,102],inner:`<circle cx="180" cy="102" r="76" fill="none" stroke="#5f7d8f" stroke-dasharray="4 4"/>`+ship(180,102,0,128)+anchor(262,102)+txt(262,60,'🔔',20)+txt(98,60,'🥁',20)+txt(180,152,'100m 이상 (선수 🔔 / 선미 🥁)',11)}),
+ anc_w:()=>({fog:0,src:[200,102],inner:`<circle cx="200" cy="102" r="56" fill="none" stroke="#5f7d8f" stroke-dasharray="4 4"/>`+ship(200,102,0,76)+anchor(250,102)+ship(54,46,20,56,GRAYSH)+arrow('M96 60 L140 78',1)+txt(60,24,'접근선',11)+txt(200,40,'⚠ 위치·충돌 위험 경고',11,'middle',MAG)}),
+ gnd_s:()=>({fog:1,src:[180,108],inner:`<path d="M96 126 Q132 92 212 100 Q276 108 262 140 Q200 160 128 152Z" fill="url(#hatch)" stroke="${INK}" stroke-width="1.5"/>`+ship(180,114,-7,76)+txt(180,56,'🔔',22)+`<path d="M280 60 l10 -16 l10 16Z" fill="${GRAYSH}"/><path d="M62 130 l8 -12 l8 12Z" fill="${GRAYSH}"/>`+txt(180,152,'좌초 · 100m 미만',11)}),
+ gnd_l:()=>({fog:1,src:[180,108],inner:`<path d="M60 126 Q110 92 220 98 Q300 106 292 140 Q210 160 90 152Z" fill="url(#hatch)" stroke="${INK}" stroke-width="1.5"/>`+ship(180,114,-5,128)+txt(244,62,'🔔',20)+txt(112,62,'🥁',20)+txt(180,36,'좌초 · 100m 이상',11)}),
+ man_stbd:()=>({fog:0,src:[110,100],inner:ship(110,100,0,84)+arrow('M172 100 Q216 100 234 150')+ship(290,40,150,64,GRAYSH)+txt(236,96,'우현 변침',11,'start')}),
+ man_port:()=>({fog:0,src:[110,100],inner:ship(110,100,0,84)+arrow('M172 100 Q216 100 234 50')+ship(290,138,-150,64,GRAYSH)+txt(236,112,'좌현 변침',11,'start')}),
+ man_astern:()=>({fog:0,src:[170,100],inner:ship(170,100,0,84)+arrow('M110 100 L40 100',1)+`<path d="M104 90 q-10 10 0 20 M92 88 q-12 12 0 24" fill="none" stroke="#5f7d8f" stroke-width="2"/>`+ship(310,100,180,64,GRAYSH)+txt(80,80,'후진',11)}),
+ man_warn:()=>({fog:0,src:[100,100],inner:ship(100,100,0,80)+ship(262,100,180,70,GRAYSH)+txt(180,64,'?!',34,'middle',MAG,900)+`<path d="M150 100 l10 -8 l10 16 l10 -16 l10 16 l10 -8" fill="none" stroke="${MAG}" stroke-width="2"/>`}),
+ ovt_s:()=>({fog:0,src:[95,90],inner:channel()+ship(215,90,0,62,GRAYSH)+ship(95,90,0,64)+arrow('M140 98 Q220 142 300 98')+txt(300,150,'상대 우현 쪽',11,'middle',MAG)+txt(180,24,'좁은 수로',11)}),
+ ovt_p:()=>({fog:0,src:[95,90],inner:channel()+ship(215,90,0,62,GRAYSH)+ship(95,90,0,64)+arrow('M140 82 Q220 38 300 82')+txt(300,150,'상대 좌현 쪽',11,'middle',MAG)+txt(180,24,'좁은 수로',11)}),
+ ovt_ok:()=>({fog:0,src:[215,90],inner:channel()+ship(215,90,0,62,GRAYSH)+ship(95,90,0,64)+arrow('M140 98 Q220 142 300 98',1)+txt(215,66,'동의 ✔',13,'middle',MAG,800)+txt(180,24,'좁은 수로 · 피추월선',11)}),
+ man_bend:()=>({fog:0,src:[80,120],inner:`<rect width="360" height="170" fill="#cbd8c4"/><path d="M-20 120 L128 120 Q214 120 214 62 L214 -20" fill="none" stroke="#e1edf2" stroke-width="56" stroke-linejoin="round"/><path d="M-20 120 L128 120 Q214 120 214 62 L214 -20" fill="none" stroke="#9fbccb" stroke-width="2" stroke-dasharray="6 6"/>`+ship(78,120,0,70)+`<g opacity=".45">${ship(214,34,90,56,GRAYSH)}</g>`+txt(250,40,'?',24,'middle',MAG,900)+txt(80,160,'만곡부 접근',11)})
+};
+
+/* =====================================================================
+   야간 등화 퀴즈 데이터 (Part C, Rules 20–31 / Part B, Rules 13–17)
+===================================================================== */
+const cW='#ffffff',cR='#d2302c',cG='#16924a',cY='#f2b705';
+const LT=(x,y,c,n,fl)=>({x,y,c,n,fl});
+const SIDE=[LT(163,128,cG,'우현 녹색 현등'),LT(197,128,cR,'좌현 홍색 현등')];
+const SIL={
+ head:'<path d="M136 152 L148 130 H212 L224 152Z"/><rect x="159" y="108" width="42" height="22" rx="2"/><rect x="178.5" y="40" width="3" height="68"/>',
+ side:'<path d="M66 152 L82 128 H280 L296 152Z"/><rect x="200" y="102" width="48" height="26" rx="2"/><rect x="214" y="86" width="14" height="16"/><rect x="110" y="92" width="3" height="36"/><rect x="178.5" y="60" width="3" height="68"/><rect x="249" y="108" width="3" height="20"/>',
+ angleL:'<path d="M120 152 L146 128 H236 L240 152Z"/><rect x="170" y="106" width="44" height="22" rx="2"/><rect x="175" y="100" width="3" height="30"/><rect x="193" y="80" width="3" height="50"/>',
+ angleR:'<path d="M120 152 L124 128 H214 L240 152Z"/><rect x="146" y="106" width="44" height="22" rx="2"/><rect x="183" y="100" width="3" height="30"/><rect x="165" y="80" width="3" height="50"/>',
+ stern:'<path d="M140 152 L146 128 H214 L220 152Z"/><rect x="162" y="106" width="36" height="22" rx="2"/>'
+};
+const Q_LIST=[
+ {id:'nuc0',prompt:'수직선상에 홍색 전주등 2개만 보입니다. 현등과 선미등은 보이지 않습니다.',sil:'head',
+  lights:[LT(180,76,cR,'홍색 전주등(상)'),LT(180,92,cR,'홍색 전주등(하)')],
+  a:'조종불능선(NUC) · 대수속력 없음',w:['흘수제약선(CBD)','조종제한선(RAM) · 대수속력 없음','정박 중인 선박 (50m 이상)'],rule:'제27조(a)',
+  ex:'조종불능선(NUC)은 수직 홍색 전주등 2개를 표시하며 마스트등은 켜지 않습니다. 현등이 없으므로 대수속력이 없는 상태입니다.'},
+ {id:'nuc1',prompt:'수직 홍색 전주등 2개와 함께 좌·우 현등이 보입니다. 마스트등은 없습니다.',sil:'head',
+  lights:[LT(180,76,cR,'홍색 전주등(상)'),LT(180,92,cR,'홍색 전주등(하)'),...SIDE],
+  a:'조종불능선(NUC) · 대수속력 있음',w:['조종제한선(RAM) · 대수속력 있음','흘수제약선(CBD)','동력선 (50m 미만)'],rule:'제27조(a)',
+  ex:'수직 홍·홍 전주등에 현등(과 선미등)이 추가되면 대수속력이 있는 NUC입니다. 마스트등은 켜지 않습니다.'},
+ {id:'ram0',prompt:'수직선상에 홍·백·홍 순서의 전주등 3개가 보입니다. 다른 등화는 없습니다.',sil:'head',
+  lights:[LT(180,70,cR,'홍색 전주등(상)'),LT(180,86,cW,'백색 전주등(중)'),LT(180,102,cR,'홍색 전주등(하)')],
+  a:'조종제한선(RAM) · 대수속력 없음',w:['조종불능선(NUC)','흘수제약선(CBD)','도선선 (도선 업무 중)'],rule:'제27조(b)',
+  ex:'조종제한선(RAM)은 수직 홍·백·홍 전주등을 표시합니다. 추가 항행등이 없으므로 대수속력이 없습니다.'},
+ {id:'ram1',prompt:'수직 홍·백·홍 전주등 위쪽에 백색 마스트등이 있고, 좌·우 현등도 보입니다.',sil:'head',
+  lights:[LT(180,56,cW,'마스트등'),LT(180,76,cR,'홍색 전주등(상)'),LT(180,92,cW,'백색 전주등(중)'),LT(180,108,cR,'홍색 전주등(하)'),LT(163,130,cG,'우현 녹색 현등'),LT(197,130,cR,'좌현 홍색 현등')],
+  a:'조종제한선(RAM) · 대수속력 있음',w:['흘수제약선(CBD) · 대수속력 있음','조종불능선(NUC) · 대수속력 있음','트롤 어로종사선 · 대수속력 있음'],rule:'제27조(b)',
+  ex:'홍·백·홍 전주등에 마스트등·현등·선미등이 추가되었으므로 대수속력이 있는 조종제한선입니다.'},
+ {id:'cbd',prompt:'마스트등과 현등 외에 수직선상 홍색 전주등 3개가 보입니다.',sil:'head',
+  lights:[LT(180,56,cW,'마스트등'),LT(180,76,cR,'홍색 전주등(상)'),LT(180,92,cR,'홍색 전주등(중)'),LT(180,108,cR,'홍색 전주등(하)'),LT(163,130,cG,'우현 녹색 현등'),LT(197,130,cR,'좌현 홍색 현등')],
+  a:'흘수제약선(CBD)',w:['조종불능선(NUC)','조종제한선(RAM) · 대수속력 있음','트롤 어로종사선 · 대수속력 있음'],rule:'제28조',
+  ex:'흘수제약선(CBD)은 동력선 항행등에 수직 홍색 전주등 3개를 추가 표시할 수 있습니다.'},
+ {id:'trawl0',prompt:'수직으로 녹색 전주등 아래 백색 전주등이 보입니다. 현등은 없습니다.',sil:'head',
+  lights:[LT(180,82,cG,'녹색 전주등(상)'),LT(180,98,cW,'백색 전주등(하)')],
+  a:'트롤 어로종사선 · 대수속력 없음',w:['트롤 외 어로종사선 · 대수속력 없음','도선선 (도선 업무 중)','조종불능선(NUC)'],rule:'제26조(b)',
+  ex:'트롤 어로종사선은 수직 녹(위)·백(아래) 전주등을 표시합니다. 대수속력이 있을 때만 현등·선미등을 추가합니다.'},
+ {id:'trawl1',prompt:'수직 녹·백 전주등, 그 뒤쪽 높은 곳의 백색 마스트등, 좌·우 현등이 보입니다.',sil:'head',
+  lights:[LT(180,50,cW,'마스트등(후방·높음)'),LT(180,72,cG,'녹색 전주등(상)'),LT(180,88,cW,'백색 전주등(하)'),LT(163,130,cG,'우현 녹색 현등'),LT(197,130,cR,'좌현 홍색 현등')],
+  a:'트롤 어로종사선(50m 이상) · 대수속력 있음',w:['트롤 외 어로종사선(50m 이상) · 대수속력 있음','조종제한선(RAM) · 대수속력 있음','도선선 · 항행 중'],rule:'제26조(b)',
+  ex:'50m 이상 트롤선은 녹·백 전주등 뒤쪽 높은 곳에 마스트등을 추가하며, 대수속력이 있으므로 현등·선미등을 켭니다.'},
+ {id:'fish0',prompt:'수직 홍·백 전주등과, 옆으로 떨어진 낮은 위치의 백색 전주등 1개가 보입니다.',sil:'head',silExtra:'<rect x="236" y="126" width="3" height="26"/>',
+  lights:[LT(180,76,cR,'홍색 전주등(상)'),LT(180,92,cW,'백색 전주등(하)'),LT(238,126,cW,'백색 전주등(어구 방향)')],
+  a:'트롤 외 어로종사선 · 어구가 수평으로 150m 초과',w:['트롤 어로종사선 · 대수속력 없음','도선선 (도선 업무 중)','범선 · 항행 중'],rule:'제26조(c)',
+  ex:'트롤 외 어로종사선은 수직 홍·백 전주등을 표시하고, 어구가 수평 150m를 넘으면 그 방향으로 백색 전주등을 추가합니다.'},
+ {id:'pilot',prompt:'수직선상에 백색 전주등 아래 홍색 전주등이 보입니다.',sil:'head',
+  lights:[LT(180,76,cW,'백색 전주등(상)'),LT(180,92,cR,'홍색 전주등(하)')],
+  a:'도선선 (도선 업무 중)',w:['트롤 외 어로종사선 (홍·백)','트롤 어로종사선 (녹·백)','조종불능선(NUC)'],rule:'제29조',
+  ex:'도선 업무 중인 도선선은 수직 백(상)·홍(하) 전주등을 표시합니다. (어로종사선의 홍·백과 반대)'},
+ {id:'sail1',prompt:'좌·우 현등만 보이고 마스트등은 보이지 않습니다.',sil:'head',
+  lights:[...SIDE],
+  a:'항행 중인 범선',w:['동력선 (길이 50m 미만)','조종불능선(NUC) · 대수속력 있음','정박 중인 선박'],rule:'제25조(a)',
+  ex:'항행 중인 범선은 현등과 선미등을 표시하며 마스트등이 없습니다.'},
+ {id:'sail2',prompt:'마스트 꼭대기에 수직으로 홍색 아래 녹색 전주등이 있고, 좌·우 현등이 보입니다.',sil:'head',
+  lights:[LT(180,56,cR,'홍색 전주등(상)'),LT(180,72,cG,'녹색 전주등(하)'),...SIDE],
+  a:'항행 중인 범선 (꼭대기 홍·녹 전주등)',w:['도선선 (백·홍)','트롤 어로종사선 (녹·백)','조종불능선(NUC) · 대수속력 있음'],rule:'제25조(c)',
+  ex:'범선은 선택적으로 마스트 꼭대기에 수직 홍(상)·녹(하) 전주등을 추가할 수 있습니다.'},
+ {id:'tug2',prompt:'수직 마스트등 2개, 황색 등, 그 아래 백색 선미등이 보입니다(측면/후방 관측).',sil:'side',
+  lights:[LT(180,66,cW,'마스트등(상)'),LT(180,82,cW,'마스트등(하)'),LT(250,106,cY,'황색 예선등'),LT(250,120,cW,'백색 선미등')],
+  a:'예인선 (예인선열 200m 이하)',w:['동력선 (50m 이상 · 예인 중 아님)','도선선 · 항행 중','조종제한선(RAM) · 대수속력 있음'],rule:'제24조(a)',
+  ex:'예인선은 수직 마스트등 2개(200m 초과 시 3개)와 선미등 위 황색 예선등을 표시합니다.'},
+ {id:'tug3',prompt:'수직 마스트등 3개, 황색 등, 그 아래 백색 선미등이 보입니다.',sil:'side',
+  lights:[LT(180,50,cW,'마스트등(상)'),LT(180,66,cW,'마스트등(중)'),LT(180,82,cW,'마스트등(하)'),LT(250,106,cY,'황색 예선등'),LT(250,120,cW,'백색 선미등')],
+  a:'예인선 (예인선열 200m 초과)',w:['예인선 (예인선열 200m 이하)','동력선 (50m 이상)','트롤 어로종사선(50m 이상) · 대수속력 있음'],rule:'제24조(a)(ii)',
+  ex:'예인선열의 길이가 200m를 넘으면 마스트등을 수직으로 3개 표시합니다.'},
+ {id:'anc1',prompt:'선수 쪽 높은 위치와 선미 쪽 낮은 위치에 백색 전주등이 각각 1개씩 보입니다.',sil:'side',
+  lights:[LT(112,94,cW,'선수 백색 전주등(높음)'),LT(250,110,cW,'선미 백색 전주등(낮음)')],
+  a:'정박선 (길이 50m 이상)',w:['좌초선','조종불능선(NUC) · 대수속력 없음','정박선 (길이 50m 미만)'],rule:'제30조(a)',
+  ex:'50m 이상 정박선은 전부에 높은 백색 전주등, 선미에 낮은 백색 전주등을 표시합니다.'},
+ {id:'anc2',prompt:'선수·선미 백색 전주등과 함께 갑판을 따라 백색 조명이 켜져 있습니다.',sil:'side',
+  lights:[LT(112,94,cW,'선수 백색 전주등'),LT(250,110,cW,'선미 백색 전주등'),LT(142,138,cW,'갑판 조명'),LT(165,138,cW,'갑판 조명'),LT(188,138,cW,'갑판 조명')],
+  a:'정박선 (길이 100m 이상 · 갑판 조명)',w:['정박선 (길이 50m 미만)','좌초선','조종제한선(RAM) · 정박 중'],rule:'제30조(b)',
+  ex:'길이 100m 이상 정박선은 갑판을 조명하는 작업등·등화를 켜야 합니다.'},
+ {id:'gnd',prompt:'선수·선미의 백색 전주등 두 개와 함께 수직 홍색 전주등 2개가 보입니다.',sil:'side',
+  lights:[LT(112,94,cW,'선수 백색 전주등'),LT(250,110,cW,'선미 백색 전주등'),LT(180,66,cR,'홍색 전주등(상)'),LT(180,82,cR,'홍색 전주등(하)')],
+  a:'좌초선 (길이 50m 이상)',w:['조종불능선(NUC) · 대수속력 없음','정박선 (길이 50m 이상)','조종제한선(RAM) · 정박 중'],rule:'제30조(d)',
+  ex:'좌초선은 정박등에 더해 수직 홍색 전주등 2개를 표시합니다.'},
+ {id:'wig',prompt:'고광도 홍색 섬광 전주등이 마스트 위에서 깜박이고, 마스트등과 좌·우 현등이 보입니다.',sil:'head',
+  lights:[LT(180,44,cR,'홍색 섬광 전주등(고광도)',true),LT(180,92,cW,'마스트등'),...SIDE],
+  a:'WIG선 (이착륙 · 표면 비행 중)',w:['공기부양선 (비배수량 항행)','조종불능선(NUC) · 대수속력 있음','흘수제약선(CBD)'],rule:'제23조(c)',
+  ex:'WIG선은 이착륙·표면 근접 비행 시 동력선 등화에 더해 고광도 홍색 섬광 전주등을 표시합니다.'},
+ {id:'acv',prompt:'황색 섬광 전주등이 마스트 위에서 깜박이고, 마스트등과 좌·우 현등이 보입니다.',sil:'head',
+  lights:[LT(180,44,cY,'황색 섬광 전주등',true),LT(180,92,cW,'마스트등'),...SIDE],
+  a:'공기부양선 (비배수량 항행 중)',w:['WIG선 (표면 비행 중)','조종불능선(NUC) · 대수속력 있음','흘수제약선(CBD)'],rule:'제23조(b)',
+  ex:'공기부양선이 비배수량 상태로 항행할 때 황색 섬광 전주등 1개를 추가합니다.'},
+ {id:'headon',prompt:'정면 접근 동력선: 두 마스트등이 거의 일직선이고 홍·녹 현등이 동시에 보입니다. (충돌 위험 있음)',sil:'head',
+  lights:[LT(180,70,cW,'마스트등(후방·높음)'),LT(180,98,cW,'마스트등(전방·낮음)'),...SIDE],
+  a:'마주치는 상태 · 각자 우현 변침해 좌현 대 좌현 통과',w:['횡단 상태 · 본선이 유지선 (침로·속력 유지)','추월 상태 · 본선이 추월선','횡단 상태 · 본선이 피항선'],rule:'제14조',
+  ex:'마주치는 상태에서는 두 동력선이 모두 피항선으로서 각자 우현으로 변침해 좌현 대 좌현으로 통과합니다.'},
+ {id:'cross_r',prompt:'상대 동력선의 홍색(좌현) 현등과 마스트등이 보이며 침로가 교차해 충돌 위험이 있습니다.',sil:'angleL',
+  lights:[LT(158,128,cR,'좌현 홍색 현등'),LT(176,102,cW,'마스트등(전방)'),LT(194,82,cW,'마스트등(후방·높음)')],
+  a:'횡단 상태 · 본선이 피항선 (우현 쪽 선박)',w:['횡단 상태 · 본선이 유지선 (침로·속력 유지)','마주치는 상태 · 각자 우현 변침','추월 상태 · 본선이 추월선'],rule:'제15조',
+  ex:'상대의 홍색 현등이 보이면 상대가 본선 우현에서 횡단 중이므로 본선이 피항선입니다.'},
+ {id:'cross_g',prompt:'상대 동력선의 녹색(우현) 현등과 마스트등이 보이며 침로가 교차해 충돌 위험이 있습니다.',sil:'angleR',
+  lights:[LT(202,128,cG,'우현 녹색 현등'),LT(184,102,cW,'마스트등(전방)'),LT(166,82,cW,'마스트등(후방·높음)')],
+  a:'횡단 상태 · 본선이 유지선 (침로·속력 유지)',w:['횡단 상태 · 본선이 피항선','마주치는 상태 · 각자 우현 변침','추월 상태 · 본선이 추월선'],rule:'제17조',
+  ex:'상대의 녹색 현등이 보이면 상대가 본선 좌현에 있으므로 본선이 유지선입니다.'},
+ {id:'ovt',prompt:'전방 선박의 백색 선미등 하나만 보이며 본선(동력선)이 더 빠르게 접근 중입니다.',sil:'stern',
+  lights:[LT(180,126,cW,'백색 선미등')],
+  a:'추월 상태 · 본선이 추월선: 추월 완료까지 상대를 피항',w:['마주치는 상태 · 각자 우현 변침','횡단 상태 · 본선이 유지선','횡단 상태 · 본선이 피항선'],rule:'제13조',
+  ex:'정횡 뒤 22.5°를 넘는 후방에서 선미등만 보이면 추월선이며, 완전히 앞질러 멀어질 때까지 피항합니다.'}
+];
+
+function nightSVG(q){
+  const rs=mulberry32(11);let stars='';
+  for(let i=0;i<46;i++)stars+=`<circle cx="${(rs()*360).toFixed(1)}" cy="${(rs()*140).toFixed(1)}" r="${(rs()*.8+.3).toFixed(2)}" fill="#8fa6c8" opacity="${(rs()*.4+.15).toFixed(2)}"/>`;
+  const refl=q.lights.filter(l=>l.y<152).map(l=>`<rect x="${l.x-1.6}" y="156" width="3.2" height="34" fill="${l.c}" opacity="${l.fl?0:.16}" filter="url(#gl2)"/>`).join('');
+  const lights=q.lights.map(l=>`<g${l.fl?' class="flash"':''}><circle cx="${l.x}" cy="${l.y}" r="12" fill="${l.c}" opacity=".32" filter="url(#gl)"/><circle cx="${l.x}" cy="${l.y}" r="6" fill="${l.c}" opacity=".62" filter="url(#gl2)"/><circle cx="${l.x}" cy="${l.y}" r="3" fill="${l.c}"/></g>`).join('');
+  const badges=q.lights.map((l,i)=>`<g class="lb"><circle cx="${l.x+11}" cy="${l.y-1}" r="6.5" fill="#0b1526" stroke="#dbe8ee" stroke-width="1"/><text x="${l.x+11}" y="${l.y+2.2}" font-size="8.5" fill="#fff" text-anchor="middle" font-weight="800" font-family="inherit">${i+1}</text></g>`).join('');
+  return `<svg viewBox="0 0 360 206" class="nsvg" role="img" aria-label="야간 등화 배치">
+<defs><linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1526"/><stop offset="1" stop-color="#16294a"/></linearGradient>
+<linearGradient id="seaN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d1c36"/><stop offset="1" stop-color="#060d1a"/></linearGradient>
+<filter id="gl" x="-300%" y="-300%" width="700%" height="700%"><feGaussianBlur stdDeviation="4"/></filter>
+<filter id="gl2" x="-300%" y="-300%" width="700%" height="700%"><feGaussianBlur stdDeviation="1.6"/></filter></defs>
+<rect width="360" height="152" fill="url(#skyG)"/>${stars}<rect y="152" width="360" height="54" fill="url(#seaN)"/>
+<path d="M0 152H360" stroke="#27406b" stroke-width="1"/>${refl}
+<g class="sil">${SIL[q.sil]}${q.silExtra||''}</g>${lights}${badges}</svg>`;
+}
+
+/* =====================================================================
+   모달 / 토스트 / 1초 컷 전환
+===================================================================== */
+let MODAL=null;
+function closeModal(){if(MODAL){MODAL.remove();MODAL=null;}}
+function modal({title,html,buttons}){
+  closeModal();
+  const back=document.createElement('div');back.className='mback';
+  back.innerHTML=`<div class="modal" role="dialog" aria-modal="true"><h2>${title}</h2><div class="mbody">${html}</div><div class="mbtns"></div></div>`;
+  const bt=$('.mbtns',back);
+  (buttons||[{label:'확인',cls:'primary'}]).forEach(b=>{
+    const el=document.createElement('button');el.className='btn '+(b.cls||'');el.textContent=b.label;
+    el.onclick=()=>{if(!b.keep)closeModal();if(b.onClick)b.onClick();};
+    bt.appendChild(el);
+  });
+  $('#modalRoot').appendChild(back);MODAL=back;
+}
+let toastT=0;
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1800);}
+
+let flashTimer=0;
+function showRoundFlash(ok,title,sub,cb){
+  clearTimeout(flashTimer);
+  const rf=$('#roundFlash');
+  rf.className='roundFlash '+(ok?'ok':'no');
+  rf.innerHTML=`<b>${title}</b><span>${sub}</span>`;
+  rf.classList.remove('hidden');
+  flashTimer=setTimeout(()=>{
+    rf.classList.add('hidden');
+    if(G.active&&cb)cb();
+  },1000);
+}
+
+/* =====================================================================
+   게임 상태 & 속도 가속 (일일 1.50x 고정 / 일반·서바이벌 최대 3.00x)
+===================================================================== */
+const G={
+  mode:null,stages:[],i:0,score:0,combo:0,maxCombo:0,lives:3,
+  marks:[],history:[],corrects:0,rng:null,seedKey:0,
+  lastR:null,lastQ:null,cur:null,active:false,started:false
+};
+let R=null,N=null,rafId=0,demoTimer=0;
+const MODE_NAME={daily:'오늘의 일일 챌린지',rhythm:'8bit 기적 리듬',night:'야간 등화 관측',survival:'종합 서바이벌'};
+
+function stageSpeed(){
+  if(G.mode==='daily')return 1.5;
+  return Math.min(3.0, Number((1 + G.i * 0.08).toFixed(2)));
+}
+
+function showScreen(name){
+  $('#screenMenu').classList.toggle('hidden',name!=='menu');
+  $('#screenGame').classList.toggle('hidden',name!=='game');
+  window.scrollTo(0,0);
+}
+function updateHud(){
+  const spd=stageSpeed();
+  const spdPill=spd!==1?`<span class="spdPill ${spd>=2.0?'fast':''}">${spd.toFixed(2)}x</span>`:'';
+  $('#hudMode').innerHTML=MODE_NAME[G.mode]+spdPill;
+  $('#hudStage').textContent=G.mode==='daily'
+    ?`라운드 ${Math.min(G.i+1,10)} / 10 (1.50x 고정)`
+    :`라운드 #${G.i+1} · ${spd.toFixed(2)}x (최대 3.00x)`;
+  $('#hudScore').textContent=G.score;
+  $('#hudLives').textContent=G.mode==='survival'?'❤'.repeat(Math.max(0,G.lives))+'🖤'.repeat(Math.max(0,3-G.lives)):'';
+  $('.pad.whistleMain').classList.toggle('fever',G.combo>=5);
+}
+
+function showComboPop(){
+  const cb=$('#comboBig');
+  if(!cb)return;
+  if(G.combo<=1){
+    cb.className='';
+    cb.textContent='';
+    return;
+  }
+  const rx=22+Math.random()*56;
+  const ry=26+Math.random()*48;
+  cb.style.left=rx.toFixed(1)+'%';
+  cb.style.top=ry.toFixed(1)+'%';
+  cb.style.right='auto';
+  cb.textContent=`${G.combo} COMBO!${G.combo>=5?' 🔥':''}`;
+  cb.className='';
+  void cb.offsetWidth;
+  cb.classList.add('pop');
+  if(G.combo>=5)cb.classList.add('fever');
+}
+
+function buildDaily(key){
+  const rng=mulberry32((key^0x9e3779b9)>>>0);
+  const grp={under:[],special:[],anchor:[],man:[]};
+  R_STAGES.forEach(s=>grp[s.g].push(s));
+  const pick=a=>a[Math.floor(rng()*a.length)];
+  let picks=[pick(grp.under),pick(grp.special),pick(grp.anchor),pick(grp.man)];
+  const rest=R_STAGES.filter(s=>!picks.includes(s));
+  picks.push(pick(rest));
+  picks=shuffle(picks,rng);
+  const qs=shuffle(Q_LIST,rng).slice(0,5);
+  const out=[];
+  for(let i=0;i<5;i++){
+    out.push({type:'rhythm',def:picks[i],song:Math.floor(rng()*3)});
+    out.push({type:'night',def:qs[i],order:shuffle([0,1,2,3],rng)});
+  }
+  return out;
+}
+function genStage(want){
+  const rng=G.rng;
+  if(want==='rhythm'){
+    let d;do{d=R_STAGES[Math.floor(rng()*R_STAGES.length)];}while(d===G.lastR&&R_STAGES.length>1);
+    G.lastR=d;return{type:'rhythm',def:d,song:Math.floor(rng()*3)};
+  }
+  let q;do{q=Q_LIST[Math.floor(rng()*Q_LIST.length)];}while(q===G.lastQ&&Q_LIST.length>1);
+  G.lastQ=q;return{type:'night',def:q,order:shuffle([0,1,2,3],rng)};
+}
+function getStage(){
+  if(G.mode==='daily')return G.stages[G.i];
+  if(G.mode==='rhythm')return genStage('rhythm');
+  if(G.mode==='night')return genStage('night');
+  return genStage(G.i%2===0?'rhythm':'night');
+}
+
+function startMode(mode){
+  PAUSED=false;Aud.ensure();
+  Object.assign(G,{
+    mode,i:0,score:0,combo:0,maxCombo:0,lives:3,
+    marks:[],history:[],corrects:0,lastR:null,lastQ:null,
+    cur:null,active:true,started:false
+  });
+  if(mode==='daily'){G.seedKey=dateKey();G.stages=buildDaily(G.seedKey);}
+  else{G.rng=mulberry32((Date.now()^0x5bd1e995)>>>0);G.stages=[];}
+  showScreen('game');syncSettings();nextStage();
+}
+
+function nextStage(){
+  stopRhythm();
+  if(!G.active)return;
+  const st=getStage();G.cur=st;updateHud();
+  if(st.type==='rhythm'){
+    Aud.setNightAmbience(false);
+    enterRhythm(st);
+  }else{
+    Aud.setNightAmbience(true);
+    enterNight(st);
+  }
+}
+
+function advance(){
+  if(!G.active)return;
+  if(G.mode==='survival'&&G.lives<=0)return finishRun();
+  if(G.mode==='daily'&&G.i>=9)return finishRun();
+  G.i++;nextStage();
+}
+
+function recordStage(type,ok,summaryItem){
+  const p=store.part[type];p[0]++;if(ok)p[1]++;
+  if(ok){store.ans++;store.bestAns=Math.max(store.bestAns,store.ans);}else store.ans=0;
+  store.maxCombo=Math.max(store.maxCombo,G.maxCombo);
+  G.marks.push(ok?'🟩':'🟥');
+  if(ok)G.corrects++;
+  if(summaryItem)G.history.push(summaryItem);
+  if(G.mode==='survival'&&!ok)G.lives--;
+  saveStore();updateHud();
+}
+
+/* =====================================================================
+   리듬 스테이지 (통합 기적 버튼 + 배속 동기화)
+===================================================================== */
+const LANES=['whistle','bell','gong'];
+const LANE_STATE={};
+function resetLanes(){
+  LANES.forEach(l=>{LANE_STATE[l]={down:false,voice:null,tap:null,hold:null,pressT:0,ringTO:0,ringIV:0,waveIV:0};});
+}
+resetLanes();
+
+function enterRhythm(st){
+  $('#stageRhythm').classList.remove('hidden');
+  $('#stageNight').classList.add('hidden');
+  const d=st.def,spd=stageSpeed();
+  const sc=SCENES[d.scene]();
+  $('#sceneBadge').textContent=`${d.badge} · ${spd.toFixed(2)}x`;
+  $('#sceneBox').innerHTML=svgWrap(sc.inner,sc.fog,sc.src);
+
+  const notes=d.chart.map(([k,t],idx)=>({
+    idx,kind:k,lane:KINDS[k].lane,
+    t:t/spd,
+    dur:(KINDS[k].dur||0)/spd,
+    vis:(KINDS[k].vis)/spd,
+    hold:KINDS[k].hold,
+    label:KINDS[k].label,
+    judged:false,res:null,holding:false
+  }));
+  const lanes=LANES.filter(l=>notes.some(n=>n.lane===l));
+  const endT=Math.max(...notes.map(n=>n.t+Math.max(n.vis,n.dur)))+.65;
+
+  R={
+    st,def:d,spd,notes,lanes,endT,
+    state:'ready',start:0,t:-3.0,
+    P:0,Gt:0,M:0,credit:0,
+    blind:store.set.diff==='blind',
+    cw:0,ch:0,dpr:1,sparks:[]
+  };
+  resetLanes();
+
+  const bells=!!d.bells;
+  $$('.pad').forEach(p=>{
+    const l=p.dataset.key;
+    p.classList.toggle('hidden',l!=='whistle'&&!bells);
+    p.classList.remove('on');
+  });
+
+  if(!G.started){
+    $('#trackOverlay').classList.remove('hidden');
+    $('#btnDemo').classList.toggle('hidden',R.blind);
+    $('#ovlHint').textContent=R.blind
+      ?'숙련 모드: 상황 일러스트만 보고 박자에 맞춰 연주하세요.'
+      :'시작 후부터는 매 라운드 1초 뒤 자동으로 다음 라운드로 이어집니다.';
+    $('#btnDemo').disabled=false;
+  }else{
+    $('#trackOverlay').classList.add('hidden');
+    launchRun();
+  }
+
+  renderGuide();setJudge('');
+  Aud.setSong(songIndexFor(st));
+  resizeTrack();
+  cancelAnimationFrame(rafId);rafId=requestAnimationFrame(loop);
+}
+
+function songIndexFor(st){const s=store.set.song;const n=Aud.SONGS.length;const i=s==='auto'?(st.song||0):+s;return(i>=0&&i<n)?i:0;}
+
+function renderGuide(){
+  const g=$('#guideRow'),d=R.def;
+  if(R.blind){
+    g.className='guide blind';
+    g.textContent='🙈 블라인드 모드 · 일러스트와 박자를 보고 신호를 연주하세요';
+    return;
+  }
+  g.className='guide';
+  g.innerHTML=d.guide.map((x,idx)=>{
+    const n=R.notes[idx];
+    const done=n&&n.judged&&n.res!=='MISS';
+    return `<span class="gn${done?' done':''}">[ ${x} ]</span>`;
+  }).join(' — ');
+}
+
+function stopRhythm(){
+  cancelAnimationFrame(rafId);rafId=0;
+  clearTimeout(demoTimer);
+  LANES.forEach(l=>laneUp(l,true));
+  R=null;
+}
+
+function resizeTrack(){
+  if(!R)return;
+  const c=$('#trackCanvas'),w=c.parentElement.clientWidth||320;
+  R.dpr=Math.min(window.devicePixelRatio||1,2);
+  R.cw=w;R.ch=24+R.lanes.length*48;
+  c.width=Math.round(w*R.dpr);c.height=Math.round(R.ch*R.dpr);
+  c.style.height=R.ch+'px';
+}
+window.addEventListener('resize',()=>{if(R)resizeTrack();});
+
+function launchRun(){
+  if(!R||R.state==='run')return;
+  Aud.ensure();
+  R.start=Aud.nextBarTime(3.2);
+  for(let i=0;i<4;i++)Aud.tick(R.start-2+i*.5,i===0);
+  R.state='run';
+  $('#trackOverlay').classList.add('hidden');
+}
+
+function startRun(){
+  if(!R||R.state!=='ready')return;
+  G.started=true;
+  launchRun();
+}
+
+function playDemo(){
+  if(!R||R.state!=='ready')return;
+  Aud.ensure();
+  const btn=$('#btnDemo');btn.disabled=true;
+  const base=Aud.time()+.15;
+  R.notes.forEach(n=>Aud.demoNote(n.kind,base+n.t,R.spd));
+  $('#ovlHint').textContent=`🎧 예시 신호 재생 중 (${R.spd.toFixed(2)}x)…`;
+  clearTimeout(demoTimer);
+  demoTimer=setTimeout(()=>{
+    if(R&&R.state==='ready'){
+      btn.disabled=false;
+      $('#ovlHint').textContent='이제 [▶ 박자 맞춰 시작]을 눌러 직접 연주해 보세요.';
+    }
+  },(R.endT+.2)*1000);
+}
+
+function setJudge(text,cls){
+  const j=$('#judgeText');j.className='judge';j.textContent=text;
+  if(text&&cls){void j.offsetWidth;j.classList.add(cls==='C'?'C':'show',cls);}
+}
+
+function spawnWave(lane){
+  const g=$('#waveG');if(!g)return;
+  const col=lane==='bell'?'#d89c00':lane==='gong'?'#2f5f9a':MAG;
+  for(let i=0;i<3;i++){
+    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('r',10);c.setAttribute('class','ripple');c.setAttribute('stroke',col);
+    c.style.animationDelay=(i*.16)+'s';
+    c.addEventListener('animationend',()=>c.remove());
+    g.appendChild(c);
+  }
+}
+
+function spawnSparks(x,y,col){
+  if(!R)return;
+  for(let i=0;i<10;i++){
+    const ang=(Math.PI*2*i)/10+(Math.random()-.5)*.3;
+    const spd=65+Math.random()*95;
+    R.sparks.push({x,y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,life:1,col});
+  }
+}
+
+function triggerShake(){
+  const sc=$('#sceneCard');
+  sc.classList.remove('shake');void sc.offsetWidth;sc.classList.add('shake');
+}
+
+function judgeNote(n,res,msg){
+  if(n.judged)return;
+  n.judged=true;n.res=res;n.holding=false;
+  if(res==='PERFECT'){R.P++;R.credit+=1;G.combo++;triggerShake();}
+  else if(res==='GREAT'){R.Gt++;R.credit+=.75;G.combo++;}
+  else{R.M++;G.combo=0;}
+  G.maxCombo=Math.max(G.maxCombo,G.combo);
+  setJudge(msg||res,res==='PERFECT'?'P':res==='GREAT'?'G':'M');
+  renderGuide();updateHud();showComboPop();
+
+  const li=R.lanes.indexOf(n.lane);
+  if(li>=0&&R.cw){
+    const jx=R.cw*.22,cy=24+li*48+24;
+    spawnSparks(jx,cy,res==='PERFECT'?'#f2b705':res==='GREAT'?'#7fe3a2':'#ff8b86');
+  }
+}
+
+function laneDown(lane){
+  if(PAUSED||!R||!LANES.includes(lane))return;
+  Aud.ensure();
+  const L=LANE_STATE[lane];if(L.down)return;
+  L.down=true;L.pressT=Aud.time();
+  const pad=$(`.pad[data-key="${lane}"]`);if(pad)pad.classList.add('on');
+  const ct=L.pressT;
+
+  if(lane==='whistle'){
+    L.voice=Aud.whistle(ct);
+  }else if(lane==='bell'){
+    Aud.bell(ct);
+    L.ringTO=setTimeout(()=>{
+      let k=0;
+      L.ringIV=setInterval(()=>{k++;Aud.bell(Aud.time(),{dec:.42,vol:.38,base:800+(k%2)*30});},130);
+    },260);
+  }else if(lane==='gong'){
+    L.voice=Aud.gong(ct,6);
+  }
+
+  spawnWave(lane);
+  if(lane==='whistle'||lane==='gong'){L.waveIV=setInterval(()=>spawnWave(lane),520);}
+
+  if(R.state!=='run')return;
+  const t=(Aud.now()-R.start)*R.spd;
+  const win=.28;
+  let best=null,bd=9;
+  for(const n of R.notes){
+    if(n.lane!==lane||n.judged||n.holding)continue;
+    const nt=n.t*R.spd;
+    const d=Math.abs(t-nt);
+    if(d<bd){bd=d;best=n;}
+  }
+  if(!best||bd>win)return;
+
+  const res=bd<=.10?'PERFECT':bd<=.20?'GREAT':'MISS';
+  const early=t<(best.t*R.spd);
+  if(best.hold){
+    if(res==='MISS'){judgeNote(best,'MISS',early?'TOO EARLY':'TOO LATE');}
+    else{best.holding=true;best.pressSimT=t;best.res0=res;L.hold=best;setJudge(res+' (홀드!)',res==='PERFECT'?'P':'G');}
+  }else{
+    best.pressSimT=t;L.tap=best;
+    judgeNote(best,res,res==='MISS'?(early?'TOO EARLY':'TOO LATE'):res);
+  }
+}
+
+function laneUp(lane,silent){
+  const L=LANE_STATE[lane];if(!L||!L.down)return;
+  L.down=false;
+  const pad=$(`.pad[data-key="${lane}"]`);if(pad)pad.classList.remove('on');
+  const ct=Aud.time();
+  const heldReal=ct-L.pressT;
+  clearTimeout(L.ringTO);clearInterval(L.ringIV);clearInterval(L.waveIV);
+
+  if(lane==='whistle'&&L.voice){
+    if(!silent&&heldReal<0.34){
+      const v=L.voice;
+      setTimeout(()=>v.release(Aud.time()),Math.max(60,(0.35-heldReal)*1000));
+    }else{
+      L.voice.release(ct);
+    }
+    L.voice=null;
+  }else if(L.voice){
+    L.voice.release(ct);L.voice=null;
+  }
+
+  if(silent||!R){L.hold=null;L.tap=null;return;}
+
+  if(R.state==='run'){
+    const t=(Aud.now()-R.start)*R.spd;
+    const h=L.hold;
+    if(h&&h.holding&&!h.judged){
+      const heldSim=t-h.pressSimT;
+      const reqSim=h.dur*R.spd;
+      const ok=heldSim>=reqSim*.72;
+      L.hold=null;
+      judgeNote(h,ok?h.res0:'MISS',ok?h.res0:'TOO SHORT (길게 홀드!)');
+    }
+    const tp=L.tap;
+    if(tp&&tp.res&&tp.res!=='MISS'){
+      const heldSim=t-tp.pressSimT;
+      const maxSim=KINDS[tp.kind].maxHold*R.spd;
+      if(heldSim>maxSim){
+        if(tp.res==='PERFECT'){R.P--;R.credit-=1;}else{R.Gt--;R.credit-=.75;}
+        R.M++;tp.res='MISS';G.combo=0;setJudge('TOO LONG (짧게 탭!)','M');
+        renderGuide();updateHud();showComboPop();
+      }
+    }
+    L.tap=null;
+  }
+}
+
+let PAUSED=false;
+function pauseGame(){
+  if(PAUSED||!G.active||!R||R.state!=='run')return;
+  PAUSED=true;
+  LANES.forEach(l=>laneUp(l,true));
+  Aud.suspend();
+  modal({title:'⏸ 일시정지',html:'<p>시간이 멈췄어요. 준비되면 계속하세요. (P / Esc)</p>',
+    buttons:[{label:'▶ 계속하기',cls:'primary',onClick:resumeGame},{label:'⏹ 당직 종료 & 결과',keep:true,onClick:()=>{PAUSED=false;Aud.resume();confirmExit();}}]});
+}
+function resumeGame(){
+  if(!PAUSED)return;
+  PAUSED=false;closeModal();Aud.resume();
+}
+
+function finishRhythm(){
+  R.state='done';
+  LANES.forEach(l=>laneUp(l,true));
+  const n=R.notes.length,acc=clamp(R.credit/n,0,1),ok=acc>=.6,pts=Math.round(acc*100);
+  G.score+=pts;
+  const d=R.def;
+  const ansStr=d.guide.map(x=>`[${x}]`).join(' — ');
+  recordStage('rhythm',ok,{
+    type:'rhythm',ok,title:`${d.title} (${d.badge})`,rule:d.rule,
+    ans:`정답 신호: ${ansStr} (정확도 ${Math.round(acc*100)}%, +${pts}점)`,
+    desc:d.desc
+  });
+  setJudge('');
+  setTimeout(()=>{
+    if(G.active)showRoundFlash(ok,ok?`⭕ CLEAR +${pts}점`:'❌ MISS',`${ansStr} · ${d.rule}`,advance);
+  },1000);
+}
+
+let lastFrameTime=0;
+function loop(nowMs){
+  if(!R)return;
+  const dt=lastFrameTime?Math.min(.05,(nowMs-lastFrameTime)/1000):.016;
+  lastFrameTime=nowMs;
+
+  if(R.state==='run'){
+    const t=Aud.now()-R.start;R.t=t;
+    const tSim=t*R.spd;
+    for(const n of R.notes){
+      const ntSim=n.t*R.spd,durSim=n.dur*R.spd;
+      if(!n.judged&&!n.holding&&tSim>ntSim+.28)judgeNote(n,'MISS','MISS');
+      if(n.holding&&!n.judged&&tSim>=ntSim+durSim+.12){
+        LANES.forEach(k=>{if(LANE_STATE[k].hold===n)LANE_STATE[k].hold=null;});
+        judgeNote(n,n.res0,n.res0);
+      }
+    }
+    if(t<0){
+      const b=Math.floor((t+2)/.5)+1;
+      if(b>=1&&b<=4)setJudge(String(b),'C');else if(t<-2)setJudge('상황 확인…','C');
+    }else if(t<.03&&$('#judgeText').classList.contains('C')){
+      setJudge('');
+    }
+    if(t>R.endT&&R.notes.every(n=>n.judged)){finishRhythm();return;}
+  }
+
+  for(let i=R.sparks.length-1;i>=0;i--){
+    const sp=R.sparks[i];
+    sp.x+=sp.vx*dt;sp.y+=sp.vy*dt;sp.vy+=240*dt;sp.life-=dt*2.4;
+    if(sp.life<=0)R.sparks.splice(i,1);
+  }
+
+  drawTrack();
+  rafId=requestAnimationFrame(loop);
+}
+
+function rr(c,x,y,w,h,r){
+  r=Math.min(r,h/2,w/2);
+  c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);
+  c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);
+  c.arcTo(x,y,x+w,y,r);c.closePath();
+}
+
+function drawTrack(){
+  const cv=$('#trackCanvas'),c=cv.getContext('2d'),W=R.cw,H=R.ch;
+  c.setTransform(R.dpr,0,0,R.dpr,0,0);
+  const jx=W*.22,pps=clamp((W-jx-8)/4.2,60,130);
+  const t=R.state==='ready'?-3.0:R.t;
+
+  c.fillStyle=G.combo>=5?'#221638':'#14213a';
+  c.fillRect(0,0,W,H);
+
+  const top=24,lh=48;
+  R.lanes.forEach((l,i)=>{
+    c.fillStyle=i%2?'rgba(255,255,255,.04)':'rgba(255,255,255,.08)';
+    c.fillRect(0,top+i*lh,W,lh);
+  });
+
+  const kMin=Math.floor((t-jx/pps)/.5)-1,kMax=Math.ceil((t+(W-jx)/pps)/.5)+1;
+  c.font='10px sans-serif';c.textAlign='left';
+  for(let k=kMin;k<=kMax;k++){
+    if(k<-4)continue;const x=jx+(k*.5-t)*pps;if(x<-2||x>W+2)continue;
+    c.strokeStyle=k%4===0?'rgba(255,255,255,.36)':'rgba(255,255,255,.11)';
+    c.lineWidth=k%4===0?1.6:1;
+    c.beginPath();c.moveTo(x,14);c.lineTo(x,H);c.stroke();
+    if(k%4===0&&k>=0){c.fillStyle='rgba(255,255,255,.55)';c.fillText('마디 '+(k/4+1),x+3,11);}
+  }
+
+  R.notes.forEach(n=>{
+    const li=R.lanes.indexOf(n.lane),y=top+li*lh+7,h=lh-14;
+    const x0=jx+(n.t-t)*pps,w=Math.max(n.vis*pps,18);
+    if(x0>W||x0+w<0)return;
+    const col=LANE_COL[n.lane];
+    if(R.blind&&!n.judged&&!n.holding)return;
+    if(n.res==='MISS'){c.fillStyle='rgba(150,160,175,.32)';rr(c,x0,y,w,h,8);c.fill();return;}
+    c.fillStyle=col;c.globalAlpha=R.blind?.55:1;rr(c,x0,y,w,h,8);c.fill();c.globalAlpha=1;
+    if(n.holding){const e=clamp(jx-x0,0,w);c.fillStyle='rgba(255,255,255,.55)';rr(c,x0,y,Math.max(e,6),h,8);c.fill();}
+    if(n.judged&&n.res){c.strokeStyle='#fff';c.lineWidth=2;rr(c,x0,y,w,h,8);c.stroke();}
+    if(!R.blind){
+      c.fillStyle=n.lane==='bell'?'#14213a':'#fff';
+      c.font='bold 14px sans-serif';c.textAlign='left';
+      c.fillText(n.label,x0+8,y+h/2+5);
+    }
+  });
+
+  R.lanes.forEach((l,i)=>{
+    const cy=top+i*lh+lh/2;
+    c.fillStyle='rgba(255,255,255,.58)';c.font='bold 10px sans-serif';c.textAlign='left';
+    c.fillText(LANE_NAME[l],5,top+i*lh+11);
+    c.strokeStyle=G.combo>=5?'#f2b705':LANE_COL[l];
+    c.lineWidth=3;c.beginPath();c.arc(jx,cy,15,0,Math.PI*2);c.stroke();
+
+    const L=LANE_STATE[l];
+    if(L&&L.down){c.fillStyle='rgba(255,255,255,.32)';c.beginPath();c.arc(jx,cy,15,0,Math.PI*2);c.fill();}
+    const h=L&&L.hold;
+    if(h&&h.holding){
+      const ratio=clamp((t*R.spd-h.pressSimT)/(h.dur*R.spd),0,1);
+      c.fillStyle='rgba(255,255,255,.18)';rr(c,jx+22,top+i*lh+lh-10,92,6,3);c.fill();
+      c.fillStyle='#f2b705';rr(c,jx+22,top+i*lh+lh-10,Math.max(6,92*ratio),6,3);c.fill();
+    }
+  });
+
+  c.strokeStyle=G.combo>=5?'#f2b705':'#fff';
+  c.lineWidth=2;c.shadowColor=G.combo>=5?'#f2b705':'#fff';c.shadowBlur=8;
+  c.beginPath();c.moveTo(jx,14);c.lineTo(jx,H);c.stroke();
+  c.shadowBlur=0;
+
+  R.sparks.forEach(sp=>{
+    c.globalAlpha=clamp(sp.life,0,1);
+    c.fillStyle=sp.col;
+    c.beginPath();c.arc(sp.x,sp.y,3.2,0,Math.PI*2);c.fill();
+  });
+  c.globalAlpha=1;
+}
+
+/* =====================================================================
+   야간 등화 스테이지 (1초 컷 전환)
+===================================================================== */
+function enterNight(st){
+  $('#stageNight').classList.remove('hidden');
+  $('#stageRhythm').classList.add('hidden');
+  const q=st.def,all=[q.a,...q.w],opts=st.order.map(i=>all[i]);
+  N={st,q,opts,correct:st.order.indexOf(0),done:false};
+  $('#nightPrompt').textContent='🔭 '+q.prompt;
+  $('#nightBox').innerHTML=nightSVG(q);
+  const wrap=$('#nightOpts');wrap.innerHTML='';
+  opts.forEach((o,i)=>{
+    const b=document.createElement('button');b.className='opt';
+    b.innerHTML=`<i>${i+1}</i><span>${o}</span>`;
+    b.onclick=()=>answerNight(i);wrap.appendChild(b);
+  });
+}
+
+function answerNight(i){
+  if(!N||N.done)return;N.done=true;
+  G.started=true;
+  const ok=i===N.correct,q=N.q;
+  $$('#nightOpts .opt').forEach((b,j)=>{
+    b.disabled=true;
+    if(j===N.correct)b.classList.add('ok');
+    else if(j===i)b.classList.add('no');
+  });
+  $('.nsvg').classList.add('reveal');
+  if(ok){G.score+=100;G.combo++;G.maxCombo=Math.max(G.maxCombo,G.combo);}
+  else{G.combo=0;}
+  recordStage('night',ok,{
+    type:'night',ok,title:'야간 등화 관측',rule:q.rule,
+    ans:`정답: ${q.a}${ok?' (+100점)':''}`,
+    desc:q.ex
+  });
+  setTimeout(()=>{
+    if(G.active)showRoundFlash(ok,ok?'⭕ 정답! +100점':'❌ 오답',`${q.a} · ${q.rule}`,advance);
+  },1000);
+}
+
+/* =====================================================================
+   종료 · 전체 답안 복기 · 공유
+===================================================================== */
+function shareText(){
+  const d=store.daily[G.seedKey]||{score:G.score,correct:G.corrects,combo:G.maxCombo,marks:G.marks};
+  return `🚢 COLREG 야간 당직 & 기적 리듬 챌린지 [${dateStr(G.seedKey)}]\n🏆 총점: ${d.score}점 (${d.correct}/10) | 🎵 MAX ${d.combo} COMBO\n🔥 일일 연속 기록: ${curStreak()}일째 (1.50x 고정)\n${d.marks.join('')}`;
+}
+async function copyText(s){
+  try{await navigator.clipboard.writeText(s);return true;}catch(e){}
+  try{
+    const ta=document.createElement('textarea');ta.value=s;
+    ta.style.cssText='position:fixed;opacity:0;left:-999px';
+    document.body.appendChild(ta);ta.select();
+    const ok=document.execCommand('copy');ta.remove();return ok;
+  }catch(e){return false;}
+}
+
+function renderReviewList(){
+  if(!G.history.length)return '<p style="color:var(--soft)">완료된 라운드 기록이 없습니다.</p>';
+  return `<div class="reviewList">${G.history.map((it,idx)=>`
+    <div class="revItem ${it.ok?'':'bad'}">
+      <div class="revTop"><span>${it.ok?'⭕':'❌'} R${idx+1} · ${it.title}</span><span class="revRule">${it.rule}</span></div>
+      <div class="revAns">${it.ans}</div>
+      <div class="revDesc">${it.desc}</div>
+    </div>`).join('')}</div>`;
+}
+
+function finishRun(){
+  stopRhythm();clearTimeout(flashTimer);$('#roundFlash').classList.add('hidden');
+  Aud.setNightAmbience(false);
+  G.active=false;
+  store.high=Math.max(store.high,G.score);
+  store.maxCombo=Math.max(store.maxCombo,G.maxCombo);
+  const dailyFull=G.mode==='daily'&&G.marks.length>=10;
+  if(dailyFull){
+    const k=G.seedKey,prev=store.daily[k];
+    if(!prev){
+      store.streak=(store.lastClear===prevKey(k))?store.streak+1:1;
+      store.lastClear=k;store.maxStreak=Math.max(store.maxStreak,store.streak);
+    }
+    if(!prev||G.score>prev.score)store.daily[k]={score:G.score,correct:G.corrects,combo:G.maxCombo,marks:G.marks.slice()};
+  }
+  saveStore();
+
+  const total=G.marks.length;
+  let html=`<p style="font-size:26px;font-weight:900;margin:2px 0">${G.score}점</p>
+    <p>정답/성공 <b>${G.corrects}/${total}</b> · 최대 콤보 <b>${G.maxCombo}</b> · 역대 최고 <b>${store.high}</b></p>
+    <div class="marks">${G.marks.join('')}</div>`;
+  const btns=[];
+  if(G.mode==='daily'&&!dailyFull){
+    html+=`<p style="color:var(--magenta);font-weight:700">10라운드를 모두 마치지 않아 일일 기록·스트릭에는 반영되지 않았어요.</p>`;
+  }
+  if(dailyFull){
+    html+=`<p>🔥 일일 연속 기록 <b>${curStreak()}일째</b> (최장 ${store.maxStreak}일)</p>`;
+    btns.push({
+      label:'📋 크루 공유하기',cls:'primary',keep:true,
+      onClick:async()=>{
+        const s=shareText();const ok=await copyText(s);
+        if(ok)toast('결과가 클립보드에 복사되었어요');
+        else modal({title:'결과 텍스트',html:`<p>자동 복사가 막혀 있어요. 아래 텍스트를 복사하세요.</p><pre class="share">${s}</pre>`});
+      }
+    });
+  }
+  if(G.mode==='survival'&&G.lives<=0){
+    html+=`<p style="color:var(--magenta);font-weight:700">⚓ 생명이 모두 소진되어 당직이 종료되었습니다.</p>`;
+  }
+  html+=`<h3 style="margin:12px 0 4px;font-size:14px">📖 라운드별 답안 및 COLREG 해설 복기</h3>${renderReviewList()}`;
+  btns.push({label:'다시 하기',onClick:()=>startMode(G.mode)});
+  btns.push({label:'메뉴로',cls:'btn',onClick:toMenu});
+  modal({title:G.mode==='daily'?'🏁 일일 챌린지 결과':'🏁 당직 결과 & 답안 복기',html,buttons:btns});
+}
+
+function toMenu(){
+  PAUSED=false;Aud.resume();stopRhythm();clearTimeout(flashTimer);$('#roundFlash').classList.add('hidden');
+  Aud.setNightAmbience(false);
+  closeModal();G.active=false;showScreen('menu');renderMenu();
+}
+
+function confirmExit(){
+  if(G.marks.length>0)finishRun();
+  else toMenu();
+}
+
+/* =====================================================================
+   메뉴 / 설정 / 이벤트
+===================================================================== */
+function renderMenu(){
+  const k=dateKey(),done=store.daily[k];
+  $('#dailySub').textContent=done
+    ?`✔ 오늘 완료 · ${done.score}점 (${done.correct}/10) · 1.50x 고정 출제`
+    :`${dateStr(k)} · 10라운드 (리듬 5 + 등화 5 · 1.50x 고정) · 크루 동일 출제`;
+  $('#dailyTag').textContent=done?'CLEARED':'TODAY';
+  $('#rankBadge').textContent=rankTitle(store.high);
+  const pc=a=>a[0]?Math.round(a[1]/a[0]*100)+'%':'-';
+  const items=[
+    [curStreak()+'일','일일 연속'],
+    [store.maxStreak+'일','최장 스트릭'],
+    [store.high,'최고 점수'],
+    [store.maxCombo,'최고 콤보'],
+    [store.ans+' / '+store.bestAns,'연속 정답(현재/최고)'],
+    [`${pc(store.part.rhythm)} · ${pc(store.part.night)}`,'정답률 리듬·등화']
+  ];
+  $('#statsBox').innerHTML=items.map(([v,l])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join('');
+}
+
+function syncSettings(){
+  $$('.js-diff').forEach(b=>b.classList.toggle('on',b.dataset.diff===store.set.diff));
+  $$('.js-diffT').forEach(b=>b.textContent=store.set.diff==='blind'?'숙련: 암기':'초급: 힌트');
+  $$('.js-song').forEach(s=>{
+    if(!s.options.length){
+      s.innerHTML='<option value="auto">BGM 자동</option>'+Aud.SONGS.map((x,i)=>`<option value="${i}">${x.name}</option>`).join('');
+    }
+    s.value=String(store.set.song);
+    if(s.value!==String(store.set.song))s.value='auto';
+  });
+  $$('.js-mute').forEach(b=>b.textContent=store.set.mute?'🔇 BGM 꺼짐':'🔊 BGM 켬');
+  Aud.setMute(store.set.mute);
+}
+
+function applyDiff(d){
+  store.set.diff=d;saveStore();syncSettings();
+  if(R&&R.state!=='run'){
+    R.blind=d==='blind';renderGuide();
+    $('#btnDemo').classList.toggle('hidden',R.blind);
+  }else if(R&&R.state==='run'){
+    toast('힌트 설정은 다음 리듬 라운드부터 적용돼요');
+  }
+}
+
+function howTo(){
+  modal({title:'조작 및 규칙 안내',html:`<ul>
+   <li><b>연속 자동 진행</b>: 첫 라운드 시작 이후에는 매 라운드 종료 시 <b>1초간 정오답만 표시하고 즉시 다음 라운드</b>로 넘어갑니다.</li>
+   <li><b>배속 규칙</b>: 일일 챌린지는 <b>1.50x 고정</b>이며, 기적 리듬·서바이벌 모드는 라운드마다 <b>+0.08x씩 빨라져 최대 3.00x</b>까지 올라갑니다.</li>
+   <li><b>단일 기적 버튼</b>: <b>짧게 탭 = 단음</b>, <b>길게 홀드 = 장음</b>입니다. 키보드: <b>Space / D / F</b>.</li>
+   <li><b>호종(J) &amp; 징(K)</b>: 정박선·좌초선 스테이지에서 활성화됩니다. 호종은 탭/홀드, 징은 홀드입니다.</li>
+   <li><b>종료 후 답안 복기</b>: 연습 모드는 <b>[⏹ 당직 종료 &amp; 결과]</b>를 누르거나 생명이 소진될 때까지 계속되며, 종료 창에서 전 라운드 답안과 해설을 복기할 수 있습니다.</li></ul>`});
+}
+
+document.addEventListener('pointerdown',()=>Aud.ensure(),{once:true});
+$$('.mode').forEach(b=>b.addEventListener('click',()=>startMode(b.dataset.mode)));
+$$('.js-diff').forEach(b=>b.addEventListener('click',()=>applyDiff(b.dataset.diff)));
+$$('.js-diffT').forEach(b=>b.addEventListener('click',()=>applyDiff(store.set.diff==='blind'?'guide':'blind')));
+$$('.js-song').forEach(s=>s.addEventListener('change',()=>{
+  Aud.ensure();store.set.song=s.value;saveStore();syncSettings();
+  Aud.setSong(songIndexFor(G.cur||{}));s.blur();
+}));
+$$('.js-mute').forEach(b=>b.addEventListener('click',()=>{
+  Aud.ensure();store.set.mute=!store.set.mute;saveStore();syncSettings();
+}));
+$('#btnHow').addEventListener('click',howTo);
+$('#btnReset').addEventListener('click',()=>modal({
+  title:'기록 초기화',
+  html:'<p>스트릭, 최고 점수, 콤보, 정답률 기록이 모두 삭제됩니다. 계속할까요?</p>',
+  buttons:[
+    {label:'취소'},
+    {label:'초기화',cls:'primary',onClick:()=>{
+      const s=store.set;store=defStore();store.set=s;saveStore();renderMenu();toast('기록을 초기화했어요');
+    }}
+  ]
+}));
+$('#btnExit').addEventListener('click',confirmExit);
+$('#btnStart').addEventListener('click',startRun);
+$('#btnPause').addEventListener('click',()=>{$('#btnPause').blur();pauseGame();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseGame();});
+$('#btnDemo').addEventListener('click',playDemo);
+
+$$('.pad').forEach(p=>{
+  const lane=p.dataset.key;
+  p.addEventListener('pointerdown',e=>{e.preventDefault();try{p.setPointerCapture(e.pointerId);}catch(_){}laneDown(lane);});
+  ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>p.addEventListener(ev,()=>laneUp(lane)));
+  p.addEventListener('contextmenu',e=>e.preventDefault());
+});
+
+const KEYMAP={Space:'whistle',KeyD:'whistle',KeyF:'whistle',KeyJ:'bell',KeyK:'gong'};
+const inRhythm=()=>!$('#screenGame').classList.contains('hidden')&&R&&!$('#stageRhythm').classList.contains('hidden');
+
+addEventListener('keydown',e=>{
+  if(PAUSED){if(e.key==='Escape'||e.code==='KeyP'){e.preventDefault();resumeGame();}return;}
+  if(MODAL){if(e.key==='Escape')closeModal();return;}
+  if($('#screenGame').classList.contains('hidden'))return;
+  if(e.code==='Space')e.preventDefault();
+  if(inRhythm()){
+    if(e.code==='KeyP'){pauseGame();return;}
+    const l=KEYMAP[e.code];
+    if(l){
+      if(e.repeat)return;
+      if((l==='bell'||l==='gong')&&!R.def.bells)return;
+      e.preventDefault();laneDown(l);return;
+    }
+    if(e.key==='Enter'&&R.state==='ready'&&!e.repeat)startRun();
+  }else if(N&&!N.done&&/^[1-4]$/.test(e.key)){
+    answerNight(+e.key-1);
+  }
+});
+addEventListener('keyup',e=>{
+  if(e.code==='Space')e.preventDefault();
+  const l=KEYMAP[e.code];
+  if(l&&R)laneUp(l);
+});
+addEventListener('blur',()=>LANES.forEach(l=>laneUp(l,true)));
+
+syncSettings();renderMenu();
+</script>
+</body>
+</html>
