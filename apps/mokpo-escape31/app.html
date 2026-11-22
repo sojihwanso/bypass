@@ -416,7 +416,7 @@ const SCENARIO = {
   ownType: 'power',    // 'power' | 'draft' | 'giveway'
   traffic: 'none'      // 2단계: 'fishing' | 'crossing' | 'overtake'
 };
-const ZONES = { escape: '목포 근해 탈출 (출항)', cadet: '승선사관부 추격 (출항)', port: '목포항 항로 (입항·내항 접안)', narrow: '협수로/만곡부 조우 (입항·내항 접안)', fishing: '어선군 밀집 해역 (입항·신항 접안)' };
+const ZONES = { escape: '목포 근해 탈출 (출항)', cadet: '북한군 추격 (출항)', port: '목포항 항로 (입항·내항 접안)', narrow: '협수로/만곡부 조우 (입항·내항 접안)', fishing: '어선군 밀집 해역 (입항·신항 접안)' };
 const WEATHER = {   // visNM 시정(해리), tint 하늘 밝기, light 조명 세기, wave 파랑 진폭(m), precip 강수 효과
   clear: { n: '맑음(상호시계)', visNM: 10, tint: 1.0, light: 1.0, wave: 0.45, precip: null },
   rain: { n: '비', visNM: 2, tint: 0.78, light: 0.75, wave: 0.8, precip: 'rain' },
@@ -442,7 +442,7 @@ function berthLocal(b, x, y) { const a = b.ang * D2R, dx = x - b.x, dy = y - b.y
 function inBerth(b, x, y) { const [u, v] = berthLocal(b, x, y); return Math.abs(u) <= b.L / 2 && Math.abs(v) <= b.W / 2; }
 const ZONE_UI = {
   escape: { n: '목포 근해 탈출 (출항)', goal: '서쪽 외해 탈출 게이트 통과', desc: '내항 앞바다에서 서쪽 탈출 게이트(x≤-13000, 게이트 폭 안)까지 출항. 마주 입항 화물선 · 목포대교 부근 횡단 페리 · 대교 서측 조종제한선(준설) · 외해 입구 어로종사선 3척' },
-  cadet: { n: '승선사관부 추격 (출항)', goal: '서쪽 외해 탈출 게이트 통과', desc: '목포대교 동측에서 서쪽 탈출 게이트까지 출항. 뒤에서 승선사관부 생도(사람, 11.5kn) 또는 북한군 경비정(12.5kn, 포격)이 무작위로 추격 — 400m 이내에서 경고신호(Shift+H)를 울리면 사관부는 25초간 경례하며 감속(경비정은 감속 안 함). 만곡부 어로종사선 2척 · 직선 항로를 비스듬히 횡단하는 범선 1척' },
+  cadet: { n: '북한군 추격 (출항)', goal: '서쪽 외해 탈출 게이트 통과', desc: '목포대교 동측에서 서쪽 탈출 게이트까지 출항. 후방에서 북한군 경비정(12.5kn)이 대포를 쏘며 추격 — 1,200m 이내에서 약 4초마다 포격하고 경고신호에도 감속하지 않음. 전속 도주와 변침으로 포탄을 피할 것. 만곡부 어로종사선 2척 · 직선 항로를 비스듬히 횡단하는 범선 1척' },
   port: { n: '목포항 항로 (입항·내항 접안)', goal: '목포 내항 접안 구역에 2.0kn 이하로 접안', desc: '지정항로 남측 외곽에서 시작 — 항로 진입 구간의 예인선열(예인선+부선 160m) · 마주 오는 출항 화물선 · 내항 앞바다 표류 중인 조종불능선' },
   narrow: { n: '협수로/만곡부 조우 (입항·내항 접안)', goal: '목포 내항 접안 구역에 2.0kn 이하로 접안', desc: '만곡부 진입 직전에서 시작 — 만곡부에서 마주 오는 출항 대형선 · 우현에서 항로를 횡단하는 소형선(Rule 15 피항 테스트) · 목포대교 부근 조종제한선' },
   fishing: { n: '어선군 밀집 해역 (입항·신항 접안)', goal: '목포신항 접안 구역에 2.0kn 이하로 접안', desc: '외달도 남측 어선군 진입 직전에서 시작 — 어로종사선 6척 · 항로를 교차하는 범선 2척 · 항로 입구의 출항 예인선열' }
@@ -480,9 +480,8 @@ function buildTargetSpecs(zone) {
     sp.push({ name: '신안페리호', kind: '소형선(횡단)', mode: 'cross', x: p.x + nx * 900, y: p.y + ny * 900, hdg: normDeg(Math.atan2(-nx, -ny) * R2D), kn: 3.5, length: 38, beam: 9, color: 0xf1f1f1, avoidRange: 900, avoidCpa: 200, waitRange: 2000 });
     sp.push(RAM('한라준설호', ...fp(10800, 120)));
   } else if (zone === 'cadet') {
-    // 후방 추격자: 선박이 아닌 사람(승선사관부 생도) — 자선 뒤 900m에서 11.5kn로 질주
-    if (rnd() < 0.5) sp.push({ name: '승선사관부', kind: '사관부 생도', mode: 'cadet', x: -600, y: 250, hdg: 270, kn: 11.5, length: 10, beam: 6, labelH: 45.6, color: 0x14284b });   // 케이스 A (50%)
-    else sp.push({ name: '북한군 경비정', kind: '군함(적대)', mode: 'navy', x: 300, y: 250, hdg: 270, kn: 12.5, length: 48, beam: 9, color: 0x7a8089 });   // 케이스 B (50%): 포격 추격
+    // 후방 추격자: 북한군 경비정 — 자선 뒤 1,800m에서 12.5kn로 포격 추격
+    sp.push({ name: '북한군 경비정', kind: '군함(적대)', mode: 'navy', x: 300, y: 250, hdg: 270, kn: 12.5, length: 48, beam: 9, color: 0x7a8089 });
     // 전방 변수: 목포대교 서쪽 만곡부 부근 저속 조업 어선 2척
     const fp = (sv, off) => { const p = channelPointAt(sv); return [p.x + off * p.dy, p.y - off * p.dx]; };
     [fp(8500, -120), fp(9300, 90)].forEach((f, i) => sp.push({ name: `제${i + 1}동진호`, kind: '어선(조업)', mode: 'fisher', x: f[0], y: f[1], cx: f[0], cy: f[1], leash: 220, kn: 2, length: 18 + i * 2, beam: 5, color: [0xf4f4f0, 0x3a78b5][i], avoidRange: 500, avoidCpa: 120 }));
@@ -686,64 +685,6 @@ const World3D = {
     for (const [t, x, y] of MAP.labels) { const s = this.makeLabel(t); s.position.copy(toV3(x, y, 260)); this.scene.add(s); this.labels.push(s); }
   },
 
-  /** 승선사관부 생도(사람) 3D 모델 — 기본 도형(Box/Cylinder/Sphere)만 사용, 키 약 28m. 정면 = -Z, 오른쪽 = +X */
-  buildCadet() {
-    const g = new THREE.Group(), body = new THREE.Group(); body.position.y = 0.5; g.add(body);
-    const M = c => new THREE.MeshLambertMaterial({ color: c });
-    const navy = M(0x14284b), white = M(0xf5f5f0), gold = M(0xd4af37), skin = M(0xf0c8a0), black = M(0x111111);
-    const add = (parent, geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); parent.add(m); return m; };
-    const torso = new THREE.Group(); torso.position.y = 12.4; body.add(torso);
-    add(torso, new THREE.BoxGeometry(7.2, 9.2, 3.8), navy, 0, 4.6, 0);                  // 감색 정복 상의
-    add(torso, new THREE.BoxGeometry(1.8, 5.2, 0.25), white, 0, 5.8, -1.95);            // 흰 셔츠
-    for (const x of [-1.5, 1.5]) for (const y of [3.2, 5.0, 6.8]) add(torso, new THREE.SphereGeometry(0.28, 8, 6), gold, x, y, -2.0);   // 금단추
-    add(torso, new THREE.BoxGeometry(7.3, 0.8, 3.9), white, 0, 0.5, 0);                 // 허리띠
-    for (const x of [-1, 1]) add(torso, new THREE.BoxGeometry(2.6, 0.5, 3.4), gold, x * 3.4, 9.3, 0);   // 금색 견장
-    add(torso, new THREE.SphereGeometry(2.2, 14, 10), skin, 0, 11.7, 0);                // 머리
-    for (const x of [-0.8, 0.8]) add(torso, new THREE.BoxGeometry(0.35, 0.35, 0.2), black, x, 11.9, -2.1);
-    add(torso, new THREE.CylinderGeometry(2.8, 2.9, 2.0, 16), white, 0, 14.2, 0);       // 흰색 정모
-    add(torso, new THREE.CylinderGeometry(2.95, 2.95, 0.5, 16), navy, 0, 13.3, 0);      // 모자 띠
-    add(torso, new THREE.BoxGeometry(3.8, 0.25, 2.1), navy, 0, 13.1, -2.7);             // 모자 챙
-    add(torso, new THREE.SphereGeometry(0.45, 8, 6), gold, 0, 13.4, -2.95);             // 금색 마크
-    const arm = sx => {
-      const sh = new THREE.Group(); sh.position.set(sx * 3.9, 8.8, 0); torso.add(sh);
-      add(sh, new THREE.CylinderGeometry(1.0, 0.9, 4.6, 10), navy, 0, -2.3, 0);
-      const el = new THREE.Group(); el.position.y = -4.6; sh.add(el);
-      add(el, new THREE.CylinderGeometry(0.9, 0.8, 4.6, 10), navy, 0, -2.3, 0);
-      add(el, new THREE.CylinderGeometry(0.95, 0.95, 0.5, 10), gold, 0, -3.7, 0);       // 금색 소매 줄
-      add(el, new THREE.SphereGeometry(0.95, 10, 8), white, 0, -4.9, 0);                // 흰 장갑
-      return { sh, el };
-    };
-    const leg = sx => {
-      const hip = new THREE.Group(); hip.position.set(sx * 1.8, 12.4, 0); body.add(hip);
-      add(hip, new THREE.CylinderGeometry(1.6, 1.4, 6.2, 10), navy, 0, -3.1, 0);
-      const knee = new THREE.Group(); knee.position.y = -6.2; hip.add(knee);
-      add(knee, new THREE.CylinderGeometry(1.3, 1.1, 6.2, 10), navy, 0, -3.1, 0);
-      add(knee, new THREE.BoxGeometry(2.1, 1.0, 3.6), black, 0, -6.4, -0.8);            // 구두
-      return { hip, knee };
-    };
-    const arms = [arm(-1), arm(1)], legs = [leg(-1), leg(1)];   // [0]=왼쪽, [1]=오른쪽
-    const rm = o => new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: o, side: THREE.DoubleSide, depthWrite: false });
-    const rings = [6, 10].map((r, i) => { const m = new THREE.Mesh(new THREE.RingGeometry(r, r + 2.2, 36), rm(0.5 - i * 0.15)); m.rotation.x = -Math.PI / 2; m.position.y = 0.6; g.add(m); return m; });   // 물보라 링
-    g.scale.set(1.2, 1.2, 1.2);   // 전체 1.2배 확대
-    g.userData = { body, torso, legs, arms, rings, ph: 0, salW: 0 };
-    return g;
-  },
-  /** 달리기(팔다리 교차·상하 바운스) / 거수경례(오른팔) 애니메이션 */
-  animateCadet(g, dt, u, salute) {
-    const d = g.userData, k = Math.max(0.35, Math.min(1.1, u / 6.5));
-    d.ph += dt * (5 + u * 1.1);
-    d.salW += ((salute ? 1 : 0) - d.salW) * Math.min(1, dt * 5);
-    const w = d.salW;
-    d.body.position.y = 0.5 + Math.abs(Math.sin(d.ph)) * 1.1 * k;   // 상하 바운스
-    d.torso.rotation.x = -0.28 * k;                                  // 앞으로 숙인 자세
-    d.legs.forEach((L, i) => { const p = d.ph + i * Math.PI; L.hip.rotation.x = Math.sin(p) * 0.95 * k; L.knee.rotation.x = -(0.25 + 0.9 * Math.max(0, Math.sin(p + 1.6))) * k; });
-    d.arms.forEach((A, i) => {
-      const sw = Math.sin(d.ph + (i ? 0 : Math.PI)) * 0.9 * k, bend = 1.1 * k + 0.2;
-      if (i === 1) { A.sh.rotation.x = sw * (1 - w); A.sh.rotation.z = 0.12 + 1.88 * w; A.el.rotation.x = bend * (1 - w); A.el.rotation.z = 2.3 * w; }   // 오른팔: 거수경례
-      else { A.sh.rotation.x = sw; A.sh.rotation.z = -0.12; A.el.rotation.x = bend; }
-    });
-    d.rings.forEach((r, i) => { const sc = 1 + 0.12 * Math.sin(d.ph * 0.5 + i * 2); r.scale.set(sc, sc, 1); });
-  },
   /** 북한군 경비정: 회색 선체 + 선수 쪽 회전 포탑·포신 */
   buildNavy(spec) {
     const g = this.buildShip(spec, 0x7a8089, false), L = spec.length, B = spec.beam;
@@ -984,7 +925,6 @@ const World3D = {
       }
       if (!on) continue;
       this.placeShip(tg.mesh, tg.x, tg.y, tg.hdg, t);
-      if (tg.mode === 'cadet') this.animateCadet(tg.mesh, dt, tg.u, tg.saluting);
       if (tg.mode === 'navy' && tg.mesh.userData.turret) tg.mesh.userData.turret.rotation.y = -(tg.turretRel || 0) * D2R;
       const hy = tg.labelH ?? tg.length * 0.3, dc = Math.hypot(tg.x - cam.x, hy - cam.y, -tg.y - cam.z), w = Math.max(80, Math.min(1100, dc * 0.2));
       tg.label.sprite.scale.set(w, w * 96 / 384, 1); tg.label.sprite.position.set(tg.x, hy + 20 + w * 0.12, -tg.y);
@@ -1187,8 +1127,8 @@ class TargetShip {
       this.off0 = sp.off; this.offc = sp.off; this.sPos = sp.s; this._place();
       const p = channelPointAt(this.sPos); this.hdg = normDeg(Math.atan2(this.dir * p.dx, this.dir * p.dy) * R2D);
     } else if (this.mode === 'cross') { this.hdg0 = sp.hdg; this.hdg = sp.hdg; }
-    else if ((this.mode === 'cadet' || this.mode === 'navy')) {   // 자선의 항적(빵부스러기)을 따라가며 추격 — 육지를 가로지르지 않음
-      this.hdg = sp.hdg; this.saluteUntil = -1; this.saluting = false; this.crumbs = [];
+    else if (this.mode === 'navy') {   // 자선의 항적(빵부스러기)을 따라가며 추격 — 육지를 가로지르지 않음
+      this.hdg = sp.hdg; this.crumbs = [];
       const o = Sim.ship, d = Math.hypot(o.x - sp.x, o.y - sp.y), n = Math.max(1, Math.round(d / 25));
       for (let i = 1; i <= n; i++) this.crumbs.push([sp.x + (o.x - sp.x) * i / n, sp.y + (o.y - sp.y) * i / n]);
     }
@@ -1223,15 +1163,14 @@ class TargetShip {
       this._turn(this.hdg0 + (this.avoid && !this.waiting ? 35 : 0), 6, dt);
       this.u = this.waiting ? 0 : this.u0 * this.f; const h = this.hdg * D2R, nx = this.x + Math.sin(h) * this.u * dt, ny = this.y + Math.cos(h) * this.u * dt;
       if (landAt(nx, ny)) { this.u0 = 0; this.u = 0; } else { this.x = nx; this.y = ny; }
-    } else if (this.mode === 'cadet' || this.mode === 'navy') {
+    } else if (this.mode === 'navy') {
       const o = Sim.ship, lc = this.crumbs[this.crumbs.length - 1];
       if (!lc || Math.hypot(o.x - lc[0], o.y - lc[1]) > 25) this.crumbs.push([o.x, o.y]);
       while (this.crumbs.length > 1 && Math.hypot(this.crumbs[0][0] - this.x, this.crumbs[0][1] - this.y) < 25) this.crumbs.shift();
       const goal = this.crumbs.length > 1 ? this.crumbs[0] : [o.x, o.y];   // 따라잡으면 자선을 직접 노림
-      this._turn(Math.atan2(goal[0] - this.x, goal[1] - this.y) * R2D, this.mode === 'navy' ? 22 : 160, dt);
-      this.saluting = this.mode === 'cadet' && Sim.t < this.saluteUntil;
-      if (this.mode === 'navy') this.turretRel = angDiff(Math.atan2(o.x - this.x, o.y - this.y) * R2D, this.hdg);
-      this.u += ((this.saluting ? 5.5 : this.kn) * KN - this.u) * Math.min(1, dt / 1.5);
+      this._turn(Math.atan2(goal[0] - this.x, goal[1] - this.y) * R2D, 22, dt);
+      this.turretRel = angDiff(Math.atan2(o.x - this.x, o.y - this.y) * R2D, this.hdg);
+      this.u += (this.kn * KN - this.u) * Math.min(1, dt / 1.5);
       const h = this.hdg * D2R; this.x += Math.sin(h) * this.u * dt; this.y += Math.cos(h) * this.u * dt;
     } else if (this.mode === 'drift') {   // 조종불능선(표류) · 조종제한선(작업): 0.5~1kn로 느리게 움직이며 구역 이탈 시 복귀, 회피 동작 없음
       this.timer -= dt;
@@ -1336,21 +1275,15 @@ const Sim = {
   gateData() { return GOALS[SCENARIO.zone] === 'gate' ? GATE : null; },
   berthData() { return BERTHS[GOALS[SCENARIO.zone]] || null; },
   applyZoneVisuals() { if (this.use3D) { World3D.gate.visible = GOALS[SCENARIO.zone] === 'gate'; for (const k in World3D.berths) World3D.berths[k].visible = GOALS[SCENARIO.zone] === k; } },
-  /** 경고신호(단음 5회): 사관부가 400m 이내면 25초간 5.5kn로 감속하며 거수경례 */
-  cadetSalute() {
-    if (this.targets.some(g => g.mode === 'navy')) { this.log('info', '경고신호 — 북한군 경비정은 응하지 않습니다', '경고신호로는 감속시킬 수 없습니다. 전속력으로 탈출 게이트까지 도주하세요!'); return; }
-    for (const g of this.targets) {
-      if (g.mode !== 'cadet' || this.t < g.saluteUntil) continue;
-      if (g.range <= 400) {
-        g.saluteUntil = this.t + 25; Rules.cnt.ok++; Run.rec('ok', 'salute', '경고신호 이행 — 승선사관부 감속 유도', '400m 이내에서 경고신호(단음 5회)를 울려 승선사관부를 감속시켰습니다.'); Rules.render();
-        this.log('ok', '승선사관부가 경고신호를 듣고 거수경례 후 속도를 늦췄습니다!', `거리 ${fmtDist(g.range)} · 약 25초간 5.5kn로 감속합니다. (해사안전법 제92조 / COLREG Rule 34(d): 경고신호) 준수 +1`);
-      } else this.log('info', '경고신호 — 사관부 반응 없음', `사관부가 ${fmtDist(g.range)} 밖에 있습니다. 400m 이내로 좁혀졌을 때 다시 울리세요.`);
-    }
+  /** 경고신호(단음 5회)를 울려도 북한군 경비정은 감속하지 않음 — 안내만 표시 */
+  chaserSignal() {
+    if (this.targets.some(g => g.mode === 'navy')) this.log('info', '경고신호 — 북한군 경비정은 응하지 않습니다', '경고신호로는 감속시킬 수 없습니다. 전속력으로 탈출 게이트까지 도주하세요!');
   },
+
   radarTargets() {
     const blink = Math.floor(this.t * 2) % 2;
     return this.targets.map(t => ({
-      x: t.x, y: t.y, hdg: t.hdg, length: t.length, vec: [t.vx, t.vy], ring: t.level === 'danger', person: t.mode === 'cadet', tow: t.barge ? [t.barge.x, t.barge.y] : null,
+      x: t.x, y: t.y, hdg: t.hdg, length: t.length, vec: [t.vx, t.vy], ring: t.level === 'danger', tow: t.barge ? [t.barge.x, t.barge.y] : null,
       color: t === this.top ? (blink ? '#ff2a2a' : '#ff7a3a') : t.level === 'danger' ? '#ff7a3a' : t.level === 'warn' ? '#ffb347' : '#ffd34f'
     }));
   },
@@ -1359,7 +1292,7 @@ const Sim = {
     if (this.use3D) for (const t of this.targets) if (t.towMesh) World3D.scene.remove(t.towMesh);
     this.targets = buildTargetSpecs(SCENARIO.zone).map(sp => new TargetShip(sp));
     for (const b of this.targets) if (b.mode === 'barge') { b.tug = this.targets.find(g => g.name === b.tugName); if (b.tug) { b.tug.barge = b; b.step(0.05); } }   // 예인선열 연결
-    if (this.use3D) for (const t of this.targets) { t.mesh = t.mode === 'cadet' ? World3D.buildCadet() : t.mode === 'navy' ? World3D.buildNavy(t) : World3D.buildShip(t, t.color, false); World3D.scene.add(t.mesh); t.label = World3D.makeDynLabel(); World3D.scene.add(t.label.sprite); if (t.barge) { t.towMesh = World3D.buildTowLine(); World3D.scene.add(t.towMesh); } }
+    if (this.use3D) for (const t of this.targets) { t.mesh = t.mode === 'navy' ? World3D.buildNavy(t) : World3D.buildShip(t, t.color, false); World3D.scene.add(t.mesh); t.label = World3D.makeDynLabel(); World3D.scene.add(t.label.sprite); if (t.barge) { t.towMesh = World3D.buildTowLine(); World3D.scene.add(t.towMesh); } }
     this.top = null; this.assess();
     this.shellsClear(); this.fireT = 2; this.bannerUntil = 0;
     if (this.targets.some(g => g.mode === 'navy')) {
@@ -1446,12 +1379,6 @@ function segCross(p1, p2, q1, q2) {
   const d1 = cr(q1, q2, p1), d2 = cr(q1, q2, p2), d3 = cr(p1, p2, q1), d4 = cr(p1, p2, q2);
   return d1 * d2 < 0 && d3 * d4 < 0;
 }
-/** 사관부 포획: 추격자가 자선 선체(선수~선미 중심선 + 반폭)에 닿았는가 */
-function cadetCaught(o, g) {
-  const h = o.hdg * D2R, L = CONFIG.own.length / 2, fx = Math.sin(h), fy = Math.cos(h);
-  const dx = g.x - o.x, dy = g.y - o.y, along = Math.max(-L, Math.min(L, dx * fx + dy * fy));
-  return Math.hypot(dx - fx * along, dy - fy * along) < CONFIG.own.beam / 2 + 5;
-}
 /** 적용 순서: 선박입출항법(1) → 해사안전법(2) → COLREG(3). 같은 경고는 15초 쿨타임. warn=주의, bad=위반 */
 const Rules = {
   COOL: 15, cnt: { ok: 0, warn: 0, bad: 0 }, last: {}, sig: [], acc: 0,
@@ -1467,7 +1394,7 @@ const Rules = {
   comply(key, title, detail) { if (!this.gate(key)) return false; this.cnt.ok++; Run.rec('ok', key, title, detail); Sim.log('ok', title, detail); this.render(); return true; },
   noteSignal(kind) {
     this.sig.push({ t: Sim.t, k: kind }); if (this.sig.length > 30) this.sig.shift();
-    if (kind === '5') Sim.cadetSalute();
+    if (kind === '5') Sim.chaserSignal();
     if (WEATHER[SCENARIO.weather].visNM < 1) this.comply('fogsig-ok', '무중신호 이행', '제한시계 중 기적 신호를 울렸습니다. (해사안전법 제93조: 2분을 넘지 않는 간격으로 장음 1회)');
   },
   statusHTML() {
@@ -1531,7 +1458,7 @@ const Rules = {
     if (vis >= 1) {
       st.fogSince = null;
       for (const g of T) {
-        if (g.mode === 'cadet' || g.mode === 'navy' || g.mode === 'barge') continue;   // 사관부는 선박이 아님 · 부선은 예인선과 함께 판정 — 경고신호는 거수경례 로직에서 별도 처리
+        if (g.mode === 'navy' || g.mode === 'barge') continue;   // 적대 추격선은 별도 처리 · 부선은 예인선과 함께 판정 — 경고신호는 거수경례 로직에서 별도 처리
         const r = st.dng[g.name];
         if (g.level === 'danger' && g.range < 3000) {
           const dn = r || (st.dng[g.name] = { t0: t, ok: false, warned: false }); dn.out = null;
@@ -1554,7 +1481,7 @@ const Rules = {
     const SPC = { nuc: '조종불능선', ram: '조종제한선', fish: '어로종사선', sail: '범선' };
     // ⑦ 우현 횡단선 피항 (해사안전법 제73조 / COLREG Rule 15) — 우현(상대방위 5°~112.5°)에서 횡단해 오는 선박
     for (const g of T) {
-      if (g.mode === 'cadet' || g.mode === 'navy' || g.mode === 'barge') continue;
+      if (g.mode === 'navy' || g.mode === 'barge') continue;
       const nm = SPC[g.cls], isSpc = nm && SCENARIO.ownType === 'power';
       const rel = normDeg(g.brg - s.hdg), hd = Math.abs(angDiff(g.hdg, s.hdg)), gs = Math.hypot(g.vx, g.vy) / KN;
       const k = (isSpc ? 'r18:' : 'r15:') + g.name; let e = st.enc[k];
@@ -1602,13 +1529,9 @@ const Rules = {
     }
 
     // 충돌 판정 (선체 겹침)
-    for (const g of T) if (g.mode === 'cadet' ? cadetCaught(s, g) : hullOverlap(s, g)) {
+    for (const g of T) if (hullOverlap(s, g)) {
       if (g.mode === 'navy') {
         if (this.emit('shot', 'bad', '⚠ 북한군 포격에 피격되었습니다!', `${tag}<br>북한군 경비정에게 따라잡혀 피격되었습니다.`)) st.caught = '⚠ 북한군 포격에 피격되었습니다!';
-        continue;
-      }
-      if (g.mode === 'cadet') {
-        if (this.emit('catch', 'bad', '⚠ 승선사관부에게 따라잡혔습니다!', `${tag}<br>추격 중이던 ${g.name}(${g.kind})에게 접촉(포획)되었습니다. 경고신호(단음 5회, Shift+H)는 사관부가 400m 이내일 때 효과가 있습니다.`)) st.caught = '⚠ 승선사관부에게 따라잡혔습니다!';
         continue;
       }
       if (this.emit('col:' + g.name, 'bad', `충돌: ${g.name}`, `${tag}<br>자선과 ${g.name}의 선체가 접촉했습니다. 경계(해사안전법 제63조)·충돌을 피하기 위한 동작(제66조) 의무를 검토하세요.`)) {
@@ -1962,8 +1885,7 @@ const CATS = {
   fogspeed: { n: '제한시계 안전속력', ans: '시정이 나쁠 때는 8kn 미만의 안전한 속력으로 항행합니다. (해사안전법 제71조)' },
   sig: { n: '기적·조종신호 이행', ans: '위험 상황에서는 기적 단음(H) 또는 경고 5단음(Shift+H)을 울립니다. (해사안전법 제92조 / COLREG Rule 34)' },
   fogsig: { n: '무중신호', ans: '제한시계에서는 2분을 넘지 않는 간격으로 장음 1회(F)를 울립니다. (해사안전법 제93조 / Rule 35)' },
-  catch: { n: '추격자 대응', ans: '승선사관부는 400m 이내에서 경고신호로 감속시키고, 계속 전속으로 게이트까지 도주합니다.' },
-  salute: { n: '추격자 대응', ans: '승선사관부 400m 이내에서 경고신호(5단음)를 울립니다.' },
+  catch: { n: '추격자 대응', ans: '추격선에게서 전속으로 거리를 벌려 탈출 게이트까지 도주합니다.' },
   shot: { n: '포격 회피', ans: '전속으로 거리를 벌리고, 포탄이 날아올 때 변침해 피합니다.' },
   r18: { n: '특수선 우선 피항', ans: '조종불능선·조종제한선·어로종사선·범선은 일찍 크게 변침·감속해 CPA 200m 이상을 확보합니다. (해사안전법 제76조 / COLREG Rule 18)' },
   r15: { n: '우현 횡단선 피항', ans: '우현에서 횡단해 오는 선박이 있으면 피항선으로서 일찍 우현 변침·감속해 그 선박의 선미 쪽으로 지나갑니다. (해사안전법 제73조 / COLREG Rule 15)' },
@@ -2125,11 +2047,6 @@ function updateTargetsHUD() {
   } else box.style.display = 'none';
   const nav = Sim.targets.find(g => g.mode === 'navy');
   if (nav && Store.data.settings.hint && nav.range <= 1500) { if (!top) box.innerHTML = ''; box.style.display = 'block'; box.innerHTML += `<div style="margin-top:4px;color:#ff9a8a;font-size:11px">⚠ 북한군 경비정 ${fmtDist(nav.range)} — ${nav.range <= 1200 ? '포격 중! 변침·전속 도주' : '곧 포격 사정권'}</div>`; }
-  const cad = Sim.targets.find(g => g.mode === 'cadet');
-  if (cad && Store.data.settings.hint) {
-    const msg = cad.saluting ? '사관부 거수경례 · 감속 중' : cad.range <= 400 ? `⚠ 사관부 ${fmtDist(cad.range)} — 경고신호(Shift+H)로 감속시키세요!` : '';
-    if (msg) { if (!top) box.innerHTML = ''; box.style.display = 'block'; box.innerHTML += `<div style="margin-top:4px;color:#ffe08a;font-size:11px">${msg}</div>`; }
-  }
   const list = Sim.targets.slice().sort((a, b) => a.range - b.range);
   $('tgtList').innerHTML = list.length ? '<table><tr><th>타선</th><th title="자선 선수 기준 상대방위 (우=우현, 좌=좌현)">상대방위</th><th>거리</th><th>CPA</th><th>TCPA</th></tr>' +
     list.map(t => `<tr class="${t.level}"><td>${t.name}</td><td>${relTxt(t.brg - Sim.ship.hdg)}${(rr => rr >= 5 && rr <= 112.5 ? '<span style="color:#7dffa8" title="우현 횡단 구역(5°~112.5°): 횡단 관계면 자선이 피항선 (Rule 15)">●</span>' : '')(normDeg(t.brg - Sim.ship.hdg))}</td><td>${fmtDist(t.range)}</td><td>${fmtDist(t.cpa)}</td><td>${t.tcpa > 0 && isFinite(t.tcpa) ? (t.tcpa / 60).toFixed(1) + '분' : '-'}</td></tr>`).join('') + '</table>' : '';
