@@ -23,11 +23,12 @@
   --r-btn:16px; --r-card:18px; color-scheme:light;
 }
 :root[data-theme="dark"]{
-  --paper:#160D13; --surface:#20131C; --ink:#F7E9F0; --muted:#C7A3B6; --rule:#3A2432; --soft:#2A1924;
-  --pri:#F0A5C7; --pri-ink:#2A0B1B; --acc:#FF8DBE; --acc-bg:#3A1A2C;
-  --sea:#E68BB5; --leave:#B57898; --edu:#8C5A76; --inj:#D2A0BE; --left:#2E1C28;
-  --ok:#8EDCA9; --ok-bg:#15261C; --bad:#FF928A; --bad-bg:#34181D; --warn:#F0C46A; --warn-bg:#2C2416;
-  --scrim:rgba(8,2,6,.62); --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.45); color-scheme:dark;
+  /* 밤 당직 모드: 선교 야간 조명처럼 어두운 바탕에 호박색 빛 */
+  --paper:#0D0B0A; --surface:#16120F; --ink:#F2E6D8; --muted:#B8A592; --rule:#352B23; --soft:#211B16;
+  --pri:#EE9A3F; --pri-ink:#1C1005; --acc:#F4AE58; --acc-bg:#33240F;
+  --sea:#EE9A3F; --leave:#DD6B5B; --edu:#9D8BDB; --inj:#4FB3A4; --left:#2A221C;
+  --ok:#8EDCA9; --ok-bg:#132219; --bad:#FF8A7A; --bad-bg:#35171A; --warn:#F2D266; --warn-bg:#2B2513;
+  --scrim:rgba(6,4,2,.66); --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.45); color-scheme:dark;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -95,6 +96,26 @@ a{color:var(--acc)}
 .note.okn b{color:var(--ok)}
 .note.badn{border-color:color-mix(in srgb,var(--bad) 35%,transparent);border-left-color:var(--bad);background:var(--bad-bg)}
 .note.badn b{color:var(--bad)}
+.note.infon{border-color:var(--rule);border-left-color:var(--acc);background:var(--soft)}
+.note.infon b{color:var(--ink)}
+.verdict{border-radius:16px;padding:14px 16px;margin:0 0 18px;background:var(--soft);border:1px solid var(--rule)}
+.verdict .vd-k{display:block;font-size:13px;font-weight:600;color:var(--muted)}
+.verdict .vd-d{font-family:var(--f-mono);font-size:clamp(26px,6vw,34px);font-weight:600;line-height:1.15;margin:4px 0 6px}
+.verdict .vd-d small{font-size:16px;color:var(--muted);font-weight:500}
+.verdict .vd-l{font-size:14.5px}
+.verdict.ok{background:var(--ok-bg);border-color:color-mix(in srgb,var(--ok) 35%,transparent)}.verdict.ok .vd-l b,.verdict.ok .vd-k{color:var(--ok)}
+.verdict.warn{background:var(--warn-bg);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}.verdict.warn .vd-l b,.verdict.warn .vd-k{color:var(--warn)}
+.verdict.bad{background:var(--bad-bg);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}.verdict.bad .vd-l b,.verdict.bad .vd-k{color:var(--bad)}
+.vrow .rh{flex-wrap:wrap}
+.vrow.auto .inp[type=date]{border-style:dashed;border-color:var(--warn)}
+.linkbtn{border:0;background:none;padding:0;color:var(--acc);font-weight:600;text-decoration:underline;text-underline-offset:3px;min-height:24px}
+.helpbox{margin-top:26px;border-top:1px solid var(--rule)}
+.helpbox>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;min-height:48px;padding:12px 0 0;font-family:var(--f-disp);font-weight:800;font-size:19px}
+.helpbox>summary::-webkit-details-marker{display:none}
+.helpbox>summary svg{width:22px;height:22px;color:var(--acc);flex:none}
+.helpbox>summary::after{content:'펼치기';margin-left:auto;font-family:var(--f-body);font-size:13px;font-weight:600;color:var(--acc)}
+.helpbox[open]>summary::after{content:'접기'}
+body.typing .bp-home{opacity:0;pointer-events:none}
 
 /* 처음 화면 */
 .hero{padding:34px 0 8px}
@@ -120,7 +141,8 @@ a{color:var(--acc)}
 .vh h2{font-size:clamp(22px,4.5vw,28px)}
 .back{display:inline-flex;align-items:center;gap:4px;min-height:40px;border-radius:12px;padding:7px 12px 7px 9px;border:1.5px solid var(--rule);background:var(--surface);font-size:14px;font-weight:600}
 .back svg{width:17px;height:17px}
-.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end}
+.fgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:end}
+.fgrid>*{min-width:0}
 .f label,.f .lb{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:5px}
 .f label small{font-size:12px;font-weight:500}
 .inp{width:100%;height:46px;border:1.5px solid var(--rule);border-radius:12px;background:var(--paper);padding:0 12px;font-family:var(--f-mono);font-size:15px;min-width:0}
@@ -136,7 +158,7 @@ select.inp{font-family:var(--f-body)}
 .more[open] summary::before{content:"−"}
 .more .fgrid{margin-top:12px}
 
-.rows{display:grid;gap:12px}
+.rows{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
 .vrow{border:1.5px solid var(--rule);border-radius:16px;padding:12px 14px 12px;background:var(--paper)}
 .vrow.bad{border-color:color-mix(in srgb,var(--bad) 55%,var(--rule))}
 .vrow .rh{display:flex;align-items:center;gap:8px;margin-bottom:10px}
@@ -184,7 +206,7 @@ select.inp{font-family:var(--f-body)}
 .done svg{width:24px;height:24px;flex:none}
 .done .mono{margin-left:auto}
 
-.pj{display:grid;gap:12px}
+.pj{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
 .pjc{border:1.5px solid var(--rule);border-radius:16px;padding:14px;background:var(--paper)}
 .pjc h4{font-size:15.5px;display:flex;align-items:center;gap:8px}
 .pjc h4 svg{width:19px;height:19px;color:var(--acc)}
@@ -221,7 +243,7 @@ table.lv tr.fut td{color:var(--muted)}
 .pitem .pz{margin-left:auto;font-family:var(--f-mono);font-size:12.5px;color:var(--acc)}
 .pchip{display:flex;align-items:center;gap:10px;border:1.5px solid var(--acc);background:var(--acc-bg);border-radius:14px;padding:10px 12px}
 .pchip > div{flex:1;min-width:0}
-.pchip .sub{font-size:13px}
+.pchip .sub{font-size:13px;color:var(--ink)}
 .eta-big{border-radius:16px;background:var(--soft);padding:14px 16px}
 .zpick{position:relative}
 .zpick .zq{font-family:var(--f-body)}
@@ -321,13 +343,15 @@ table.lv tr.fut td{color:var(--muted)}
 @media (max-width:620px){
   .res-top{grid-template-columns:1fr;justify-items:center;text-align:center}
   .res-top .kv{text-align:left;width:100%}
-  .fgrid{grid-template-columns:1fr 1fr}
+  .fgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .card{padding:15px}
   .mast .brand b{font-size:15.5px}
   .net span{display:none}
+  .net.off span{display:inline}
   .net{padding:4px 11px}
   .btn-big{padding:16px 26px;font-size:18px}
 }
+@media (max-width:440px){ .inp[type=date]{padding:0 8px;font-size:14px;letter-spacing:-.02em} .inp[type=date]::-webkit-calendar-picker-indicator{margin:0;padding:0} }
 @media (max-width:380px){ .fgrid{grid-template-columns:1fr} .brand{font-size:14.5px;gap:7px} .brand svg{width:24px;height:24px} }
 @media print{ .mast,.addrow,.xbtn,#syncCard,.foot,.back{display:none!important} body{background:#fff} }
 </style>
@@ -366,8 +390,19 @@ table.lv tr.fut td{color:var(--muted)}
 
 <script>
 'use strict';
-const VERSION = '2.3.3';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '2.4.0';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  { v: '2.4.0', d: '2026. 11. 23', i: [
+    '계산 결과 맨 위에 복무 완료일과 기한까지 남은 날(여유·빠듯함·초과)을 한 줄로 보여 줌',
+    '승선 기간을 추가할 때 미리 채운 날짜를 \'날짜 확인 필요\'로 표시하고, 고치거나 [맞음]을 누르기 전까지 결과에 알림',
+    '처음 화면(편입일 전)은 3단계 안내만 보여 주고, 만료 예상·휴가 내역·백업은 기록을 넣은 뒤에 나타나게 함',
+    '사용 방법·도움말·관련 법령을 한 곳에 접어 둠',
+    '다크 화면을 밤 당직 모드(어두운 바탕에 호박색)로 바꾸고, 승선·휴가·교육소집·휴직 색을 서로 다른 색으로 나눔',
+    '\'남은 비율\' 칸을 \'오늘까지 인정\'으로 바꾸고, 대체공휴일 선택지 설명을 아래에 따로 적음',
+    '입력하는 동안 커뮤니티 버튼을 숨기고, 휴대폰에서도 오프라인이면 \'오프라인\' 글자를 보여 줌',
+    '복무 완료일이 바뀌면 화면 읽기 프로그램이 알려 주고, ETA 빈칸 안내 문구(을/를)를 자연스럽게 고침',
+    '휴대폰에서 승선 기록 날짜 칸이 카드 밖으로 넘쳐 화면이 옆으로 밀리던 문제 수정',
+  ] },
   { v: '2.3.3', d: '2026. 11. 23', i: [
     '처음 화면 제목 위의 작은 영문 글(SEA SERVICE)을 빼서 제목이 바로 보이게 함',
   ] },
@@ -790,6 +825,7 @@ function field(id, label, val, type = 'date', extra = ''){
   return `<div class="f"><label for="${id}">${label}</label><input class="inp" id="${id}" type="${type}" value="${esc(val)}" ${extra}></div>`;
 }
 
+const SUB_HINT = { on: '대체공휴일을 공휴일처럼 휴가 사용일에서 빼고, 그만큼 휴가를 늘립니다.', off: '대체공휴일도 휴가를 쓴 날로 셉니다.' };
 function drawCalc(v){
   document.title = '복무완료 계산기 · 바다생활 계산기';
   v.innerHTML = `
@@ -802,9 +838,9 @@ function drawCalc(v){
       ${field('fBirth', '출생연도 <small>(선택 · 30세 기한)</small>', S.birth, 'number', 'inputmode="numeric" min="1960" max="2099" placeholder="예: 2001"')}
       <div class="f full"><label for="fSub">휴가 중 대체공휴일</label>
         <select class="inp" id="fSub">
-          <option value="on" ${S.noSub ? '' : 'selected'}>포함 (기본) · 공휴일처럼 휴가 사용일에서 빼고 휴가를 늘림</option>
-          <option value="off" ${S.noSub ? 'selected' : ''}>포함 안 함 · 대체공휴일도 휴가를 쓴 날로 셈</option>
-        </select></div>
+          <option value="on" ${S.noSub ? '' : 'selected'}>포함 (기본)</option>
+          <option value="off" ${S.noSub ? 'selected' : ''}>포함 안 함</option>
+        </select><p class="sub" id="subHint" style="margin:6px 0 0">${SUB_HINT[S.noSub ? 'off' : 'on']}</p></div>
     </div>
     <details class="more" ${S.trS || S.trE || S.extra ? 'open' : ''}>
       <summary>군사교육소집 · 추가 인정일수</summary>
@@ -820,26 +856,30 @@ function drawCalc(v){
   <div class="card">
     <div class="rows" id="rows"></div>
     <button class="btn btn-ghost btn-block addrow" id="addRow" type="button">${IC.more}승선 기간 추가</button>
-    <p class="sub" style="margin:10px 0 0">새 기간은 승선일이 직전 기간의 승선일로부터 2개월 뒤, 하선일이 오늘로 미리 채워집니다. 직전 기간의 하선일과 함께 실제 날짜로 고쳐 주세요.</p>
+    <p class="sub" style="margin:10px 0 0">새 기간에는 날짜를 미리 채워 둡니다(승선일 = 직전 승선일 + 2개월, 하선일 = 오늘). <b>날짜 확인 필요</b> 표시가 있는 줄은 실제 날짜로 고치거나, 맞으면 <b>맞음</b>을 눌러 주세요.</p>
   </div>
 
   <div class="sec-t"><h3>${IC.chart}계산 결과</h3><span class="sp"></span><span class="chip" id="srcChip"></span></div>
   <div class="card" id="resCard"></div>
 
+  <div id="moreSec">
   <div class="sec-t"><h3>${IC.clock}만료 예상</h3></div>
   <div class="card" id="pjCard"></div>
 
   <div class="sec-t"><h3>${IC.list}휴가 계산 내역</h3></div>
   <div class="card" id="lvCard"></div>
+  </div>
 
+  <div id="syncSec">
   <div class="sec-t"><h3>${IC.cloud}기록 백업</h3></div>
   <div class="card" id="syncCard"></div>
+  </div>
 
-  ${helpHTML()}`;
+  <details class="helpbox"><summary>${IC.help}사용 방법 · 도움말 · 관련 법령</summary>${helpHTML()}</details>`;
 
   const bind = (id, key) => { const el = $('#' + id); el.addEventListener('input', () => { S[key] = el.value.trim(); save(); refresh(); }); };
   bind('fEnlist', 'enlist'); bind('fBirth', 'birth'); bind('fTrS', 'trS'); bind('fTrE', 'trE'); bind('fExtra', 'extra');
-  $('#fSub').addEventListener('change', e => { S.noSub = e.target.value === 'off'; save(); refresh(); });
+  $('#fSub').addEventListener('change', e => { S.noSub = e.target.value === 'off'; $('#subHint').textContent = SUB_HINT[e.target.value]; save(); refresh(); });
   $('#addRow').onclick = addRow;
   drawRows(); drawSyncBox(); refresh();
 }
@@ -851,7 +891,7 @@ function addRow(){
   let on;
   if (prev && toN(prev.on) != null) on = addMonths(toN(prev.on), 2);
   else on = toN(S.enlist) != null ? toN(S.enlist) : today;
-  S.rows.push({ id: rid++, on: toS(on), off: toS(today), kind: prev ? prev.kind : 'ocean', lv: '' });
+  S.rows.push({ id: rid++, on: toS(on), off: toS(today), kind: prev ? prev.kind : 'ocean', lv: '', auto: 1 });   // auto: 미리 채운 날짜(사용자가 고치거나 [맞음]을 누를 때까지 '확인 필요')
   save(); drawRows(); refresh();
   const last = document.querySelector('.vrow:last-child'); if (last) last.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
@@ -860,9 +900,10 @@ function drawRows(){
   const box = $('#rows'); if (!box) return;
   if (!S.rows.length){ box.innerHTML = `<p class="sub" style="margin:0">아직 승선 기록이 없습니다. 아래 <b>승선 기간 추가</b>를 눌러 첫 승선 기간을 넣으세요.</p>`; return; }
   box.innerHTML = S.rows.map((r, i) => `
-    <div class="vrow" data-id="${r.id}">
+    <div class="vrow${r.auto ? ' auto' : ''}" data-id="${r.id}">
       <div class="rh"><span class="no">${i + 1}차</span>
         <select data-k="kind" aria-label="선박 구분">${Object.entries(KINDS).map(([k, o]) => `<option value="${k}" ${r.kind === k ? 'selected' : ''}>${o.nm}</option>`).join('')}</select>
+        ${r.auto ? `<span class="chip warn" data-autotag>날짜 확인 필요</span><button class="btn btn-ghost btn-sm" type="button" data-okd aria-label="${i + 1}차 미리 채운 날짜가 맞음">맞음</button>` : ''}
         <button class="xbtn" type="button" data-del aria-label="${i + 1}차 기록 지우기">${X_SVG}</button></div>
       <div class="fgrid">
         <div class="f"><label for="rd${r.id}on">승선일</label><input class="inp" id="rd${r.id}on" type="date" data-k="on" value="${esc(r.on)}"></div>
@@ -874,10 +915,13 @@ function drawRows(){
   box.querySelectorAll('.vrow').forEach(el => {
     const id = +el.dataset.id, row = () => S.rows.find(x => x.id === id);
     el.querySelectorAll('[data-k]').forEach(inp => inp.addEventListener(inp.tagName === 'SELECT' ? 'change' : 'input', () => {
-      const r = row(); if (!r) return; r[inp.dataset.k] = inp.value.trim(); save();
+      const r = row(); if (!r) return; r[inp.dataset.k] = inp.value.trim();
+      if ((inp.dataset.k === 'on' || inp.dataset.k === 'off') && r.auto){ delete r.auto; el.classList.remove('auto'); el.querySelectorAll('[data-autotag],[data-okd]').forEach(x => x.remove()); }
+      save();
       if (inp.dataset.k === 'kind') el.querySelector('[data-k="off"]').previousElementSibling.textContent = r.kind === 'injury' ? '휴직 끝' : '하선일';
       refresh();
     }));
+    const okd = el.querySelector('[data-okd]'); if (okd) okd.onclick = () => { const r = row(); if (!r) return; delete r.auto; save(); drawRows(); refresh(); };
     el.querySelector('[data-del]').onclick = () => {
       const r = row(); if (!r) return;
       const i = S.rows.indexOf(r);
@@ -888,7 +932,7 @@ function drawRows(){
   });
 }
 
-let refT = null;
+let refT = null, lastDone, syncShown = false;
 function refresh(){ clearTimeout(refT); refT = setTimeout(drawResults, 60); }
 
 function drawResults(){
@@ -915,9 +959,17 @@ function drawResults(){
   const sc = $('#srcChip'); sc.textContent = src; sc.className = 'chip' + (HOL.src === 'rule' ? ' warn' : '');
 
   const res = $('#resCard'), pj = $('#pjCard'), lv = $('#lvCard');
-  if (P.E == null){
-    const msg = '<p class="sub" style="margin:0">먼저 <b>편입일</b>을 넣어 주세요. 편입일부터 인정일수를 셉니다.</p>';
-    res.innerHTML = msg; pj.innerHTML = '<p class="sub" style="margin:0">편입일과 승선 기록을 넣으면 만료 예상일이 나옵니다.</p>'; lv.innerHTML = '<p class="sub" style="margin:0">승선 기록을 넣으면 휴가 계산 내역이 나옵니다.</p>';
+  const empty = P.E == null;
+  $('#moreSec').hidden = empty;
+  if (!syncShown) $('#syncSec').hidden = empty && !S.rows.length && !syncCfg().code;
+  if (empty){
+    lastDone = undefined;
+    res.innerHTML = `<ol class="steps guide">
+      <li>위 <b>기본 설정</b>에 승선근무예비역 <b>편입일</b>을 넣습니다.</li>
+      <li><b>승선 기간 추가</b>를 눌러 첫 승선 기간을 넣습니다.</li>
+      <li>여기에 <b>복무 완료일</b>과 <b>기한까지 남은 날</b>이 나옵니다.</li></ol>
+      <p class="sub" style="margin:12px 0 0">다른 기기에서 쓰던 기록이 있나요? <button class="linkbtn" type="button" id="showSync">기록 불러오기</button></p>`;
+    const sb = $('#showSync'); if (sb) sb.onclick = () => { syncShown = true; $('#syncSec').hidden = false; $('#syncSec').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     return;
   }
   const credit = base.credit, left = Math.max(0, TARGET - credit);
@@ -929,8 +981,25 @@ function drawResults(){
   const deadline30 = P.birth ? Date.UTC(P.birth + 30, 11, 31) / DAY : null;
   const deadline = deadline30 != null ? Math.min(deadline5, deadline30) : deadline5;
   const futureIncl = base.lastDay != null && base.lastDay > today;
+  const dlName = deadline30 != null && deadline30 < deadline5 ? '30세 기한' : '편입 5년 기한';
+  const unc = S.rows.filter(r => r.auto).length;
+  let verdict;
+  if (base.done != null){
+    const m = deadline - base.done, cls = m < 0 ? 'bad' : m <= 60 ? 'warn' : 'ok';
+    const line = m < 0 ? `${dlName} ${fmt(deadline)}보다 <b>${num(-m)}일</b> 늦습니다`
+      : m === 0 ? `${dlName} ${fmt(deadline)} 당일에 끝납니다`
+      : `${dlName} ${fmt(deadline)}까지 <b>${num(m)}일</b>${dur(m) ? ` (${dur(m)})` : ''} 여유${m <= 60 ? ' · 빠듯합니다' : ''}`;
+    verdict = `<div class="verdict ${cls}"><span class="vd-k">${base.done <= today ? '복무 완료' : '복무 완료 예정'} · 1,095일 도달</span><div class="vd-d">${fmt(base.done)}</div><div class="vd-l">${line}</div></div>`;
+  } else {
+    const m = deadline - today;
+    verdict = `<div class="verdict"><span class="vd-k">입력한 기록으로는 1,095일에 못 미칩니다</span><div class="vd-d">${num(left)}<small>일 남음</small></div><div class="vd-l">${dlName} ${fmt(deadline)}까지 ${m >= 0 ? `<b>${num(m)}일</b>` : '<b>이미 지났습니다</b>'} · 아래 <b>만료 예상</b>에서 앞으로 승선했을 때의 날짜를 보세요</div></div>`;
+  }
+  if (lastDone !== undefined && lastDone !== base.done){ const sr = $('#srLive'); sr.textContent = ''; setTimeout(() => { sr.textContent = base.done != null ? `복무 완료일이 ${fmt(base.done)}로 바뀌었습니다` : '아직 1,095일에 못 미칩니다'; }, 60); }
+  lastDone = base.done;
 
   res.innerHTML = `
+    ${unc ? `<div class="note" style="margin:0 0 14px"><b>확인하지 않은 날짜 ${unc}건</b> 미리 채운 날짜를 그대로 두면 결과가 실제와 다를 수 있습니다. 승선 기록에서 고치거나 <b>맞음</b>을 눌러 주세요.</div>` : ''}
+    ${verdict}
     <div class="res-top">
       <div class="ring" role="img" aria-label="진행률 ${p1(prog)}">
         <svg viewBox="0 0 150 150"><circle cx="75" cy="75" r="62" fill="none" stroke="var(--left)" stroke-width="14"/><circle cx="75" cy="75" r="62" fill="none" stroke="var(--sea)" stroke-width="14" stroke-linecap="round" stroke-dasharray="${dash} ${C}"/></svg>
@@ -939,10 +1008,10 @@ function drawResults(){
       <div>
         <div class="big">${num(Math.min(credit, 99999))}<small> / ${num(TARGET)}일</small></div>
         ${dur(credit) ? `<div class="bigd">${dur(credit)} / 3년</div>` : ''}
-        <div class="sub">${futureIncl ? '입력한 기록 기준(하선 뒤 휴가 예정 포함)' : '입력한 기록 기준'} · 오늘(${fmt(today, false)})까지 <b>${num(base.todayCredit)}</b>일</div>
+        <div class="sub">${futureIncl ? '입력한 기록 기준(하선 뒤 휴가 예정 포함)' : '입력한 기록 기준'}</div>
         <div class="kv">
           <div><span>남은 일수</span><b>${num(left)}<small>일</small></b>${dur(left) ? `<em>${dur(left)}</em>` : ''}</div>
-          <div><span>남은 비율</span><b>${p1(leftP)}</b></div>
+          <div><span>오늘까지 인정</span><b>${num(base.todayCredit)}<small>일</small></b><em>${fmt(today, false)} 기준</em></div>
           <div><span>승선일수</span><b>${num(by.sea)}<small>일</small></b>${dur(by.sea) ? `<em>${dur(by.sea)}</em>` : ''}<em>1,095일의 ${p1(pct(by.sea, TARGET))}</em></div>
           <div><span>휴가 인정</span><b>${num(by.leave)}<small>일</small></b>${dur(by.leave) ? `<em>${dur(by.leave)}</em>` : ''}<em>1,095일의 ${p1(pct(by.leave, TARGET))}</em></div>
         </div>
@@ -951,7 +1020,6 @@ function drawResults(){
     <div class="bar" aria-hidden="true">${segs.map(s => `<i style="width:${pct(s[2], Math.max(TARGET, credit))}%;background:var(--${s[0] === 'edu' ? 'edu' : s[0]})"></i>`).join('')}</div>
     <div class="legend">${segs.concat([['left', '남은 기간', left]]).map(s => { const pc = s[0] === 'left' ? leftP : pct(s[2], TARGET);
       return `<div class="lg"><i style="background:var(--${s[0]})${s[0] === 'left' ? ';border:1px solid var(--rule)' : ''}"></i><span class="nm">${s[1]}</span><span class="v"><b>${num(s[2])}일<small>${p1(pc)}</small></b>${dur(s[2]) ? `<em>${dur(s[2])}</em>` : ''}</span></div>`; }).join('')}</div>
-    ${base.done != null ? `<div class="done">${IC.check}<span>${base.done <= today ? '복무 완료' : '복무 완료 예정'} · 1,095일 도달</span><span class="mono">${fmt(base.done)}</span></div>` : ''}
     <div class="dl">
       <div>편입 5년 기한 <span class="sub">(편입일부터 5년)</span><b>${fmt(deadline5)}</b></div>
       ${deadline30 != null ? `<div>30세 기한 <span class="sub">(${P.birth + 30}년 말)</span><b>${fmt(deadline30)}</b></div>` : ''}
@@ -964,7 +1032,7 @@ function drawResults(){
 
   // 만료 예상
   if (base.done != null){
-    pj.innerHTML = `<p class="sub" style="margin:0">입력한 기록으로 1,095일을 채웁니다. 만료일: <b>${fmt(base.done)}</b>${base.done > today ? ' (예정)' : ''}</p>`;
+    pj.innerHTML = `<p class="sub" style="margin:0">입력한 기록만으로 1,095일을 채웁니다. 완료일과 기한까지 여유는 위 <b>계산 결과</b> 맨 위에 있습니다.</p>`;
   } else if (!P.valid.length){
     pj.innerHTML = '<p class="sub" style="margin:0">승선 기록을 1건 이상 넣으면 만료 예상일이 나옵니다.</p>';
   } else {
@@ -1217,7 +1285,7 @@ function drawEta(v){
   <div class="card" id="etaRes"></div>
   <div class="sec-t"><h3>${IC.cloud}기록 백업</h3></div>
   <div class="card" id="syncCard"></div>
-  ${etaHelpHTML()}`;
+  <details class="helpbox"><summary>${IC.help}사용 방법 · 도움말</summary>${etaHelpHTML()}</details>`;
   v.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { ET.mode = b.dataset.mode; saveEta(); drawEta(v); });
   const bind = (id, k, num = false) => { const el = $('#' + id); if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => { ET[k] = num ? +el.value : el.value.trim(); saveEta(); calcEta(); }); };
   bind('eDepAt', 'depAt'); bind('eSpd', 'spd'); bind('eDist', 'dist'); bind('eShipAt', 'shipAt');
@@ -1245,7 +1313,7 @@ function calcEta(){
   if (!ship && !ET.dep) miss.push('출항지');
   if (!(spd > 0)) miss.push('속력');
   if (!(dist >= 0) || ET.dist === '') miss.push('남은 거리');
-  if (miss.length){ box.innerHTML = `<p class="sub" style="margin:0">${miss.join(' · ')}을(를) 넣으면 ETA가 나옵니다.${!ET.dest ? ' 목적지를 고르면 목적지 현지 시각으로도 보여 줍니다.' : ''}</p>`; return; }
+  if (miss.length){ const last = miss[miss.length - 1], jc = last.charCodeAt(last.length - 1) - 0xAC00; box.innerHTML = `<p class="sub" style="margin:0">${miss.join(' · ')}${jc >= 0 && jc < 11172 && jc % 28 ? '을' : '를'} 넣으면 ETA가 나옵니다.${!ET.dest ? ' 목적지를 고르면 목적지 현지 시각으로도 보여 줍니다.' : ''}</p>`; return; }
   const startUtc = wallToUtc(startW, startZone);
   const hours = dist / spd, eta = Math.round((startUtc + hours * 3.6e6) / 6e4) * 6e4, now = Date.now();   // 도착 시각은 분 단위로 반올림
   const dz = ET.dest;
@@ -1267,7 +1335,7 @@ function calcEta(){
       <div><span>${ship ? '선박 시간 기준 ETA' : '출항지 시각 기준 ETA'}</span><b style="font-size:15px">${fmtZ(eta, startZone)}</b><em>${offLabel(zoneOff(startZone, eta))}</em></div>
       <div><span>UTC 기준 ETA</span><b style="font-size:15px">${fmtZ(eta, { fixed: 0 })}</b><em>${ship ? '선박 시각 ' + fmtZ(startUtc, startZone) : '출항 ' + fmtZ(startUtc, { fixed: 0 }) + ' UTC'}</em></div>
     </div>
-    ${nowLine ? `<div class="note okn" style="margin-top:14px">${nowLine}</div>` : ''}
+    ${nowLine ? `<div class="note infon" style="margin-top:14px">${nowLine}</div>` : ''}
     ${dz && dz.fixed == null ? `<p class="sub" style="margin:12px 0 0">목적지 ${esc(dz.tz)}: ${zoneLine(dz, eta)}</p>` : ''}
     ${!ship && ET.dep && ET.dep.fixed == null ? `<p class="sub" style="margin:4px 0 0">출항지 ${esc(ET.dep.tz)}: ${zoneLine(ET.dep, startUtc)}</p>` : ''}
     ${!dz ? '<p class="sub" style="margin:12px 0 0">목적지를 고르면 목적지 현지 시각과 시차도 보여 줍니다.</p>' : ''}`;
@@ -1575,6 +1643,9 @@ function showEgg(){
 
 /* ---------- 시작 ---------- */
 setNet(navigator.onLine !== false);
+// 입력 중에는 왼쪽 아래 커뮤니티 버튼을 숨겨 입력칸을 가리지 않게 함
+document.addEventListener('focusin', e => { if (e.target.matches('input, select, textarea')) document.body.classList.add('typing'); });
+document.addEventListener('focusout', () => document.body.classList.remove('typing'));
 render();
 loadHolidays();
 if (SYNC_AVAIL && syncCfg().code) setTimeout(() => syncNow(), 700);

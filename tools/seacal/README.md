@@ -45,7 +45,7 @@ python3 tools/seacal/build_holidays.py --check   # 생성 + 교차 검증
 - 지명 검색: Open-Meteo Geocoding API(키 불필요, 지명만 보냄)로 IANA 시간대를 받습니다. UTC 오프셋·일광절약시 여부·시작/끝 날짜는 브라우저 `Intl`(세계 시간대 자료)로 계산합니다.
 - 오프라인: 검색 대신 UTC 오프셋이나 `Intl.supportedValuesOf('timeZone')` 목록에서 직접 고릅니다. 오프라인용 내장 시간대 자료는 넣지 않았습니다(넣는다면 현재 규칙만 담은 POSIX TZ 문자열 기준 598개 시간대, JSON 약 19KB·gzip 약 4.9KB, 과거 이력까지면 TZif 원본 합계 약 690KB — 진행 기록 참고).
 - 24시간이 넘으면 일, 30일(1달 = 30일)이 넘으면 달을 괄호 안에 함께 적습니다. 예: 321.4시간 (13일 9시간 26분).
-- 입력값은 `localStorage`의 `sd-eta-v1`에 저장됩니다(서버 백업 대상 아님).
+- 입력값은 `localStorage`의 `sd-eta-v1`에 저장되고, 서버 백업을 켜면 복무 기록과 함께 올라갑니다(`syncPayload`).
 
 ## 공휴일 자료
 
