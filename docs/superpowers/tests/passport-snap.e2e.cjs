@@ -327,6 +327,32 @@ test('one-h1', async () => {
   eq(hs.length, 1, 'h1 count'); eq(hs[0], '여권스냅', 'h1 text');
 });
 
+// ---------- Task 7: 현지 정보 용어, 버전 ----------
+test('no-jewon', async () => {
+  for (const lang of ['ja', 'zh']) {
+    const page = await open({ width: 1280, height: 900, storage: { version: 1, lang, courseMode: 7, showKoPron: true, phraseDensity: null, langs: {} } });
+    const texts = [];
+    texts.push(await page.evaluate(() => document.body.innerText));
+    await page.evaluate(() => switchView('specs')); texts.push(await page.evaluate(() => document.body.innerText));
+    await page.evaluate(() => { toggleLangMenu(); }); texts.push(await page.evaluate(() => document.body.innerText));
+    await page.evaluate(() => { toggleLangMenu(); openHelpModal(); }); texts.push(await page.evaluate(() => document.body.innerText));
+    await page.evaluate(() => { closeHelpModal(); startRandomSprint(); }); await answerAll(page); texts.push(await page.evaluate(() => document.body.innerText));
+    assert(!texts.join('\n').includes('제원'), `${lang}: '제원' still visible`);
+  }
+});
+test('help-storage', async () => {
+  const page = await open();
+  await page.evaluate(() => openHelpModal());
+  const t = await page.evaluate(() => document.getElementById('help-overlay').innerText);
+  assert(!t.includes('아직 저장되지 않습니다'), 'stale storage help removed');
+  assert(t.includes('이 기기'), 'help mentions device storage');
+});
+test('version', async () => {
+  const page = await open({ width: 1280, height: 900 });
+  eq((await page.textContent('#ver-top')).trim(), 'v1.1.0', 'top version');
+  eq(await page.evaluate(() => PATCH_NOTES[0].v), '1.1.0', 'patch notes head');
+});
+
 (async () => {
   browser = await chromium.launch({ channel: 'chrome' });
   let pass = 0, fail = 0;
