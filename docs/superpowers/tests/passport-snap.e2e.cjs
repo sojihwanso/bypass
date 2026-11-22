@@ -288,6 +288,45 @@ test('detect-clean', async () => {
   eq(bad.length, 0, `font-size/color advisories: ${bad.map(b => (b.antipattern || b.rule) + '@' + b.line).join(', ')}`);
 });
 
+// ---------- Task 6: 학습 화면 접근성과 키보드 ----------
+test('dialog-role', async () => {
+  const page = await open({ width: 1280, height: 900 });
+  await page.focus('#today-primary');
+  await page.keyboard.press('Enter'); await page.waitForTimeout(200);
+  eq(await page.getAttribute('#quiz-screen', 'role'), 'dialog', 'role');
+  eq(await page.getAttribute('#quiz-screen', 'aria-modal'), 'true', 'aria-modal');
+  eq(await page.evaluate(() => document.getElementById('quiz-screen').contains(document.activeElement)), true, 'focus inside');
+  eq(await page.evaluate(() => document.querySelector('main').inert), true, 'main inert');
+  await page.evaluate(() => closeQuizScreen()); await page.waitForTimeout(100);
+  eq(await page.evaluate(() => document.activeElement && document.activeElement.id), 'today-primary', 'focus returned');
+  eq(await page.evaluate(() => document.querySelector('main').inert), false, 'main not inert');
+});
+test('keys-preview', async () => {
+  const page = await open({ width: 1280, height: 900 });
+  await page.evaluate(() => startLesson('7-1')); await page.waitForTimeout(150);
+  await page.keyboard.press('ArrowRight'); await page.waitForTimeout(100);
+  eq((await page.textContent('#quiz-counter')).trim(), '카드 2/30', 'after right');
+  await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(100);
+  eq((await page.textContent('#quiz-counter')).trim(), '카드 1/30', 'after left');
+});
+test('keys-quiz', async () => {
+  const page = await open({ width: 1280, height: 900 });
+  await page.evaluate(() => startRandomSprint()); await page.waitForTimeout(150);
+  const before = await page.evaluate(() => quiz.queue.length);
+  await page.keyboard.press('1'); await page.waitForTimeout(100);
+  assert(await page.$('.option-btn.selected'), 'first option selected');
+  await page.keyboard.press('Enter'); await page.waitForTimeout(100);
+  eq(await page.evaluate(() => quiz.answered), true, 'answered');
+  await page.keyboard.press('Enter'); await page.waitForTimeout(100);
+  eq(await page.evaluate(() => quiz.answered), false, 'moved to next question');
+  assert(await page.evaluate(n => quiz.queue.length <= n, before), 'queue advanced');
+});
+test('one-h1', async () => {
+  const page = await open();
+  const hs = await page.$$eval('h1', els => els.map(e => e.textContent.trim()));
+  eq(hs.length, 1, 'h1 count'); eq(hs[0], '여권스냅', 'h1 text');
+});
+
 (async () => {
   browser = await chromium.launch({ channel: 'chrome' });
   let pass = 0, fail = 0;
