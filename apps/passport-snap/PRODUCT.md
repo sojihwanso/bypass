@@ -36,7 +36,7 @@ web
 - 오늘의 한마디, 현지 제원 노트(교통·전압·세금·에티켓·긴급 연락처).
 - 발음은 브라우저 `speechSynthesis`(언어별 speechLang)로 재생한다.
 - **다국어 확장 전제:** 언어팩(`LANGUAGE_PACKS`) 구조로 현재 일본어(ja)·중국어(zh, 간체자·성조·병음)가 활성이며, 앞으로 언어가 더 늘어난다. 새 화면·기능은 특정 언어(가나 등)에 고정되지 않고 언어팩별 문자 체계를 받아낼 수 있어야 한다.
-- 현재 기록은 JS 메모리에만 있어 새로고침하면 사라진다. **결정(2026-11-21):** 진도 저장은 이후 Vercel·Supabase 연동으로 해결하며, 같은 저장소의 해기사 시험문제 앱(`apps/cbttest/`) 작동 방식을 참고한다. 그 전까지 임시 로컬 저장을 따로 만들지 않는다.
+- 학습 진도·기록은 아직 JS 메모리에만 있어 새로고침하면 사라진다(음성 설정만 `localStorage`에 저장). **결정(2026-11-23):** Vercel·Supabase 연동 전까지 학습 진도도 `localStorage`에 임시 저장해도 된다. 최종 진도 저장은 Supabase 연동으로 해결하며, 같은 저장소의 해기사 시험문제 앱(`apps/cbttest/`) 작동 방식을 참고한다.
 - 현재 구현은 단일 정적 HTML 파일(Pretendard·LINE Seed KR 웹폰트 CDN). 단일 파일을 계속 유지해야 하는지는 **미정**이다.
 
 ## Brand Commitments
@@ -59,4 +59,4 @@ web
 ## Accessibility & Inclusion
 
 - 현지에서 상대에게 보여주는 상황이므로 원문은 크게 볼 수 있어야 하고, 듣기에는 천천히 재생이 있어야 한다.
-- 현재 viewport가 `maximum-scale=1.0, user-scalable=no`로 확대를 막고 있다. 확대 허용 여부는 이후 작업에서 결정할 문제로 남긴다.
+- 화면 확대를 허용한다(**확정, 2026-11-23**). viewport에 `user-scalable=no`·`maximum-scale`을 넣지 않는다.

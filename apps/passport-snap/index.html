@@ -4,13 +4,15 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>여권스냅 — 매일 20분 여행 일본어 루틴</title>
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png" />
 <style>
   :root {
     --bg: #f8f7f4;
     --surface: #ffffff;
     --surface-2: #f2f0eb;
     --text: #2d3436;
-    --text-muted: var(--text-muted);
+    --text-muted: #5f6663;        /* ≥4.5:1 on paper, sunk and every pastel soft */
     --border: #e6e2da;
     --border-strong: #d4cfc4;
 
@@ -596,6 +598,57 @@
   .mt-16 { margin-top: 16px; }
   .flex-between { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
   .flex-center { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  /* Showcard is full screen on phones: a toast there would cover the action buttons, so it drops in from the top */
+  body.sc-open .toast { top: max(16px, env(safe-area-inset-top)); bottom: auto; transform: translateX(-50%) translateY(-20px); }
+  body.sc-open .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Version, Team Bypass shortcut, easter egg */
+  .ver-btn {
+    font-size: var(--fs-micro); font-weight: 700; color: var(--text-muted); font-variant-numeric: tabular-nums;
+    padding: 6px 4px; border-radius: 8px; white-space: nowrap; cursor: default; -webkit-tap-highlight-color: transparent;
+  }
+  .ver-btn:focus-visible, .home-logo:focus-visible { outline: 2px solid var(--pastel-sky-dark); outline-offset: 2px; }
+  .home-logo { display: inline-flex; flex-shrink: 0; border-radius: 8px; padding: 2px; }
+  .home-logo img { display: block; width: 28px; height: 28px; transition: transform 0.15s ease; }
+  .home-logo:hover img { transform: scale(1.08); }
+  .app-foot { max-width: 1180px; margin: -64px auto 0; padding: 0 24px 32px; text-align: center; }
+  .ver-foot { letter-spacing: 0.08em; }
+  @media (max-width: 640px) {
+    .topbar-right { gap: 6px; }
+    .topbar-right .ver-btn { padding: 6px 2px; }
+    /* Flag + chevron is enough on a phone; the language name stays for screen readers */
+    #current-lang-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .app-foot { margin-top: calc(-84px - env(safe-area-inset-bottom)); padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  }
+  /* Narrow phones: the 여 mark alone carries the home link (its aria-label names the app) */
+  @media (max-width: 370px) { .brand > span:last-child { display: none; } }
+  @media (max-width: 374px) {
+    .hero-3s { padding: 20px 18px; }
+    .course-toggle { display: flex; width: 100%; }
+    .course-opt { flex: 1 1 0; white-space: normal; text-align: center; line-height: 1.35; justify-content: center; }
+  }
+  .egg { position: fixed; inset: 0; z-index: 120; background: rgba(45, 52, 54, 0.45); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; padding: 16px; animation: fadeInStill 0.18s ease; }
+  .egg-card {
+    position: relative; background: var(--surface); border: 1.5px solid var(--border); border-radius: 22px; box-shadow: 0 20px 50px rgba(45, 52, 54, 0.18);
+    width: 100%; max-width: 340px; padding: 30px 24px 22px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .egg-stamp {
+    border: 2.5px solid var(--pastel-sky-dark); color: var(--pastel-sky-dark); border-radius: 12px; padding: 8px 16px;
+    font-weight: 800; font-size: var(--fs-small); letter-spacing: 0.06em; transform: rotate(-4deg); font-variant-numeric: tabular-nums;
+  }
+  .egg-made { font-size: var(--fs-title); font-weight: 800; margin-top: 4px; }
+  .egg-sub { font-size: var(--fs-small); color: var(--text-muted); margin: 0; }
+  .egg-card .btn { margin-top: 8px; min-width: 160px; }
+  .egg-x { position: absolute; top: 12px; right: 12px; }
+  .egg-card.pn { max-width: 560px; max-height: min(80vh, 720px); padding: 0; text-align: left; align-items: stretch; gap: 0; overflow: hidden; }
+  .pn-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 16px 18px 14px; border-bottom: 1.5px solid var(--border); }
+  .pn-h h3 { margin: 0; font-size: var(--fs-strong); font-weight: 800; }
+  .pn-b { overflow-y: auto; padding: 4px 20px 18px; overscroll-behavior: contain; }
+  .pn-b section { padding: 14px 0; border-top: 1px dashed var(--border-strong); }
+  .pn-b section:first-child { border-top: 0; }
+  .pn-b h4 { margin: 0 0 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: var(--fs-label); font-weight: 700; color: var(--text-muted); }
+  .pn-b ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: var(--fs-small); line-height: 1.6; }
+  @media (prefers-reduced-motion: reduce) { .home-logo img { transition: none; } }
 </style>
 </head>
 <body>
@@ -628,6 +681,8 @@
         </button>
         <div class="lang-dropdown" id="lang-dropdown"></div>
       </div>
+      <button class="ver-btn" id="ver-top" type="button" title="버전"></button>
+      <a class="home-logo" href="https://teambypass.vercel.app/" target="_top" title="Team Bypass 메인 페이지" aria-label="Team Bypass 메인 페이지"><img src="/assets/favicon.svg" alt="" width="28" height="28" /></a>
     </div>
   </div>
 </header>
@@ -658,7 +713,7 @@
         <div class="section-head">
           <h2 style="margin:0;font-size:var(--fs-strong);line-height:1.35;" id="course-heading">7일 코스 · 총 7일 (하루 30문장)</h2>
           <div class="flex-center">
-            <button class="btn btn-outline btn-sm" onclick="switchView('notes')">오답노트 (<span id="home-notes-badge">0</span>)</button>
+            <button class="btn btn-outline btn-sm" onclick="switchView('notes')"><span>오답노트 (<span id="home-notes-badge">0</span>)</span></button>
             <button class="btn btn-blue btn-sm" onclick="startRandomSprint()">랜덤 10문장 퀴즈</button>
           </div>
         </div>
@@ -895,6 +950,8 @@
     </div>
   </div>
 </div>
+
+<footer class="app-foot"><button class="ver-btn ver-foot" id="ver-foot" type="button" title="버전"></button></footer>
 
 <nav class="tabbar" aria-label="주요 기능 메뉴 (하단)">
   <button class="tab-btn active" data-view="home" onclick="switchView('home')" aria-current="page">
@@ -1373,15 +1430,20 @@ function renderPhraseList() {
   document.getElementById('phrase-count-badge').textContent = `${filtered.length} / ${totalCount}문장`;
   document.getElementById('phrase-list').innerHTML = filtered.length ? filtered.map(p => {
     const cat = pack.categories[p.cat];
-    return `<div class="phrase-item"><div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap;"><span class="badge badge-gray">#${p.id}</span><span class="badge badge-blue">${cat.name}</span></div><div class="phrase-jp">${p.jp}</div><div class="phrase-kana">${p.kana}</div>${state.showKoPron ? `<div class="phrase-ko">${p.ko}</div>` : ''}<div class="phrase-mean">${p.mean}</div><div class="phrase-tip">${p.tip}</div></div><div class="phrase-actions"><button class="btn btn-outline btn-sm" onclick="speakPhraseById(${p.id}, 1.0)">듣기</button><button class="btn btn-outline btn-sm" onclick="speakPhraseById(${p.id}, 0.65)">천천히</button><button class="btn btn-outline btn-sm" onclick="openShowCard(${p.id})">크게 보기</button></div></div>`;
+    return `<div class="phrase-item"><div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap;"><span class="badge badge-gray">#${p.id}</span><span class="badge badge-blue">${cat.name}</span></div><div class="phrase-jp">${p.jp}</div>${readingOf(p) ? `<div class="phrase-kana">${readingOf(p)}</div>` : ''}${state.showKoPron ? `<div class="phrase-ko">${p.ko}</div>` : ''}<div class="phrase-mean">${p.mean}</div><div class="phrase-tip">${p.tip}</div></div><div class="phrase-actions"><button class="btn btn-outline btn-sm" onclick="speakPhraseById(${p.id}, 1.0)">듣기</button><button class="btn btn-outline btn-sm" onclick="speakPhraseById(${p.id}, 0.65)">천천히</button><button class="btn btn-outline btn-sm" onclick="openShowCard(${p.id})">크게 보기</button></div></div>`;
   }).join('') : `<div class="card" style="text-align:center;padding:34px;">검색 결과가 없습니다.</div>`;
+}
+// Kana-only phrases would repeat themselves on the reading line; show it only when it adds something.
+function readingOf(p) {
+  const norm = t => String(t || '').replace(/[\s。、．，！？!?,.・…〜~「」]/g, '');
+  return norm(p.kana) && norm(p.kana) !== norm(p.jp) ? p.kana : '';
 }
 function speakPhraseById(id, rate) { const p = LANGUAGE_PACKS[state.lang].phrases.find(x => x.id === id); if (p) speakText(p.jp, rate); }
 function openShowCard(id) {
   const pack = LANGUAGE_PACKS[state.lang], p = pack.phrases.find(x => x.id === id);
   if (!p) return; currentShowPhrase = p;
   document.getElementById('sc-cat').textContent = `${pack.categories[p.cat].name} · #${p.id}`;
-  document.getElementById('sc-jp').textContent = p.jp; document.getElementById('sc-kana').textContent = p.kana;
+  document.getElementById('sc-jp').textContent = p.jp; const scKana = document.getElementById('sc-kana'); scKana.textContent = readingOf(p); scKana.hidden = !scKana.textContent;
   document.getElementById('sc-ko').textContent = p.ko; document.getElementById('sc-mean').textContent = p.mean;
   document.getElementById('sc-tip').textContent = p.tip;
   const jpEl = document.getElementById('sc-jp');
@@ -1711,6 +1773,10 @@ function renderWrongNotebookBadges() {
   if (allEl) allEl.textContent = totalCount;
   if (pEl) pEl.textContent = phraseCount;
   if (cEl) cEl.textContent = charCount;
+  const reviewBtn = document.getElementById('btn-start-wrong-quiz');
+  const clearBtn = document.getElementById('btn-clear-wrong-notes');
+  if (reviewBtn) reviewBtn.disabled = totalCount === 0;
+  if (clearBtn) clearBtn.disabled = totalCount === 0;
 }
 function renderWrongNotebook() {
   renderWrongNotebookBadges();
@@ -1736,7 +1802,7 @@ function renderWrongNotebook() {
   listEl.innerHTML = items.map(item => {
     if (item._kind === 'phrase') {
       const cat = pack.categories[item.cat] || { name: '회화' };
-      return `<div class="phrase-item"><div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap;"><span class="badge badge-rose">오답 ${item.wrongTimes}회</span><span class="badge badge-gray">#${item.id}</span><span class="badge badge-blue">${cat.name}</span><span class="muted" style="font-size:var(--fs-micro);">${item.lastWrongAt || ''}</span></div><div class="phrase-jp">${item.jp}</div><div class="phrase-kana">${item.kana}</div>${state.showKoPron ? `<div class="phrase-ko">${item.ko}</div>` : ''}<div class="phrase-mean">${item.mean}</div><div class="phrase-tip">${item.tip}</div></div><div class="phrase-actions"><button class="btn btn-outline btn-sm" onclick="speakPhraseById(${item.id}, 1.0)">듣기</button><button class="btn btn-outline btn-sm" onclick="openShowCard(${item.id})">크게 보기</button><button class="btn btn-outline btn-sm" onclick="removeWrongItem('phrase', ${item.id})">삭제</button></div></div>`;
+      return `<div class="phrase-item"><div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap;"><span class="badge badge-rose">오답 ${item.wrongTimes}회</span><span class="badge badge-gray">#${item.id}</span><span class="badge badge-blue">${cat.name}</span><span class="muted" style="font-size:var(--fs-micro);">${item.lastWrongAt || ''}</span></div><div class="phrase-jp">${item.jp}</div>${readingOf(item) ? `<div class="phrase-kana">${readingOf(item)}</div>` : ''}${state.showKoPron ? `<div class="phrase-ko">${item.ko}</div>` : ''}<div class="phrase-mean">${item.mean}</div><div class="phrase-tip">${item.tip}</div></div><div class="phrase-actions"><button class="btn btn-outline btn-sm" onclick="speakPhraseById(${item.id}, 1.0)">듣기</button><button class="btn btn-outline btn-sm" onclick="openShowCard(${item.id})">크게 보기</button><button class="btn btn-outline btn-sm" onclick="removeWrongItem('phrase', ${item.id})">삭제</button></div></div>`;
     } else {
       return `<div class="phrase-item"><div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap;"><span class="badge badge-rose">오답 ${item.wrongTimes}회</span><span class="badge badge-purple">문자·한자</span><span class="muted" style="font-size:var(--fs-micro);">${item.lastWrongAt || ''}</span></div><div class="phrase-jp" style="font-size:24px;">${item.char}</div><div class="phrase-ko">${item.title} · <span class="muted" style="font-weight: 400;">${item.sub}</span></div><div class="phrase-tip">${item.tip}</div></div><div class="phrase-actions"><button class="btn btn-outline btn-sm" onclick="speakText('${(item.char || '').split('/')[0].trim()}', 0.9)">듣기</button><button class="btn btn-outline btn-sm" onclick="removeWrongItem('char', '${item.key.replace(/'/g, "\'")}')">삭제</button></div></div>`;
     }
@@ -1893,6 +1959,56 @@ new MutationObserver(records => {
 }).observe(document.body, { childList: true, subtree: true });
 renderAll();
 tagTargetLang();
+
+/* ===== 버전 · 패치노트 · 이스터에그 (버전 표시를 5번 누르면 열림) ===== */
+const VERSION = '1.0.1';
+const PATCH_NOTES = [
+  { v: '1.0.1', d: '2026-11-23', i: [
+    '보조 글자 색이 본문과 똑같이 진하게 보이던 문제 수정 (설명·가나·로마자가 다시 한 단계 흐리게)',
+    '가나로만 된 문장에서 같은 글자가 두 줄로 반복되던 것 정리 (치트시트·크게 보기·오답노트)',
+    '오답이 없을 때 [오답노트 복습 퀴즈]·[전체 비우기]를 누를 수 없게 바꿈',
+    '홈의 [오답노트 (0)] 버튼 숫자 앞뒤에 생기던 빈칸 제거',
+    '크게 보기에서 알림이 아래 버튼을 가리지 않도록 화면 위쪽에 표시',
+    '버전 표시, Team Bypass 바로가기, 패치노트, 사이트 아이콘 추가',
+  ] },
+  { v: '1.0.0', d: '2026-11-22', i: [
+    '첫 공개: 일본어·중국어 7일/14일 코스, 210문장 치트시트, 문자 익히기, 오답노트, 현지 제원',
+    '휴대폰 하단 탭 바, 크게 보기 전체 화면 모드, 원어민 음성 우선과 여성/남성 선택',
+    '대비 AA, 화면 확대 허용, 키보드·화면 낭독기, 터치 대상 44px, 동작 줄이기 대응',
+  ] },
+];
+const escHtml = t => String(t).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+document.getElementById('ver-top').textContent = 'v' + VERSION;
+document.getElementById('ver-foot').textContent = 'v' + VERSION + ' · TEAM BYPASS';
+let eggTaps = 0, eggTimer = null;
+['ver-top', 'ver-foot'].forEach(id => document.getElementById(id).addEventListener('click', () => {
+  eggTaps++; clearTimeout(eggTimer); eggTimer = setTimeout(() => { eggTaps = 0; }, 1500);
+  if (eggTaps >= 5) { eggTaps = 0; showEgg(); }
+}));
+function showEgg() {
+  if (document.querySelector('.egg')) return;
+  const opener = document.activeElement;
+  const o = document.createElement('div');
+  o.className = 'egg';
+  const closeIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  const card = document.createElement('div');
+  card.className = 'egg-card'; card.setAttribute('role', 'dialog'); card.setAttribute('aria-modal', 'true'); card.setAttribute('aria-label', 'Made by Bypass');
+  card.innerHTML = `<button class="btn-icon egg-x" type="button" aria-label="닫기">${closeIco}</button><div class="egg-stamp">여권스냅 v${VERSION}</div><div class="egg-made">Made by &quot;Bypass&quot;</div><p class="egg-sub">매일 20분, 여행 하나를 위한 루틴</p><button class="btn btn-primary egg-pn" type="button">패치노트</button>`;
+  o.appendChild(card);
+  const close = () => { o.remove(); document.removeEventListener('keydown', onKey); if (opener && opener.focus) opener.focus(); };
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  o.addEventListener('click', e => { if (e.target === o) close(); });
+  card.querySelector('.egg-x').addEventListener('click', close);
+  card.querySelector('.egg-pn').addEventListener('click', () => {
+    card.classList.add('pn');
+    card.innerHTML = `<div class="pn-h"><h3>패치노트</h3><button class="btn-icon pn-x" type="button" aria-label="닫기">${closeIco}</button></div><div class="pn-b">${PATCH_NOTES.map(n => `<section><h4><span class="badge badge-green">v${n.v}</span>${escHtml(n.d)}</h4><ul>${n.i.map(x => `<li>${escHtml(x)}</li>`).join('')}</ul></section>`).join('')}</div>`;
+    card.querySelector('.pn-x').addEventListener('click', close);
+    card.querySelector('.pn-x').focus();
+  });
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(o);
+  card.querySelector('.egg-pn').focus();
+}
 </script>
 </body>
 </html>

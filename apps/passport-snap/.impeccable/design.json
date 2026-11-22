@@ -1,0 +1,604 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-23T06:45:42+09:00",
+  "title": "Design System: 여권스냅",
+  "extensions": {
+    "colorMeta": {
+      "sage": {
+        "role": "primary",
+        "displayName": "Sage",
+        "tonalRamp": [
+          "#3e7046",
+          "#7fb685",
+          "#b8dec0",
+          "#e6f4e8"
+        ]
+      },
+      "sage-dark": {
+        "role": "primary",
+        "displayName": "Sage Dark",
+        "tonalRamp": [
+          "#3e7046",
+          "#7fb685",
+          "#b8dec0",
+          "#e6f4e8"
+        ]
+      },
+      "sage-soft": {
+        "role": "primary",
+        "displayName": "Sage Soft",
+        "tonalRamp": [
+          "#3e7046",
+          "#7fb685",
+          "#b8dec0",
+          "#e6f4e8"
+        ]
+      },
+      "sage-border": {
+        "role": "primary",
+        "displayName": "Sage Border",
+        "tonalRamp": [
+          "#3e7046",
+          "#7fb685",
+          "#b8dec0",
+          "#e6f4e8"
+        ]
+      },
+      "sky": {
+        "role": "secondary",
+        "displayName": "Sky",
+        "tonalRamp": [
+          "#36698a",
+          "#74b3d8",
+          "#c5e2f3",
+          "#ebf5fb"
+        ]
+      },
+      "sky-dark": {
+        "role": "secondary",
+        "displayName": "Sky Dark",
+        "tonalRamp": [
+          "#36698a",
+          "#74b3d8",
+          "#c5e2f3",
+          "#ebf5fb"
+        ]
+      },
+      "sky-soft": {
+        "role": "secondary",
+        "displayName": "Sky Soft",
+        "tonalRamp": [
+          "#36698a",
+          "#74b3d8",
+          "#c5e2f3",
+          "#ebf5fb"
+        ]
+      },
+      "sky-border": {
+        "role": "secondary",
+        "displayName": "Sky Border",
+        "tonalRamp": [
+          "#36698a",
+          "#74b3d8",
+          "#c5e2f3",
+          "#ebf5fb"
+        ]
+      },
+      "apricot": {
+        "role": "tertiary",
+        "displayName": "Apricot",
+        "tonalRamp": [
+          "#8a5a2b",
+          "#e8a86b",
+          "#f3d9b8",
+          "#fdf3e7"
+        ]
+      },
+      "apricot-dark": {
+        "role": "tertiary",
+        "displayName": "Apricot Dark",
+        "tonalRamp": [
+          "#8a5a2b",
+          "#e8a86b",
+          "#f3d9b8",
+          "#fdf3e7"
+        ]
+      },
+      "apricot-soft": {
+        "role": "tertiary",
+        "displayName": "Apricot Soft",
+        "tonalRamp": [
+          "#8a5a2b",
+          "#e8a86b",
+          "#f3d9b8",
+          "#fdf3e7"
+        ]
+      },
+      "apricot-border": {
+        "role": "tertiary",
+        "displayName": "Apricot Border",
+        "tonalRamp": [
+          "#8a5a2b",
+          "#e8a86b",
+          "#f3d9b8",
+          "#fdf3e7"
+        ]
+      },
+      "rose": {
+        "role": "tertiary",
+        "displayName": "Rose",
+        "tonalRamp": [
+          "#8f3c3c",
+          "#df7b7b",
+          "#ebbaba",
+          "#fae5e5"
+        ]
+      },
+      "rose-dark": {
+        "role": "tertiary",
+        "displayName": "Rose Dark",
+        "tonalRamp": [
+          "#8f3c3c",
+          "#df7b7b",
+          "#ebbaba",
+          "#fae5e5"
+        ]
+      },
+      "rose-soft": {
+        "role": "tertiary",
+        "displayName": "Rose Soft",
+        "tonalRamp": [
+          "#8f3c3c",
+          "#df7b7b",
+          "#ebbaba",
+          "#fae5e5"
+        ]
+      },
+      "rose-border": {
+        "role": "tertiary",
+        "displayName": "Rose Border",
+        "tonalRamp": [
+          "#8f3c3c",
+          "#df7b7b",
+          "#ebbaba",
+          "#fae5e5"
+        ]
+      },
+      "lavender": {
+        "role": "tertiary",
+        "displayName": "Lavender",
+        "tonalRamp": [
+          "#5f4f8c",
+          "#a393c9",
+          "#d9d1ec",
+          "#f3f0fa"
+        ]
+      },
+      "lavender-dark": {
+        "role": "tertiary",
+        "displayName": "Lavender Dark",
+        "tonalRamp": [
+          "#5f4f8c",
+          "#a393c9",
+          "#d9d1ec",
+          "#f3f0fa"
+        ]
+      },
+      "lavender-soft": {
+        "role": "tertiary",
+        "displayName": "Lavender Soft",
+        "tonalRamp": [
+          "#5f4f8c",
+          "#a393c9",
+          "#d9d1ec",
+          "#f3f0fa"
+        ]
+      },
+      "lavender-border": {
+        "role": "tertiary",
+        "displayName": "Lavender Border",
+        "tonalRamp": [
+          "#5f4f8c",
+          "#a393c9",
+          "#d9d1ec",
+          "#f3f0fa"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Notebook Paper",
+        "tonalRamp": [
+          "#2d3436",
+          "#d4cfc4",
+          "#e6e2da",
+          "#f2f0eb",
+          "#f8f7f4",
+          "#ffffff"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Page White",
+        "tonalRamp": [
+          "#2d3436",
+          "#d4cfc4",
+          "#e6e2da",
+          "#f2f0eb",
+          "#f8f7f4",
+          "#ffffff"
+        ]
+      },
+      "surface-sunk": {
+        "role": "neutral",
+        "displayName": "Sunk Paper",
+        "tonalRamp": [
+          "#2d3436",
+          "#d4cfc4",
+          "#e6e2da",
+          "#f2f0eb",
+          "#f8f7f4",
+          "#ffffff"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Graphite Ink",
+        "tonalRamp": [
+          "#2d3436",
+          "#d4cfc4",
+          "#e6e2da",
+          "#f2f0eb",
+          "#f8f7f4",
+          "#ffffff"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Pencil Rule",
+        "tonalRamp": [
+          "#2d3436",
+          "#d4cfc4",
+          "#e6e2da",
+          "#f2f0eb",
+          "#f8f7f4",
+          "#ffffff"
+        ]
+      },
+      "rule-strong": {
+        "role": "neutral",
+        "displayName": "Strong Rule",
+        "tonalRamp": [
+          "#2d3436",
+          "#d4cfc4",
+          "#e6e2da",
+          "#f2f0eb",
+          "#f8f7f4",
+          "#ffffff"
+        ]
+      },
+      "cta": {
+        "role": "primary",
+        "displayName": "Notebook Green",
+        "tonalRamp": [
+          "#2f5a35",
+          "#42744a",
+          "#4a8051",
+          "#7fb685",
+          "#e6f4e8"
+        ]
+      },
+      "cta-hover": {
+        "role": "primary",
+        "displayName": "Notebook Green Hover",
+        "tonalRamp": [
+          "#2f5a35",
+          "#42744a",
+          "#4a8051",
+          "#7fb685",
+          "#e6f4e8"
+        ]
+      },
+      "cta-edge": {
+        "role": "primary",
+        "displayName": "Notebook Green Edge",
+        "tonalRamp": [
+          "#2f5a35",
+          "#42744a",
+          "#4a8051",
+          "#7fb685",
+          "#e6f4e8"
+        ]
+      },
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Danger",
+        "tonalRamp": [
+          "#853535",
+          "#a14646",
+          "#b04f4f",
+          "#df7b7b",
+          "#fae5e5"
+        ]
+      },
+      "danger-hover": {
+        "role": "tertiary",
+        "displayName": "Danger Hover",
+        "tonalRamp": [
+          "#853535",
+          "#a14646",
+          "#b04f4f",
+          "#df7b7b",
+          "#fae5e5"
+        ]
+      },
+      "danger-edge": {
+        "role": "tertiary",
+        "displayName": "Danger Edge",
+        "tonalRamp": [
+          "#853535",
+          "#a14646",
+          "#b04f4f",
+          "#df7b7b",
+          "#fae5e5"
+        ]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Pencil Gray",
+        "tonalRamp": [
+          "#2d3436",
+          "#5f6663",
+          "#d4cfc4",
+          "#e6e2da",
+          "#f2f0eb",
+          "#f8f7f4",
+          "#ffffff"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "showcard": {
+        "displayName": "Showcard",
+        "purpose": "크게 보기에서 상대에게 보여 주는 원문"
+      },
+      "display": {
+        "displayName": "Display",
+        "purpose": "홈의 오늘 학습 제목"
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "화면·섹션 제목"
+      },
+      "target": {
+        "displayName": "Target",
+        "purpose": "목록 속 원문 문장"
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "카드·항목 제목"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "뜻·본문"
+      },
+      "small": {
+        "displayName": "Small",
+        "purpose": "보조 설명·버튼·한글 발음"
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "칩·작은 버튼·라벨"
+      },
+      "micro": {
+        "displayName": "Micro",
+        "purpose": "배지·개수·로마자"
+      }
+    },
+    "shadows": [
+      {
+        "name": "paper-lift",
+        "value": "0 4px 16px rgba(45, 52, 54, 0.04)",
+        "purpose": "카드·hero·hover한 강의 카드"
+      },
+      {
+        "name": "press-edge",
+        "value": "0 3px 0 var(--cta-edge)",
+        "purpose": "채운 버튼의 눌림 받침, 누르면 0 1px 0"
+      },
+      {
+        "name": "toggle-thumb",
+        "value": "0 1px 3px rgba(45, 52, 54, 0.08)",
+        "purpose": "세그먼트 토글의 선택된 칸"
+      },
+      {
+        "name": "dropdown",
+        "value": "0 12px 28px rgba(45, 52, 54, 0.12)",
+        "purpose": "언어 선택 메뉴"
+      },
+      {
+        "name": "dialog",
+        "value": "0 20px 50px rgba(45, 52, 54, 0.18)",
+        "purpose": "크게 보기·도움말·확인 대화상자"
+      }
+    ],
+    "motion": [
+      {
+        "name": "press",
+        "value": "transform 0.08s ease",
+        "purpose": "버튼 눌림 2px 이동"
+      },
+      {
+        "name": "state",
+        "value": "0.15s ease",
+        "purpose": "색·테두리·토글 전환"
+      },
+      {
+        "name": "view-fade",
+        "value": "fadeIn 0.2s ease (opacity + translateY 4px)",
+        "purpose": "화면 전환. 동작 줄이기에서는 투명도만"
+      },
+      {
+        "name": "toast",
+        "value": "opacity/transform 0.25s ease",
+        "purpose": "알림 올라오기"
+      },
+      {
+        "name": "progress",
+        "value": "width 0.25~0.3s ease",
+        "purpose": "진행 막대"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone",
+        "value": "640px"
+      },
+      {
+        "name": "phrase-compact",
+        "value": "600px"
+      },
+      {
+        "name": "tablet",
+        "value": "780px"
+      },
+      {
+        "name": "rail-stack",
+        "value": "960px"
+      },
+      {
+        "name": "container",
+        "value": "1180px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "그 화면의 '지금 할 일' 하나. 눌림 받침이 있다.",
+      "html": "<button class=\"ds-btn-primary\">오늘 학습 바로 시작 →</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#4a8051;color:#fff;font-weight:700;font-size:16px;padding:12px 22px;border:none;border-radius:12px;box-shadow:0 3px 0 #2f5a35;cursor:pointer;transition:transform .08s ease,box-shadow .08s ease,background .15s ease}.ds-btn-primary:hover{background:#42744a}.ds-btn-primary:active{transform:translateY(2px);box-shadow:0 1px 0 #2f5a35}.ds-btn-primary:focus-visible{outline:2px solid #36698a;outline-offset:2px}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "보조 동작.",
+      "html": "<button class=\"ds-btn-outline\">제원 전체 보기</button>",
+      "css": ".ds-btn-outline{display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#2d3436;border:1.5px solid #e6e2da;border-radius:12px;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer;transition:background .15s ease}.ds-btn-outline:hover{background:#f2f0eb;border-color:#d4cfc4}.ds-btn-outline:active{transform:translateY(2px)}.ds-btn-outline:focus-visible{outline:2px solid #36698a;outline-offset:2px}"
+    },
+    {
+      "name": "Soft Sky Button",
+      "kind": "button",
+      "refersTo": "button-soft-sky",
+      "description": "퀴즈 같은 보조 학습 동작.",
+      "html": "<button class=\"ds-btn-sky\">랜덤 10문장 퀴즈</button>",
+      "css": ".ds-btn-sky{background:#ebf5fb;color:#36698a;border:1.5px solid #c5e2f3;border-radius:12px;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer}.ds-btn-sky:hover{background:#dceefa;border-color:#74b3d8}.ds-btn-sky:focus-visible{outline:2px solid #36698a;outline-offset:2px}"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "진도·데이터를 버리는 확인에만.",
+      "html": "<button class=\"ds-btn-danger\">초기화</button>",
+      "css": ".ds-btn-danger{background:#b04f4f;color:#fff;border:none;border-radius:12px;padding:10px 16px;font-weight:700;font-size:14px;box-shadow:0 3px 0 #853535;cursor:pointer}.ds-btn-danger:hover{background:#a14646}.ds-btn-danger:active{transform:translateY(2px);box-shadow:0 1px 0 #853535}.ds-btn-danger:focus-visible{outline:2px solid #36698a;outline-offset:2px}"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "search-input",
+      "description": "치트시트 문장 검색.",
+      "html": "<input class=\"ds-input\" placeholder=\"문장·뜻·발음 검색\" />",
+      "css": ".ds-input{min-width:210px;padding:10px 15px;border-radius:13px;border:1.5px solid #e6e2da;background:#fff;color:#2d3436;font-size:16px;outline:none}.ds-input:focus{border-color:#74b3d8;box-shadow:0 0 0 3px #ebf5fb}"
+    },
+    {
+      "name": "Category Chips",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "카테고리 필터. 선택은 하늘색.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip is-active\">전체</button><button class=\"ds-chip\">식당·주문</button><button class=\"ds-chip\">공항·교통</button></div>",
+      "css": ".ds-chips{display:flex;gap:6px}.ds-chip{padding:7px 13px;border-radius:999px;background:#fff;border:1.5px solid #e6e2da;font-size:12.5px;font-weight:700;color:#2d3436;cursor:pointer}.ds-chip:hover{border-color:#d4cfc4}.ds-chip.is-active{background:#ebf5fb;color:#36698a;border-color:#74b3d8}.ds-chip:focus-visible{outline:2px solid #36698a;outline-offset:2px}"
+    },
+    {
+      "name": "Top Navigation",
+      "kind": "nav",
+      "refersTo": "nav-tab-active",
+      "description": "상단 바의 텍스트 탭.",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-mark\">여</span><b>여권스냅</b><a class=\"ds-tab is-active\">학습 코스</a><a class=\"ds-tab\">문자 익히기</a><a class=\"ds-tab\">치트시트</a></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(248,247,244,.95);border-bottom:1.5px solid #e6e2da;font-size:14px}.ds-mark{width:30px;height:30px;border-radius:9px;background:#e6f4e8;border:1.5px solid #b8dec0;color:#3e7046;font-weight:800;display:inline-flex;align-items:center;justify-content:center}.ds-nav b{margin-right:12px;font-size:17.5px}.ds-tab{padding:8px 14px;border-radius:11px;font-weight:700;color:#2d3436;cursor:pointer}.ds-tab:hover{color:#2d3436;background:#f2f0eb}.ds-tab.is-active{background:#ebf5fb;color:#36698a}"
+    },
+    {
+      "name": "Phrase Item",
+      "kind": "card",
+      "refersTo": "phrase-item",
+      "description": "치트시트 문장 한 줄. 원문→가나→발음→뜻→팁.",
+      "html": "<div class=\"ds-phrase\"><div><div class=\"ds-jp\" lang=\"ja\">おはようございます。</div><div class=\"ds-ko\">오하요 고자이마스</div><div class=\"ds-mean\">안녕하세요. (아침 인사)</div><span class=\"ds-tip\">오전 10시 전후까지 쓰는 인사예요.</span></div><button class=\"ds-ico\" aria-label=\"듣기\">▶</button></div>",
+      "css": ".ds-phrase{display:flex;justify-content:space-between;gap:14px;background:#fff;border:1.5px solid #e6e2da;border-radius:15px;padding:15px 16px}.ds-jp{font-size:21px;font-weight:800;line-height:1.35}.ds-ko{font-size:14px;font-weight:700;color:#36698a;margin-top:2px}.ds-mean{font-size:16px;font-weight:700;margin-top:4px}.ds-tip{display:block;margin-top:6px;font-size:14px;background:#f2f0eb;padding:7px 11px;border-radius:9px}.ds-ico{width:34px;height:34px;border-radius:10px;background:#f2f0eb;border:1.5px solid #e6e2da;cursor:pointer}.ds-ico:hover{background:#e6e2da}.ds-ico:focus-visible{outline:2px solid #36698a;outline-offset:2px}"
+    },
+    {
+      "name": "Segmented Toggle",
+      "kind": "custom",
+      "description": "코스·타이머·목소리 선택.",
+      "html": "<div class=\"ds-seg\"><button class=\"ds-seg-opt is-active\">7일 코스</button><button class=\"ds-seg-opt\">14일 코스</button></div>",
+      "css": ".ds-seg{display:inline-flex;gap:3px;padding:3px;background:#f2f0eb;border:1.5px solid #e6e2da;border-radius:10px}.ds-seg-opt{padding:6px 12px;border-radius:8px;font-size:12.5px;font-weight:700;color:#2d3436;background:none;border:none;cursor:pointer}.ds-seg-opt.is-active{background:#fff;box-shadow:0 1px 3px rgba(45,52,54,.08)}.ds-seg-opt:focus-visible{outline:2px solid #36698a;outline-offset:2px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Travel Notebook",
+    "overview": "**Creative North Star: \"The Travel Notebook\"**\n\n여권스냅은 여행자가 매일 펼쳐 보는 개인 수첩이다. 따뜻한 미색 종이(paper) 위에 흰 페이지 카드가 놓이고, 다섯 가지 파스텔 색이 수첩의 인덱스 탭처럼 섹션과 상태를 나눈다. 출발 전에는 하루치 공부를 적어 둔 노트가 되고, 현지에서는 같은 페이지를 상대에게 내밀어 보여 주는 도구가 된다. 화면이 조용하고 정돈되어 있어야 원문 문장이 가장 크게 보인다.\n\n밀도는 중간이다. 넓은 화면에서는 본문 칸과 316px 오른쪽 칸(타이머·현지 제원·오늘의 한마디·통계)이 나란히 놓이고, 휴대폰에서는 한 칸으로 쌓이고 아래 탭 바로 이동한다. 부품은 말랑하고 만지고 싶은 느낌이다. 모서리는 두툼하게 둥글고, 주요 버튼은 아래쪽 진한 테두리 덕분에 실제로 눌리는 느낌이 난다.",
+    "keyCharacteristics": [
+      "따뜻한 미색 종이 바탕 + 흰 카드 + 1.5px 연한 테두리",
+      "파스텔 다섯 색은 각각 soft(배경)·border(테두리)·base(채움)·dark(글자) 네 단계로만 쓴다",
+      "원문(일본어·중국어)은 언제나 화면에서 가장 크고 굵은 글자",
+      "그림자는 거의 없고, 입체감은 누를 수 있는 것에만 준다",
+      "웹폰트 없이 OS 기본 한글·일본어·중국어 글꼴을 `:lang()`으로 나눠 쓴다"
+    ],
+    "rules": [
+      {
+        "name": "The Four-Step Tab Rule",
+        "body": "파스텔 색은 soft·border·base·dark 네 단계로만 쓴다. 배경은 soft, 테두리는 border, 채움 막대·점은 base, 그 위의 글자는 dark. 파스텔 base 위에 흰 글자를 올리지 않는다.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Green Button Rule",
+        "body": "채운 초록(cta) 버튼은 그 화면에서 \"다음에 할 일\"에만 쓴다. 보조 동작은 outline이나 soft 버튼이다.",
+        "section": "colors"
+      },
+      {
+        "name": "The Pencil Gray Rule",
+        "body": "보조 글자는 Pencil Gray 한 가지만 쓴다. 더 흐린 회색을 만들지 않는다. 연한 rule·rule-strong 바탕 위에는 보조 글자를 올리지 않는다(대비 부족).",
+        "section": "colors"
+      },
+      {
+        "name": "The Source-First Rule",
+        "body": "원문이 위, 그 아래 가나/병음(muted), 한글 발음(sky-dark 700), 뜻(700) 순서로 쌓는다. 이 순서와 크기 차이를 바꾸지 않는다.",
+        "section": "typography"
+      },
+      {
+        "name": "The Keep-All Rule",
+        "body": "한국어는 `word-break: keep-all`로 어절 단위로 줄을 바꾸고, 일본어·중국어 원문은 `word-break: normal; line-break: strict`로 바꾼다. 제목은 `text-wrap: balance`, 문단은 `pretty`.",
+        "section": "typography"
+      },
+      {
+        "name": "The Press-Only Depth Rule",
+        "body": "진한 받침 테두리는 누를 수 있는 채운 버튼에만 붙인다. 카드나 정보 상자에는 쓰지 않는다.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do 파스텔 색을 Four-Step Tab Rule(soft·border·base·dark)대로만 쓴다.",
+      "Do 원문을 그 화면에서 가장 크고 굵게(800) 두고, 그 아래 한글 발음을 sky-dark 700으로 둔다.",
+      "Do 터치 기기에서 누르는 요소를 최소 44px로 만든다.",
+      "Do 동작 줄이기 설정에서는 이동을 빼고 색과 투명도 변화만 남긴다.",
+      "Do 새 언어를 넣을 때는 `:lang()` 글꼴 스택을 추가하고, 원문 줄바꿈은 `line-break: strict`로 둔다."
+    ],
+    "donts": [
+      "Don't 채운 초록 버튼을 한 화면에 여러 의미로 쓰지 않는다. \"지금 할 일\" 하나만 채운다.",
+      "Don't 카드나 정보 상자에 눌림 받침(Press Edge)이나 진한 그림자를 주지 않는다.",
+      "Don't 파스텔 base 색 위에 흰 글자를 올리지 않는다. 흰 글자는 cta와 danger 위에만 쓴다.",
+      "Don't Pencil Gray보다 흐린 회색 글자를 새로 만들지 않는다.",
+      "Don't 화면 확대를 막지 않는다(`user-scalable=no`, `maximum-scale` 금지)."
+    ]
+  }
+}
