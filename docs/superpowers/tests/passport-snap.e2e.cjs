@@ -353,6 +353,44 @@ test('version', async () => {
   eq(await page.evaluate(() => PATCH_NOTES[0].v), '1.1.0', 'patch notes head');
 });
 
+// ---------- Final review fixes ----------
+test('undo-delete', async () => {
+  const p1 = { id: 1, cat: 0, jp: 'x', kana: 'x', ko: 'x', mean: 'x', tip: 'x', wrongTimes: 2, lastWrongAt: '' };
+  const page = await open({ storage: { version: 1, lang: 'ja', courseMode: 7, showKoPron: true, phraseDensity: null, langs: { ja: { completed: {}, usable: [], favorites: [], notebook: { phrases: { 1: p1 }, chars: {} } } } } });
+  await page.evaluate(() => switchView('notes'));
+  await page.evaluate(() => removeWrongItem('phrase', 1));
+  eq(Object.keys((await stored(page)).langs.ja.notebook.phrases).length, 0, 'deleted');
+  await page.click('#toast .toast-action');
+  const nb = (await stored(page)).langs.ja.notebook.phrases;
+  eq(nb['1'] && nb['1'].wrongTimes, 2, 'restored with its count');
+});
+test('review-char-from-pack', async () => {
+  const page = await open();
+  const ok = await page.evaluate(() => {
+    const k = LANGUAGE_PACKS.ja.kanji[0];
+    const nb = ensureLangNotebook();
+    nb.chars[`kanji:${k.char}`] = { key: `kanji:${k.char}`, charTab: 'kanji', char: k.char, title: k.meaning, sub: `${k.ko} (${k.reading})`, tip: k.tip, wrongTimes: 1 };
+    startWrongNotebookQuiz();
+    const it = quiz.queue[0].item;
+    return it.reading === k.reading && it.ko === k.ko && it.meaning === k.meaning;
+  });
+  eq(ok, true, 'review uses the pack item, not the notebook summary');
+});
+test('day-rollover', async () => {
+  const page = await open();
+  await page.evaluate(() => startLesson('7-1'));
+  await answerAll(page);
+  await page.evaluate(() => closeQuizScreen());
+  assert((await page.textContent('#today')).includes('오늘 분량 완료'), 'done today first');
+  await page.evaluate(() => {
+    const D = Date, off = 86400000;
+    window.Date = class extends D { constructor(...a) { if (a.length) super(...a); else super(D.now() + off); } static now() { return D.now() + off; } };
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.waitForTimeout(100);
+  eq((await visiblePrimaries(page))[0], 'DAY 2 시작 →', 'next day shows DAY 2 start');
+});
+
 (async () => {
   browser = await chromium.launch({ channel: 'chrome' });
   let pass = 0, fail = 0;

@@ -537,6 +537,10 @@
     transition: opacity 0.25s ease, transform 0.25s ease; z-index: 200; width: max-content; max-width: min(520px, calc(100vw - 32px)); text-align: center; line-height: 1.45;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.has-action { pointer-events: auto; display: flex; align-items: center; gap: 12px; }
+  .toast-action { color: var(--pastel-sky-border); font-weight: 800; text-decoration: underline; text-underline-offset: 3px; padding: 6px 2px; min-height: 32px; }
+  .toast-action:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  @media (pointer: coarse) { .toast-action { min-height: 44px; } }
 
   /* Brand doubles as the home link */
   .brand { padding: 4px 6px 4px 0; border-radius: 11px; }
@@ -1265,12 +1269,19 @@ function announceQuiz(msg) {
   el.textContent = '';
   setTimeout(() => { el.textContent = msg; }, 60);
 }
-function showToast(msg) {
+function showToast(msg, action = null) {
   const el = document.getElementById('toast');
   el.textContent = msg;
+  el.classList.toggle('has-action', !!action);
+  if (action) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'toast-action'; b.textContent = action.label;
+    b.addEventListener('click', () => { el.classList.remove('show', 'has-action'); clearTimeout(showToast._t); action.onAction(); });
+    el.appendChild(b);
+  }
   el.classList.add('show');
   clearTimeout(showToast._t);
-  showToast._t = setTimeout(() => el.classList.remove('show'), Math.min(6000, 2200 + Math.max(0, msg.length - 24) * 45));
+  showToast._t = setTimeout(() => el.classList.remove('show', 'has-action'), action ? 4000 : Math.min(6000, 2200 + Math.max(0, msg.length - 24) * 45));
 }
 let helpOpener = null;
 function openHelpModal() {
@@ -1988,12 +1999,12 @@ function recordWrongItem(q) {
   renderWrongNotebookBadges();
 }
 function removeWrongItem(kind, itemKey) {
-  const nb = ensureLangNotebook(state.lang);
-  if (kind === 'phrase') delete nb.phrases[String(itemKey)];
-  else if (kind === 'char') delete nb.chars[String(itemKey)];
+  const nb = ensureLangNotebook(state.lang), bucket = kind === 'phrase' ? 'phrases' : 'chars', key = String(itemKey);
+  const removed = nb[bucket][key];
+  delete nb[bucket][key];
   saveStore();
   renderWrongNotebook();
-  showToast('오답노트에서 항목을 삭제했습니다.');
+  showToast('오답노트에서 항목을 삭제했습니다.', removed ? { label: '되돌리기', onAction: () => { ensureLangNotebook()[bucket][key] = removed; saveStore(); renderWrongNotebook(); } } : null);
 }
 function clearWrongNotebook() {
   const counts = getWrongCounts(state.lang);
@@ -2065,8 +2076,11 @@ function renderWrongNotebook() {
     }
   }).join('');
 }
+// 오답노트의 요약값이 아니라 언어팩 원본 항목으로 복습해야 보기 형식이 정답을 드러내지 않는다.
 function notebookCharToItem(c) {
-  return { kind: 'char', charTab: c.charTab || 'kanji', item: { char: c.char, ko: c.title, meaning: c.title, romaji: c.sub, reading: c.sub, tip: c.tip } };
+  const charTab = c.charTab || 'kanji', pool = LANGUAGE_PACKS[state.lang][charTab] || [];
+  const orig = pool.find(x => x.char === c.char);
+  return { kind: 'char', charTab, item: orig || { char: c.char, ko: c.title, meaning: c.title, romaji: c.sub, reading: c.sub, tip: c.tip } };
 }
 function startWrongNotebookQuiz() {
   const pack = LANGUAGE_PACKS[state.lang];
@@ -2221,6 +2235,14 @@ new MutationObserver(records => {
 }).observe(document.body, { childList: true, subtree: true });
 function syncTopbarHeight() { document.documentElement.style.setProperty('--topbar-h', `${document.querySelector('.topbar').offsetHeight}px`); }
 syncTopbarHeight(); addEventListener('resize', syncTopbarHeight);
+// 탭을 띄워 둔 채 날짜가 바뀌면(휴대폰 백그라운드 복원 등) 오늘 페이지를 다시 계산한다.
+let lastRenderDay = todayStr();
+function refreshIfNewDay() {
+  if (document.visibilityState === 'hidden' || todayStr() === lastRenderDay) return;
+  lastRenderDay = todayStr(); renderHome(); updateStatsUI();
+}
+document.addEventListener('visibilitychange', refreshIfNewDay);
+addEventListener('focus', refreshIfNewDay);
 loadStore();
 syncSettingsUI();
 renderAll();
