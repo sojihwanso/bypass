@@ -4,50 +4,222 @@
   "title": "Design System: 바다생활 계산기",
   "extensions": {
     "colorMeta": {
-      "pri": { "role": "primary", "displayName": "선실 소나무 초록", "canonical": "#2D6A4C", "tonalRamp": ["#0F2419", "#173826", "#204D35", "#2D6A4C", "#4A8A69", "#78AE90", "#B0D3BE", "#E3F1E8"] },
-      "acc": { "role": "primary", "displayName": "잎새 초록", "canonical": "#2B744F", "tonalRamp": ["#123020", "#1B4A31", "#256544", "#2B744F", "#56A77D", "#86C3A2", "#BADFCA", "#E6F5EC"] },
-      "pri-dark": { "role": "primary", "displayName": "밤 벚꽃 분홍", "canonical": "#F0A5C7", "tonalRamp": ["#3A1328", "#5C2141", "#83325D", "#B0517F", "#D67CA6", "#F0A5C7", "#F7CCDF", "#FCEDF4"] },
-      "acc-dark": { "role": "primary", "displayName": "형광 분홍", "canonical": "#FF8DBE", "tonalRamp": ["#3F0E24", "#661A3B", "#912956", "#C43D77", "#EE609E", "#FF8DBE", "#FFBCD9", "#FFE8F2"] },
-      "paper": { "role": "neutral", "displayName": "파스텔 종이", "canonical": "#F1F7EE" },
-      "surface": { "role": "neutral", "displayName": "흰 갑판", "canonical": "#FBFEF9" },
-      "ink": { "role": "neutral", "displayName": "먹", "canonical": "#1D2A21" },
-      "muted": { "role": "neutral", "displayName": "흐린 먹", "canonical": "#56705E" },
-      "rule": { "role": "neutral", "displayName": "선", "canonical": "#D2E4CE" },
-      "soft": { "role": "neutral", "displayName": "옅은 칸", "canonical": "#E4F0DF" },
-      "paper-dark": { "role": "neutral", "displayName": "밤 선실", "canonical": "#160D13" },
-      "surface-dark": { "role": "neutral", "displayName": "밤 갑판", "canonical": "#20131C" },
-      "sea": { "role": "tertiary", "displayName": "승선 (자료 색)", "canonical": "#3F8F68" },
-      "leave": { "role": "tertiary", "displayName": "휴가 (자료 색)", "canonical": "#8FCBA2" },
-      "edu": { "role": "tertiary", "displayName": "군사교육소집 (자료 색)", "canonical": "#C6E3AE" },
-      "inj": { "role": "tertiary", "displayName": "업무상 휴직 (자료 색)", "canonical": "#6FB3A0" },
-      "ok": { "role": "status", "displayName": "완료·연결", "canonical": "#1E7A3C" },
-      "bad": { "role": "status", "displayName": "오류", "canonical": "#B3261E" },
-      "warn": { "role": "status", "displayName": "주의·오프라인", "canonical": "#8A5A00" }
+      "pri": {
+        "role": "primary",
+        "displayName": "선실 소나무 초록",
+        "canonical": "#2D6A4C",
+        "tonalRamp": [
+          "#0F2419",
+          "#173826",
+          "#204D35",
+          "#2D6A4C",
+          "#4A8A69",
+          "#78AE90",
+          "#B0D3BE",
+          "#E3F1E8"
+        ]
+      },
+      "acc": {
+        "role": "primary",
+        "displayName": "잎새 초록",
+        "canonical": "#2B744F",
+        "tonalRamp": [
+          "#123020",
+          "#1B4A31",
+          "#256544",
+          "#2B744F",
+          "#56A77D",
+          "#86C3A2",
+          "#BADFCA",
+          "#E6F5EC"
+        ]
+      },
+      "pri-dark": {
+        "role": "primary",
+        "displayName": "밤 벚꽃 분홍",
+        "canonical": "#F0A5C7",
+        "tonalRamp": [
+          "#3A1328",
+          "#5C2141",
+          "#83325D",
+          "#B0517F",
+          "#D67CA6",
+          "#F0A5C7",
+          "#F7CCDF",
+          "#FCEDF4"
+        ]
+      },
+      "acc-dark": {
+        "role": "primary",
+        "displayName": "형광 분홍",
+        "canonical": "#FF8DBE",
+        "tonalRamp": [
+          "#3F0E24",
+          "#661A3B",
+          "#912956",
+          "#C43D77",
+          "#EE609E",
+          "#FF8DBE",
+          "#FFBCD9",
+          "#FFE8F2"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "파스텔 종이",
+        "canonical": "#F1F7EE"
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "흰 갑판",
+        "canonical": "#FBFEF9"
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "먹",
+        "canonical": "#1D2A21"
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "흐린 먹",
+        "canonical": "#56705E"
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "선",
+        "canonical": "#D2E4CE"
+      },
+      "soft": {
+        "role": "neutral",
+        "displayName": "옅은 칸",
+        "canonical": "#E4F0DF"
+      },
+      "paper-dark": {
+        "role": "neutral",
+        "displayName": "밤 선실",
+        "canonical": "#160D13"
+      },
+      "surface-dark": {
+        "role": "neutral",
+        "displayName": "밤 갑판",
+        "canonical": "#20131C"
+      },
+      "sea": {
+        "role": "tertiary",
+        "displayName": "승선 (자료 색)",
+        "canonical": "#3F8F68"
+      },
+      "leave": {
+        "role": "tertiary",
+        "displayName": "휴가 (자료 색)",
+        "canonical": "#8FCBA2"
+      },
+      "edu": {
+        "role": "tertiary",
+        "displayName": "군사교육소집 (자료 색)",
+        "canonical": "#C6E3AE"
+      },
+      "inj": {
+        "role": "tertiary",
+        "displayName": "업무상 휴직 (자료 색)",
+        "canonical": "#6FB3A0"
+      },
+      "ok": {
+        "role": "status",
+        "displayName": "완료·연결",
+        "canonical": "#1E7A3C"
+      },
+      "bad": {
+        "role": "status",
+        "displayName": "오류",
+        "canonical": "#B3261E"
+      },
+      "warn": {
+        "role": "status",
+        "displayName": "주의·오프라인",
+        "canonical": "#8A5A00"
+      }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "처음 화면 앱 이름 한 곳." },
-      "headline": { "displayName": "Headline", "purpose": "계산기 화면 제목." },
-      "title": { "displayName": "Title", "purpose": "섹션 제목, 메뉴 카드 제목." },
-      "body": { "displayName": "Body", "purpose": "설명·도움말. keep-all 줄바꿈." },
-      "label": { "displayName": "Label", "purpose": "입력칸 라벨, 결과 칸 이름." },
-      "figure": { "displayName": "Figure", "purpose": "핵심 결과 숫자(남은 날, ETA)." },
-      "data": { "displayName": "Data", "purpose": "입력값·날짜·표·복구 코드." }
+      "display": {
+        "displayName": "Display",
+        "purpose": "처음 화면 앱 이름 한 곳."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "계산기 화면 제목."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "섹션 제목, 메뉴 카드 제목."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "설명·도움말. keep-all 줄바꿈."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "입력칸 라벨, 결과 칸 이름."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "핵심 결과 숫자(남은 날, ETA)."
+      },
+      "data": {
+        "displayName": "Data",
+        "purpose": "입력값·날짜·표·복구 코드."
+      }
     },
     "shadows": [
-      { "name": "lift", "value": "0 1px 2px rgba(30,70,40,.06), 0 10px 28px rgba(30,70,40,.10)", "purpose": "메뉴 카드 호버, 창, 시간대 목록, 토스트. 다크: 0 1px 2px rgba(0,0,0,.35), 0 10px 28px rgba(0,0,0,.45)." },
-      { "name": "press-lip", "value": "0 2px 0 color-mix(in srgb, var(--pri) 55%, #000)", "purpose": "주 버튼·메뉴 아이콘·켜진 세그먼트의 두께." }
+      {
+        "name": "lift",
+        "value": "0 1px 2px rgba(30,70,40,.06), 0 10px 28px rgba(30,70,40,.10)",
+        "purpose": "메뉴 카드 호버, 창, 시간대 목록, 토스트. 다크: 0 1px 2px rgba(0,0,0,.35), 0 10px 28px rgba(0,0,0,.45)."
+      },
+      {
+        "name": "press-lip",
+        "value": "0 2px 0 color-mix(in srgb, var(--pri) 55%, #000)",
+        "purpose": "주 버튼·메뉴 아이콘·켜진 세그먼트의 두께."
+      }
     ],
     "motion": [
-      { "name": "state", "value": ".15s", "purpose": "버튼·카드 호버와 누름(1px 내려감)." },
-      { "name": "fade", "value": ".18s ease", "purpose": "창·토스트·이스터에그 나타남." },
-      { "name": "eggpop", "value": ".35s ease-out scale(.85→1)", "purpose": "이스터에그 카드. reduced-motion에서 끔." }
+      {
+        "name": "state",
+        "value": ".15s",
+        "purpose": "버튼·카드 호버와 누름(1px 내려감)."
+      },
+      {
+        "name": "fade",
+        "value": ".18s ease",
+        "purpose": "창·토스트·이스터에그 나타남."
+      },
+      {
+        "name": "eggpop",
+        "value": ".35s ease-out scale(.85→1)",
+        "purpose": "이스터에그 카드. reduced-motion에서 끔."
+      }
     ],
     "breakpoints": [
-      { "name": "tiny", "value": "380px" },
-      { "name": "hide-top-version", "value": "520px" },
-      { "name": "legend-1col", "value": "560px" },
-      { "name": "phone", "value": "620px" },
-      { "name": "container", "value": "880px" }
+      {
+        "name": "tiny",
+        "value": "380px"
+      },
+      {
+        "name": "hide-top-version",
+        "value": "520px"
+      },
+      {
+        "name": "legend-1col",
+        "value": "560px"
+      },
+      {
+        "name": "phone",
+        "value": "620px"
+      },
+      {
+        "name": "container",
+        "value": "880px"
+      }
     ]
   },
   "components": [
@@ -126,11 +298,31 @@
       "누르는 것은 크고 단단하다: 46px 입력칸, 2px 아래 그림자가 있는 주 버튼, 누르면 1px 내려간다."
     ],
     "rules": [
-      { "name": "The Complement Rule", "body": "다크 테마는 라이트의 보색이다. 새 색을 넣을 때는 라이트 초록 계열 값과 다크 분홍·자주 계열 값을 반드시 한 쌍으로 정의한다. 한쪽만 있는 색은 없다.", "section": "colors" },
-      { "name": "The Fixed Meaning Rule", "body": "상태색(ok·bad·warn)과 자료 색(sea·leave·edu·inj)은 뜻이 고정이다. 장식이나 브랜드 강조에 쓰지 않는다.", "section": "colors" },
-      { "name": "The Numbers Are Mono Rule", "body": "사용자가 읽고 옮겨 적을 수 있는 모든 숫자·날짜·시각·코드는 IBM Plex Mono로 쓴다. 입력칸도 숫자를 받으면 Mono, 글(지명 검색·선택)을 받으면 본문 글꼴.", "section": "typography" },
-      { "name": "The Small Eyebrow Rule", "body": "대문자 Mono 꼬리 글(SEA SERVICE, letter-spacing .1em)은 처음 화면 hero 한 곳에만 쓴다.", "section": "typography" },
-      { "name": "The Flat-By-Default Rule", "body": "평소에 떠 있는 카드는 없다. --shadow는 호버·창·목록·토스트에만 쓴다.", "section": "elevation" }
+      {
+        "name": "The Complement Rule",
+        "body": "다크 테마는 라이트의 보색이다. 새 색을 넣을 때는 라이트 초록 계열 값과 다크 분홍·자주 계열 값을 반드시 한 쌍으로 정의한다. 한쪽만 있는 색은 없다.",
+        "section": "colors"
+      },
+      {
+        "name": "The Fixed Meaning Rule",
+        "body": "상태색(ok·bad·warn)과 자료 색(sea·leave·edu·inj)은 뜻이 고정이다. 장식이나 브랜드 강조에 쓰지 않는다.",
+        "section": "colors"
+      },
+      {
+        "name": "The Numbers Are Mono Rule",
+        "body": "사용자가 읽고 옮겨 적을 수 있는 모든 숫자·날짜·시각·코드는 IBM Plex Mono로 쓴다. 입력칸도 숫자를 받으면 Mono, 글(지명 검색·선택)을 받으면 본문 글꼴.",
+        "section": "typography"
+      },
+      {
+        "name": "The No Eyebrow Rule",
+        "body": "제목 위에 작은 대문자 꼬리 글을 달지 않는다. 제목이 스스로 무게를 갖는다(2.3.3에서 SEA SERVICE를 뺐다).",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "평소에 떠 있는 카드는 없다. --shadow는 호버·창·목록·토스트에만 쓴다.",
+        "section": "elevation"
+      }
     ],
     "dos": [
       "Do 새 색은 라이트 초록·다크 분홍 한 쌍으로 :root와 :root[data-theme=\"dark\"]에 함께 정의한다.",

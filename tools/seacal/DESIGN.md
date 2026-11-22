@@ -212,7 +212,7 @@ components:
 ### Named Rules
 **The Numbers Are Mono Rule.** 사용자가 읽고 옮겨 적을 수 있는 모든 숫자·날짜·시각·코드는 IBM Plex Mono로 쓴다. 입력칸도 숫자를 받으면 Mono, 글(지명 검색·선택)을 받으면 본문 글꼴.
 
-**The Small Eyebrow Rule.** 대문자 Mono 꼬리 글(`SEA SERVICE`, letter-spacing .1em)은 처음 화면 hero 한 곳에만 쓴다.
+**The No Eyebrow Rule.** 제목 위에 작은 대문자 꼬리 글을 달지 않는다. 제목이 스스로 무게를 갖는다(2.3.3에서 `SEA SERVICE`를 뺐다).
 
 ## Layout
 

@@ -99,7 +99,6 @@ a{color:var(--acc)}
 
 /* 처음 화면 */
 .hero{padding:34px 0 8px}
-.hero .tag{font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
 .hero h1{font-size:clamp(32px,6vw,52px);line-height:1.2;margin:8px 0 12px}
 .hero h1 em{font-style:normal;color:var(--acc)}
 .hero p{margin:0;max-width:560px;color:var(--ink);opacity:.86}
@@ -368,8 +367,11 @@ table.lv tr.fut td{color:var(--muted)}
 
 <script>
 'use strict';
-const VERSION = '2.3.2';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '2.3.3';   // 버전 규칙: 첫째 자리 큰 기능 추가 · 둘째 자리 하위 기능 추가·변경 · 셋째 자리 오타·버그 수정 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  { v: '2.3.3', d: '2026. 11. 23', i: [
+    '처음 화면 제목 위의 작은 영문 글(SEA SERVICE)을 빼서 제목이 바로 보이게 함',
+  ] },
   { v: '2.3.2', d: '2026. 11. 23', i: [
     '라이트 화면의 초록 강조 글자를 조금 더 진하게 바꿔 꼬리표·링크·단계 번호가 잘 읽히게 함',
     '승선일·하선일·선박 시간대·지명 검색 칸에 화면 읽기 프로그램용 이름을 붙이고, 계산 기준 버튼이 고른 쪽을 알려 주게 함',
@@ -764,7 +766,6 @@ function drawHome(v){
   document.title = '바다생활 계산기';
   v.innerHTML = `
   <section class="hero">
-    <div class="tag">Sea service</div>
     <h1><em>바다생활</em> 계산기</h1>
     <p>승선근무예비역 복무 인정일수와 만료 예정일, 항해 ETA를 계산합니다.</p>
   </section>
