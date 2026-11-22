@@ -462,6 +462,24 @@
   .option-mark.ok { background: var(--cta); color: #fff; }
   .option-mark.no { background: var(--danger); color: #fff; }
 
+  .result-card { text-align: center; padding: 28px 22px; }
+  .result-title { margin: 10px 0 4px; font-size: var(--fs-title); }
+  .result-sub { margin: 0 0 18px; font-size: var(--fs-small); }
+  .result-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 18px; }
+  @media (max-width: 560px) { .result-grid { grid-template-columns: 1fr; } }
+  .result-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; display: grid; gap: 2px; align-content: start; }
+  .result-label { font-size: var(--fs-label); font-weight: 700; color: var(--text-muted); }
+  .result-num { font-size: var(--fs-title); font-weight: 800; font-variant-numeric: tabular-nums; }
+  .result-cap { font-size: var(--fs-micro); color: var(--text-muted); font-weight: 700; }
+  .result-sky { background: var(--pastel-sky-soft); border-color: var(--pastel-sky-border); }
+  .result-sky .result-label, .result-sky .result-num, .result-sky .result-cap { color: var(--pastel-sky-dark); }
+  .result-rose { background: var(--pastel-rose-soft); border-color: var(--pastel-rose-border); }
+  .result-rose .result-label, .result-rose .result-num, .result-rose .result-cap { color: var(--pastel-rose-dark); }
+  .result-sage { background: var(--pastel-sage-soft); border-color: var(--pastel-sage-border); }
+  .result-sage .result-label, .result-sage .result-num, .result-sage .result-cap { color: var(--pastel-sage-dark); }
+  .result-tip { text-align: left; background: var(--pastel-apricot-soft); border: 1.5px solid var(--pastel-apricot-border); border-radius: 15px; padding: 15px; }
+  .result-tip-title { font-weight: 700; font-size: var(--fs-body); margin-top: 6px; }
+  .result-tip-body { font-size: var(--fs-small); color: var(--pastel-apricot-dark); margin-top: 4px; }
   .situation-box { background: var(--pastel-lavender-soft); border: 1.5px solid var(--pastel-lavender-border); border-radius: 16px; padding: 16px 18px; margin-top: 14px; }
   .flashcard { background: var(--surface); border: 1.5px solid var(--border); border-radius: 22px; padding: 26px 22px; text-align: center; box-shadow: var(--shadow); }
 
@@ -671,7 +689,7 @@
     <div class="topbar-right">
       <button class="help-btn" onclick="openHelpModal()" title="사이트 기능 도움말 열기">도움말</button>
       <div class="session-pill" title="현재 세션 통계">
-        <span id="stat-xp">0</span> XP · <span id="stat-done">0</span>강
+        쓸 수 있는 문장 <span id="stat-usable">0</span> · <span id="stat-done">0</span>강
       </div>
       <div class="lang-picker">
         <button class="lang-btn" id="lang-btn" onclick="toggleLangMenu()">
@@ -774,12 +792,12 @@
               <div class="stat-tile-val" id="card-stat-done">0 / 7강</div>
             </div>
             <div class="stat-tile">
-              <div class="stat-tile-label">누적 XP</div>
-              <div class="stat-tile-val" id="card-stat-xp">0 XP</div>
+              <div class="stat-tile-label">쓸 수 있는 문장</div>
+              <div class="stat-tile-val" id="card-stat-usable">0문장</div>
             </div>
             <div class="stat-tile">
-              <div class="stat-tile-label">오답 복습</div>
-              <div class="stat-tile-val" id="card-stat-wrong">0회</div>
+              <div class="stat-tile-label">오답노트</div>
+              <div class="stat-tile-val" id="card-stat-notes">0문장</div>
             </div>
             <div class="stat-tile">
               <div class="stat-tile-label">수록 문장</div>
@@ -986,9 +1004,7 @@ const LANGUAGE_PACKS = {"ja":{"code":"ja","speechLang":"ja-JP","name":"일본어
 const state = {
   lang: 'ja',
   courseMode: 7,
-  wrongReviewCount: 0,
   noteFilter: 'all',
-  xp: 0,
   charTab: 'hiragana',
   selectedChar: null,
   phraseCat: 'all',
@@ -1230,7 +1246,8 @@ function shuffle(arr) {
   return copy;
 }
 function updateStatsUI() {
-  document.getElementById('stat-xp').textContent = state.xp;
+  const usableCount = langData().usable.length;
+  document.getElementById('stat-usable').textContent = usableCount;
   document.getElementById('stat-done').textContent = completedLessonList().length;
 
   const totalLessons = getLessons().length || 7;
@@ -1238,15 +1255,15 @@ function updateStatsUI() {
   const rate = Math.min(100, Math.round((doneCount / totalLessons) * 100));
 
   const elDone = document.getElementById('card-stat-done');
-  const elXp = document.getElementById('card-stat-xp');
-  const elWrong = document.getElementById('card-stat-wrong');
+  const elUsable = document.getElementById('card-stat-usable');
+  const elNotes = document.getElementById('card-stat-notes');
   const elRate = document.getElementById('card-stat-rate');
   const elBar = document.getElementById('card-stat-bar');
   const elTags = document.getElementById('card-done-tags');
 
   if (elDone) elDone.textContent = `${doneCount} / ${totalLessons}강`;
-  if (elXp) elXp.textContent = `${state.xp} XP`;
-  if (elWrong) elWrong.textContent = `${state.wrongReviewCount}회`;
+  if (elUsable) elUsable.textContent = `${usableCount}문장`;
+  if (elNotes) elNotes.textContent = `${getWrongCounts().totalCount}개`;
   if (elRate) elRate.textContent = `${rate}%`;
   if (elBar) elBar.style.width = `${rate}%`;
   const badge = document.getElementById('store-badge');
@@ -1582,7 +1599,7 @@ function startRandomSprint() {
 function openPhraseQuiz({ mode, lessonKey, title, phrases, includePreview }) {
   const target = phrases.length > 12 ? shuffle(phrases).slice(0, 12) : shuffle(phrases);
   const types = ['listen_mean', 'mean_jp', 'situation_choice'];
-  quiz = { mode, lessonKey, title, stage: includePreview ? 'preview' : 'quiz', previewPhrases: phrases, previewIdx: 0, queue: target.map((p, idx) => ({ kind: 'phrase', qType: types[idx % types.length], phrase: p, isRetry: false })), initialTotal: target.length, completedCount: 0, wrongCount: 0, answered: false, selectedVal: null, currentOptions: [] };
+  quiz = { mode, lessonKey, title, stage: includePreview ? 'preview' : 'quiz', previewPhrases: phrases, previewIdx: 0, queue: target.map((p, idx) => ({ kind: 'phrase', qType: types[idx % types.length], phrase: p, isRetry: false })), initialTotal: target.length, completedCount: 0, wrongCount: 0, firstTryCorrect: 0, addedUsable: 0, lostUsable: 0, wrongItems: [], answered: false, selectedVal: null, currentOptions: [] };
   document.getElementById('quiz-screen').classList.add('open'); renderQuizScreen();
 }
 function startCharQuiz() {
@@ -1590,7 +1607,7 @@ function startCharQuiz() {
   const tabName = state.lang === 'zh'
     ? (tab === 'katakana' ? '기초 문자·성조' : '여행 필수 간체자')
     : (tab === 'hiragana' ? '히라가나' : (tab === 'katakana' ? '가타카나' : '여행 필수 한자'));
-  quiz = { mode: 'char', lessonKey: null, title: `${tabName} 스피드 퀴즈`, stage: 'quiz', queue: picked.map(item => ({ kind: 'char', charTab: tab, item, isRetry: false })), initialTotal: picked.length, completedCount: 0, wrongCount: 0, answered: false, selectedVal: null, currentOptions: [] };
+  quiz = { mode: 'char', lessonKey: null, title: `${tabName} 스피드 퀴즈`, stage: 'quiz', queue: picked.map(item => ({ kind: 'char', charTab: tab, item, isRetry: false })), initialTotal: picked.length, completedCount: 0, wrongCount: 0, firstTryCorrect: 0, addedUsable: 0, lostUsable: 0, wrongItems: [], answered: false, selectedVal: null, currentOptions: [] };
   document.getElementById('quiz-screen').classList.add('open'); renderQuizScreen();
 }
 function closeQuizScreen() { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); document.getElementById('quiz-screen').classList.remove('open'); quiz = null; }
@@ -1647,11 +1664,30 @@ function renderQuizScreen() {
   if (quiz.stage === 'done') {
     document.getElementById('quiz-progress').style.width = '100%'; document.getElementById('quiz-counter').textContent = '완료';
     const specs = LANGUAGE_PACKS[state.lang].specs, bonusTip = specs[Math.floor(Math.random() * specs.length)];
-    body.innerHTML = `<div class="card" style="text-align:center;padding:28px 22px;"><span class="badge badge-green">학습 완료</span><h2 style="margin:10px 0 6px;font-size:var(--fs-title);">오늘 학습을 마쳤습니다</h2><p class="muted" style="margin:0 0 18px;">${quiz.title}</p><div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:20px;"><div style="background:var(--pastel-apricot-soft);border:1px solid var(--pastel-apricot-border);padding:12px 20px;border-radius:14px;"><div style="font-size:var(--fs-label);font-weight:700;color:var(--pastel-apricot-dark);">획득 XP</div><div style="font-size:var(--fs-title);font-weight:800;color:var(--pastel-apricot-dark);">+${quiz.initialTotal * 10} XP</div></div><div style="background:var(--pastel-sage-soft);border:1px solid var(--pastel-sage-border);padding:12px 20px;border-radius:14px;"><div style="font-size:var(--fs-label);font-weight:700;color:var(--pastel-sage-dark);">오답 복습</div><div style="font-size:var(--fs-title);font-weight:800;color:var(--pastel-sage-dark);">${quiz.wrongCount}문제</div></div></div><div style="text-align:left;background:var(--pastel-apricot-soft);border:1.5px solid var(--pastel-apricot-border);border-radius:15px;padding:15px;"><span class="badge badge-amber">${LANGUAGE_PACKS[state.lang].country} 제원 노트 · ${bonusTip.tag}</span><div style="font-weight:700;font-size:var(--fs-body);margin-top:6px;">${bonusTip.title}</div><div style="font-size:var(--fs-small);color:var(--pastel-apricot-dark);margin-top:4px;">${bonusTip.dailyTip}</div></div></div>`;
-    footerInner.innerHTML = `<div class="muted" style="font-size:var(--fs-small);font-weight: 400;">내일도 하루 20분 루틴을 이어가 보세요.</div><button class="btn btn-primary" onclick="closeQuizScreen()">코스로 돌아가기</button>`; return;
+    const total = quiz.initialTotal, wrongN = quiz.wrongItems.length, usableTotal = langData().usable.length;
+    const lesson = quiz.lessonKey ? getLessons().find(l => l.key === quiz.lessonKey) : null;
+    const heading = quiz.mode === 'lesson' && lesson ? `DAY ${lesson.day} 완료` : quiz.mode === 'random' ? '랜덤 퀴즈 완료' : quiz.mode === 'review' ? '오답 복습 완료' : `${quiz.title.replace(' 스피드 퀴즈', '')} 퀴즈 완료`;
+    const sub = quiz.mode === 'lesson' ? '오늘 학습을 마쳤습니다' : quiz.title;
+    const usableLine = quiz.mode === 'char'
+      ? `<div class="result-num">문자</div><div class="result-cap">문자 퀴즈는 문장 수에 들어가지 않아요</div>`
+      : `<div class="result-num">+${quiz.addedUsable}</div><div class="result-cap">총 ${usableTotal}문장${quiz.lostUsable ? ` · ${quiz.lostUsable}개 다시 연습 필요` : ''}</div>`;
+    const wrongBox = wrongN
+      ? `<div class="result-box result-rose" id="result-wrong"><div class="result-label">틀린 ${quiz.mode === 'char' ? '문자' : '문장'}</div><div class="result-num">${wrongN}</div><div class="result-cap">오답노트에 모였어요</div></div>`
+      : `<div class="result-box result-sage" id="result-wrong"><div class="result-label">틀린 문장</div><div class="result-num">0</div><div class="result-cap">모두 한 번에 맞힘</div></div>`;
+    body.innerHTML = `<div class="card result-card"><span class="badge ${wrongN ? 'badge-blue' : 'badge-green'}">${quiz.mode === 'lesson' ? '학습 완료' : '퀴즈 완료'}</span><h2 class="result-title">${heading}</h2><p class="muted result-sub">${sub}</p>
+      <div class="result-grid">
+        <div class="result-box"><div class="result-label">첫 시도 정답</div><div class="result-num" id="result-first">${quiz.firstTryCorrect}/${total}</div><div class="result-cap">다시 맞힌 건 세지 않아요</div></div>
+        <div class="result-box result-sky" id="result-usable"><div class="result-label">쓸 수 있는 문장</div>${usableLine}</div>
+        ${wrongBox}
+      </div>
+      <div class="result-tip"><span class="badge badge-amber">${LANGUAGE_PACKS[state.lang].country} 제원 노트 · ${bonusTip.tag}</span><div class="result-tip-title">${bonusTip.title}</div><div class="result-tip-body">${bonusTip.dailyTip}</div></div></div>`;
+    footerInner.innerHTML = wrongN
+      ? `<button class="btn btn-outline" onclick="closeQuizScreen()">코스로 돌아가기</button><button class="btn btn-primary" id="result-primary" onclick="reviewWrongFromResult()">틀린 ${wrongN}${quiz.mode === 'char' ? '자' : '문장'} 바로 복습 →</button>`
+      : `<div class="muted" style="font-size:var(--fs-small);">내일도 하루 20분 루틴을 이어가 보세요.</div><button class="btn btn-primary" id="result-primary" onclick="closeQuizScreen()">코스로 돌아가기</button>`;
+    return;
   }
   const q = quiz.queue[0];
-  document.getElementById('quiz-progress').style.width = `${Math.min(98, (quiz.completedCount / quiz.initialTotal) * 100)}%`;
+  { const doneQ = quiz.answeredCount || 0; document.getElementById('quiz-progress').style.width = `${Math.min(98, (doneQ / (doneQ + quiz.queue.length)) * 100)}%`; }
   document.getElementById('quiz-counter').textContent = `남은 ${quiz.queue.length}문제`;
   if (q.kind === 'char') { prepareCharQuestion(q); renderCharQuestion(q); } else { preparePhraseQuestion(q); renderPhraseQuestion(q); }
 }
@@ -1660,7 +1696,7 @@ function skipToQuiz() { quiz.stage = 'quiz'; renderQuizScreen(); }
 function prepareCharQuestion(q) { if (!quiz.currentOptions.length) { const pool = LANGUAGE_PACKS[state.lang][q.charTab]; quiz.currentOptions = shuffle([q.item, ...shuffle(pool.filter(x => x.char !== q.item.char)).slice(0, 3)]); } }
 function renderCharQuestion(q) {
   const isKanji = q.charTab === 'kanji';
-  document.getElementById('quiz-body').innerHTML = `<div><div class="flex-center" style="margin-bottom:8px;"><span class="badge ${q.isRetry ? 'badge-rose' : 'badge-purple'}">${q.isRetry ? '오답 복습' : '문자 퀴즈'}</span></div><h2 style="margin:0;font-size:var(--fs-title);">${isKanji ? '이 여행 한자의 뜻과 발음은?' : '이 문자의 발음을 고르세요'}</h2><div class="card mt-16" style="text-align:center;padding:24px;"><div style="font-size:56px;font-weight:800;">${q.item.char}</div><div class="mt-12"><button class="btn btn-blue btn-sm" onclick="speakCurrentCharQuiz(0.9)">발음 힌트 듣기</button></div></div><div class="option-grid">${quiz.currentOptions.map((opt, idx) => {
+  document.getElementById('quiz-body').innerHTML = `<div><div class="flex-center" style="margin-bottom:8px;"><span class="badge ${q.isRetry || quiz.mode === 'review' ? 'badge-rose' : 'badge-purple'}">${q.isRetry || quiz.mode === 'review' ? '오답 복습' : '문자 퀴즈'}</span></div><h2 style="margin:0;font-size:var(--fs-title);">${isKanji ? '이 여행 한자의 뜻과 발음은?' : '이 문자의 발음을 고르세요'}</h2><div class="card mt-16" style="text-align:center;padding:24px;"><div style="font-size:56px;font-weight:800;">${q.item.char}</div><div class="mt-12"><button class="btn btn-blue btn-sm" onclick="speakCurrentCharQuiz(0.9)">발음 힌트 듣기</button></div></div><div class="option-grid">${quiz.currentOptions.map((opt, idx) => {
     let cls = '', mark = '';
     if (quiz.answered) { if (opt.char === q.item.char) { cls = 'correct'; mark = '<span class="option-mark ok">정답</span>'; } else if (opt.char === quiz.selectedVal) { cls = 'wrong'; mark = '<span class="option-mark no">선택함</span>'; } }
     else if (opt.char === quiz.selectedVal) cls = 'selected';
@@ -1676,7 +1712,7 @@ function preparePhraseQuestion(q) {
   }
 }
 function renderPhraseQuestion(q) {
-  const p = q.phrase, retryBadge = q.isRetry ? `<span class="badge badge-rose">오답 복습</span>` : '';
+  const p = q.phrase, retryBadge = q.isRetry || quiz.mode === 'review' ? `<span class="badge badge-rose">오답 복습</span>` : '';
   const optHtml = (opt, fn, showSub) => {
     let cls = '', mark = '';
     if (quiz.answered) { if (opt.id === p.id) { cls = 'correct'; mark = '<span class="option-mark ok">정답</span>'; } else if (opt.id === quiz.selectedVal) { cls = 'wrong'; mark = '<span class="option-mark no">선택함</span>'; } }
@@ -1846,53 +1882,34 @@ function renderWrongNotebook() {
     }
   }).join('');
 }
+function notebookCharToItem(c) {
+  return { kind: 'char', charTab: c.charTab || 'kanji', item: { char: c.char, ko: c.title, meaning: c.title, romaji: c.sub, reading: c.sub, tip: c.tip } };
+}
 function startWrongNotebookQuiz() {
   const pack = LANGUAGE_PACKS[state.lang];
   const nb = ensureLangNotebook(state.lang);
   const phraseList = Object.values(nb.phrases).map(wp => pack.phrases.find(p => p.id === wp.id) || wp);
   const charList = Object.values(nb.chars);
-
-  if (!phraseList.length && !charList.length) {
-    showToast('복습할 오답이 아직 없습니다.');
-    return;
-  }
-
+  if (!phraseList.length && !charList.length) { showToast('복습할 오답이 아직 없습니다.'); return; }
+  const items = shuffle(phraseList).slice(0, 12).map(p => ({ kind: 'phrase', phrase: p }));
+  shuffle(charList).slice(0, Math.max(0, 12 - items.length)).forEach(c => items.push(notebookCharToItem(c)));
+  startReviewOf(items, `${pack.name} 오답노트 복습 퀴즈`);
+}
+// 주어진 항목으로 복습 퀴즈. 첫 출제는 첫 시도로 센다(맞히면 쓸 수 있는 문장 + 오답노트에서 뺌).
+function startReviewOf(items, title = '틀린 문장 바로 복습') {
+  if (!items || !items.length) return;
   const types = ['listen_mean', 'mean_jp', 'situation_choice'];
-  const queue = [];
-  shuffle(phraseList).slice(0, 12).forEach((p, idx) => {
-    queue.push({ kind: 'phrase', qType: types[idx % types.length], phrase: p, isRetry: true });
-  });
-  shuffle(charList).slice(0, Math.max(0, 12 - queue.length)).forEach(c => {
-    queue.push({
-      kind: 'char',
-      charTab: c.charTab || 'kanji',
-      item: {
-        char: c.char,
-        ko: c.title,
-        meaning: c.title,
-        romaji: c.sub,
-        reading: c.sub,
-        tip: c.tip
-      },
-      isRetry: true
-    });
-  });
-
-  quiz = {
-    mode: 'wrong_notebook',
-    lessonKey: null,
-    title: `${pack.name} 오답노트 복습 퀴즈`,
-    stage: 'quiz',
-    queue,
-    initialTotal: queue.length,
-    completedCount: 0,
-    wrongCount: 0,
-    answered: false,
-    selectedVal: null,
-    currentOptions: []
-  };
+  let pi = 0;
+  const queue = items.map(it => it.kind === 'phrase'
+    ? { kind: 'phrase', qType: types[pi++ % types.length], phrase: it.phrase, isRetry: false }
+    : { kind: 'char', charTab: it.charTab, item: it.item, isRetry: false });
+  quiz = { mode: 'review', lessonKey: null, title, stage: 'quiz', queue, initialTotal: queue.length, completedCount: 0, wrongCount: 0, firstTryCorrect: 0, addedUsable: 0, lostUsable: 0, wrongItems: [], answered: false, selectedVal: null, currentOptions: [] };
   document.getElementById('quiz-screen').classList.add('open');
   renderQuizScreen();
+}
+function reviewWrongFromResult() {
+  const items = quiz ? quiz.wrongItems.slice() : [];
+  startReviewOf(items);
 }
 
 function checkQuizAnswer() {
@@ -1900,16 +1917,38 @@ function checkQuizAnswer() {
   const isCorrect = q.kind === 'char' ? (quiz.selectedVal === q.item.char) : (quiz.selectedVal === q.phrase.id);
   if (q.kind !== 'char') speakText(q.phrase.jp, 1.0);
   quiz.answered = true; quiz.lastCorrect = isCorrect;
-  if (isCorrect) { playTone('correct'); if (!q.isRetry) quiz.completedCount++; }
-  else { playTone('wrong'); quiz.wrongCount++; state.wrongReviewCount++; recordWrongItem(q); }
+  const usable = langData().usable;
+  if (isCorrect) {
+    playTone('correct');
+    if (!q.isRetry) {
+      quiz.completedCount++; quiz.firstTryCorrect++;
+      if (q.kind === 'phrase' && !usable.includes(q.phrase.id)) { usable.push(q.phrase.id); quiz.addedUsable++; }
+      if (quiz.mode === 'review') {
+        const nb = ensureLangNotebook();
+        if (q.kind === 'phrase') delete nb.phrases[String(q.phrase.id)];
+        else delete nb.chars[`${q.charTab}:${q.item.char}`];
+        renderWrongNotebookBadges();
+      }
+    }
+  } else {
+    playTone('wrong'); quiz.wrongCount++; recordWrongItem(q);
+    if (q.kind === 'phrase') {
+      const i = usable.indexOf(q.phrase.id);
+      if (i >= 0) { usable.splice(i, 1); quiz.lostUsable++; }
+    }
+    const sameItem = w => w.kind === q.kind && (q.kind === 'phrase' ? w.phrase.id === q.phrase.id : w.item.char === q.item.char);
+    if (!quiz.wrongItems.some(sameItem)) quiz.wrongItems.push(q.kind === 'phrase' ? { kind: 'phrase', phrase: q.phrase } : { kind: 'char', charTab: q.charTab, item: q.item });
+  }
+  saveStore();
   renderQuizScreen();
 }
 function nextQuizQuestion() {
   const finished = quiz.queue.shift();
+  quiz.answeredCount = (quiz.answeredCount || 0) + (quiz.lastCorrect ? 1 : 0);
   if (!quiz.lastCorrect) quiz.queue.push({ ...finished, isRetry: true });
   quiz.answered = false; quiz.selectedVal = null; quiz.currentOptions = [];
   if (quiz.queue.length === 0) {
-    quiz.stage = 'done'; state.xp += quiz.initialTotal * 10;
+    quiz.stage = 'done';
     if (quiz.lessonKey) {
       markLessonDone(quiz.lessonKey);
     }
@@ -1996,7 +2035,7 @@ function tagTargetLang() {
   const code = state.lang;
   document.querySelectorAll(TARGET_TEXT_SEL).forEach(el => { if (el.lang !== code) el.lang = code; });
 }
-const LANG_TAG_SKIP = '#timer-display, #toast, #quiz-counter, #stat-xp, #stat-done';
+const LANG_TAG_SKIP = '#timer-display, #toast, #quiz-counter, #stat-usable, #stat-done';
 new MutationObserver(records => {
   if (records.every(r => r.target.closest && r.target.closest(LANG_TAG_SKIP))) return;
   tagTargetLang();

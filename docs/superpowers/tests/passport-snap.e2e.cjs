@@ -95,6 +95,53 @@ test('persist-settings', async () => {
   eq(await page.evaluate(() => state.courseMode), 14, 'course mode');
 });
 
+// ---------- Task 2: 쓸 수 있는 문장과 결과 화면 ----------
+test('usable-first-try', async () => {
+  const page = await open();
+  await page.evaluate(() => startRandomSprint());
+  await answerAll(page, { wrong: 2 });
+  eq((await page.textContent('#result-first')).trim(), '8/10', 'first try');
+  assert((await page.textContent('#result-usable')).includes('+8'), 'usable +8');
+  assert((await page.textContent('#result-wrong')).includes('2'), 'wrong 2');
+  eq((await page.textContent('#result-primary')).trim(), '틀린 2문장 바로 복습 →', 'primary');
+  assert(!(await page.textContent('#quiz-body')).includes('오늘 학습을 마쳤습니다'), 'random is not today lesson');
+  eq((await stored(page)).langs.ja.usable.length, 8, 'stored usable');
+});
+test('review-recovers', async () => {
+  const page = await open();
+  await page.evaluate(() => startRandomSprint());
+  await answerAll(page, { wrong: 2 });
+  await page.click('#result-primary');
+  eq(await page.evaluate(() => quiz.queue.length), 2, 'review queue length');
+  await answerAll(page);
+  const s = await stored(page);
+  eq(s.langs.ja.usable.length, 10, 'usable after review');
+  eq(Object.keys(s.langs.ja.notebook.phrases).length, 0, 'notebook emptied');
+});
+test('wrong-removes-usable', async () => {
+  const page = await open({ storage: { version: 1, lang: 'ja', courseMode: 7, showKoPron: true, phraseDensity: null, langs: { ja: { completed: {}, usable: [1, 2, 3], favorites: [], notebook: { phrases: {}, chars: {} } } } } });
+  await page.evaluate(() => openPhraseQuiz({ mode: 'random', lessonKey: null, title: '테스트', phrases: LANGUAGE_PACKS.ja.phrases.filter(p => [1, 2, 3].includes(p.id)), includePreview: false }));
+  await answerAll(page, { wrongIds: [2] });
+  const s = await stored(page);
+  assert(!s.langs.ja.usable.includes(2), 'phrase 2 removed from usable');
+  assert((await page.textContent('#result-usable')).includes('다시 연습 필요'), 'lost note shown');
+});
+test('no-xp', async () => {
+  const page = await open({ width: 1280, height: 900 });
+  await page.evaluate(() => startRandomSprint());
+  await answerAll(page);
+  assert(!(await page.evaluate(() => document.body.innerText)).includes('XP'), 'no XP on result');
+  await page.evaluate(() => closeQuizScreen());
+  assert(!(await page.evaluate(() => document.body.innerText)).includes('XP'), 'no XP on home');
+});
+test('all-correct', async () => {
+  const page = await open();
+  await page.evaluate(() => startRandomSprint());
+  await answerAll(page);
+  assert((await page.textContent('#result-wrong')).includes('모두 한 번에 맞힘'), 'all correct note');
+  eq((await page.textContent('#result-primary')).trim(), '코스로 돌아가기', 'primary when all correct');
+});
+
 (async () => {
   browser = await chromium.launch({ channel: 'chrome' });
   let pass = 0, fail = 0;
