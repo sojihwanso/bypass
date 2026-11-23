@@ -441,7 +441,8 @@ img, svg { display: block; max-width: 100%; }
   align-items: center;
   gap: 5px;
   padding: 4px 11px;
-  border-radius: var(--r-pill);
+  /* 한 줄일 때는 알약 모양, 좁은 화면에서 두 줄이 되면 둥근 사각형으로 (찌그러진 타원 방지) */
+  border-radius: 14px;
   border: 1px solid rgba(24, 24, 27, 0.22);
   background: var(--bf-soft);
   color: var(--bf-ink);
@@ -743,6 +744,7 @@ img, svg { display: block; max-width: 100%; }
 }
 
 .btn-link-inline {
+  white-space: nowrap;
   background: none;
   border: 0;
   padding: 2px 4px;
@@ -1446,9 +1448,22 @@ img, svg { display: block; max-width: 100%; }
 .block-actions { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
 .blk-btn { padding: 3px 8px; border-radius: 7px; border: 1px solid #D4D4D8; background: var(--bf-paper); font-size: 12px; font-weight: 600; color: var(--bf-muted); cursor: pointer; }
 .blk-btn:hover { border-color: var(--bf-ink); color: var(--bf-ink); }
-.source-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--bf-muted); background: var(--bf-soft); padding: 2px 8px; border-radius: var(--r-pill); border: 0; cursor: pointer; }
+.blk-btn { white-space: nowrap; flex: none; }
+/* 카드 머리줄(제목 + 칩·버튼): 좁으면 제목을 찌그러뜨리지 말고 칩을 다음 줄로 */
+.card > div:first-child[style*="space-between"] { flex-wrap: wrap; row-gap: 6px; }
+.card > div:first-child[style*="space-between"] > .chip,
+.card > div:first-child[style*="space-between"] > .btn { white-space: nowrap; flex: none; }
+@media (max-width: 640px) {
+  /* 노트 블록 도구줄: 버튼은 한 줄(넘치면 옆으로 밀기), 출처·AI 보충 표시는 아래 줄에 넓게 */
+  .block-controls { flex-wrap: wrap; row-gap: 6px; }
+  .block-actions { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .block-actions::-webkit-scrollbar { display: none; }
+  .block-controls > div:last-child { width: 100%; flex-wrap: wrap; }
+  .block-controls .ai-sup-badge { margin-left: 0; }
+}
+.source-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--bf-muted); background: var(--bf-soft); padding: 2px 8px; border-radius: 11px; border: 0; cursor: pointer; text-align: left; max-width: 100%; overflow-wrap: anywhere; }
 .source-tag.clickable:hover { background: var(--bf-lime-soft); color: var(--bf-ink); }
-.ai-sup-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: var(--r-pill); background: var(--warn-bg); color: var(--warn); font-size: 11.5px; font-weight: 700; margin-left: 6px; }
+.ai-sup-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 11px; background: var(--warn-bg); color: var(--warn); font-size: 11.5px; font-weight: 700; margin-left: 6px; white-space: nowrap; flex: none; }
 [contenteditable="true"]:focus { outline: 1.5px dashed var(--bf-ink); outline-offset: 3px; border-radius: 4px; }
 
 .blk-title { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; padding-bottom: 6px; border-bottom: 1.5px solid var(--bf-ink); }
@@ -1538,9 +1553,10 @@ img, svg { display: block; max-width: 100%; }
 .modal-backdrop { position: fixed; inset: 0; z-index: 100; background: rgba(24,24,27,0.45); display: none; align-items: center; justify-content: center; padding: 16px; }
 .modal-backdrop.open { display: flex; }
 .modal-box { width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; background: var(--bf-paper); border: 1.5px solid var(--bf-ink); border-radius: var(--r-dialog); padding: 26px; box-shadow: 0 6px 0 rgba(24,24,27,0.16), 0 24px 48px -12px rgba(24,24,27,0.28); }
-.modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.modal-head .modal-title { min-width: 0; }
 .modal-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
-.icon-close { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--bf-ink); background: var(--bf-paper); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-weight: 700; }
+.icon-close { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--bf-ink); background: var(--bf-paper); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-weight: 700; }
 .icon-close:hover { background: var(--bf-lime); }
 
 .toast-stack { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 120; display: flex; flex-direction: column; gap: 8px; pointer-events: none; width: min(440px, calc(100vw - 32px)); }
@@ -1900,7 +1916,7 @@ img, svg { display: block; max-width: 100%; }
 
     <div class="top-right">
       <span class="offline-dot" id="offline-indicator" style="display:none">오프라인</span>
-      <button type="button" class="ver-pill" data-version-tap title="버전 정보">v. 2.0.0</button>
+      <button type="button" class="ver-pill" data-version-tap title="버전 정보">v. 2.0.1</button>
       <a href="/" class="bypass-link" title="Bypass 홈으로 이동" aria-label="Bypass 사이트로 이동">
         <!-- Bypass diamond logo (PDF p.8) -->
         <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
@@ -2500,7 +2516,7 @@ img, svg { display: block; max-width: 100%; }
 
 <!-- ==================== Footer (Centered Version, 5-tap trigger) ==================== -->
 <footer class="site-footer no-print">
-  <button type="button" class="ver-pill" data-version-tap>v. 2.0.0</button>
+  <button type="button" class="ver-pill" data-version-tap>v. 2.0.1</button>
   <div>공부노트 · 모든 원본 파일과 API 키는 이 브라우저 안에서만 처리됩니다.</div>
 </footer>
 
@@ -2530,10 +2546,20 @@ img, svg { display: block; max-width: 100%; }
 /* ==========================================================================
    app-core.js — 상태 관리, IndexedDB 오프라인 저장소(이 기기에만 보관), 샘플 데이터
    ========================================================================== */
-const APP_VERSION = '2.0.0';
+const APP_VERSION = '2.0.1';
 const STORAGE_LIMIT_BYTES = 100 * 1024 * 1024; // 100MB
 
 const PATCH_NOTES = [
+  {
+    version: '2.0.1',
+    date: '2026-11-24',
+    items: [
+      '휴대폰에서 팝업 닫기(×) 버튼이 타원으로 찌그러지던 문제 수정',
+      '설정의 "무료 티어 추천" 등 카드 제목 옆 표시가 두 줄로 접히지 않게 다음 줄로 정렬',
+      '휴대폰 노트 화면: 블록 도구 버튼은 한 줄, 출처(파일명·쪽수)는 아래 줄에 넓게 표시',
+      '칩·출처·AI 보충 표시가 좁은 화면에서도 모양이 깨지지 않게 다듬기'
+    ]
+  },
   {
     version: '2.0.0',
     date: '2026-11-24',
