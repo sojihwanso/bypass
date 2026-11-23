@@ -1,6 +1,6 @@
-/* 공부노트 Service Worker v1.0.0 — 오프라인 열람·복습 및 외부 라이브러리 캐시 */
-const CACHE_NAME = 'studynote-shell-v1.0.1';
-const LIB_CACHE = 'studynote-libs-v1.0.0';
+/* 공부노트 Service Worker v2.0.0 — 오프라인 열람·복습 및 외부 라이브러리 캐시 */
+const CACHE_NAME = 'studynote-shell-v2.0.0';
+const LIB_CACHE = 'studynote-libs-v2.0.0';
 
 const APP_SHELL = [
   './',
@@ -20,7 +20,6 @@ const PINNED_LIBS = [
   'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js',
   'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js',
   'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js',
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js',
   'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css'
 ];
 
