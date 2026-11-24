@@ -607,7 +607,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
     <div class="htools">
       <div class="seg2" role="group" aria-label="Language"><button type="button" data-act="lang" data-v="ko">한</button><button type="button" data-act="lang" data-v="en">EN</button></div>
       <button class="hbtn" type="button" data-act="fs" id="fsBtn" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
-      <button class="ver" type="button" aria-label="버전 2.4.2">v2.4.2</button>
+      <button class="ver" type="button" aria-label="버전 2.4.3">v2.4.3</button>
       <a class="tb-home" href="https://teambypass.vercel.app/" aria-label="Team Bypass 메인 페이지로 이동" title="Team Bypass"><svg viewBox="0 0 132 132" width="30" height="30" aria-hidden="true"><path d="M66 4L128 66L66 128L4 66Z" fill="#1C211E" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/><path d="M66 12L120 66L66 120L12 66Z" fill="#EE6A1F"/><path d="M66 18L114 66L66 114L18 66Z" fill="#1C211E"/><path d="M66 25L107 66L66 107L25 66Z" fill="#EE6A1F"/><g transform="translate(36 34) scale(0.6)" fill="#1C211E"><ellipse cx="44" cy="60" rx="27" ry="23"/><path d="M51 45C55 37 58 31 61 25L72 30C68 36 66 44 64 53Z"/><circle cx="66" cy="26" r="10"/><path d="M72 20C83 19 93 24 95 32C96 38 91 41 88 37C86 34 82 33 74 33Z"/><path d="M19 52C10 47 7 40 11 34C14 43 20 46 23 46Z"/><path d="M37 80L35 92L27 95L41 95L42 81Z"/><path d="M51 80L51 92L44 95L58 95L56 81Z"/><circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/><path d="M32 55C40 50 51 54 54 64" fill="none" stroke="#EE6A1F" stroke-width="2.6" stroke-linecap="round"/></g></svg></a>
     </div>
   </div>
@@ -645,7 +645,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
     <span id="footTxt"></span>
     <p class="book" id="footBook"></p>
     <p class="disclaimer" role="note" id="footDisc"></p>
-    <div class="ver-row"><button class="ver" type="button" aria-label="버전 2.4.2">v2.4.2</button></div>
+    <div class="ver-row"><button class="ver" type="button" aria-label="버전 2.4.3">v2.4.3</button></div>
   </div>
 </footer>
 
@@ -658,7 +658,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
 <div id="dlgRoot"></div>
 
 <script src="egg.js"></script>
-<script src="tutor.js?v=2.4.2"></script>
+<script src="tutor.js?v=2.4.3"></script>
 <script>
 /* ================= I18N ================= */
 let LANG="ko";
@@ -703,7 +703,7 @@ planHint:"해도를 눌러 WPT 추가 · WPT를 끌어 이동 · 길게 눌러 �
 chkLand:"레그 {0}→{1}: 육지를 지납니다",chkSafe:"레그 {0}→{1}: 안전 등심선({2} m)보다 얕은 수역을 지납니다",chkHaz:"레그 {0}→{1}: {2} (수심 {3} m)이 XTD 채널 안에 있습니다",chkArea:"레그 {0}→{1}: {2}을(를) 지납니다",chkTurn:"WPT {0}: 선회반경에 비해 레그가 짧습니다",chkOk:"레그 {0}→{1}: 이상 없음",chkHead:"XTD 채널과 안전 등심선 {0} m 기준으로 검사합니다.",chkNg:"위험 {0}건 · 항로를 수정하세요",chkAllOk:"모든 레그가 안전합니다",
 helpT:"도움말 · 시스템 정보",sysInfo:"시스템 정보",seed:"시드",area:"해역 중심",cells:"해도 셀",
 helpBody:`<h4>시작 화면 · 시나리오</h4><ul><li><b>없음 (자유 항해)</b>: 목표 없이 자유롭게 항해합니다. 시작 위치는 임의 해역 / 위경도 지정 / TSS 해역(실제 TSS 통항로 입구) 중에서 고르거나, 저장된 항로를 골라 그 항로의 WPT1에서 출발합니다.</li><li><b>랜덤 시나리오</b>: 임의 해역에 계획 항로·조우선·어선·정박선·TSS를 만듭니다. 시드를 넣으면 같은 해역과 항로를 다시 만들 수 있습니다. <b>목표</b>: 마지막 WPT(GOAL) 0.3 NM 안으로 들어오면 결과(걸린 시간·항주 거리·2 NM 이내 접근 선박·최근접 거리·좌초)를 보여 주고 시작 화면으로 돌아갑니다.</li><li><b>이전 시나리오 계속</b>: 15초마다, 그리고 페이지를 닫을 때 이 브라우저에 자동 저장된 상태에서 이어 갑니다.</li><li><b>자유 항해계획</b>: 자선과 다른 선박 없이 해도에서 항로 계획만 짭니다(항로계획 모드로 시작). 해도를 옮기면 멈춘 곳의 상세 해도가 따라오고, 만든 항로는 저장 항로(최대 10개)로 남아 자유 항해에서 바로 쓸 수 있습니다. 이 모드는 이어하기 저장을 덮어쓰지 않습니다.</li><li>시작 창은 네 모드(자유 항해 · 랜덤 시나리오 · 이전 시나리오 계속 · 자유 항해계획)를 2×2 칸으로 고르고, 아래에 고른 모드의 설정이 나옵니다.</li><li><b>충돌</b>: 자선이 다른 선박이나 물표(부표·등부표·계류부표·등대, 흘수보다 얕은 침선·장애물·수중암)와 0.05 NM(약 93 m) 이내로 접근하면 충돌로 판정해 즉시 시나리오를 끝냅니다. 화면이 검게 어두워지며 상대·위치·시각을 보여 주고, 버튼으로 시작 화면에 돌아갑니다. 저장된 진행 상태는 지워집니다.</li><li>상대선 수(난이도)는 상단 <b>상대선</b> 버튼으로 언제든 바꿉니다 (없음 → 쉬움 → 중간 → 어려움).</li><li>수심은 대륙붕 위치를 반영한 가상 모델에 시드마다 ±5 m 이내의 변화를 줍니다. 연안의 침선·장애물·특수표지·계류부표·양식장 일부(세션 물표)는 새로고침할 때마다 새로 놓입니다.</li></ul>
-<h4>화면 구성</h4><ul><li><b>헤더</b>: 한/EN 언어, 전체 화면, 버전, Team Bypass.</li><li><b>상태바(위)</b>: 표시 모드(전자해도/컨닝), 운용 모드 항해·해도관리·항로계획, 기타(시나리오 선택·새 시나리오·다시 시작·지금 저장·대기), 레이더 지우기, 해도만(누르고 있기), 자선으로, 상대선(난이도), 해도 수정 잠금, 표시 기준(기본/표준/전체, 기본값 전체), 도움말, 해도 방향(N UP → H UP → C UP 전환), 설정, 시각(UTC/LT), 정보창.</li><li><b>퀵 액세스 바(왼쪽)</b>: 모드별 기능 버튼과 공통 버튼(해도 정보, 표시, 기록, 주간/박명/야간 = 화면 전체 라이트·다크, 밝기, MOB, 캡처).</li><li><b>해도 영역</b>: 축척·표시 모드 상자(왼쪽 위), 커서 위치 상자(오른쪽 위), EBL·VRM 상자(아래), 영구 경고(아래 가운데). 실제 TSS(싱가포르·말라카, 한국 남해 홍도·보길도·거문도, 수에즈만·포트사이드·바브엘만데브, 다르다넬스·보스포러스, 도버 해협, 호르무즈)는 자홍색 분리대·점선 경계·통항 방향 화살표로 항상 표시됩니다.</li><li><b>오른쪽 정보창</b>: 센서 정보, 자선 조종, 자선 기능(시나리오 상태·GOAL까지 거리), 항로 정보, Overlay/NAV Tools, 경보 상자. ⋮⋮ 손잡이로 순서를 바꾸고, 조종 창을 띄우면 자선 조종 상자는 숨겨집니다.</li></ul>
+<h4>화면 구성</h4><ul><li><b>헤더</b>: 한/EN 언어, 전체 화면, 버전, Team Bypass.</li><li><b>상태바(위)</b>: 표시 모드(전자해도/Conning), 운용 모드 항해·해도관리·항로계획, 기타(시나리오 선택·새 시나리오·다시 시작·지금 저장·대기), 레이더 지우기, 해도만(누르고 있기), 자선으로, 상대선(난이도), 해도 수정 잠금, 표시 기준(기본/표준/전체, 기본값 전체), 도움말, 해도 방향(N UP → H UP → C UP 전환), 설정, 시각(UTC/LT), 정보창.</li><li><b>퀵 액세스 바(왼쪽)</b>: 모드별 기능 버튼과 공통 버튼(해도 정보, 표시, 기록, 주간/박명/야간 = 화면 전체 라이트·다크, 밝기, MOB, 캡처).</li><li><b>해도 영역</b>: 축척·표시 모드 상자(왼쪽 위), 커서 위치 상자(오른쪽 위), EBL·VRM 상자(아래), 영구 경고(아래 가운데). 실제 TSS(싱가포르·말라카, 한국 남해 홍도·보길도·거문도, 수에즈만·포트사이드·바브엘만데브, 다르다넬스·보스포러스, 도버 해협, 호르무즈)는 자홍색 분리대·점선 경계·통항 방향 화살표로 항상 표시됩니다.</li><li><b>오른쪽 정보창</b>: 센서 정보, 자선 조종, 자선 기능(시나리오 상태·GOAL까지 거리), 항로 정보, Overlay/NAV Tools, 경보 상자. ⋮⋮ 손잡이로 순서를 바꾸고, 조종 창을 띄우면 자선 조종 상자는 숨겨집니다.</li></ul>
 <h4>항로 계획</h4><ul><li><b>이름</b>: 항로 계획 중 편집 막대의 이름칸, WPT 표의 이름칸, 항로 관리의 이름 버튼에서 정합니다(최대 24자).</li><li><b>해도에서 만들기</b>: 항로계획 모드 → 항로 계획 → 해도를 눌러 WPT 추가, 끌어서 이동, 길게 눌러 삭제·삽입·WPT 속성.</li><li><b>WPT 표</b>: 편집 막대의 WPT 표 버튼(또는 위경도 입력, 항로 관리의 WPT 표) → 모든 WPT의 위경도(도°분.분′), XTD, <b>PI</b>(평행지표선, 구간 진행 방향 오른쪽 + / 왼쪽 −, 최대 3 NM), <b>WPT 인식 반경</b>(최대 3 NM, 이 원 안에 들어오면 다음 WPT로 전환), 선회 반경, 속력을 한 화면에서 수정합니다. XTD·PI는 그 WPT로 들어오는 구간의 값입니다. 위쪽 일괄 적용 줄로 PI·인식 반경·XTD를 한 번에 바꿀 수 있습니다.</li><li><b>PI 일괄</b>: 편집 막대의 PI 일괄 버튼으로 이 항로 모든 구간의 PI를 한 번에 정합니다(최대 ±3 NM).</li><li><b>구간 편집</b>: 항로의 구간(두 WPT 사이 선)을 누르면 출발·도착 WPT 위경도, XTD, PI, 인식 반경, 선회 반경, 속력을 고칩니다. 감시 중인 항로, 항로계획 모드의 선택 항로, 편집 중인 항로 모두 됩니다(편집 중에는 선 위를 누르면 WPT 추가 대신 구간 편집).</li><li>해도에는 PI가 점선과 'PI 1.20S' 표시로, 인식 반경은 WPT 둘레 점선 원으로 보입니다. 항로는 최대 10개까지 브라우저에 저장되고, <b>해도 수정 잠금</b>을 켜면 만들기·편집·삭제·이름 바꾸기가 막힙니다.</li></ul>
 <h4>사용자 해도 (User Chart)</h4><ul><li><b>만들기</b>: 항로계획 모드 → <b>사용자 해도</b> → 새 사용자 해도. 위쪽 도구 막대에서 도구를 고르고 해도를 누릅니다. 하나의 사용자 해도에 여러 물체(마크)를 담고, 보관함에는 최대 10개까지 저장됩니다.</li><li><b>물체</b>: 라벨 마크(라벨·점·원형·마름모·핀, 표시 문자), 선(항해선·해안선·항로선·등심선), 클리어링 라인(NMT/NLT), 구역(다각형), 원(반경 0.1~100 NM), 조류(실측·예측, 방향·속도·시각). 색상 8가지(색 견본과 이름으로 선택), 선 굵기 1~5, 채움 농도 0~75%. 이름·표시 문자의 <b>문자 색</b>은 마크 색과 따로 정할 수 있습니다(자동 = 마크와 같은 색).</li><li><b>좌표 직접 입력</b>: 속성 창에서 라벨·원·조류는 위경도를, 구역·선·클리어링 라인은 꼭짓점마다 위경도(도°분.분′)를 표로 고치고 점을 추가·삭제할 수 있습니다(구역 3점, 선 2점 이상).</li><li><b>그리기</b>: 선·구역은 점을 차례로 찍고 <b>그리기 끝</b>(또는 오른쪽 클릭 메뉴), 원은 중심 → 반경 순서로 누릅니다. ↖ 상태에서 물체를 누르면 속성 창, 끌면 이동, 오른쪽 클릭으로 꼭짓점 삽입·삭제와 물체 삭제. Undo, 물체 목록(편집·이동·삭제), 이름 입력, 저장·취소.</li><li><b>Danger</b>: 체크한 물체는 Look-ahead 영역에 들어오면 <b>사용자 해도 위험 물체</b> 경고, 항로 점검에서도 XTD 채널 안이면 경고합니다.</li><li><b>Notes</b>: 선·구역·원에 메시지를 붙입니다. E는 들어가거나(선은 알림 거리 안) 접근할 때, P는 10 NM 앞에서 알림. Danger와 함께 쓸 수 없습니다.</li><li><b>표시·감시 선택</b>: 사용자 해도 관리 창의 체크, 항해 모드 <b>항해·항로 ▾ → 사용자 해도 선택</b>, 시작 창의 사용자 해도 체크(여러 개 가능). 항로에 연결한 사용자 해도(WPT 표의 연결 사용자 해도, 편집 막대의 UC 버튼)는 그 항로를 감시하는 동안 함께 켜집니다.</li></ul>
 <h4>마우스 · 터치 조작</h4><ul><li>해도 끌기: 화면 이동 (자선으로 버튼 또는 'TM 리셋 꺼짐' 표시로 복귀)</li><li>휠 / 두 손가락 벌리기: 축척 변경</li><li>물표 누르기: 선택·활성화, 정보 카드 표시 · 항로 구간 누르기: 구간 편집</li><li>오른쪽 센서 정보의 POSN 행 4번 연속 누르기: 자선 위치 변경(위도·경도 입력, 육지·얕은 곳은 거부)</li><li>오른쪽 클릭 / 길게 누르기: 상황 메뉴 (픽 리포트, 범례, 중앙 이동, <b>자선 위치 고정(Off Centre)</b> — 누른 화면 위치에 자선을 고정하고 해도가 따라 움직임, EBL/VRM 지정)</li><li>EBL 선·VRM 원을 끌어 직접 조절, 아래 상자의 ◀ ▶ 또는 휠로 미세 조절, 상자를 눌러 켜고 끄기, 상자의 <b>OC</b>(오프센터) 버튼 → 해도에서 한 점을 눌러 그 점을 EBL·VRM 원점으로 고정 (다시 누르면 자선 원점)</li><li>설정 침로·속력 값: 누르면 숫자 입력, 위아래로 끌거나 휠로 조절, ± 버튼은 누르고 있으면 연속 변경</li><li>조종 창: 제목줄을 끌어 이동, ▁ 로 작게, × 로 닫기 · 오른쪽 정보창 상자: ⋮⋮ 를 끌어 순서 변경</li></ul>
@@ -794,10 +794,10 @@ function t(k,args){let s=(I18N[LANG]&&I18N[LANG][k]);if(s==null)s=I18N.en[k];if(
   if(args)s=s.replace(/\{(\d)\}/g,(m,i)=>args[i]!=null?args[i]:"");return s}
 /* ---- 메뉴 라벨 (v1.1) ---- */
 Object.assign(I18N.ko,{
-dm_ECDIS:"전자해도",dm_CONNING:"컨닝",dm_RADAR:"레이더 (미지원)",dm_AMS:"경보관리 (미지원)",
+dm_ECDIS:"전자해도",dm_CONNING:"Conning",dm_RADAR:"레이더 (미지원)",dm_AMS:"경보관리 (미지원)",
 md_NAVI:"항해",md_CHARTS:"해도관리",md_PLAN:"항로계획",sb_others:"기타",sb_clr:"레이더 지우기",sb_only:"해도만",sb_std:"표준 화면",
 db_BASE:"기본 표시",db_STD:"표준 표시",db_ALL:"전체 표시",
-ia_voyage:"항해<br>항로",ia_tgt:"물표",ia_conn:"컨닝",ia_plan:"항로<br>계획",ia_report:"보고서",ia_check:"항로<br>점검",ia_manage:"항로<br>관리",ia_auto:"자동<br>설치",ia_mch:"해도<br>관리",ia_cell:"셀<br>상태",ia_lic:"라이<br>선스",ia_key:"공개키",ia_cinfo:"해도<br>정보",ia_disp:"표시",ia_log:"기록",
+ia_voyage:"항해<br>항로",ia_tgt:"물표",ia_conn:"Conning",ia_plan:"항로<br>계획",ia_report:"보고서",ia_check:"항로<br>점검",ia_manage:"항로<br>관리",ia_auto:"자동<br>설치",ia_mch:"해도<br>관리",ia_cell:"셀<br>상태",ia_lic:"라이<br>선스",ia_key:"공개키",ia_cinfo:"해도<br>정보",ia_disp:"표시",ia_log:"기록",
 pal_day:"주간",pal_dusk:"박명",pal_night:"야간",
 bxNav:"오버레이·항해 도구",h_man:"수동",h_auto:"자동",simL:"배속",offset:"오프셋",nonEnc:"비공식 해도",
 tmOn:"TM 리셋 켜짐",tmOff:"TM 리셋 꺼짐",rmOn:"상대운동",rmOff:"상대운동 해제",shipOff:"자선 화면 밖",
@@ -840,7 +840,7 @@ const HELPMENU=[
 ["버전","Version","현재 버전입니다.","Current version."],
 ["Team Bypass","Team Bypass","Team Bypass 메인 페이지로 이동합니다.","Opens the Team Bypass home page."]]},
 {ko:"상태바 (화면 위)",en:"Status bar (top)",rows:[
-["전자해도 ▾","ECDIS ▾","표시 모드를 고릅니다. 전자해도 화면과 컨닝(계기) 화면을 오갑니다. 레이더·경보관리 화면은 시뮬레이터에서 지원하지 않습니다.","Selects the display mode: the chart display or the conning (instrument) display. Radar and AMS displays are not available in the simulator."],
+["전자해도 ▾","ECDIS ▾","표시 모드를 고릅니다. 전자해도 화면과 Conning(계기) 화면을 오갑니다. 레이더·경보관리 화면은 시뮬레이터에서 지원하지 않습니다.","Selects the display mode: the chart display or the conning (instrument) display. Radar and AMS displays are not available in the simulator."],
 ["항해","NAVI","항해 감시 모드입니다. 항로 감시, 물표 감시, 해도 경보가 동작합니다.","Voyage navigation mode: route monitoring, target monitoring and chart alerts run here."],
 ["해도관리","CHARTS","해도 관리 모드입니다. 해도 셀 경계(자홍 점선)를 보여 주고 셀 목록·상태·라이선스를 확인합니다.","Chart maintenance mode: shows chart cell limits (magenta dashes) and lists cells, status and licences."],
 ["항로계획","PLAN","항로 계획 모드입니다. 항로를 새로 만들거나 편집하고 점검합니다.","Voyage planning mode: create, edit and check routes."],
@@ -860,7 +860,7 @@ const HELPMENU=[
 ["◀","◀","바를 좁게 접습니다. 접힌 바를 누르면 다시 펼칩니다.","Minimises the bar; tap the narrow bar to restore it."],
 ["항해·항로","Voyage","감시할 항로 선택, 항로 감시 중지, 사용자 해도 선택(감시할 사용자 해도 여러 개), 감시 정보(남은 거리·ETA), 항로 계획으로 이동.","Select a route to monitor, stop monitoring, select user charts to monitor (several allowed), monitoring info (distance to go, ETA), go to planning."],
 ["물표","AIS/TT","모든 물표의 방위·거리·COG·SOG·CPA·TCPA 목록. 행을 누르면 그 물표를 선택합니다.","List of all targets with bearing, range, COG, SOG, CPA and TCPA; tap a row to select."],
-["컨닝","Conning","선수방위 나침반, 속력, 선회율, 해류, 바람, 선저 여유수심, XTD를 큰 숫자로 보여 줍니다.","Large readouts: heading compass, speeds, rate of turn, current, wind, under-keel clearance, XTD."],
+["Conning","Conning","선수방위 나침반, 속력, 선회율, 해류, 바람, 선저 여유수심, XTD를 큰 숫자로 보여 줍니다.","Large readouts: heading compass, speeds, rate of turn, current, wind, under-keel clearance, XTD."],
 ["조종 창","Ctrl Win","자선 조종을 따로 떠 있는 창으로 엽니다(타각 게이지, 텔레그래프, RPM 미세 조정, 타각 제한). 제목줄을 끌어 이동, ▁ 작게, × 닫기. 열려 있는 동안 오른쪽 자선 조종 상자는 숨겨집니다.","Opens ship control as a floating window (rudder gauge, telegraph, fine RPM, rudder limit). Drag the title bar to move, ▁ to compact, × to close. The right-panel Ship control box is hidden while it is open."]]},
 {ko:"퀵 액세스 바 · 항로계획 모드",en:"Quick access bar · PLAN",rows:[
 ["항로 계획","Planning","새 항로 만들기 또는 기존 항로 편집. 해도를 눌러 WPT 추가, 끌어서 이동, 길게 눌러 삭제·삽입·속성. 편집 막대(해도 위쪽): 항로 이름 입력칸, WPT 표(연결 사용자 해도 포함, 모든 WPT의 위경도·XTD·PI·인식 반경·선회 반경·속력을 한 화면에서 수정, PI·인식 반경·XTD 일괄 적용), PI 일괄(이 항로 모든 구간의 PI를 한 번에, 최대 ±3 NM), Undo, Check, 저장, 취소. 편집 중 구간(두 WPT 사이 선)을 누르면 그 구간 편집 창이 열립니다.","New route or edit an existing one. Tap to add WPTs, drag to move, long-press to delete, insert or edit properties. Edit bar (top of chart): route name field, WPT table (with linked user charts, edit lat/lon, XTD, PI, arrival radius, turn radius and speed of every WPT on one screen, with bulk PI / arrival radius / XTD), PI bulk (sets PI on every leg of the route at once, up to ±3 NM), Undo, Check, Save, Cancel. Tapping a leg (line between two WPTs) while editing opens leg editing."],
@@ -2942,8 +2942,9 @@ function dlgUCSelect(){const cur=S.ucActive||[];
     d.querySelector("#usOk").onclick=()=>{S.ucActive=ucReadChecks(d,"ucsel");logEv("evUcSel",[S.ucActive.length]);chartDirty=true;lookAheadSafe();close()}}})}
 
 /* ================= UI ================= */
-const VERSION="2.4.2";
+const VERSION="2.4.3";
 const PATCH_NOTES=[
+{v:"2.4.3",d:"2026-11-25",ko:["교육 소개정 단계에서 같은 셀을 다시 업데이트해도 정답 처리","화면 버튼 이름 '컨닝'을 'Conning'으로 통일","교육 문구 오타·표현 다듬기, 타각 단계 시연 영상을 S20(S10 두 번)으로 다시 제작"],en:["Small-correction step counts re-updating the same cell","Conning label unified","Training text fixes; rudder demo clip remade for S20"]},
 {v:"2.4.2",d:"2026-11-25",ko:["교육 과정 3 타각 단계: S20으로 30° 변침, 배속과 실제 선박의 선회 시간 차이 안내"],en:["Training rudder step: 30° alteration with S20, note on sim speed vs real turning time"]},
 {v:"2.4.1",d:"2026-11-25",ko:["조타기 속도 조정: 한쪽 35°에서 반대쪽 30°까지 약 18초 (SOLAS 기준 28초 이내, 컨테이너선 기준)"],en:["Steering gear: 35° one side to 30° other side in about 18 s (SOLAS limit 28 s)"]},
 {v:"2.4.0",d:"2026-11-25",ko:["셀 업데이트로 생기는 새 침선이 항로 위, 선박 10마일 이내에 나타남","교육 '해 보기' 막힘 해결: 해도를 찍는 동안 팝업 접기, 해도 수정 잠금·일시정지 자동 해제, 항로가 없으면 연습 항로 생성, 영어 화면 표시 단계 판정"],en:["New wreck from a cell update appears on the route within 10 NM of the ship","Training tasks no longer get stuck (pop-up folds while plotting, lock and pause released, practice route when none, English display-level step)"]},

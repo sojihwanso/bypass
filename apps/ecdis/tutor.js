@@ -288,7 +288,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
       quiz: [["오른쪽(우현 쪽)으로 밀리고 있어요", true], ["왼쪽(좌현 쪽)으로 밀리고 있어요", false], ["밀리지 않아요", false]],
       good: "정답이에요! COG가 HDG보다 오른쪽이니 우현 쪽으로 밀리고 있어요.", bad: "COG 095는 HDG 090보다 오른쪽이에요. 다시 생각해 볼까요?" },
     { id: "D7", mood: "explain", target: "#eblBox", before: navi, title: "EBL / VRM",
-      body: "방위·거리를 재는 도구예요. 물표까지 거리와 방위를 잴 때 써요.", say: "해도 아래쪽 EBL·VRM 칸의 ◀ ▶ 로 값을 바꿀 수 있어요." },
+      body: "방위·거리를 재는 도구예요. 물표까지 거리와 방위를 잴 때 써요.", say: "해도 아래쪽 EBL·VRM 칸의 ◀ ▶로 값을 바꿀 수 있어요." },
     { id: "D8", mood: "caution", target: () => { const b = q("#ackAll") || q('[data-act="ack"]'); return b && (b.closest(".al, .alb, div") || b); }, optTarget: true, before: navi, title: "경보 — 확인(ACK) · 경보 기록",
       body: "안전 등심선 횡단, 항로 이탈, 좌초 같은 경보가 뜨는 곳이에요. 경보는 확인(ACK)해야 꺼져요.",
       say: "경보는 끄는 게 목적이 아니에요. 왜 울렸는지부터 봐 주세요!" },
@@ -306,7 +306,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
   const mode = (m) => () => { try { if (S.mode !== m) setMode(m); } catch (e) {} };
   const plan = mode("PLAN"), charts = mode("CHARTS"), navi = mode("NAVI");
   const uc = '[data-act="uchart"]';
-  let cu0 = 0, bk0 = "{}";
+  let cu0 = "{}", bk0 = "{}";
   Tutor.STEPS.A.push(
     { id: "A0", mood: "explain", title: "항로 계획은 4단계예요",
       body: "IMO 지침(A.893(21))에 따라 <b>평가(Appraisal) → 계획(Planning) → 실행(Execution) → 감시(Monitoring)</b> 순서로 해요. 이번 과정에서는 앞의 두 단계를 ECDIS로 직접 해 볼 거예요.",
@@ -329,14 +329,14 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
       quiz: [["회사 절차에 따라 해도 대리점에 청구해요", true], ["허가 없이 그냥 써요", false], ["종이해도가 있으니 무시해요", false]],
       good: "맞아요! 빠진 셀은 바로 청구 목록에 넣어요.", bad: "공식 해도 없이 항해하면 안 돼요. 다시 골라 볼까요?" },
     { id: "A4", clip: "a4", mood: "caution", glow: true, target: () => q(".dlg [data-cu]") || q('[data-act="cm"][data-v="status"]'), cursor: true,
-      before: () => { charts(); cu0 = Object.keys(S.cellUpd || {}).length; try { if (!S.sc.cells.some((c) => cellLatest(c) > c.upd)) { const c = S.sc.cells[0]; c.latest = c.upd + 1; } } catch (e) {} }, title: "소개정 (Small correction)",
+      before: () => { charts(); cu0 = JSON.stringify(S.cellUpd || {}); try { if (!S.sc.cells.some((c) => cellLatest(c) > c.upd)) { const c = S.sc.cells[0]; c.latest = c.upd + 1; } } catch (e) {} }, title: "소개정 (Small correction)",
       body: "ENC는 주간 항행통보(NtM)에 맞춘 업데이트 파일로 최신화해요. 셀마다 업데이트 번호가 최신인지 확인하고, 임시·예고 통보(T&amp;P)나 항행경보처럼 ENC에 안 들어간 내용은 수동 개정이나 사용자 해도로 표시해요. 개정 내용은 해도 개정 기록부에 남겨요.",
       say: "업데이트를 안 한 ENC는 '오래된 종이해도'랑 같아요. 새로 생긴 침선이 안 보일 수 있어요!",
       task: "'셀 상태'를 열고, 반짝이는 '업데이트 적용' 버튼을 눌러 보세요.",
-      check: () => Object.keys(S.cellUpd || {}).length > cu0,
+      check: () => JSON.stringify(S.cellUpd || {}) !== cu0,
       good: "최신 해도가 됐어요! 업데이트로 새 침선이 해도에 생겼어요.", bad: "그 셀은 이미 최신이에요. 업데이트 번호를 다시 봐 주세요." },
     { id: "A5", mood: "explain", target: '[data-act="llroute"]', before: plan, title: "위도·경도 정리 — 0.1분 단위",
-      body: "WPT 위치는 도°분.분′ 형식으로, 가능하면 0.1분 단위로 정리해요(예: 35°06.4′N 129°03.7′E). 다만 반드시 피해야 하는 위험물이 0.1분(약 185 m) 범위 안에 있다면, 반올림하지 말고 정확한 위치로 정해야 해요. 0.1분은 약 185 m예요. 숫자를 깔끔히 맞춰 두면 다른 계기·서류로 옮길 때 오류가 줄고, 교대 당직자도 읽기 쉬워요.",
+      body: "WPT 위치는 도°분.분′ 형식으로, 가능하면 0.1분 단위로 정리해요(예: 35°06.4′N 129°03.7′E). 다만 반드시 피해야 하는 위험물이 0.1분(약 185 m) 범위 안에 있다면, 반올림하지 말고 정확한 위치로 정해야 해요.숫자를 깔끔히 맞춰 두면 다른 계기·서류로 옮길 때 오류가 줄고, 교대 당직자도 읽기 쉬워요.",
       say: "0.1분은 약 185 m예요! 항로 위치로는 충분히 정확하고, 받아 적기도 편해요.",
       note: "분 자리는 60을 넘을 수 없어요. 60분이 1도예요." },
     { id: "A6", clip: "a6", mood: "caution", target: '[data-act="rcheck"]', cursor: true, before: () => { plan(); try { eduEnsureRoute(false); } catch (e) {} S.checkMarks = null; }, title: "항로 시뮬레이션 · 수심 · 위험물 확인",
@@ -352,7 +352,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
       body: "다음은 사용자 해도(User chart)예요. ENC 위에 덧씌우는 '내 투명 필름'으로, 종이해도에 연필로 적던 내용을 여기 그려요. 경보 계산에 쓰이게 할 수도 있어요.",
       say: "이어서 User chart로 무엇을 표시하는지 하나씩 볼게요!" },
     { id: "B1", mood: "explain", target: uc, before: plan, title: "VTS Area",
-      body: "구역(다각형)으로 VTS 관제 해역 경계를 그리고 표시 문자에 'VTS ○○ CH 12'처럼 채널을 적어요. 알림을 '들어가면'으로 두면 진입할 때 메시지가 떠요.",
+      body: "구역(다각형)으로 VTS 관제 해역 경계를 그리고 표시 문자에 'VTS ○○ CH 12'처럼 채널을 적어요. 알림을 '들어가면/접근하면'으로 두면 진입할 때 메시지가 떠요.",
       say: "들어갈 때 메시지가 뜨게 하면 보고를 안 까먹어요." },
     { id: "B2", mood: "caution", target: uc, before: plan, title: "Abort line",
       body: "선을 그리고 'ABORT'라고 빨간색으로 표시해요. 이 선을 넘기 전까지는 항로를 포기하고 돌아갈 수 있는 마지막 지점이에요. 되돌릴 수 없는(Point of no return) 협수로·항내 진입 전에 둬요.",
@@ -366,7 +366,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
       body: "새로 보고된 침선·어망 구역처럼 ENC에 없는 위험물(항행경보, T&amp;P)을 점·구역으로 그리고 'Danger'를 켜요. 그러면 경보 계산에 들어가요.",
       say: "Danger와 알림 메시지는 같이 못 써요. 위험물은 Danger로 표시해 주세요!" },
     { id: "B6", mood: "explain", target: uc, before: plan, title: "보고 라인",
-      body: "선을 그리고 'REPORT: 선명·위치·ETA'처럼 보고 항목을 적어요. VTS·선박 보고제도(Ship reporting system)의 보고선이에요.", say: "알림을 '들어가면'으로 두면 선을 넘을 때 알려 드려요." },
+      body: "선을 그리고 'REPORT: 선명·위치·ETA'처럼 보고 항목을 적어요. VTS·선박 보고제도(Ship reporting system)의 보고선이에요.", say: "알림을 '들어가면/접근하면'으로 두면 선을 넘을 때 알려 드려요." },
     { id: "B7", mood: "explain", target: uc, before: plan, title: "항내 속도 제한 구역",
       body: "구역을 그리고 'MAX 10 kn'처럼 적어요. 항만 당국이 정한 속도 제한이에요. 한국 주요 항만의 선박 감속 운항 구역도 여기에 표시하면 좋아요.", say: "다가가면 메시지가 뜨게 해 두면 편해요." },
     { id: "B8", mood: "explain", target: uc, before: plan, title: "특정 해역 통과 시 보고 내용",
@@ -394,7 +394,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
     { id: "A9", clip: "a9", mood: "caution", target: '[data-act="manage"]', cursor: true, before: () => { plan(); try { eduEnsureRoute(false); } catch (e) {} bk0 = JSON.stringify(typeof bkLoad === "function" ? bkLoad() : {}); }, title: "항해 계기에 적용 · 백업 ECDIS",
       body: "완성한 항로를 '감시' 항로로 불러오면 XTD 경보, WPT 도착, 다음 변침 방위·거리가 표시돼요. 실제 선박에서는 백업 ECDIS에도 같은 항로를 넣고, 두 대의 항로가 같은지(이름·WPT 수·총 거리)를 꼭 비교해요.",
       say: "주 ECDIS만 고치고 백업 ECDIS를 안 고치는 실수가 정말 많아요!",
-      task: "'항로 관리'에서 항로를 '백업 ECDIS로 보내기' 한 뒤 '비교'를 눌러 보세요.",
+      task: "'항로 관리'에서 항로를 '백업 ECDIS로 보내기'를 누른 뒤 '비교'를 눌러 보세요.",
       check: () => JSON.stringify(S.backup || {}) !== bk0,
       good: "백업 ECDIS로 보냈어요! 항로를 고친 뒤에는 꼭 다시 비교해 주세요.", bad: "두 항로가 달라요. 백업 ECDIS로 다시 보내야 해요." },
     { id: "A10", mood: "think", target: '[data-act="owninfo"]', before: navi, title: "Passage Plan 확인 — UKC · Air draft",
@@ -405,7 +405,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
       good: "맞아요! 기준이 20%면 2.0 m가 필요해서 안 돼요. 속력이 빠르면 스쿼트(squat)로 더 가라앉는다는 것도 잊지 마세요.", bad: "UKC = 수심 − 흘수예요. 11.5 − 10.0 = 1.5 m, 필요한 건 1.0 m예요. 다시 볼까요?" },
     { id: "A11", mood: "happy", target: '[data-act="report"]', before: plan, title: "다른 서류·게시물에 항로 옮기기",
       body: "확정한 항로는 선교 게시용 Passage Plan, 항해일지, 종이해도 백업, 입항 서류, 기관부 통보 등에 같은 값으로 옮겨요. 옮길 때마다 WPT 번호·위경도를 서로 대조해요.",
-      say: "항로 계획 과정 끝! 이제 이 항로로 실제로 배를 몰아 볼까요? 교육 메뉴에서 '선박 조종'을 골라 주세요." }
+      say: "항로 계획 과정 끝! 이제 이 항로로 실제로 배를 몰아 볼까요? 다음 화면에서 '과정 3 · 선박 조종'을 골라 주세요." }
   );
 })();
 
