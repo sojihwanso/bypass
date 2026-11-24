@@ -1,0 +1,1916 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>선사록</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<script>try{var t=localStorage.getItem('sasarok-theme-v1');if(t!=='dark'&&t!=='light')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<style>
+:root{
+  --paper:#f1f2f4;
+  --sheet:#ffffff;
+  --ink:#16181d;
+  --muted:#5a606b;
+  --rule:#d3d6dc;
+  --accent:#c2410c;
+  --accent-bg:#ea580c;
+  --mark:#fb8c3c;
+  --soft:#fff1e6;
+  --plus:#1d7a4c;
+  --minus:#b3261e;
+  --bp-bg:#16181d; --bp-ink:#ffffff; --bp-btn:#ea580c; --bp-btn-ink:#ffffff;
+  --r-card:10px;--r-in:7px;--r-chip:6px;--r-tag:4px;--r-tbl:9px;
+  --font-body:"Pretendard Variable","Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --font-mono:"Pretendard Variable","Pretendard","Apple SD Gothic Neo",system-ui,sans-serif;
+  color-scheme:light;
+}
+/* 다크모드: 주황의 보색인 남색을 바탕으로, 강조는 주황 */
+:root[data-theme="dark"]{
+  --paper:#0b1626; --sheet:#112038; --ink:#e9eef6; --muted:#9db0ca; --rule:#24395a;
+  --accent:#ff9a52; --accent-bg:#f97316; --mark:#ff9a52; --soft:#1a2d4a;
+  --plus:#5cc28d; --minus:#f59187;
+  --bp-bg:#f97316; --bp-ink:#0b1626; --bp-btn:#0b1626; --bp-btn-ink:#ff9a52;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-feature-settings:"tnum" 0;background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
+p,li,dd,td,h1,h2,h3{text-wrap:pretty}
+a{color:var(--accent)}
+::placeholder{color:var(--muted);opacity:1}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;text-wrap:balance}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+.mono{font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+button{font:inherit;color:inherit}
+
+/* 머리 */
+.mast{background:var(--sheet);border-bottom:3px solid var(--accent-bg)}
+.topstrip{border-bottom:1px solid var(--rule);background:var(--paper)}
+.topstrip-in{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;padding-top:8px;padding-bottom:8px}
+.sx{position:relative;flex:1 1 360px;max-width:520px}
+.sx-box{display:flex;align-items:center;background:var(--sheet);border:1px solid var(--ink);border-radius:var(--r-in);overflow:hidden}
+.sx-box input{flex:1;min-width:0;border:0;background:none;color:var(--ink);font:inherit;font-size:14px;padding:8px 12px}
+.sx-box input:focus-visible{outline:none}
+.sx-box:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.sx-box button{border:0;border-left:1px solid var(--rule);background:none;cursor:pointer;padding:8px 13px;font-weight:600;font-size:14px}
+.sx-box button:hover{background:var(--paper)}
+.sx-panel{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;background:var(--sheet);border:1px solid var(--ink);border-radius:var(--r-card);box-shadow:0 10px 28px rgba(0,0,0,.18);max-height:min(70vh,520px);overflow:auto;padding:6px 0}
+.sx-panel[hidden]{display:none}
+.sx-sec{padding:6px 14px 2px;font-size:11.5px;color:var(--muted);font-family:var(--font-mono);letter-spacing:.04em}
+.sx-item{display:flex;align-items:center;gap:10px;padding:8px 14px;color:var(--ink);text-decoration:none;font-size:14px}
+.sx-item:hover,.sx-item.on{background:var(--paper)}
+.sx-item .sym{width:34px;height:20px;flex:0 0 auto}
+.sx-item small{color:var(--muted);font-size:12px;margin-left:auto;white-space:nowrap}
+.sx-help{padding:8px 14px;font-size:13.5px}
+.sx-help b{display:block}
+.sx-help span{color:var(--muted);font-size:13px}
+.sx-empty{padding:10px 14px;color:var(--muted);font-size:13.5px}
+.mast-meta{display:flex;align-items:center;gap:8px 18px;flex-wrap:wrap;font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+.cmp-top{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-body);font-size:13.5px;font-weight:600;color:var(--ink);text-decoration:none;border:1px solid var(--ink);border-radius:var(--r-in);padding:5px 12px;background:var(--sheet);white-space:nowrap}
+.cmp-top:hover{background:var(--accent-bg);color:#16181d;border-color:var(--accent-bg)}
+.cmp-top small{font-weight:400;font-size:12px;color:var(--muted)}
+.cmp-top:hover small{color:#16181d}
+.mast-top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 28px;padding:20px 24px 16px}
+.logo{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;text-decoration:none;color:var(--ink)}
+.logo b{color:var(--ink);white-space:nowrap;font-size:36px;font-weight:700;letter-spacing:-0.02em;line-height:1}
+.logo span{font-size:15px;color:var(--muted);font-weight:500}
+.navlinks{display:flex;gap:6px 22px;font-size:14px}
+.navlinks a{color:var(--ink);text-decoration:none;border-bottom:2px solid transparent;padding:2px 0}
+.navlinks a:hover,.navlinks a[aria-current="page"]{border-bottom-color:var(--mark)}
+
+main.wrap{padding:30px 24px 72px}
+.view[hidden]{display:none}
+.sheet{background:var(--sheet);border:1px solid var(--rule);border-radius:var(--r-card)}
+.label{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;color:var(--muted)}
+.note{font-size:12.5px;color:var(--muted)}
+.sym{display:block;width:40px;height:24px;color:var(--ink)}
+.sym.big{width:84px;height:50px}
+.star{font:inherit;font-size:19px;line-height:1;border:0;background:none;color:var(--muted);cursor:pointer;padding:4px 6px;border-radius:var(--r-tag)}
+.star:hover{color:var(--ink);background:var(--paper)}
+.star[aria-pressed="true"]{color:var(--accent-bg)}
+
+/* 홈 */
+.home-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:24px 28px;align-items:start}
+.home-side{display:grid;gap:24px;min-width:0}
+.types-foot{margin:0;padding:12px 20px 14px}
+/* 히어로: 항구 일러스트 (라이트 낮, 다크 밤) */
+.hero{position:relative;height:clamp(300px,30vw,420px);overflow:hidden;border-bottom:1px solid var(--rule);background:#d4e7f2}
+.hero[hidden]{display:none}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:right 40%}
+.hero .hero-night{display:none}
+:root[data-theme="dark"] .hero{background:#0b1626}
+:root[data-theme="dark"] .hero .hero-day{display:none}
+:root[data-theme="dark"] .hero .hero-night{display:block}
+.hero-in{position:relative;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+.hero h1{font-size:36px;line-height:1.3;font-weight:800;letter-spacing:-0.02em;color:#0f2238}
+.hero-lead{margin:10px 0 18px;color:#24384d;font-size:15px;max-width:30em}
+:root[data-theme="dark"] .hero h1{color:#fff}
+:root[data-theme="dark"] .hero-lead{color:#c9d6e6}
+.hero-cta{font:inherit;font-weight:700;font-size:15px;background:var(--accent-bg);color:#16181d;border:0;border-radius:var(--r-in);padding:10px 18px;cursor:pointer}
+.hero-cta:hover{filter:brightness(1.06)}
+.intro{align-self:center;padding:2px 4px 2px 0}
+.intro h1{font-size:28px;line-height:1.35;font-weight:600;letter-spacing:-0.015em}
+.intro p{margin:12px 0 0;color:var(--muted);max-width:44em}
+.fav{padding:16px 20px 18px}
+.fav.is-empty{display:flex;align-items:baseline;gap:12px;padding:14px 20px}
+.fav.is-empty .fav-grid{display:block;margin:0}
+.fav h2,.card-h h2{font-size:17px}
+.fav-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin-top:10px}
+.fav-grid h3{font-size:12.5px;font-weight:500;color:var(--muted);margin-bottom:6px}
+.fav-list{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.fav-list li{display:inline-flex;align-items:center;border:1px solid var(--rule);border-radius:var(--r-chip);background:var(--paper)}
+.fav-list a{display:inline-flex;align-items:center;gap:7px;color:var(--ink);text-decoration:none;padding:4px 4px 4px 9px;font-size:13.5px}
+.fav-list a:hover{text-decoration:underline}
+.fav-list .sym{width:26px;height:16px}
+.fav-list button{border:0;background:none;cursor:pointer;color:var(--muted);padding:4px 8px;font-size:14px;line-height:1}
+.fav-list button:hover{color:var(--minus)}
+.fav-empty{font-size:13px;color:var(--muted);margin:0}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 20px;border-bottom:1px solid var(--ink)}
+.more{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:var(--ink);text-decoration:none;border:1px solid var(--ink);border-radius:var(--r-in);padding:3px 11px;background:var(--sheet)}
+.more:hover{background:var(--ink);color:var(--sheet)}
+.news{display:flex;flex-direction:column;overflow:hidden}
+.news ol{list-style:none;margin:0;padding:0;max-height:430px;overflow-y:auto}
+.news li{padding:13px 20px;border-bottom:1px solid var(--rule);display:grid;grid-template-columns:48px 1fr;gap:4px 12px}
+.news li:last-child{border-bottom:0}
+.news .d{font-family:var(--font-mono);font-size:12px;color:var(--muted);padding-top:3px}
+.news a.t{color:var(--ink);text-decoration:none;font-weight:600;line-height:1.5}
+.news a.t:hover{text-decoration:underline;text-decoration-color:var(--mark);text-decoration-thickness:3px}
+.news p{margin:2px 0 0;font-size:13.5px;color:var(--muted)}
+.news .meta{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin-top:3px;font-size:12px;color:var(--muted)}
+.cat{display:inline-block;font-size:11.5px;line-height:1.5;padding:0 7px;border:1px solid var(--rule);border-radius:var(--r-tag);color:var(--muted);white-space:nowrap}
+.types{overflow:hidden}
+.tlist{list-style:none;margin:0;padding:0}
+.trow{display:grid;grid-template-columns:34px 56px minmax(0,1fr) auto auto;gap:4px 12px;align-items:center;padding:11px 16px 11px 10px;border-bottom:1px solid var(--rule);cursor:pointer}
+.trow:last-child{border-bottom:0}
+.trow:hover{background:var(--paper)}
+.trow .sym{width:54px;height:30px}
+.trow .tn{font-weight:600;font-size:15.5px}
+.trow .tn a{color:var(--ink);text-decoration:none}
+.trow .td{display:block;font-size:13px;color:var(--muted);font-weight:400;margin-top:1px}
+.trow .tc{text-align:right;white-space:nowrap}
+.trow .tc small{display:block;font-size:12px;color:var(--muted)}
+.trow .pk{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);white-space:nowrap}
+.trow .pk input{width:16px;height:16px;accent-color:var(--accent)}
+.bypass{background:var(--sheet);color:var(--ink);border:1px solid var(--rule);padding:18px 20px;border-radius:var(--r-card)}
+.bypass .bp-tag{font-size:12px;color:var(--muted)}
+.bypass h2{font-size:20px;letter-spacing:.04em;margin:4px 0 2px;font-weight:700}
+.bypass p{margin:8px 0 0;font-size:14px;line-height:1.7;color:var(--muted)}
+.bypass ul{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.bypass li{font-size:12.5px;border:1px solid currentColor;padding:1px 9px;border-radius:var(--r-tag);opacity:.9}
+.bypass a{display:inline-block;margin-top:14px;color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.bypass a:hover{filter:brightness(1.05)}
+.bshell{padding:0;overflow:hidden}
+.bshell .body{padding:16px 20px 18px}
+.bshell p{margin:0 0 12px;color:var(--muted);font-size:14px}
+.bslots{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:8px}
+.bslots li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;border:1px dashed var(--rule);border-radius:var(--r-in);padding:9px 12px;font-size:13.5px;color:var(--muted)}
+.bslots .cat{background:var(--paper)}
+.btn{font:inherit;font-weight:600;font-size:14px;background:var(--accent-bg);color:#16181d;border:0;padding:10px 18px;cursor:pointer;border-radius:var(--r-in);text-decoration:none;display:inline-block}
+.btn.ghost{background:var(--sheet);color:var(--ink);border:1px solid var(--ink)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* 뉴스 화면 */
+.page-h{font-size:28px;letter-spacing:-0.015em}
+.page-lead{margin:8px 0 18px;max-width:64ch;color:var(--muted)}
+.cats{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.chip{font:inherit;font-size:13.5px;padding:5px 13px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);cursor:pointer;border-radius:var(--r-chip)}
+.chip:hover{border-color:var(--ink)}
+.chip[aria-pressed="true"]{border-color:var(--accent-bg);background:var(--accent-bg);color:#16181d}
+.chip small{margin-left:4px;font-weight:600}
+.newsfull{list-style:none;margin:0;padding:0}
+.newsfull li{display:grid;grid-template-columns:88px 1fr;gap:6px 16px;padding:16px 22px;border-bottom:1px solid var(--rule)}
+.newsfull li:last-child{border-bottom:0}
+.newsfull .d{font-family:var(--font-mono);font-size:12.5px;color:var(--muted);padding-top:3px}
+.newsfull a.t{color:var(--ink);font-weight:600;font-size:16px;text-decoration:none}
+.newsfull a.t:hover{text-decoration:underline;text-decoration-color:var(--mark);text-decoration-thickness:3px}
+.newsfull p{margin:3px 0 0;color:var(--muted);font-size:14px}
+.newsfull .meta{margin-top:4px;font-size:12px;color:var(--muted);display:flex;gap:4px 10px;flex-wrap:wrap;align-items:center}
+
+/* 선종 화면 */
+.crumb{font-size:13px;color:var(--muted);margin-bottom:14px}
+.crumb a{color:var(--muted)}
+.type-head{display:grid;grid-template-columns:auto 1fr auto;gap:6px 22px;align-items:center;padding-bottom:20px;border-bottom:1px solid var(--ink)}
+.type-head .sym{margin-top:4px}
+.type-head h1{font-size:32px;line-height:1.2;letter-spacing:-0.015em}
+.type-head p{margin:10px 0 0;max-width:70ch}
+.type-head .acts{display:flex;gap:8px;align-items:center}
+.pc{display:grid;grid-template-columns:1fr;gap:0;border-bottom:1px solid var(--rule)}
+.pc section{padding:18px 26px 20px 0}
+.pc section + section{border-top:1px dashed var(--rule)}
+.pc h2{font-size:14.5px;font-weight:600;margin-bottom:8px}
+.pc ul{margin:0;padding:0;list-style:none}
+.pc li{position:relative;padding:5px 0 5px 22px;font-size:14.5px}
+.pc li::before{position:absolute;left:0;top:5px;font-family:var(--font-mono);font-weight:600}
+.pc .pros li::before{content:"+";color:var(--plus)}
+.pc .cons li::before{content:"−";color:var(--minus)}
+.refs{font-size:12.5px;color:var(--muted);padding:12px 0 0}
+.pc li.pc-x{display:none}
+.pc section.open li.pc-x{display:list-item}
+.pc-more{margin-top:6px;font-size:13.5px}
+#type-pc{margin-top:28px;border-top:1px solid var(--rule)}
+.refs a{margin-right:12px}
+.filters{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-end;padding:20px 0 16px}
+.fgroup{display:grid;gap:5px}
+.fgroup > span{font-size:12px;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--ink);border-radius:var(--r-in);overflow:hidden}
+.seg button{font-size:13.5px;background:var(--sheet);color:var(--ink);border:0;padding:6px 14px;cursor:pointer;white-space:nowrap}
+.seg button + button{border-left:1px solid var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--sheet)}
+select,.fgroup input[type="search"]{font:inherit;font-size:13.5px;padding:6px 10px;border:1px solid var(--ink);background:var(--sheet);color:var(--ink);border-radius:var(--r-in);min-height:34px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.check{display:flex;align-items:center;gap:6px;font-size:13.5px;min-height:34px;white-space:nowrap}
+.check input{width:16px;height:16px;accent-color:var(--accent)}
+.result-line{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:10px 0;border-top:1px solid var(--ink);font-size:13px;color:var(--muted)}
+.result-line button{font-size:13px;background:none;border:0;color:var(--accent);cursor:pointer;padding:0;text-decoration:underline}
+.result-line .rl-acts{display:flex;gap:16px;flex-wrap:wrap}
+.th-help{cursor:help}
+.th-help::after{content:" ?";font-size:11px;color:var(--muted)}
+#cap-legend{margin:0 0 10px;font-size:12.5px;color:var(--muted)}
+#cap-legend .ctag{margin:0 4px 0 10px}
+.th-sort{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+.reg th[aria-sort] .th-sort{color:var(--ink);font-weight:600;text-decoration:none}
+.reg th[aria-sort="ascending"] .th-sort::after{content:" ↑"}
+.reg th[aria-sort="descending"] .th-sort::after{content:" ↓"}
+.table-scroll{overflow-x:auto;border-radius:var(--r-tbl)}
+.reg{width:100%;border-collapse:separate;border-spacing:0;background:var(--sheet);border:1px solid var(--rule);border-radius:var(--r-tbl);overflow:hidden;min-width:980px}
+.reg th{font-weight:500;font-size:12.5px;color:var(--muted);text-align:left;padding:10px 14px;border-bottom:1px solid var(--rule);white-space:nowrap;background:var(--sheet)}
+.reg td{padding:14px;border-bottom:1px solid var(--rule);vertical-align:top;font-size:14px}
+.reg tr:last-child td{border-bottom:0}
+.reg tr.row{cursor:pointer}
+.reg tr.row:hover td{background:var(--paper)}
+.reg td.rk{font-family:var(--font-mono);color:var(--muted);width:44px;text-align:right}
+.reg td.pick{width:44px;text-align:center}
+.reg td.pick input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer}
+.pick-hit{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;margin:-13px -14px;cursor:pointer}
+.reg tr.row:focus-visible,.trow:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.reg .cname{font-weight:600;font-size:15px;display:block;white-space:nowrap}
+.reg .cname a{color:var(--ink);text-decoration:none}
+.reg .cname a:hover{text-decoration:underline}
+.reg .cname .sub{display:block;font-weight:400;font-size:12.5px;color:var(--muted)}
+.kind{display:inline-block;font-size:12px;padding:1px 8px;border:1px solid var(--ink);border-radius:var(--r-tag);white-space:nowrap}
+.kind.mgr{border-style:dashed}
+.kind.fx{border-color:var(--accent);color:var(--accent);margin-top:4px}
+.cap{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:500}
+.cap.cap-p{font-weight:700}
+.cap.cap-e{font-weight:400;color:var(--muted)}
+.cap.cap-e .ctag{color:var(--muted)}
+.ctag{display:inline-block;margin-left:6px;font-family:var(--font-body);font-size:11px;font-weight:400;border:1px solid currentColor;border-radius:var(--r-tag);padding:0 5px;vertical-align:1px}
+/* 신뢰 수준: 색이 아니라 채움으로 (보도 꽉 참, 환산 실선, 추정 점선) */
+.ctag{color:var(--ink)}
+.ctag.p{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.ctag.c{border-style:solid}
+.ctag.e{border-style:dashed;color:var(--muted)}
+.fleet{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.fleet small{display:block;font-family:var(--font-body);font-size:12px;color:var(--muted);white-space:normal;max-width:17em}
+.basis{display:inline-block;margin-left:6px;font-family:var(--font-body);font-size:11px;color:var(--muted);border:1px solid var(--rule);border-radius:var(--r-tag);padding:0 5px;vertical-align:1px}
+.routes{font-size:13.5px;min-width:9em}
+.other{display:flex;flex-wrap:wrap;gap:5px;min-width:11em}
+.other a{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;text-decoration:none;color:var(--ink);border:1px solid var(--rule);padding:1px 8px 1px 5px;border-radius:var(--r-chip);white-space:nowrap}
+.other a:hover{border-color:var(--accent)}
+.other .sym{width:22px;height:13px}
+.none{color:var(--muted);font-size:12.5px}
+.jobs{display:grid;gap:4px;justify-items:start}
+.jb{font-size:12px;padding:0 7px;border:1px solid var(--rule);border-radius:var(--r-tag);color:var(--muted);white-space:nowrap}
+.jb.on{border-color:var(--plus);color:var(--plus)}
+.jrot{font-size:12px}
+.empty-row td{padding:30px 14px;text-align:center;color:var(--muted)}
+.foot-note{margin-top:14px;max-width:96ch}
+
+/* 선사 화면 */
+.co-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 24px;align-items:flex-start;padding-bottom:18px;border-bottom:1px solid var(--ink)}
+.co-head h1{font-size:32px;letter-spacing:-0.015em;line-height:1.25}
+.co-head h1 small{font-size:15px;font-weight:500;color:var(--muted);margin-left:10px}
+.co-head .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center}
+.co-head .acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.co-grid{display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:28px;margin-top:22px;align-items:start}
+.co-main{display:grid;gap:22px}
+.blk{padding:0;overflow:hidden}
+.blk h2{font-size:15.5px;padding:12px 20px;border-bottom:1px solid var(--ink)}
+.blk .in{padding:14px 20px 18px}
+.blk p{margin:0 0 10px}
+.blk p:last-child{margin-bottom:0}
+dl.kv{display:grid;grid-template-columns:8.5em 1fr;gap:9px 18px;margin:0;font-size:14.5px}
+dl.kv dt{color:var(--muted)}
+dl.kv dd{margin:0}
+.blk ul.pts{margin:0;padding:0;list-style:none}
+.blk ul.pts li{position:relative;padding:4px 0 4px 18px;font-size:14.5px}
+.blk ul.pts li::before{content:"-";position:absolute;left:2px;color:var(--muted)}
+.rankline{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--rule)}
+.rankline:last-child{border-bottom:0}
+.rankline a{display:inline-flex;align-items:center;gap:8px;color:var(--ink);font-weight:600;text-decoration:none}
+.rankline .sym{width:34px;height:20px}
+.co-side{display:grid;gap:18px}
+.linklist{list-style:none;margin:0;padding:0}
+.linklist li{padding:7px 0;border-bottom:1px dashed var(--rule);font-size:14px}
+.linklist li:last-child{border-bottom:0}
+.linklist span{display:block;font-size:12px;color:var(--muted)}
+.src-tag{font-family:var(--font-mono);font-size:11px;border:1px solid var(--rule);border-radius:var(--r-tag);padding:0 6px;margin-left:6px;color:var(--muted);white-space:nowrap}
+
+/* 제보 */
+.board{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:28px;align-items:start}
+.board-intro{margin:8px 0 18px;max-width:64ch;color:var(--muted)}
+form.post{padding:22px;display:grid;gap:14px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:grid;gap:5px}
+.field label{font-size:13px;font-weight:600}
+.field input,.field select,.field textarea{font:inherit;font-size:14px;padding:9px 11px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);border-radius:var(--r-in);width:100%}
+.field textarea{min-height:130px;resize:vertical}
+.field .hint{font-size:12px;color:var(--muted)}
+fieldset{border:1px solid var(--rule);border-radius:var(--r-in);padding:10px 14px 12px;margin:0}
+legend{font-size:13px;font-weight:600;padding:0 4px}
+.radios{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+.radios label{display:flex;align-items:center;gap:6px}
+.submit-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.status{font-size:13px;padding:10px 14px;border:1px solid var(--rule);background:var(--paper);border-radius:var(--r-in);display:none}
+.status.show{display:block}
+.flow{list-style:none;margin:0;padding:0;counter-reset:f}
+.flow li{counter-increment:f;display:grid;grid-template-columns:34px 1fr;gap:12px;padding:13px 20px;border-bottom:1px solid var(--rule);font-size:14px}
+.flow li:last-child{border-bottom:0}
+.flow li::before{content:counter(f);font-family:var(--font-mono);font-weight:600;width:26px;height:26px;border:1px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-size:13px}
+.flow li b{display:block}
+.flow li span{color:var(--muted);font-size:13px}
+.qtabs{display:flex;border-bottom:1px solid var(--rule)}
+.qtabs button{flex:1;font-size:13px;background:none;border:0;padding:9px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent}
+.qtabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+.qbody{padding:14px 20px 18px;font-size:13.5px}
+.sample{border:1px dashed var(--rule);border-radius:var(--r-in);padding:12px 14px;margin-top:10px}
+.sample .stamp{font-family:var(--font-mono);font-size:11px;color:var(--minus);border:1px solid var(--minus);border-radius:var(--r-tag);padding:0 6px;display:inline-block;margin-bottom:6px}
+.sample dl{display:grid;grid-template-columns:5.5em 1fr;gap:3px 10px;margin:6px 0 0}
+.sample dt{color:var(--muted)}
+.sample dd{margin:0}
+
+/* 비교 */
+.cmp-tabs{display:flex;gap:8px;margin:0 0 16px}
+.cmp{border-collapse:separate;border-spacing:0;background:var(--sheet);border:1px solid var(--rule);border-radius:var(--r-tbl);min-width:760px;width:100%}
+.cmp th,.cmp td{padding:11px 14px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top;font-size:14px}
+.cmp tr:last-child th,.cmp tr:last-child td{border-bottom:0}
+.cmp thead th{border-bottom:1px solid var(--ink);font-size:15px}
+.cmp tbody th{font-weight:500;color:var(--muted);font-size:13px;white-space:nowrap;width:9em}
+.cmp td + td,.cmp th + th{border-left:1px solid var(--rule)}
+.cmp ul{margin:0;padding-left:16px}
+.cmp-x{font-size:12px;background:none;border:1px solid var(--rule);color:var(--muted);padding:0 8px;margin-left:8px;cursor:pointer;border-radius:var(--r-tag)}
+.cmp-empty{padding:26px;background:var(--sheet);border:1px solid var(--rule);border-radius:var(--r-card);color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--sheet);color:var(--ink);border:1px solid var(--ink);border-radius:var(--r-in);padding:11px 16px;font-size:13.5px;z-index:30;max-width:90vw;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.toast[hidden]{display:none}
+
+footer{border-top:1px solid var(--rule);padding:22px 0 44px;font-size:13px;color:var(--muted)}
+footer h2{display:inline;font-size:12px;font-family:var(--font-mono);letter-spacing:.06em;font-weight:500;color:var(--ink)}
+footer ul{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+footer li{display:grid;grid-template-columns:18px 1fr;line-height:1.65}
+footer li::before{content:"-";color:var(--muted)}
+
+@media (max-width: 960px){
+  .home-grid,.board,.co-grid{grid-template-columns:1fr}
+  .news ol{max-height:440px}
+  .pc{grid-template-columns:1fr}
+  .pc section{padding-right:0}
+  .pc section + section{padding-left:0;border-left:0;border-top:1px solid var(--rule)}
+  .frow{grid-template-columns:1fr}
+  .fav-grid{grid-template-columns:1fr}
+}
+@media (max-width: 640px){
+  .wrap{padding:0 16px}
+  .mast-top{padding:16px}
+  .logo b{color:var(--ink);font-size:30px}
+  .type-head{grid-template-columns:auto 1fr}
+  .type-head .acts{grid-column:1 / -1}
+  .trow{grid-template-columns:30px 48px minmax(0,1fr) auto}
+  .trow .pk{grid-column:3 / -1}
+  dl.kv{grid-template-columns:1fr;gap:2px}
+  dl.kv dt{margin-top:8px}
+  .topstrip-in{align-items:stretch}
+  .sx{max-width:none;flex-basis:100%}
+}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important;transition:none!important}}
+/* 휴대폰: 선사 표를 카드로 */
+@media (max-width: 640px){
+  .table-scroll:has(.reg){overflow:visible}
+  .reg{min-width:0;display:block}
+  .reg thead{display:none}
+  .reg tbody{display:block}
+  .reg tr.row{display:grid;grid-template-columns:44px minmax(0,1fr);column-gap:6px;padding:10px 12px 12px 4px;border-bottom:1px solid var(--rule)}
+  .reg tr.row td{display:block;border:0;padding:3px 0;width:auto;text-align:left}
+  .reg tr.row td.pick{grid-row:1 / span 7;padding:0}
+  .reg tr.row td.pick .pick-hit{margin:0}
+  .reg tr.row td.rk{font-size:12px}
+  .reg tr.row td.rk::after{content:"위"}
+  .reg tr.row td.routes::before{content:"항로 ";color:var(--muted);font-size:12px}
+  .reg .cname{white-space:normal}
+  .reg tr.empty-row td{display:block}
+  .star{min-width:44px;min-height:44px}
+  #f-routes .chip,.cats .chip{min-height:40px}
+  .trow .pk{min-height:44px}
+  .mast-meta{flex-wrap:nowrap;gap:8px}
+  #m-count{display:none}
+  .mast-top{padding:10px 16px;flex-wrap:nowrap;align-items:center}
+  .logo span{display:none}
+  .logo b{font-size:26px}
+  .navlinks{gap:14px;flex:none}
+}
+@media (max-width: 820px){
+  .hero{height:auto;background:var(--sheet)}
+  .hero img{position:relative;height:180px;object-position:75% 60%}
+  .hero-in{padding-top:20px;padding-bottom:24px}
+  .hero h1{font-size:26px;color:var(--ink)}
+  .hero-lead{color:var(--muted)}
+  :root[data-theme="dark"] .hero{background:var(--sheet)}
+}
+@media (max-width: 640px){
+  .mast-meta{flex-wrap:nowrap;gap:6px 8px;width:100%;justify-content:space-between}
+  .mast-meta > span:first-child{display:none}
+  .cmp-top{margin-left:auto}
+}
+
+/* 2차: 문장 단위 줄바꿈, 테마 단추, 소식 필터 */
+.lines > span{display:block}
+.intro p{max-width:none}
+.theme-btn{font:inherit;font-size:13px;font-weight:600;color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:var(--r-in);padding:5px 11px;cursor:pointer;white-space:nowrap}
+.theme-btn:hover{border-color:var(--accent-bg);color:var(--accent)}
+.type-head .sub{margin:6px 0 0;color:var(--muted);font-size:14px}
+.nf{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:flex-end;margin:0 0 14px}
+.nf .fgroup input[type="date"]{font:inherit;font-size:13.5px;padding:5px 9px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);border-radius:var(--r-in);min-height:34px}
+.nf .seg button{font-size:13px;padding:6px 12px}
+.nf-q{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.nf-q b{color:var(--ink)}
+.feed-state{font-size:12.5px;color:var(--muted);margin:10px 0 0}
+.newsfull .d{white-space:nowrap}
+footer li{text-wrap:pretty}
+.sx-box{border-color:var(--rule)}
+.sx-box:focus-within{border-color:var(--accent-bg);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent-bg) 25%,transparent)}
+.sx-box button{color:var(--accent)}
+@media (max-width: 640px){ .newsfull li{grid-template-columns:1fr} }
+
+/* 버전, BYPASS 바로가기, 이스터에그 */
+.ver{font:inherit;font-family:var(--font-mono);font-size:12px;color:var(--muted);background:none;border:0;padding:4px 2px;cursor:pointer;font-variant-numeric:tabular-nums}
+.ver:hover{color:var(--ink)}
+.bp-logo{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:var(--r-in)}
+.bp-logo img{display:block;width:26px;height:26px}
+.foot-ver{text-align:center;margin:22px 0 0}
+.egg{position:fixed;inset:0;z-index:70;background:rgba(8,16,28,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.egg-card{background:var(--sheet);color:var(--ink);border:1px solid var(--rule);border-radius:14px;padding:22px 26px 20px;text-align:center;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.egg-card .ev{font-family:var(--font-mono);font-size:15px;font-weight:600}
+.egg-card .eb{font-size:20px;font-weight:800;margin-top:4px}
+.egg-btns{display:flex;justify-content:center;gap:10px;margin-top:16px}
+.egg-btns button{font:inherit;font-weight:700;font-size:14px;border-radius:var(--r-in);padding:8px 16px;cursor:pointer}
+.egg-pn{background:var(--accent-bg);color:#16181d;border:0}
+.egg-close{background:var(--sheet);color:var(--ink);border:1px solid var(--ink)}
+.egg-card.pn{max-width:560px;text-align:left;padding:0;display:flex;flex-direction:column;max-height:min(80vh,720px);overflow:hidden}
+.egg-card.pn header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--ink)}
+.egg-card.pn header h3{margin:0;font-size:17px}
+.egg-card.pn .pn-body{overflow-y:auto;padding:6px 20px 18px}
+.egg-card.pn section{padding:12px 0;border-bottom:1px solid var(--rule)}
+.egg-card.pn section:last-child{border-bottom:0}
+.egg-card.pn h4{margin:0 0 6px;font-size:14px;display:flex;gap:10px;align-items:baseline}
+.egg-card.pn h4 span{font-family:var(--font-mono);color:var(--accent)}
+.egg-card.pn ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--ink)}
+.egg-card.pn li{margin:3px 0}
+/* 필터 초기화 단추 한 가지 모양 */
+#f-reset,#nf-reset{font:inherit;font-size:13px;font-weight:600;line-height:1;color:var(--ink);background:var(--sheet);border:1px solid var(--ink);border-radius:var(--r-in);padding:0 11px;height:34px;text-decoration:none;cursor:pointer;display:inline-flex;align-items:center}
+.nf .fgroup input[type="date"]{height:34px;min-height:0;box-sizing:border-box}
+/* 홈 소식: 더 있음을 아래쪽 흐림으로 */
+.news ol{-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 40px),transparent)}
+.news ol.at-end{-webkit-mask-image:none;mask-image:none}
+
+/* 선종 바꾸기 줄 */
+.type-switch{display:flex;gap:6px;overflow-x:auto;padding:2px 0 12px;margin-bottom:6px;scrollbar-width:thin}
+.type-switch a{flex:none;display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--rule);border-radius:var(--r-chip);background:var(--sheet);color:var(--ink);text-decoration:none;font-size:13px;white-space:nowrap;min-height:36px}
+.type-switch a .sym{width:30px;height:16px}
+.type-switch a[aria-current="page"]{border-color:var(--ink);font-weight:700;box-shadow:inset 0 -2px 0 var(--accent-bg)}
+.type-switch a:hover{border-color:var(--ink)}
+.f-active{color:var(--ink);font-weight:600}
+.f-toggle{display:none}
+#readme-toggle{font:inherit;font-size:12px;color:var(--accent);background:none;border:0;padding:0 0 0 8px;cursor:pointer}
+footer .readme-h{display:block;margin-bottom:10px}
+/* 비교 표 첫 열 고정 */
+.cmp tbody th,.cmp thead th:first-child{position:sticky;left:0;background:var(--sheet);z-index:1}
+.cmp tbody th{box-shadow:1px 0 0 var(--rule)}
+@media (max-width: 640px){
+  .f-toggle{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;margin:0 0 10px;font:inherit;font-size:14px;font-weight:600;color:var(--ink);background:var(--sheet);border:1px solid var(--ink);border-radius:var(--r-in);cursor:pointer}
+  .filters:not(.open){display:none}
+  .reg tr.row td:nth-child(9) .other{display:flex;flex-wrap:wrap;gap:4px}
+  .reg tr.row td:nth-child(9) .none{display:none}
+}
+@media (max-width: 820px){ .hero img{display:block} }
+
+</style>
+</head>
+<body>
+<div id="cmp-live" class="sr" aria-live="polite"></div>
+<header class="mast">
+  <div class="topstrip">
+    <div class="wrap topstrip-in">
+      <div class="sx" id="sx">
+        <div class="sx-box">
+          <label for="q-all" class="sr">회사, 선종, 도움말 검색</label>
+          <input id="q-all" type="search" placeholder="회사나 선종 검색, 도움말은 ? 입력" autocomplete="off" aria-controls="sx-panel" aria-expanded="false">
+          <button type="button" id="sx-help" aria-label="도움말 열기">?</button>
+        </div>
+        <div class="sx-panel" id="sx-panel" hidden></div>
+      </div>
+      <div class="mast-meta">
+        <span>2026.11.24 기준</span>
+        <span id="m-count"></span>
+        <a class="cmp-top" href="#compare" id="cmp-top">비교 <small id="cmp-n"></small></a>
+        <button type="button" class="theme-btn" id="theme-btn" aria-pressed="false">다크모드</button>
+        <button type="button" class="ver" id="ver-top" title="버전">v1.0.0</button>
+        <a class="bp-logo" href="https://teambypass.vercel.app/" target="_blank" rel="noopener" title="BYPASS로 가기"><img src="/assets/favicon.svg" alt="BYPASS" width="26" height="26"></a>
+      </div>
+    </div>
+  </div>
+  <div class="wrap mast-top">
+    <a class="logo" href="#home"><b>선사록</b><span>선사, 선종, 해운 뉴스 한눈에 확인</span></a>
+    <nav class="navlinks" aria-label="바로가기" id="navlinks">
+      <a href="#news">해운 소식</a>
+      <a href="#board">정보 제보</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="hero" aria-labelledby="hero-h">
+  <img class="hero-day" data-src="assets/hero-day.webp" alt="" width="1376" height="614">
+  <img class="hero-night" data-src="assets/hero-night.webp" alt="" width="1024" height="457">
+  <div class="wrap hero-in">
+    <h1 id="hero-h">배 종류부터 정하면<br>지원할 회사가 좁혀집니다</h1>
+    <p class="hero-lead" id="hero-lead"></p>
+    <button type="button" class="hero-cta" id="hero-cta">선종 고르기</button>
+  </div>
+</section>
+
+<main class="wrap">
+
+  <!-- 홈 -->
+  <div class="view" id="v-home">
+    <div class="home-grid">
+      <section class="sheet types" aria-labelledby="types-h">
+        <div class="card-h"><h2 id="types-h">선종</h2><span class="note">별표는 즐겨찾기, 오른쪽 체크는 선종 비교</span></div>
+        <ul class="tlist" id="type-list"></ul>
+        <p class="note types-foot">여러 선종을 운영하는 회사는 해당 선종마다 모두 올라 있습니다.</p>
+      </section>
+      <div class="home-side">
+      <section class="sheet fav" aria-labelledby="fav-h">
+        <h2 id="fav-h">즐겨찾기</h2>
+        <div class="fav-grid" id="fav-body"></div>
+      </section>
+      <section class="sheet news" aria-labelledby="news-h">
+        <div class="card-h"><h2 id="news-h">해운 소식</h2><a class="more" href="#news">더보기 &rsaquo;</a></div>
+        <ol id="news-list"></ol>
+      </section>
+      <section class="sheet bshell" aria-labelledby="bs-h">
+        <div class="card-h"><h2 id="bs-h">정보 제보 게시판</h2><span class="cat">준비 중</span></div>
+        <div class="body">
+          <p class="lines"><span>재직자와 승선실습을 다녀온 분들의 경험을 받는 곳입니다.</span><span>글은 운영진이 확인한 뒤에 게시됩니다.</span><span>지금은 화면 틀만 있고 저장은 되지 않습니다.</span></p>
+          <ul class="bslots" aria-label="게시글 자리">
+            <li><span class="cat">후기</span><span>아직 게시된 글 없음. 승인된 후기가 이 자리에 쌓임</span></li>
+            <li><span class="cat">추가 요청</span><span>목록에 없는 회사는 출처와 함께 제보 바람</span></li>
+            <li><span class="cat">수정 요청</span><span>틀린 숫자나 바뀐 내용을 알려 주면 확인 후 반영함</span></li>
+          </ul>
+          <a class="btn ghost" href="#board">글쓰기 화면 보기</a>
+        </div>
+      </section>
+      <section class="bypass" aria-labelledby="bp-h">
+        <div class="bp-tag">목포해양대 바이브 코딩 크루</div>
+        <h2 id="bp-h">BYPASS</h2>
+        <p class="lines"><span>시간표 맞추기 귀찮아서 수강플래너를,</span><span>배고파서 학식 알리미를,</span><span>시험이 걱정돼서 ECDIS 시뮬레이터를 만든 사람들이에요.</span></p>
+        <p class="lines"><span>다들 AI한테 말로 설명하면서 만들었어요.</span><span>코딩은 처음인 사람이 대부분이었어요.</span><span>항해학과든 기관학과든 휴학생이든 상관없어요.</span><span>만들어 보고 싶은 게 하나 있으면 같이 해요.</span></p>
+        <ul><li>수강플래너</li><li>꿀꿀이(학식)</li><li>토익 RC 10문제</li><li>ECDIS 시뮬레이터</li><li>엑셀 훈련소</li></ul>
+        <a href="https://teambypass.vercel.app/" target="_blank" rel="noopener">BYPASS 구경하러 가기 ↗</a>
+      </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- 해운 소식 전체 -->
+  <div class="view" id="v-news" hidden>
+    <h1 class="page-h">해운 소식</h1>
+    <p class="page-lead lines"><span>사고, 선대와 발주, 운임, 실적 같은 분류와 날짜로 걸러 볼 수 있습니다.</span><span>이 화면에서 위쪽 검색창에 입력하면 해운 소식 안에서만 찾습니다.</span><span>제목을 누르면 원문 기사로 이동합니다.</span></p>
+    <div class="cats" id="news-cats" role="group" aria-label="소식 분류"></div>
+    <div class="nf" role="group" aria-label="날짜 필터">
+      <div class="fgroup"><span>기간</span>
+        <div class="seg" id="nf-range">
+          <button type="button" data-v="all" aria-pressed="true">전체</button>
+          <button type="button" data-v="7" aria-pressed="false">1주</button>
+          <button type="button" data-v="30" aria-pressed="false">1개월</button>
+          <button type="button" data-v="90" aria-pressed="false">3개월</button>
+          <button type="button" data-v="365" aria-pressed="false">1년</button>
+        </div>
+      </div>
+      <div class="fgroup"><label for="nf-from"><span class="note">시작일</span></label><input type="date" id="nf-from"></div>
+      <div class="fgroup"><label for="nf-to"><span class="note">종료일</span></label><input type="date" id="nf-to"></div>
+      <div class="fgroup"><span>&nbsp;</span><button type="button" class="linkbtn more" id="nf-reset">필터 초기화</button></div>
+    </div>
+    <p class="nf-q" id="nf-q" hidden></p>
+    <div class="sheet"><ol class="newsfull" id="news-full"></ol></div>
+    <p class="feed-state" id="feed-state"></p>
+  </div>
+
+  <!-- 선종 화면 -->
+  <div class="view" id="v-type" hidden>
+    <div class="crumb"><a href="#home">처음</a> &rsaquo; 선종</div>
+    <nav class="type-switch" id="type-switch" aria-label="다른 선종 보기"></nav>
+    <div class="type-head" id="type-head"></div>
+    <button type="button" class="f-toggle" id="f-toggle" aria-expanded="false" aria-controls="filters">필터</button>
+    <div class="filters" id="filters" role="group" aria-label="필터">
+      <div class="fgroup"><span>회사 구분</span>
+        <div class="seg" id="f-kind">
+          <button type="button" data-v="all" aria-pressed="true">전체</button>
+          <button type="button" data-v="owner" aria-pressed="false">선주사</button>
+          <button type="button" data-v="manager" aria-pressed="false">관리선사</button>
+        </div>
+      </div>
+      <div class="fgroup"><label for="f-fleet"><span class="note">선단 규모</span></label>
+        <select id="f-fleet">
+          <option value="all">전체</option>
+          <option value="s">10척 이하</option>
+          <option value="m">11~30척</option>
+          <option value="l">31~100척</option>
+          <option value="xl">101척 이상</option>
+          <option value="na">숫자 미공개</option>
+        </select>
+      </div>
+      <div class="fgroup"><span>국적</span>
+        <label class="check"><input type="checkbox" id="f-foreign" checked> 외국계 한국지사 포함</label>
+      </div>
+      <div class="fgroup"><span>실습, 병역 (회사 공개 자료 기준)</span>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <label class="check"><input type="checkbox" id="f-cadet"> 2027 실습생 선발</label>
+          <label class="check"><input type="checkbox" id="f-reserve"> 승선근무예비역 가능</label>
+        </div>
+      </div>
+      <div class="fgroup"><label for="f-q"><span class="note">이 선종 안에서 검색</span></label>
+        <input type="search" id="f-q" placeholder="회사 이름" autocomplete="off">
+      </div>
+      <div class="fgroup" style="flex-basis:100%"><span>항로 (하나라도 해당하면 표시)</span>
+        <div class="chips" id="f-routes"></div>
+      </div>
+    </div>
+
+    <div class="result-line"><span><span id="r-count"></span> <span id="f-active" class="f-active"></span></span><span class="rl-acts"><button type="button" id="f-pickall">표에 나온 회사 비교에 담기</button><button type="button" id="f-reset">필터 초기화</button></span></div>
+    <p id="cap-legend">규모 옆 표시:<span class="ctag p">보도</span>발표 수치<span class="ctag c">환산</span>선박 수 × 대표 선형<span class="ctag e">추정</span>대략적인 짐작</p>
+    <div class="table-scroll">
+      <table class="reg" aria-label="선사 목록">
+        <thead><tr><th>담기</th><th data-col="rank" aria-sort="ascending"><button type="button" class="th-sort" data-sort="rank">순위</button></th><th data-col="name"><button type="button" class="th-sort" data-sort="name">회사</button></th><th>구분</th><th id="th-cap" class="th-help" title="컨테이너선은 총 선복량(TEU), 나머지는 재화중량(dwt). 옆 표시는 수치가 어디서 왔는지(보도, 환산, 추정)">규모</th><th data-col="fleet" class="th-help" title="회사가 운영하거나 관리하는 배의 수. 기준 시점과 집계 방식이 회사마다 다릅니다"><button type="button" class="th-sort" data-sort="fleet">선단</button></th><th>주요 항로</th><th data-col="job" class="th-help" title="각 회사가 공개한 2027년 실습생 선발, 승선근무예비역 계획 기준"><button type="button" class="th-sort" data-sort="job">실습, 병역</button></th><th>이 회사의 다른 선종</th></tr></thead>
+        <tbody id="reg-body"></tbody>
+      </table>
+    </div>
+    <p class="note foot-note" id="sort-note"></p>
+    <div class="pc" id="type-pc"></div>
+    <div class="refs" id="type-refs"></div>
+  </div>
+
+  <!-- 선사 상세 -->
+  <div class="view" id="v-co" hidden></div>
+
+  <!-- 제보 게시판 -->
+  <div class="view" id="v-board" hidden>
+    <div class="board">
+      <div>
+        <h1 class="page-h">정보 제보 게시판</h1>
+        <p class="board-intro lines"><span>재직 중이거나 승선실습을 다녀온 분들이 직접 겪은 내용을 남기는 곳입니다.</span><span>올라온 글은 운영진이 확인한 뒤에 게시됩니다.</span><span>지금은 화면만 만들어 둔 단계라 글을 보낼 수 없습니다. 쓴 내용은 복사해 둘 수 있습니다.</span></p>
+
+        <form class="sheet post" id="post-form" novalidate>
+          <div class="field"><label for="p-kind">글 종류</label>
+            <select id="p-kind">
+              <option value="exp">경험 공유 (재직, 실습 후기)</option>
+              <option value="add">회사 추가 요청 (목록에 없는 회사)</option>
+              <option value="fix">정보 수정 요청 (틀린 숫자, 바뀐 내용)</option>
+            </select>
+            <span class="hint">회사 추가나 수정 요청은 출처(회사 누리집, 기사 링크)를 함께 적으면 빨리 반영됨</span>
+          </div>
+          <fieldset>
+            <legend>경험 종류</legend>
+            <div class="radios">
+              <label><input type="radio" name="who" id="who-job" value="재직" checked> 재직(또는 퇴사)</label>
+              <label><input type="radio" name="who" id="who-cadet" value="실습"> 승선실습</label>
+            </div>
+          </fieldset>
+          <div class="frow">
+            <div class="field"><label for="p-company">회사</label>
+              <input id="p-company" list="company-list" placeholder="회사 이름" required>
+              <datalist id="company-list"></datalist>
+            </div>
+            <div class="field"><label for="p-type">선종</label>
+              <select id="p-type" required></select>
+            </div>
+          </div>
+          <div class="frow">
+            <div class="field"><label for="p-dept">부서</label>
+              <select id="p-dept"><option>갑판부</option><option>기관부</option><option>육상직</option></select>
+            </div>
+            <div class="field"><label for="p-when">승선 시기</label>
+              <input id="p-when" placeholder="예: 2025년 하반기, 6개월">
+            </div>
+          </div>
+          <div class="frow">
+            <div class="field"><label for="p-route">항로</label>
+              <input id="p-route" placeholder="예: 한중일, 중동-한국">
+            </div>
+            <div class="field"><label for="p-rotation">승선/휴가 주기</label>
+              <input id="p-rotation" placeholder="예: 4개월 승선, 2개월 휴가">
+            </div>
+          </div>
+          <div class="field"><label for="p-body">본문</label>
+            <textarea id="p-body" placeholder="선내 분위기, 인터넷 환경, 상륙 기회, 실습생 대우, 면접 질문 등" required></textarea>
+            <span class="hint">개인 이름, 연락처는 적지 말 것. 운영진 확인 과정에서 지워질 수 있음</span>
+          </div>
+          <div class="submit-row">
+            <button class="btn" type="submit" id="p-send" disabled>서버 연결 전 (보내기 준비 중)</button>
+            <button class="btn ghost" type="button" id="p-copy">쓴 내용 복사</button>
+            <span class="note">아직 보낼 수 없습니다. 쓴 내용은 복사해 두었다가 게시판이 열리면 붙여 넣어 주세요. 로그인은 BYPASS 계정으로 연결 예정</span>
+          </div>
+          <div class="status" id="p-status" role="status"></div>
+        </form>
+      </div>
+
+      <aside style="display:grid;gap:22px">
+        <section class="sheet blk">
+          <h2>글이 올라가는 순서</h2>
+          <ol class="flow">
+            <li><div><b>작성</b><span>BYPASS 계정으로 로그인해 글 작성</span></div></li>
+            <li><div><b>운영진 확인</b><span>사실과 다른 부분, 개인정보 포함 여부 확인</span></div></li>
+            <li><div><b>게시</b><span>승인된 글은 회사 화면과 선종 화면에 연결됨</span></div></li>
+          </ol>
+        </section>
+        <section class="sheet blk">
+          <h2>게시판</h2>
+          <div class="qtabs" role="tablist">
+            <button type="button" role="tab" id="qt-pub" aria-selected="true" aria-controls="q-pub">게시됨</button>
+            <button type="button" role="tab" id="qt-wait" aria-selected="false" aria-controls="q-wait">확인 대기</button>
+          </div>
+          <div class="qbody" id="q-pub" role="tabpanel" aria-labelledby="qt-pub">
+            <p style="margin:0">아직 승인된 글 없음. 글이 올라오면 아래 모양으로 보임</p>
+            <div class="sample" aria-label="게시글 모양 예시">
+              <span class="stamp">예시 화면</span>
+              <div><b>○○해운</b> <span class="note">컨테이너선 / 승선실습 / 갑판부</span></div>
+              <dl>
+                <dt>승선 시기</dt><dd>20XX년 상반기, 6개월</dd>
+                <dt>항로</dt><dd>○○ - ○○</dd>
+                <dt>주기</dt><dd>○개월 승선, ○개월 휴가</dd>
+              </dl>
+              <p class="note" style="margin:8px 0 0">본문이 들어가는 자리</p>
+            </div>
+          </div>
+          <div class="qbody" id="q-wait" role="tabpanel" aria-labelledby="qt-wait" hidden>
+            <p style="margin:0">운영진 전용 목록. 서버 연결 후 여기서 승인, 반려 처리</p>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <!-- 비교 -->
+  <div class="view" id="v-compare" hidden>
+    <h1 class="page-h">비교</h1>
+    <p class="page-lead lines"><span>선사와 선종을 각각 5개까지 나란히 놓고 봅니다.</span><span>선사는 선종 화면과 선사 화면에서, 선종은 홈의 선종 목록에서 담습니다.</span><span>실습, 채용, 병역 칸은 각 회사가 공개한 2027년 계획입니다.</span></p>
+    <div class="cmp-tabs" role="tablist">
+      <button type="button" class="chip" id="ct-co" aria-pressed="true">선사</button>
+      <button type="button" class="chip" id="ct-ty" aria-pressed="false">선종</button>
+    </div>
+    <div class="table-scroll" id="cmp-table"></div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<footer>
+  <div class="wrap">
+    <h2 class="readme-h">읽기 전에 <button type="button" id="readme-toggle" aria-expanded="true" aria-controls="readme">접기</button></h2>
+    <div id="readme">
+    <ul>
+      <li><span class="lines"><span>선사 정보는 2026년 11월까지의 언론 보도와 회사 발표를 먼저 썼고, 찾지 못한 숫자만 「2026 국립목포해양대학교 취업박람회」 참가기업 자료로 채웠습니다.</span></span></li>
+      <li><span class="lines"><span>실습생 선발, 초급사관 채용, 승선근무예비역, 승선과 휴가 주기는 각 회사가 낸 2027년 계획입니다.</span><span>실제 공고와 다를 수 있으니 지원 전에 공고를 꼭 확인하시기 바랍니다.</span></span></li>
+      <li><span class="lines"><span>선종 화면은 컨테이너선은 총 선복량(TEU), 나머지는 재화중량(dwt)이 큰 순서로 정렬합니다.</span></span></li>
+      <li><span class="lines"><span>규모 칸의 보도는 발표 수치, 환산은 선박 수에 대표 선형을 곱한 값, 추정은 대략적인 짐작입니다.</span><span>환산과 추정은 순서를 가늠하는 용도로만 봐 주시기 바랍니다.</span></span></li>
+      <li><span class="lines"><span>선종별 장단점은 현직자 후기, 실습 후기, 인터뷰에서 자주 나오는 이야기를 정리한 것으로, 회사와 배마다 사정이 다를 수 있습니다.</span></span></li>
+      <li><span class="lines"><span>외국계는 한국에 선원 관리 조직이나 법인이 있는 곳만 담았고, 연락사무소 수준의 지사와 영업법인은 제외했습니다.</span></span></li>
+      <li><span class="lines"><span>이 사이트는 개인이 만든 자료 모음이며 회사나 학교와 관계가 없습니다.</span><span>틀린 내용은 정보 제보 게시판으로 알려 주시기 바랍니다.</span></span></li>
+    </ul>
+    </div>
+    <p class="foot-ver"><button type="button" class="ver" id="ver-foot" title="버전">v1.0.0</button></p>
+  </div>
+</footer>
+
+<script>
+/* ---------- 선종 기호 (선박 단면 그림) ---------- */
+const HULL = '<path d="M2 19.5h44l-4.5 6H7z"/><rect x="38" y="10" width="6" height="9.5"/>';
+const SYM = {
+  lng: '<path d="M4 19.5a5 5 0 0 1 10 0z"/><path d="M15.5 19.5a5 5 0 0 1 10 0z"/><path d="M27 19.5a5 5 0 0 1 10 0z"/>',
+  lpg: '<rect x="4" y="11" width="15" height="8.5" rx="4.2"/><rect x="21" y="11" width="15" height="8.5" rx="4.2"/>',
+  crude: '<rect x="4" y="16.5" width="33" height="3"/><path d="M9 16.5v-5M18 16.5v-5M27 16.5v-5M6 11.5h30" fill="none" stroke="currentColor" stroke-width="1.7"/>',
+  container: '<rect x="4" y="13" width="6" height="5.5"/><rect x="11" y="13" width="6" height="5.5"/><rect x="18" y="13" width="6" height="5.5"/><rect x="25" y="13" width="6" height="5.5"/><rect x="31.5" y="13" width="4.5" height="5.5"/><rect x="7.5" y="7.5" width="6" height="5"/><rect x="14.5" y="7.5" width="6" height="5"/><rect x="21.5" y="7.5" width="6" height="5"/>',
+  pctc: '<rect x="4" y="6" width="33" height="13.5" rx="1.5"/><path d="M4 10.5h33M4 15h33" fill="none" stroke="var(--sheet)" stroke-width="1.4"/><path d="M2 19.5 4 13.5v6z"/>',
+  bulk: '<rect x="4" y="15" width="9" height="4.5"/><rect x="15" y="15" width="9" height="4.5"/><rect x="26" y="15" width="9" height="4.5"/><path d="M8.5 15V7.5l5-2M19.5 15V7.5l5-2M30.5 15V7.5l5-2" fill="none" stroke="currentColor" stroke-width="1.6"/>',
+  product: '<rect x="4" y="16.5" width="10" height="3"/><rect x="26" y="16.5" width="10" height="3"/><path d="M20 3.5c3.4 4.4 5.3 6.7 5.3 9.4a5.3 5.3 0 0 1-10.6 0c0-2.7 1.9-5 5.3-9.4z"/>',
+  cement: '<path d="M7 19.5V9.5L12.5 5 18 9.5v10z"/><rect x="21" y="14.5" width="14" height="5"/><path d="M24 14.5v-4M31 14.5v-4" fill="none" stroke="currentColor" stroke-width="1.6"/>',
+  heavy: '<rect x="6" y="11.5" width="17" height="8"/><path d="M31 19.5V3.5M31 3.5l-9 8" fill="none" stroke="currentColor" stroke-width="1.9"/><rect x="29" y="3" width="4" height="3"/>'
+};
+function sym(id, cls){
+  return '<svg class="sym'+(cls?' '+cls:'')+'" viewBox="0 0 48 26" fill="currentColor" aria-hidden="true" focusable="false">'+HULL+(SYM[id]||'')+'</svg>';
+}
+
+/* 순서: 일반적으로 선호된다는 순서 (가스선, 원유선, 컨테이너선, 자동차운반선, 벌크선, 석유제품과 케미컬선 ...) */
+const TYPES = [
+ {id:'lng', name:'LNG선', short:'영하 162도로 액화한 천연가스를 나르는 배',
+  pros:['장기계약 위주라 회사 수익과 고용이 안정적이다.','급여와 복지가 상위권이라는 평이 많다.','신조선 비중이 높아 설비가 최신이고 거주 공간이 넓다.','가스선 경력은 희소해서 나중에 육상직이나 다른 회사로 옮길 때도 유리하다.','LNG 이중연료 추진선이 늘면서 연료 취급 자격과 경력이 쌓인 사관의 가치가 오르는 중이다.','신조 대형선이 많아 흔들림이 적고 선내 설비가 잘 갖춰졌다는 후기가 있다.','선원 교대 주기가 비교적 일정한 편이다.'],
+  cons:['검사 기준이 엄격하고 공부할 내용이 많다.','터미널 접안이 24시간 안에 끝나는 경우가 많아 상륙을 기대하기 어렵다는 실습 후기가 있다.','입거하면 한 달 가까이 도크에 머물기도 한다.','경력 없이 중간에 들어가기 어렵다는 말이 많아 실습이나 첫 배 선택이 중요하다.','블라인드에는 LNG선을 노린다면 IGF코드 교육을 미리 받아 두라는 조언이 있다. 준비 없이 지원하면 서류에서 밀릴 수 있다.']},
+ {id:'lpg', name:'LPG선/가스선', short:'LPG, 암모니아 같은 액화가스를 나르는 배',
+  pros:['가스선 경력이 생겨 LNG선으로 옮기기 수월하다는 이야기가 많다.','암모니아, 메탄올 같은 신연료 화물을 일찍 경험할 수 있다.','VLGC는 원양 장거리 항로라 항해 경험을 넓게 쌓을 수 있다.','가스선 교육을 이수한 사관을 찾는 회사가 많아 LNG선으로 옮기는 발판이 된다.','한중일 근해를 도는 소형 가스선은 한국에 자주 들어와 교대 일정을 잡기 쉬운 편이다.'],
+  cons:['냉동, 가압 방식에 따라 화물 작업이 복잡하고 공부할 내용이 많다.','암모니아 같은 독성 화물은 안전 절차가 까다롭다.','가스 터미널은 외곽에 있어 상륙이 어려운 편이다.','국내 선사 수가 적어 선택지가 좁고, 일부는 외국 선주의 배를 관리하는 구조다.']},
+ {id:'crude', name:'원유운반선', short:'VLCC 등으로 중동 원유를 정유사까지 나르는 탱커',
+  pros:['탱커는 다른 선종보다 급여가 높은 편이라는 의견이 많다.','블라인드에는 항해사 월급이 600만~700만 원 수준이라는 언급이 있다. 회사와 직급에 따라 차이가 크다.','VLCC 경력은 이직할 때 인정받기 좋다.','장금상선, 팬오션 등이 2026년에 VLCC를 크게 늘려 자리가 많아지고 있다.','정유사 장기계약 선박은 항로가 단순하고 일정이 일정한 편이다.','대형선이라 거주 공간이 넓고 선내 생활 환경이 좋은 편이다.'],
+  cons:['화물 작업이 진행되는 2~3일은 1항사를 중심으로 잠을 거의 못 잔다는 후기가 있다.','오일 메이저 검사(SIRE)와 항만국 검사가 잦고 기준이 엄격하다.','원유 터미널이 도심에서 멀어 상륙하기 어렵다.','중동 정세 같은 지정학 위험에 그대로 노출된다. 호르무즈 사태 이후 일정과 항로가 갑자기 바뀌는 일도 있다.','운임이 내려가는 국면에서는 선사가 선대를 줄이거나 중고선을 팔 수 있어 호황기 채용 규모가 계속된다고 단정하기 어렵다.','교대가 터미널 일정과 항로 변경에 영향을 받아 휴가 시점이 밀리는 경우가 있다.']},
+ {id:'container', name:'컨테이너선', short:'규격 컨테이너를 정해진 스케줄로 나르는 정기선',
+  pros:['스케줄이 미리 정해져 있어 교대와 휴가 시기를 예측하기 쉽다.','대형선은 신조선 비중이 높고 거주 공간, 인터넷 같은 선내 환경이 좋은 편이라는 평이 많다.','여러 나라 항구에 기항해서 다양한 입출항 경험을 빨리 쌓을 수 있다.','커뮤니티에서는 컨테이너선 경력자가 HMM 같은 국적 대형선사로 옮기기 유리하다는 이야기가 자주 나온다.','업무 강도가 비교적 낮고 하역 작업 시 항해사들의 부담이 비교적 적다.','선원 교대 주기가 비교적 일정한 편이다.'],
+  cons:['크레인 하역이 빨라 정박 시간이 짧고 상륙할 틈이 거의 없다는 말이 많다.','입출항이 잦아 계류, 도선, 당직 부담이 크다. 한중일 근해선은 하루 걸러 입항하기도 한다.','운임 변동이 커서 회사 실적이 해마다 크게 출렁인다.','적재 계획과 고박, 위험물 컨테이너 확인 등 항구마다 챙길 서류와 작업이 많다.','신조선 인도가 이어지면서 2027년에는 선복 과잉 우려가 크다는 전망이 나와 호황이 길게 가지 않을 수 있다.','정기선이라 항로가 고정돼 있어 같은 항구를 반복해서 도는 단조로움을 꼽는 사람도 있다.']},
+ {id:'pctc', name:'자동차운반선', short:'완성차와 중장비를 굴려서 싣는 RoRo선',
+  pros:['시황이 좋아 현대글로비스 등이 선대를 계속 늘리고 있다.','기항 항구가 많아 여러 나라를 다녀볼 수 있다.','업무 강도가 비교적 낮고 하역 작업 시 항해사들의 부담이 비교적 적다.','대형 화주 계열 선사는 장기 운송계약이 깔려 있어 물량이 안정적이다.'],
+  cons:['기항지가 많고 하역이 빨라 정박 시간이 짧다.','차량 고박 확인 같은 갑판 작업이 계속 이어진다.','차량 화재, 특히 전기차 화재 대응이 큰 부담이다.','선체가 높고 넓어 바람 영향을 많이 받아 조선이 까다롭다.','선원 교대 주기가 일정하지 않은 경향이 있다.','완성차 물량이 줄거나 중국 수출이 꺾이면 시황이 바로 흔들릴 수 있다.']},
+ {id:'bulk', name:'벌크선', short:'철광석, 석탄, 곡물을 포장 없이 화물창에 싣는 배',
+  pros:['하역 시간이 길고 대도시 항구에 기항하는 경우가 많아 상륙 기회가 다른 선종보다 많다는 평이다.','구조가 비교적 단순해서 첫 배로 배우기 무난하다는 의견이 많다.','포스코, 한전, 가스공사 같은 화주와 맺은 장기 전용선은 항로와 일정이 안정적이다.','선내 작업으로 인한 수당을 많이 받을 수 있다.','건화물 운임이 11월 들어 오르는 등 시황이 받쳐 주는 시기에는 승선 일자리가 늘어난다.'],
+  cons:['부정기선은 다음 항구가 늦게 정해져 일정 예측이 어렵다.','화물이 바뀔 때마다 하는 화물창 청소(홀드 클리닝)가 고되다는 이야기가 많다.','회사에 따라 노후선 비중이 높을 수 있다. 면접 전에 선령을 확인한다.','벌크만 타다가 탱커나 가스선으로 옮기려면 추가 교육과 경력이 필요하다는 말이 있다.','급여가 타 선종에 비해서 적은 편이다.','업무 난이도가 비교적 낮아 운항급 해기사(2, 3항기사)들은 빠르게 외국인으로 대체되는 추세다.','노후선에서는 정비와 청소 작업이 몰려 휴식 시간이 줄어든다는 이야기가 있다.']},
+ {id:'product', name:'석유제품선/케미컬선', short:'휘발유, 경유, 화학제품을 나르는 중소형 탱커',
+  pros:['화물 종류가 다양해서 배울 것이 많고 탱커 경력으로 인정받는다.','근해 노선이 많아 한국에 자주 들어오는 배가 있다.','일본 선주와 오래 관리 계약을 이어 온 회사가 많아 관리선사 일자리가 꾸준하다.','이 경력으로 큰 탱커나 가스선으로 옮겨 가는 사람이 많다.','케미컬 경력은 화물 지식이 두꺼워 면접에서 강점이 된다는 평이 있다.'],
+  cons:['화물을 바꿀 때마다 탱크 세정과 가스 프리 작업이 따라와 일이 많다.','독성과 인화성 화물이 많아 보호구 착용과 안전 절차가 까다롭다.','근해선은 입출항이 잦아 휴식 시간이 쪼개진다.','검사가 많고 서류 작업 부담이 크다.','배가 작아 흔들림이 크고 거주 설비가 대형선보다 떨어진다는 평이 있다.','소규모 선사가 많아 사관 한 명이 맡는 일의 범위가 넓고 다양한 일을 겪게 된다.','회사 규모가 작은 곳은 선내 인터넷 등 복지가 대형 선사들에 비해 부족한 편이다.']},
+ {id:'cement', name:'시멘트선/연안선', short:'시멘트 전용선 등 국내 연안을 도는 배',
+  pros:['국내 연안만 다녀서 집과 가깝고 휴가 이동이 편하다.','시멘트 회사와의 장기 용선이라 일감이 안정적이다.','같은 구간을 반복해서 항해 감각을 빨리 익힐 수 있다.','내항 해기사가 부족해 외국인 해기사 도입까지 검토될 정도라 자리를 구하기는 쉬운 편이다.','정부가 연안선박 현대화 펀드와 친환경선박 건조 지원을 늘리고 있어 선대 교체가 이어질 전망이다.','선원 수가 적은 소형선이라 같이 일하는 사람들과 가까워지기 쉽다는 평이 있다.'],
+  cons:['배가 작아 흔들림이 크고 거주 설비가 대형선보다 부족하다.','짧은 구간을 오가서 입출항이 매우 잦다.','회사에 따라 승선 기간이 길다. 박람회 자료 기준 삼표시멘트해운은 10개월, 동주해운은 6~10개월 승선에 휴가 2개월이다.','외항선보다 급여가 낮은 편이고 연안선은 노후선 비중이 높다는 지적이 있다.','악천후에는 입항이 막혀 대기하는 시간이 길어지고, 휴가 일정이 틀어질 수 있다.','외항 경력으로 이어지지 않아 나중에 대형선사로 옮길 때 경력 인정이 제한될 수 있다.']},
+ {id:'heavy', name:'중량물선/특수선', short:'플랜트 모듈, 해상풍력 설비를 나르는 특수 선박',
+  pros:['DP 운용 같은 희소한 경력을 쌓을 수 있다.','해상풍력, 해저 케이블 사업이 늘면서 수요가 커지고 있다.','프로젝트마다 화물과 작업이 달라 배울 것이 많다.','STX오션서비스처럼 쇄빙 연구선, 방제선, 해상풍력 지원선(CTV)까지 관리하는 회사도 있어 경험 폭이 넓다.','프로젝트가 길어지면 한 지역에 오래 머물러 상륙 기회가 생기기도 한다.','경력이 쌓이면 해양 플랜트와 해양 건설 쪽 육상직으로 옮길 길도 열린다.','전반적으로 항해 시간과 대기 시간이 길어 여유로운 승선을 할 수 있다.'],
+  cons:['국내 회사 수가 적어 선택지가 좁다.','프로젝트 단위로 움직여 일정이 불규칙하다.','특수 작업이 많아 처음 적응하는 데 시간이 걸린다.','소규모 회사가 많아 실습 협약이 없는 곳도 있다. 지원 전에 학교 실습 인정 여부를 확인한다.','프로젝트가 끊기면 승선이 비는 기간이 생길 수 있고, 계약직 비중이 높은 편이다.','DP 자격과 경력을 요구하는 자리가 많아 신입이 바로 들어가기 어렵다.']}
+];
+const TYPE_BY_ID = Object.fromEntries(TYPES.map(t=>[t.id,t]));
+const ROUTES = ['한중일','동남아','중동/인도','미주','유럽','남미/아프리카','호주','전 세계 부정기','국내 연안'];
+
+/* ---------- 선사 ----------
+ kind: owner(선주사) | manager(관리선사)
+ src: web(보도, 회사 발표) | pdf(2026 목포해양대 취업박람회 자료)
+*/
+const CO = [
+ {n:'HMM', sub:'구 현대상선', kind:'owner', types:['container','bulk','crude','product','lng'], routes:['미주','유럽','중동/인도','동남아','남미/아프리카','전 세계 부정기'],
+  fleet:154, fleetLabel:'154척', fleetNote:'2026년 3월 말, 사선 118척과 용선 36척', src:'web',
+  hq:'부산 (2026년 10월 본점 이전, 일부 조직은 서울)', group:'관리선사 HMM오션서비스', note:'2030년까지 컨테이너선 166척, 벌크선 110척으로 늘릴 계획이다. 2026년 3분기 영업이익은 1조3947억 원이다.'},
+ {n:'HMM오션서비스', kind:'manager', types:['container','bulk','crude','lng','pctc'], routes:[],
+  fleet:71, fleetLabel:'71척', fleetNote:'관리 선박 기준, 그 외 특수선 11척 포함', src:'pdf', hq:'부산', group:'HMM 자회사', note:'선박관리, 선원관리, 선원교육, 신조 감리를 맡는다.'},
+ {n:'고려해운', sub:'KMTC', kind:'owner', types:['container'], routes:['한중일','동남아','중동/인도','미주','남미/아프리카'],
+  fleet:68, fleetLabel:'68척', fleetNote:'알파라이너 기준 약 15.8만 TEU (2026년 7월 말)', src:'pdf', hq:'부산 중구', group:'관리선사 고려에스엠', note:'1954년 설립. 서남아, 중동, 아시아 역내가 중심이고 북미 서안, 남미, 아프리카로 노선을 넓히는 중이다.'},
+ {n:'고려에스엠', kind:'manager', types:['container'], routes:[], fleet:null, fleetLabel:'미공개', src:'pdf', hq:null, group:'고려해운 계열', note:'고려해운 선박의 선박관리를 맡는 계열사다.'},
+ {n:'장금상선', sub:'Sinokor', kind:'owner', types:['container','crude'], routes:['한중일','동남아','중동/인도','미주','전 세계 부정기'],
+  fleet:175, fleetLabel:'175척 이상', fleetNote:'컨테이너 선복 약 11.9만 TEU(흥아라인 포함)에 VLCC 100척 이상. VLCC 수는 보도마다 118~150척으로 차이가 난다.', src:'web',
+  hq:'서울', group:'흥아라인, 흥아해운 계열. 선박관리는 범진상운', note:'2025년 말부터 2026년 초까지 중고 VLCC를 대거 사들여 세계 최대 VLCC 운영사로 꼽힌다.'},
+ {n:'범진상운', kind:'manager', types:['crude','bulk','container'], routes:[], fleet:97, fleetLabel:'97척', fleetNote:'유조선 40, 벌크 13, 컨테이너 44', src:'pdf', hq:'부산 중구', group:'장금그룹', note:'여러 선주의 배에 선원을 배치하고 관리하는 선원, 선박관리사다. 장금상선의 탱커 여러 척을 관리한다.'},
+ {n:'흥아라인', kind:'owner', types:['container'], routes:['한중일','동남아','중동/인도'], fleet:null, fleetLabel:'미공개', fleetNote:'선복은 장금상선 집계에 포함', src:'web', hq:'서울 중구', group:'장금상선 계열', note:'1961년 한일 정기선에서 출발한 아시아 역내 선사다. 2019년 장금상선이 흥아해운 컨테이너 부문을 인수해 세웠고 연간 120만 TEU 이상을 수송한다.'},
+ {n:'흥아해운', kind:'owner', types:['product'], routes:['한중일','동남아','중동/인도','남미/아프리카'], fleet:15, fleetLabel:'15척', fleetNote:'3,500~20,000톤급 석유, 화학제품 탱커', src:'web', hq:'부산 이전 중 (2026년 말 완료 계획)', group:'장금상선 계열', note:'1976년 상장한 국내 첫 상장 해운사다. 컨테이너 사업을 넘긴 뒤 케미컬 탱커에 집중하고 있다.'},
+ {n:'남성해운', kind:'owner', types:['container'], routes:['한중일','동남아'], fleet:19, fleetLabel:'19척', fleetNote:'해운 정보 사이트 기준, 집계 시점 불명. 알파라이너 기준 약 4만 TEU', src:'web', hq:'서울 중구', group:'', note:'1953년 설립된 국내 첫 민간 해운사다. 한국, 일본, 중국과 아시아 역내 항만을 잇는 근해 정기선사다.'},
+ {n:'동영해운', kind:'owner', types:['container'], routes:['한중일','동남아'], fleet:null, fleetLabel:'미공개', src:'web', hq:'서울 중구', group:'남성해운 자회사', note:'1974년 설립. 일본, 중국, 동남아 근해 컨테이너 정기선사다.'},
+ {n:'동진상선', kind:'owner', types:['container'], routes:['한중일','동남아'], fleet:10, fleetLabel:'10척', fleetNote:'컨테이너선 7, 일반화물선 3, 합계 약 12만 DWT (선박 데이터베이스 집계)', src:'web', hq:'서울 중구', group:'', note:'1984년 정부의 해운산업 합리화 계획에 따라 세워진 선사다. 일본, 중국, 동남아를 잇는 컨테이너와 벌크 정기선을 운항하며 아시아 역내 항로에 집중한다.'},
+ {n:'천경해운', kind:'owner', types:['container','bulk'], routes:['한중일','동남아'], fleet:12, fleetLabel:'12척', fleetNote:'컨테이너 10, 벌크 2. 알파라이너 기준 컨테이너 약 2.1만 TEU', src:'pdf', hq:'서울 중구', group:'', note:'1962년 설립. 한일, 한중, 한중일, 한국과 동남아를 잇는 컨테이너 정기선과 벌크 정기선을 운영한다.'},
+ {n:'범주해운', kind:'owner', types:['container'], routes:['한중일','동남아'], fleet:7, fleetLabel:'7척', fleetNote:'약 2만 톤급 자사 컨테이너선. 알파라이너 기준 약 9,300 TEU', src:'pdf', hq:'서울 중구', group:'', note:'한중일과 동남아를 잇는 컨테이너 정기선사다.'},
+ {n:'SM상선', kind:'owner', types:['container'], routes:['미주','한중일','동남아'], fleet:13, fleetLabel:'13척', fleetNote:'2026년 3월 보도, 미주와 아시아 노선 운항 컨테이너선. 알파라이너 기준 약 6.9만 TEU', src:'web', hq:null, group:'SM그룹. 선박관리는 KLCSM', note:'2016년 설립. 2025년 닝보와 저우산항 처리 물동량이 처음 20만 TEU를 넘었고 전 선박에 스타링크를 달았다.'},
+ {n:'팬오션', kind:'owner', types:['bulk','crude','product','lng','container'], routes:['전 세계 부정기','한중일'],
+  fleet:258, fleetLabel:'258척', fleetNote:'운항 기준. 보유선은 약 122척, 약 1,383만 DWT (2026년 2분기)', src:'web', hq:'서울 종로구', group:'하림그룹. 관리선사 포스에스엠', note:'국내 최대 벌크선사다. 2026년 SK해운에서 VLCC 10척을 사들이는 등 탱커 사업을 키우고 있다.'},
+ {n:'포스에스엠', kind:'manager', types:['bulk','crude','product','lng','container'], routes:[], fleet:131, fleetLabel:'131척', fleetNote:'팬오션 선대 관리 기준', src:'pdf', hq:'부산', group:'팬오션 계열', note:'팬오션 선박의 선박관리와 선원관리를 맡는다.'},
+ {n:'대한해운', kind:'owner', types:['bulk','lng','pctc'], routes:['전 세계 부정기'], fleet:56, fleetLabel:'56척', fleetNote:'자회사 포함. 벌크 38, LNG 14, 탱커 3 등', src:'web', hq:null, group:'SM그룹. 관리선사 KLCSM', note:'철광석, 석탄, LNG 장기운송계약 비중이 높다. 2026년 9월 현대글로비스와 자동차운반선 장기대선 계약을 맺었고, 10월에는 포스코플로우와 720억 원 규모 장기운송 계약을 맺었다.'},
+ {n:'대한해운엘엔지', kind:'owner', types:['lng'], routes:[], fleet:null, fleetLabel:'미공개', src:'web', hq:null, group:'대한해운 100% 자회사', note:'LNG 운반선과 LNG 벙커링을 하는 회사로 대한해운에서 분할했다.'},
+ {n:'대한상선', kind:'owner', types:['bulk'], routes:[], fleet:null, fleetLabel:'미공개', src:'web', hq:null, group:'SM그룹', note:'2026년 무역사업을 정리하고 해운에 집중하는 중이다.'},
+ {n:'창명해운', kind:'owner', types:['bulk'], routes:[], fleet:null, fleetLabel:'미공개', src:'pdf', hq:null, group:'SM그룹', note:'SM그룹 해운 계열사다.'},
+ {n:'KLCSM', kind:'manager', types:['bulk','lng','container','pctc'], routes:[], fleet:null, fleetLabel:'미공개', src:'web', hq:'부산 중구', group:'SM그룹 (대한해운 지분 65.8%)', note:'SM그룹 해운사 선박의 선원, 정비, 안전관리를 맡는다.'},
+ {n:'에이치라인해운', sub:'H-Line', kind:'owner', types:['bulk','crude','pctc'], routes:['전 세계 부정기'], fleet:42, fleetLabel:'42척', fleetNote:'LNG 13척을 포함한 회사 제출 숫자. 2026년 8월 LNG선 16척을 K-LNG로 넘기고 유조선 12척을 받는 재편을 발표했다.', src:'pdf', hq:'부산', group:'한앤컴퍼니', note:'벌크와 유조선 중심 선사로 재편 중이다. LNG 이중연료 대형 벌크선과 PCTC를 운항한다.'},
+ {n:'K-LNG', sub:'구 SK해운', kind:'owner', types:['lng','lpg'], routes:['전 세계 부정기'], fleet:46, fleetLabel:'46척', fleetNote:'재편 후 LNG선 32척과 LPG선 14척. 에이치라인해운과의 맞교환은 승인 대기 중', src:'web', hq:'부산', group:'한앤컴퍼니', note:'아시아 최대, 세계 3위권 LNG 선사를 내세우며 2026년 사명을 바꿨다. 원유선은 팬오션과 에이치라인해운으로 넘겼다.'},
+ {n:'현대LNG해운', kind:'owner', types:['lng'], routes:[], fleet:19, fleetLabel:'19척', fleetNote:'LNG선 18, 특수선 1', src:'pdf', hq:'서울 (부산 사무소)', group:'', note:'외항화물운송과 선박관리를 함께 한다.'},
+ {n:'폴라리스쉬핑', kind:'owner', types:['bulk'], routes:['남미/아프리카','전 세계 부정기'], fleet:25, fleetLabel:'25척', fleetNote:'벌크선 25척', src:'pdf', hq:'부산', group:'', note:'초대형 광석선(VLOC) 중심 벌크선사다.'},
+ {n:'KSS해운', kind:'owner', types:['lpg','product'], routes:['전 세계 부정기'], fleet:29, fleetLabel:'29척', fleetNote:'가스선 19, 화학제품선 10', src:'pdf', hq:'부산 중구', group:'', note:'LPG, 암모니아 같은 액화가스와 석유화학 화물을 반세기 넘게 운송해 왔다.'},
+ {n:'현대글로비스', kind:'owner', types:['pctc','bulk'], routes:['미주','유럽','중동/인도','전 세계 부정기'], fleet:94, fleetLabel:'94척', fleetNote:'자동차운반선 기준 (2025년 7월 보도). 2030년 128척 목표', src:'web', hq:'서울', group:'현대자동차그룹. 관리선사 지마린서비스', note:'1만800대를 싣는 세계 최대 자동차운반선 글로비스 리더호를 운항한다. 비계열 물량이 절반을 넘는다.'},
+ {n:'지마린서비스', kind:'manager', types:['pctc','bulk','crude','container','lng'], routes:[], fleet:48, fleetLabel:'48척', fleetNote:'자동차운반선 33척 포함', src:'pdf', hq:'부산 동구', group:'현대글로비스 자회사', note:'선박관리, 선원관리, 교육훈련, 신조 감리를 맡는다.'},
+ {n:'유코카캐리어스', sub:'EUKOR', kind:'owner', foreign:true, types:['pctc'], routes:['미주','유럽','호주'], fleet:67, fleetLabel:'약 67척', fleetNote:'2024년 말 보도 기준', src:'web', hq:'서울 송파구', group:'Wallenius Wilhelmsen 계열 (현대차, 기아 지분 20%)', note:'현대차와 기아의 한국 공장 수출 물량 50%를 맡는 5년 계약을 맺었다.'},
+ {n:'윌헴슨쉽매니지먼트코리아', kind:'manager', foreign:true, types:['pctc','bulk','lng'], routes:[], fleet:52, fleetLabel:'52척', fleetNote:'자동차운반선 42, 벌크 6, LNG 4', src:'pdf', hq:'부산 중구', group:'노르웨이 윌헴슨 그룹', note:'2005년 설립, 2010년부터 한국인 선원을 관리한다. 주 선주는 Wallenius Wilhelmsen이다.'},
+ {n:'아이엠에스코리아', sub:'IMS Korea', kind:'manager', foreign:true, types:['crude','product','lpg'], routes:['전 세계 부정기'], fleet:35, fleetLabel:'35척', fleetNote:'VLCC, 케미컬선, LPG선 등 대형 특수선', src:'pdf', hq:'부산 동구', group:'일본 이이노해운(Iino) 계열 선박관리', note:'메탄올, 암모니아 운반선도 관리한다. 실습생 승선 선박을 포함해 전 선단에 스타링크를 달았다.'},
+ {n:'싱크로해운', kind:'manager', types:['crude','product','bulk'], routes:[], fleet:17, fleetLabel:'17척', fleetNote:'유조선 14 포함', src:'pdf', hq:'서울 중구', group:'', note:'1999년 설립. 외국 선주의 장기계약 선박을 관리한다.'},
+ {n:'삼주에스엠', kind:'manager', types:['bulk','pctc'], routes:[], fleet:12, fleetLabel:'12척', fleetNote:'벌크 5, 자동차운반선 7. 자동차선은 외국인 선원만 승선', src:'pdf', hq:'서울 (부산지사)', group:'', note:'육상 약 25명, 해상 약 350명 규모의 선박관리사다.'},
+ {n:'디엘에스엠', kind:'manager', types:['container','bulk','product'], routes:[], fleet:33, fleetLabel:'33척', fleetNote:'컨테이너 15, 벌크 8, MR탱커 10', src:'pdf', hq:'부산 중구', group:'', note:'한국인과 외국인 선원을 함께 관리하는 선원관리사다.'},
+ {n:'동진상운', kind:'manager', types:['product'], routes:[], fleet:14, fleetLabel:'14척', fleetNote:'Oil, Chemical 선박', src:'pdf', hq:'부산 중구', group:'', note:'해상직원 관리 회사다.'},
+ {n:'정양해운', kind:'manager', types:['product','crude'], routes:[], fleet:24, fleetLabel:'24척', fleetNote:'화학제품선 22, 유조선 2', src:'pdf', hq:'부산 중구', group:'', note:'43년 동안 일본 선주의 케미컬 선박을 관리해 왔다.'},
+ {n:'우진선박', kind:'owner', types:['product'], routes:['한중일','동남아'], fleet:10, fleetLabel:'10척', fleetNote:'전 선대 스테인리스 탱크 케미컬선', src:'pdf', hq:'부산 중구', group:'관리선사 오션제이드쉬핑', note:'업력 38년의 케미컬 탱커 선주사다.'},
+ {n:'오션제이드쉬핑', kind:'manager', types:['product'], routes:['한중일','동남아'], fleet:10, fleetLabel:'10척', fleetNote:'우진선박 선대', src:'pdf', hq:'부산 중구', group:'우진선박', note:'케미컬 탱커 전문 선원, 선박관리사다.'},
+ {n:'우양상선', kind:'owner', types:['bulk'], routes:[], fleet:15, fleetLabel:'15척', fleetNote:'벌크선과 일반화물선, 합계 약 131만 DWT (선박 데이터베이스 집계)', src:'web', hq:null, group:'관리선사 코리아쉽메니져스', note:'벌크선이 선대의 3분의 2, 일반화물선이 3분의 1을 차지하는 선주사다. 선박관리는 코리아쉽메니져스가 맡는다.'},
+ {n:'코리아쉽메니져스', kind:'manager', types:['bulk','product'], routes:['한중일','동남아','유럽','중동/인도','전 세계 부정기'], fleet:20, fleetLabel:'20척', fleetNote:'기업소개 기준. 벌크 11, 일반화물 4, 컨테이너 겸용 벌크 4, 케미컬 1', src:'pdf', hq:'부산 해운대구', group:'우양상선', note:'다양한 선종과 항로를 관리하는 선박관리사다.'},
+ {n:'상지해운', kind:'owner', types:['product','lpg'], routes:['국내 연안'], fleet:4, fleetLabel:'4척', fleetNote:'가스선 1, 유조선 1, 화학제품선 2', src:'pdf', hq:'여수', group:'GS칼텍스 자회사', note:'내항, 외항 화물운송과 선박급유업을 한다.'},
+ {n:'삼표시멘트해운', kind:'owner', types:['cement'], routes:['국내 연안'], fleet:9, fleetLabel:'9척', fleetNote:'시멘트선 8, 일반화물선 1', src:'pdf', hq:'부산 서구', group:'삼표그룹', note:'국내 최대 수준의 시멘트 수송 능력을 내세우는 선주사다.'},
+ {n:'동주해운', kind:'owner', types:['cement'], routes:['국내 연안'], fleet:7, fleetLabel:'7척', fleetNote:'시멘트 전용선', src:'pdf', hq:'부산 해운대구', group:'', note:'국내 시멘트사와 장기 용선, 수송 계약을 맺고 있다.'},
+ {n:'수성해운', kind:'owner', types:['cement'], routes:['국내 연안'], fleet:6, fleetLabel:'6척', fleetNote:'시멘트 전용선', src:'pdf', hq:'부산 중구', group:'', note:'한라시멘트와 장기 용선계약을 맺고 있다.'},
+ {n:'KMC해운', kind:'owner', types:['bulk','heavy'], routes:['국내 연안'], fleet:7, fleetLabel:'7척', fleetNote:'벌크선 7', src:'pdf', hq:'광양', group:'', note:'내항, 외항 화물운송과 중량물 운송을 한다.'},
+ {n:'인터렉스메가라인', kind:'owner', types:['heavy'], routes:[], fleet:4, fleetLabel:'4척', fleetNote:'반잠수식 DP선 1, 자항식 데크 운반선 1, 케이블 포설선 2(관리)', src:'pdf', hq:'서울 금천구', group:'', note:'2027년 중량물선 신조를 시작으로 2030년까지 10척을 운영할 계획이다.'},
+ {n:'STX오션서비스', kind:'manager', types:['bulk','product','lpg','container','heavy'], routes:[], fleet:30, fleetLabel:'30척', fleetNote:'2026년 2분기. 벌크 9, 탱커 8(석유, 케미컬, LPG), 컨테이너 3, 특수선 10(쇄빙 연구선, 방제선, 중량물선, CTV)', src:'web', hq:'부산 중구', group:'STX 자회사', note:'선박관리와 용선, 해운물류를 한다. 특수선 관리 비중이 높은 편이다.'},
+ /* 2026년 11월 보강: 씨넷, 한국선원복지고용센터 구인 공고와 회사 소개로 확인한 곳 */
+ {n:'대호상선', kind:'owner', types:['bulk'], routes:['한중일','동남아','미주','유럽','국내 연안'], fleet:16, fleetLabel:'16척', fleetNote:'자사 보유 소형 벌크선, 2,960~30,000 DWT', src:'web', hq:'서울', group:'', note:'1990년 설립. 철강재와 조선 기자재 같은 화물을 소형 선박으로 나른다.'},
+ {n:'국제해양기술', kind:'manager', types:['bulk','container','crude'], routes:[], fleet:20, fleetLabel:'20척', fleetNote:'소형 벌크 13, 컨테이너 3, VLCC 4 (직접 또는 간접 관리)', src:'web', hq:null, group:'국제선박투자운용 계열', note:'직원 91명 규모의 선박관리사다. 벌크, 컨테이너, VLCC를 함께 관리한다.'},
+ {n:'대진해운', kind:'owner', types:['cement'], routes:['국내 연안'], fleet:2, fleetLabel:'2척', fleetNote:'국내 연안 샌드(모래) 운반선', src:'web', hq:'부산 영도', group:'', note:'모래를 나르는 연안 화물선 2척을 운영한다. 시멘트 전용선은 아니지만 연안선으로 묶었다.'},
+ {n:'코린스타', kind:'owner', types:['product'], routes:[], fleet:2, fleetLabel:'2척', fleetNote:'2016년 등록 당시 케미컬, 유조선 2척. 현재 선대는 확인하지 못했다.', src:'web', hq:null, group:'', note:'씨넷에 사관 구인 공고를 올린 소형 탱커 선사다.'},
+ {n:'동지해운', kind:'manager', types:['lng'], routes:[], fleet:null, fleetLabel:'미공개', src:'web', hq:null, group:'', note:'LNG선 전문 선원관리를 표방하며 씨넷에 LNG선 사관 구인 공고를 올린 회사다. 선대와 본사 정보는 확인하지 못했다.'},
+ {n:'훼어선박', sub:'Fair Ship Management', kind:'manager', types:['container','heavy'], routes:[], fleet:null, fleetLabel:'미공개', src:'web', hq:'부산 중구 중앙대로 (부일빌딩)', group:'', note:'1998년 부산에서 설립된 선원, 선박관리 회사다. 컨테이너선과 중량물선 관리를 맡고 내항 화물운송업도 등록돼 있다. 직원은 150명 안팎이다.'}
+];
+
+/* 선단 숫자 기준 */
+const BASIS = {
+ 'HMM':'사선+용선','팬오션':'운항','현대글로비스':'용선 포함','장금상선':'계열 합산','K-LNG':'운항 선박','유코카캐리어스':'운항 선박',
+ '대한해운':'자회사 포함','SM상선':'운항 선박','남성해운':'시점 불명','흥아해운':'운항 선박','포스에스엠':'관리 선박','STX오션서비스':'관리 선박'
+};
+CO.forEach(c => {
+  if (c.fleet == null) { c.basis = null; return; }
+  c.basis = BASIS[c.n] || (c.kind === 'manager' ? '관리 선박' : (c.src === 'pdf' ? '회사 제출' : '보도'));
+});
+
+/* 선종별 규모. [값, 종류, 메모]
+   컨테이너선은 TEU, 나머지는 만 DWT.
+   p: 보도, 발표 수치  c: 선박 수에 대표 선형을 곱한 환산  e: 대략적인 추정 */
+const CAP = {
+ container:{
+  'HMM':[1033593,'p','알파라이너 2026년 7월 말'],'고려해운':[157748,'p','알파라이너'],'장금상선':[119453,'p','흥아라인 포함, 알파라이너'],
+  'SM상선':[68743,'p','알파라이너'],'남성해운':[39786,'p','알파라이너'],'천경해운':[20915,'p','알파라이너'],'팬오션':[11399,'p','알파라이너'],'범주해운':[9288,'p','알파라이너'],'동진상선':[5600,'e','컨테이너선 7척 x 약 800 TEU'],
+  '범진상운':[70000,'c','컨테이너 44척 x 평균 약 1,590 TEU'],'고려에스엠':[157748,'c','관리 대상 고려해운 선대 기준'],'포스에스엠':[11399,'c','팬오션 선대 기준'],
+  'KLCSM':[68743,'c','SM상선 선대 기준'],'디엘에스엠':[27000,'e','컨테이너 15척 x 약 1,800 TEU'],'STX오션서비스':[6000,'e','컨테이너 3척 x 약 2,000 TEU']
+ },
+ bulk:{
+  '팬오션':[1383,'p','보유선 기준, 2026년 2분기'],'HMM':[730,'e','벌크 61척 x 평균 약 12만 DWT'],'대한해운':[530,'c','벌크 38척 x 약 14만 DWT'],'폴라리스쉬핑':[650,'c','25척 x 약 26만 DWT (VLOC 중심)'],
+  '현대글로비스':[400,'e','벌크 사업 규모 추정'],'에이치라인해운':[420,'e','케이프급 중심 추정'],'HMM오션서비스':[730,'c','HMM 벌크선 기준'],'포스에스엠':[1383,'c','팬오션 선대 기준'],'KLCSM':[530,'c','대한해운 벌크 기준'],
+  '지마린서비스':[400,'c','현대글로비스 벌크 기준'],'범진상운':[78,'e','벌크 13척 x 약 6만 DWT'],'코리아쉽메니져스':[55,'e','벌크 15척 x 약 3.7만 DWT'],'STX오션서비스':[54,'e','벌크 9척 x 약 6만 DWT'],
+  '디엘에스엠':[40,'e','벌크 8척 x 약 5만 DWT'],'윌헴슨쉽매니지먼트코리아':[36,'e','벌크 6척 x 약 6만 DWT'],'국제해양기술':[30,'e','소형 벌크 13척'],'삼주에스엠':[25,'e','벌크 5척 x 약 5만 DWT'],
+  '대호상선':[25,'e','16척, 2,960~30,000 DWT 범위'],'우양상선':[88,'p','벌크 약 10척 몫, 선박 데이터베이스 집계 131만 DWT의 3분의 2'],'KMC해운':[20,'e','벌크 7척 x 약 3만 DWT'],'천경해운':[8,'e','벌크 2척']
+ },
+ crude:{
+  '장금상선':[3000,'c','VLCC 100척 x 약 30만 DWT'],'범진상운':[1200,'c','VLCC 40척 x 약 30만 DWT'],'팬오션':[465,'c','VLCC 15척 x 약 31만 DWT'],'포스에스엠':[465,'c','팬오션 선대 기준'],
+  'HMM':[420,'c','VLCC 약 14척 x 약 30만 DWT'],'HMM오션서비스':[420,'c','HMM 선대 기준'],'아이엠에스코리아':[250,'e','VLCC 포함 추정'],'에이치라인해운':[190,'e','유조선 12척 추정'],
+  '국제해양기술':[120,'c','VLCC 4척 x 약 30만 DWT'],'싱크로해운':[70,'e','유조선 14척 추정'],'정양해운':[10,'e','유조선 2척 추정']
+ },
+ product:{
+  '팬오션':[65,'c','MR 11척 x 약 5만 + 케미컬 5척'],'포스에스엠':[65,'c','팬오션 선대 기준'],'디엘에스엠':[50,'c','MR 10척 x 약 5만 DWT'],'싱크로해운':[40,'e','유조선과 케미컬 혼합 추정'],
+  '아이엠에스코리아':[30,'e','케미컬선 비중 추정'],'정양해운':[26,'e','화학제품선 22척 x 약 1.2만 DWT'],'STX오션서비스':[16,'e','탱커 8척 x 약 2만 DWT'],'흥아해운':[15,'c','15척 x 평균 약 1만 DWT'],
+  '동진상운':[14,'e','14척 x 약 1만 DWT'],'KSS해운':[13,'e','화학제품선 10척 x 약 1.3만 DWT'],'우진선박':[5,'e','스테인리스 케미컬선 10척 (소형)'],'오션제이드쉬핑':[5,'e','우진선박 선대 기준'],
+  '코리아쉽메니져스':[1.5,'e','케미컬 1척'],'상지해운':[1.5,'e','소형 연안 탱커'],'코린스타':[1,'e','소형 케미컬, 유조선 2척']
+ },
+ lng:{
+  'K-LNG':[256,'c','LNG선 32척 x 약 8만 DWT'],'현대LNG해운':[144,'c','18척 x 약 8만 DWT'],'대한해운':[112,'c','LNG 14척 x 약 8만 DWT'],'KLCSM':[112,'c','대한해운 LNG 기준'],
+  '에이치라인해운':[104,'c','LNG 13척 (K-LNG 이관 승인 대기)'],'팬오션':[96,'c','LNG 12척 x 약 8만 DWT'],'포스에스엠':[96,'c','팬오션 선대 기준'],'윌헴슨쉽매니지먼트코리아':[32,'c','LNG 4척 x 약 8만 DWT']
+ },
+ lpg:{
+  'K-LNG':[63,'c','LPG선 14척 x 약 4.5만 DWT'],'KSS해운':[50,'e','가스선 19척 추정'],'상지해운':[0.5,'e','소형 가스선 1척']
+ },
+ pctc:{
+  '현대글로비스':[207,'c','94척 x 약 2.2만 DWT'],'유코카캐리어스':[147,'c','67척 x 약 2.2만 DWT'],'윌헴슨쉽매니지먼트코리아':[92,'c','42척 x 약 2.2만 DWT'],
+  '지마린서비스':[73,'c','33척 x 약 2.2만 DWT'],'삼주에스엠':[15,'c','7척 x 약 2.2만 DWT']
+ },
+ cement:{
+  '삼표시멘트해운':[4.8,'e','시멘트선 8척 x 약 0.6만 DWT'],'동주해운':[3.5,'e','7척 x 약 0.5만 DWT'],'수성해운':[3,'e','6척 x 약 0.5만 DWT'],'대진해운':[0.8,'e','소형 샌드 운반선 2척']
+ },
+ heavy:{}
+};
+const CAP_TAG = {p:'보도', c:'환산', e:'추정'};
+function capTag(k){ return '<span class="ctag '+k+'">'+CAP_TAG[k]+'</span>'; }
+
+/* 선사별 보충 설명 */
+const MORE = {
+ 'HMM':['2026년 3월 말 154척을 운영한다. 사선 118척과 용선 36척이다.','벌크선은 2026년 상반기 기준 61척이고 VLCC는 약 14척이다.','2030년까지 컨테이너선 166척, 벌크선 110척으로 늘릴 계획이다.','2026년 10월 HD한국조선해양에 1만3천TEU급 LNG 이중연료 컨테이너선 8척을 약 1조9196억 원에 발주했다.','2026년 10월 부산 본사가 출범했고 단계적으로 조직을 옮기는 중이다. 이전 과정에서 노조와 이견이 있었다.','선박과 선원 관리는 HMM오션서비스가 맡는다.'],
+ '팬오션':['운항 선박은 258척이고 보유선은 약 122척, 약 1,383만 DWT다 (2026년 2분기).','VLCC는 기존 5척에 SK해운에서 사들이는 10척이 더해진다. 2026년에만 신조 VLCC를 7척 발주해 2030년까지 19척을 운용할 계획이다.','MR 탱커 11척, LNG선 12척, 화학제품선 5척을 보유한다.','2026년 1분기 기준 드라이벌크 이익 비중은 39%로 줄었다. 탱커와 LNG 쪽 이익이 커지는 구조로 바뀌고 있다.','선박관리와 선원관리는 포스에스엠이 맡는다.'],
+ '장금상선':['컨테이너 선복은 약 11.9만 TEU다 (흥아라인 포함, 알파라이너 2026년 7월 말).','2025년 말부터 중고 VLCC를 대거 사들여 세계 최대 VLCC 운영사로 꼽힌다. 보도마다 VLCC 수가 118척에서 150척으로 다르다.','계열 회사로 흥아라인과 흥아해운이 있다.'],
+ 'K-LNG':['2026년 SK해운에서 사명을 바꿨다. LNG선 32척과 LPG선 14척 규모로 재편했다.','에이치라인해운과 LNG선과 유조선을 맞바꾸는 재편은 승인 대기 중이다.','원유선 사업은 팬오션과 에이치라인해운으로 넘어갔다.'],
+ '현대글로비스':['1만800대를 싣는 글로비스 리더호는 세계 최대 자동차운반선이다.','비계열 물량이 절반을 넘고, 2030년 128척을 목표로 선대를 늘리고 있다.','2026년 9월 대한해운과 자동차운반선 장기대선 계약을 맺었다.','2027년 실습생은 선발하지 않지만 실습 협약은 맺었다. 자사 실습생과 장학생을 우대한다.'],
+ '고려해운':['알파라이너 기준 약 15.8만 TEU로 국내 컨테이너 선사 가운데 HMM 다음이다.','서남아, 중동, 아시아 역내 노선이 중심이다.','2027년 실습생은 항해 12명, 기관 20명을 사전선발할 예정이다.'],
+ 'SM상선':['알파라이너 기준 약 6.9만 TEU다.','2025년 말 전 선박에 스타링크를 달았다.','선박관리는 KLCSM이 맡는다.'],
+ '에이치라인해운':['2014년 설립, 2024년 매출 1.3조 원으로 국내 벌크선사 가운데 10위권이다.','2026년 8월 LNG선과 유조선을 맞바꾸는 재편을 발표했다.','부산 본사 이전 계획을 발표했다.'],
+ '대한해운':['그룹 합산 56척이다. 벌크 38척, LNG선 14척, 탱커 3척 등으로 이뤄진다.','2026년 9월 현대글로비스와 자동차운반선 장기대선 계약을 맺었다.','10월에는 포스코플로우와 720억 원 규모 장기운송 계약을 맺었다.'],
+ '흥아해운':['2026년 7월 부산 이전을 발표했고, 2026년 말까지 완료할 계획이다.','컨테이너 사업을 장금상선에 넘긴 뒤 케미컬 탱커에 집중한다.']
+};
+
+/* 공식 누리집 */
+const SITE = {
+ 'HMM':'https://www.hmm21.com','HMM오션서비스':'https://www.hos21.com','고려해운':'https://www.kmtc.co.kr','동진상운':'https://www.djship.com',
+ '범주해운':'https://www.pancon.co.kr','삼주에스엠':'https://www.samjoosm-doriko.com/','상지해운':'https://www.sangjiship.com','싱크로해운':'https://www.syncro.co.kr',
+ '아이엠에스코리아':'https://www.e-imk.com','KLCSM':'https://www.klcsm.co.kr','STX오션서비스':'https://www.stxoceanservice.com/ko','에이치라인해운':'https://www.h-lineshipping.com',
+ '코리아쉽메니져스':'https://www.ksmship.com','우양상선':'https://www.wooyangship.com','윌헴슨쉽매니지먼트코리아':'https://www.wilhelmsen.com/ship-management/',
+ '인터렉스메가라인':'https://www.megaline.kr','지마린서비스':'https://www.gmarineservice.com','천경해운':'https://www.ckline.co.kr','KSS해운':'https://www.kssline.com',
+ 'K-LNG':'https://www.klng.com','KMC해운':'https://www.kmclines.com','팬오션':'https://www.panocean.com','폴라리스쉬핑':'https://www.polaris-shipping.com',
+ '현대LNG해운':'https://www.hls.co.kr','남성해운':'http://www.namsung.co.kr','동영해운':'http://www.pcsline.co.kr','흥아라인':'http://www.heungaline.com',
+ '정양해운':'http://pf.kakao.com/_xdBxdFn'
+};
+
+/* 실습, 채용, 병역: 2026 목포해양대 취업박람회(11월 12~13일) 참가기업 자료의 2027년 계획 */
+const SM_JOB = {cadet:'항해 24, 기관 32 (1, 2학기 실습생 사전선발 예정)', yes:true, junior:'항해 32, 기관 36 (정규직 또는 계약직, 26년 11~12월)', reserve:true, reserveNote:'TO 미정', rot:'4개월 승선, 2개월 유급휴가', extra:'SM그룹 해운 계열 공통. 스타링크, 그룹 리조트 이용'};
+const PO_JOB = {cadet:'항해 15, 기관 15', yes:true, junior:'항해 40, 기관 40 정규직 (변동 가능)', reserve:true, reserveNote:'', rot:'4개월 승선, 2개월 유급휴가', extra:'산업기능요원 편입 가능. 팬오션, 포스에스엠 공통'};
+const GM_JOB = {cadet:'2027년 선발 없음 (실습 협약은 체결)', yes:false, junior:'정규직 (인원 미공개)', reserve:true, reserveNote:'', rot:'4개월 승선 시 유급휴가', extra:'지마린서비스, 현대글로비스 공통. 자사 실습생, 장학생, 인턴 수료자 우대'};
+const WJ_JOB = {cadet:'항해 1, 기관 1', yes:true, junior:'항해 2, 기관 1 정규직 (연 7천만 원 수준)', reserve:true, reserveNote:'2027년 3명', rot:'계약기간에 따름', extra:'평균 1.5개월마다 한국에 기항. 우진선박, 오션제이드쉬핑 공통'};
+const KS_JOB = {cadet:'2027년 선발 없음', yes:false, junior:'2027년 계획 없음', reserve:true, reserveNote:'2027년 8명', rot:'6~8개월 승선, 2~4개월 유급휴가', extra:'우양상선, 코리아쉽메니져스 공통'};
+const JOB = {
+ 'HMM':{cadet:'상반기 항해 20, 기관 41 (하반기 미정)', yes:true, junior:'항해 30, 기관 50 정규직 (26년 11~12월)', reserve:true, reserveNote:'2026년 76명', rot:'사규에 따름', extra:'연간 복지카드, 건강검진비'},
+ 'HMM오션서비스':{cadet:'상반기 항해 27, 기관 26 (하반기 미정)', yes:true, junior:'항해 30, 기관 30 비정규직 (26년 11~12월)', reserve:true, reserveNote:'2026년 60명', rot:'4개월 승선, 1.5개월 유급휴가', extra:'산업기능요원 편입 가능. 연계교육생 우대'},
+ '고려해운':{cadet:'항해 12, 기관 20 (사전선발 예정)', yes:true, junior:'', reserve:true, reserveNote:'2027년 24명 예정', rot:'4개월 승선, 2개월 유급휴가', extra:'학점, 어학 우수자와 자사 실습생 가점'},
+ '동주해운':{cadet:'항해 6, 기관 6 (학점 3.0, 토익 600 이상)', yes:true, junior:'항해 4, 기관 4 계약직 (26년 11~12월)', reserve:true, reserveNote:'2027년 미정', rot:'6~10개월 승선, 2개월 휴가'},
+ '동진상운':{cadet:'항해 8, 기관 8', yes:true, junior:'항해 14, 기관 14 비정규직 (26년 11~12월)', reserve:true, reserveNote:'', rot:'6개월 승선, 2개월 휴가'},
+ '디엘에스엠':{cadet:'2027년 선발 없음', yes:false, junior:'항해 4, 기관 4 계약직 (토익 600 이상)', reserve:true, reserveNote:'TO 24명', rot:'6개월 승선, 2개월 휴가'},
+ '범주해운':{cadet:'하반기 항해 1, 기관 1', yes:true, junior:'항해 6, 기관 6 정규직 (26년 11~12월)', reserve:true, reserveNote:'2027년 12명 내외 예상', rot:'4~5개월 승선, 2~3개월 유급휴가', extra:'1주 단위로 국내항 기항, 스타링크. 컨테이너선 실습 경력 우대'},
+ '삼주에스엠':{cadet:'하반기 항해 2, 기관 2', yes:true, junior:'항해 2, 기관 2 계약직', reserve:true, reserveNote:'2027년 4명', rot:'4개월 승선, 2개월 휴가', extra:'스타링크, 교육비, 육해상 순환근무'},
+ '삼표시멘트해운':{cadet:'2027년 선발 없음', yes:false, junior:'항해 4, 기관 4 (6개월 단위 계약, 26년 12월부터)', reserve:true, reserveNote:'2027년 16명', rot:'10개월 승선, 2개월 휴가'},
+ '상지해운':{cadet:'항해 4, 기관 4', yes:true, junior:'2027년 계획 없음', reserve:true, reserveNote:'', rot:'4~6개월 승선, 2~3개월 유급휴가'},
+ '수성해운':{cadet:'2027년 선발 없음', yes:false, junior:'항해 2, 기관 2 (26년 12월~27년 1월)', reserve:true, reserveNote:'', rot:'6개월 승선, 2개월 휴가'},
+ '싱크로해운':{cadet:'미정 (중동 정세에 따라 결정)', yes:false, junior:'정규직 소수 (26년 11~12월)', reserve:true, reserveNote:'2027년 6~7명', rot:'사규에 따름', extra:'장기근속 포상, 학자금 지원'},
+ '아이엠에스코리아':{cadet:'항해 12, 기관 14 (전원 사전선발, 타 학교 포함)', yes:true, junior:'상반기 항해 6, 기관 7 계약직 (하반기는 필요할 때)', reserve:true, reserveNote:'2026년 13명', rot:'6개월 승선, 2~3개월 유급휴가 (시기 조정 가능)'},
+ '대한해운':SM_JOB, '대한상선':SM_JOB, '창명해운':SM_JOB, 'KLCSM':SM_JOB,
+ 'STX오션서비스':{cadet:'항해 4, 기관 4 (학점 3.0 이상)', yes:true, junior:'항해 4, 기관 4 비정규직 (월 660만~700만 원)', reserve:true, reserveNote:'2027년 8명', rot:'6개월 승선, 2개월 유급휴가'},
+ '에이치라인해운':{cadet:'자료에 인원 없음', yes:false, junior:'정규직', reserve:true, reserveNote:'', rot:'4개월 승선, 2개월 유급휴가', extra:'산업기능요원 편입 가능. 자사 실습생, 산학 약정 학생 우대'},
+ '우진선박':WJ_JOB, '오션제이드쉬핑':WJ_JOB,
+ '우양상선':KS_JOB, '코리아쉽메니져스':KS_JOB,
+ '윌헴슨쉽매니지먼트코리아':{cadet:'상반기 항해 11, 기관 11 (학점 3.0 이상)', yes:true, junior:'계약직', reserve:true, reserveNote:'2025년 18명', rot:'사규에 따름', extra:'연계 교육생 우대'},
+ '인터렉스메가라인':{cadet:'항해 4, 기관 4 (실습 협약은 아직 없음)', yes:true, junior:'항해 4, 기관 4 비정규직 (연 6,212만 원)', reserve:true, reserveNote:'2027년 2명', rot:'계약기간에 따름', extra:'산업기능요원 편입 가능'},
+ '범진상운':{cadet:'인원 미공개', yes:false, junior:'정규직 (인원 미공개)', reserve:true, reserveNote:'', rot:'4개월 승선, 2개월 유급휴가', extra:'자사 실습생 우대'},
+ '정양해운':{cadet:'항해 1, 기관 2 (학점 2.7 이상)', yes:true, junior:'항해 1, 기관 2 정규직 (연 7,000만 원)', reserve:true, reserveNote:'2027년 5명', rot:'6개월 승선, 2개월 유급휴가', extra:'케미컬선 실습 경력 우대'},
+ '지마린서비스':GM_JOB, '현대글로비스':GM_JOB,
+ '천경해운':{cadet:'상반기 항해 1, 기관 1 (계획 중)', yes:true, junior:'항해 4, 기관 4 정규직 (26년 12월)', reserve:true, reserveNote:'2027년 8명', rot:'6개월 승선, 2개월 휴가'},
+ 'KSS해운':{cadet:'인원 미공개 (학점 2.5 이상)', yes:false, junior:'정규직 (인원 미공개)', reserve:true, reserveNote:'', rot:'4개월 승선, 2개월 유급휴가', extra:'선내 인터넷. 자사 실습생 우대'},
+ 'K-LNG':{cadet:'인원 미공개', yes:false, junior:'정규직 (토익 700 또는 토익스피킹 성적)', reserve:true, reserveNote:'TO 미정', rot:'사규에 따름'},
+ 'KMC해운':{cadet:'항해, 기관 각 1~2명 (학점 2.5 이상)', yes:true, junior:'항해 5, 기관 5 정규직 (연 5,950만 원, 수시)', reserve:true, reserveNote:'2027년 6명', rot:'숙달 후 4개월 승선, 1개월 유급휴가', extra:'휴가 중 승선 급여 100% 지급'},
+ '팬오션':PO_JOB, '포스에스엠':PO_JOB,
+ '폴라리스쉬핑':{cadet:'상반기 항해 4, 기관 4 (학점 3.2 이상, 어학 점수)', yes:true, junior:'정규직 (인원 미공개)', reserve:true, reserveNote:'', rot:'4~6개월 승선, 2~2.5개월 유급휴가', extra:'산업기능요원 편입 가능. 휴가 중 어학비 지원'},
+ '훼어선박':{cadet:'자료에 인원 없음', yes:false, junior:'항해 4, 기관 4 계약직 (상시 접수)', reserve:true, reserveNote:'2026년 8~10명', rot:'4개월 승선, 2개월 유급휴가'},
+ '현대LNG해운':{cadet:'항해 18, 기관 22 (상반기와 하반기에 항해 9명씩, 기관 11명씩)', yes:true, junior:'항해 6~8, 기관 8~10 정규직 (학점 3.0 이상)', reserve:true, reserveNote:'2026년 22명', rot:'4~6개월 적기교대 (유급휴가 11일 부여)'}
+};
+
+/* ---------- 소식 ----------
+ c: 분류. 날짜는 보도일이거나 지표 기준일 */
+const NEWS_CATS = ['사고','선대와 발주','운임과 원자재','실적과 시황','정책과 제도','선원과 채용','기업 소식'];
+const NEWS = [
+ {d:'2026-11-24', c:'선대와 발주', t:'한화 필리 조선소, 10년 만에 MR 탱커 강재 절단', s:'글로벌이코노믹', u:'https://www.g-enews.com/article/Global-Biz/2026/11/2026112322505947382bd56fbc3c_1', p:'한화해운이 4만9500DWT급 MR 탱커 4척을 확정 발주했고 6척은 옵션이다. LNG선 2척까지 더해 총 12척 규모다.'},
+ {d:'2026-11-09', c:'선대와 발주', t:'HD한국조선해양, 아프리카 선사에서 LNG선 2척 6,629억 원 수주', s:'Baird Maritime', u:'https://www.bairdmaritime.com/shipping/tankers/hd-korea-shipbuilding-lng-order', p:'올해 누적 수주는 195척, 216억9000만 달러로 연간 목표의 93.1%다.'},
+ {d:'2026-10-20', c:'선대와 발주', t:'HMM, 1만3천TEU급 LNG 이중연료 컨테이너선 8척 1.9조 원 발주', s:'연합뉴스', u:'https://www.koreancenter.or.kr/news/articleView.html?idxno=1427052', p:'HD한국조선해양이 건조한다. HMM의 올해 투자 규모는 6조 원을 넘어섰다.'},
+ {d:'2026-11-16', c:'선대와 발주', t:'삼성중공업, 오세아니아 선주에서 LNG운반선 3,424억 원 수주', s:'코리아헤럴드', u:'https://mbiz.heraldcorp.com/article/10938058', p:'LNG선 발주가 이어지고 있다. 업계는 올해 대형 LNG선 발주가 전년의 두 배를 넘을 것으로 본다.'},
+ {d:'2026-11-12', c:'사고', t:'통영 앞바다 어선 좌초, 해경이 50여 분 만에 인근 항구로 이동', s:'KNN', u:'https://news.knn.co.kr/news/article/194372', p:'승선원 2명이 타고 있었고 인명 피해는 없었다.'},
+ {d:'2026-11-12', c:'정책과 제도', t:'IMO 사무총장, 호르무즈 해협 해사 규정 준수 촉구', s:'Cyprus Shipping News', u:'https://cyprusshippingnews.com/2026/11/12/atlantic-tanker-earnings-fall-faster-than-gulf-earnings/', p:'국제해사기구가 각국에 해협 통항 질서를 지키기 위한 구체적 조치를 요구했다.'},
+ {d:'2026-11-11', c:'기업 소식', t:'르자오와 인천 잇는 주 2회 컨테이너 서비스 개시', s:'FreshPlaza', u:'https://www.freshplaza.com/asia/article/9892993/new-twice-weekly-container-service-links-china-and-south-korea/', p:'약 1,100 TEU급 컨테이너선으로 한 주에 두 번 운항한다.'},
+ {d:'2026-11-11', c:'정책과 제도', t:'해진공, 하반기 중소 선사 CEO 간담회 부산에서 개최', s:'코리아헤럴드', u:'https://mbiz.heraldcorp.com/article/10933194', p:'중소, 중견 선사 대표들과 금융 지원과 시황 대응 방안을 논의했다.'},
+ {d:'2026-11-09', c:'실적과 시황', t:'중국 조선소, 자동차선 이어 LNG선까지 추격', s:'녹색경제신문', u:'https://www.greened.kr/news/articleViewAmp.html?idxno=354133', p:'중국이 올해 대형 LNG선 32척을 수주해 점유율이 42%까지 올랐다는 분석이다.'},
+ {d:'2026-11-05', c:'운임과 원자재', t:'11월 해상 화물시장, 수요는 완화됐지만 혼잡으로 선복 빠듯', s:'C.H. Robinson', u:'https://www.chrobinson.com/ko-kr/resources/insights-and-advisories/north-america-freight-insights/nov-2026-freight-market-update/ocean/', p:'중동 일부 서비스는 전쟁 위험과 항만 혼잡 할증료를 붙이고 있다.'},
+ {d:'2026-11-04', c:'사고', t:'바다 부유물에 프로펠러 감기는 사고, 한 해 평균 427건', s:'코리아헤럴드', u:'https://mbiz.heraldcorp.com/article/10925244', p:'해양수산부 집계로, 폐어구와 해양 쓰레기가 주요 원인으로 꼽힌다.'},
+ {d:'2026-11-04', c:'운임과 원자재', t:'수요 둔화에도 컨테이너 운임이 오르는 이유', s:'첼로스퀘어(FreightWaves)', u:'https://www.cello-square.com/kr/marketupdates/view-2295.do', p:'선사들이 운임 인상과 함께 아시아-유럽 항로 결항을 늘리고 있다.'},
+ {d:'2026-11-03', c:'운임과 원자재', t:'부산항발 컨테이너 운임 반등 주춤, 벌크는 대형 강세', s:'더팩트', u:'https://news.tf.co.kr/read/ogmeta/2384121.htm', p:'KCCI는 4,667포인트였고, BDI는 2.0% 올랐지만 파나막스 운임은 10.4% 내렸다.'},
+ {d:'2026-09-14', c:'운임과 원자재', t:'호르무즈 불안에 VLCC 중동-아시아 운임 하루 60만 달러 돌파', s:'Seatrade Maritime', u:'https://www.seatrade-maritime.com/tankers/hormuz-security-fears-feed-sky-high-large-tanker-rates', p:'대형 탱커 운임이 전 항로에서 매우 높은 수준을 기록했다.'},
+ {d:'2026-07-09', c:'선원과 채용', t:'월급 650만 원이라지만 해운업계는 외국인 선원 선호', s:'데일리안', u:'https://www.dailian.co.kr/news/view/1665005/', p:'외국어 실력과 비용 차이로 초급 해기사 자리가 줄고 있다는 진단이다.'},
+ {d:'2026-07-07', c:'선원과 채용', t:'한국인 선원 월평균 임금 655만 원, 고령화는 더 빨라져', s:'데일리안', u:'https://www.dailian.co.kr/news/view/1663844/', p:'10년 전보다 41% 올랐지만 60세 이상 선원이 전체의 43.9%를 차지한다.'},
+ {d:'2026-11-18', c:'실적과 시황', t:'중동 특수 탄 해운사 3분기 호실적, 내년은 선종별로 갈린다', s:'아시아경제', u:'https://view.asiae.co.kr/article/2026111815214288970', p:'컨테이너는 신조선 인도와 수에즈 정상화가 부담이고, 벌크는 운임 하방이 단단할 거라는 전망이다.'},
+ {d:'2026-11-17', c:'실적과 시황', t:'중국차 수출 호황에 현대글로비스 자동차선 매출 38.5% 증가', s:'딜사이트', u:'https://dealsite.co.kr/articles/172672', p:'자동차운반선 부족이 쉽게 풀리지 않을 거라는 회사 전망이다.'},
+ {d:'2026-11-16', c:'사고', t:'영덕 앞바다 어선 화재, 승선원 4명 바다로 탈출해 인근 어선이 구조', s:'경북매일', u:'https://kbmaeil.com/article/20261116500502', p:'새벽 조업 중 기관실에서 난 불이 선체 전체로 번졌고, 구조한 선장에게 해양경찰청장 감사장이 전달됐다.'},
+ {d:'2026-11-16', c:'운임과 원자재', t:'초대형 원유선 운임, 기록적 고점에서 60% 넘게 하락', s:'gCaptain(로이터)', u:'https://gcaptain.com/supertanker-rates-plunge-more-than-60-from-record-highs/', p:'호르무즈 위기로 치솟았던 VLCC 운임이 빠르게 식고 있다. 선물시장에서도 고점을 지났다는 해석이 나온다.'},
+ {d:'2026-11-16', c:'운임과 원자재', t:'삼성SDS, 11~12월 SCFI 소폭 하락 전망', s:'첼로스퀘어', u:'https://www.cello-square.com/kr/marketupdates/view-2299.do', p:'연말 수요가 둔화되고 수에즈 복귀로 가용 선복이 늘어난다는 분석이다.'},
+ {d:'2026-11-16', c:'정책과 제도', t:'해수부, 연안선박 현대화 펀드 4차 지원 대상 공모', s:'정책브리핑', u:'https://m.korea.kr/briefing/pressReleaseView.do?newsId=156789251', p:'11월 16일부터 12월 4일까지 접수한다. 노후 연안선 교체를 지원하는 펀드다.'},
+ {d:'2026-11-13', c:'운임과 원자재', t:'건화물 운임지수 BDI 2,980으로 한 주 만에 6.2% 상승', s:'더팩트', u:'https://news.tf.co.kr/read/ogmeta/2389541.htm', p:'컨테이너 운임은 부산발 기준 하락 전환했고 미주와 중남미가 약세였다. 건화물은 강세를 보였다.'},
+ {d:'2026-11-12', c:'실적과 시황', t:'HMM 3분기 영업이익 1조3947억 원, 전년보다 370% 늘어', s:'뉴스토마토', u:'https://newstomato.com/ReadNews.aspx?no=1320255', p:'컨테이너 운임 상승과 벌크 장기계약 확대가 함께 반영됐다.'},
+ {d:'2026-11-12', c:'선대와 발주', t:'대한조선, 수에즈막스 원유운반선 2척 2,500억 원 수주', s:'헤럴드경제', u:'https://mbiz.heraldcorp.com/article/10934607', p:'올해 들어 19척째 수주다. 원유선 신조 수요가 이어지고 있다.'},
+ {d:'2026-11-11', c:'운임과 원자재', t:'아시아-미국 운임 보합, 선사들은 11월 인상 추진', s:'첼로스퀘어', u:'https://www.cello-square.com/kr/marketupdates/view-2297.do', p:'수에즈 운하와 홍해 항로로 돌아가는 서비스가 늘면서 우회하던 선박이 풀리는 중이다.'},
+ {d:'2026-11-10', c:'선원과 채용', t:'2026년도 도선수습생 13명 선발, 경쟁률 약 13대 1', s:'정책브리핑', u:'https://m.korea.kr/briefing/pressReleaseView.do?newsId=156788523', p:'166명이 응시했다. 합격자 평균 나이는 46세이고 전국 항만에 도선사 252명이 일한다.'},
+ {d:'2026-11-10', c:'정책과 제도', t:'해양진흥공사, 24일 부산에서 해상공급망 위기 다루는 콘퍼런스', s:'뉴스토마토', u:'https://newstomato.com/ReadNews.aspx?no=1319865', p:'호르무즈 위기와 북극항로가 주요 의제다.'},
+ {d:'2026-11-06', c:'운임과 원자재', t:'호르무즈 통과 물량, 전쟁 전의 약 69% 수준', s:'Kpler', u:'https://www.kpler.com/blog/plunging-atlantic-rates-reprice-midsizes-into-west-east-trades', p:'하루 통과 탱커는 11척 안팎으로, 전쟁 전 50척에 한참 못 미친다.'},
+ {d:'2026-11-02', c:'실적과 시황', t:'팬오션 3분기 영업이익 1974억 원, 4년 만에 분기 최대', s:'뉴스토마토', u:'https://newstomato.com/ReadNews.aspx?no=1318886', p:'벌크, 탱커, LNG, 컨테이너 모든 부문 이익이 늘었다.'},
+ {d:'2026-10-21', c:'사고', t:'해수부, 11월 5일 제41차 해양사고방지 세미나 개최', s:'해양수산부', u:'https://www.korea.kr/news/ministryNewsList.do?repCode=A00023', p:'선내 배터리 화재와 고위험 어선 관리 같은 안전 현안을 다룬다.'},
+ {d:'2026-10-14', c:'기업 소식', t:'HMM 부산 본사 출범, 120명 근무 시작', s:'토요경제', u:'https://sateconomy.co.kr/news/view/1065592152737222', p:'단계적으로 조직을 옮기고 북항에 새 사옥을 추진한다.'},
+ {d:'2026-10-13', c:'기업 소식', t:'국내 컨테이너선 첫 북극항로 왕복, 50일 만에 부산 귀항', s:'KNN', u:'https://news.knn.co.kr/news/article/193135', p:'팬스타 아크로호가 북극해를 지나 유럽에 기항한 뒤 돌아왔다.'},
+ {d:'2026-09-03', c:'선대와 발주', t:'한화오션, 양밍해운 컨테이너선 6척 수주', s:'파이낸셜뉴스', u:'https://www.fnnews.com/news/202609031504063677', p:'LNG 추진 1만3000TEU급이다. 한화오션의 올해 누적 수주는 약 9조6000억 원이 됐다.'},
+ {d:'2026-09-02', c:'정책과 제도', t:'녹색해운항로 특별법 시행령과 시행규칙 입법예고', s:'해양수산부', u:'https://www.motir.go.kr/kor/article/ATCL3f49a5a8c/172134/view', p:'9월 2일부터 10월 13일까지 의견을 받았다. 해운 탈탄소 지원 근거를 구체화하는 작업이다.'},
+ {d:'2026-08-07', c:'정책과 제도', t:'내항 우수 선화주 인증제, 2027년 초 시행 목표', s:'KDI 경제정보센터', u:'https://eiec.kdi.re.kr/policy/materialView.do?num=285178', p:'인증 화주가 내항 운송사업자와 3년 이상 계약하면 운송비 1%를 세액공제하는 안이 함께 나왔다.'},
+ {d:'2026-07-14', c:'선대와 발주', t:'팬오션, VLCC 2척 추가 발주해 올해 신조만 7척', s:'뉴데일리경제', u:'https://biz.newdaily.co.kr/site/data/html/2026/07/14/2026071400114.amp.html', p:'SK해운에서 인수하는 10척과 합쳐 2030년까지 VLCC 19척을 운용할 계획이다.'},
+ {d:'2026-07-05', c:'선원과 채용', t:'외국인 선원 3만3000명 첫 돌파, 한국인은 또 줄었다', s:'헤럴드경제', u:'https://www.heraldk.com/article/2026070520001940393', p:'2026 한국선원통계연보 기준 한국인 선원은 2만7372명으로 1년 새 1359명 줄었다.'},
+ {d:'2026-06-27', c:'사고', t:'부산 앞바다 LPG 운반선과 어선 충돌, 선장과 3항사 입건', s:'세계일보', u:'https://www.segye.com/newsView/20260627503357', p:'어선 선장이 숨지고 외국인 선원 2명이 실종됐다. 해경은 전방 주시 태만을 혐의로 봤다.'},
+ {d:'2026-02-16', c:'기업 소식', t:'한앤컴퍼니, SK해운 VLCC 10척 팬오션에 9737억 원에 매각', s:'Cyprus Shipping News', u:'https://cyprusshippingnews.com/2026/02/16/hahn-co-sells-sk-shippings-10-vlccs-to-pan-ocean-for-973-7-billion-won/', p:'장기 화물운송계약이 함께 넘어간다. 2027년 4월까지 인수를 마칠 계획이다.'}
+];
+
+/* ---------- 소식 갱신 설정 ----------
+ BYPASS 서버와 연결하면 NEWS_FEED_URL에 주소만 넣으면 된다.
+ 응답 형식: [{d:'YYYY-MM-DD', c:'분류', t:'제목', s:'출처', u:'원문 주소', p:'요약'}]
+ 또는 {items:[...]} 형태. 받은 소식은 기본 목록과 합쳐 원문 주소 기준으로 중복을 없앤다. */
+const NEWS_FEED = {
+  url: '',                 /* 예: 'https://teambypass.vercel.app/api/news' */
+  refreshMinutes: 30,      /* 화면을 켜 둔 동안 다시 받아 오는 간격 */
+  cacheKey: 'sasarok-news-cache-v1'
+};
+
+/* ---------- 연결 ---------- */
+CO.forEach(c => { c.job = JOB[c.n] || null; c.site = SITE[c.n] || null; });
+const CO_BY = Object.fromEntries(CO.map(c => [c.n, c]));
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LIMIT = 5;
+const state = {kind:'all', fleet:'all', foreign:true, q:'', routes:new Set(), cadet:false, reserve:false, newsCat:'all', newsRange:'all', newsFrom:'', newsTo:'', newsQ:'', cmpTab:'co', sort:'rank'};
+const cmp = {co:[], ty:[]};
+const CMP_KEY = 'sasarok-cmp-v1';
+function loadCmp(){
+  try{
+    const v = JSON.parse(localStorage.getItem(CMP_KEY) || 'null');
+    if (v){
+      const ok = (map, list) => [...new Set(Array.isArray(list) ? list : [])].filter(k => typeof k === 'string' && Object.hasOwn(map, k)).slice(0, LIMIT);
+      cmp.co = ok(CO_BY, v.co);
+      cmp.ty = ok(TYPE_BY_ID, v.ty);
+    }
+  }catch(e){}
+}
+function saveCmp(){ try{ localStorage.setItem(CMP_KEY, JSON.stringify(cmp)); }catch(e){} }
+loadCmp();
+let currentType = null;
+let lastHash = null;
+
+/* ---------- 테마 (라이트 / 다크) ---------- */
+const THEME_KEY = 'sasarok-theme-v1';
+function heroSrc(){
+  const img = document.querySelector(document.documentElement.getAttribute('data-theme') === 'dark' ? '.hero-night' : '.hero-day');
+  if (img && !img.getAttribute('src')) img.src = img.dataset.src;
+}
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  heroSrc();
+  const b = document.getElementById('theme-btn');
+  if (b){ b.textContent = t === 'dark' ? '라이트모드' : '다크모드'; b.setAttribute('aria-pressed', String(t === 'dark')); }
+}
+(function(){
+  let t = null;
+  try{ t = localStorage.getItem(THEME_KEY); }catch(e){}
+  if (t !== 'dark' && t !== 'light') t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  applyTheme(t);
+})();
+
+/* ---------- 해운 소식: 기본 목록 + 서버에서 받은 목록 ---------- */
+let NEWS_ALL = [];
+let feedStatus = '';
+function normDate(d){
+  const m = String(d||'').trim().match(/^(\d{4})[-.\/](\d{1,2})[-.\/](\d{1,2})/);
+  return m ? m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0') : null;
+}
+function mergeNews(items){
+  const map = new Map(NEWS_ALL.map(n => [n.u, n]));
+  let added = 0;
+  (items || []).forEach(x => {
+    if (!x || typeof x !== 'object') return;
+    const d = normDate(x.d || x.date), t = String(x.t || x.title || '').trim(), u = String(x.u || x.url || '').trim();
+    if (!d || !t || !/^https?:\/\//.test(u)) return;
+    const c = String(x.c || x.category || '기업 소식').trim();
+    if (!NEWS_CATS.includes(c)) NEWS_CATS.push(c);
+    if (!map.has(u)) added++;
+    map.set(u, {d, c, t, u, s:String(x.s || x.source || '').trim(), p:String(x.p || x.summary || '').trim()});
+  });
+  NEWS_ALL = [...map.values()].sort((a,b) => b.d.localeCompare(a.d) || a.t.localeCompare(b.t,'ko'));
+  return added;
+}
+mergeNews(NEWS);
+try{ const cached = JSON.parse(localStorage.getItem(NEWS_FEED.cacheKey) || 'null'); if (Array.isArray(cached)) mergeNews(cached); }catch(e){}
+function rerenderNews(){ const v = currentView(); if (v === 'home') renderHome(); else if (v === 'news') renderNews(); }
+async function fetchFeed(){
+  if (!NEWS_FEED.url){ feedStatus = '지금은 사이트에 들어 있는 소식만 보여 줍니다. 소식 서버가 연결되면 새 소식을 자동으로 받아 옵니다.'; return; }
+  try{
+    const r = await fetch(NEWS_FEED.url, {cache:'no-store'});
+    if (!r.ok) throw new Error(String(r.status));
+    const j = await r.json();
+    const arr = Array.isArray(j) ? j : (j.items || []);
+    const added = mergeNews(arr);
+    try{ localStorage.setItem(NEWS_FEED.cacheKey, JSON.stringify(arr.slice(0,300))); }catch(e){}
+    const now = new Date();
+    feedStatus = '소식 서버에서 '+now.getHours()+'시 '+String(now.getMinutes()).padStart(2,'0')+'분에 받아 왔습니다.'+(added ? ' 새 소식 '+added+'건이 추가됐습니다.' : '');
+  }catch(e){
+    feedStatus = '소식 서버에 연결하지 못해 저장된 소식을 보여 줍니다.';
+  }
+  rerenderNews();
+}
+/* 서버 스크립트나 다른 화면에서 소식을 직접 넣을 때: window.sasarokAddNews([...]) */
+window.sasarokAddNews = function(items){ const n = mergeNews(items); rerenderNews(); return n; };
+function currentView(){
+  const h = (location.hash || '#home').slice(1).split('?')[0];
+  if (h.startsWith('type-')) return 'type';
+  if (h.startsWith('co-')) return 'co';
+  return ['news','board','compare'].includes(h) ? h : 'home';
+}
+
+/* ---------- 즐겨찾기 (브라우저 저장소가 막혀 있어도 동작은 유지) ---------- */
+const FAV_KEY = 'sasarok-fav-v1';
+function loadFav(){
+  try{
+    const v = JSON.parse(localStorage.getItem(FAV_KEY) || 'null');
+    if (v && Array.isArray(v.types) && Array.isArray(v.cos))
+      return {types:[...new Set(v.types)].filter(id => typeof id === 'string' && Object.hasOwn(TYPE_BY_ID, id)), cos:[...new Set(v.cos)].filter(n => typeof n === 'string' && Object.hasOwn(CO_BY, n))};
+  }catch(e){}
+  return {types:[], cos:[]};
+}
+const fav = loadFav();
+function saveFav(){ try{ localStorage.setItem(FAV_KEY, JSON.stringify(fav)); }catch(e){} }
+function toggleFav(kind, key){
+  const list = fav[kind], i = list.indexOf(key);
+  if (i >= 0) list.splice(i,1); else list.push(key);
+  saveFav();
+}
+
+/* ---------- 공통 ---------- */
+function companiesOf(typeId){ return CO.filter(c => c.types.includes(typeId)); }
+function bucket(c){
+  if (c.fleet == null) return 'na';
+  if (c.fleet <= 10) return 's';
+  if (c.fleet <= 30) return 'm';
+  if (c.fleet <= 100) return 'l';
+  return 'xl';
+}
+const coHref = n => '#co-' + encodeURIComponent(n);
+function capOf(typeId, c){
+  const e = CAP[typeId] && CAP[typeId][c.n];
+  return e ? {v:e[0], k:e[1], m:e[2]} : null;
+}
+function capText(typeId, cap){
+  const v = cap.v, pre = cap.k === 'p' ? '' : '약 ';
+  if (typeId === 'container'){
+    return v >= 10000 ? pre + (v/10000).toFixed(1) + '만 TEU' : pre + v.toLocaleString('ko-KR') + ' TEU';
+  }
+  const num = v >= 10 ? Math.round(v).toLocaleString('ko-KR') : String(v);
+  return pre + num + '만 dwt';
+}
+function sortedFor(typeId){
+  const list = companiesOf(typeId).slice();
+  const fl = c => (c.fleet == null ? -1 : c.fleet);
+  list.sort((a,b) => {
+    if (typeId === 'heavy') return fl(b) - fl(a) || a.n.localeCompare(b.n,'ko');
+    const ca = capOf(typeId,a), cb = capOf(typeId,b);
+    if (ca && cb) return (cb.v - ca.v) || ((a.kind === b.kind) ? 0 : (a.kind === 'owner' ? -1 : 1)) || (fl(b) - fl(a));
+    if (ca) return -1;
+    if (cb) return 1;
+    return fl(b) - fl(a) || a.n.localeCompare(b.n,'ko');
+  });
+  return list;
+}
+function typeChips(c, exclude){
+  const others = c.types.filter(id => id !== exclude);
+  return others.map(id => '<a href="#type-'+id+'">'+sym(id)+esc(TYPE_BY_ID[id].name)+'</a>').join('');
+}
+function kindTag(c){
+  return '<span class="kind'+(c.kind==='manager'?' mgr':'')+'">'+(c.kind==='owner'?'선주사':'관리선사')+'</span>'+(c.foreign?' <span class="kind fx">외국계 한국지사</span>':'');
+}
+function starBtn(kind, key, label){
+  const on = fav[kind].includes(key);
+  return '<button type="button" class="star" data-star="'+kind+'" data-key="'+esc(key)+'" aria-pressed="'+on+'" aria-label="'+esc(label)+' 즐겨찾기" title="즐겨찾기">'+(on?'★':'☆')+'</button>';
+}
+let toastTimer;
+function showToast(msg){
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3000);
+}
+
+/* ---------- 머리: 비교 단추, 검색과 도움말 ---------- */
+function renderHeader(){
+  const a = cmp.co.length, b = cmp.ty.length;
+  $('#cmp-n').textContent = (a || b) ? '선사 '+a+' / 선종 '+b : '최대 '+LIMIT+'곳';
+  const h = (location.hash || '#home').slice(1);
+  document.querySelectorAll('#navlinks a').forEach(el => {
+    if (el.getAttribute('href') === '#'+h) el.setAttribute('aria-current','page'); else el.removeAttribute('aria-current');
+  });
+}
+const HELP = [
+ {t:'선종에서 회사 찾기', k:['선종','선사','회사','찾기','목록'], d:'홈의 선종 목록을 누르면 그 배를 운영하거나 관리하는 회사가 나옵니다. 여러 선종을 가진 회사는 해당 선종마다 모두 올라 있습니다.'},
+ {t:'정렬 기준', k:['정렬','순서','순위','teu','dwt','규모','큰'], d:'컨테이너선은 총 선복량(TEU), 나머지는 재화중량(dwt)이 큰 순서입니다. 규모 옆 태그는 보도(발표 수치), 환산(선박 수 x 대표 선형), 추정(대략)을 뜻합니다.'},
+ {t:'선주사와 관리선사', k:['선주사','관리선사','관리','차이','선박관리'], d:'선주사는 배를 소유하거나 운항하는 회사이고, 관리선사는 선주의 배에 선원을 배치하고 정비와 안전을 맡는 회사입니다. 같은 배라도 지원 창구가 다를 수 있습니다.'},
+ {t:'즐겨찾기', k:['즐겨찾기','별','저장','북마크'], d:'선종과 선사 옆 별표를 누르면 홈 상단 즐겨찾기에 모입니다. 지금 쓰는 브라우저에만 저장됩니다.'},
+ {t:'비교하기', k:['비교','나란히'], d:'상단 비교 단추에서 선사와 선종을 각각 5개까지 나란히 봅니다. 선사는 선종 화면과 선사 화면에서, 선종은 홈의 선종 목록에서 담습니다.'},
+ {t:'해운 소식', k:['소식','뉴스','분류','카테고리','더보기','사고','운임'], d:'홈에는 최근 소식이 나오고, 더보기를 누르면 분류와 날짜로 걸러 볼 수 있습니다. 해운 소식 화면에서 검색하면 소식 안에서만 찾습니다.'},
+ {t:'외국계 선사', k:['외국','외국계','지사'], d:'한국에 선원 관리 조직이나 법인이 있는 곳만 담았습니다. 연락사무소 수준의 지사와 영업법인은 제외했습니다.'},
+ {t:'실습, 병역 정보', k:['실습','병역','예비역','채용','박람회','승선근무'], d:'각 회사가 공개한 2027년 계획입니다. 선사 화면에서 자세히 보고, 선종 화면에서는 실습생 선발이나 예비역 가능 여부로 거를 수 있습니다.'},
+ {t:'정보 제보', k:['제보','후기','게시판','수정','틀린'], d:'재직자와 실습 경험자의 이야기, 틀린 숫자, 빠진 회사를 받는 곳입니다. 지금은 화면만 있고 저장은 되지 않습니다.'},
+ {t:'다크모드', k:['다크','어둡','테마','라이트','밝'], d:'상단 다크모드 단추로 화면을 어둡게 바꿉니다. 고른 설정은 다음 방문에도 유지됩니다.'},
+ {t:'바로 가기 키', k:['키','단축','단축키'], d:'입력창 밖에서 / 키를 누르면 검색창으로 이동합니다. Esc를 누르면 창이 닫힙니다.'}
+];
+let sxActive = -1;
+function sxOpen(helpMode){
+  const panel = $('#sx-panel'), input = $('#q-all');
+  const raw = input.value.trim(), q = raw.toLowerCase();
+  const help = helpMode || !q || q === '?' || q === '도움말';
+  let html = '';
+  if (help){
+    html += '<div class="sx-sec">도움말</div>' + HELP.map(h => '<div class="sx-help"><b>'+esc(h.t)+'</b><span>'+esc(h.d)+'</span></div>').join('');
+    html += '<div class="sx-sec">바로 가기</div>' +
+      '<a class="sx-item" href="#news">해운 소식 전체 보기</a><a class="sx-item" href="#board">정보 제보 게시판</a>';
+  } else {
+    const ty = TYPES.filter(t => (t.name+' '+t.short).toLowerCase().includes(q));
+    const co = CO.filter(c => (c.n+' '+(c.sub||'')+' '+c.types.map(id => TYPE_BY_ID[id].name).join(' ')).toLowerCase().includes(q));
+    const hp = HELP.filter(h => h.k.some(k => k.includes(q) || (q.length >= 2 && q.includes(k))));
+    if (ty.length) html += '<div class="sx-sec">선종</div>' + ty.map(t => '<a class="sx-item" href="#type-'+t.id+'">'+sym(t.id)+'<span>'+esc(t.name)+'</span><small>'+companiesOf(t.id).length+'곳</small></a>').join('');
+    if (co.length) html += '<div class="sx-sec">선사</div>' + co.slice(0,10).map(c => '<a class="sx-item" href="'+coHref(c.n)+'"><span>'+esc(c.n)+(c.sub?' <span class="note">'+esc(c.sub)+'</span>':'')+'</span><small>'+(c.kind==='owner'?'선주사':'관리선사')+'</small></a>').join('') + (co.length > 10 ? '<div class="sx-empty">'+(co.length-10)+'곳 더 있습니다. 검색어를 좁히면 더 정확합니다.</div>' : '');
+    if (hp.length) html += '<div class="sx-sec">도움말</div>' + hp.map(h => '<div class="sx-help"><b>'+esc(h.t)+'</b><span>'+esc(h.d)+'</span></div>').join('');
+    if (!html) html = '<div class="sx-empty">일치하는 회사나 선종이 없습니다. 철자를 바꾸거나 정보 제보 게시판으로 알려 주시기 바랍니다.</div>';
+  }
+  panel.innerHTML = html; panel.hidden = false; sxActive = -1;
+  input.setAttribute('aria-expanded','true');
+}
+function sxClose(){ $('#sx-panel').hidden = true; $('#q-all').setAttribute('aria-expanded','false'); sxActive = -1; }
+function sxMove(d){
+  const items = [...document.querySelectorAll('#sx-panel a.sx-item')];
+  if (!items.length) return;
+  sxActive = (sxActive + d + items.length) % items.length;
+  items.forEach((el,i) => el.classList.toggle('on', i === sxActive));
+  items[sxActive].scrollIntoView({block:'nearest'});
+}
+
+/* ---------- 홈 ---------- */
+function renderFav(){
+  const tHtml = fav.types.length ? '<ul class="fav-list">'+fav.types.map(id => '<li><a href="#type-'+id+'">'+sym(id)+esc(TYPE_BY_ID[id].name)+'</a><button type="button" data-unfav="types" data-key="'+id+'" aria-label="'+esc(TYPE_BY_ID[id].name)+' 즐겨찾기 해제">×</button></li>').join('')+'</ul>' : '<p class="fav-empty">담긴 선종 없음</p>';
+  const cHtml = fav.cos.length ? '<ul class="fav-list">'+fav.cos.map(n => '<li><a href="'+coHref(n)+'">'+esc(n)+'</a><button type="button" data-unfav="cos" data-key="'+esc(n)+'" aria-label="'+esc(n)+' 즐겨찾기 해제">×</button></li>').join('')+'</ul>' : '<p class="fav-empty">담긴 선사 없음</p>';
+  const empty = !fav.types.length && !fav.cos.length;
+  $('#v-home .fav').classList.toggle('is-empty', empty);
+  $('#fav-body').innerHTML = empty
+    ? '<p class="fav-empty">담긴 선종·선사 없음. 별표(☆)를 누르면 여기에 모입니다.</p>'
+    : '<div><h3>선종</h3>'+tHtml+'</div><div><h3>선사</h3>'+cHtml+'</div>';
+}
+function renderNewsItem(n, full){
+  const dd = full ? n.d.replace(/-/g,'.') : n.d.slice(5).replace('-','.');
+  return '<li><span class="d">'+dd+'</span><div><a class="t" href="'+esc(n.u)+'" target="_blank" rel="noopener">'+esc(n.t)+'</a>'+(n.p?'<p>'+esc(n.p)+'</p>':'')+'<div class="meta"><span class="cat">'+esc(n.c)+'</span><span>'+esc(n.s)+'</span></div></div></li>';
+}
+function newsFade(el){ el.classList.toggle('at-end', el.scrollTop + el.clientHeight >= el.scrollHeight - 4); }
+function renderHome(){
+  renderFav();
+  $('#hero-lead').textContent = '선사 '+CO.length+'곳, 선종 '+TYPES.length+'개. 2027 실습생 선발 여부까지 한 표에서 확인합니다.';
+  $('#news-list').innerHTML = NEWS_ALL.slice(0,12).map(n => renderNewsItem(n)).join('');
+  newsFade($('#news-list'));
+  $('#type-list').innerHTML = TYPES.map(t => {
+    const list = companiesOf(t.id);
+    const o = list.filter(c => c.kind === 'owner').length, m = list.length - o;
+    return '<li class="trow" tabindex="0" data-type="'+t.id+'">'+
+      starBtn('types', t.id, t.name)+
+      sym(t.id)+
+      '<div class="tn"><a href="#type-'+t.id+'">'+esc(t.name)+'</a><span class="td">'+esc(t.short)+'</span></div>'+
+      '<div class="tc"><span class="mono">'+list.length+'</span><small>선주 '+o+', 관리 '+m+'</small></div>'+
+      '<label class="pk"><input type="checkbox" data-pickty="'+t.id+'"'+(cmp.ty.includes(t.id)?' checked':'')+'> 비교에 담기</label></li>';
+  }).join('');
+}
+
+/* ---------- 해운 소식 ---------- */
+function ymd(dt){ return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); }
+function newsWindow(){
+  let from = state.newsFrom, to = state.newsTo;
+  if (state.newsRange !== 'all' && state.newsRange !== 'custom'){
+    const dt = new Date(); dt.setDate(dt.getDate() - Number(state.newsRange));
+    from = ymd(dt); to = '';
+  }
+  return {from, to};
+}
+function renderNews(){
+  const w = newsWindow();
+  const q = state.newsQ.trim().toLowerCase();
+  const base = NEWS_ALL.filter(n => (!w.from || n.d >= w.from) && (!w.to || n.d <= w.to) && (!q || (n.t+' '+n.p+' '+n.s+' '+n.c).toLowerCase().includes(q)));
+  const counts = {all:base.length};
+  NEWS_CATS.forEach(c => counts[c] = base.filter(n => n.c === c).length);
+  $('#news-cats').innerHTML = ['all'].concat(NEWS_CATS).map(c =>
+    '<button type="button" class="chip" data-cat="'+esc(c)+'" aria-pressed="'+(state.newsCat===c)+'">'+(c==='all'?'전체':esc(c))+'<small>'+counts[c]+'</small></button>').join('');
+  document.querySelectorAll('#nf-range button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === state.newsRange)));
+  $('#nf-from').value = w.from || '';
+  $('#nf-to').value = w.to || '';
+  const qbox = $('#nf-q');
+  if (q){ qbox.hidden = false; qbox.innerHTML = '검색어 <b>'+esc(state.newsQ.trim())+'</b> 결과 '+base.length+'건 <button type="button" class="linkbtn" id="nf-q-clear">검색 지우기</button>'; }
+  else qbox.hidden = true;
+  const list = base.filter(n => state.newsCat === 'all' || n.c === state.newsCat);
+  $('#news-full').innerHTML = list.length ? list.map(n => renderNewsItem(n, true)).join('') : '<li><span></span><div>조건에 맞는 소식이 없습니다. 기간이나 분류를 바꿔 보시기 바랍니다.</div></li>';
+  $('#feed-state').textContent = feedStatus;
+}
+
+/* ---------- 선종 화면 ---------- */
+function renderTypeHead(t){
+  const l = companiesOf(t.id), o = l.filter(c => c.kind === 'owner').length;
+  $('#type-head').innerHTML = sym(t.id,'big') +
+    '<div><h1>'+esc(t.name)+'</h1><p class="sub">선사 '+l.length+'곳 (선주사 '+o+', 관리선사 '+(l.length-o)+')</p></div>'+
+    '<div class="acts">'+starBtn('types', t.id, t.name)+'<label class="check"><input type="checkbox" data-pickty="'+t.id+'"'+(cmp.ty.includes(t.id)?' checked':'')+'> 비교에 담기</label></div>';
+  $('#type-pc').innerHTML =
+    pcSection('pros', '장점으로 꼽히는 것', '장점', t.pros) + pcSection('cons', '단점으로 꼽히는 것', '단점', t.cons);
+}
+const PC_SHOW = 3;
+function pcSection(cls, title, word, items){
+  const more = items.length - PC_SHOW;
+  return '<section class="'+cls+'"><h2>'+title+'</h2><ul>'+items.map((x,i) => '<li'+(i >= PC_SHOW ? ' class="pc-x"' : '')+'>'+esc(x)+'</li>').join('')+'</ul>'+
+    (more > 0 ? '<button type="button" class="linkbtn pc-more" aria-expanded="false" data-more="'+word+' '+more+'개 더 보기">'+word+' '+more+'개 더 보기</button>' : '')+'</section>';
+}
+function renderTypeSwitch(cur){
+  $('#type-switch').innerHTML = TYPES.map(t => '<a href="#type-'+t.id+'"'+(t.id === cur ? ' aria-current="page"' : '')+'>'+sym(t.id)+'<span>'+esc(t.name.split('/')[0])+'</span></a>').join('');
+}
+function renderRoutes(){
+  $('#f-routes').innerHTML = ROUTES.map(r => '<button type="button" class="chip" data-r="'+r+'" aria-pressed="'+state.routes.has(r)+'">'+r+'</button>').join('');
+}
+/* 실습생: 선발 / 없음(회사가 '없음'이라고 밝힘) / 미정 */
+function cadetState(j){ return j.yes ? 'yes' : (/없음/.test(j.cadet || '') ? 'no' : 'tbd'); }
+const CADET_TXT = {yes:'선발', no:'없음', tbd:'미정'};
+function jobCell(c){
+  if (!c.job) return '<span class="none">자료 없음</span>';
+  const j = c.job;
+  return '<div class="jobs"><span class="jb'+(j.yes?' on':'')+'">실습생 '+CADET_TXT[cadetState(j)]+'</span><span class="jb'+(j.reserve?' on':'')+'">예비역 '+(j.reserve?'가능':'불가')+'</span>'+(j.rot?'<span class="jrot">'+esc(j.rot)+'</span>':'')+'</div>';
+}
+function fleetHtml(c){
+  return '<span class="fleet">'+esc(c.fleetLabel)+(c.basis?'<span class="basis">'+esc(c.basis)+'</span>':'')+(c.fleetNote?'<small>'+esc(c.fleetNote)+'</small>':'')+'</span>';
+}
+/* 필터 하나하나를 이름과 함께 둔다: 빈 결과 때 원인을 알려 주려고 */
+const FILTERS = [
+  {k:'kind',    label:'회사 구분',        on: s => s.kind !== 'all',  off: s => s.kind = 'all',     ok: (c,s) => c.kind === s.kind},
+  {k:'foreign', label:'국적',            on: s => !s.foreign,        off: s => s.foreign = true,   ok: (c,s) => !c.foreign},
+  {k:'fleet',   label:'선단 규모',        on: s => s.fleet !== 'all', off: s => s.fleet = 'all',    ok: (c,s) => bucket(c) === s.fleet},
+  {k:'q',       label:'회사 이름 검색',    on: s => !!s.q,             off: s => s.q = '',           ok: (c,s) => (c.n+' '+(c.sub||'')).toLowerCase().includes(s.q.toLowerCase())},
+  {k:'routes',  label:'항로',            on: s => s.routes.size > 0, off: s => s.routes = new Set(), ok: (c,s) => c.routes.some(r => s.routes.has(r))},
+  {k:'cadet',   label:'2027 실습생 선발', on: s => s.cadet,           off: s => s.cadet = false,    ok: c => !!(c.job && c.job.yes)},
+  {k:'reserve', label:'승선근무예비역',    on: s => s.reserve,         off: s => s.reserve = false,  ok: c => !!(c.job && c.job.reserve)}
+];
+function filterList(full, s){ return full.filter(c => FILTERS.every(f => !f.on(s) || f.ok(c, s))); }
+function emptyHint(full){
+  let best = null;
+  FILTERS.filter(f => f.on(state)).forEach(f => {
+    const s = Object.assign({}, state, {routes:new Set(state.routes)}); f.off(s);
+    const n = filterList(full, s).length;
+    if (n > 0 && (!best || n > best.n)) best = {label:f.label, n};
+  });
+  return best ? '조건에 맞는 회사가 없습니다. '+best.label+' 조건을 풀면 '+best.n+'곳이 보입니다.' : '조건에 맞는 회사가 없습니다. 필터를 하나씩 풀어 보시기 바랍니다.';
+}
+const SORTS = {
+  rank:  null,
+  name:  (a,b) => a.n.localeCompare(b.n,'ko'),
+  fleet: (a,b) => (b.fleet == null ? -1 : b.fleet) - (a.fleet == null ? -1 : a.fleet),
+  job:   (a,b) => ((b.job&&b.job.yes?1:0) - (a.job&&a.job.yes?1:0)) || ((b.job&&b.job.reserve?1:0) - (a.job&&a.job.reserve?1:0))
+};
+const SORT_DIR = {rank:'ascending', name:'ascending', fleet:'descending', job:'descending'};
+let shownList = [];
+/* 주소에 담는 필터: 기본값은 생략 */
+function filterQuery(){
+  const q = [];
+  if (state.kind !== 'all') q.push('kind='+state.kind);
+  if (state.fleet !== 'all') q.push('fleet='+state.fleet);
+  if (!state.foreign) q.push('foreign=0');
+  if (state.cadet) q.push('cadet=1');
+  if (state.reserve) q.push('reserve=1');
+  if (state.q) q.push('q='+encodeURIComponent(state.q));
+  if (state.routes.size) q.push('r='+[...state.routes].map(encodeURIComponent).join(','));
+  if (state.sort !== 'rank') q.push('sort='+state.sort);
+  return q.join('&');
+}
+function applyQuery(qs){
+  resetFilters();
+  const p = new URLSearchParams(qs);
+  if (['owner','manager'].includes(p.get('kind'))) state.kind = p.get('kind');
+  if (['s','m','l','xl','na'].includes(p.get('fleet'))) state.fleet = p.get('fleet');
+  if (p.get('foreign') === '0') state.foreign = false;
+  state.cadet = p.get('cadet') === '1';
+  state.reserve = p.get('reserve') === '1';
+  state.q = p.get('q') || '';
+  state.routes = new Set((p.get('r') || '').split(',').filter(r => ROUTES.includes(r)));
+  if (SORTS.hasOwnProperty(p.get('sort'))) state.sort = p.get('sort');
+}
+function typeHash(){ const q = filterQuery(); return '#type-'+currentType+(q ? '?'+q : ''); }
+function syncHash(){
+  const h = typeHash();
+  if (location.hash !== h){ history.replaceState(null, '', h); lastHash = h; }
+  try{ sessionStorage.setItem('sasarok-last-type', h); }catch(e){}
+}
+function renderTable(typeId){
+  const full = sortedFor(typeId);
+  const rank = new Map(full.map((c,i) => [c.n, i+1]));
+  const list = filterList(full, state);
+  if (SORTS[state.sort]) list.sort((a,b) => SORTS[state.sort](a,b) || rank.get(a.n) - rank.get(b.n));
+  shownList = list;
+  const nOn = FILTERS.filter(f => f.on(state)).length;
+  $('#f-active').textContent = nOn ? '· 걸린 조건 '+nOn+'개' : '';
+  $('#f-toggle').textContent = nOn ? '필터 · '+nOn+'개 적용' : '필터';
+  document.querySelectorAll('.reg th[data-col]').forEach(th => {
+    const on = th.dataset.col === state.sort;
+    if (on) th.setAttribute('aria-sort', SORT_DIR[state.sort]); else th.removeAttribute('aria-sort');
+  });
+  if (typeId === currentType && currentView() === 'type') syncHash();
+  $('#th-cap').textContent = typeId === 'container' ? '선복량 (TEU)' : (typeId === 'heavy' ? '운영 척수' : '재화중량 (dwt)');
+  $('#r-count').textContent = full.length+'곳 중 '+list.length+'곳 표시';
+  $('#sort-note').innerHTML = '<span class="lines"><span>'+(typeId === 'container' ? '정렬은 총 선복량(TEU)이 큰 순서입니다.' : (typeId === 'heavy' ? '중량물선과 특수선은 규모를 한 가지 수치로 비교하기 어려워 운영 척수 순서로 놓았습니다.' : '정렬은 재화중량(dwt)이 큰 순서로, 큰 배를 많이 가진 회사가 위에 옵니다.'))+'</span>' +
+    '<span>값을 찾지 못한 회사는 아래쪽에 선단 척수 순서로 둡니다.</span><span>선단 숫자는 기준 시점과 집계 방식이 회사마다 달라 대략적인 규모로 봐 주시기 바랍니다.</span><span>회사 이름이나 줄을 누르면 자세한 화면으로 이동합니다.</span></span>';
+  if (!list.length){
+    $('#reg-body').innerHTML = '<tr class="empty-row"><td colspan="9">'+esc(emptyHint(full))+'</td></tr>';
+    return;
+  }
+  $('#reg-body').innerHTML = list.map(c => {
+    const cap = capOf(typeId, c);
+    const capCell = typeId === 'heavy'
+      ? '<span class="cap">'+(c.fleet!=null ? c.fleet+'척' : '미공개')+'</span>'
+      : (cap ? '<span class="cap cap-'+cap.k+'">'+esc(capText(typeId,cap))+capTag(cap.k)+'</span><small class="note" style="display:block;max-width:15em;white-space:normal">'+esc(cap.m||'')+'</small>' : '<span class="none">수치를 찾지 못함</span>');
+    const picked = cmp.co.includes(c.n);
+    const cid = 'cmp-'+CO.indexOf(c);
+    return '<tr class="row" tabindex="0" data-co="'+esc(c.n)+'">'+
+      '<td class="pick"><label class="pick-hit"><input type="checkbox" id="'+cid+'" data-pickco="'+esc(c.n)+'"'+(picked?' checked':'')+'><span class="sr">'+esc(c.n)+' 비교에 담기</span></label></td>'+
+      '<td class="rk">'+rank.get(c.n)+'</td>'+
+      '<td><span class="cname"><a href="'+coHref(c.n)+'">'+esc(c.n)+'</a>'+(c.sub?'<span class="sub">'+esc(c.sub)+'</span>':'')+'</span></td>'+
+      '<td>'+kindTag(c)+'</td>'+
+      '<td>'+capCell+'</td>'+
+      '<td>'+fleetHtml(c)+'</td>'+
+      '<td class="routes">'+(c.routes.length?esc(c.routes.join(', ')):'<span class="none">'+(c.kind==='manager'?'선주사 배치에 따라 다름':'확인 필요')+'</span>')+'</td>'+
+      '<td>'+jobCell(c)+'</td>'+
+      '<td><div class="other">'+(c.types.length>1?typeChips(c,typeId):'<span class="none">이 선종만</span>')+'</div></td></tr>';
+  }).join('');
+}
+function syncFilterUI(){
+  document.querySelectorAll('#f-kind button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === state.kind)));
+  $('#f-fleet').value = state.fleet;
+  $('#f-foreign').checked = state.foreign;
+  $('#f-q').value = state.q;
+  $('#f-cadet').checked = state.cadet;
+  $('#f-reserve').checked = state.reserve;
+}
+
+/* ---------- 선사 화면 ---------- */
+function jobDl(c){
+  if (!c.job) return '<dt>실습, 채용</dt><dd>공개된 자료 없음. 아는 내용이 있으면 제보 바람</dd>';
+  const j = c.job;
+  return '<dt>2027 실습생</dt><dd>'+esc(j.cadet)+'</dd>'+
+    (j.junior ? '<dt>초급사관 채용</dt><dd>'+esc(j.junior)+'</dd>' : '')+
+    '<dt>승선근무예비역</dt><dd>'+(j.reserve?'편입 가능':'불가')+(j.reserveNote?' ('+esc(j.reserveNote)+')':'')+'</dd>'+
+    '<dt>승선, 휴가</dt><dd>'+esc(j.rot || '자료 없음')+'</dd>'+
+    (j.extra ? '<dt>기타</dt><dd>'+esc(j.extra)+'</dd>' : '');
+}
+function relatedOf(c){
+  return CO.filter(x => x.n !== c.n && (((x.group||'').includes(c.n)) || ((c.group||'').includes(x.n))));
+}
+function backCrumb(c){
+  let h = '', from = ''; try{ h = sessionStorage.getItem('sasarok-last-type') || ''; from = sessionStorage.getItem('sasarok-from-table') || ''; }catch(e){}
+  if (from !== c.n) return '';
+  const m = h.match(/^#type-([a-z]+)/);
+  if (!m || !TYPE_BY_ID[m[1]] || !c.types.includes(m[1])) return '';
+  return '<a href="'+esc(h)+'" data-back>'+esc(TYPE_BY_ID[m[1]].name)+' 표로 돌아가기</a> &rsaquo; ';
+}
+function renderCo(name){
+  const c = CO_BY[name];
+  const box = $('#v-co');
+  if (!c){ box.innerHTML = '<div class="crumb"><a href="#home">처음</a></div><p class="cmp-empty">찾는 선사가 없습니다. 검색창에서 다시 찾아보시기 바랍니다.</p>'; return; }
+  const rel = relatedOf(c);
+  const more = MORE[c.n];
+  const picked = cmp.co.includes(c.n);
+  const kindExp = c.kind === 'owner'
+    ? '선주사로 분류했습니다. 배를 소유하거나 직접 운항하는 회사이며, 선원은 직접 뽑거나 관리선사를 통해 뽑습니다.'
+    : '관리선사로 분류했습니다. 선주의 배에 선원을 배치하고 정비와 안전을 맡는 회사라, 실제로 타게 될 배의 선주와 선종을 따로 확인해야 합니다.';
+  const typeLines = c.types.map(id => {
+    const full = sortedFor(id), r = full.findIndex(x => x.n === c.n) + 1;
+    const cap = capOf(id, c);
+    const capTxt = id === 'heavy' ? (c.fleet != null ? '운영 척수 '+c.fleet+'척' : '척수 미공개') : (cap ? '<span class="cap cap-'+cap.k+'">'+esc(capText(id,cap))+'</span> '+capTag(cap.k)+' <span class="note">'+esc(cap.m||'')+'</span>' : '<span class="none">규모 수치를 찾지 못함</span>');
+    return '<div class="rankline"><a href="#type-'+id+'">'+sym(id)+esc(TYPE_BY_ID[id].name)+'</a><span class="mono">'+r+'위 / '+full.length+'곳</span><span>'+capTxt+'</span></div>';
+  }).join('');
+  box.innerHTML =
+    '<div class="crumb"><a href="#home">처음</a> &rsaquo; '+backCrumb(c)+'선사</div>'+
+    '<div class="co-head"><div><h1>'+esc(c.n)+(c.sub?'<small>'+esc(c.sub)+'</small>':'')+'</h1>'+
+      '<div class="tags">'+kindTag(c)+'</div></div>'+
+      '<div class="acts">'+starBtn('cos', c.n, c.n)+'<button type="button" class="btn ghost" data-cmpco="'+esc(c.n)+'">'+(picked?'비교에서 빼기':'비교에 담기')+'</button></div></div>'+
+    '<div class="co-grid"><div class="co-main">'+
+      '<section class="sheet blk"><h2>개요</h2><div class="in"><p>'+esc(c.note||'')+'</p>'+
+        (more ? '<ul class="pts">'+more.map(x => '<li>'+esc(x)+'</li>').join('')+'</ul>' : '')+
+        '<p class="note" style="margin-top:12px">'+esc(kindExp)+'</p></div></section>'+
+      '<section class="sheet blk"><h2>기본 정보</h2><div class="in"><dl class="kv">'+
+        '<dt>본사</dt><dd>'+esc(c.hq || '확인 필요')+'</dd>'+
+        (c.group ? '<dt>계열, 관계</dt><dd>'+esc(c.group)+'</dd>' : '')+
+        '<dt>선단</dt><dd>'+fleetHtml(c)+'</dd>'+
+        '<dt>주요 항로</dt><dd>'+(c.routes.length ? esc(c.routes.join(', ')) : (c.kind==='manager' ? '선주사 배치에 따라 다름' : '확인 필요'))+'</dd>'+
+        '<dt>자료 출처</dt><dd>'+(c.src==='web' ? '언론 보도와 회사 발표' : '회사 제출 자료 (2026 목포해양대 취업박람회)')+'<span class="src-tag">'+(c.src==='web'?'보도':'회사 제출')+'</span></dd>'+
+      '</dl></div></section>'+
+      '<section class="sheet blk"><h2>선종별 위치</h2><div class="in">'+typeLines+'<p class="note" style="margin-top:10px">순위는 선종 화면 정렬 기준과 같음. 환산, 추정 값은 순서를 가늠하는 용도</p></div></section>'+
+      '<section class="sheet blk"><h2>실습과 채용 (2027년 계획)</h2><div class="in"><dl class="kv">'+jobDl(c)+'</dl></div></section>'+
+      '<section class="sheet blk"><h2>지원 전에 확인할 것</h2><div class="in"><ul class="pts">'+
+        '<li>'+(c.kind==='owner' ? '직접 선원을 뽑는지, 관리선사를 통해 뽑는지 공고에서 확인할 것' : '승선하게 될 배의 실제 선주, 선종, 선령을 면접에서 확인할 것')+'</li>'+
+        '<li>승선근무예비역, 산업기능요원 편입 가능 여부는 공고 시점마다 달라질 수 있음</li>'+
+        '<li>승선 기간, 휴가 보전, 선내 인터넷 같은 조건은 계약서 기준으로 확인할 것</li>'+
+        '<li>최신 구인 공고는 씨넷과 한국선원복지고용센터에서 확인할 것</li></ul></div></section>'+
+    '</div><aside class="co-side">'+
+      '<section class="sheet blk"><h2>바로 가기</h2><div class="in"><ul class="linklist">'+
+        (c.site ? '<li><a href="'+c.site+'" target="_blank" rel="noopener">공식 누리집 ↗</a><span>'+esc(c.site.replace(/^https?:\/\//,'').replace(/\/$/,''))+'</span></li>' : '')+
+        '<li><a href="https://www.seanet.co.kr/" target="_blank" rel="noopener">씨넷 구인 공고 ↗</a><span>해기사 채용 정보</span></li>'+
+        '<li><a href="https://www.koswec.or.kr/" target="_blank" rel="noopener">한국선원복지고용센터 ↗</a><span>선원 구인구직</span></li>'+
+        '<li><a href="#board">이 회사 정보 제보</a><span>틀린 내용이나 후기</span></li></ul></div></section>'+
+      (rel.length ? '<section class="sheet blk"><h2>관련 회사</h2><div class="in"><ul class="linklist">'+rel.map(x => '<li><a href="'+coHref(x.n)+'">'+esc(x.n)+'</a><span>'+(x.kind==='owner'?'선주사':'관리선사')+', '+esc(x.types.map(id => TYPE_BY_ID[id].name).join(', '))+'</span></li>').join('')+'</ul></div></section>' : '')+
+    '</aside></div>';
+}
+
+/* ---------- 비교 ---------- */
+function renderCompare(){
+  $('#ct-co').setAttribute('aria-pressed', String(state.cmpTab === 'co'));
+  $('#ct-ty').setAttribute('aria-pressed', String(state.cmpTab === 'ty'));
+  const box = $('#cmp-table');
+  if (state.cmpTab === 'co'){
+    const cos = cmp.co.map(n => CO_BY[n]).filter(Boolean);
+    if (!cos.length){ box.innerHTML = '<p class="cmp-empty">비교할 선사가 없습니다. 선종 화면에서 회사 왼쪽 칸을 체크하면 '+LIMIT+'곳까지 담을 수 있습니다.</p>'; return; }
+    const rows = [
+      ['구분', c => (c.kind==='owner'?'선주사':'관리선사')+(c.foreign?', 외국계 한국지사':'')],
+      ['2027 실습생', c => c.job ? c.job.cadet : '자료 없음'],
+      ['초급사관 채용', c => c.job ? (c.job.junior || '자료 없음') : '자료 없음'],
+      ['승선근무예비역', c => c.job ? ((c.job.reserve?'편입 가능':'불가')+(c.job.reserveNote?' ('+c.job.reserveNote+')':'')) : '자료 없음'],
+      ['승선, 휴가', c => c.job ? (c.job.rot || '자료 없음') : '자료 없음'],
+      ['선종', c => c.types.map(id => TYPE_BY_ID[id].name).join(', ')],
+      ['선종별 규모', c => '<ul>'+c.types.filter(id => id!=='heavy').map(id => { const cp = capOf(id,c); return '<li>'+esc(TYPE_BY_ID[id].name)+': '+(cp ? esc(capText(id,cp))+' '+capTag(cp.k) : '확인 못함')+'</li>'; }).join('')+'</ul>', true],
+      ['선단', c => c.fleetLabel+(c.basis?' ('+c.basis+')':'')+(c.fleetNote?'. '+c.fleetNote:'')],
+      ['주요 항로', c => c.routes.join(', ') || '확인 필요'],
+      ['본사', c => c.hq || '확인 필요'],
+      ['계열, 관계', c => c.group || ''],
+      ['기타', c => (c.job && c.job.extra) || ''],
+      ['메모', c => c.note || '']
+    ];
+    box.innerHTML = '<table class="cmp"><thead><tr><th scope="col"><span class="sr">항목</span></th>'+
+      cos.map(c => '<th scope="col"><a href="'+coHref(c.n)+'">'+esc(c.n)+'</a><button type="button" class="cmp-x" data-unpickco="'+esc(c.n)+'">빼기</button></th>').join('')+'</tr></thead><tbody>'+
+      rows.map(r => '<tr><th scope="row">'+r[0]+'</th>'+cos.map(c => '<td>'+(r[2] ? r[1](c) : esc(r[1](c)))+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
+  } else {
+    const tys = cmp.ty.map(id => TYPE_BY_ID[id]).filter(Boolean);
+    if (!tys.length){ box.innerHTML = '<p class="cmp-empty">비교할 선종이 없습니다. 홈의 선종 목록에서 오른쪽 체크를 누르면 '+LIMIT+'개까지 담을 수 있습니다.</p>'; return; }
+    const rows = [
+      ['한 줄 설명', t => esc(t.short)],
+      ['선사 수', t => { const l = companiesOf(t.id), o = l.filter(c => c.kind==='owner').length; return l.length+'곳 (선주 '+o+', 관리 '+(l.length-o)+')'; }],
+      ['규모 상위', t => { const l = sortedFor(t.id).slice(0,3); return '<ul>'+l.map(c => '<li><a href="'+coHref(c.n)+'">'+esc(c.n)+'</a></li>').join('')+'</ul>'; }],
+      ['장점', t => '<ul>'+t.pros.map(x => '<li>'+esc(x)+'</li>').join('')+'</ul>'],
+      ['단점', t => '<ul>'+t.cons.map(x => '<li>'+esc(x)+'</li>').join('')+'</ul>']
+    ];
+    box.innerHTML = '<table class="cmp"><thead><tr><th scope="col"><span class="sr">항목</span></th>'+
+      tys.map(t => '<th scope="col"><a href="#type-'+t.id+'">'+esc(t.name)+'</a><button type="button" class="cmp-x" data-unpickty="'+t.id+'">빼기</button></th>').join('')+'</tr></thead><tbody>'+
+      rows.map(r => '<tr><th scope="row">'+r[0]+'</th>'+tys.map(t => '<td>'+r[1](t)+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
+  }
+}
+function pick(kind, key, on){
+  const list = cmp[kind], i = list.indexOf(key);
+  if (on && i < 0){
+    if (list.length >= LIMIT){ showToast((kind==='co'?'선사':'선종')+' 비교는 '+LIMIT+'개까지 담을 수 있습니다. 하나를 빼고 다시 골라 주시기 바랍니다.'); return false; }
+    list.push(key);
+  } else if (!on && i >= 0){ list.splice(i,1); }
+  else return true;
+  saveCmp();
+  const name = kind === 'co' ? key : TYPE_BY_ID[key].name;
+  $('#cmp-live').textContent = name+(on ? ' 비교에 담음' : ' 비교에서 뺌')+' ('+(kind==='co'?'선사':'선종')+' '+list.length+'/'+LIMIT+')';
+  renderHeader();
+  return true;
+}
+
+/* ---------- 제보 ---------- */
+/* 제보 폼의 모든 칸을 글 하나로 (게시판이 열리면 붙여 넣을 수 있게) */
+function boardText(){
+  const v = id => ($('#'+id).value || '').trim();
+  const sel = id => { const s = $('#'+id); return s.options[s.selectedIndex] ? s.options[s.selectedIndex].text : ''; };
+  const who = document.querySelector('input[name="who"]:checked');
+  const lines = [
+    ['글 종류', sel('p-kind')], ['경험 종류', who ? who.closest('label').textContent.trim() : ''],
+    ['회사', v('p-company')], ['선종', sel('p-type')], ['부서', sel('p-dept')],
+    ['승선 시기', v('p-when')], ['항로', v('p-route')], ['승선/휴가 주기', v('p-rotation')]
+  ].filter(x => x[1]).map(x => x[0]+': '+x[1]);
+  return lines.join('\n') + '\n\n' + v('p-body');
+}
+function setupBoard(){
+  $('#company-list').innerHTML = CO.map(c => '<option value="'+esc(c.n)+'">').join('');
+  $('#p-type').innerHTML = TYPES.map(t => '<option value="'+t.id+'">'+esc(t.name)+'</option>').join('');
+  $('#p-copy').addEventListener('click', async () => {
+    const st = $('#p-status');
+    const text = boardText();
+    try{ await navigator.clipboard.writeText(text); st.textContent = '쓴 내용을 복사했습니다. 게시판이 열리면 붙여 넣어 주세요.'; }
+    catch(e){ $('#p-body').select(); st.textContent = '자동 복사가 막혀 있어 본문을 선택해 두었습니다. 직접 복사해 주세요.'; }
+    st.classList.add('show');
+  });
+  $('#post-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const st = $('#p-status');
+    const company = $('#p-company').value.trim(), body = $('#p-body').value.trim();
+    if (!company || !body){ st.textContent = '회사와 본문을 채워 주시기 바랍니다.'; st.classList.add('show'); return; }
+    const kindTxt = {exp:'경험 공유', add:'회사 추가 요청', fix:'정보 수정 요청'}[$('#p-kind').value];
+    st.innerHTML = '<b>'+esc(company)+'</b> '+kindTxt+' 글을 운영진 확인 대기로 보내는 화면입니다. 아직 서버와 연결 전이라 실제로 저장되지는 않았습니다. 연결되면 확인 대기 목록에 올라갑니다.';
+    st.classList.add('show');
+  });
+  const qtabs = [...document.querySelectorAll('.qtabs button')];
+  qtabs.forEach((b, i) => b.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    const n = qtabs[(i + (e.key === 'ArrowRight' ? 1 : -1) + qtabs.length) % qtabs.length];
+    n.click(); n.focus();
+  }));
+  qtabs.forEach(b => b.addEventListener('click', () => {
+    qtabs.forEach(x => { x.setAttribute('aria-selected', String(x === b)); x.tabIndex = x === b ? 0 : -1; });
+    $('#q-pub').hidden = b.id !== 'qt-pub';
+    $('#q-wait').hidden = b.id !== 'qt-wait';
+  }));
+}
+
+/* ---------- 라우팅 ---------- */
+function resetFilters(){
+  Object.assign(state, {kind:'all', fleet:'all', foreign:true, q:'', cadet:false, reserve:false, sort:'rank'});
+  state.routes = new Set();
+}
+/* 선종을 옮길 때: 선종과 상관없는 조건(회사 구분, 국적, 실습생 선발, 예비역)은 두고 나머지만 비움 */
+function resetTypeOnly(){ state.q = ''; state.fleet = 'all'; state.routes = new Set(); state.sort = 'rank'; }
+function setReadme(open){ $('#readme').hidden = !open; const b = $('#readme-toggle'); b.setAttribute('aria-expanded', String(open)); b.textContent = open ? '접기' : '펼치기'; }
+function route(){
+  const hash = location.hash || '#home';
+  const qpos = hash.indexOf('?');
+  const h = (qpos < 0 ? hash : hash.slice(0, qpos)).slice(1);
+  const qs = qpos < 0 ? '' : hash.slice(qpos + 1);
+  const changed = hash !== lastHash;
+  lastHash = hash;
+  const ids = ['home','news','type','co','board','compare'];
+  ids.forEach(id => $('#v-'+id).hidden = true);
+  $('#hero').hidden = true;
+  sxClose();
+  const qi = $('#q-all');
+  if (h === 'news'){ qi.placeholder = '해운 소식 안에서 검색'; qi.value = state.newsQ; }
+  else { if (qi.placeholder !== PH_DEFAULT) qi.value = ''; qi.placeholder = PH_DEFAULT; }
+  let title = '선사록';
+  if (h.startsWith('type-') && TYPE_BY_ID[h.slice(5)]){
+    const next = h.slice(5);
+    if (qs) applyQuery(qs);
+    else if (next !== currentType) resetTypeOnly();
+    currentType = next;
+    $('#v-type').hidden = false;
+    const t = TYPE_BY_ID[next];
+    renderTypeSwitch(next); renderTypeHead(t); renderRoutes(); syncFilterUI(); renderTable(next);
+    title = t.name+' | 선사록';
+  } else if (h.startsWith('co-')){
+    try{ const f = sessionStorage.getItem('sasarok-from-table'); let n0 = ''; try{ n0 = decodeURIComponent(h.slice(3)); }catch(e){} if (f && f !== n0) sessionStorage.removeItem('sasarok-from-table'); }catch(e){}
+    let n = ''; try{ n = decodeURIComponent(h.slice(3)); }catch(e){}
+    $('#v-co').hidden = false; renderCo(n);
+    title = (n || '선사')+' | 선사록';
+  } else if (h === 'news'){
+    $('#v-news').hidden = false; renderNews(); title = '해운 소식 | 선사록';
+  } else if (h === 'compare'){
+    $('#v-compare').hidden = false; renderCompare(); title = '비교 | 선사록';
+  } else if (h === 'board'){
+    $('#v-board').hidden = false; title = '정보 제보 | 선사록';
+  } else {
+    $('#v-home').hidden = false; $('#hero').hidden = false; renderHome();
+  }
+  document.title = title;
+  if (changed) setReadme(!h || h === 'home');
+  renderHeader();
+  if (changed) window.scrollTo(0,0);
+}
+
+/* ---------- 이벤트 ---------- */
+function markFromTable(n){ try{ sessionStorage.setItem('sasarok-from-table', n); }catch(e){} }
+document.addEventListener('click', e => {
+  const t = e.target;
+  const tl = t.closest('#reg-body tr.row a[href^="#co-"]');
+  if (tl) markFromTable(tl.closest('tr.row').dataset.co);
+  const sx = t.closest('#sx');
+  if (!sx) sxClose();
+  else if (t.closest('a.sx-item')) { /* 이동은 링크가 처리 */ }
+  const star = t.closest('button[data-star]');
+  if (star){ toggleFav(star.dataset.star, star.dataset.key); route(); return; }
+  const unfav = t.closest('button[data-unfav]');
+  if (unfav){ toggleFav(unfav.dataset.unfav, unfav.dataset.key); route(); return; }
+  const cmpBtn = t.closest('button[data-cmpco]');
+  if (cmpBtn){ const n = cmpBtn.dataset.cmpco; pick('co', n, !cmp.co.includes(n)); route(); return; }
+  const un1 = t.closest('[data-unpickco]');
+  if (un1){ pick('co', un1.dataset.unpickco, false); renderCompare(); return; }
+  const un2 = t.closest('[data-unpickty]');
+  if (un2){ pick('ty', un2.dataset.unpickty, false); renderCompare(); return; }
+  const nr = t.closest('#nf-range button');
+  if (nr){ state.newsRange = nr.dataset.v; state.newsFrom = ''; state.newsTo = ''; renderNews(); return; }
+  if (t.closest('#nf-reset')){ Object.assign(state, {newsRange:'all', newsFrom:'', newsTo:'', newsCat:'all', newsQ:''}); $('#q-all').value = ''; renderNews(); return; }
+  if (t.closest('#nf-q-clear')){ state.newsQ = ''; $('#q-all').value = ''; renderNews(); return; }
+  if (t.closest('#theme-btn')){
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next); try{ localStorage.setItem(THEME_KEY, next); }catch(e){}
+    return;
+  }
+  const pm = t.closest('.pc-more');
+  if (pm){ const sec = pm.closest('section'); const open = sec.classList.toggle('open'); pm.setAttribute('aria-expanded', String(open)); pm.textContent = open ? '접기' : pm.dataset.more; return; }
+  const cat = t.closest('button[data-cat]');
+  if (cat){ state.newsCat = cat.dataset.cat; renderNews(); return; }
+  const seg = t.closest('#f-kind button');
+  if (seg){ state.kind = seg.dataset.v; syncFilterUI(); renderTable(currentType); return; }
+  const chip = t.closest('#f-routes .chip');
+  if (chip){ const r = chip.dataset.r; state.routes.has(r) ? state.routes.delete(r) : state.routes.add(r); chip.setAttribute('aria-pressed', String(state.routes.has(r))); renderTable(currentType); return; }
+  if (t.closest('input,label,button,a')) return;
+  const trow = t.closest('.trow');
+  if (trow){ location.hash = 'type-'+trow.dataset.type; return; }
+  const row = t.closest('#reg-body tr.row');
+  if (row){ markFromTable(row.dataset.co); location.hash = 'co-'+encodeURIComponent(row.dataset.co); return; }
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.target !== e.target.closest('tr.row, .trow')) return;
+  const el = e.target;
+  if (el.matches('.trow')) location.hash = 'type-'+el.dataset.type;
+  else { markFromTable(el.dataset.co); location.hash = 'co-'+encodeURIComponent(el.dataset.co); }
+});
+document.addEventListener('change', e => {
+  const c1 = e.target.closest('input[data-pickco]');
+  if (c1){ if (!pick('co', c1.dataset.pickco, c1.checked)) c1.checked = false; return; }
+  const c2 = e.target.closest('input[data-pickty]');
+  if (c2){
+    if (!pick('ty', c2.dataset.pickty, c2.checked)) c2.checked = false;
+    document.querySelectorAll('input[data-pickty="'+c2.dataset.pickty+'"]').forEach(x => x.checked = c2.checked);
+  }
+});
+$('#f-fleet').addEventListener('change', e => { state.fleet = e.target.value; renderTable(currentType); });
+$('#f-foreign').addEventListener('change', e => { state.foreign = e.target.checked; renderTable(currentType); });
+$('#f-q').addEventListener('input', e => { state.q = e.target.value; renderTable(currentType); });
+$('#f-cadet').addEventListener('change', e => { state.cadet = e.target.checked; renderTable(currentType); });
+$('#f-reserve').addEventListener('change', e => { state.reserve = e.target.checked; renderTable(currentType); });
+$('#f-toggle').addEventListener('click', () => { const f = $('#filters'); const open = f.classList.toggle('open'); $('#f-toggle').setAttribute('aria-expanded', String(open)); });
+$('#readme-toggle').addEventListener('click', () => setReadme($('#readme').hidden));
+$('#f-reset').addEventListener('click', () => { resetFilters(); renderRoutes(); syncFilterUI(); renderTable(currentType); });
+$('#f-pickall').addEventListener('click', () => {
+  const room = LIMIT - cmp.co.length;
+  const todo = shownList.map(c => c.n).filter(n => !cmp.co.includes(n));
+  if (!todo.length){ showToast(shownList.length ? '표에 나온 회사는 이미 모두 비교에 담겨 있습니다.' : '표에 나온 회사가 없습니다. 필터를 풀어 보시기 바랍니다.'); return; }
+  todo.slice(0, Math.max(room, 0)).forEach(n => pick('co', n, true));
+  if (todo.length > room) showToast((room > 0 ? room+'곳만 담았습니다. ' : '')+'선사 비교는 '+LIMIT+'곳까지입니다. 비교 화면에서 몇 곳을 빼고 다시 담아 주시기 바랍니다.');
+  renderTable(currentType);
+});
+document.querySelector('.reg thead').addEventListener('click', e => {
+  const b = e.target.closest('.th-sort'); if (!b) return;
+  state.sort = b.dataset.sort; renderTable(currentType);
+});
+$('#hero-cta').addEventListener('click', () => {
+  const sec = $('#v-home .types'); sec.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start'});
+  const first = sec.querySelector('.tn a'); if (first) first.focus({preventScroll:true});
+});
+$('#ct-co').addEventListener('click', () => { state.cmpTab = 'co'; renderCompare(); });
+$('#ct-ty').addEventListener('click', () => { state.cmpTab = 'ty'; renderCompare(); });
+const qIn = $('#q-all');
+const PH_DEFAULT = qIn.placeholder;
+function inNews(){ return currentView() === 'news'; }
+qIn.addEventListener('input', () => {
+  if (inNews() && qIn.value.trim() !== '?'){ sxClose(); state.newsQ = qIn.value; renderNews(); return; }
+  sxOpen(false);
+});
+qIn.addEventListener('focus', () => { if (!inNews()) sxOpen(false); });
+qIn.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown'){ e.preventDefault(); sxMove(1); }
+  else if (e.key === 'ArrowUp'){ e.preventDefault(); sxMove(-1); }
+  else if (e.key === 'Escape'){ sxClose(); qIn.blur(); }
+  else if (e.key === 'Enter'){
+    if (inNews()){ e.preventDefault(); return; }
+    const items = [...document.querySelectorAll('#sx-panel a.sx-item')];
+    const target = sxActive >= 0 ? items[sxActive] : items.find(a => a.getAttribute('href').startsWith('#type-') || a.getAttribute('href').startsWith('#co-'));
+    if (target){ e.preventDefault(); location.hash = target.getAttribute('href').slice(1); qIn.value = ''; qIn.blur(); }
+  }
+});
+$('#sx-help').addEventListener('click', () => { qIn.focus(); sxOpen(true); });
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && !e.target.matches('input,textarea,select')){ e.preventDefault(); qIn.focus(); }
+  if (e.key === 'Escape') sxClose();
+});
+$('#nf-from').addEventListener('change', e => { const w = newsWindow(); state.newsTo = w.to; state.newsFrom = e.target.value; state.newsRange = 'custom'; renderNews(); });
+$('#nf-to').addEventListener('change', e => { const w = newsWindow(); state.newsFrom = w.from; state.newsTo = e.target.value; state.newsRange = 'custom'; renderNews(); });
+
+/* ---------- 버전, 패치노트, 이스터에그 ---------- */
+const VERSION = '1.0.0';   // 첫째 자리 큰 기능·개편, 둘째 자리 작은 기능, 셋째 자리 버그·오타 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const PATCH_NOTES = [
+  {v:'1.0.0', d:'2026-11-24', i:[
+    '홈 첫 화면에 항구 일러스트를 넣었습니다. 라이트모드는 낮, 다크모드는 밤 그림입니다.',
+    '홈에서 선종 목록을 맨 앞으로 옮기고, 비어 있는 즐겨찾기는 한 줄로 줄였습니다.',
+    '선종 화면에서 선사 표를 장단점보다 먼저 보여 주고, 장단점은 3줄씩 접었습니다.',
+    '휴대폰에서 선사 표를 카드로 바꿔 실습·병역 정보가 가려지지 않게 했습니다.',
+    '규모 옆 보도·환산·추정 표시를 색 대신 모양으로 구분하고 비교 화면에도 똑같이 붙였습니다.',
+    '주황 단추와 칩, 검색창 안내 문구의 글자 대비를 높였습니다.',
+    '비교 목록이 새로고침해도 남고, 걸어 둔 필터가 주소에 담겨 그대로 공유됩니다.',
+    '표 머리를 눌러 회사, 선단, 실습 순으로 정렬하고, 표에 나온 회사를 한꺼번에 비교에 담을 수 있습니다.',
+    '결과가 없을 때 어느 조건을 풀면 몇 곳이 보이는지 알려 줍니다.',
+    '실습생 표시를 선발, 없음, 미정으로 나누고 용어를 통일했습니다.',
+    '제보 게시판의 보내기 단추를 서버 연결 전 상태로 바꾸고, 쓴 내용 복사 단추를 넣었습니다.',
+    '선종 화면 위에 다른 선종으로 바로 가는 줄을 넣었습니다.',
+    '휴대폰 선종 화면에서 필터를 접어 두어 첫 화면에 회사가 바로 보입니다. 걸린 조건 수도 함께 보여 줍니다.',
+    '비교 표에서 실습생·초급사관·예비역·승선 휴가 줄을 위로 올리고, 휴대폰에서 항목 이름 칸을 고정했습니다.',
+    '제보 화면의 쓴 내용 복사가 모든 칸을 함께 복사합니다.',
+    '테마에 맞는 그림만 내려받고, 이스터에그 창 안에서 Tab 키가 돌도록 했습니다.',
+    '버전 표시와 패치노트, BYPASS 바로가기를 넣었습니다.'
+  ]}
+];
+let eggTaps = [], eggBack = null;
+function closeEgg(){ const o = document.querySelector('.egg'); if (o){ o.remove(); if (eggBack) eggBack.focus(); } }
+function eggCard(html, cls){
+  closeEgg();
+  const o = document.createElement('div');
+  o.className = 'egg';
+  o.innerHTML = '<div class="egg-card'+(cls?' '+cls:'')+'" role="dialog" aria-modal="true" aria-label="선사록 정보">'+html+'</div>';
+  o.addEventListener('click', e => { if (e.target === o) closeEgg(); });
+  document.body.append(o);
+  const f = o.querySelector('button'); if (f) f.focus();
+  return o;
+}
+function openEgg(){
+  const o = eggCard('<div class="ev">Ver.'+VERSION+'</div><div class="eb">Made by &quot;Bypass&quot;</div><div class="egg-btns"><button type="button" class="egg-pn">패치노트</button><button type="button" class="egg-close">닫기</button></div>');
+  o.querySelector('.egg-pn').addEventListener('click', openPatch);
+  o.querySelector('.egg-close').addEventListener('click', closeEgg);
+}
+function openPatch(){
+  const o = eggCard('<header><h3>패치노트</h3><button type="button" class="egg-close">닫기</button></header><div class="pn-body">'+
+    PATCH_NOTES.map(n => '<section><h4><span>v'+n.v+'</span>'+esc(n.d)+'</h4><ul>'+n.i.map(x => '<li>'+esc(x)+'</li>').join('')+'</ul></section>').join('')+'</div>', 'pn');
+  o.querySelector('.egg-close').addEventListener('click', closeEgg);
+}
+document.querySelectorAll('.ver').forEach(b => { b.textContent = 'v'+VERSION; b.addEventListener('click', () => {
+  const now = Date.now(); eggTaps = eggTaps.filter(x => now - x < 2000).concat(now);
+  if (eggTaps.length >= 5){ eggTaps = []; eggBack = b; openEgg(); }
+}); });
+document.addEventListener('keydown', e => {
+  const o = document.querySelector('.egg'); if (!o) return;
+  if (e.key === 'Escape'){ closeEgg(); return; }
+  if (e.key !== 'Tab') return;
+  const f = [...o.querySelectorAll('button, a[href]')]; if (!f.length) return;
+  const i = f.indexOf(document.activeElement);
+  if (e.shiftKey && i <= 0){ e.preventDefault(); f[f.length-1].focus(); }
+  else if (!e.shiftKey && (i === -1 || i === f.length-1)){ e.preventDefault(); f[0].focus(); }
+});
+$('#news-list').addEventListener('scroll', e => newsFade(e.target));
+heroSrc();
+window.addEventListener('hashchange', route);
+
+$('#m-count').textContent = '선사 '+CO.length+'곳, 선종 '+TYPES.length+'개';
+applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+setupBoard();
+route();
+fetchFeed().then(() => { if (currentView() === 'news') renderNews(); });
+if (NEWS_FEED.url) setInterval(fetchFeed, Math.max(5, NEWS_FEED.refreshMinutes) * 60000);
+
+</script>
+</body>
+</html>
