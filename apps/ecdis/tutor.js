@@ -14,7 +14,7 @@
   const $ = (q, r = document) => r.querySelector(q);
   const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   let cur = null; // {course, step}
-  let root, spot, pop, chip, cursor, timer = null, reacted = false;
+  let root, spot, pop, chip, cursor, timer = null, reacted = false, manual = null, drag = null;
 
   const CSS = `
 #tuRoot{position:fixed;inset:0;z-index:90;pointer-events:none;font-family:inherit}
@@ -26,7 +26,9 @@
 @keyframes tuPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.06)}}
 .tu-pop{position:absolute;width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;background:#fff;color:#241008;border:3px solid #241008;border-radius:20px;box-shadow:8px 8px 0 rgba(36,16,8,.85);pointer-events:auto;opacity:0;transform:translateY(14px) scale(.97);transition:opacity .35s,transform .35s,left .45s,top .45s}
 .tu-pop.on{opacity:1;transform:none}
-.tu-ph{display:flex;align-items:center;gap:10px;padding:14px 18px 10px;border-bottom:2px dashed #e8d9c4}
+.tu-ph{display:flex;align-items:center;gap:10px;padding:14px 18px 10px;border-bottom:2px dashed #e8d9c4;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.tu-ph:active{cursor:grabbing}.tu-grip{color:#b9a58e;font-size:15px;letter-spacing:-2px;margin-right:-2px}
+.tu-pop.tu-dragging{transition:opacity .35s,transform .35s}
 .tu-tag{background:#FF7A26;color:#241008;font-weight:800;font-size:13px;padding:3px 10px;border-radius:999px}
 .tu-course{font-size:13px;color:#7A4532;font-weight:700}
 .tu-cnt{margin-left:auto;font-size:12px;color:#8a7766;font-weight:700}
@@ -103,7 +105,7 @@
   function render() {
     const s = stepObj(), n = steps().length;
     const quiz = s.quiz ? `<div class="tu-quiz">${s.quiz.map((q, i) => `<button type="button" data-q="${i}">${esc(q[0])}</button>`).join("")}</div>` : "";
-    pop.innerHTML = `<div class="tu-ph"><span class="tu-tag">${esc(s.id)}</span><span class="tu-course">${esc(COURSES[cur.course].name)}</span><span class="tu-cnt">${cur.step + 1} / ${n}</span><button type="button" class="tu-x" data-tu="stop" aria-label="교육 끝내기">×</button></div>
+    pop.innerHTML = `<div class="tu-ph" title="끌어서 옮길 수 있어요"><span class="tu-grip" aria-hidden="true">⠿</span><span class="tu-tag">${esc(s.id)}</span><span class="tu-course">${esc(COURSES[cur.course].name)}</span><span class="tu-cnt">${cur.step + 1} / ${n}</span><button type="button" class="tu-x" data-tu="stop" aria-label="교육 끝내기">×</button></div>
 <div class="tu-pb"><div class="tu-face"><img class="tu-dodo" alt="도도" src="edu/dodo_${s.mood || "explain"}.webp"></div><div class="tu-txt"><h3>${esc(s.title)}</h3><p>${s.body}</p></div></div>
 <div class="tu-bub">${s.say}</div>${s.note ? `<div class="tu-note">${s.note}</div>` : ""}${s.task ? `<div class="tu-task">해 보기 · ${s.task}</div>` : ""}${s.clip ? `<div class="tu-clip"><button type="button" class="tu-cbtn" data-tu="clip" aria-expanded="false">▶ 시연 보기</button><div class="tu-vid"></div></div>` : ""}${quiz}
 <div class="tu-pf"><span class="tu-en">${typeof LANG !== "undefined" && LANG !== "ko" ? "교육 과정은 한국어로 제공됩니다 (Korean only)" : ""}</span><button type="button" class="tu-btn" data-tu="prev"${cur.step ? "" : " disabled"}>이전</button><button type="button" class="tu-btn pri" data-tu="next">${cur.step === n - 1 ? "끝내기" : "다음"}</button></div>`;
@@ -134,6 +136,7 @@
       }
     }
     cursor.classList.toggle("show", !!(el && s.cursor));
+    if (manual) { x = manual.x; y = manual.y; }
     x = Math.max(12, Math.min(W - pw - 12, x)); y = Math.max(12, Math.min(H - ph - 12, y));
     pop.style.left = x + "px"; pop.style.top = y + "px";
   }
@@ -147,7 +150,7 @@
   }
 
   function show(i) {
-    mount(); ensurePop(); cur.step = Math.max(0, Math.min(steps().length - 1, i)); save(); reacted = false;
+    mount(); ensurePop(); cur.step = Math.max(0, Math.min(steps().length - 1, i)); save(); reacted = false; manual = null;
     const s = stepObj();
     try { s.before && s.before(); } catch (e) {}
     pop.classList.remove("on"); root.classList.add("on");
@@ -181,7 +184,26 @@
     root.classList.remove("on"); cursor.classList.remove("show"); chip.classList.remove("show"); spot.classList.remove("show");
     if (pop) { pop.remove(); pop = null; }
   }
-  function ensurePop() { if (pop) return; pop = document.createElement("div"); pop.className = "tu-pop"; pop.setAttribute("role", "dialog"); pop.setAttribute("aria-live", "polite"); pop.addEventListener("click", onClick); root.appendChild(pop); }
+  function ensurePop() { if (pop) return; pop = document.createElement("div"); pop.className = "tu-pop"; pop.setAttribute("role", "dialog"); pop.setAttribute("aria-live", "polite"); pop.addEventListener("click", onClick); pop.addEventListener("pointerdown", onDown); root.appendChild(pop); }
+  // 머리줄을 잡고 끌어서 팝업 옮기기 (마우스·터치)
+  function onDown(e) {
+    const h = e.target.closest(".tu-ph"); if (!h || e.target.closest("button")) return;
+    const r = pop.getBoundingClientRect();
+    drag = { id: e.pointerId, dx: e.clientX - r.left, dy: e.clientY - r.top };
+    pop.classList.add("tu-dragging"); e.preventDefault();
+    addEventListener("pointermove", onMove); addEventListener("pointerup", onUp); addEventListener("pointercancel", onUp);
+  }
+  function onMove(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    const W = innerWidth, H = innerHeight, pw = pop.offsetWidth, ph = pop.offsetHeight;
+    manual = { x: Math.max(12, Math.min(W - pw - 12, e.clientX - drag.dx)), y: Math.max(12, Math.min(H - Math.min(ph, 80) - 12, e.clientY - drag.dy)) };
+    pop.style.left = manual.x + "px"; pop.style.top = manual.y + "px";
+  }
+  function onUp(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    drag = null; pop && pop.classList.remove("tu-dragging");
+    removeEventListener("pointermove", onMove); removeEventListener("pointerup", onUp); removeEventListener("pointercancel", onUp);
+  }
   function menu() {
     mount(); stop(); cur = null; ensurePop();
     const sv = saved();
