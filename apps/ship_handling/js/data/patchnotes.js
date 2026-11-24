@@ -1,6 +1,9 @@
 /* 최신 버전이 맨 위. 버전을 올릴 때마다 같은 작업에서 항목을 더한다. */
-export const VERSION = '1.0.2';
+export const VERSION = '1.0.3';
 export const PATCH_NOTES = [
+  { v: '1.0.3', date: '2026-11-25', items: [
+    '이스터에그 창 맨 위에 도도 마스코트가 리모컨으로 수조의 작은 모형선을 조종하는 그림을 넣었다'
+  ] },
   { v: '1.0.2', date: '2026-11-25', items: [
     '브라우저 탭 아이콘을 bypass 로고로 바꿨다'
   ] },
