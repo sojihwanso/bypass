@@ -566,6 +566,7 @@ tr.cu-lag td{background:rgba(255,122,38,.12)}
 .scn.scn4{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .scn4 .scn-o{min-height:96px;align-content:start}
 .scn4 .scn-i{grid-column:1/-1}
+.scn4 .scn-edu{grid-column:1/-1;min-height:0;border-color:#FF7A26}
 .scn-opts{margin-top:8px}
 .scn-opts .scn-x{grid-column:auto;margin-top:0;padding:8px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--soft)}
 @media (max-height:540px){.scn4 .scn-o{min-height:0}.scn4 .scn-o p{display:none}.scn4 .scn-i{display:none}}
@@ -657,6 +658,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
 <div id="dlgRoot"></div>
 
 <script src="egg.js"></script>
+<script src="tutor.js"></script>
 <script>
 /* ================= I18N ================= */
 let LANG="ko";
@@ -668,7 +670,7 @@ foot:"ECDIS(전자해도표시정보시스템) 조작을 연습하기 위한 학
 footBook:"<b>참고 자료</b>상용 ECDIS 운용자 매뉴얼 (IEC 62923-1/2 적합 장비), IHO S-52 · IEC 62288 · IEC 61174. 기호와 색상은 표준을 바탕으로 근사했으며 실제 장비 화면과 다를 수 있습니다.",
 disc:"본 시뮬레이터는 학습용이며 실제 항해에 사용할 수 없습니다. 해도는 공식 ENC가 아니며(Non-ENC) 수심·항로표지는 실제와 다른 가상 자료이고, 선박 거동은 단순화된 모델입니다. 실무 전에는 장비 매뉴얼과 공식 해도로 확인하세요.",
 rotT:"가로 화면으로 돌려 주세요",rotP:"ECDIS 콘솔은 가로 화면에 맞춰져 있습니다. 기기를 가로로 돌리면 해도와 정보창이 함께 보입니다.",rotBtn:"세로로 계속 보기",
-eggAlt:"노트북을 하는 주황색 새 캐릭터",eggClose:"아무 곳이나 누르면 닫힙니다",eggPatch:"패치노트",cuApply:"업데이트 적용",airDraft:"Air draft (수면~최고점)",ukcPct:"UKC 기준 (흘수의 %)",ukcNote:"UKC는 통상 흘수의 10~20%로 잡아요. 회사마다 규정이 다르니 소속 회사 SMS 기준을 꼭 확인하세요.",ukcCol:"UKC 기준",ukcOk:"충족",ukcNg:"부족",ukcRepNote:"흘수 {0} m · UKC 기준 흘수의 {1}% = {2} m. MIN DEP는 XTD 폭 안 최소 수심입니다.",bkSend:"백업 ECDIS로 보내기",bkCmpS:"비교",bkCmp:"주·백업 ECDIS 항로 비교",bkMain:"주 ECDIS",bkBack:"백업 ECDIS",bkChanged:"다른 WPT",bkSame:"두 ECDIS의 항로가 같습니다.",bkDiff:"두 ECDIS의 항로가 다릅니다. 백업 ECDIS로 다시 보내세요.",bkNone:"이 항로는 아직 백업 ECDIS로 보내지 않았습니다.",bkSent:"백업 ECDIS로 보냈습니다.",bkResend:"다시 보내기",cuLatest:"최신",cuDone:"{0} 업데이트를 적용했습니다. 새 물표를 확인하세요.",evCellUpd:"해도 셀 업데이트 적용 · {0} (Update {1})",patchT:"패치노트",
+eggAlt:"노트북을 하는 주황색 새 캐릭터",eggClose:"아무 곳이나 누르면 닫힙니다",eggPatch:"패치노트",cuApply:"업데이트 적용",eduMenu:"교육 과정",eduP:"도도와 함께 화면 둘러보기 · 항로 계획 · 선박 조종을 단계별로 따라 해요.",airDraft:"Air draft (수면~최고점)",ukcPct:"UKC 기준 (흘수의 %)",ukcNote:"UKC는 통상 흘수의 10~20%로 잡아요. 회사마다 규정이 다르니 소속 회사 SMS 기준을 꼭 확인하세요.",ukcCol:"UKC 기준",ukcOk:"충족",ukcNg:"부족",ukcRepNote:"흘수 {0} m · UKC 기준 흘수의 {1}% = {2} m. MIN DEP는 XTD 폭 안 최소 수심입니다.",bkSend:"백업 ECDIS로 보내기",bkCmpS:"비교",bkCmp:"주·백업 ECDIS 항로 비교",bkMain:"주 ECDIS",bkBack:"백업 ECDIS",bkChanged:"다른 WPT",bkSame:"두 ECDIS의 항로가 같습니다.",bkDiff:"두 ECDIS의 항로가 다릅니다. 백업 ECDIS로 다시 보내세요.",bkNone:"이 항로는 아직 백업 ECDIS로 보내지 않았습니다.",bkSent:"백업 ECDIS로 보냈습니다.",bkResend:"다시 보내기",cuLatest:"최신",cuDone:"{0} 업데이트를 적용했습니다. 새 물표를 확인하세요.",evCellUpd:"해도 셀 업데이트 적용 · {0} (Update {1})",patchT:"패치노트",
 fsNo:"이 화면에서는 전체 화면을 지원하지 않습니다",
 holdOnly:"누르고 있는 동안 해도만 표시",
 bxSens:"센서 정보",bxHelm:"자선 조종",bxOsf:"자선 기능",bxRoute:"항로 정보",
@@ -731,7 +733,7 @@ foot:"A training simulator for practising ECDIS operation. The screen layout and
 footBook:"<b>References</b>Commercial ECDIS operator's manual (IEC 62923-1/2 type-approved equipment), IHO S-52, IEC 62288, IEC 61174. Symbols and colours are approximations and may differ from real equipment.",
 disc:"This simulator is for training only and must not be used for navigation. Charts are not official ENCs (Non-ENC), depths and aids to navigation are synthetic, and ship behaviour is a simplified model. Always confirm with the equipment manual and official charts before real operation.",
 rotT:"Rotate to landscape",rotP:"The ECDIS console is laid out for landscape. Turn your device sideways to see the chart and the information panel together.",rotBtn:"Continue in portrait",
-eggAlt:"Orange bird character using a laptop",eggClose:"Tap anywhere to close",eggPatch:"Patch notes",cuApply:"Apply update",airDraft:"Air draft",ukcPct:"UKC policy (% of draft)",ukcNote:"UKC is usually 10–20% of the draft, but every company sets its own rule. Check your company SMS.",ukcCol:"UKC policy",ukcOk:"OK",ukcNg:"Short",ukcRepNote:"Draft {0} m · UKC policy {1}% of draft = {2} m. MIN DEP is the least depth inside the XTD corridor.",bkSend:"Send to backup",bkCmpS:"Compare",bkCmp:"Main vs backup ECDIS route",bkMain:"Main ECDIS",bkBack:"Backup ECDIS",bkChanged:"Different WPT",bkSame:"Both ECDIS hold the same route.",bkDiff:"The routes differ. Send the route to the backup ECDIS again.",bkNone:"This route has not been sent to the backup ECDIS yet.",bkSent:"Sent to backup ECDIS.",bkResend:"Send again",cuLatest:"Latest",cuDone:"Update applied to {0}. Check the new objects.",evCellUpd:"Chart cell update applied · {0} (Update {1})",patchT:"Patch notes",
+eggAlt:"Orange bird character using a laptop",eggClose:"Tap anywhere to close",eggPatch:"Patch notes",cuApply:"Apply update",eduMenu:"Training (Korean)",eduP:"Step-by-step screen tour, passage planning and ship handling with Dodo (Korean only).",airDraft:"Air draft",ukcPct:"UKC policy (% of draft)",ukcNote:"UKC is usually 10–20% of the draft, but every company sets its own rule. Check your company SMS.",ukcCol:"UKC policy",ukcOk:"OK",ukcNg:"Short",ukcRepNote:"Draft {0} m · UKC policy {1}% of draft = {2} m. MIN DEP is the least depth inside the XTD corridor.",bkSend:"Send to backup",bkCmpS:"Compare",bkCmp:"Main vs backup ECDIS route",bkMain:"Main ECDIS",bkBack:"Backup ECDIS",bkChanged:"Different WPT",bkSame:"Both ECDIS hold the same route.",bkDiff:"The routes differ. Send the route to the backup ECDIS again.",bkNone:"This route has not been sent to the backup ECDIS yet.",bkSent:"Sent to backup ECDIS.",bkResend:"Send again",cuLatest:"Latest",cuDone:"Update applied to {0}. Check the new objects.",evCellUpd:"Chart cell update applied · {0} (Update {1})",patchT:"Patch notes",
 fsNo:"Fullscreen is not available here",
 holdOnly:"Hold to show the chart only",
 bxSens:"Sensors",bxHelm:"Helm & engine",bxOsf:"Functions",bxRoute:"Route",
@@ -3399,7 +3401,7 @@ const ACT={
   mode:b=>setMode(b.dataset.v),
   dispmode:b=>openPop(b,[{label:t("dm_ECDIS"),on:dispMode==="ECDIS",fn:()=>setDisp("ECDIS")},{label:t("dm_CONNING"),on:dispMode==="CONNING",fn:()=>setDisp("CONNING")},{label:t("dm_RADAR"),dis:true},{label:t("dm_AMS"),dis:true}]),
   conn:()=>setDisp(dispMode==="CONNING"?"ECDIS":"CONNING"),
-  others:b=>openPop(b,[{label:t("silent"),fn:()=>{S.standby=true;$("#standby").hidden=false;$("#standby").innerHTML=`<b>SILENT</b><span>${t("silentP")}</span><button class="btn" data-act="wake">${t("wake")}</button>`}},"-",{label:t("scChoose"),fn:()=>dlgScenario(false)},{label:t("newSc"),fn:()=>restart(Math.floor(Math.random()*1e9),{mode:"random"})},{label:t("restart"),fn:()=>restart(S.seed,S.scOpts)},"-",{label:t("scSaveNow"),fn:()=>{toast(saveState()?t("scSaved"):"ERROR")}}]),
+  others:b=>openPop(b,[{label:t("silent"),fn:()=>{S.standby=true;$("#standby").hidden=false;$("#standby").innerHTML=`<b>SILENT</b><span>${t("silentP")}</span><button class="btn" data-act="wake">${t("wake")}</button>`}},"-",{label:t("eduMenu"),fn:()=>Tutor.menu()},{label:t("scChoose"),fn:()=>dlgScenario(false)},{label:t("newSc"),fn:()=>restart(Math.floor(Math.random()*1e9),{mode:"random"})},{label:t("restart"),fn:()=>restart(S.seed,S.scOpts)},"-",{label:t("scSaveNow"),fn:()=>{toast(saveState()?t("scSaved"):"ERROR")}}]),
   wake:()=>{S.standby=false;$("#standby").hidden=true},
   clearradar:()=>{S.clearRadar=!S.clearRadar;$("#bClr").classList.toggle("on",S.clearRadar);if(NAVPAGES[navPage]==="ttais")renderNavPage()},
   stddisp:stdDisp,
@@ -4112,6 +4114,7 @@ function dlgScenario(first,pre){
     <div class="scn-o" role="radio" tabindex="0" data-sc="rand"><span class="rd"></span><b>${t("scRand")}<small>SCENARIO</small></b><p>${t("scRandP")}</p></div>
     <div class="scn-o${sv?"":" dis"}" role="radio" tabindex="${sv?0:-1}" aria-disabled="${!sv}" data-sc="cont"><span class="rd"></span><b>${t("scCont")}<small>CONTINUE</small></b>${sv?`<p>${t("scContP")}</p>`:""}${svInfo}</div>
     <div class="scn-o" role="radio" tabindex="0" data-sc="plan"><span class="rd"></span><b>${t("scPlan")}<small>PLANNING</small></b><p>${t("scPlanP")}</p></div>
+    <div class="scn-o scn-edu" role="radio" tabindex="0" data-sc="edu"><span class="rd"></span><b>${t("eduMenu")}<small>TRAINING</small></b><p>${t("eduP")}</p></div>
   </div>
   <div class="scn-opts">
     <div class="scn-x" data-for="free plan">
@@ -4130,7 +4133,7 @@ function dlgScenario(first,pre){
   openDlg(t("scTitle"),body,{sub:t("scSub"),modal:first,foot:`${first?"":`<button class="btn" data-x>${t("scCancel")}</button>`}<button class="btn pri" id="scGo">${t("scStart")}</button>`,onMount:(d,close)=>{
     const segV=n=>d.querySelector(`[data-seg="${n}"] button.on`).dataset.v;
     const paint=()=>{d.querySelectorAll(".scn-o").forEach(b=>{b.classList.toggle("on",b.dataset.sc===sel);b.setAttribute("aria-checked",b.dataset.sc===sel)});d.querySelectorAll(".scn-x").forEach(x=>x.hidden=!x.dataset.for.split(" ").includes(sel));
-      const plan=sel==="plan";d.querySelector(".only-free").hidden=plan;d.querySelector("#scLvl").hidden=plan||sel==="cont";
+      const plan=sel==="plan";d.querySelector(".only-free").hidden=plan;d.querySelector("#scLvl").hidden=plan||sel==="cont"||sel==="edu";
       const rt=plan?"":d.querySelector("#scRt").value,pv=d.querySelector('input[name="scPos"]:checked').value;d.querySelector("#scPosRow").hidden=!!rt;d.querySelector(".scn-ll").hidden=!!rt||pv!=="ll";d.querySelector(".scn-tss").hidden=!!rt||pv!=="tss"};
     paint();
     const pickO=b=>{if(b&&!b.classList.contains("dis")&&b.dataset.sc!==sel){sel=b.dataset.sc;paint()}};
@@ -4143,6 +4146,7 @@ function dlgScenario(first,pre){
       if(sel==="cont"){const sv2=hasSave();if(!sv2){err(t("scNone"));return}close();
         const e=await runScenario(async()=>{await loadState(sv2);S.scOpts=sv2.opts||{mode:sv2.mode||"random"}},()=>t("scResumed"));
         if(e){toast(t("scLoadErr"));dlgScenario(first)}return}
+      if(sel==="edu"){close();const e=await restart(Math.floor(Math.random()*1e9),{mode:"random"});if(e){toast("ERROR: "+e.message);if(!S.own)dlgScenario(first);return}setTimeout(()=>Tutor.menu(),300);return}
       if(sel==="rand"){const v=d.querySelector("#scSeed").value.trim();const seed=v===""?Math.floor(Math.random()*1e9):Math.max(0,Math.min(999999999,Math.round(+v)||0));close();const e=await restart(seed,{mode:"random",uc:ucReadChecks(d,"scuc")});if(e){toast("ERROR: "+e.message);if(!S.own)dlgScenario(first)}return}
       const opts={mode:sel==="plan"?"plan":"free",uc:ucReadChecks(d,"scuc")};
       const rt=sel==="plan"?"":d.querySelector("#scRt").value;
