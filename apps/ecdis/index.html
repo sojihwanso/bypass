@@ -603,11 +603,11 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
 </style>
 <header class="top">
   <div class="bar">
-    <a class="brand" href="#" data-act="noop"><b data-t="brand">ECDIS 시뮬레이터</b><span>ECDIS SIMULATOR · TRAINING</span></a>
+    <a class="brand" href="#" data-act="home" title="모드 선택 화면으로"><b data-t="brand">ECDIS 시뮬레이터</b><span>ECDIS SIMULATOR · TRAINING</span></a>
     <div class="htools">
       <div class="seg2" role="group" aria-label="Language"><button type="button" data-act="lang" data-v="ko">한</button><button type="button" data-act="lang" data-v="en">EN</button></div>
       <button class="hbtn" type="button" data-act="fs" id="fsBtn" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
-      <button class="ver" type="button" aria-label="버전 2.2.1">v2.2.1</button>
+      <button class="ver" type="button" aria-label="버전 2.3.0">v2.3.0</button>
       <a class="tb-home" href="https://teambypass.vercel.app/" aria-label="Team Bypass 메인 페이지로 이동" title="Team Bypass"><svg viewBox="0 0 132 132" width="30" height="30" aria-hidden="true"><path d="M66 4L128 66L66 128L4 66Z" fill="#1C211E" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/><path d="M66 12L120 66L66 120L12 66Z" fill="#EE6A1F"/><path d="M66 18L114 66L66 114L18 66Z" fill="#1C211E"/><path d="M66 25L107 66L66 107L25 66Z" fill="#EE6A1F"/><g transform="translate(36 34) scale(0.6)" fill="#1C211E"><ellipse cx="44" cy="60" rx="27" ry="23"/><path d="M51 45C55 37 58 31 61 25L72 30C68 36 66 44 64 53Z"/><circle cx="66" cy="26" r="10"/><path d="M72 20C83 19 93 24 95 32C96 38 91 41 88 37C86 34 82 33 74 33Z"/><path d="M19 52C10 47 7 40 11 34C14 43 20 46 23 46Z"/><path d="M37 80L35 92L27 95L41 95L42 81Z"/><path d="M51 80L51 92L44 95L58 95L56 81Z"/><circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/><path d="M32 55C40 50 51 54 54 64" fill="none" stroke="#EE6A1F" stroke-width="2.6" stroke-linecap="round"/></g></svg></a>
     </div>
   </div>
@@ -645,7 +645,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
     <span id="footTxt"></span>
     <p class="book" id="footBook"></p>
     <p class="disclaimer" role="note" id="footDisc"></p>
-    <div class="ver-row"><button class="ver" type="button" aria-label="버전 2.2.1">v2.2.1</button></div>
+    <div class="ver-row"><button class="ver" type="button" aria-label="버전 2.3.0">v2.3.0</button></div>
   </div>
 </footer>
 
@@ -658,7 +658,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
 <div id="dlgRoot"></div>
 
 <script src="egg.js"></script>
-<script src="tutor.js?v=2.2.1"></script>
+<script src="tutor.js?v=2.3.0"></script>
 <script>
 /* ================= I18N ================= */
 let LANG="ko";
@@ -670,7 +670,7 @@ foot:"ECDIS(전자해도표시정보시스템) 조작을 연습하기 위한 학
 footBook:"<b>참고 자료</b>상용 ECDIS 운용자 매뉴얼 (IEC 62923-1/2 적합 장비), IHO S-52 · IEC 62288 · IEC 61174. 기호와 색상은 표준을 바탕으로 근사했으며 실제 장비 화면과 다를 수 있습니다.",
 disc:"본 시뮬레이터는 학습용이며 실제 항해에 사용할 수 없습니다. 해도는 공식 ENC가 아니며(Non-ENC) 수심·항로표지는 실제와 다른 가상 자료이고, 선박 거동은 단순화된 모델입니다. 실무 전에는 장비 매뉴얼과 공식 해도로 확인하세요.",
 rotT:"가로 화면으로 돌려 주세요",rotP:"ECDIS 콘솔은 가로 화면에 맞춰져 있습니다. 기기를 가로로 돌리면 해도와 정보창이 함께 보입니다.",rotBtn:"세로로 계속 보기",
-eggAlt:"노트북을 하는 주황색 새 캐릭터",eggClose:"아무 곳이나 누르면 닫힙니다",eggPatch:"패치노트",cuApply:"업데이트 적용",eduMenu:"교육 과정",eduP:"도도와 함께 화면 둘러보기 · 항로 계획 · 선박 조종을 단계별로 따라 해요.",airDraft:"Air draft (수면~최고점)",ukcPct:"UKC 기준 (흘수의 %)",ukcNote:"UKC는 통상 흘수의 10~20%로 잡아요. 회사마다 규정이 다르니 소속 회사 SMS 기준을 꼭 확인하세요.",ukcCol:"UKC 기준",ukcOk:"충족",ukcNg:"부족",ukcRepNote:"흘수 {0} m · UKC 기준 흘수의 {1}% = {2} m. MIN DEP는 XTD 폭 안 최소 수심입니다.",bkSend:"백업 ECDIS로 보내기",bkCmpS:"비교",bkCmp:"주·백업 ECDIS 항로 비교",bkMain:"주 ECDIS",bkBack:"백업 ECDIS",bkChanged:"다른 WPT",bkSame:"두 ECDIS의 항로가 같습니다.",bkDiff:"두 ECDIS의 항로가 다릅니다. 백업 ECDIS로 다시 보내세요.",bkNone:"이 항로는 아직 백업 ECDIS로 보내지 않았습니다.",bkSent:"백업 ECDIS로 보냈습니다.",bkResend:"다시 보내기",cuLatest:"최신",cuDone:"{0} 업데이트를 적용했습니다. 새 물표를 확인하세요.",evCellUpd:"해도 셀 업데이트 적용 · {0} (Update {1})",patchT:"패치노트",
+eggAlt:"노트북을 하는 주황색 새 캐릭터",eggClose:"아무 곳이나 누르면 닫힙니다",eggPatch:"패치노트",hmT:"모드 선택 화면으로",hmP:"지금까지의 진행 상황을 저장할까요?",hmNote:"교육 과정은 단계마다 자동으로 저장돼요. 시나리오는 15초마다 자동 저장되므로, 저장하지 않아도 직전 자동 저장분은 남아 있어요.",hmSave:"저장하고 나가기",hmNoSave:"저장하지 않고 나가기",hmSaved:"진행 상황을 저장했습니다.",hmSaveFail:"지금은 저장할 수 없는 상태입니다.",cuApply:"업데이트 적용",eduMenu:"교육 과정",eduP:"도도와 함께 화면 둘러보기 · 항로 계획 · 선박 조종을 단계별로 따라 해요.",airDraft:"Air draft (수면~최고점)",ukcPct:"UKC 기준 (흘수의 %)",ukcNote:"UKC는 통상 흘수의 10~20%로 잡아요. 회사마다 규정이 다르니 소속 회사 SMS 기준을 꼭 확인하세요.",ukcCol:"UKC 기준",ukcOk:"충족",ukcNg:"부족",ukcRepNote:"흘수 {0} m · UKC 기준 흘수의 {1}% = {2} m. MIN DEP는 XTD 폭 안 최소 수심입니다.",bkSend:"백업 ECDIS로 보내기",bkCmpS:"비교",bkCmp:"주·백업 ECDIS 항로 비교",bkMain:"주 ECDIS",bkBack:"백업 ECDIS",bkChanged:"다른 WPT",bkSame:"두 ECDIS의 항로가 같습니다.",bkDiff:"두 ECDIS의 항로가 다릅니다. 백업 ECDIS로 다시 보내세요.",bkNone:"이 항로는 아직 백업 ECDIS로 보내지 않았습니다.",bkSent:"백업 ECDIS로 보냈습니다.",bkResend:"다시 보내기",cuLatest:"최신",cuDone:"{0} 업데이트를 적용했습니다. 새 물표를 확인하세요.",evCellUpd:"해도 셀 업데이트 적용 · {0} (Update {1})",patchT:"패치노트",
 fsNo:"이 화면에서는 전체 화면을 지원하지 않습니다",
 holdOnly:"누르고 있는 동안 해도만 표시",
 bxSens:"센서 정보",bxHelm:"자선 조종",bxOsf:"자선 기능",bxRoute:"항로 정보",
@@ -733,7 +733,7 @@ foot:"A training simulator for practising ECDIS operation. The screen layout and
 footBook:"<b>References</b>Commercial ECDIS operator's manual (IEC 62923-1/2 type-approved equipment), IHO S-52, IEC 62288, IEC 61174. Symbols and colours are approximations and may differ from real equipment.",
 disc:"This simulator is for training only and must not be used for navigation. Charts are not official ENCs (Non-ENC), depths and aids to navigation are synthetic, and ship behaviour is a simplified model. Always confirm with the equipment manual and official charts before real operation.",
 rotT:"Rotate to landscape",rotP:"The ECDIS console is laid out for landscape. Turn your device sideways to see the chart and the information panel together.",rotBtn:"Continue in portrait",
-eggAlt:"Orange bird character using a laptop",eggClose:"Tap anywhere to close",eggPatch:"Patch notes",cuApply:"Apply update",eduMenu:"Training (Korean)",eduP:"Step-by-step screen tour, passage planning and ship handling with Dodo (Korean only).",airDraft:"Air draft",ukcPct:"UKC policy (% of draft)",ukcNote:"UKC is usually 10–20% of the draft, but every company sets its own rule. Check your company SMS.",ukcCol:"UKC policy",ukcOk:"OK",ukcNg:"Short",ukcRepNote:"Draft {0} m · UKC policy {1}% of draft = {2} m. MIN DEP is the least depth inside the XTD corridor.",bkSend:"Send to backup",bkCmpS:"Compare",bkCmp:"Main vs backup ECDIS route",bkMain:"Main ECDIS",bkBack:"Backup ECDIS",bkChanged:"Different WPT",bkSame:"Both ECDIS hold the same route.",bkDiff:"The routes differ. Send the route to the backup ECDIS again.",bkNone:"This route has not been sent to the backup ECDIS yet.",bkSent:"Sent to backup ECDIS.",bkResend:"Send again",cuLatest:"Latest",cuDone:"Update applied to {0}. Check the new objects.",evCellUpd:"Chart cell update applied · {0} (Update {1})",patchT:"Patch notes",
+eggAlt:"Orange bird character using a laptop",eggClose:"Tap anywhere to close",eggPatch:"Patch notes",hmT:"Back to mode select",hmP:"Save your progress before leaving?",hmNote:"Training progress is saved at every step. The scenario also auto-saves every 15 s, so the last auto-save stays even if you leave without saving.",hmSave:"Save and leave",hmNoSave:"Leave without saving",hmSaved:"Progress saved.",hmSaveFail:"Cannot save right now.",cuApply:"Apply update",eduMenu:"Training (Korean)",eduP:"Step-by-step screen tour, passage planning and ship handling with Dodo (Korean only).",airDraft:"Air draft",ukcPct:"UKC policy (% of draft)",ukcNote:"UKC is usually 10–20% of the draft, but every company sets its own rule. Check your company SMS.",ukcCol:"UKC policy",ukcOk:"OK",ukcNg:"Short",ukcRepNote:"Draft {0} m · UKC policy {1}% of draft = {2} m. MIN DEP is the least depth inside the XTD corridor.",bkSend:"Send to backup",bkCmpS:"Compare",bkCmp:"Main vs backup ECDIS route",bkMain:"Main ECDIS",bkBack:"Backup ECDIS",bkChanged:"Different WPT",bkSame:"Both ECDIS hold the same route.",bkDiff:"The routes differ. Send the route to the backup ECDIS again.",bkNone:"This route has not been sent to the backup ECDIS yet.",bkSent:"Sent to backup ECDIS.",bkResend:"Send again",cuLatest:"Latest",cuDone:"Update applied to {0}. Check the new objects.",evCellUpd:"Chart cell update applied · {0} (Update {1})",patchT:"Patch notes",
 fsNo:"Fullscreen is not available here",
 holdOnly:"Hold to show the chart only",
 bxSens:"Sensors",bxHelm:"Helm & engine",bxOsf:"Functions",bxRoute:"Route",
@@ -2942,8 +2942,9 @@ function dlgUCSelect(){const cur=S.ucActive||[];
     d.querySelector("#usOk").onclick=()=>{S.ucActive=ucReadChecks(d,"ucsel");logEv("evUcSel",[S.ucActive.length]);chartDirty=true;lookAheadSafe();close()}}})}
 
 /* ================= UI ================= */
-const VERSION="2.2.1";
+const VERSION="2.3.0";
 const PATCH_NOTES=[
+{v:"2.3.0",d:"2026-11-25",ko:["교육 과정을 마치면 다음 과정을 바로 고르는 팝업, 끝낸 과정에 ✓ 표시","좌상단 'ECDIS 시뮬레이터'를 누르면 저장 여부를 묻고 모드 선택 화면으로 이동"],en:["Course-complete pop-up to pick the next course, ✓ on finished courses","Click the top-left title to save (optional) and return to mode select"]},
 {v:"2.2.1",d:"2026-11-25",ko:["교육 팝업을 처음 열었을 때도 끌어서 옮길 수 있게 수정","배가 다른 해도 셀로 넘어간 뒤 새 침선·위험물·등대가 해도에 나타나지 않던 문제 수정"],en:["Training pop-up can be dragged from the first open","New wrecks, hazards and lights now appear after the ship moves into a new chart cell"]},
 {v:"2.2.0",d:"2026-11-24",ko:["교육 팝업을 머리줄(⠿)을 잡고 끌어서 옮길 수 있음 — 팝업에 가려진 버튼도 누를 수 있게"],en:["Drag the training pop-up by its header (⠿) to reach buttons underneath"]},
 {v:"2.1.2",d:"2026-11-24",ko:["화면 둘러보기 첫 단계 인사말 다듬기"],en:["Polished the greeting in the first tour step"]},
@@ -3404,6 +3405,7 @@ window.addEventListener("resize",()=>placeCtl());
 /* ---------- 메뉴 ---------- */
 const ACT={
   noop:()=>{},
+  home:()=>dlgHome(),
   lang:b=>{LANG=b.dataset.v;try{localStorage.setItem("ecdis-sim-lang",LANG)}catch(e){}applyLang()},
   fs:()=>{const d=document;try{if(d.fullscreenElement||d.webkitFullscreenElement)(d.exitFullscreen||d.webkitExitFullscreen).call(d);else{const e=d.documentElement,f=e.requestFullscreen||e.webkitRequestFullscreen;if(!f)throw 0;const p=f.call(e);if(p&&p.catch)p.catch(()=>toast(t("fsNo")));try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock("landscape").catch(()=>{})}catch(e){}}}catch(e){toast(t("fsNo"))}},
   rotok:()=>{$("#rotHint").classList.remove("need");try{sessionStorage.setItem("rotok","1")}catch(e){}},
@@ -4009,6 +4011,9 @@ function showEgg(){
   const close=()=>{o.remove();document.removeEventListener("keydown",k)};const k=e=>{if(e.key==="Escape")close()};
   o.addEventListener("click",e=>{if(e.target.closest('[data-act="patch"]')){e.stopPropagation();close();dlgPatch();return}close()});document.addEventListener("keydown",k);document.body.appendChild(o);
 }
+function dlgHome(){if(!S.own){dlgScenario(true);return}
+  openDlg(t("hmT"),`<p style="margin:0 0 6px">${t("hmP")}</p><p class="note" style="margin:0">${t("hmNote")}</p>`,{sub:"Mode select",foot:`<button class="btn" data-x>${t("cancel")}</button><button class="btn" id="hmNoSave">${t("hmNoSave")}</button><button class="btn pri" id="hmSave">${t("hmSave")}</button>`,
+    onMount:(d,close)=>{const go=save=>{if(window.Tutor)Tutor.stop();if(save)toast(saveState()?t("hmSaved"):t("hmSaveFail"));close();dlgScenario(false)};d.querySelector("#hmSave").onclick=()=>go(true);d.querySelector("#hmNoSave").onclick=()=>go(false)}})}
 function dlgPatch(){const L=LANG==="ko"?"ko":"en";openDlg(t("patchT"),`<div class="patch">${PATCH_NOTES.map(p=>`<section data-pv="${p.v}"><h4>v${p.v} <small>${p.d}</small></h4><ul>${p[L].map(x=>`<li>${esc(x)}</li>`).join("")}</ul></section>`).join("")}</div>`,{sub:"ECDIS-SIM "+VERSION})}
 
 /* ---------- 키보드 ---------- */

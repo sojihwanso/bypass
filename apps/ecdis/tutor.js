@@ -1,10 +1,13 @@
 /* ECDIS 시뮬레이터 교육 과정 (v2.0.0) — 배경 어둡게 + 강조 + 도도 마스코트 팝업
    본체 전역(S, LANG, dlgStack, setMode …)을 읽기만 한다. 공개: window.Tutor */
 (() => {
-  const KEY = "ecdis-edu";
+  const KEY = "ecdis-edu", DONE_KEY = "ecdis-edu-done", ORDER = ["D", "A", "C"];
+  const doneList = () => { try { return JSON.parse(localStorage.getItem(DONE_KEY) || "[]"); } catch (e) { return []; } };
+  const markDone = (c) => { const d = doneList(); if (!d.includes(c)) d.push(c); try { localStorage.setItem(DONE_KEY, JSON.stringify(d)); } catch (e) {} };
+  const ck = (k) => (doneList().includes(k) ? `<span class="tu-ck" aria-label="완료">✓</span>` : "");
   const MOOD = { explain: "설명", happy: "기쁨", oops: "당황", caution: "주의", think: "생각" };
   const COURSES = {
-    D: { name: "화면 둘러보기", sub: "처음이라면 여기부터 · 10단계" },
+    D: { name: "화면 둘러보기", sub: "처음이라면 여기부터" },
     A: { name: "과정 1 · 항로 계획", sub: "Passage Plan 전 과정 + User chart · ECA" },
     C: { name: "과정 2 · 선박 조종", sub: "타각 · RPM · 자동 조타 · 항로 추종" },
   };
@@ -70,7 +73,7 @@
 .tu-menu{display:flex;flex-direction:column;gap:8px;margin:12px 18px 0}
 .tu-menu button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;font:inherit;padding:11px 14px;border:2px solid #241008;border-radius:12px;background:#fff;cursor:pointer;color:#241008}
 .tu-menu button:hover{background:#FCF0E0}
-.tu-menu b{font-size:15.5px}.tu-menu small{font-size:12.5px;color:#7A4532}
+.tu-menu b{font-size:15.5px}.tu-ck{color:#22A04B;margin-left:6px;font-weight:900}.tu-menu button.tu-rec{background:#FF7A26}.tu-menu button.tu-rec:hover{background:#FF8F47}.tu-menu button.tu-rec small{color:#241008}.tu-menu small{font-size:12.5px;color:#7A4532}
 .tu-chip{position:absolute;right:14px;bottom:14px;display:none;align-items:center;gap:8px;background:#fff;border:2px solid #241008;border-radius:999px;padding:4px 14px 4px 4px;font-size:13px;font-weight:700;pointer-events:auto;box-shadow:3px 3px 0 rgba(36,16,8,.6)}
 .tu-chip img{width:34px;height:34px}
 .tu-chip.show{display:flex}
@@ -172,9 +175,24 @@
     if (a === "next") next(); else if (a === "prev") prev(); else if (a === "stop") stop();
     else if (a === "pick") start(b.dataset.c, 0); else if (a === "resume") { const sv = saved(); if (sv) start(sv.course, sv.step); }
   }
-  function next() { if (!cur) return; if (cur.step >= steps().length - 1) { const c = cur.course; stop(); toastDone(c); return; } show(cur.step + 1); }
+  function next() { if (!cur) return; if (cur.step >= steps().length - 1) { const c = cur.course; markDone(c); showDone(c); return; } show(cur.step + 1); }
   function prev() { if (cur && cur.step > 0) show(cur.step - 1); }
-  function toastDone(c) { if (typeof toast === "function") toast(COURSES[c].name + " 완료! 수고했어요."); }
+  // 과정을 마치면 다음 과정을 바로 고를 수 있는 팝업
+  function showDone(c) {
+    mount(); stop(); ensurePop();
+    const d = doneList(), after = ORDER.slice(ORDER.indexOf(c) + 1).concat(ORDER.slice(0, ORDER.indexOf(c)));
+    const rec = after.find((k) => !d.includes(k)) || null;
+    const others = ORDER.filter((k) => k !== rec);
+    const btn = (k, main) => `<button type="button" data-tu="pick" data-c="${k}"${main ? ' class="tu-rec"' : ""}><b>${main ? "추천 · " : ""}${esc(COURSES[k].name)}${ck(k)}</b><small>${esc(COURSES[k].sub)} · ${STEPS[k].length}단계</small></button>`;
+    pop.innerHTML = `<div class="tu-done"><div class="tu-ph" title="끌어서 옮길 수 있어요"><span class="tu-grip" aria-hidden="true">⠿</span><span class="tu-tag">완료</span><span class="tu-course">${esc(COURSES[c].name)}</span><button type="button" class="tu-x" data-tu="stop" aria-label="닫기" style="margin-left:auto">×</button></div>
+<div class="tu-pb"><div class="tu-face"><img class="tu-dodo tu-bnc" alt="도도" src="edu/dodo_happy.webp"></div><div class="tu-txt"><h3>${esc(COURSES[c].name)} 완료!</h3><p>${rec ? "수고했어요! 바로 이어서 다음 과정을 해 볼까요?" : "모든 과정을 마쳤어요! 다시 보고 싶은 과정을 골라 보세요."}</p></div></div>
+<div class="tu-menu">${rec ? btn(rec, true) : ""}${others.map((k) => btn(k, false)).join("")}</div>
+<div class="tu-pf"><span class="tu-en"></span><button type="button" class="tu-btn" data-tu="stop">교육 끝내기</button></div></div>`;
+    pop.classList.toggle("tu-narrow", narrow());
+    root.classList.add("on"); $(".tu-dim", root).classList.add("show"); spot.classList.remove("show");
+    pop.style.visibility = "visible"; pop.style.left = (innerWidth - pop.offsetWidth) / 2 + "px"; pop.style.top = Math.max(12, (innerHeight - pop.offsetHeight) / 2) + "px";
+    requestAnimationFrame(() => pop.classList.add("on"));
+  }
   function saved() { try { const v = JSON.parse(localStorage.getItem(KEY) || "null"); return v && STEPS[v.course] && STEPS[v.course][v.step] ? v : null; } catch (e) { return null; } }
 
   function start(course, step) { if (!STEPS[course] || !STEPS[course].length) return; mount(); cur = { course, step: step || 0 }; show(cur.step); }
@@ -209,7 +227,7 @@
     const sv = saved();
     pop.innerHTML = `<div class="tu-ph"><span class="tu-tag">EDU</span><span class="tu-course">ECDIS 교육 과정</span><button type="button" class="tu-x" data-tu="stop" aria-label="닫기" style="margin-left:auto">×</button></div>
 <div class="tu-pb"><div class="tu-face"><img class="tu-dodo tu-bnc" alt="도도" src="edu/dodo_explain.webp"></div><div class="tu-txt"><h3>무엇부터 배워 볼까요?</h3><p>설명할 버튼만 밝게 비추고, 직접 해 보면 맞았는지 알려 드려요. 언제든 × 로 끝낼 수 있어요.</p></div></div>
-${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴대폰을 가로로 돌려서 하면 설명과 버튼이 잘 보여요. 세로 화면에서도 진행할 수는 있어요.</div>` : ""}<div class="tu-menu">${sv ? `<button type="button" data-tu="resume"><b>이어서 하기 · ${esc(COURSES[sv.course].name)} ${sv.step + 1}단계</b><small>지난번 멈춘 곳부터</small></button>` : ""}${Object.keys(COURSES).map((k) => `<button type="button" data-tu="pick" data-c="${k}"><b>${esc(COURSES[k].name)}</b><small>${esc(COURSES[k].sub)} · ${STEPS[k].length}단계</small></button>`).join("")}</div>
+${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴대폰을 가로로 돌려서 하면 설명과 버튼이 잘 보여요. 세로 화면에서도 진행할 수는 있어요.</div>` : ""}<div class="tu-menu">${sv ? `<button type="button" data-tu="resume"><b>이어서 하기 · ${esc(COURSES[sv.course].name)} ${sv.step + 1}단계</b><small>지난번 멈춘 곳부터</small></button>` : ""}${Object.keys(COURSES).map((k) => `<button type="button" data-tu="pick" data-c="${k}"><b>${esc(COURSES[k].name)}${ck(k)}</b><small>${esc(COURSES[k].sub)} · ${STEPS[k].length}단계</small></button>`).join("")}</div>
 <div class="tu-pf"><span class="tu-en">${typeof LANG !== "undefined" && LANG !== "ko" ? "교육 과정은 한국어로 제공됩니다 (Korean only)" : ""}</span></div>`;
     root.classList.add("on"); $(".tu-dim", root).classList.add("show"); spot.classList.remove("show");
     pop.style.visibility = "visible"; pop.style.left = (innerWidth - pop.offsetWidth) / 2 + "px"; pop.style.top = Math.max(12, (innerHeight - pop.offsetHeight) / 2) + "px";
