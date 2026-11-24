@@ -7,9 +7,9 @@
   const ck = (k) => (doneList().includes(k) ? `<span class="tu-ck" aria-label="완료">✓</span>` : "");
   const MOOD = { explain: "설명", happy: "기쁨", oops: "당황", caution: "주의", think: "생각" };
   const COURSES = {
-    D: { name: "화면 둘러보기", sub: "처음이라면 여기부터" },
-    A: { name: "과정 1 · 항로 계획", sub: "Passage Plan 전 과정 + User chart · ECA" },
-    C: { name: "과정 2 · 선박 조종", sub: "타각 · RPM · 자동 조타 · 항로 추종" },
+    D: { name: "과정 1 · 화면 둘러보기", sub: "처음이라면 여기부터" },
+    A: { name: "과정 2 · 항로 계획", sub: "Passage Plan 전 과정 + User chart · ECA" },
+    C: { name: "과정 3 · 선박 조종", sub: "타각 · RPM · 자동 조타 · 항로 추종" },
   };
   // 단계 데이터: Tutor.STEPS[course] = [{id,title,body,say,mood,target?,before?,check?,good?,bad?,note?,quiz?,cursor?}]
   const STEPS = { D: [], A: [], C: [] };
@@ -227,7 +227,7 @@
     const sv = saved();
     pop.innerHTML = `<div class="tu-ph"><span class="tu-tag">EDU</span><span class="tu-course">ECDIS 교육 과정</span><button type="button" class="tu-x" data-tu="stop" aria-label="닫기" style="margin-left:auto">×</button></div>
 <div class="tu-pb"><div class="tu-face"><img class="tu-dodo tu-bnc" alt="도도" src="edu/dodo_explain.webp"></div><div class="tu-txt"><h3>무엇부터 배워 볼까요?</h3><p>설명할 버튼만 밝게 비추고, 직접 해 보면 맞았는지 알려 드려요. 언제든 × 로 끝낼 수 있어요.</p></div></div>
-${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴대폰을 가로로 돌려서 하면 설명과 버튼이 잘 보여요. 세로 화면에서도 진행할 수는 있어요.</div>` : ""}<div class="tu-menu">${sv ? `<button type="button" data-tu="resume"><b>이어서 하기 · ${esc(COURSES[sv.course].name)} ${sv.step + 1}단계</b><small>지난번 멈춘 곳부터</small></button>` : ""}${Object.keys(COURSES).map((k) => `<button type="button" data-tu="pick" data-c="${k}"><b>${esc(COURSES[k].name)}${ck(k)}</b><small>${esc(COURSES[k].sub)} · ${STEPS[k].length}단계</small></button>`).join("")}</div>
+${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴대폰을 가로로 돌려서 하면 설명과 버튼이 잘 보여요. 세로 화면에서도 진행할 수는 있어요.</div>` : ""}<div class="tu-menu">${sv ? `<button type="button" data-tu="resume"><b>이어서 하기 · ${esc(COURSES[sv.course].name)}</b><small>지난번 멈춘 곳부터 · ${sv.step + 1} / ${STEPS[sv.course].length}</small></button>` : ""}${Object.keys(COURSES).map((k) => `<button type="button" data-tu="pick" data-c="${k}"><b>${esc(COURSES[k].name)}${ck(k)}</b><small>${esc(COURSES[k].sub)} · ${STEPS[k].length}단계</small></button>`).join("")}</div>
 <div class="tu-pf"><span class="tu-en">${typeof LANG !== "undefined" && LANG !== "ko" ? "교육 과정은 한국어로 제공됩니다 (Korean only)" : ""}</span></div>`;
     root.classList.add("on"); $(".tu-dim", root).classList.add("show"); spot.classList.remove("show");
     pop.style.visibility = "visible"; pop.style.left = (innerWidth - pop.offsetWidth) / 2 + "px"; pop.style.top = Math.max(12, (innerHeight - pop.offsetHeight) / 2) + "px";
@@ -237,7 +237,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
   window.Tutor = { _narrow: null, STEPS, COURSES, menu, start, next, prev, stop, react, state: () => (cur ? { course: cur.course, step: cur.step } : null) };
 })();
 
-/* ===== 공통 D. 화면 둘러보기 ===== */
+/* ===== 과정 1. 화면 둘러보기 (D) ===== */
 (() => {
   const q = (s) => document.querySelector(s);
   const btnText = (txt) => () => [...document.querySelectorAll("button")].find((b) => b.textContent.replace(/\s+/g, "") === txt && b.getBoundingClientRect().width);
@@ -278,7 +278,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
   );
 })();
 
-/* ===== 과정 1. 항로 계획 (A) + User chart (B) + ECA ===== */
+/* ===== 과정 2. 항로 계획 (A) + User chart (B) + ECA ===== */
 (() => {
   const q = (s) => document.querySelector(s);
   const mode = (m) => () => { try { if (S.mode !== m) setMode(m); } catch (e) {} };
@@ -384,7 +384,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
   );
 })();
 
-/* ===== 과정 2. 선박 조종 (C) ===== */
+/* ===== 과정 3. 선박 조종 (C) ===== */
 (() => {
   const q = (s) => document.querySelector(s);
   const navi = () => { try { if (S.mode !== "NAVI") setMode("NAVI"); } catch (e) {} };
