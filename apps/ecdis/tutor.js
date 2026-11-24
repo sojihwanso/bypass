@@ -87,7 +87,7 @@
     document.body.appendChild(root);
     spot = $(".tu-spot", root); pop = $(".tu-pop", root); chip = $(".tu-chip", root); cursor = $(".tu-cursor", root);
     chip.onclick = () => { if (typeof closeTopDlg === "function") while (dlgStack.length) closeTopDlg(); };
-    pop.addEventListener("click", onClick);
+    pop.addEventListener("click", onClick); pop.addEventListener("pointerdown", onDown);
     addEventListener("resize", place);
   }
   // 좁은 세로 화면(휴대폰 세로) 여부 — 테스트에서 바꿔 끼울 수 있게 Tutor._narrow로 노출
