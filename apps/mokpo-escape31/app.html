@@ -407,6 +407,11 @@ const BRIDGE_PIERS = (function () {
   for (let f = 0.05; f < 1; f += 0.1) if (Math.abs(f - fc) > 0.2) at(f, 3, 5, 'pier');
   out.fc = fc; return out;
 })();
+/** 국립목포해양대학교 캠퍼스(죽교동, 목포대교 북단과 유달산 사이 해안) — 간략화한 배치 */
+const CAMPUS = { x1: -2920, x2: -1780, y1: 640, y2: 1080, pier: { x: -2700, y: 585, len: 400, w: 18 }, ship: { x: -2700, y: 561, hdg: 270, len: 120, beam: 18 } };
+BRIDGE_PIERS.push(   // 실습선 부두·계류 실습선도 충돌 장애물
+  { x: CAMPUS.pier.x, y: CAMPUS.pier.y, hdg: 90, hl: CAMPUS.pier.len / 2, hw: CAMPUS.pier.w / 2, kind: 'mmu', name: '목포해양대 실습선 부두' },
+  { x: CAMPUS.ship.x, y: CAMPUS.ship.y, hdg: 90, hl: CAMPUS.ship.len / 2 * 0.94, hw: CAMPUS.ship.beam / 2 * 0.9, kind: 'mmu', name: '목포해양대 실습선' });
 /** 해당 지점의 육지 판정 (좌초) */
 function landAt(x, y) {
   for (const L of MAP.land) if (pointInPoly(x, y, L.poly)) return L;
@@ -547,7 +552,7 @@ const World3D = {
     const r = this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     r.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     r.setSize(innerWidth, innerHeight);
-    r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;   // 자선 주변 부드러운 그림자
+    r.shadowMap.enabled = false;   // 성능 우선: 그림자 맵 사용 안 함
     const sc = this.scene = new THREE.Scene();
     this.sky = new THREE.Color(0x9cc6e8);
     sc.background = this.sky.clone();
@@ -555,43 +560,21 @@ const World3D = {
     this.camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 1, 70000);
     this.hemi = new THREE.HemisphereLight(0xdfefff, 0x3a4a3a, 0.75); sc.add(this.hemi);
     this.sun = new THREE.DirectionalLight(0xfff3dc, 0.85); this.sun.position.set(-4000, 6000, 2500); sc.add(this.sun);
-    this.sunOff = new THREE.Vector3(-4000, 6000, 2500).setLength(2400);   // 해 방향은 그대로, 그림자 카메라만 자선을 따라다님
-    const shd = this.sun.shadow; this.sun.castShadow = true; shd.mapSize.set(1024, 1024);
-    Object.assign(shd.camera, { left: -230, right: 230, top: 230, bottom: -230, near: 50, far: 5000 }); shd.camera.updateProjectionMatrix();
-    shd.bias = -0.0004; shd.normalBias = 0.5; sc.add(this.sun.target);
     this.buildSky();
-    this.buildWater(); this.buildLand(); this.buildChannel(); this.buildBridge(); this.buildPort(); this.buildLabels(); this.buildGate(); this.buildBerths();
+    this.buildWater(); this.buildLand(); this.buildChannel(); this.buildBridge(); this.buildPort(); this.buildCampus(); this.buildLabels(); this.buildGate(); this.buildBerths();
     this.setOwnShip(OWN_SPECS[SCENARIO.ownType]);
     this.buildWake(); this.buildBowWave(); this.buildPrecip();
     this.ok = true;
   },
 
-  /** 잔물결 패턴 캔버스(정수 주기 사인 합 → 이음매 없이 반복). bumpMap·roughnessMap 공용 */
-  rippleTex(rep) {
-    if (!this._rip) {
-      const N = 256, c = document.createElement('canvas'); c.width = c.height = N; const x = c.getContext('2d'), im = x.createImageData(N, N), P2 = Math.PI * 2 / N;
-      for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
-        const v = 0.5 + 0.17 * Math.sin(P2 * (3 * i + 2 * j)) + 0.13 * Math.sin(P2 * (5 * i - 4 * j) + 1.3) + 0.09 * Math.sin(P2 * (11 * i + 7 * j) + 0.4)
-          + 0.07 * Math.sin(P2 * (-9 * i + 13 * j) + 2.1) + 0.05 * Math.sin(P2 * (17 * i - 19 * j) + 0.9);
-        const k = (j * N + i) * 4, g = Math.max(0, Math.min(255, v * 255)); im.data[k] = im.data[k + 1] = im.data[k + 2] = g; im.data[k + 3] = 255;
-      }
-      x.putImageData(im, 0, 0); this._rip = c;
-    }
-    const t = new THREE.CanvasTexture(this._rip); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep, rep); t.anisotropy = 4; return t;
-  },
-  waterMat(rep, extra) {
-    const t = this.rippleTex(rep);
-    const m = new THREE.MeshStandardMaterial(Object.assign({ color: 0x154863, roughness: 0.78, metalness: 0.0, bumpMap: t, bumpScale: 0.35, roughnessMap: t, envMapIntensity: 0.32 }, extra || {}));
-    (this.waterMats || (this.waterMats = [])).push(m); return m;
-  },
   buildWater() {
-    const base = new THREE.Mesh(new THREE.PlaneGeometry(90000, 90000), this.waterMat(1500));
-    base.rotation.x = -Math.PI / 2; base.position.set(-3000, -2.4, 0); this.scene.add(base); this.water = base;   // 파랑 메시 최저점보다 아래
-    // 자선 주변 파랑 메시 (그림자를 받음)
+    const base = new THREE.Mesh(new THREE.PlaneGeometry(90000, 90000),
+      new THREE.MeshPhongMaterial({ color: 0x1b4d6b, shininess: 40, specular: 0x335566 }));
+    base.rotation.x = -Math.PI / 2; base.position.set(-3000, -2.4, 0); this.scene.add(base); this.water = base;   // 파랑 메시 최저점보다 아래(얼룩 방지)
+    // 자선 주변 파랑 메시
     const SEG = 90, SIZE = 2400;
     const g = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG); g.rotateX(-Math.PI / 2);
-    this.wave = new THREE.Mesh(g, this.waterMat(SIZE / 60, { color: 0x1f5878, transparent: true, opacity: 0.93 }));
-    this.wave.receiveShadow = true;
+    this.wave = new THREE.Mesh(g, new THREE.MeshPhongMaterial({ color: 0x1f5878, shininess: 70, specular: 0x6688aa, transparent: true, opacity: 0.92 }));
     this.wave.userData = { step: SIZE / SEG, base: Float32Array.from(g.attributes.position.array) };
     this.scene.add(this.wave);
   },
@@ -599,9 +582,6 @@ const World3D = {
     const w = this.wave, st = w.userData.step * 4;
     const ox = Math.round(cx / st) * st, oz = Math.round(-cy / st) * st;
     w.position.set(ox, 0, oz);
-    const fr = v => ((v % 1) + 1) % 1;   // 잔물결 무늬를 세계 좌표에 고정하고 천천히 흐르게
-    w.material.bumpMap.offset.set(fr(ox / 60 + t * 0.011), fr(-oz / 60 + t * 0.007));
-    this.water.material.bumpMap.offset.set(fr(t * 0.0004), fr(t * 0.0003));
     const pos = w.geometry.attributes.position.array, b = w.userData.base;
     const amp = this.waveAmp ?? 0.45;
     for (let i = 0; i < pos.length; i += 3) {
@@ -611,30 +591,26 @@ const World3D = {
     w.geometry.attributes.position.needsUpdate = true;
     if ((this._nf = (this._nf || 0) + 1) % 3 === 0) w.geometry.computeVertexNormals();
   },
-  /** 그라데이션 하늘 돔(수평선 → 천정) + 야간 별 */
+
+  /** 하늘 돔: 큰 구(BackSide)에 수평선→천정 그라데이션 CanvasTexture. 기상이 바뀔 때만 다시 그림 */
   buildSky() {
-    const mat = new THREE.ShaderMaterial({
-      uniforms: { top: { value: new THREE.Color(0x3f7fc6) }, hor: { value: new THREE.Color(0x9cc6e8) }, bot: { value: new THREE.Color(0x86aac8) } },
-      vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-      fragmentShader: 'uniform vec3 top; uniform vec3 hor; uniform vec3 bot; varying vec3 vP; void main(){ float h = vP.y; vec3 c = h > 0.0 ? mix(hor, top, pow(clamp(h * 1.4, 0.0, 1.0), 0.55)) : mix(hor, bot, clamp(-h * 5.0, 0.0, 1.0)); gl_FragColor = vec4(c, 1.0); }',
-      side: THREE.BackSide, depthWrite: false, fog: false
-    });
-    const dome = this.dome = new THREE.Mesh(new THREE.SphereGeometry(52000, 32, 16), mat); dome.renderOrder = -10; dome.frustumCulled = false; this.scene.add(dome);
-    const N = 900, a = new Float32Array(N * 3);
-    for (let i = 0; i < N; i++) { const u = Math.random() * Math.PI * 2, v = 0.06 + Math.random() * 0.94, r = 50000, cv = Math.sqrt(1 - v * v); a[i * 3] = Math.cos(u) * cv * r; a[i * 3 + 1] = v * r; a[i * 3 + 2] = Math.sin(u) * cv * r; }
+    const c = this.skyCv = document.createElement('canvas'); c.width = 4; c.height = 256;
+    this.skyTex = new THREE.CanvasTexture(c);
+    const dome = this.dome = new THREE.Mesh(new THREE.SphereGeometry(52000, 32, 16), new THREE.MeshBasicMaterial({ map: this.skyTex, side: THREE.BackSide, fog: false, depthWrite: false }));
+    dome.renderOrder = -10; dome.frustumCulled = false; this.scene.add(dome);
+    this.paintSky(new THREE.Color(0x3a78c2), new THREE.Color(0x9cc6e8));
+    const N = 900, a = new Float32Array(N * 3);   // 야간 별
+    for (let i = 0; i < N; i++) { const u = Math.random() * Math.PI * 2, v = 0.06 + Math.random() * 0.94, rr = 50000, cv = Math.sqrt(1 - v * v); a[i * 3] = Math.cos(u) * cv * rr; a[i * 3 + 1] = v * rr; a[i * 3 + 2] = Math.sin(u) * cv * rr; }
     const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(a, 3));
     const stars = new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xffffff, size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0.85, fog: false, depthWrite: false }));
     stars.frustumCulled = false; dome.add(stars); this.nightOnly(stars);
-    // 반사용 환경맵(작은 돔을 PMREM으로 굽기) — 기상이 바뀔 때만 다시 구움
-    this.envScene = new THREE.Scene(); this.envScene.add(new THREE.Mesh(new THREE.SphereGeometry(50, 24, 12), mat));
   },
-  updateEnv() {
-    try {
-      this.pmrem = this.pmrem || new THREE.PMREMGenerator(this.renderer);
-      const rt = this.pmrem.fromScene(this.envScene, 0.04); if (this.envRT) this.envRT.dispose(); this.envRT = rt;
-      for (const m of this.waterMats || []) { m.envMap = rt.texture; m.needsUpdate = true; }
-    } catch (e) { console.warn('env map', e); }
+  paintSky(top, hor) {
+    const x = this.skyCv.getContext('2d'), g = x.createLinearGradient(0, 0, 0, 256), css = c => '#' + c.getHexString();
+    g.addColorStop(0, css(top)); g.addColorStop(0.28, css(top.clone().lerp(hor, 0.45))); g.addColorStop(0.49, css(hor)); g.addColorStop(0.53, css(hor.clone().multiplyScalar(0.92))); g.addColorStop(1, css(hor.clone().multiplyScalar(0.8)));
+    x.fillStyle = g; x.fillRect(0, 0, 4, 256); this.skyTex.needsUpdate = true;
   },
+  updateEnv() { },   // (반사 환경맵 미사용 — 성능 우선)
   /** 야간 전용 표시 / 야간 발광 재질 등록 */
   nightOnly(o) { o.userData.nightOnly = true; o.visible = !!this.night; return o; },
   nightMat(m, e) { m.userData.nightE = e; if (m.emissive) m.emissive.setHex(this.night ? e : 0); return m; },
@@ -650,11 +626,26 @@ const World3D = {
       g2.rotateX(-Math.PI / 2);
       const s = new THREE.Mesh(g2, new THREE.MeshLambertMaterial({ color: 0xcdbb8e })); s.position.y = -1.2; this.scene.add(s);
     }
-    const hm = new THREE.MeshLambertMaterial({ color: 0x4f6e40, flatShading: true });
-    for (const [x, y, r, h] of MAP.hills) {
-      const c = new THREE.Mesh(new THREE.ConeGeometry(r, h, 9, 2), hm);
-      c.position.copy(toV3(x, y, 12 + h / 2)); c.rotation.y = x; this.scene.add(c);
-    }
+    // 산지: 큰 능선(초록) + 곁봉우리 2개(짙은 수풀) + 암봉(회색 다면체). 유달산은 바위산 느낌을 더 강하게
+    const hm = new THREE.MeshLambertMaterial({ color: 0x4f6e40, flatShading: true }), hm2 = new THREE.MeshLambertMaterial({ color: 0x3f5c34, flatShading: true });
+    const rock = new THREE.MeshLambertMaterial({ color: 0x8b8a84, flatShading: true }), rock2 = new THREE.MeshLambertMaterial({ color: 0x6f6e69, flatShading: true });
+    let seed = 7; const rr = () => (seed = (seed * 16807) % 2147483647) / 2147483647;   // 지형 모양 고정용 난수
+    MAP.hills.forEach(([x, y, r, h], hi) => {
+      const yud = hi === 0, base = 12;
+      const c = new THREE.Mesh(new THREE.ConeGeometry(r, h * (yud ? 0.82 : 1), 11, 3), hm); c.position.copy(toV3(x, y, base + h * (yud ? 0.41 : 0.5))); c.rotation.y = x; this.scene.add(c);
+      for (let k = 0; k < 2; k++) {   // 곁봉우리(능선)
+        const a = rr() * Math.PI * 2, d = r * (0.42 + rr() * 0.2), hh = h * (0.45 + rr() * 0.2), rc = r * (0.45 + rr() * 0.15);
+        const s2 = new THREE.Mesh(new THREE.ConeGeometry(rc, hh, 9, 2), k ? hm : hm2); s2.position.copy(toV3(x + Math.cos(a) * d, y + Math.sin(a) * d, base + hh / 2)); s2.rotation.y = a; this.scene.add(s2);
+      }
+      const nRock = yud ? 7 : (h > 100 ? 2 : 1);
+      for (let k = 0; k < nRock; k++) {   // 암봉(정상부 바위)
+        const a = rr() * Math.PI * 2, d = (yud ? r * (0.05 + 0.3 * k / 7) : r * 0.08 * rr()), sz = (yud ? 78 - k * 6 : h * 0.16) * (0.7 + rr() * 0.5);
+        const m = new THREE.Mesh(new THREE.DodecahedronGeometry(1, 0), k % 2 ? rock2 : rock);
+        m.scale.set(sz * (0.8 + rr() * 0.4), sz * (yud ? 1.5 + rr() * 0.6 : 1.1), sz * (0.8 + rr() * 0.4)); m.rotation.set(rr(), rr() * 3, rr());
+        const top = base + h * (yud ? 0.82 : 1) * (yud ? 0.92 - k * 0.09 : 0.86);
+        m.position.copy(toV3(x + Math.cos(a) * d, y + Math.sin(a) * d, top)); this.scene.add(m);
+      }
+    });
     // 시가지 건물 (InstancedMesh)
     const N = 420, box = new THREE.BoxGeometry(1, 1, 1); box.translate(0, 0.5, 0);
     { const uv = box.attributes.uv; for (let v = 8; v < 16; v++) uv.setXY(v, 0.02, 0.98); }   // 지붕·바닥 면은 창문 없는 벽 부분 사용
@@ -674,12 +665,101 @@ const World3D = {
     const mtx = new THREE.Matrix4(), q = new THREE.Quaternion(), col = new THREE.Color(); let k = 0, guard = 0;
     while (k < N && guard++ < 8000) {
       const x = -3400 + Math.random() * 7000, y = 700 + Math.random() * 2600;
-      if (!pointInPoly(x, y, MAP.land[0].poly) || Math.hypot(x + 600, y - 1550) < 620) continue;
+      if (!pointInPoly(x, y, MAP.land[0].poly) || Math.hypot(x + 600, y - 1550) < 620 || (x > CAMPUS.x1 - 60 && x < CAMPUS.x2 + 60 && y > CAMPUS.y1 - 40 && y < CAMPUS.y2 + 60)) continue;
       const w = 18 + Math.random() * 30, h = 8 + Math.random() * (y < 1300 ? 55 : 30);
       mtx.compose(toV3(x, y, 16), q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.random() * 0.4), new THREE.Vector3(w, h, w * (0.6 + Math.random() * 0.8)));
       im.setMatrixAt(k, mtx); im.setColorAt(k, col.setHSL(0.08, 0.08, 0.6 + Math.random() * 0.3)); k++;
     }
     im.count = k; this.scene.add(im);
+    this.buildStreetLights();
+  },
+  /** 국립목포해양대학교 캠퍼스: 본관(탑)·해사대학관·공학관·도서관·승선생활관 3동·체육관·운동장·신호기 마스트·실습선 부두와 실습선 */
+  buildCampus() {
+    const C = CAMPUS, G = 16.05, grp = new THREE.Group(); this.scene.add(grp);
+    const Y = new THREE.Vector3(0, 1, 0), lam = c => new THREE.MeshLambertMaterial({ color: c });
+    // 건물 외벽: 창문 격자(낮) + 불 켜진 창(밤). 층·칸 수를 건물 크기에 맞춰 그림
+    const winTex = (cols, rows, lit, glass) => {
+      const c = document.createElement('canvas'); c.width = 256; c.height = 128; const x = c.getContext('2d');
+      x.fillStyle = lit ? '#000' : '#fff'; x.fillRect(0, 0, 256, 128);
+      const cw = 256 / cols, rh = 128 / rows;
+      for (let r = 0; r < rows; r++) for (let k = 0; k < cols; k++) {
+        if (lit) { const v = Math.random(); if (v < 0.35) continue; x.fillStyle = v < 0.7 ? '#ffd88a' : '#eaf4ff'; }
+        else x.fillStyle = glass ? '#6f93b0' : '#7b8a96';
+        x.fillRect(k * cw + cw * (glass ? 0.06 : 0.18), r * rh + rh * 0.25, cw * (glass ? 0.88 : 0.64), rh * 0.5);
+      }
+      const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t;
+    };
+    const bmat = (color, cols, rows, glass) => this.nightMat(new THREE.MeshLambertMaterial({ color, map: winTex(cols, rows, false, glass), emissiveMap: winTex(cols, rows, true, glass), emissive: 0 }), 0xffffff);
+    const boxGeo = (w, h, d) => { const g = new THREE.BoxGeometry(w, h, d); const uv = g.attributes.uv; for (let v = 8; v < 16; v++) uv.setXY(v, 0.003, 0.995); g.translate(0, h / 2, 0); return g; };
+    const bld = (x, y, w, d, h, mat, rot = 0, roof = 0x2c4f7c) => {
+      const m = new THREE.Mesh(boxGeo(w, h, d), mat); m.position.copy(toV3(x, y, G)); m.rotation.y = rot; grp.add(m);
+      const rf = new THREE.Mesh(new THREE.BoxGeometry(w + 1.5, 1.4, d + 1.5), lam(roof)); rf.position.copy(toV3(x, y, G + h + 0.7)); rf.rotation.y = rot; grp.add(rf);
+      return m;
+    };
+    const band = (x, y, w, d, hgt, rot, color) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w + 0.6, 1.6, d + 0.6), lam(color)); b.position.copy(toV3(x, y, G + hgt)); b.rotation.y = rot; grp.add(b); };
+    // 캠퍼스 바닥: 잔디 + 광장 + 진입로
+    const flat = (x, y, w, d, color, z = 0.15) => { const p = new THREE.Mesh(new THREE.PlaneGeometry(w, d), lam(color)); p.rotation.x = -Math.PI / 2; p.position.copy(toV3(x, y, G + z)); grp.add(p); return p; };
+    flat((C.x1 + C.x2) / 2, (C.y1 + C.y2) / 2, C.x2 - C.x1, C.y2 - C.y1, 0x7fa86a);
+    flat(-2350, 700, 300, 70, 0xaaa69d, 0.3); flat(-2350, 870, 26, 300, 0xbdb7ab, 0.32);
+    // ① 대학본부(본관) — 흰 외벽 + 남색 띠 + 가운데 탑과 마스트
+    bld(-2350, 760, 160, 34, 32, bmat(0xf4f4f0, 16, 7)); band(-2350, 760, 160, 34, 11, 0, 0x2a5aa0); band(-2350, 760, 160, 34, 22, 0, 0x2a5aa0);
+    bld(-2350, 760, 28, 28, 58, bmat(0xf8f8f6, 3, 12), 0, 0x1f3f6b);
+    const mastM = lam(0xffffff), mast = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 26, 8), mastM); mast.position.copy(toV3(-2350, 760, G + 59.4 + 13)); grp.add(mast);
+    const yard = new THREE.Mesh(new THREE.BoxGeometry(16, 0.5, 0.5), mastM); yard.position.copy(toV3(-2350, 760, G + 59.4 + 20)); grp.add(yard);
+    // ② 해사대학관 · ③ 공학관 (본관 양옆, 바다 쪽으로 살짝 벌림)
+    bld(-2610, 830, 118, 30, 32, bmat(0xeceae4, 12, 7), 0.12); band(-2610, 830, 118, 30, 14, 0.12, 0x2a5aa0);
+    bld(-2090, 830, 118, 30, 30, bmat(0xeceae4, 12, 7), -0.12); band(-2090, 830, 118, 30, 14, -0.12, 0x2a5aa0);
+    // ④ 도서관 — 유리 커튼월
+    bld(-2350, 920, 70, 48, 22, bmat(0xa9c4d8, 10, 4, true), 0, 0x3a4652);
+    // ⑤ 학생생활관(승선생활관) 3동 — 고층 베이지, 층마다 발코니 띠
+    [[-2760, 970], [-2640, 1000], [-2520, 1025]].forEach(([x, y]) => {
+      bld(x, y, 26, 70, 62, bmat(0xe9dcc3, 4, 16), 0.25, 0x8a4b2a);
+      for (let f = 1; f <= 5; f++) band(x, y, 26, 70, f * 11, 0.25, 0xd7c6a6);
+    });
+    // ⑥ 체육관 — 둥근 지붕
+    bld(-2060, 995, 84, 56, 14, bmat(0xdedad2, 8, 2), 0, 0xdedad2);
+    const dome = new THREE.Mesh(new THREE.CylinderGeometry(28, 28, 84, 20, 1, false, 0, Math.PI), lam(0x3f6fa8)); dome.rotation.z = Math.PI / 2; dome.position.copy(toV3(-2060, 995, G + 15)); grp.add(dome);
+    // ⑦ 대운동장 — 잔디 + 붉은 트랙
+    const tr = new THREE.Mesh(new THREE.RingGeometry(30, 40, 40), lam(0xb5523b)); tr.rotation.x = -Math.PI / 2; tr.scale.set(1.5, 1, 1); tr.position.copy(toV3(-1885, 900, G + 0.4)); grp.add(tr);
+    flat(-1885, 900, 88, 58, 0x5f9a4c, 0.35);
+    // ⑧ 해안 신호기 마스트(국제신호기)
+    const sm = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.9, 34, 8), mastM); sm.position.copy(toV3(-2150, 690, G + 17)); grp.add(sm);
+    const flagC = [0xd62828, 0xf7f7f7, 0x1d4fa0, 0xf2c12e, 0x111111, 0xd62828];
+    flagC.forEach((c, i) => { const f = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 2.2), new THREE.MeshLambertMaterial({ color: c, side: THREE.DoubleSide })); f.position.copy(toV3(-2150 + 2 + i * 3.6 * 0.5, 690, G + 32 - i * 2.6)); f.rotation.y = 0.2; grp.add(f); });
+    // ⑨ 실습선 부두 + 계류 중인 실습선 (충돌 장애물로도 등록됨)
+    const pq = C.pier, pier = new THREE.Mesh(new THREE.BoxGeometry(pq.len, 6, pq.w), lam(0xa3a39b)); pier.position.copy(toV3(pq.x, pq.y, 1)); grp.add(pier);
+    const fm = lam(0x151515), bmL = lam(0x2a2d30);
+    for (let d = -pq.len / 2 + 10; d < pq.len / 2; d += 20) {
+      const f = new THREE.Mesh(new THREE.BoxGeometry(2.6, 3.2, 1.2), fm); f.position.copy(toV3(pq.x + d, pq.y - pq.w / 2 - 0.6, 1.6)); grp.add(f);
+      const b = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.85, 1.4, 10), bmL); b.position.copy(toV3(pq.x + d + 10, pq.y - pq.w / 2 + 1.5, 4.7)); grp.add(b);
+    }
+    const sp = C.ship, ts = this.buildShip({ length: sp.len, beam: sp.beam, noCargo: true }, 0x1f3f73, false);
+    ts.position.copy(toV3(sp.x, sp.y, 0)); ts.rotation.y = -sp.hdg * D2R; grp.add(ts);
+    // 캠퍼스 가로등(야간) + 이름표
+    const lp = []; for (let x = C.x1 + 30; x < C.x2; x += 55) for (const y of [665, 1060]) lp.push(x, G + 10, -y); for (let y = 700; y < 1060; y += 50) lp.push(-2350 + 18, G + 10, -y, -2350 - 18, G + 10, -y);
+    const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(lp, 3));
+    grp.add(this.nightOnly(new THREE.Points(lg, new THREE.PointsMaterial({ size: 12, map: this.foamTex(), color: 0xfff0c8, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }))));
+    const lab = this.makeLabel('목포해양대학교'); lab.position.copy(toV3(-2350, 870, 150)); lab.scale.multiplyScalar(0.7); this.scene.add(lab); (this.campusLabels = []).push(lab);
+  },
+  /** 해안 도로 가로등: 해안선 안쪽 30m를 따라 45m 간격의 발광 점(야간에만) — 점 묶음 1개라 가벼움 */
+  buildStreetLights() {
+    const pos = [], col = [], warm = [1, 0.8, 0.45], cool = [0.92, 0.94, 1];
+    const along = (L, i0, i1) => {
+      const P = L.poly;
+      for (let i = i0; i < i1; i++) {
+        const [ax, ay] = P[i], [bx, by] = P[i + 1], len = Math.hypot(bx - ax, by - ay), ux = (bx - ax) / len, uy = (by - ay) / len;
+        let nx = -uy, ny = ux; if (!pointInPoly(ax + ux * len / 2 + nx * 30, ay + uy * len / 2 + ny * 30, L.poly)) { nx = -nx; ny = -ny; }
+        for (let d = 20; d < len; d += 45) {
+          const x = ax + ux * d + nx * 30, y = ay + uy * d + ny * 30; if (!pointInPoly(x, y, L.poly)) continue;
+          pos.push(x, 26, -y); col.push(...((pos.length / 3) % 5 ? warm : cool));
+        }
+      }
+    };
+    along(MAP.land[0], 0, 11);   // 목포 시내 남측 해안 (서쪽 끝 ~ 동쪽)
+    along(MAP.land[1], 2, 9);    // 남측 해안 (목포신항 ~ 영암)
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+    const pts = new THREE.Points(g, new THREE.PointsMaterial({ size: 16, map: this.foamTex(), vertexColors: true, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
+    this.scene.add(this.nightOnly(pts));
   },
 
   buildChannel() {
@@ -719,12 +799,19 @@ const World3D = {
   buildBridge() {
     const B = MAP.bridge, dx = B.b[0] - B.a[0], dy = B.b[1] - B.a[1], L = Math.hypot(dx, dy);
     const grp = new THREE.Group(), mat = this.nightMat(new THREE.MeshLambertMaterial({ color: 0xe9ecef }), 0x2c3a4a);   // 야간: 은은한 경관 조명
+    const pyMat = this.nightMat(new THREE.MeshLambertMaterial({ color: 0xe9ecef }), 0x6a5428);   // 주탑: 야간 금색 조명
     const deck = new THREE.Mesh(new THREE.BoxGeometry(L, 4, 24), mat); deck.position.y = B.deckH; grp.add(deck);
-    const cable = new THREE.LineBasicMaterial({ color: 0xffffff }); cable.userData.dayC = 0xffffff; cable.userData.nightC = 0x9fd0ff;
+    const cable = new THREE.LineBasicMaterial({ color: 0xffffff }); cable.userData.dayC = 0xffffff; cable.userData.nightC = 0xbfe2ff;   // 야간: 청백색 케이블 조명
+    for (const z of [-11.8, 11.8]) {   // 상판 양옆 난간(가드레일)
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(L, 1.3, 0.45), this.nightMat(new THREE.MeshLambertMaterial({ color: 0xcfd6dc }), 0x6d6040)); rail.position.set(0, B.deckH + 2.65, z); grp.add(rail);
+    }
     this.aviLamps = [];
     BRIDGE_PIERS.filter(q => q.kind === 'pylon').map(q => q.f).forEach(f => {
       const px = (f - 0.5) * L;
-      [-14, 14].forEach(z => { const p = new THREE.Mesh(new THREE.BoxGeometry(7, B.pylonH, 5), mat); p.position.set(px, B.pylonH / 2, z); grp.add(p); });
+      [-14, 14].forEach(z => { const p = new THREE.Mesh(new THREE.BoxGeometry(7, B.pylonH, 5), pyMat); p.position.set(px, B.pylonH / 2, z); grp.add(p); });
+      // 주탑 기초 방충공(교각 보호공): 콘크리트 타원 기초 + 검은 고무 방충대
+      const ft = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 28), new THREE.MeshLambertMaterial({ color: 0x8a8d8f })); ft.scale.set(16, 5, 30); ft.position.set(px, 1.5, 0); grp.add(ft);
+      const fb = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 28), new THREE.MeshLambertMaterial({ color: 0x1b1b1b })); fb.scale.set(16.8, 1.4, 30.8); fb.position.set(px, 1.2, 0); grp.add(fb);
       for (const z of [-14, 14]) {   // 주탑 상단 붉은 항공장애등
         const l = new THREE.Mesh(new THREE.SphereGeometry(2.2, 10, 8), new THREE.MeshBasicMaterial({ color: 0xff2020 })); l.position.set(px, B.pylonH + 2.5, z); grp.add(l); this.addGlow(l, 0xff3030, 16); this.aviLamps.push(l);
       }
@@ -740,16 +827,39 @@ const World3D = {
 
   buildPort() {
     const qm = new THREE.MeshLambertMaterial({ color: 0x9a9a92 });
+    const fen = [], bol = [];
     for (const [x1, y1, x2, y2] of MAP.quays) {
       const L = Math.hypot(x2 - x1, y2 - y1); const q = new THREE.Mesh(new THREE.BoxGeometry(L, 6, 40), qm);
       q.position.copy(toV3((x1 + x2) / 2, (y1 + y2) / 2, 1)); q.rotation.y = Math.atan2(y2 - y1, x2 - x1); this.scene.add(q);
+      // 안벽의 바다 쪽 면 찾기 → 고무 방충재(25m 간격) · 계선주(25m 간격, 엇갈림)
+      const ux = (x2 - x1) / L, uy = (y2 - y1) / L; let nx = -uy, ny = ux;
+      if (landAt((x1 + x2) / 2 + nx * 70, (y1 + y2) / 2 + ny * 70)) { nx = -nx; ny = -ny; }
+      for (let d = 12; d < L; d += 25) {
+        fen.push([x1 + ux * d + nx * 20.6, y1 + uy * d + ny * 20.6, Math.atan2(uy, ux)]);
+        bol.push([x1 + ux * (d + 12.5) + nx * 18, y1 + uy * (d + 12.5) + ny * 18]);
+      }
     }
+    const mtx = new THREE.Matrix4(), q4 = new THREE.Quaternion(), one = new THREE.Vector3(1, 1, 1), Yax = new THREE.Vector3(0, 1, 0);
+    const fm = new THREE.InstancedMesh(new THREE.BoxGeometry(3, 3.4, 1.3), new THREE.MeshLambertMaterial({ color: 0x151515 }), fen.length);
+    fen.forEach(([x, y, a], i) => fm.setMatrixAt(i, mtx.compose(toV3(x, y, 1.6), q4.setFromAxisAngle(Yax, a), one))); this.scene.add(fm);
+    const bg = new THREE.CylinderGeometry(0.6, 0.85, 1.4, 10); bg.translate(0, 0.7, 0);
+    const bm = new THREE.InstancedMesh(bg, new THREE.MeshLambertMaterial({ color: 0x2a2d30 }), bol.length);
+    bol.forEach(([x, y], i) => bm.setMatrixAt(i, mtx.compose(toV3(x, y, 4), q4.identity(), one))); this.scene.add(bm);
     const cr = new THREE.MeshLambertMaterial({ color: 0xc8402c }), cw = new THREE.MeshLambertMaterial({ color: 0xeeeeee });
     for (const [x, y] of MAP.cranes) {
       const g = new THREE.Group();
       [[-10, -10], [10, -10], [-10, 10], [10, 10]].forEach(([a, b]) => { const l = new THREE.Mesh(new THREE.BoxGeometry(2.5, 48, 2.5), cr); l.position.set(a, 24, b); g.add(l); });
       const top = new THREE.Mesh(new THREE.BoxGeometry(26, 8, 26), cw); top.position.y = 50; g.add(top);
       const boom = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 110), cr); boom.position.set(0, 54, 45); g.add(boom);
+      // 트롤리 + 와이어 + 스프레더(컨테이너를 집는 장치) + 매달린 컨테이너
+      const tr = new THREE.Mesh(new THREE.BoxGeometry(6, 2.6, 7), cw); tr.position.set(0, 51.2, 66); g.add(tr);
+      for (const sx of [-2, 2]) { const w = new THREE.Mesh(new THREE.BoxGeometry(0.25, 16, 0.25), this._wireMat || (this._wireMat = new THREE.MeshLambertMaterial({ color: 0x333333 }))); w.position.set(sx, 42, 66); g.add(w); }
+      const sp = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.1, 12.5), new THREE.MeshLambertMaterial({ color: 0xf2c12e })); sp.position.set(0, 33.6, 66); g.add(sp);
+      const box = new THREE.Mesh(new THREE.BoxGeometry(2.6, 2.6, 12), this.containerMat([0xc0392b, 0x2471a3, 0x239b56, 0xe67e22][MAP.cranes.findIndex(c => c[0] === x) % 4], false)); box.position.set(0, 31.7, 66); g.add(box);
+      // 야간 작업등: 붐 끝·기계실 + 바닥을 비추는 은은한 빛기둥
+      for (const [lx, ly, lz] of [[0, 52, 99], [0, 46, 0], [0, 52, 40]]) { const l = new THREE.Mesh(new THREE.SphereGeometry(0.9, 8, 6), new THREE.MeshBasicMaterial({ color: 0xfff1cc })); l.position.set(lx, ly, lz); g.add(l); this.addGlow(l, 0xffe2a8, 10); }
+      const beam = new THREE.Mesh(new THREE.ConeGeometry(16, 50, 16, 1, true), new THREE.MeshBasicMaterial({ color: 0xffe6b0, transparent: true, opacity: 0.07, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+      beam.position.set(0, 26, 66); g.add(this.nightOnly(beam));
       g.position.copy(toV3(x, y, 2)); g.rotation.y = -0.33; this.scene.add(g);
     }
   },
@@ -781,7 +891,7 @@ const World3D = {
   /** 북한군 경비정: 회색 선체 + 선수 쪽 회전 포탑·포신 */
   buildNavy(spec) {
     const g = this.buildShip(spec, 0x7a8089, false), L = spec.length, B = spec.beam;
-    g.traverse(m => { if (m.material && m.material.color && !m.material.isMeshBasicMaterial) { const h = m.material.color.getHex(); if (h === 0xf2f2f0) m.material.color.setHex(0x9aa0a8); else if (h === 0x1f3d7a) m.material.color.setHex(0x4b4f55); else if (h === 0x5d6b5f) m.material.color.setHex(0x666c72); } });
+    g.traverse(m => { if (m.material && m.material.color && !m.material.isMeshBasicMaterial) { const h = m.material.color.getHex(); if (h === 0xf2f2f0) m.material.color.setHex(0x9aa0a8); else if (h === 0x1f3d7a) m.material.color.setHex(0x4b4f55); else if (h === 0x5d6b5f) m.material.color.setHex(0x666c72); else if (h === 0xe6e6e1) m.material.color.setHex(0x8d939a); } });
     const hullH = Math.max(4, L * 0.09), deckY = hullH * 0.55 + 0.6, dark = new THREE.MeshLambertMaterial({ color: 0x4a4f55 });
     const turret = new THREE.Group(); turret.position.set(0, deckY, -L * 0.22); g.add(turret);
     const base = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.26, B * 0.3, 1.6, 14), dark); base.position.y = 0.8; turret.add(base);
@@ -831,8 +941,10 @@ const World3D = {
     if (!plain) {
     const sup = new THREE.Mesh(new THREE.BoxGeometry(B * 0.86, L * 0.12, L * 0.13), white); sup.position.set(0, deckY + L * 0.06, L * 0.33); g.add(sup);
     const brg = new THREE.Mesh(new THREE.BoxGeometry(B * 1.08, L * 0.035, L * 0.06), white); brg.position.set(0, deckY + L * 0.135, L * 0.30); g.add(brg);
-    const winMat = this.nightMat(new THREE.MeshPhongMaterial({ color: 0x14212d, shininess: 160, specular: 0xa9bfd2, emissive: 0x000000 }), 0x2f8a72);   // 반사 유리 · 야간 계기판 불빛
+    const winMat = this.nightMat(new THREE.MeshPhongMaterial({ color: 0x14212d, shininess: 160, specular: 0xa9bfd2, emissive: 0x000000 }), 0x2f8a72);   // 반사 유리 · 야간 청록 계기판 불빛
+    const winMat2 = this.nightMat(new THREE.MeshPhongMaterial({ color: 0x14212d, shininess: 160, specular: 0xa9bfd2, emissive: 0x000000 }), 0x9a7a2a);   // 야간 황색 실내등
     const win = new THREE.Mesh(new THREE.BoxGeometry(B * 0.9, L * 0.015, 0.4), winMat); win.position.set(0, deckY + L * 0.137, L * 0.27 - 0.2); g.add(win);
+    for (const yy of [0.03, 0.075]) { const w2 = new THREE.Mesh(new THREE.BoxGeometry(B * 0.7, L * 0.01, 0.3), winMat2); w2.position.set(0, deckY + L * yy, L * 0.265 - 0.2); g.add(w2); }   // 거주구 창
     for (const sx of [-1, 1]) {   // 선교 날개
       const wing = new THREE.Mesh(new THREE.BoxGeometry(B * 0.2, L * 0.012, L * 0.045), white); wing.position.set(sx * B * 0.64, deckY + L * 0.128, L * 0.29); g.add(wing);
     }
@@ -856,7 +968,7 @@ const World3D = {
     const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, L * 0.2, 6), white); mast.position.set(0, deckY + L * 0.1, -L * 0.3); g.add(mast);
     }
     if (spec.cls === 'barge') { const pile = new THREE.Mesh(new THREE.BoxGeometry(B * 0.8, 4, L * 0.7), new THREE.MeshLambertMaterial({ color: 0x9c8462 })); pile.position.set(0, deckY + 2, 0); g.add(pile); }
-    if (L > 60) {   // 화물(컨테이너)
+    if (L > 60 && !spec.noCargo) {   // 화물(컨테이너)
       const cols = [0xc0392b, 0x2471a3, 0xd4ac0d, 0x239b56, 0x7d3c98, 0xe67e22];
       for (let z = -L * 0.33; z < L * 0.2; z += L * 0.075) for (let x = -1; x <= 1; x++) {
         const hh = 2.6 * (1 + Math.floor(Math.random() * 3));
@@ -874,7 +986,6 @@ const World3D = {
     };
     g.userData.bridgeEye = new THREE.Vector3(0, deckY + L * 0.15, L * 0.27);
     if (spec.cls) this.addDayShapes(g, spec, deckY, L);
-    g.traverse(o => { if (o.isMesh && !(o.material && o.material.transparent)) { o.castShadow = true; o.receiveShadow = true; } });
     return g;
   },
   /** 컨테이너 옆면: 골판 주름 + 상하 프레임 줄무늬 (캔버스 텍스처, 색은 재질색으로 곱함) */
@@ -883,6 +994,7 @@ const World3D = {
       const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d');
       x.fillStyle = '#e4e4e4'; x.fillRect(0, 0, 64, 64);
       for (let i = 0; i < 64; i += 4) { x.fillStyle = '#b8b8b8'; x.fillRect(i, 0, 1.5, 64); x.fillStyle = '#f6f6f6'; x.fillRect(i + 2, 0, 1, 64); }
+      x.fillStyle = 'rgba(255,255,255,.85)'; x.fillRect(3, 20, 58, 6); x.fillStyle = 'rgba(40,40,40,.55)'; x.fillRect(3, 27, 58, 2);   // 선사 줄무늬
       x.fillStyle = '#8c8c8c'; x.fillRect(0, 0, 64, 5); x.fillRect(0, 59, 64, 5); x.fillRect(0, 0, 3, 64); x.fillRect(61, 0, 3, 64);
       this._ctex = new THREE.CanvasTexture(c); this._ctex.anisotropy = 4; this._cmat = {};
     }
@@ -1048,8 +1160,7 @@ const World3D = {
     const c = new THREE.Color(0x9aa6ad).lerp(new THREE.Color(0x9cc6e8), k).multiplyScalar(tint);
     this.scene.background.copy(c); this.scene.fog.color.copy(c);
     if (this.dome) {   // 하늘 돔: 수평선 = 안개색, 천정 = 기상별 짙은 하늘색
-      const u = this.dome.material.uniforms, top = new THREE.Color(0x3a78c2).lerp(new THREE.Color(0x8e99a0), 1 - k).multiplyScalar(tint);
-      u.hor.value.copy(c); u.top.value.copy(top); u.bot.value.copy(c).multiplyScalar(0.9);
+      this.paintSky(new THREE.Color(0x3a78c2).lerp(new THREE.Color(0x8e99a0), 1 - k).multiplyScalar(tint), c.clone());
     }
     this.hemi.intensity = 0.75 * light; this.sun.intensity = 0.85 * light;
   },
@@ -1058,7 +1169,7 @@ const World3D = {
     this.setVisibility(W.visNM, W.tint, W.light);
     this.waveAmp = W.wave; this.precipKind = W.precip; this.setNight(key === 'night');
     this.rain.visible = W.precip === 'rain'; this.snow.visible = W.precip === 'snow';
-    const showLabel = W.visNM >= 1.5; this.labels.forEach(s => { s.visible = showLabel; });
+    const showLabel = W.visNM >= 1.5; this.labels.forEach(s => { s.visible = showLabel; }); (this.campusLabels || []).forEach(s => { s.visible = showLabel; });
     this.updateEnv();
   },
   /** 빗줄기(선분)·눈송이(점) — 카메라 주변 박스 안에서 순환 */
@@ -1125,7 +1236,6 @@ const World3D = {
   update(t, dt, ship) {
     this.placeShip(this.ship, ship.x, ship.y, ship.hdg, t, -ship.r * 0.012);
     this.updateWater(t, ship.x, ship.y); this.updateWake(dt); this.updateBowWave(dt, ship);
-    this.sun.position.copy(this.ship.position).add(this.sunOff); this.sun.target.position.copy(this.ship.position);   // 그림자 범위를 자선 주변으로
     if (this.ship.userData.radar) this.ship.userData.radar.rotation.y += dt * 2.6;
     for (const l of this.aviLamps || []) l.visible = (t % 1.6) < 0.8;   // 항공장애등 점멸
     for (const b of this.buoyLights) b.lamp.visible = ((t + b.phase) % b.period) < 0.6;
@@ -1432,8 +1542,8 @@ const Sim = {
     }
     if (!s.grounded) {   // 목포대교 교각·주탑 충돌
       const me = { x: s.x, y: s.y, hdg: s.hdg, hl: CONFIG.own.length / 2 * 0.94, hw: CONFIG.own.beam / 2 * 0.9 };
-      const q = BRIDGE_PIERS.find(p => Math.hypot(p.x - s.x, p.y - s.y) < CONFIG.own.length && obbOverlap(me, p));
-      if (q) { s.grounded = { name: `목포대교 ${q.kind === 'pylon' ? '주탑' : '교각'}`, pier: true }; s.eng = ENG_STOP; this.log('bad', `충돌 — ${s.grounded.name}`, '교량 통과 시에는 주경간(두 주탑 사이) 항로 중앙으로 지나가세요. 경계 의무(해사안전법 제63조) · 안전한 속력(제64조)'); showBanner(`⚠ 충돌 (${s.grounded.name})`, 'R 키 또는 [재시작]으로 초기화'); }
+      const q = BRIDGE_PIERS.find(p => Math.hypot(p.x - s.x, p.y - s.y) < CONFIG.own.length + p.hl && obbOverlap(me, p));
+      if (q) { s.grounded = { name: q.name || `목포대교 ${q.kind === 'pylon' ? '주탑' : '교각'}`, pier: true }; s.eng = ENG_STOP; this.log('bad', `충돌 — ${s.grounded.name}`, '교량 통과 시에는 주경간(두 주탑 사이) 항로 중앙으로 지나가세요. 경계 의무(해사안전법 제63조) · 안전한 속력(제64조)'); showBanner(`⚠ 충돌 (${s.grounded.name})`, 'R 키 또는 [재시작]으로 초기화'); }
     }
     // 항로 출입 알림 (3단계에서 판정 엔진으로 이관)
     const ci = channelInfo(s.x, s.y);
