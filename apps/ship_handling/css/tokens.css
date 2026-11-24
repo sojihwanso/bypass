@@ -1,0 +1,32 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+@import url("https://hangeul.pstatic.net/hangeul_static/css/maru-buri.css");
+
+:root {
+  /* 사진에서 뽑은 색 — 밝은 테마(낮 바다) */
+  --navy: #0F2A3F; --sea-c: #1F5F8B; --deck: #3F7A55; --amber: #C9771F;
+  --paper: #F4F7F6; --surface: #FFFFFF; --ink: #10212E; --muted: #4E6070; --rule: #D3DDE2; --soft: #E8EFF1;
+  --accent: var(--deck); --accent-bg: #E1EEE5; --info: var(--sea-c); --info-bg: #E2EEF6;
+  --warm: var(--amber); --warm-bg: #F8EBDD; --ok: #2D7A48; --bad: #B4352A; --warn: #8C5B00; --warn-bg: #FBF0D9;
+  --on-navy: #EAF1F4; --on-navy-muted: #A9BDC9;
+  /* 3D 무대 */
+  --sky: #D9E6EC; --sky2: #EEF3F5; --sea: #3F7E95; --sea2: #1D4D64; --seaLine: #E9F4F7; --sand: #C9BC95;
+  --flow0: #1B6672; --flow1: #2FCFC0; --jet0: #D2601C; --jet1: #FFD27A; --air0: #7D93A8; --air1: #FFFFFF; --cool0: #2367B2; --cool1: #BFE9FF;
+  /* 글꼴과 크기 (1.25배 단계) */
+  --f-display: "MaruBuri", "Noto Serif KR", "AppleMyungjo", serif;
+  --f-body: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --s-13: .8125rem; --s-16: 1rem; --s-20: 1.25rem; --s-25: 1.5625rem; --s-31: 1.953rem; --s-39: 2.441rem; --s-61: clamp(2.2rem, 3.9vw, 3.815rem);
+  --r-stage: 14px; --shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 10px 28px rgba(0, 0, 0, .10);
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  /* 어두운 테마(해 질 녘 바다) */
+  --navy: #08131C; --sea-c: #6AAED6; --deck: #86C79A; --amber: #F0A04B;
+  --paper: #0D1B26; --surface: #13242F; --ink: #E6EEF2; --muted: #9AB0BE; --rule: #243A48; --soft: #182D3A;
+  --accent-bg: #18342A; --info-bg: #14304A; --warm-bg: #3A2814; --ok: #7FD39A; --bad: #F08A7E; --warn: #E8BC5E; --warn-bg: #2F2614;
+  --on-navy: #EAF1F4; --on-navy-muted: #9AB0BE;
+  --sky: #1A2430; --sky2: #2A2A2E; --sea: #1D4A58; --sea2: #0B2530; --seaLine: #3C6874; --sand: #3D3A2C;
+  --flow0: #2C8090; --flow1: #C8F5F0; --jet0: #F0863F; --jet1: #FFE0A0; --air0: #6F86A0; --air1: #E8EEF7; --cool0: #3A8FD0; --cool1: #BFE6FF;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 32px rgba(0, 0, 0, .4);
+  color-scheme: dark;
+}
