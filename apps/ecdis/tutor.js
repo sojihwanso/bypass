@@ -47,6 +47,8 @@
 .tu-bub.bad{background:#FDE8E3}.tu-bub.bad::after{border-bottom-color:#FDE8E3}
 .tu-note{margin:10px 18px 0;padding:8px 12px;border-left:4px solid #FFCC33;background:#FFF8E1;font-size:13.5px;line-height:1.55}
 .tu-task{margin:10px 18px 0;padding:8px 12px;border-left:4px solid #FF7A26;background:#FFF1E6;font-size:13.5px;line-height:1.55;font-weight:600}
+.tu-clip{margin:10px 18px 0}.tu-cbtn{font:inherit;font-weight:800;font-size:13.5px;padding:7px 14px;border:2px solid #241008;border-radius:999px;background:#FCF0E0;color:#241008;cursor:pointer}
+.tu-vid video{display:block;width:100%;margin-top:8px;border:2px solid #241008;border-radius:10px;background:#0d1b2a}
 .tu-quiz{display:flex;flex-direction:column;gap:7px;margin:12px 18px 0}
 .tu-quiz button{text-align:left;font:inherit;font-size:14px;padding:9px 12px;border:2px solid #241008;border-radius:10px;background:#fff;cursor:pointer;color:#241008}
 .tu-quiz button:hover{background:#FCF0E0}
@@ -98,7 +100,7 @@
     const quiz = s.quiz ? `<div class="tu-quiz">${s.quiz.map((q, i) => `<button type="button" data-q="${i}">${esc(q[0])}</button>`).join("")}</div>` : "";
     pop.innerHTML = `<div class="tu-ph"><span class="tu-tag">${esc(s.id)}</span><span class="tu-course">${esc(COURSES[cur.course].name)}</span><span class="tu-cnt">${cur.step + 1} / ${n}</span><button type="button" class="tu-x" data-tu="stop" aria-label="교육 끝내기">×</button></div>
 <div class="tu-pb"><div class="tu-face"><img class="tu-dodo" alt="도도" src="edu/dodo_${s.mood || "explain"}.webp"></div><div class="tu-txt"><h3>${esc(s.title)}</h3><p>${s.body}</p></div></div>
-<div class="tu-bub">${s.say}</div>${s.note ? `<div class="tu-note">${s.note}</div>` : ""}${s.task ? `<div class="tu-task">해 보기 · ${s.task}</div>` : ""}${quiz}
+<div class="tu-bub">${s.say}</div>${s.note ? `<div class="tu-note">${s.note}</div>` : ""}${s.task ? `<div class="tu-task">해 보기 · ${s.task}</div>` : ""}${s.clip ? `<div class="tu-clip"><button type="button" class="tu-cbtn" data-tu="clip" aria-expanded="false">▶ 시연 보기</button><div class="tu-vid"></div></div>` : ""}${quiz}
 <div class="tu-pf"><span class="tu-en">${typeof LANG !== "undefined" && LANG !== "ko" ? "교육 과정은 한국어로 제공됩니다 (Korean only)" : ""}</span><button type="button" class="tu-btn" data-tu="prev"${cur.step ? "" : " disabled"}>이전</button><button type="button" class="tu-btn pri" data-tu="next">${cur.step === n - 1 ? "끝내기" : "다음"}</button></div>`;
     face(s.mood || "explain");
   }
@@ -157,6 +159,7 @@
     if (q) { const ok = !!stepObj().quiz[+q.dataset.q][1]; q.classList.add(ok ? "ok" : "no"); react(ok ? "good" : "bad"); return; }
     const b = e.target.closest("[data-tu]"); if (!b) return;
     const a = b.dataset.tu;
+    if (a === "clip") { const box = $(".tu-vid", pop), open = !box.firstChild; box.innerHTML = open ? `<video src="edu/clips/${stepObj().clip}.mp4" autoplay muted loop playsinline preload="auto" aria-label="시연 영상"></video>` : ""; b.textContent = open ? "■ 시연 닫기" : "▶ 시연 보기"; b.setAttribute("aria-expanded", open); place(); return; }
     if (a === "next") next(); else if (a === "prev") prev(); else if (a === "stop") stop();
     else if (a === "pick") start(b.dataset.c, 0); else if (a === "resume") { const sv = saved(); if (sv) start(sv.course, sv.step); }
   }
@@ -203,7 +206,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
       say: "지금 하는 일에 맞춰 모드를 바꾸면 돼요." },
     { id: "D3", mood: "explain", target: "#bDisp", before: navi, title: "표시 화면 — 전자해도 / Conning",
       body: "해도 화면과 Conning(조타·기관 계기) 화면을 바꿔요.", say: "Conning 화면은 조타실 앞 계기판이라고 생각하시면 돼요." },
-    { id: "D4", mood: "caution", target: "#bBase", cursor: true, before: () => { navi(); sawOther = false; }, title: "표시 단계 — 기본 / 표준 / 전체",
+    { id: "D4", clip: "d4", mood: "caution", target: "#bBase", cursor: true, before: () => { navi(); sawOther = false; }, title: "표시 단계 — 기본 / 표준 / 전체",
       body: "IMO가 정한 Display Base · Standard · All other information이에요. 항로를 계획할 때는 '전체 표시'로 놓아야 놓치는 위험물이 없어요. 일반적으로는 All(전체 표시) 모드로 놓고 사용해요.",
       say: "기본 표시만 보고 항로를 짜면 안 돼요. 숨겨진 위험물이 있을 수 있어요!",
       task: "버튼을 눌러 표시 단계를 바꿔 본 뒤, 마지막에 '전체 표시'로 맞춰 주세요.",
@@ -239,7 +242,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
     { id: "A0", mood: "explain", title: "항로 계획은 4단계예요",
       body: "IMO 지침(A.893(21))에 따라 <b>평가(Appraisal) → 계획(Planning) → 실행(Execution) → 감시(Monitoring)</b> 순서로 해요. 이번 과정에서는 앞의 두 단계를 ECDIS로 직접 해 볼 거예요.",
       say: "출항 전에 '선석에서 선석까지(Berth to Berth)' 전부 계획이 있어야 해요!" },
-    { id: "A1", mood: "explain", target: '[data-act="planning"]', cursor: true, before: plan, title: "대략적인 항로 구성 — 큰 물표 기준 WPT",
+    { id: "A1", clip: "a1", mood: "explain", target: '[data-act="planning"]', cursor: true, before: plan, title: "대략적인 항로 구성 — 큰 물표 기준 WPT",
       body: "처음에는 세밀하게 짜지 않아요. 출발·도착과 그 사이의 큰 물표(곶, 섬, 등대, TSS 입구)를 기준으로 굵직한 변침점(WPT)만 찍어 전체 모양을 잡아요. 넓은 범위(소축척)에서 시작해요.",
       say: "처음엔 지도 앱에서 경유지 몇 개 찍는 느낌이면 돼요. 큰 곶을 돌아가는 지점, TSS에 들어가는 지점 같은 곳이요!",
       task: "'항로 계획'을 누르고 해도를 클릭해 WPT를 4개 이상 찍어 보세요.",
@@ -255,7 +258,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
       say: "항로 위에 허가 안 된 셀이 하나라도 있으면 그 구간은 공식 해도 없이 가는 거예요. 출항 전에 꼭 확인해 주세요!",
       quiz: [["회사 절차에 따라 해도 대리점에 청구해요", true], ["허가 없이 그냥 써요", false], ["종이해도가 있으니 무시해요", false]],
       good: "맞아요! 빠진 셀은 바로 청구 목록에 넣어요.", bad: "공식 해도 없이 항해하면 안 돼요. 다시 골라 볼까요?" },
-    { id: "A4", mood: "caution", target: '[data-act="cm"][data-v="status"]', cursor: true, before: charts, title: "소개정 (Small correction)",
+    { id: "A4", clip: "a4", mood: "caution", target: '[data-act="cm"][data-v="status"]', cursor: true, before: charts, title: "소개정 (Small correction)",
       body: "ENC는 주간 항행통보(NtM)에 맞춘 업데이트 파일로 최신화해요. 셀마다 업데이트 번호가 최신인지 확인하고, 임시·예고 통보(T&amp;P)나 항행경보처럼 ENC에 안 들어간 내용은 수동 개정이나 사용자 해도로 표시해요. 개정 내용은 해도 개정 기록부에 남겨요.",
       say: "업데이트를 안 한 ENC는 '오래된 종이해도'랑 같아요. 새로 생긴 침선이 안 보일 수 있어요!",
       task: "'셀 상태'를 열고 주황색 셀의 '업데이트 적용'을 눌러 보세요.",
@@ -265,7 +268,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
       body: "WPT 위치는 도°분.분′ 형식으로, 가능하면 0.1분 단위로 정리해요(예: 35°06.4′N 129°03.7′E). 다만 반드시 피해야 하는 위험물이 0.1분(약 185 m) 범위 안에 있다면, 반올림하지 말고 정확한 위치로 정해야 해요. 0.1분은 약 185 m예요. 숫자를 깔끔히 맞춰 두면 다른 계기·서류로 옮길 때 오류가 줄고, 교대 당직자도 읽기 쉬워요.",
       say: "0.1분은 약 185 m예요! 항로 위치로는 충분히 정확하고, 받아 적기도 편해요.",
       note: "분 자리는 60을 넘을 수 없어요. 60분이 1도예요." },
-    { id: "A6", mood: "caution", target: '[data-act="rcheck"]', cursor: true, before: plan, title: "항로 시뮬레이션 · 수심 · 위험물 확인",
+    { id: "A6", clip: "a6", mood: "caution", target: '[data-act="rcheck"]', cursor: true, before: plan, title: "항로 시뮬레이션 · 수심 · 위험물 확인",
       body: "먼저 흘수와 UKC로 안전 등심선·안전 수심을 정해요(해도에 없는 값이면 다음 깊은 등심선). 그다음 '항로 점검'을 실행하면 XTD 폭 안에 얕은 수역이나 위험물이 있는지 레그마다 알려 줘요. 마지막으로 '전체 표시', 최대 축척으로 항로를 따라가며 육안으로 직접 다시 점검해요.",
       say: "자동 점검이 '안전'이라고 해도, 위험물 경보를 꺼 둔 항목은 안 잡혀요. 마지막엔 해도를 확대해 가며 직접 육안으로 하나하나 점검해 주세요!",
       task: "'항로 점검'을 눌러 결과를 확인해 보세요.",
@@ -317,7 +320,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
       good: "정답이에요! 2022년부터는 규제해역 안을 항해할 때도 0.1%예요.", bad: "아쉬워요. 지금은 규제해역에 들어가는 순간부터 0.1%가 적용돼요." },
     { id: "B10", mood: "happy", target: uc, before: plan, title: "항로 연결",
       body: "사용자 해도 창에서 '항로 연결'을 쓰면, 항로를 감시할 때 이 사용자 해도가 자동으로 같이 켜져요.", say: "이제 항로를 켜면 직접 그린 표시도 다 같이 나와요!" },
-    { id: "A9", mood: "caution", target: '[data-act="manage"]', cursor: true, before: plan, title: "항해 계기에 적용 · 백업 ECDIS",
+    { id: "A9", clip: "a9", mood: "caution", target: '[data-act="manage"]', cursor: true, before: plan, title: "항해 계기에 적용 · 백업 ECDIS",
       body: "완성한 항로를 '감시' 항로로 불러오면 XTD 경보, WPT 도착, 다음 변침 방위·거리가 표시돼요. 실제 선박에서는 백업 ECDIS에도 같은 항로를 넣고, 두 대의 항로가 같은지(이름·WPT 수·총 거리)를 꼭 비교해요.",
       say: "주 ECDIS만 고치고 백업 ECDIS를 안 고치는 실수가 정말 많아요!",
       task: "'항로 관리'에서 항로를 '백업 ECDIS로 보내기' 한 뒤 '비교'를 눌러 보세요.",
@@ -347,7 +350,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
     { id: "C2", mood: "explain", target: '[data-act="helm"]', before: navi, title: "조종 패널",
       body: "타각, 선수방위(HDG), 기관 명령(RPM), 속력이 한 곳에 모여 있어요. 'Conning' 화면에서는 같은 정보를 계기판처럼 크게 볼 수 있어요.",
       say: "Conning 화면은 조타실 앞 계기판이라고 생각하시면 돼요." },
-    { id: "C3", mood: "caution", target: () => { const b = q('[data-adj="rud"][data-d="10"]'); return b && b.parentElement; }, cursor: true, before: () => { navi(); hdg0 = S.own.hdg; }, title: "수동 조타 · 타각 지시",
+    { id: "C3", clip: "c3", mood: "caution", target: () => { const b = q('[data-adj="rud"][data-d="10"]'); return b && b.parentElement; }, cursor: true, before: () => { navi(); hdg0 = S.own.hdg; }, title: "수동 조타 · 타각 지시",
       body: "타각은 P(좌현) / S(우현)예요. 키를 쓴 뒤 배가 실제로 돌기까지 시간이 걸려요(선회 지연). 해도의 예측 항적(30초 간격 점)으로 미리 보면서, 원하는 침로 조금 전에 반대 키로 멈춰요.",
       say: "반대 키를 너무 늦게 쓰면 침로를 지나쳐 버려요! 이걸 오버슈트라고 해요.",
       task: "S10으로 침로를 30° 바꿔 보세요. (속도를 ×4로 올리면 빨라요)",
