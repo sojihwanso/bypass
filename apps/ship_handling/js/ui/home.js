@@ -24,7 +24,7 @@ export function renderHome(root, progress) {
   <section class="hero" aria-labelledby="heroTitle">
     <div class="hero-text">
       <div>
-        <p class="hero-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="none" stroke="currentColor" stroke-width="1.5"/><g fill="currentColor"><path d="M16 16c.4-3.4 2.9-5.5 5-5-1.7 1.3-3 2.9-5 5z"/><path d="M16 16c.4-3.4 2.9-5.5 5-5-1.7 1.3-3 2.9-5 5z" transform="rotate(72 16 16)"/><path d="M16 16c.4-3.4 2.9-5.5 5-5-1.7 1.3-3 2.9-5 5z" transform="rotate(144 16 16)"/><path d="M16 16c.4-3.4 2.9-5.5 5-5-1.7 1.3-3 2.9-5 5z" transform="rotate(216 16 16)"/><path d="M16 16c.4-3.4 2.9-5.5 5-5-1.7 1.3-3 2.9-5 5z" transform="rotate(288 16 16)"/></g></svg>선박조종 3D</p>
+        <p class="hero-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="none" stroke="currentColor" stroke-width="1.5"/><g fill="currentColor"><path d="M16 16c.4-3.4 2.9-5.5 5-5-1.7 1.3-3 2.9-5 5z"/><path d="M16 16c.4-3.4 2.9-5.5 5-5-1.7 1.3-3 2.9-5 5z" transform="rotate(72 16 16)"/><path d="M16 16c.4-3.4 2.9-5.5 5-5-1.7 1.3-3 2.9-5 5z" transform="rotate(144 16 16)"/><path d="M16 16c.4-3.4 2.9-5.5 5-5-1.7 1.3-3 2.9-5 5z" transform="rotate(216 16 16)"/><path d="M16 16c.4-3.4 2.9-5.5 5-5-1.7 1.3-3 2.9-5 5z" transform="rotate(288 16 16)"/></g></svg>선박 조종 3D 모델</p>
         <h1 id="heroTitle">배가 왜 그렇게 움직이는지, 돌려 보고 멈춰 보며</h1>
         <p class="lede">강의 슬라이드와 교재의 그림을 3D 장면으로 옮겼습니다. 한 척의 6,000TEU 컨테이너선이 기울고, 돌고, 밀리고, 닻을 끕니다. 재생바를 끌어 원하는 순간에 멈추고, 배를 돌려 물속까지 들여다보세요.</p>
         <div class="acts">
@@ -85,7 +85,7 @@ export function renderHome(root, progress) {
       <div><h2>읽기 전에</h2><p class="note-box"><b>모델 값에 주의.</b> 3D 장면의 숫자는 개념을 보이기 위한 단순 모델의 결과입니다. 실제 선박의 조종 특성은 선박 조종성 자료(Pilot card, Wheelhouse poster)와 시운전 기록을 따릅니다.</p></div>
     </section>
   </div>
-  <footer class="foot"><button class="ver" type="button" aria-label="버전 정보">v. ${VERSION}</button><div>선박조종학 수업 자료로 만든 학습용 사이트</div></footer>`;
+  <footer class="foot"><div>선박조종학 수업 자료로 만든 학습용 사이트</div><button class="ver" type="button" title="버전" aria-label="버전 정보">v. ${VERSION} · TEAM BYPASS</button></footer>`;
 
   root.querySelectorAll('.cat-btn').forEach(b => b.addEventListener('click', () => {
     const row = b.closest('.cat-row'), open = !row.classList.contains('open'); row.classList.toggle('open', open); b.setAttribute('aria-expanded', open);

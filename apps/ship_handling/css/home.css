@@ -72,8 +72,7 @@
 .note-box { background: var(--warn-bg); border-radius: 14px; padding: 18px 22px; color: var(--ink); }
 .note-box b { color: var(--warn); }
 .foot { border-top: 1px solid var(--rule); padding: 22px 0 90px; text-align: center; color: var(--muted); font-size: var(--s-13); }
-.foot .ver { background: none; border: 0; color: inherit; font: inherit; cursor: pointer; padding: 6px 10px; border-radius: 999px; font-variant-numeric: tabular-nums; }
-.foot .ver:hover { background: var(--soft); }
+.foot .ver { display: block; margin: 10px auto 0; border: 0; background: none; padding: 4px 8px; color: inherit; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; letter-spacing: .1em; cursor: default; -webkit-tap-highlight-color: transparent; }
 
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; min-height: 0; }

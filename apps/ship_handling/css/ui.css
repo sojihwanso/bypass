@@ -22,9 +22,14 @@ img { max-width: 100%; display: block; }
 .btn svg { width: 18px; height: 18px; }
 
 /* 떠 있는 장치들(상단 막대 대신) */
+/* bypass 공통: 우측 최상단 버전 알약 · bypass 로고 (기준 구현: 바다생활 계산기) */
+.home-logo { display: inline-flex; flex: none; border-radius: 6px; padding: 2px; }
+.home-logo img { display: block; width: 30px; height: 30px; transition: transform .15s; }
+.home-logo:hover img { transform: scale(1.08); }
+.mver { min-height: 34px; border: 1px solid var(--rule); border-radius: 999px; background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 3px 10px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; font-weight: 500; letter-spacing: .04em; white-space: nowrap; cursor: default; -webkit-tap-highlight-color: transparent; }
+@media (max-width: 520px) { .mver { display: none; } }
 .corner { position: fixed; top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); z-index: 40; display: flex; align-items: center; gap: 8px; }
-.corner .ver, .corner .theme { height: 40px; min-width: 40px; border-radius: 999px; border: 1px solid var(--rule); background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; font-size: var(--s-13); color: var(--muted); cursor: pointer; }
-.corner .ver { font-variant-numeric: tabular-nums; }
+.corner .theme { height: 40px; min-width: 40px; border-radius: 999px; border: 1px solid var(--rule); background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; font-size: var(--s-13); color: var(--muted); cursor: pointer; }
 .corner .theme svg { width: 18px; height: 18px; }
 .corner .help { position: relative; }
 .help-tip { position: absolute; top: 50px; left: 0; margin: 0; white-space: nowrap; padding: 8px 12px; border-radius: 12px; background: var(--ink); color: var(--surface); font-size: var(--s-13); font-weight: 600; box-shadow: 0 6px 18px rgba(0,0,0,.18); pointer-events: none; }
@@ -35,9 +40,7 @@ img { max-width: 100%; display: block; }
 .dlg .help-dl dt { font-weight: 700; color: var(--ink); }
 .dlg .help-dl dd { margin: 0; color: var(--muted); line-height: 1.55; }
 @media (max-width: 520px) { .dlg .help-dl div { grid-template-columns: 1fr; gap: 2px; } }
-.corner .bp { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--navy); color: #fff; border: 1px solid rgba(255,255,255,.18); }
-.corner .bp svg { width: 22px; height: 22px; }
-.on-hero .corner .ver, .on-hero .corner .theme { color: var(--on-navy); border-color: rgba(255,255,255,.28); background: rgba(8, 19, 28, .35); }
+.on-hero .corner .mver, .on-hero .corner .theme { color: var(--on-navy); border-color: rgba(255,255,255,.28); background: rgba(8, 19, 28, .35); }
 
 .toc-btn { position: fixed; left: max(16px, env(safe-area-inset-left)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 40; height: 48px; padding: 0 18px 0 14px; border-radius: 999px; border: 0; background: var(--navy); color: var(--on-navy); display: inline-flex; align-items: center; gap: 10px; font-weight: 650; cursor: pointer; box-shadow: var(--shadow); }
 :root[data-theme="dark"] .toc-btn { background: #E6EEF2; color: #08131C; }
@@ -131,3 +134,29 @@ img { max-width: 100%; display: block; }
 .swap { transition: none; }
 .swap.on { transition: opacity .2s var(--ease), visibility .2s; }
 @media (max-width: 720px) { .corner { position: absolute; } }
+
+/* bypass 공통: 이스터에그 (버전 표시 5번 누르기) — 카드 바탕은 흰색 고정 */
+.egg { position: fixed; inset: 0; z-index: 70; background: rgba(8,20,14,.55); display: flex; align-items: center; justify-content: center; padding: 16px; cursor: pointer; animation: egg-fade .18s ease; }
+.egg-card { background: #FFFFFF; color: #16241B; border-radius: 14px; padding: 22px 26px 20px; text-align: center; max-width: 360px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.35); animation: eggpop .35s ease-out; }
+.egg-card .art { width: 100%; max-width: 280px; height: auto; display: block; margin: 0 auto 10px; border-radius: 10px; }
+.egg-card .ev { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 15px; font-weight: 600; }
+.egg-card .eb { font-family: var(--f-display); font-size: 20px; font-weight: 800; margin-top: 4px; }
+.egg-card small { display: block; margin-top: 14px; font-size: 12px; color: #62756A; }
+.egg-btns { display: flex; justify-content: center; gap: 10px; margin-top: 16px; }
+.egg-btns button { display: block; margin: 0; width: 120px; border: 0; border-radius: 14px; color: #fff; font: inherit; font-weight: 700; font-size: 14px; padding: 9px 0; cursor: pointer; }
+.egg-btns button:hover { filter: brightness(1.1); }
+.egg-pn { background: #0F2A3F; }
+.egg-card.pn { max-width: 560px; text-align: left; padding: 0; display: flex; flex-direction: column; max-height: min(80vh, 720px); cursor: default; overflow: hidden; }
+.pn-h { display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px solid #D5DEE4; }
+.pn-h b { font-family: var(--f-display); font-weight: 800; font-size: 20px; margin-right: auto; }
+.pn-x { border: 0; background: #E6EEF2; color: #16241B; min-width: 34px; height: 34px; border-radius: 10px; font-size: 18px; line-height: 1; cursor: pointer; }
+.pn-b { overflow: auto; padding: 6px 18px 16px; overscroll-behavior: contain; }
+.pn-b section { padding: 12px 0; border-top: 1px dashed #D5DEE4; }
+.pn-b section:first-child { border-top: 0; }
+.pn-b h4 { margin: 0 0 6px; display: flex; align-items: baseline; gap: 10px; font-size: 12.5px; font-weight: 500; color: #56707E; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.pn-b h4 span { font-size: 15px; font-weight: 700; color: #0F2A3F; }
+.pn-b ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 14px; line-height: 1.6; color: #1D2A21; }
+.pn-b li { word-break: keep-all; overflow-wrap: anywhere; }
+@keyframes egg-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes eggpop { from { transform: scale(.85); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .egg-card, .egg { animation: none; } }

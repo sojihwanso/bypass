@@ -38,12 +38,9 @@ export function initChrome({ onTheme }) {
     r.dataset.theme = next; try { localStorage.setItem('shs-theme', next); } catch (e) { /* 무시 */ }
     onTheme && onTheme(next);
   });
-  /* 버전 다섯 번 누르면 이스터에그 */
-  const hits = [];
-  const egg = () => {
-    const now = Date.now(); hits.push(now); while (hits.length && now - hits[0] > 2500) hits.shift();
-    if (hits.length >= 5) { hits.length = 0; openEgg(); }
-  };
+  /* 버전 다섯 번 누르면 이스터에그 (1.5초 안에 다섯 번, 누를 때마다 타이머를 다시 잰다) */
+  let eggN = 0, eggT = null;
+  const egg = () => { eggN++; clearTimeout(eggT); eggT = setTimeout(() => { eggN = 0; }, 1500); if (eggN >= 5) { eggN = 0; openEgg(); } };
   $('helpBtn').addEventListener('click', () => { try { localStorage.setItem('shs-help', '1'); } catch (e) { /* 무시 */ } document.querySelector('.help-tip')?.remove(); openHelp(); });
   let seen = false; try { seen = !!localStorage.getItem('shs-help'); } catch (e) { seen = true; }
   if (!seen) { const tip = document.createElement('p'); tip.className = 'help-tip'; tip.textContent = '도움말은 여기'; $('helpBtn').appendChild(tip); setTimeout(() => tip.remove(), 9000); }
@@ -86,14 +83,24 @@ function openHelp() {
       ${row('단원 넘기기', '키보드 [ 와 ] 로 앞뒤 단원으로 간다.')}
     </dl>`);
 }
+/* bypass 공통 이스터에그 카드 (기준 구현: 바다생활 계산기). 그림은 준비 중이라 아직 넣지 않는다. */
 function openEgg() {
-  openDialog(`<p class="kicker">숨은 창</p><h2 id="dlgTitle">갑판에서 찾으셨네요</h2>
-    <p>버전 표시를 다섯 번 누르면 열리는 창입니다. 이 사이트는 선박조종학 수업 자료로 공부하던 학생이 시험 준비를 위해 만들었습니다.</p>
-    <p><button class="btn btn-solid" type="button" id="pnBtn">패치노트</button></p>
-    <div class="notes" id="pnBox" hidden></div>`);
-  document.getElementById('pnBtn').addEventListener('click', () => {
-    const b = document.getElementById('pnBox'); b.hidden = false;
-    b.innerHTML = PATCH_NOTES.map(n => `<p><span class="v">v. ${n.v}</span> <span class="num">${n.date}</span></p><ol>${n.items.map(i => `<li>${esc(i)}</li>`).join('')}</ol>`).join('');
+  if (document.querySelector('.egg')) return;
+  const back = document.activeElement;
+  const o = document.createElement('div'); o.className = 'egg'; o.setAttribute('role', 'dialog'); o.setAttribute('aria-modal', 'true'); o.setAttribute('aria-label', 'Made by "Bypass"');
+  o.innerHTML = `<div class="egg-card"><div class="ev">Ver.${VERSION}</div><div class="eb">Made by &quot;Bypass&quot;</div><div class="egg-btns"><button class="egg-pn" type="button">패치노트</button></div><small>아무 곳이나 누르면 닫힙니다</small></div>`;
+  const close = () => { o.remove(); document.removeEventListener('keydown', k, true); if (back && back.focus) back.focus(); };
+  const k = e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
+  const card = o.querySelector('.egg-card');
+  o.querySelector('.egg-pn').addEventListener('click', e => {
+    e.stopPropagation();
+    card.classList.add('pn');
+    card.innerHTML = `<div class="pn-h"><b>패치노트</b><button class="pn-x" type="button" aria-label="닫기">×</button></div><div class="pn-b">${PATCH_NOTES.map(n => `<section><h4><span>v${n.v}</span>${esc(n.date)}</h4><ul>${n.items.map(i => `<li>${esc(i)}</li>`).join('')}</ul></section>`).join('')}</div>`;
+    card.onclick = ev => ev.stopPropagation();
+    card.querySelector('.pn-x').onclick = close;
+    card.querySelector('.pn-x').focus();
   });
+  o.addEventListener('click', close); document.addEventListener('keydown', k, true); document.body.appendChild(o);
+  o.querySelector('.egg-pn').focus();
 }
 export { esc, STAGE1 };
