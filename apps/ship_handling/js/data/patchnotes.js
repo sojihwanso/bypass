@@ -1,6 +1,9 @@
 /* 최신 버전이 맨 위. 버전을 올릴 때마다 같은 작업에서 항목을 더한다. */
-export const VERSION = '1.0.1';
+export const VERSION = '1.0.2';
 export const PATCH_NOTES = [
+  { v: '1.0.2', date: '2026-11-25', items: [
+    '브라우저 탭 아이콘을 bypass 로고로 바꿨다'
+  ] },
   { v: '1.0.1', date: '2026-11-25', items: [
     '사이트 이름을 \'선박 조종 3D 모델\'로 바꿨다(주소는 그대로)',
     '오른쪽 위 버전 표시와 bypass 로고, 맨 아래 버전 표시를 다른 bypass 앱과 같은 모양으로 맞췄다',

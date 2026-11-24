@@ -1,5 +1,5 @@
 /* 공부노트 Service Worker v2.0.2 — 오프라인 열람·복습 및 외부 라이브러리 캐시 */
-const CACHE_NAME = 'studynote-shell-v2.0.3';
+const CACHE_NAME = 'studynote-shell-v2.0.4';
 const LIB_CACHE = 'studynote-libs-v2.0.0';
 
 const APP_SHELL = [
