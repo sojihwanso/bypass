@@ -38,6 +38,11 @@
 @keyframes tuBounce{0%{transform:scale(.8)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
 .tu-mood{position:absolute;top:-4px;left:-4px;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;border:2px solid #241008;background:#FCF0E0}
 .tu-txt{flex:1;min-width:0}
+.tu-pop.tu-narrow .tu-pb{display:block;position:relative}
+.tu-pop.tu-narrow .tu-face{position:absolute;left:18px;top:12px;width:56px;height:56px;flex:none}
+.tu-pop.tu-narrow .tu-dodo{max-width:56px;max-height:56px}
+.tu-pop.tu-narrow .tu-txt h3{min-height:56px;padding-left:66px;display:flex;align-items:center;font-size:18px}
+.tu-pop.tu-narrow .tu-bub::before,.tu-pop.tu-narrow .tu-bub::after{display:none}
 .tu-txt h3{margin:0 0 6px;font-size:20px;letter-spacing:-.01em}
 .tu-txt p{margin:0 0 8px;font-size:14.5px;line-height:1.62;color:#3b2a20}
 .tu-bub{position:relative;background:#FCF0E0;border:2px solid #241008;border-radius:14px;padding:10px 14px;font-size:14.5px;line-height:1.55;font-weight:600;margin:4px 18px 0}
@@ -102,6 +107,7 @@
 <div class="tu-pb"><div class="tu-face"><img class="tu-dodo" alt="도도" src="edu/dodo_${s.mood || "explain"}.webp"></div><div class="tu-txt"><h3>${esc(s.title)}</h3><p>${s.body}</p></div></div>
 <div class="tu-bub">${s.say}</div>${s.note ? `<div class="tu-note">${s.note}</div>` : ""}${s.task ? `<div class="tu-task">해 보기 · ${s.task}</div>` : ""}${s.clip ? `<div class="tu-clip"><button type="button" class="tu-cbtn" data-tu="clip" aria-expanded="false">▶ 시연 보기</button><div class="tu-vid"></div></div>` : ""}${quiz}
 <div class="tu-pf"><span class="tu-en">${typeof LANG !== "undefined" && LANG !== "ko" ? "교육 과정은 한국어로 제공됩니다 (Korean only)" : ""}</span><button type="button" class="tu-btn" data-tu="prev"${cur.step ? "" : " disabled"}>이전</button><button type="button" class="tu-btn pri" data-tu="next">${cur.step === n - 1 ? "끝내기" : "다음"}</button></div>`;
+    pop.classList.toggle("tu-narrow", narrow());
     face(s.mood || "explain");
   }
 
