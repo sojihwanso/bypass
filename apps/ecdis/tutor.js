@@ -57,6 +57,7 @@
 .tu-btn.pri{background:#FF7A26;color:#241008;box-shadow:none;padding:10px 26px;font-size:16px}
 .tu-btn.pri:hover{background:#FF8F47}
 .tu-btn:disabled{opacity:.35;cursor:default}
+.tu-rot{margin:12px 18px 0;padding:10px 12px;border:2px solid #241008;border-radius:12px;background:#FFF1C2;font-size:13.5px;line-height:1.55}.tu-rot b{display:block;font-size:14.5px;margin-bottom:2px}
 .tu-menu{display:flex;flex-direction:column;gap:8px;margin:12px 18px 0}
 .tu-menu button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;font:inherit;padding:11px 14px;border:2px solid #241008;border-radius:12px;background:#fff;cursor:pointer;color:#241008}
 .tu-menu button:hover{background:#FCF0E0}
@@ -78,9 +79,10 @@
     spot = $(".tu-spot", root); pop = $(".tu-pop", root); chip = $(".tu-chip", root); cursor = $(".tu-cursor", root);
     chip.onclick = () => { if (typeof closeTopDlg === "function") while (dlgStack.length) closeTopDlg(); };
     pop.addEventListener("click", onClick);
-    addEventListener("resize", place); addEventListener("keydown", (e) => { if (!cur || !root.classList.contains("on")) return; if (e.key === "ArrowRight" && !isTyping(e)) next(); if (e.key === "ArrowLeft" && !isTyping(e)) prev(); });
+    addEventListener("resize", place);
   }
-  const isTyping = (e) => /INPUT|TEXTAREA|SELECT/.test((e.target && e.target.tagName) || "");
+  // 좁은 세로 화면(휴대폰 세로) 여부 — 테스트에서 바꿔 끼울 수 있게 Tutor._narrow로 노출
+  const narrow = () => (window.Tutor && Tutor._narrow ? Tutor._narrow() : matchMedia("(orientation: portrait) and (max-width: 900px)").matches);
 
   function face(m) {
     const img = $(".tu-dodo", pop); if (!img) return;
@@ -177,14 +179,14 @@
     const sv = saved();
     pop.innerHTML = `<div class="tu-ph"><span class="tu-tag">EDU</span><span class="tu-course">ECDIS 교육 과정</span><button type="button" class="tu-x" data-tu="stop" aria-label="닫기" style="margin-left:auto">×</button></div>
 <div class="tu-pb"><div class="tu-face"><span class="tu-mood">설명</span><img class="tu-dodo tu-bnc" alt="도도" src="edu/dodo_explain.webp"></div><div class="tu-txt"><h3>무엇부터 배워 볼까요?</h3><p>설명할 버튼만 밝게 비추고, 직접 해 보면 맞았는지 알려 드려요. 언제든 × 로 끝낼 수 있어요.</p></div></div>
-<div class="tu-menu">${sv ? `<button type="button" data-tu="resume"><b>이어서 하기 · ${esc(COURSES[sv.course].name)} ${sv.step + 1}단계</b><small>지난번 멈춘 곳부터</small></button>` : ""}${Object.keys(COURSES).map((k) => `<button type="button" data-tu="pick" data-c="${k}"><b>${esc(COURSES[k].name)}</b><small>${esc(COURSES[k].sub)} · ${STEPS[k].length}단계</small></button>`).join("")}</div>
+${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴대폰을 가로로 돌려서 하면 설명과 버튼이 잘 보여요. 세로 화면에서도 진행할 수는 있어요.</div>` : ""}<div class="tu-menu">${sv ? `<button type="button" data-tu="resume"><b>이어서 하기 · ${esc(COURSES[sv.course].name)} ${sv.step + 1}단계</b><small>지난번 멈춘 곳부터</small></button>` : ""}${Object.keys(COURSES).map((k) => `<button type="button" data-tu="pick" data-c="${k}"><b>${esc(COURSES[k].name)}</b><small>${esc(COURSES[k].sub)} · ${STEPS[k].length}단계</small></button>`).join("")}</div>
 <div class="tu-pf"><span class="tu-en">${typeof LANG !== "undefined" && LANG !== "ko" ? "교육 과정은 한국어로 제공됩니다 (Korean only)" : ""}</span></div>`;
     root.classList.add("on"); $(".tu-dim", root).classList.add("show"); spot.classList.remove("show");
     pop.style.visibility = "visible"; pop.style.left = (innerWidth - pop.offsetWidth) / 2 + "px"; pop.style.top = Math.max(12, (innerHeight - pop.offsetHeight) / 2) + "px";
     requestAnimationFrame(() => pop.classList.add("on"));
   }
 
-  window.Tutor = { STEPS, COURSES, menu, start, next, prev, stop, react, state: () => (cur ? { course: cur.course, step: cur.step } : null) };
+  window.Tutor = { _narrow: null, STEPS, COURSES, menu, start, next, prev, stop, react, state: () => (cur ? { course: cur.course, step: cur.step } : null) };
 })();
 
 /* ===== 공통 D. 화면 둘러보기 ===== */
