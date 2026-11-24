@@ -17,7 +17,7 @@
   const $ = (q, r = document) => r.querySelector(q);
   const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   let cur = null; // {course, step}
-  let root, spot, pop, chip, cursor, timer = null, reacted = false, manual = null, drag = null;
+  let root, spot, pop, chip, cursor, timer = null, reacted = false, manual = null, drag = null, engaged = false, clicks = [];
 
   const CSS = `
 #tuRoot{position:fixed;inset:0;z-index:90;pointer-events:none;font-family:inherit}
@@ -25,6 +25,7 @@
 #tuRoot.on .tu-dim.show{opacity:1}
 .tu-spot{position:absolute;border-radius:10px;box-shadow:0 0 0 4000px rgba(8,14,24,.72);transition:left .5s cubic-bezier(.4,.1,.2,1),top .5s cubic-bezier(.4,.1,.2,1),width .5s,height .5s;opacity:0}
 #tuRoot.on .tu-spot.show{opacity:1}
+.tu-spot.tu-lite{box-shadow:none}
 .tu-spot::after{content:"";position:absolute;inset:-6px;border:3px solid #FF7A26;border-radius:13px;animation:tuPulse 1.6s ease-in-out infinite}
 @keyframes tuPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.06)}}
 .tu-pop{position:absolute;width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;background:#fff;color:#241008;border:3px solid #241008;border-radius:20px;box-shadow:8px 8px 0 rgba(36,16,8,.85);pointer-events:auto;opacity:0;transform:translateY(14px) scale(.97);transition:opacity .35s,transform .35s,left .45s,top .45s}
@@ -92,6 +93,8 @@
     chip.onclick = () => { if (typeof closeTopDlg === "function") while (dlgStack.length) closeTopDlg(); };
     pop.addEventListener("click", onClick); pop.addEventListener("pointerdown", onDown);
     addEventListener("resize", place);
+    // 비춘 버튼이나 화면을 직접 누르면 그 단계에서는 어두운 막을 걷어 결과가 보이게
+    document.addEventListener("pointerdown", (e) => { if (!cur || (e.target.closest && e.target.closest("#tuRoot"))) return; clicks.push(e.target); if (!engaged) { engaged = true; place(); } }, true);
   }
   // 좁은 세로 화면(휴대폰 세로) 여부 — 테스트에서 바꿔 끼울 수 있게 Tutor._narrow로 노출
   const narrow = () => (window.Tutor && Tutor._narrow ? Tutor._narrow() : matchMedia("(orientation: portrait) and (max-width: 900px)").matches);
@@ -119,11 +122,22 @@
   function place() {
     if (!cur || !pop || !pop.firstChild) return;
     const s = stepObj(); if (!s) return;
-    const minimize = typeof dlgStack !== "undefined" && dlgStack.length > 0 && !(targetEl(s) && targetEl(s).closest(".dlg"));
+    const menuOpen = [...document.querySelectorAll(".pop")].some((e) => !e.closest("#tuRoot") && e.getBoundingClientRect().width > 0);
+    let minimize = menuOpen || (typeof dlgStack !== "undefined" && dlgStack.length > 0 && !(targetEl(s) && targetEl(s).closest(".dlg")));
+    // 대상이 대화상자 안에 있으면 그 대화상자와 겹치지 않는 자리를 찾고, 없으면 접기
+    const t0 = !minimize && targetEl(s), inDlg = t0 && t0.closest(".dlg");
+    let dlgSpot = null;
+    if (inDlg && !manual) {
+      const A = inDlg.getBoundingClientRect(), W0 = innerWidth, H0 = innerHeight, pw0 = pop.offsetWidth, ph0 = pop.offsetHeight, cx0 = (A.left + A.right) / 2, cy0 = (A.top + A.bottom) / 2;
+      const fits = (x, y) => x >= 12 && y >= 12 && x + pw0 <= W0 - 12 && y + ph0 <= H0 - 12;
+      const cands = [[cx0 - pw0 / 2, A.bottom + 16], [cx0 - pw0 / 2, A.top - 16 - ph0], [A.right + 20, cy0 - ph0 / 2], [A.left - 20 - pw0, cy0 - ph0 / 2]].map(([x, y]) => [Math.max(12, Math.min(W0 - pw0 - 12, x)), Math.max(12, Math.min(H0 - ph0 - 12, y))]);
+      dlgSpot = cands.find(([x, y]) => fits(x, y) && !(x < A.right && x + pw0 > A.left && y < A.bottom && y + ph0 > A.top)) || null;
+      if (!dlgSpot) minimize = true;
+    }
     chip.classList.toggle("show", minimize); $("span", chip).textContent = s.id;
     pop.style.visibility = minimize ? "hidden" : "visible";
     const el = minimize ? null : targetEl(s);
-    spot.classList.toggle("show", !!el); $(".tu-dim", root).classList.toggle("show", !el && !minimize);
+    spot.classList.toggle("show", !!el); spot.classList.toggle("tu-lite", engaged); $(".tu-dim", root).classList.toggle("show", !el && !minimize && !engaged);
     const W = innerWidth, H = innerHeight, pw = pop.offsetWidth, ph = pop.offsetHeight;
     let x = (W - pw) / 2, y = (H - ph) / 2;
     if (el) {
@@ -139,6 +153,7 @@
       }
     }
     cursor.classList.toggle("show", !!(el && s.cursor));
+    if (dlgSpot) { x = dlgSpot[0]; y = dlgSpot[1]; }
     if (manual) { x = manual.x; y = manual.y; }
     x = Math.max(12, Math.min(W - pw - 12, x)); y = Math.max(12, Math.min(H - ph - 12, y));
     pop.style.left = x + "px"; pop.style.top = y + "px";
@@ -153,7 +168,7 @@
   }
 
   function show(i) {
-    mount(); ensurePop(); cur.step = Math.max(0, Math.min(steps().length - 1, i)); save(); reacted = false; manual = null;
+    mount(); ensurePop(); cur.step = Math.max(0, Math.min(steps().length - 1, i)); save(); reacted = false; manual = null; engaged = false; clicks = [];
     const s = stepObj();
     try { s.before && s.before(); } catch (e) {}
     pop.classList.remove("on"); root.classList.add("on");
@@ -234,7 +249,8 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
     requestAnimationFrame(() => pop.classList.add("on"));
   }
 
-  window.Tutor = { _narrow: null, STEPS, COURSES, menu, start, next, prev, stop, react, state: () => (cur ? { course: cur.course, step: cur.step } : null) };
+  const clicked = (sel, text) => clicks.some((el) => { const h = el.closest && el.closest(sel); return !!h && (!text || (el.textContent || "").includes(text) || (h.textContent || "").includes(text)); });
+  window.Tutor = { clicked, _narrow: null, STEPS, COURSES, menu, start, next, prev, stop, react, state: () => (cur ? { course: cur.course, step: cur.step } : null) };
 })();
 
 /* ===== 과정 1. 화면 둘러보기 (D) ===== */
@@ -256,7 +272,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
       body: "IMO가 정한 Display Base · Standard · All other information이에요. 항로를 계획할 때는 '전체 표시'로 놓아야 놓치는 위험물이 없어요. 일반적으로는 All(전체 표시) 모드로 놓고 사용해요.",
       say: "기본 표시만 보고 항로를 짜면 안 돼요. 숨겨진 위험물이 있을 수 있어요!",
       task: "버튼을 눌러 표시 단계를 바꿔 본 뒤, 마지막에 '전체 표시'로 맞춰 주세요.",
-      check: () => { if (S.set.dbase !== "ALL") sawOther = true; return sawOther && S.set.dbase === "ALL"; },
+      check: () => { if (S.set.dbase !== "ALL") sawOther = true; return S.set.dbase === "ALL" && (sawOther || Tutor.clicked(".pop", "전체")); },
       good: "맞아요! 전체 표시로 바꾸니 작은 위험물까지 다 보이죠?", bad: "지금은 '전체 표시'가 아니에요. 한 번 더 눌러 주세요." },
     { id: "D5", mood: "explain", target: "#bUp", before: navi, title: "방위 표시 · 자선으로",
       body: "방위 표시(North up 등)를 바꾸고, '자선으로' 버튼으로 화면을 자선 위치로 되돌려요.", say: "해도를 너무 멀리 옮겼다면 '자선으로'를 누르면 돼요." },
@@ -284,6 +300,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
   const mode = (m) => () => { try { if (S.mode !== m) setMode(m); } catch (e) {} };
   const plan = mode("PLAN"), charts = mode("CHARTS"), navi = mode("NAVI");
   const uc = '[data-act="uchart"]';
+  let cu0 = 0, bk0 = "{}";
   Tutor.STEPS.A.push(
     { id: "A0", mood: "explain", title: "항로 계획은 4단계예요",
       body: "IMO 지침(A.893(21))에 따라 <b>평가(Appraisal) → 계획(Planning) → 실행(Execution) → 감시(Monitoring)</b> 순서로 해요. 이번 과정에서는 앞의 두 단계를 ECDIS로 직접 해 볼 거예요.",
@@ -292,7 +309,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
       body: "처음에는 세밀하게 짜지 않아요. 출발·도착과 그 사이의 큰 물표(곶, 섬, 등대, TSS 입구)를 기준으로 굵직한 변침점(WPT)만 찍어 전체 모양을 잡아요. 넓은 범위(소축척)에서 시작해요.",
       say: "처음엔 지도 앱에서 경유지 몇 개 찍는 느낌이면 돼요. 큰 곶을 돌아가는 지점, TSS에 들어가는 지점 같은 곳이요!",
       task: "'항로 계획'을 누르고 해도를 클릭해 WPT를 4개 이상 찍어 보세요.",
-      check: () => !!(S.plan && S.plan.wps && S.plan.wps.length >= 4),
+      check: () => !!(S.plan && S.plan.editing && S.plan.wps && S.plan.wps.length >= 4) && Tutor.clicked("#cvChart, canvas"),
       good: "좋아요! 큰 그림이 나왔어요. 아직 육지에 붙어 있어도 괜찮아요, 뒤에서 다듬을 거예요.", bad: "WPT가 2개뿐이면 항로가 육지를 그냥 가로질러요. 곶을 돌아가는 점을 추가해 보세요." },
     { id: "A2", mood: "think", title: "대략적인 거리 계산 · 기관부 전달 (Bunker)",
       body: "WPT 표에 레그 거리와 총 거리가 자동으로 계산돼요. 총 거리 ÷ 계획 속력 = 항해 시간이에요. 이 거리와 예상 시간을 기관부(기관장)에 전달하면 연료(Bunker)·윤활유·청수 소요량을 계산해요. 보통 기상 여유분을 더하고, ECA를 지나는 구간 거리도 함께 알려 줘요.",
@@ -304,17 +321,17 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
       say: "항로 위에 허가 안 된 셀이 하나라도 있으면 그 구간은 공식 해도 없이 가는 거예요. 출항 전에 꼭 확인해 주세요!",
       quiz: [["회사 절차에 따라 해도 대리점에 청구해요", true], ["허가 없이 그냥 써요", false], ["종이해도가 있으니 무시해요", false]],
       good: "맞아요! 빠진 셀은 바로 청구 목록에 넣어요.", bad: "공식 해도 없이 항해하면 안 돼요. 다시 골라 볼까요?" },
-    { id: "A4", clip: "a4", mood: "caution", target: '[data-act="cm"][data-v="status"]', cursor: true, before: charts, title: "소개정 (Small correction)",
+    { id: "A4", clip: "a4", mood: "caution", target: '[data-act="cm"][data-v="status"]', cursor: true, before: () => { charts(); cu0 = Object.keys(S.cellUpd || {}).length; }, title: "소개정 (Small correction)",
       body: "ENC는 주간 항행통보(NtM)에 맞춘 업데이트 파일로 최신화해요. 셀마다 업데이트 번호가 최신인지 확인하고, 임시·예고 통보(T&amp;P)나 항행경보처럼 ENC에 안 들어간 내용은 수동 개정이나 사용자 해도로 표시해요. 개정 내용은 해도 개정 기록부에 남겨요.",
       say: "업데이트를 안 한 ENC는 '오래된 종이해도'랑 같아요. 새로 생긴 침선이 안 보일 수 있어요!",
       task: "'셀 상태'를 열고 주황색 셀의 '업데이트 적용'을 눌러 보세요.",
-      check: () => Object.keys(S.cellUpd || {}).length > 0,
+      check: () => Object.keys(S.cellUpd || {}).length > cu0,
       good: "최신 해도가 됐어요! 업데이트로 새 침선이 해도에 생겼어요.", bad: "그 셀은 이미 최신이에요. 업데이트 번호를 다시 봐 주세요." },
     { id: "A5", mood: "explain", target: '[data-act="llroute"]', before: plan, title: "위도·경도 정리 — 0.1분 단위",
       body: "WPT 위치는 도°분.분′ 형식으로, 가능하면 0.1분 단위로 정리해요(예: 35°06.4′N 129°03.7′E). 다만 반드시 피해야 하는 위험물이 0.1분(약 185 m) 범위 안에 있다면, 반올림하지 말고 정확한 위치로 정해야 해요. 0.1분은 약 185 m예요. 숫자를 깔끔히 맞춰 두면 다른 계기·서류로 옮길 때 오류가 줄고, 교대 당직자도 읽기 쉬워요.",
       say: "0.1분은 약 185 m예요! 항로 위치로는 충분히 정확하고, 받아 적기도 편해요.",
       note: "분 자리는 60을 넘을 수 없어요. 60분이 1도예요." },
-    { id: "A6", clip: "a6", mood: "caution", target: '[data-act="rcheck"]', cursor: true, before: plan, title: "항로 시뮬레이션 · 수심 · 위험물 확인",
+    { id: "A6", clip: "a6", mood: "caution", target: '[data-act="rcheck"]', cursor: true, before: () => { plan(); S.checkMarks = null; }, title: "항로 시뮬레이션 · 수심 · 위험물 확인",
       body: "먼저 흘수와 UKC로 안전 등심선·안전 수심을 정해요(해도에 없는 값이면 다음 깊은 등심선). 그다음 '항로 점검'을 실행하면 XTD 폭 안에 얕은 수역이나 위험물이 있는지 레그마다 알려 줘요. 마지막으로 '전체 표시', 최대 축척으로 항로를 따라가며 육안으로 직접 다시 점검해요.",
       say: "자동 점검이 '안전'이라고 해도, 위험물 경보를 꺼 둔 항목은 안 잡혀요. 마지막엔 해도를 확대해 가며 직접 육안으로 하나하나 점검해 주세요!",
       task: "'항로 점검'을 눌러 결과를 확인해 보세요.",
@@ -366,11 +383,11 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
       good: "정답이에요! 2022년부터는 규제해역 안을 항해할 때도 0.1%예요.", bad: "아쉬워요. 지금은 규제해역에 들어가는 순간부터 0.1%가 적용돼요." },
     { id: "B10", mood: "happy", target: uc, before: plan, title: "항로 연결",
       body: "사용자 해도 창에서 '항로 연결'을 쓰면, 항로를 감시할 때 이 사용자 해도가 자동으로 같이 켜져요.", say: "이제 항로를 켜면 직접 그린 표시도 다 같이 나와요!" },
-    { id: "A9", clip: "a9", mood: "caution", target: '[data-act="manage"]', cursor: true, before: plan, title: "항해 계기에 적용 · 백업 ECDIS",
+    { id: "A9", clip: "a9", mood: "caution", target: '[data-act="manage"]', cursor: true, before: () => { plan(); bk0 = JSON.stringify(typeof bkLoad === "function" ? bkLoad() : {}); }, title: "항해 계기에 적용 · 백업 ECDIS",
       body: "완성한 항로를 '감시' 항로로 불러오면 XTD 경보, WPT 도착, 다음 변침 방위·거리가 표시돼요. 실제 선박에서는 백업 ECDIS에도 같은 항로를 넣고, 두 대의 항로가 같은지(이름·WPT 수·총 거리)를 꼭 비교해요.",
       say: "주 ECDIS만 고치고 백업 ECDIS를 안 고치는 실수가 정말 많아요!",
       task: "'항로 관리'에서 항로를 '백업 ECDIS로 보내기' 한 뒤 '비교'를 눌러 보세요.",
-      check: () => Object.keys(S.backup || {}).length > 0,
+      check: () => JSON.stringify(S.backup || {}) !== bk0,
       good: "백업 ECDIS로 보냈어요! 항로를 고친 뒤에는 꼭 다시 비교해 주세요.", bad: "두 항로가 달라요. 백업 ECDIS로 다시 보내야 해요." },
     { id: "A10", mood: "think", target: '[data-act="owninfo"]', before: navi, title: "Passage Plan 확인 — UKC · Air draft",
       body: "항로 보고서로 WPT 위경도, 침로, 거리, XTD, 속력, ETA, 구간별 최소 수심·UKC를 뽑아 회사 Passage Plan 양식에 옮겨요. 다리·케이블 밑을 지나면 Air draft(수면에서 선체 최고점까지)와 구조물 높이(조석 고려)로 여유 높이를 확인해요. 작성자 → 선장 승인 → 전 항해사 숙지 서명 순서예요. 얕은 구간에서는 속력에 따른 스쿼트(squat)도 UKC에서 빼고 계산해요.",
@@ -410,12 +427,12 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
     { id: "C5", mood: "caution", target: '[data-act="helm"][data-v="AP"]', cursor: true, before: navi, title: "자동 조타 · 설정 선수방위",
       body: "설정한 방위를 유지해요. 조류·바람이 있으면 HDG는 맞아도 COG가 틀어져요.",
       say: "오토파일럿을 켰다고 끝이 아니에요. 항적을 계속 봐 주세요!",
-      task: "'자동 조타'를 눌러 보세요.", check: () => S.helm === "AP",
+      task: "'자동 조타'를 눌러 보세요.", check: () => S.helm === "AP" && Tutor.clicked('[data-act="helm"][data-v="AP"]'),
       good: "자동 조타가 켜졌어요! HDG와 COG를 비교해 보세요.", bad: "아직 수동 조타예요." },
     { id: "C6", mood: "explain", target: '[data-act="helm"][data-v="TRACK"]', cursor: true, before: navi, title: "항로 추종 (TRACK)",
       body: "감시 항로를 따라 자동으로 조타해요. WPT에 닿기 전 변침 경고가 떠요. 오른쪽 '항로 정보'에서 XTD를 계속 확인해요.",
       say: "항로선에 딱 붙어 가는지 XTD로 확인해요.",
-      task: "'항로 추종'을 눌러 보세요.", check: () => S.helm === "TRACK",
+      task: "'항로 추종'을 눌러 보세요.", check: () => S.helm === "TRACK" && Tutor.clicked('[data-act="helm"][data-v="TRACK"]'),
       good: "항로선에 딱 붙어서 가고 있어요!", bad: "감시 항로가 있어야 항로 추종을 쓸 수 있어요." },
     { id: "C7", mood: "happy", title: "조우선 · TSS · 좌초",
       body: "상대선을 피하고(COLREG), TSS 통항 방향을 지켜요. 좌초하면 '직전 안전 위치로'로 돌아가 다시 해 봐요. 마지막 WPT(GOAL) 0.3 NM 안으로 들어가면 시나리오가 끝나요.",
