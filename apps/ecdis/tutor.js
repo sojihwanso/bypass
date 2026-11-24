@@ -87,7 +87,6 @@
   function face(m) {
     const img = $(".tu-dodo", pop); if (!img) return;
     img.src = "edu/dodo_" + m + ".webp"; img.classList.remove("tu-bnc"); void img.offsetWidth; img.classList.add("tu-bnc");
-    $(".tu-mood", pop).textContent = MOOD[m];
   }
   const steps = () => (cur ? STEPS[cur.course] : []);
   const stepObj = () => steps()[cur.step];
@@ -98,7 +97,7 @@
     const s = stepObj(), n = steps().length;
     const quiz = s.quiz ? `<div class="tu-quiz">${s.quiz.map((q, i) => `<button type="button" data-q="${i}">${esc(q[0])}</button>`).join("")}</div>` : "";
     pop.innerHTML = `<div class="tu-ph"><span class="tu-tag">${esc(s.id)}</span><span class="tu-course">${esc(COURSES[cur.course].name)}</span><span class="tu-cnt">${cur.step + 1} / ${n}</span><button type="button" class="tu-x" data-tu="stop" aria-label="교육 끝내기">×</button></div>
-<div class="tu-pb"><div class="tu-face"><span class="tu-mood"></span><img class="tu-dodo" alt="도도" src="edu/dodo_${s.mood || "explain"}.webp"></div><div class="tu-txt"><h3>${esc(s.title)}</h3><p>${s.body}</p></div></div>
+<div class="tu-pb"><div class="tu-face"><img class="tu-dodo" alt="도도" src="edu/dodo_${s.mood || "explain"}.webp"></div><div class="tu-txt"><h3>${esc(s.title)}</h3><p>${s.body}</p></div></div>
 <div class="tu-bub">${s.say}</div>${s.note ? `<div class="tu-note">${s.note}</div>` : ""}${s.task ? `<div class="tu-task">해 보기 · ${s.task}</div>` : ""}${quiz}
 <div class="tu-pf"><span class="tu-en">${typeof LANG !== "undefined" && LANG !== "ko" ? "교육 과정은 한국어로 제공됩니다 (Korean only)" : ""}</span><button type="button" class="tu-btn" data-tu="prev"${cur.step ? "" : " disabled"}>이전</button><button type="button" class="tu-btn pri" data-tu="next">${cur.step === n - 1 ? "끝내기" : "다음"}</button></div>`;
     face(s.mood || "explain");
@@ -178,7 +177,7 @@
     mount(); stop(); cur = null; ensurePop();
     const sv = saved();
     pop.innerHTML = `<div class="tu-ph"><span class="tu-tag">EDU</span><span class="tu-course">ECDIS 교육 과정</span><button type="button" class="tu-x" data-tu="stop" aria-label="닫기" style="margin-left:auto">×</button></div>
-<div class="tu-pb"><div class="tu-face"><span class="tu-mood">설명</span><img class="tu-dodo tu-bnc" alt="도도" src="edu/dodo_explain.webp"></div><div class="tu-txt"><h3>무엇부터 배워 볼까요?</h3><p>설명할 버튼만 밝게 비추고, 직접 해 보면 맞았는지 알려 드려요. 언제든 × 로 끝낼 수 있어요.</p></div></div>
+<div class="tu-pb"><div class="tu-face"><img class="tu-dodo tu-bnc" alt="도도" src="edu/dodo_explain.webp"></div><div class="tu-txt"><h3>무엇부터 배워 볼까요?</h3><p>설명할 버튼만 밝게 비추고, 직접 해 보면 맞았는지 알려 드려요. 언제든 × 로 끝낼 수 있어요.</p></div></div>
 ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴대폰을 가로로 돌려서 하면 설명과 버튼이 잘 보여요. 세로 화면에서도 진행할 수는 있어요.</div>` : ""}<div class="tu-menu">${sv ? `<button type="button" data-tu="resume"><b>이어서 하기 · ${esc(COURSES[sv.course].name)} ${sv.step + 1}단계</b><small>지난번 멈춘 곳부터</small></button>` : ""}${Object.keys(COURSES).map((k) => `<button type="button" data-tu="pick" data-c="${k}"><b>${esc(COURSES[k].name)}</b><small>${esc(COURSES[k].sub)} · ${STEPS[k].length}단계</small></button>`).join("")}</div>
 <div class="tu-pf"><span class="tu-en">${typeof LANG !== "undefined" && LANG !== "ko" ? "교육 과정은 한국어로 제공됩니다 (Korean only)" : ""}</span></div>`;
     root.classList.add("on"); $(".tu-dim", root).classList.add("show"); spot.classList.remove("show");
