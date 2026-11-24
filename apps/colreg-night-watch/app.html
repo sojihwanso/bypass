@@ -177,6 +177,12 @@ select{font:inherit;font-size:13px;border:2px solid var(--ink);border-radius:8px
 .pad.on small{color:#fff}
 .pad.bell.on{background:var(--light-yellow);color:var(--ink)}
 .pad.gong.on{background:var(--gong);color:#fff}
+.aiBadge{position:absolute;left:8px;top:8px;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:900;opacity:0;pointer-events:none;transition:opacity .2s}
+.aiBadge.show{opacity:1}
+.aiBadge.call{background:#dbe8f7}
+.aiBadge.resp{background:var(--magenta);color:#fff}
+#sceneBox{position:relative}
+.gn.call{color:var(--soft)}
 .ripple{fill:none;stroke-width:2.5;transform-box:fill-box;transform-origin:center;animation:rip .9s ease-out forwards}
 @keyframes rip{from{transform:scale(.3);opacity:.9}to{transform:scale(4.6);opacity:0}}
 
@@ -188,6 +194,20 @@ select{font:inherit;font-size:13px;border:2px solid var(--ink);border-radius:8px
 .nsvg.reveal .sil{opacity:1}
 .nsvg .lb{opacity:0;transition:opacity .5s .2s}
 .nsvg.reveal .lb{opacity:1}
+.nightCard.dayCard,.nightCard.fogCard{background:#e6f0f5;color:var(--ink)}
+.nightCard.fogCard{background:#e3e9ec}
+.nightCard.dayCard .nightPrompt,.nightCard.fogCard .nightPrompt{color:var(--ink)}
+.nightCard.dayCard .nightNote,.nightCard.fogCard .nightNote{color:var(--soft)}
+.nsvg.dsvg{border-color:#9fbccb}
+.audCtl{display:flex;align-items:center;gap:12px;margin-top:8px}
+.audBars{display:inline-flex;gap:3px;align-items:flex-end;height:22px}
+.audBars i{width:5px;height:6px;background:var(--ink);border-radius:2px;opacity:.35}
+.audBars.on i{opacity:1;animation:bar .5s ease-in-out infinite alternate}
+.audBars.on i:nth-child(2){animation-delay:.1s}.audBars.on i:nth-child(3){animation-delay:.2s}
+.audBars.on i:nth-child(4){animation-delay:.05s}.audBars.on i:nth-child(5){animation-delay:.15s}
+@keyframes bar{from{height:5px}to{height:22px}}
+.sigReveal{display:none;margin-top:8px;font-weight:900;font-size:15px;background:#fff;border:2px solid var(--ink);border-radius:10px;padding:7px 10px}
+#nightBox.reveal .sigReveal{display:block}
 .flash{animation:fl .55s steps(1) infinite}
 @keyframes fl{50%{opacity:0}}
 .nightNote{font-size:11px;color:#8fa6c8;margin-top:6px}
@@ -283,8 +303,8 @@ pre.share{background:var(--paper);border:1.5px solid var(--line);border-radius:8
         <small>종료 시까지 무한 · 최대 3.00x 가속</small>
       </button>
       <button class="mode" data-mode="night">
-        <b>🌙 야간 등화 관측</b>
-        <small>종료 시까지 무한 · 등화/항법 판별</small>
+        <b>🔭 당직 식별 관측 (등화 · 형상물 · 청음)</b>
+        <small>종료 시까지 무한 · 야간 등화 / 주간 형상물 / 무중 청음 판별</small>
       </button>
       <button class="mode surv" data-mode="survival">
         <span class="tag">SURVIVAL</span>
@@ -370,7 +390,7 @@ pre.share{background:var(--paper);border:1.5px solid var(--line);border-radius:8
       <div class="card nightCard">
         <div class="nightPrompt" id="nightPrompt"></div>
         <div id="nightBox"></div>
-        <div class="nightNote">※ COLREG Part C(제20~31조) 및 Part B(제13~17조) 기반 식별 시뮬레이션입니다.</div>
+        <div class="nightNote" id="nightNote"></div>
       </div>
       <div class="opts" id="nightOpts"></div>
     </div>
@@ -443,6 +463,9 @@ const Aud=(()=>{
   const BPM=120,BEAT=60/BPM,STEP=BEAT/2,PAT=64,BAR=BEAT*4;
   let ctx=null,bgmG=null,bgmFilter=null,sfxG=null,noise=null;
   let bgmStart=0,step=0,songStep0=0,cur=0,pending=null,timer=null,muted=false,nightMode=false;
+  let spd=1,dest=null;
+  const STEPc=()=>STEP/spd,BARc=()=>BAR/spd;
+  const D=()=>dest||sfxG;
   const t0=performance.now()/1000;
   const NOTE={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
   const midi=n=>{
@@ -509,9 +532,9 @@ const Aud=(()=>{
   const time=()=>ctx?ctx.currentTime:performance.now()/1000-t0;
   const now=()=>ctx?ctx.currentTime-lat():performance.now()/1000-t0;
   function nextBarTime(minLead){
-    if(!ctx)return time()+Math.ceil(minLead/BAR)*BAR;
-    const k=Math.ceil((ctx.currentTime+minLead-bgmStart)/BAR);
-    return bgmStart+k*BAR;
+    if(!ctx)return time()+Math.ceil(minLead/BARc())*BARc();
+    const k=Math.ceil((ctx.currentTime+minLead-bgmStart)/BARc());
+    return bgmStart+k*BARc();
   }
   function setSong(i){if(i===cur&&pending===null)return;pending=i;}
   function setMute(m){muted=m;if(ctx)bgmG.gain.setTargetAtTime(m?0:.48,ctx.currentTime,.04);}
@@ -540,13 +563,13 @@ const Aud=(()=>{
   }
   function sched(){
     if(!ctx||ctx.state!=='running')return;
-    while(bgmStart+step*STEP<ctx.currentTime+.25){
-      const t=bgmStart+step*STEP;
+    while(bgmStart+step*STEPc()<ctx.currentTime+.25){
+      const t=bgmStart+step*STEPc();
       if(pending!==null&&step%8===0){cur=pending;pending=null;songStep0=step;}
       if(t>=ctx.currentTime-.03){
         const S=SONGS[cur],pos=(step-songStep0)%PAT,inBar=pos%8;
-        const m=S.mel[pos];if(m)osc('square',m.f,t,m.len*STEP,nightMode?.06:.105,bgmFilter);
-        const b=S.bass[pos];if(b)osc('triangle',b.f,t,b.len*STEP*.9,nightMode?.34:.28,bgmFilter,.008);
+        const m=S.mel[pos];if(m)osc('square',m.f,t,m.len*STEPc(),nightMode?.06:.105,bgmFilter);
+        const b=S.bass[pos];if(b)osc('triangle',b.f,t,b.len*STEPc()*.9,nightMode?.34:.28,bgmFilter,.008);
         if(inBar===0||inBar===4)kick(t);
         if(inBar===2||inBar===6||(pos>=56&&inBar===7)){
           nz(t,.13,nightMode?.12:.22,'highpass',1800,bgmFilter);
@@ -569,7 +592,7 @@ const Aud=(()=>{
       const o=ctx.createOscillator(),g=ctx.createGain();o.type=ty;o.frequency.value=f;g.gain.value=gv;
       o.connect(g);g.connect(lp);vg.connect(o.detune);o.start(t);oscs.push(o);
     });
-    vib.start(t);lp.connect(out);out.connect(sfxG);
+    vib.start(t);lp.connect(out);out.connect(D());
     let done=false;
     function release(t2){
       if(done)return;done=true;const g=out.gain;
@@ -592,12 +615,12 @@ const Aud=(()=>{
       const os=ctx.createOscillator(),e=ctx.createGain();os.type='sine';os.frequency.value=base*r;
       e.gain.setValueAtTime(.0001,t);e.gain.linearRampToValueAtTime(vol*g*.38,t+.003);
       e.gain.exponentialRampToValueAtTime(.0001,t+dec*d);
-      os.connect(e);e.connect(sfxG);os.start(t);os.stop(t+dec*d+.05);
+      os.connect(e);e.connect(D());os.start(t);os.stop(t+dec*d+.05);
     });
   }
   function gong(t,dur){
     if(!ctx)return{release(){}};
-    dur=dur||5;const out=ctx.createGain();out.gain.value=1;out.connect(sfxG);
+    dur=dur||5;const out=ctx.createGain();out.gain.value=1;out.connect(D());
     [[1,1,1],[1.47,.6,.8],[2.0,.55,.7],[2.76,.35,.5],[3.4,.25,.4],[1.003,.9,1]].forEach(([r,g,d])=>{
       const o=ctx.createOscillator(),e=ctx.createGain();o.type='sine';o.frequency.value=78*r;
       e.gain.setValueAtTime(.0001,t);e.gain.linearRampToValueAtTime(.42*g,t+.02);
@@ -621,9 +644,34 @@ const Aud=(()=>{
     else if(kind==='B'){for(let x=0;x<1.5/spd;x+=.13)bell(t+x,{dec:.4,vol:.38,base:800+(Math.round(x/.13)%2)*30});}
     else if(kind==='G'){gong(t,4).release(t+1.5/spd);}
   }
+  /* 배속 ↔ BGM 템포 동기화: 다음 미예약 스텝의 절대 시각을 고정한 채 bgmStart를 재정렬(겹침/공백 방지) */
+  function setSpeed(ns){
+    ns=clamp(+ns||1,.5,4);
+    if(Math.abs(ns-spd)<1e-6)return;
+    if(ctx){
+      const nextT=bgmStart+step*STEPc();
+      spd=ns;
+      bgmStart=nextT-step*STEPc();
+    }else spd=ns;
+  }
+  const getSpeed=()=>spd;
+  function duck(on){
+    if(ctx&&bgmG)bgmG.gain.setTargetAtTime(on?.1:(muted?0:.48),ctx.currentTime,.05);
+  }
+  /* 취소 가능한 신호음 시퀀스: items=[[kind,절대시각],…] */
+  function seq(items,sp=1){
+    if(!ctx)return{stop(){}};
+    const bus=ctx.createGain();bus.gain.value=1;bus.connect(sfxG);
+    dest=bus;
+    try{items.forEach(([k,t])=>demoNote(k,t,sp));}finally{dest=null;}
+    return{stop(){
+      try{bus.gain.cancelScheduledValues(0);bus.gain.setValueAtTime(0,ctx.currentTime);}catch(e){}
+      setTimeout(()=>{try{bus.disconnect();}catch(e){}},80);
+    }};
+  }
   function suspend(){if(ctx&&ctx.state==='running')ctx.suspend();}
   function resume(){if(ctx&&ctx.state==='suspended')ctx.resume();}
-  return {ensure,suspend,resume,time,now,nextBarTime,setSong,setMute,setNightAmbience,tick,whistle,bell,gong,demoNote,SONGS,get ok(){return !!ctx;}};
+  return {ensure,suspend,resume,setSpeed,getSpeed,duck,seq,time,now,nextBarTime,setSong,setMute,setNightAmbience,tick,whistle,bell,gong,demoNote,SONGS,get ok(){return !!ctx;}};
 })();
 
 /* =====================================================================
@@ -637,8 +685,8 @@ const KINDS={
   B:{lane:'bell',vis:1.5,hold:true,label:'🔔 급속',dur:1.5},
   G:{lane:'gong',vis:1.5,hold:true,label:'🥁 징',dur:1.5}
 };
-const LANE_COL={whistle:'#d6468f',bell:'#f2b705',gong:'#5a8ed6'};
-const LANE_NAME={whistle:'기적',bell:'호종',gong:'징'};
+const LANE_COL={whistle:'#d6468f',bell:'#f2b705',gong:'#5a8ed6',ai:'#7f93b3'};
+const LANE_NAME={whistle:'기적',bell:'호종',gong:'징',ai:'📡 상대선 발신'};
 const LSS=[['L',0],['S',1.5],['S',2.0]];
 const TXT_35C='장음(prolonged blast, 4~6초) 1회 + 단음(short blast, 약 1초) 2회를 2분 이내 간격으로 울립니다. NUC·RAM·CBD·범선·어로종사선·예인/압항선(복합체 제외)이 사용합니다.';
 
@@ -681,6 +729,18 @@ const R_STAGES=[
   desc:'좁은 수로에서 상대 좌현 쪽으로 추월하려 할 때는 장·장·단·단 신호를 울립니다.'},
  {id:'ovt_ok',g:'man',scene:'ovt_ok',badge:'좁은 수로 · 추월에 동의 (피추월선 응답)',title:'추월 동의 신호',guide:['장','단','장','단'],chart:[['L',0],['S',1.5],['L',2.0],['S',3.5]],rule:'제34조(c)(ii)',
   desc:'피추월선이 추월에 동의할 때는 장·단·장·단 순서로 응답합니다.'},
+ {id:'cr_ovt_s',g:'man',scene:'ovt_ask_s',badge:'좁은 수로 · 후방 선박이 우현 추월 요청 수신',title:'추월 요청 응답 (동의)',
+  callChart:[['L',0],['L',1.5],['S',3.0]],callGuide:['장','장','단'],guide:['장','단','장','단'],chart:[['L',0],['S',1.5],['L',2.0],['S',3.5]],rule:'제34조(c)(ii)',
+  desc:'뒤쪽 선박이 장·장·단(우현 추월 의도)을 울렸고 안전하게 추월시킬 수 있다면 장·단·장·단으로 동의를 표시합니다.'},
+ {id:'cr_ovt_p',g:'man',scene:'ovt_ask_p',badge:'좁은 수로 · 후방 선박이 좌현 추월 요청 수신',title:'추월 요청 응답 (동의)',
+  callChart:[['L',0],['L',1.5],['S',3.0],['S',3.5]],callGuide:['장','장','단','단'],guide:['장','단','장','단'],chart:[['L',0],['S',1.5],['L',2.0],['S',3.5]],rule:'제34조(c)(ii)',
+  desc:'뒤쪽 선박이 장·장·단·단(좌현 추월 의도)을 울렸고 안전하게 추월시킬 수 있다면 장·단·장·단으로 동의를 표시합니다.'},
+ {id:'cr_ovt_q',g:'man',scene:'ovt_ask_q',badge:'좁은 수로 · 추월 요청 수신 · 추월이 위험함',title:'추월 요청 응답 (의문·거절 경고)',
+  callChart:[['L',0],['L',1.5],['S',3.0]],callGuide:['장','장','단'],guide:['단','단','단','단','단'],chart:[['s',0],['s',.5],['s',1.0],['s',1.5],['s',2.0]],rule:'제34조(d)',
+  desc:'추월 의도에 동의할 수 없거나 안전을 의심할 때는 단음 5회 이상을 급속히 울려 의문·경고를 표시합니다.'},
+ {id:'cr_bend',g:'man',scene:'bend_resp',badge:'좁은 수로 만곡부 · 반대편 접근선 장음 수신',title:'만곡부 응답 신호',
+  callChart:[['L',0]],callGuide:['장'],guide:['장'],chart:[['L',0]],rule:'제34조(e)',
+  desc:'만곡부 반대편에서 접근하는 선박의 장음을 들으면 장음 1회로 응답합니다.'},
  {id:'man_bend',g:'man',scene:'man_bend',badge:'좁은 수로 만곡부 접근',title:'만곡부 접근 신호',guide:['장'],chart:[['L',0]],rule:'제34조(e)',
   desc:'장애물로 가려질 수 있는 만곡부에 접근하는 선박은 장음 1회를 울리고, 반대편 접근선도 장음 1회로 응답합니다.'}
 ];
@@ -699,14 +759,14 @@ const anchor=(x,y)=>`<g transform="translate(${x} ${y})" stroke="${INK}" fill="n
 const FOG=`<g><path d="M-10 18 Q30 2 70 16 T150 14 T230 18 T320 12 T380 18 V44 H-10Z" fill="#fff" fill-opacity=".5" stroke="#8aa3b3" stroke-dasharray="6 5"/>
 <path d="M-10 70 Q40 52 90 68 T190 66 T290 70 T380 64 V92 H-10Z" fill="#fff" fill-opacity=".28" stroke="#8aa3b3" stroke-dasharray="6 5"/>
 <path d="M-10 128 Q40 112 90 126 T190 124 T290 128 T380 122 V170 H-10Z" fill="#fff" fill-opacity=".5" stroke="#8aa3b3" stroke-dasharray="6 5"/></g>`;
-function svgWrap(inner,fog,src){
+function svgWrap(inner,fog,src,ai){
   return `<svg viewBox="0 0 360 170" class="sceneSvg" role="img" aria-label="항해 상황 일러스트">
 <defs><linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8f1f5"/><stop offset="1" stop-color="#cde0e9"/></linearGradient>
 <pattern id="waveP" width="40" height="18" patternUnits="userSpaceOnUse"><path d="M0 9 Q10 1 20 9 T40 9" fill="none" stroke="#9fbccb" stroke-width="1" stroke-dasharray="3 3"/></pattern>
 <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#e6d9b8"/><line x1="0" y1="0" x2="0" y2="7" stroke="#a98f4f" stroke-width="2"/></pattern>
 <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${INK}"/></marker></defs>
 <rect width="360" height="170" fill="url(#seaG)"/><rect width="360" height="170" fill="url(#waveP)"/>
-${inner}${fog?FOG:''}<g id="waveG" transform="translate(${src[0]} ${src[1]})"></g></svg>`;
+${inner}${fog?FOG:''}<g id="waveG" transform="translate(${src[0]} ${src[1]})"></g>${ai?`<g id="waveAI" transform="translate(${ai[0]} ${ai[1]})"></g>`:''}</svg>`;
 }
 const channel=()=>`<rect x="0" y="0" width="360" height="50" fill="#cbd8c4"/><rect x="0" y="130" width="360" height="40" fill="#cbd8c4"/><path d="M0 50H360M0 130H360" stroke="#6f8a68" stroke-width="2" stroke-dasharray="7 4"/>`;
 const SCENES={
@@ -732,8 +792,12 @@ const SCENES={
  ovt_s:()=>({fog:0,src:[95,90],inner:channel()+ship(215,90,0,62,GRAYSH)+ship(95,90,0,64)+arrow('M140 98 Q220 142 300 98')+txt(300,150,'상대 우현 쪽',11,'middle',MAG)+txt(180,24,'좁은 수로',11)}),
  ovt_p:()=>({fog:0,src:[95,90],inner:channel()+ship(215,90,0,62,GRAYSH)+ship(95,90,0,64)+arrow('M140 82 Q220 38 300 82')+txt(300,150,'상대 좌현 쪽',11,'middle',MAG)+txt(180,24,'좁은 수로',11)}),
  ovt_ok:()=>({fog:0,src:[215,90],inner:channel()+ship(215,90,0,62,GRAYSH)+ship(95,90,0,64)+arrow('M140 98 Q220 142 300 98',1)+txt(215,66,'동의 ✔',13,'middle',MAG,800)+txt(180,24,'좁은 수로 · 피추월선',11)}),
+ ovt_ask_s:()=>({fog:0,src:[215,90],ai:[95,90],inner:channel()+ship(95,90,0,64,GRAYSH)+ship(215,90,0,62)+arrow('M140 98 Q220 142 300 98',1)+txt(95,66,'후방 선박',11)+txt(215,66,'본선',11)+txt(300,150,'우현 추월 요청',11,'middle',MAG)+txt(180,24,'좁은 수로',11)}),
+ ovt_ask_p:()=>({fog:0,src:[215,90],ai:[95,90],inner:channel()+ship(95,90,0,64,GRAYSH)+ship(215,90,0,62)+arrow('M140 82 Q220 38 300 82',1)+txt(95,66,'후방 선박',11)+txt(215,66,'본선',11)+txt(300,150,'좌현 추월 요청',11,'middle',MAG)+txt(180,24,'좁은 수로',11)}),
+ ovt_ask_q:()=>({fog:0,src:[215,90],ai:[95,90],inner:channel()+ship(95,90,0,64,GRAYSH)+ship(215,90,0,62)+ship(318,112,180,46,GRAYSH)+arrow('M140 98 Q220 142 300 98',1)+txt(95,66,'후방 선박',11)+txt(215,66,'본선',11)+txt(260,150,'맞은편 선박 접근 · 위험',11,'middle',MAG)+txt(180,24,'좁은 수로',11)}),
  man_bend:()=>({fog:0,src:[80,120],inner:`<rect width="360" height="170" fill="#cbd8c4"/><path d="M-20 120 L128 120 Q214 120 214 62 L214 -20" fill="none" stroke="#e1edf2" stroke-width="56" stroke-linejoin="round"/><path d="M-20 120 L128 120 Q214 120 214 62 L214 -20" fill="none" stroke="#9fbccb" stroke-width="2" stroke-dasharray="6 6"/>`+ship(78,120,0,70)+`<g opacity=".45">${ship(214,34,90,56,GRAYSH)}</g>`+txt(250,40,'?',24,'middle',MAG,900)+txt(80,160,'만곡부 접근',11)})
 };
+SCENES.bend_resp=()=>Object.assign({},SCENES.man_bend(),{ai:[214,38]});
 
 /* =====================================================================
    야간 등화 퀴즈 데이터 (Part C, Rules 20–31 / Part B, Rules 13–17)
@@ -839,6 +903,95 @@ const Q_LIST=[
   ex:'정횡 뒤 22.5°를 넘는 후방에서 선미등만 보이면 추월선이며, 완전히 앞질러 멀어질 때까지 피항합니다.'}
 ];
 
+/* ---- kind:'day' 주간 형상물 (Part C 제24~30조) / kind:'audio' 무중 청음 (제34·35조) ---- */
+const DB=(x,y,n)=>({t:'ball',x,y,n}),DD=(x,y,n)=>({t:'diamond',x,y,n}),DC=(x,y,n)=>({t:'cyl',x,y,n});
+const DU=(x,y,n)=>({t:'coneUp',x,y,n}),DN=(x,y,n)=>({t:'coneDn',x,y,n});
+Q_LIST.push(
+ {id:'d_nuc',kind:'day',prompt:'주간입니다. 마스트에 같은 크기의 둥근 흑색 형상물이 수직으로 2개 게양되어 있습니다.',deco:'plain',
+  shapes:[DB(180,62,'흑구'),DB(180,86,'흑구')],
+  a:'조종불능선(NUC)',w:['조종제한선(RAM)','흘수제약선(CBD)','정박 중인 선박'],rule:'제27조(a)',
+  ex:'조종불능선(NUC)은 주간에 수직으로 흑구 2개를 표시합니다. 야간에는 수직 홍색 전주등 2개에 해당합니다.'},
+ {id:'d_ram',kind:'day',prompt:'주간입니다. 마스트에 흑구 – 마름모 – 흑구 순서로 형상물 3개가 수직으로 게양되어 있습니다.',deco:'plain',
+  shapes:[DB(180,54,'흑구'),DD(180,78,'마름모'),DB(180,102,'흑구')],
+  a:'조종제한선(RAM)',w:['조종불능선(NUC)','흘수제약선(CBD)','좌초선'],rule:'제27조(b)',
+  ex:'조종제한선(RAM)은 주간에 수직으로 구–마름모–구를 표시합니다(야간 홍·백·홍 전주등). 수중 작업·준설 등으로 조종이 제한된 선박입니다.'},
+ {id:'d_cbd',kind:'day',prompt:'주간입니다. 마스트에 원통형 흑색 형상물이 1개 게양되어 있습니다.',deco:'plain',
+  shapes:[DC(180,72,'원통')],
+  a:'흘수제약선(CBD)',w:['조종불능선(NUC)','조종제한선(RAM)','어로종사선'],rule:'제28조',
+  ex:'흘수제약선(CBD)은 주간에 원통형 형상물 1개를 표시할 수 있습니다. 흘수에 비해 수심이 얕아 침로 이탈이 크게 제한되는 동력선입니다.'},
+ {id:'d_fish',kind:'day',prompt:'주간입니다. 마스트에 원뿔 2개가 꼭짓점을 맞대고 수직으로 게양되어 있고, 선체 한쪽에는 꼭짓점이 위를 향한 원뿔이 따로 보입니다.',deco:'fish',
+  shapes:[DN(180,60,'원뿔(꼭짓점 아래)'),DU(180,84,'원뿔(꼭짓점 위)'),DU(112,114,'어구 방향 원뿔(꼭짓점 위)')],
+  a:'어로종사선 (어구가 수평으로 150m를 넘어 뻗음)',w:['예인선열 200m 초과 예인선','범선 + 기관 병용 항행','조종제한선(RAM)'],rule:'제26조',
+  ex:'어로종사선은 꼭짓점을 맞댄 원뿔 2개(모래시계형)를 표시합니다. 어구가 수평으로 150m를 넘게 뻗으면 그 방향으로 꼭짓점이 위를 향한 원뿔 1개를 추가합니다.'},
+ {id:'d_tow',kind:'day',prompt:'주간입니다. 마스트에 마름모형 흑색 형상물이 1개 게양되어 있고, 뒤쪽에 선박 한 척이 긴 줄로 끌려오고 있습니다.',deco:'tow',
+  shapes:[DD(180,70,'마름모')],
+  a:'예인선열 길이 200m 초과 (예인선·피예인선이 표시)',w:['조종제한선(RAM) 단독 표시','흘수제약선(CBD)','정박 중인 선박'],rule:'제24조',
+  ex:'예인선열 길이가 200m를 넘으면 예인선과 피예인선 모두 잘 보이는 곳에 마름모 형상물을 1개 표시합니다. 구–마름모–구(RAM)와 혼동하지 마세요.'},
+ {id:'d_sail',kind:'day',prompt:'주간입니다. 돛을 펼친 선박의 앞쪽에 꼭짓점이 아래를 향한 원뿔 흑색 형상물이 1개 게양되어 있습니다.',deco:'sail',
+  shapes:[DN(236,92,'원뿔(꼭짓점 아래)')],
+  a:'범선이 기관을 함께 사용하며 항행 중',w:['돛만으로 항행 중인 범선','트롤 어로종사선','조종불능선(NUC)'],rule:'제25조(e)',
+  ex:'돛과 기관을 함께 쓰는 선박은 동력선으로 취급되며, 주간에는 앞쪽에 꼭짓점이 아래인 원뿔 1개를 표시합니다.'},
+ {id:'d_anc',kind:'day',prompt:'주간입니다. 선박의 앞쪽 부분에 둥근 흑색 형상물이 1개 게양되어 있습니다.',deco:'anchor',
+  shapes:[DB(236,92,'흑구')],
+  a:'정박 중인 선박',w:['좌초선','조종불능선(NUC)','흘수제약선(CBD)'],rule:'제30조(a)',
+  ex:'정박선은 주간에 선수 부분에 흑구 1개를 표시합니다(야간 백색 전주등). 흑구가 수직 3개이면 좌초선입니다.'},
+ {id:'d_gnd',kind:'day',prompt:'주간입니다. 얕은 바닥에 얹힌 선박의 마스트에 둥근 흑색 형상물이 수직으로 3개 게양되어 있습니다.',deco:'ground',
+  shapes:[DB(180,42,'흑구'),DB(180,66,'흑구'),DB(180,90,'흑구')],
+  a:'좌초선',w:['정박 중인 선박','조종불능선(NUC)','조종제한선(RAM)'],rule:'제30조(d)',
+  ex:'좌초선은 주간에 수직 흑구 3개를 표시합니다(야간에는 정박등 + 수직 홍색 전주등 2개). 흑구 2개(NUC)와 개수를 꼭 구분하세요.'}
+);
+const AUDIO_MAP={
+ aud_way:[[['L',0]],'대수속력이 있는 동력선 (항행 중)',['대수속력이 없는 동력선 (정선 중)','닻을 내린 정박선','좌초선'],'제35조(a)','대수속력이 있는 동력선은 2분 이내 간격으로 장음 1회를 울립니다.'],
+ aud_stop:[[['L',0],['L',1.5]],'항행 중이나 대수속력이 없는 동력선',['대수속력이 있는 동력선','닻을 내린 정박선 (100m 미만)','우현으로 변침 중인 선박'],'제35조(b)','기관을 정지해 대수속력이 없는 동력선은 약 2초 간격으로 장음 2회를 울립니다.'],
+ aud_nuc:[LSS,'조종불능·조종제한·흘수제약·범선·어로종사·예인 중 하나 (제35조(c) 신호)',['대수속력이 있는 동력선','대수속력이 없는 동력선','닻을 내린 정박선'],'제35조(c)','장·단·단은 NUC·RAM·CBD·범선·어로종사선·예인/압항선이 공통으로 사용합니다. 소리만으로는 이 중 어느 선박인지 특정할 수 없습니다.'],
+ aud_anc:[[['B',0]],'닻을 내린 정박선 (100m 미만)',['좌초선','대수속력이 있는 동력선','조종불능선(NUC)'],'제35조(g)','정박선은 1분 이내 간격으로 호종을 약 5초간 급속히 울립니다. 좌초선은 급속 타종 앞뒤에 분리된 3타가 추가됩니다.'],
+ aud_ancw:[[['S',0],['L',.5],['S',2.0]],'정박선이 접근선에 위치와 충돌 위험을 경고',['좁은 수로에서 우현 쪽 추월 의도','기관 후진 중인 선박','만곡부로 접근 중인 선박'],'제35조(g)','정박선은 접근 선박에 위치와 충돌 가능성을 알리려고 단·장·단 기적을 추가로 울릴 수 있습니다.'],
+ aud_ovt:[[['L',0],['L',1.5],['S',3.0]],'좁은 수로에서 상대 우현 쪽으로 추월하려는 의도',['좁은 수로에서 상대 좌현 쪽으로 추월하려는 의도','추월에 동의한다는 응답','우현으로 변침 중'],'제34조(c)(i)','장·장·단은 우현 쪽 추월 의도, 장·장·단·단은 좌현 쪽 추월 의도입니다.'],
+ aud_astern:[[['S',0],['S',.5],['S',1.0]],'기관을 후진하는 중',['우현으로 변침 중','좌현으로 변침 중','상대 의도를 의심하는 경고'],'제34조(a)(iii)','서로 시계 안에서 단음 1회는 우현 변침, 2회는 좌현 변침, 3회는 기관 후진입니다.'],
+ aud_towed:[[['L',0],['S',1.5],['S',2.0],['S',2.5]],'여러 척 중 최후단의 유인 피예인선',['예인 중인 예인선','도선 업무 중인 도선선','항행 중인 범선'],'제35조(e)','피예인선이 여러 척이면 최후단 유인선이 장 1회 + 단 3회를 울립니다. 예인선은 장·단·단입니다.'],
+ aud_warn:[[['s',0],['s',.5],['s',1.0],['s',1.5],['s',2.0]],'상대의 의도를 의심하거나 충돌 회피가 불충분하다고 경고',['기관을 후진하는 중','우현으로 변침 중','좌현으로 변침 중'],'제34조(d)','단음 5회 이상의 급속한 신호는 의문·경고 신호입니다.']
+};
+Object.keys(AUDIO_MAP).forEach(id=>{
+  const [seq,a,w,rule,ex]=AUDIO_MAP[id];
+  Q_LIST.push({id,kind:'audio',prompt:'안개로 시정이 제한된 해상입니다. 어딘가에서 신호음이 들립니다. 소리의 장·단·타종 패턴만 듣고 알맞은 선박 상태나 의도를 고르세요.',seq,a,w,rule,ex});
+});
+const qkind=q=>q.kind||'night';
+const QKINDS=['night','day','audio'];
+const sigText=seq=>seq.map(([k])=>`[${KINDS[k].label}]`).join(' — ');
+
+const cone=(x,y,up)=>up?`<path d="M${x} ${y-8}L${x+7} ${y+7}L${x-7} ${y+7}Z" fill="${INK}"/>`:`<path d="M${x} ${y+8}L${x+7} ${y-7}L${x-7} ${y-7}Z" fill="${INK}"/>`;
+function dayShapeSVG(sh){
+  const inner=sh.t==='ball'?ball(0,0):sh.t==='diamond'?diamond(0,0):sh.t==='cyl'?cyl(0,0):cone(0,0,sh.t==='coneUp');
+  return `<g transform="translate(${sh.x} ${sh.y}) scale(1.6)">${inner}</g>`;
+}
+function daySVG(q){
+  let hull='',extra='',mast='';
+  if(q.deco==='sail'){
+    hull=`<g transform="translate(180 150) scale(1.4)"><path d="M-46 0 L46 0 L34 14 L-34 14Z" fill="${INK}"/><path d="M-3 -4 L-3 -66 L32 -8Z" fill="#fff" stroke="${INK}" stroke-width="2"/><path d="M-9 -4 L-9 -52 L-40 -8Z" fill="#fff" stroke="${INK}" stroke-width="2"/></g><path d="M178 88 L252 130" stroke="${INK}" stroke-width="1.4"/>`;
+  }else{
+    hull=ship(180,152,0,170);
+    mast=`<rect x="178.5" y="${q.deco==='anchor'?150:34}" width="3" height="${q.deco==='anchor'?0:100}" fill="${INK}"/>`;
+    if(q.deco==='anchor')mast=`<rect x="235" y="92" width="2.4" height="42" fill="${INK}"/>`;
+  }
+  if(q.deco==='fish')extra=`<path d="M112 120 V136" stroke="${INK}" stroke-width="2"/><path d="M105 156 H18" stroke="${INK}" stroke-width="1.6" stroke-dasharray="5 4"/><circle cx="60" cy="156" r="3.4" fill="#fff" stroke="${INK}"/><circle cx="32" cy="156" r="3.4" fill="#fff" stroke="${INK}"/>`;
+  if(q.deco==='tow')extra=ship(46,170,0,64,GRAYSH)+`<path d="M78 166 L112 156" stroke="${INK}" stroke-width="2" stroke-dasharray="3 3"/>`;
+  if(q.deco==='ground')extra=`<path d="M96 176 Q140 150 190 170 Q250 156 292 176 V206 H96Z" fill="#c9b98b" stroke="#8d7c4e" stroke-width="1.5"/>`;
+  const lbl=(q.deco==='anchor'?`<g class="lb">${anchor(300,170)}</g>`:'')+q.shapes.map(sh=>`<g class="lb"><text x="${sh.x+(sh.x>200?-16:16)}" y="${sh.y+4}" font-size="9.5" fill="${INK}" text-anchor="${sh.x>200?'end':'start'}" font-weight="800" font-family="inherit" stroke="#fff" stroke-width="3" paint-order="stroke">${sh.n}</text></g>`).join('');
+  return `<svg viewBox="0 0 360 206" class="nsvg dsvg" role="img" aria-label="주간 형상물 배치">
+<defs><linearGradient id="skyD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe0f0"/><stop offset="1" stop-color="#eaf5fa"/></linearGradient>
+<linearGradient id="seaD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8bbfd4"/><stop offset="1" stop-color="#5a93ae"/></linearGradient></defs>
+<rect width="360" height="152" fill="url(#skyD)"/><circle cx="318" cy="34" r="15" fill="#fff4bd"/>
+<path d="M30 40 q12 -14 28 -4 q10 -10 24 0 q14 0 12 12 H24 q-6 -4 6 -8Z" fill="#fff" opacity=".8"/>
+<rect y="152" width="360" height="54" fill="url(#seaD)"/><path d="M0 152H360" stroke="#4d7f98" stroke-width="1"/>
+${extra}${hull}${mast}${q.shapes.map(dayShapeSVG).join('')}${lbl}</svg>`;
+}
+function audioSVG(q){
+  let h=0;for(const ch of q.id)h=(h*31+ch.charCodeAt(0))>>>0;
+  const x=120+(h%110),y=96+(h%3)*8;
+  const inner=`<g opacity=".38">${ship(x,y,0,92,GRAYSH)}</g>`+txt(x,y-44,'?',30,'middle',MAG,900)+txt(180,24,'안개 · 시정 제한',11)+txt(180,158,'🎧 소리에 집중하세요',11);
+  return svgWrap(inner,1,[x,y],[x,y]);
+}
+
 function nightSVG(q){
   const rs=mulberry32(11);let stars='';
   for(let i=0;i<46;i++)stars+=`<circle cx="${(rs()*360).toFixed(1)}" cy="${(rs()*140).toFixed(1)}" r="${(rs()*.8+.3).toFixed(2)}" fill="#8fa6c8" opacity="${(rs()*.4+.15).toFixed(2)}"/>`;
@@ -897,7 +1050,19 @@ const G={
   lastR:null,lastQ:null,cur:null,active:false,started:false
 };
 let R=null,N=null,rafId=0,demoTimer=0;
-const MODE_NAME={daily:'오늘의 일일 챌린지',rhythm:'8bit 기적 리듬',night:'야간 등화 관측',survival:'종합 서바이벌'};
+/* 청음/예시 신호용 예약 타이머·사운드 일괄 관리 */
+let AUD_TIMERS=[],AUD_SESS=null;
+function audTimer(fn,ms){
+  const id=setTimeout(()=>{AUD_TIMERS=AUD_TIMERS.filter(x=>x!==id);fn();},ms);
+  AUD_TIMERS.push(id);return id;
+}
+function stopAudioDemo(){
+  AUD_TIMERS.forEach(clearTimeout);AUD_TIMERS=[];
+  if(AUD_SESS){AUD_SESS.stop();AUD_SESS=null;}
+  Aud.duck(false);
+  const b=document.querySelector('.audBars');if(b)b.classList.remove('on');
+}
+const MODE_NAME={daily:'오늘의 일일 챌린지',rhythm:'8bit 기적 리듬',night:'🔭 당직 식별 관측',survival:'종합 서바이벌'};
 
 function stageSpeed(){
   if(G.mode==='daily')return 1.5;
@@ -950,11 +1115,13 @@ function buildDaily(key){
   const rest=R_STAGES.filter(s=>!picks.includes(s));
   picks.push(pick(rest));
   picks=shuffle(picks,rng);
-  const qs=shuffle(Q_LIST,rng).slice(0,5);
+  /* 비리듬 5라운드: 등화·형상물·청음을 1개씩 보장 + 나머지 2개는 무작위 */
+  const kinds=shuffle([...QKINDS,pick(QKINDS),pick(QKINDS)],rng);
+  const pools={};QKINDS.forEach(k=>{pools[k]=shuffle(Q_LIST.filter(q=>qkind(q)===k),rng);});
   const out=[];
   for(let i=0;i<5;i++){
     out.push({type:'rhythm',def:picks[i],song:Math.floor(rng()*3)});
-    out.push({type:'night',def:qs[i],order:shuffle([0,1,2,3],rng)});
+    out.push({type:'night',def:pools[kinds[i]].pop(),order:shuffle([0,1,2,3],rng)});
   }
   return out;
 }
@@ -964,7 +1131,10 @@ function genStage(want){
     let d;do{d=R_STAGES[Math.floor(rng()*R_STAGES.length)];}while(d===G.lastR&&R_STAGES.length>1);
     G.lastR=d;return{type:'rhythm',def:d,song:Math.floor(rng()*3)};
   }
-  let q;do{q=Q_LIST[Math.floor(rng()*Q_LIST.length)];}while(q===G.lastQ&&Q_LIST.length>1);
+  if(!G.kindBag||!G.kindBag.length)G.kindBag=shuffle(QKINDS,rng);
+  const kind=G.kindBag.pop();
+  const pool=Q_LIST.filter(q=>qkind(q)===kind&&q!==G.lastQ);
+  const q=pool[Math.floor(rng()*pool.length)];
   G.lastQ=q;return{type:'night',def:q,order:shuffle([0,1,2,3],rng)};
 }
 function getStage(){
@@ -978,7 +1148,7 @@ function startMode(mode){
   PAUSED=false;Aud.ensure();
   Object.assign(G,{
     mode,i:0,score:0,combo:0,maxCombo:0,lives:3,
-    marks:[],history:[],corrects:0,lastR:null,lastQ:null,
+    marks:[],history:[],corrects:0,lastR:null,lastQ:null,kindBag:[],
     cur:null,active:true,started:false
   });
   if(mode==='daily'){G.seedKey=dateKey();G.stages=buildDaily(G.seedKey);}
@@ -987,7 +1157,7 @@ function startMode(mode){
 }
 
 function nextStage(){
-  stopRhythm();
+  stopRhythm();stopAudioDemo();
   if(!G.active)return;
   const st=getStage();G.cur=st;updateHud();
   if(st.type==='rhythm'){
@@ -995,6 +1165,7 @@ function nextStage(){
     enterRhythm(st);
   }else{
     Aud.setNightAmbience(true);
+    Aud.setSpeed(1);
     enterNight(st);
   }
 }
@@ -1031,9 +1202,10 @@ function enterRhythm(st){
   $('#stageRhythm').classList.remove('hidden');
   $('#stageNight').classList.add('hidden');
   const d=st.def,spd=stageSpeed();
+  Aud.setSpeed(spd);
   const sc=SCENES[d.scene]();
   $('#sceneBadge').textContent=`${d.badge} · ${spd.toFixed(2)}x`;
-  $('#sceneBox').innerHTML=svgWrap(sc.inner,sc.fog,sc.src);
+  $('#sceneBox').innerHTML=svgWrap(sc.inner,sc.fog,sc.src,sc.ai)+(d.callChart?'<div class="aiBadge" id="aiBadge"></div>':'');
 
   const notes=d.chart.map(([k,t],idx)=>({
     idx,kind:k,lane:KINDS[k].lane,
@@ -1046,10 +1218,19 @@ function enterRhythm(st){
   }));
   const lanes=LANES.filter(l=>notes.some(n=>n.lane===l));
   const endT=Math.max(...notes.map(n=>n.t+Math.max(n.vis,n.dur)))+.65;
+  /* 응답(callChart) 스테이지: [상대선 발신 N마디] + [카운트인 1마디] + [응답]. 상대 노트는 판정 대상이 아님 */
+  const call=d.callChart||[];
+  const callBars=call.length?Math.ceil((Math.max(...call.map(([k,t])=>t+Math.max(KINDS[k].vis,KINDS[k].dur||0)))+.2)/2):0;
+  const preBars=1+callBars;
+  const callNotes=call.map(([k,t],idx)=>({
+    idx,kind:k,lane:'ai',t:(t-preBars*2)/spd,dur:(KINDS[k].dur||0)/spd,vis:KINDS[k].vis/spd,
+    label:KINDS[k].label,nextFire:(t-preBars*2)/spd
+  }));
+  const rows=(callNotes.length?['ai']:[]).concat(lanes);
 
   R={
-    st,def:d,spd,notes,lanes,endT,
-    state:'ready',start:0,t:-3.0,
+    st,def:d,spd,notes,lanes,endT,callNotes,callBars,rows,pre:preBars*2/spd,
+    state:'ready',start:0,t:-preBars*2/spd,
     P:0,Gt:0,M:0,credit:0,
     blind:store.set.diff==='blind',
     cw:0,ch:0,dpr:1,sparks:[]
@@ -1087,11 +1268,12 @@ function renderGuide(){
   const g=$('#guideRow'),d=R.def;
   if(R.blind){
     g.className='guide blind';
-    g.textContent='🙈 블라인드 모드 · 일러스트와 박자를 보고 신호를 연주하세요';
+    g.textContent=d.callChart?'🙈 블라인드 모드 · 상대선의 신호를 듣고 알맞은 응답을 연주하세요':'🙈 블라인드 모드 · 일러스트와 박자를 보고 신호를 연주하세요';
     return;
   }
   g.className='guide';
-  g.innerHTML=d.guide.map((x,idx)=>{
+  const pre=d.callGuide?`<span class="gn call">📡 수신 [ ${d.callGuide.join(' · ')} ]</span> ➜ 응답 `:'';
+  g.innerHTML=pre+d.guide.map((x,idx)=>{
     const n=R.notes[idx];
     const done=n&&n.judged&&n.res!=='MISS';
     return `<span class="gn${done?' done':''}">[ ${x} ]</span>`;
@@ -1100,7 +1282,7 @@ function renderGuide(){
 
 function stopRhythm(){
   cancelAnimationFrame(rafId);rafId=0;
-  clearTimeout(demoTimer);
+  stopAudioDemo();
   LANES.forEach(l=>laneUp(l,true));
   R=null;
 }
@@ -1109,7 +1291,7 @@ function resizeTrack(){
   if(!R)return;
   const c=$('#trackCanvas'),w=c.parentElement.clientWidth||320;
   R.dpr=Math.min(window.devicePixelRatio||1,2);
-  R.cw=w;R.ch=24+R.lanes.length*48;
+  R.cw=w;R.ch=24+R.rows.length*48;
   c.width=Math.round(w*R.dpr);c.height=Math.round(R.ch*R.dpr);
   c.style.height=R.ch+'px';
 }
@@ -1118,8 +1300,11 @@ window.addEventListener('resize',()=>{if(R)resizeTrack();});
 function launchRun(){
   if(!R||R.state==='run')return;
   Aud.ensure();
-  R.start=Aud.nextBarTime(3.2);
-  for(let i=0;i<4;i++)Aud.tick(R.start-2+i*.5,i===0);
+  stopAudioDemo();
+  R.start=Aud.nextBarTime(R.pre+1.0);
+  const BARr=2/R.spd,BEATr=.5/R.spd;
+  for(let i=0;i<4;i++)Aud.tick(R.start-BARr+i*BEATr,i===0);
+  if(R.callNotes.length){AUD_SESS=Aud.seq(R.callNotes.map(n=>[n.kind,R.start+n.t]),R.spd);}
   R.state='run';
   $('#trackOverlay').classList.add('hidden');
 }
@@ -1132,18 +1317,20 @@ function startRun(){
 
 function playDemo(){
   if(!R||R.state!=='ready')return;
-  Aud.ensure();
+  Aud.ensure();stopAudioDemo();
   const btn=$('#btnDemo');btn.disabled=true;
-  const base=Aud.time()+.15;
-  R.notes.forEach(n=>Aud.demoNote(n.kind,base+n.t,R.spd));
+  const base=Aud.time()+.15,cb=R.callBars*2/R.spd;
+  const items=[];
+  R.callNotes.forEach(n=>items.push([n.kind,base+n.t+R.pre]));
+  R.notes.forEach(n=>items.push([n.kind,base+cb+n.t]));
+  AUD_SESS=Aud.seq(items,R.spd);
   $('#ovlHint').textContent=`🎧 예시 신호 재생 중 (${R.spd.toFixed(2)}x)…`;
-  clearTimeout(demoTimer);
-  demoTimer=setTimeout(()=>{
+  audTimer(()=>{
     if(R&&R.state==='ready'){
       btn.disabled=false;
       $('#ovlHint').textContent='이제 [▶ 박자 맞춰 시작]을 눌러 직접 연주해 보세요.';
     }
-  },(R.endT+.2)*1000);
+  },(R.endT+cb+.2)*1000);
 }
 
 function setJudge(text,cls){
@@ -1152,8 +1339,8 @@ function setJudge(text,cls){
 }
 
 function spawnWave(lane){
-  const g=$('#waveG');if(!g)return;
-  const col=lane==='bell'?'#d89c00':lane==='gong'?'#2f5f9a':MAG;
+  const g=$(lane==='ai'?'#waveAI':'#waveG');if(!g)return;
+  const col=lane==='ai'?'#2f5f9a':lane==='bell'?'#d89c00':lane==='gong'?'#2f5f9a':MAG;
   for(let i=0;i<3;i++){
     const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
     c.setAttribute('r',10);c.setAttribute('class','ripple');c.setAttribute('stroke',col);
@@ -1187,7 +1374,7 @@ function judgeNote(n,res,msg){
   setJudge(msg||res,res==='PERFECT'?'P':res==='GREAT'?'G':'M');
   renderGuide();updateHud();showComboPop();
 
-  const li=R.lanes.indexOf(n.lane);
+  const li=R.rows.indexOf(n.lane);
   if(li>=0&&R.cw){
     const jx=R.cw*.22,cy=24+li*48+24;
     spawnSparks(jx,cy,res==='PERFECT'?'#f2b705':res==='GREAT'?'#7fe3a2':'#ff8b86');
@@ -1230,13 +1417,15 @@ function laneDown(lane){
   if(!best||bd>win)return;
 
   const res=bd<=.10?'PERFECT':bd<=.20?'GREAT':'MISS';
-  const early=t<(best.t*R.spd);
+  const diff=t-best.t*R.spd,early=diff<0;
+  const tag=(res!=='MISS'&&Math.abs(diff)>0.035)?(early?' (FAST)':' (LATE)'):'';
+  best.tag=tag;
   if(best.hold){
     if(res==='MISS'){judgeNote(best,'MISS',early?'TOO EARLY':'TOO LATE');}
-    else{best.holding=true;best.pressSimT=t;best.res0=res;L.hold=best;setJudge(res+' (홀드!)',res==='PERFECT'?'P':'G');}
+    else{best.holding=true;best.pressSimT=t;best.res0=res;L.hold=best;setJudge(res+tag+' (홀드!)',res==='PERFECT'?'P':'G');}
   }else{
     best.pressSimT=t;L.tap=best;
-    judgeNote(best,res,res==='MISS'?(early?'TOO EARLY':'TOO LATE'):res);
+    judgeNote(best,res,res==='MISS'?(early?'TOO EARLY':'TOO LATE'):res+tag);
   }
 }
 
@@ -1270,7 +1459,7 @@ function laneUp(lane,silent){
       const reqSim=h.dur*R.spd;
       const ok=heldSim>=reqSim*.72;
       L.hold=null;
-      judgeNote(h,ok?h.res0:'MISS',ok?h.res0:'TOO SHORT (길게 홀드!)');
+      judgeNote(h,ok?h.res0:'MISS',ok?h.res0+(h.tag||''):'TOO SHORT (길게 홀드!)');
     }
     const tp=L.tap;
     if(tp&&tp.res&&tp.res!=='MISS'){
@@ -1306,7 +1495,7 @@ function finishRhythm(){
   const n=R.notes.length,acc=clamp(R.credit/n,0,1),ok=acc>=.6,pts=Math.round(acc*100);
   G.score+=pts;
   const d=R.def;
-  const ansStr=d.guide.map(x=>`[${x}]`).join(' — ');
+  const ansStr=(d.callGuide?`수신 ${d.callGuide.map(x=>`[${x}]`).join(' — ')} ➜ 응답 `:'')+d.guide.map(x=>`[${x}]`).join(' — ');
   recordStage('rhythm',ok,{
     type:'rhythm',ok,title:`${d.title} (${d.badge})`,rule:d.rule,
     ans:`정답 신호: ${ansStr} (정확도 ${Math.round(acc*100)}%, +${pts}점)`,
@@ -1332,14 +1521,31 @@ function loop(nowMs){
       if(!n.judged&&!n.holding&&tSim>ntSim+.28)judgeNote(n,'MISS','MISS');
       if(n.holding&&!n.judged&&tSim>=ntSim+durSim+.12){
         LANES.forEach(k=>{if(LANE_STATE[k].hold===n)LANE_STATE[k].hold=null;});
-        judgeNote(n,n.res0,n.res0);
+        judgeNote(n,n.res0,n.res0+(n.tag||''));
       }
     }
+    const BARr=2/R.spd,BEATr=.5/R.spd;
+    for(const n of R.callNotes){
+      const len=Math.max(n.dur,.3/R.spd);
+      while(t>=n.nextFire&&n.nextFire<n.t+len){spawnWave('ai');n.nextFire+=.45;}
+    }
+    let cj='';
     if(t<0){
-      const b=Math.floor((t+2)/.5)+1;
-      if(b>=1&&b<=4)setJudge(String(b),'C');else if(t<-2)setJudge('상황 확인…','C');
+      if(t<-BARr)cj=R.callNotes.length?'📡 상대선 발신':'상황 확인…';
+      else{const b=Math.floor((t+BARr)/BEATr)+1;cj=(b>=1&&b<=4)?String(b):'';}
+      if(cj&&cj!==R.cj)setJudge(cj,'C');
     }else if(t<.03&&$('#judgeText').classList.contains('C')){
       setJudge('');
+    }
+    R.cj=cj;
+    const ab=$('#aiBadge');
+    if(ab){
+      const ph=t<-BARr?'call':t<0?'ready':t<R.endT-.6?'resp':'';
+      if(ab.dataset.ph!==ph){
+        ab.dataset.ph=ph;
+        ab.textContent=ph==='call'?'📡 상대선 발신 중 · 신호를 확인하세요':ph==='ready'?'⏱ 곧 응답 차례':ph==='resp'?'🎺 응답 신호를 연주하세요!':'';
+        ab.className='aiBadge'+(ph?' show '+ph:'');
+      }
     }
     if(t>R.endT&&R.notes.every(n=>n.judged)){finishRhythm();return;}
   }
@@ -1365,45 +1571,46 @@ function drawTrack(){
   const cv=$('#trackCanvas'),c=cv.getContext('2d'),W=R.cw,H=R.ch;
   c.setTransform(R.dpr,0,0,R.dpr,0,0);
   const jx=W*.22,pps=clamp((W-jx-8)/4.2,60,130);
-  const t=R.state==='ready'?-3.0:R.t;
+  const t=R.state==='ready'?-R.pre:R.t;
+  const beat=.5/R.spd,kFloor=-4*(R.callBars+1);
 
   c.fillStyle=G.combo>=5?'#221638':'#14213a';
   c.fillRect(0,0,W,H);
 
   const top=24,lh=48;
-  R.lanes.forEach((l,i)=>{
+  R.rows.forEach((l,i)=>{
     c.fillStyle=i%2?'rgba(255,255,255,.04)':'rgba(255,255,255,.08)';
     c.fillRect(0,top+i*lh,W,lh);
   });
 
-  const kMin=Math.floor((t-jx/pps)/.5)-1,kMax=Math.ceil((t+(W-jx)/pps)/.5)+1;
+  const kMin=Math.floor((t-jx/pps)/beat)-1,kMax=Math.ceil((t+(W-jx)/pps)/beat)+1;
   c.font='10px sans-serif';c.textAlign='left';
   for(let k=kMin;k<=kMax;k++){
-    if(k<-4)continue;const x=jx+(k*.5-t)*pps;if(x<-2||x>W+2)continue;
+    if(k<kFloor)continue;const x=jx+(k*beat-t)*pps;if(x<-2||x>W+2)continue;
     c.strokeStyle=k%4===0?'rgba(255,255,255,.36)':'rgba(255,255,255,.11)';
     c.lineWidth=k%4===0?1.6:1;
     c.beginPath();c.moveTo(x,14);c.lineTo(x,H);c.stroke();
     if(k%4===0&&k>=0){c.fillStyle='rgba(255,255,255,.55)';c.fillText('마디 '+(k/4+1),x+3,11);}
   }
 
-  R.notes.forEach(n=>{
-    const li=R.lanes.indexOf(n.lane),y=top+li*lh+7,h=lh-14;
+  R.callNotes.concat(R.notes).forEach(n=>{
+    const li=R.rows.indexOf(n.lane),y=top+li*lh+7,h=lh-14;
     const x0=jx+(n.t-t)*pps,w=Math.max(n.vis*pps,18);
     if(x0>W||x0+w<0)return;
     const col=LANE_COL[n.lane];
-    if(R.blind&&!n.judged&&!n.holding)return;
+    if(R.blind&&n.lane!=='ai'&&!n.judged&&!n.holding)return;
     if(n.res==='MISS'){c.fillStyle='rgba(150,160,175,.32)';rr(c,x0,y,w,h,8);c.fill();return;}
-    c.fillStyle=col;c.globalAlpha=R.blind?.55:1;rr(c,x0,y,w,h,8);c.fill();c.globalAlpha=1;
+    c.fillStyle=col;c.globalAlpha=(R.blind&&n.lane!=='ai')?.55:1;rr(c,x0,y,w,h,8);c.fill();c.globalAlpha=1;
     if(n.holding){const e=clamp(jx-x0,0,w);c.fillStyle='rgba(255,255,255,.55)';rr(c,x0,y,Math.max(e,6),h,8);c.fill();}
     if(n.judged&&n.res){c.strokeStyle='#fff';c.lineWidth=2;rr(c,x0,y,w,h,8);c.stroke();}
-    if(!R.blind){
+    if(!R.blind||n.lane==='ai'){
       c.fillStyle=n.lane==='bell'?'#14213a':'#fff';
       c.font='bold 14px sans-serif';c.textAlign='left';
       c.fillText(n.label,x0+8,y+h/2+5);
     }
   });
 
-  R.lanes.forEach((l,i)=>{
+  R.rows.forEach((l,i)=>{
     const cy=top+i*lh+lh/2;
     c.fillStyle='rgba(255,255,255,.58)';c.font='bold 10px sans-serif';c.textAlign='left';
     c.fillText(LANE_NAME[l],5,top+i*lh+11);
@@ -1411,6 +1618,7 @@ function drawTrack(){
     c.lineWidth=3;c.beginPath();c.arc(jx,cy,15,0,Math.PI*2);c.stroke();
 
     const L=LANE_STATE[l];
+    if(l==='ai')return;
     if(L&&L.down){c.fillStyle='rgba(255,255,255,.32)';c.beginPath();c.arc(jx,cy,15,0,Math.PI*2);c.fill();}
     const h=L&&L.hold;
     if(h&&h.holding){
@@ -1436,13 +1644,28 @@ function drawTrack(){
 /* =====================================================================
    야간 등화 스테이지 (1초 컷 전환)
 ===================================================================== */
+const NIGHT_META={
+  night:{icon:'🔭',title:'야간 등화 관측',note:'※ COLREG Part C(제20~31조) 및 Part B(제13~17조) 기반 식별 시뮬레이션입니다.'},
+  day:{icon:'☀️',title:'주간 형상물 관측',note:'※ COLREG Part C(제24~30조) 주간 형상물 식별 시뮬레이션입니다.'},
+  audio:{icon:'🎧',title:'무중 청음 식별',note:'※ COLREG 제34·35조 음향신호 청음 식별입니다. 다시 듣기는 횟수 제한·감점이 없습니다.'}
+};
 function enterNight(st){
   $('#stageNight').classList.remove('hidden');
   $('#stageRhythm').classList.add('hidden');
-  const q=st.def,all=[q.a,...q.w],opts=st.order.map(i=>all[i]);
-  N={st,q,opts,correct:st.order.indexOf(0),done:false};
-  $('#nightPrompt').textContent='🔭 '+q.prompt;
-  $('#nightBox').innerHTML=nightSVG(q);
+  const q=st.def,kind=qkind(q),M=NIGHT_META[kind],all=[q.a,...q.w],opts=st.order.map(i=>all[i]);
+  N={st,q,kind,opts,correct:st.order.indexOf(0),done:false};
+  const card=$('#stageNight .nightCard');
+  card.classList.toggle('dayCard',kind==='day');
+  card.classList.toggle('fogCard',kind==='audio');
+  $('#nightBox').classList.remove('reveal');
+  $('#nightPrompt').textContent=M.icon+' '+q.prompt;
+  $('#nightNote').textContent=M.note;
+  if(kind==='day')$('#nightBox').innerHTML=daySVG(q);
+  else if(kind==='audio'){
+    $('#nightBox').innerHTML=audioSVG(q)+`<div class="audCtl"><button class="btn primary" id="btnReplay">🔊 신호 다시 듣기</button><span class="audBars"><i></i><i></i><i></i><i></i><i></i></span></div><div class="sigReveal">신호 기호: ${sigText(q.seq)}</div>`;
+    $('#btnReplay').onclick=()=>{$('#btnReplay').blur();playAudioQuiz();};
+    audTimer(playAudioQuiz,400);
+  }else $('#nightBox').innerHTML=nightSVG(q);
   const wrap=$('#nightOpts');wrap.innerHTML='';
   opts.forEach((o,i)=>{
     const b=document.createElement('button');b.className='opt';
@@ -1451,21 +1674,41 @@ function enterNight(st){
   });
 }
 
+const SIG_LEN={S:.35,s:.22,L:.95,b:.15,B:1.5,G:1.5};
+function playAudioQuiz(){
+  if(!N||N.kind!=='audio')return;
+  Aud.ensure();stopAudioDemo();
+  const q=N.q,SP=.8,base=Aud.time()+.08;
+  AUD_SESS=Aud.seq(q.seq.map(([k,t])=>[k,base+t/SP]),SP);
+  Aud.duck(true);
+  const bars=$('.audBars');if(bars)bars.classList.add('on');
+  let end=0;
+  q.seq.forEach(([k,t])=>{
+    const st=t/SP,len=SIG_LEN[k]/SP;end=Math.max(end,st+len);
+    const n=Math.max(1,Math.ceil(len/.45));
+    for(let i=0;i<n;i++)audTimer(()=>spawnWave('ai'),(st+i*.45)*1000+80);
+  });
+  audTimer(stopAudioDemo,(end+.5)*1000);
+}
+
 function answerNight(i){
   if(!N||N.done)return;N.done=true;
   G.started=true;
-  const ok=i===N.correct,q=N.q;
+  stopAudioDemo();
+  const ok=i===N.correct,q=N.q,kind=N.kind,M=NIGHT_META[kind];
   $$('#nightOpts .opt').forEach((b,j)=>{
     b.disabled=true;
     if(j===N.correct)b.classList.add('ok');
     else if(j===i)b.classList.add('no');
   });
-  $('.nsvg').classList.add('reveal');
+  $('#nightBox').classList.add('reveal');
+  const sv=$('#nightBox .nsvg');if(sv)sv.classList.add('reveal');
   if(ok){G.score+=100;G.combo++;G.maxCombo=Math.max(G.maxCombo,G.combo);}
   else{G.combo=0;}
+  const sig=kind==='audio'?` · 신호 ${sigText(q.seq)}`:'';
   recordStage('night',ok,{
-    type:'night',ok,title:'야간 등화 관측',rule:q.rule,
-    ans:`정답: ${q.a}${ok?' (+100점)':''}`,
+    type:'night',ok,title:M.title,rule:q.rule,
+    ans:`정답: ${q.a}${sig}${ok?' (+100점)':''}`,
     desc:q.ex
   });
   setTimeout(()=>{
@@ -1501,7 +1744,7 @@ function renderReviewList(){
 }
 
 function finishRun(){
-  stopRhythm();clearTimeout(flashTimer);$('#roundFlash').classList.add('hidden');
+  stopRhythm();stopAudioDemo();Aud.setSpeed(1);clearTimeout(flashTimer);$('#roundFlash').classList.add('hidden');
   Aud.setNightAmbience(false);
   G.active=false;
   store.high=Math.max(store.high,G.score);
@@ -1546,7 +1789,7 @@ function finishRun(){
 }
 
 function toMenu(){
-  PAUSED=false;Aud.resume();stopRhythm();clearTimeout(flashTimer);$('#roundFlash').classList.add('hidden');
+  PAUSED=false;Aud.resume();stopRhythm();stopAudioDemo();Aud.setSpeed(1);clearTimeout(flashTimer);$('#roundFlash').classList.add('hidden');
   Aud.setNightAmbience(false);
   closeModal();G.active=false;showScreen('menu');renderMenu();
 }
@@ -1573,7 +1816,7 @@ function renderMenu(){
     [store.high,'최고 점수'],
     [store.maxCombo,'최고 콤보'],
     [store.ans+' / '+store.bestAns,'연속 정답(현재/최고)'],
-    [`${pc(store.part.rhythm)} · ${pc(store.part.night)}`,'정답률 리듬·등화']
+    [`${pc(store.part.rhythm)} · ${pc(store.part.night)}`,'정답률 리듬·관측']
   ];
   $('#statsBox').innerHTML=items.map(([v,l])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join('');
 }
@@ -1608,6 +1851,8 @@ function howTo(){
    <li><b>배속 규칙</b>: 일일 챌린지는 <b>1.50x 고정</b>이며, 기적 리듬·서바이벌 모드는 라운드마다 <b>+0.08x씩 빨라져 최대 3.00x</b>까지 올라갑니다.</li>
    <li><b>단일 기적 버튼</b>: <b>짧게 탭 = 단음</b>, <b>길게 홀드 = 장음</b>입니다. 키보드: <b>Space / D / F</b>.</li>
    <li><b>호종(J) &amp; 징(K)</b>: 정박선·좌초선 스테이지에서 활성화됩니다. 호종은 탭/홀드, 징은 홀드입니다.</li>
+   <li><b>응답 스테이지</b>: 상대 선박이 먼저 기적을 울리면(📡 상대선 줄) 그 신호를 보고 들은 뒤, 카운트인 다음 마디부터 알맞은 <b>응답 신호</b>를 연주합니다. 판정에는 FAST/LATE 표시가 붙어 박자를 보정할 수 있습니다.</li>
+   <li><b>관측 퀴즈</b>: 야간 등화·주간 형상물·무중 청음 문제가 섞여 나옵니다. 청음 문제는 [🔊 신호 다시 듣기]를 횟수 제한 없이 누를 수 있습니다.</li>
    <li><b>종료 후 답안 복기</b>: 연습 모드는 <b>[⏹ 당직 종료 &amp; 결과]</b>를 누르거나 생명이 소진될 때까지 계속되며, 종료 창에서 전 라운드 답안과 해설을 복기할 수 있습니다.</li></ul>`});
 }
 
