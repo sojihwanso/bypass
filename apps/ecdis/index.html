@@ -607,7 +607,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
     <div class="htools">
       <div class="seg2" role="group" aria-label="Language"><button type="button" data-act="lang" data-v="ko">한</button><button type="button" data-act="lang" data-v="en">EN</button></div>
       <button class="hbtn" type="button" data-act="fs" id="fsBtn" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
-      <button class="ver" type="button" aria-label="버전 2.1.1">v2.1.1</button>
+      <button class="ver" type="button" aria-label="버전 2.1.2">v2.1.2</button>
       <a class="tb-home" href="https://teambypass.vercel.app/" aria-label="Team Bypass 메인 페이지로 이동" title="Team Bypass"><svg viewBox="0 0 132 132" width="30" height="30" aria-hidden="true"><path d="M66 4L128 66L66 128L4 66Z" fill="#1C211E" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/><path d="M66 12L120 66L66 120L12 66Z" fill="#EE6A1F"/><path d="M66 18L114 66L66 114L18 66Z" fill="#1C211E"/><path d="M66 25L107 66L66 107L25 66Z" fill="#EE6A1F"/><g transform="translate(36 34) scale(0.6)" fill="#1C211E"><ellipse cx="44" cy="60" rx="27" ry="23"/><path d="M51 45C55 37 58 31 61 25L72 30C68 36 66 44 64 53Z"/><circle cx="66" cy="26" r="10"/><path d="M72 20C83 19 93 24 95 32C96 38 91 41 88 37C86 34 82 33 74 33Z"/><path d="M19 52C10 47 7 40 11 34C14 43 20 46 23 46Z"/><path d="M37 80L35 92L27 95L41 95L42 81Z"/><path d="M51 80L51 92L44 95L58 95L56 81Z"/><circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/><path d="M32 55C40 50 51 54 54 64" fill="none" stroke="#EE6A1F" stroke-width="2.6" stroke-linecap="round"/></g></svg></a>
     </div>
   </div>
@@ -645,7 +645,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
     <span id="footTxt"></span>
     <p class="book" id="footBook"></p>
     <p class="disclaimer" role="note" id="footDisc"></p>
-    <div class="ver-row"><button class="ver" type="button" aria-label="버전 2.1.1">v2.1.1</button></div>
+    <div class="ver-row"><button class="ver" type="button" aria-label="버전 2.1.2">v2.1.2</button></div>
   </div>
 </footer>
 
@@ -658,7 +658,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
 <div id="dlgRoot"></div>
 
 <script src="egg.js"></script>
-<script src="tutor.js?v=2.1.1"></script>
+<script src="tutor.js?v=2.1.2"></script>
 <script>
 /* ================= I18N ================= */
 let LANG="ko";
@@ -2941,8 +2941,9 @@ function dlgUCSelect(){const cur=S.ucActive||[];
     d.querySelector("#usOk").onclick=()=>{S.ucActive=ucReadChecks(d,"ucsel");logEv("evUcSel",[S.ucActive.length]);chartDirty=true;lookAheadSafe();close()}}})}
 
 /* ================= UI ================= */
-const VERSION="2.1.1";
+const VERSION="2.1.2";
 const PATCH_NOTES=[
+{v:"2.1.2",d:"2026-11-24",ko:["화면 둘러보기 첫 단계 인사말 다듬기"],en:["Polished the greeting in the first tour step"]},
 {v:"2.1.1",d:"2026-11-24",ko:["휴대폰 세로 화면에서 교육 팝업의 마스코트를 작게 줄여 제목 옆에 두고 설명 글 폭을 넓힘"],en:["On portrait phones the training mascot shrinks beside the title so the text gets full width"]},
 {v:"2.1.0",d:"2026-11-24",ko:["교육 과정에 시연 영상 추가: 표시 단계 · WPT 찍기 · 셀 업데이트 · 항로 점검 · 백업 ECDIS 비교 · 타각 (팝업의 ▶ 시연 보기)"],en:["Demo clips in training: display level, plotting WPTs, cell update, route check, backup ECDIS compare, rudder (▶ in the pop-up)"]},
 {v:"2.0.3",d:"2026-11-24",ko:["교육 팝업에서 마스코트 옆 표정 이름(설명·기쁨 등) 표시 제거"],en:["Removed the mood label next to the mascot in training pop-ups"]},

@@ -206,7 +206,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
   Tutor.STEPS.D.push(
     { id: "D1", mood: "explain", target: "#cvChart", before: navi, title: "해도 화면", cursor: false,
       body: "전자해도(ENC)가 표시되는 곳이에요. 드래그로 옮기고, 휠·핀치로 축척을 바꿔요. 길게 누르거나 오른쪽 클릭하면 픽 리포트로 물표 정보를 볼 수 있어요.",
-      say: "안녕하세요! 저는 항해사 도도예요. 해도는 그림이 아니라 정보 덩어리예요. 등부표를 오른쪽 클릭해 보세요!" },
+      say: "안녕하세요! 해도는 그림이 아니라 정보 덩어리예요. 등부표를 오른쪽 클릭해 보세요!" },
     { id: "D2", mood: "explain", target: () => { const b = q('[data-act="mode"]'); return b && b.parentElement; }, before: navi, title: "작업 모드 — 항해 / 해도관리 / 항로계획",
       body: "항해 중 감시, 해도 설치·관리, 항로 작성의 세 작업 모드예요. 실제 선박의 ECDIS도 같은 구조예요.",
       say: "지금 하는 일에 맞춰 모드를 바꾸면 돼요." },
