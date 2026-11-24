@@ -607,7 +607,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
     <div class="htools">
       <div class="seg2" role="group" aria-label="Language"><button type="button" data-act="lang" data-v="ko">한</button><button type="button" data-act="lang" data-v="en">EN</button></div>
       <button class="hbtn" type="button" data-act="fs" id="fsBtn" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
-      <button class="ver" type="button" aria-label="버전 2.4.1">v2.4.1</button>
+      <button class="ver" type="button" aria-label="버전 2.4.2">v2.4.2</button>
       <a class="tb-home" href="https://teambypass.vercel.app/" aria-label="Team Bypass 메인 페이지로 이동" title="Team Bypass"><svg viewBox="0 0 132 132" width="30" height="30" aria-hidden="true"><path d="M66 4L128 66L66 128L4 66Z" fill="#1C211E" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/><path d="M66 12L120 66L66 120L12 66Z" fill="#EE6A1F"/><path d="M66 18L114 66L66 114L18 66Z" fill="#1C211E"/><path d="M66 25L107 66L66 107L25 66Z" fill="#EE6A1F"/><g transform="translate(36 34) scale(0.6)" fill="#1C211E"><ellipse cx="44" cy="60" rx="27" ry="23"/><path d="M51 45C55 37 58 31 61 25L72 30C68 36 66 44 64 53Z"/><circle cx="66" cy="26" r="10"/><path d="M72 20C83 19 93 24 95 32C96 38 91 41 88 37C86 34 82 33 74 33Z"/><path d="M19 52C10 47 7 40 11 34C14 43 20 46 23 46Z"/><path d="M37 80L35 92L27 95L41 95L42 81Z"/><path d="M51 80L51 92L44 95L58 95L56 81Z"/><circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/><path d="M32 55C40 50 51 54 54 64" fill="none" stroke="#EE6A1F" stroke-width="2.6" stroke-linecap="round"/></g></svg></a>
     </div>
   </div>
@@ -645,7 +645,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
     <span id="footTxt"></span>
     <p class="book" id="footBook"></p>
     <p class="disclaimer" role="note" id="footDisc"></p>
-    <div class="ver-row"><button class="ver" type="button" aria-label="버전 2.4.1">v2.4.1</button></div>
+    <div class="ver-row"><button class="ver" type="button" aria-label="버전 2.4.2">v2.4.2</button></div>
   </div>
 </footer>
 
@@ -658,7 +658,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
 <div id="dlgRoot"></div>
 
 <script src="egg.js"></script>
-<script src="tutor.js?v=2.4.1"></script>
+<script src="tutor.js?v=2.4.2"></script>
 <script>
 /* ================= I18N ================= */
 let LANG="ko";
@@ -2942,8 +2942,9 @@ function dlgUCSelect(){const cur=S.ucActive||[];
     d.querySelector("#usOk").onclick=()=>{S.ucActive=ucReadChecks(d,"ucsel");logEv("evUcSel",[S.ucActive.length]);chartDirty=true;lookAheadSafe();close()}}})}
 
 /* ================= UI ================= */
-const VERSION="2.4.1";
+const VERSION="2.4.2";
 const PATCH_NOTES=[
+{v:"2.4.2",d:"2026-11-25",ko:["교육 과정 3 타각 단계: S20으로 30° 변침, 배속과 실제 선박의 선회 시간 차이 안내"],en:["Training rudder step: 30° alteration with S20, note on sim speed vs real turning time"]},
 {v:"2.4.1",d:"2026-11-25",ko:["조타기 속도 조정: 한쪽 35°에서 반대쪽 30°까지 약 18초 (SOLAS 기준 28초 이내, 컨테이너선 기준)"],en:["Steering gear: 35° one side to 30° other side in about 18 s (SOLAS limit 28 s)"]},
 {v:"2.4.0",d:"2026-11-25",ko:["셀 업데이트로 생기는 새 침선이 항로 위, 선박 10마일 이내에 나타남","교육 '해 보기' 막힘 해결: 해도를 찍는 동안 팝업 접기, 해도 수정 잠금·일시정지 자동 해제, 항로가 없으면 연습 항로 생성, 영어 화면 표시 단계 판정"],en:["New wreck from a cell update appears on the route within 10 NM of the ship","Training tasks no longer get stuck (pop-up folds while plotting, lock and pause released, practice route when none, English display-level step)"]},
 {v:"2.3.4",d:"2026-11-25",ko:["교육 과정 2 소개정 단계: 업데이트할 셀이 없으면 연습용 셀을 만들고, 셀 상태 창의 '업데이트 적용' 버튼을 강조 애니메이션으로 안내"],en:["Training small-correction step: always provides a cell to update and highlights the Apply update button"]},
