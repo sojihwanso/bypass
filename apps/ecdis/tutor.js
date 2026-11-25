@@ -17,6 +17,8 @@
   const $ = (q, r = document) => r.querySelector(q);
   const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   let cur = null; // {course, step}
+  // 교육 중 경보음: 들어가자마자 울리지 않게 기본은 끔. 단계에 sound:true면 켜고, 사용자가 단추로 바꾸면 그 과정 동안은 그 선택을 따른다
+  let active = false, sndOver = null, snd = null;
   let root, spot, pop, chip, cursor, timer = null, reacted = false, manual = null, drag = null, engaged = false, clicks = [];
 
   const CSS = `
@@ -81,6 +83,9 @@
 .tu-chip{position:absolute;right:14px;bottom:14px;display:none;align-items:center;gap:8px;background:#fff;border:2px solid #241008;border-radius:999px;padding:4px 14px 4px 4px;font-size:13px;font-weight:700;pointer-events:auto;box-shadow:3px 3px 0 rgba(36,16,8,.6)}
 .tu-chip img{width:34px;height:34px}
 .tu-chip.show{display:flex}
+#tuRoot .tu-snd{position:fixed;left:50%;top:100px;transform:translateX(-50%);display:none;align-items:center;gap:6px;pointer-events:auto;background:#fff;color:#241008;border:2px solid #241008;border-radius:999px;padding:6px 14px;font:inherit;font-size:13px;font-weight:800;cursor:pointer;box-shadow:3px 3px 0 rgba(36,16,8,.85)}
+#tuRoot .tu-snd.show{display:flex}
+#tuRoot .tu-snd.on{background:#E6F6EA}
 .tu-cursor{position:absolute;width:26px;height:26px;pointer-events:none;display:none;filter:drop-shadow(1px 2px 1px rgba(0,0,0,.4))}
 .tu-cursor.show{display:block;animation:tuCur 2.2s ease-in-out infinite}
 @keyframes tuCur{0%{transform:translate(var(--fx),var(--fy));opacity:0}15%{opacity:1}55%{transform:translate(var(--tx),var(--ty)) scale(1)}62%{transform:translate(var(--tx),var(--ty)) scale(.8)}70%{transform:translate(var(--tx),var(--ty)) scale(1)}90%{opacity:1}100%{transform:translate(var(--tx),var(--ty));opacity:0}}
@@ -91,6 +96,8 @@
     const st = document.createElement("style"); st.textContent = CSS; document.head.appendChild(st);
     root = document.createElement("div"); root.id = "tuRoot";
     root.innerHTML = `<div class="tu-dim"></div><div class="tu-spot"></div><svg class="tu-cursor" viewBox="0 0 24 24"><path d="M4 2l15 9-6.5 1.5L16 20l-3 1.5-3.5-7.5L4 18z" fill="#FF7A26" stroke="#241008" stroke-width="1.6" stroke-linejoin="round"/></svg><div class="tu-pop" role="dialog" aria-live="polite"></div><button type="button" class="tu-chip"><img src="edu/dodo_explain.webp" alt="">교육 중 · <span></span></button>`;
+    snd = document.createElement("button"); snd.type = "button"; snd.className = "tu-snd"; root.appendChild(snd);
+    snd.onclick = () => { sndOver = !(sndOver ?? soundStep()); applySnd(); };
     document.body.appendChild(root);
     spot = $(".tu-spot", root); pop = $(".tu-pop", root); chip = $(".tu-chip", root); cursor = $(".tu-cursor", root);
     chip.onclick = () => { if (typeof closeTopDlg === "function") while (dlgStack.length) closeTopDlg(); };
@@ -108,6 +115,15 @@
   }
   const steps = () => (cur ? STEPS[cur.course] : []);
   const stepObj = () => steps()[cur.step];
+  const soundStep = () => { const s = cur && stepObj(); return !!(s && s.sound); };
+  function applySnd() {
+    const on = sndOver ?? soundStep();
+    window.EDU_MUTE = active && !on;
+    if (!snd) return;
+    snd.classList.toggle("show", active); snd.classList.toggle("on", on);
+    snd.textContent = on ? "🔊 경보음 켜짐 · 끄기" : "🔇 교육 중 경보음 꺼짐 · 켜기";
+    snd.setAttribute("aria-pressed", String(on));
+  }
   const targetEl = (s) => { if (!s || !s.target) return null; const el = typeof s.target === "function" ? s.target() : $(s.target); if (!el) return null; const r = el.getBoundingClientRect(); return r.width || r.height ? el : null; };
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(cur)); } catch (e) {} };
 
@@ -176,6 +192,7 @@
   function show(i) {
     mount(); ensurePop(); cur.step = Math.max(0, Math.min(steps().length - 1, i)); save(); reacted = false; manual = null; engaged = false; clicks = [];
     const s = stepObj();
+    applySnd();
     try { s.before && s.before(); } catch (e) {}
     pop.classList.remove("on"); root.classList.add("on");
     setTimeout(() => { render(); place(); requestAnimationFrame(() => pop.classList.add("on")); }, 120);
@@ -200,7 +217,7 @@
   function prev() { if (cur && cur.step > 0) show(cur.step - 1); }
   // 과정을 마치면 다음 과정을 바로 고를 수 있는 팝업
   function showDone(c) {
-    mount(); stop(); ensurePop();
+    mount(); stop(); active = true; applySnd(); ensurePop();
     const d = doneList(), after = ORDER.slice(ORDER.indexOf(c) + 1).concat(ORDER.slice(0, ORDER.indexOf(c)));
     const rec = after.find((k) => !d.includes(k)) || null;
     const others = ORDER.filter((k) => k !== rec);
@@ -216,9 +233,9 @@
   }
   function saved() { try { const v = JSON.parse(localStorage.getItem(KEY) || "null"); return v && STEPS[v.course] && STEPS[v.course][v.step] ? v : null; } catch (e) { return null; } }
 
-  function start(course, step) { if (!STEPS[course] || !STEPS[course].length) return; mount(); cur = { course, step: step || 0 }; show(cur.step); }
+  function start(course, step) { if (!STEPS[course] || !STEPS[course].length) return; mount(); active = true; sndOver = null; cur = { course, step: step || 0 }; show(cur.step); }
   function stop() {
-    clearInterval(timer); timer = null; cur = null; document.querySelectorAll(".tu-glow").forEach((g) => g.classList.remove("tu-glow"));
+    clearInterval(timer); timer = null; cur = null; active = false; applySnd(); document.querySelectorAll(".tu-glow").forEach((g) => g.classList.remove("tu-glow"));
     if (!root) return;
     root.classList.remove("on"); cursor.classList.remove("show"); chip.classList.remove("show"); spot.classList.remove("show");
     if (pop) { pop.remove(); pop = null; }
@@ -244,7 +261,7 @@
     removeEventListener("pointermove", onMove); removeEventListener("pointerup", onUp); removeEventListener("pointercancel", onUp);
   }
   function menu() {
-    mount(); stop(); cur = null; ensurePop();
+    mount(); stop(); cur = null; active = true; sndOver = null; applySnd(); ensurePop();
     const sv = saved();
     pop.innerHTML = `<div class="tu-ph"><span class="tu-tag">EDU</span><span class="tu-course">ECDIS 교육 과정</span><button type="button" class="tu-x" data-tu="stop" aria-label="닫기" style="margin-left:auto">×</button></div>
 <div class="tu-pb"><div class="tu-face"><img class="tu-dodo tu-bnc" alt="도도" src="edu/dodo_explain.webp"></div><div class="tu-txt"><h3>무엇부터 배워 볼까요?</h3><p>설명할 버튼만 밝게 비추고, 직접 해 보면 맞았는지 알려 드려요. 언제든 × 로 끝낼 수 있어요.</p></div></div>
@@ -264,6 +281,8 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
   const q = (s) => document.querySelector(s);
   const btnText = (txt) => () => [...document.querySelectorAll("button")].find((b) => b.textContent.replace(/\s+/g, "") === txt && b.getBoundingClientRect().width);
   const navi = () => { try { if (S.mode !== "NAVI") setMode("NAVI"); } catch (e) {} };
+  // 경보 단계용 연습 경보(경고 등급). 켜면 목록에 뜨고, 끄면 해소 처리돼 기록에 남는다
+  const eduAlert = (on) => { try { if (on) S.alerts = S.alerts.filter((x) => x.id !== "edu"); setAlert("edu", on, "W", "alEdu"); uiAlertChanged = true; } catch (e) {} };
   let sawOther = false;
   Tutor.STEPS.D.push(
     { id: "D1", mood: "explain", target: "#cvChart", before: navi, title: "해도 화면", cursor: false,
@@ -289,12 +308,33 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
       good: "정답이에요! COG가 HDG보다 오른쪽이니 우현 쪽으로 밀리고 있어요.", bad: "COG 095는 HDG 090보다 오른쪽이에요. 다시 생각해 볼까요?" },
     { id: "D7", mood: "explain", target: "#eblBox", before: navi, title: "EBL / VRM",
       body: "방위·거리를 재는 도구예요. 물표까지 거리와 방위를 잴 때 써요.", say: "해도 아래쪽 EBL·VRM 칸의 ◀ ▶로 값을 바꿀 수 있어요." },
-    { id: "D8", mood: "caution", target: () => { const b = q("#ackAll") || q('[data-act="ack"]'); return b && (b.closest(".al, .alb, div") || b); }, optTarget: true, before: navi, title: "경보 — 확인(ACK) · 경보 기록",
-      body: "안전 등심선 횡단, 항로 이탈, 좌초 같은 경보가 뜨는 곳이에요. 경보는 확인(ACK)해야 꺼져요.",
-      say: "경보는 끄는 게 목적이 아니에요. 왜 울렸는지부터 봐 주세요!" },
-    { id: "D9", mood: "explain", target: "#bLvl", before: navi, title: "상대선 단계 · 해도 수정 잠금",
+    { id: "D8", mood: "caution", target: "#abox", before: () => { navi(); eduAlert(true); }, title: "경보 상자",
+      body: "해도 오른쪽 위의 이 상자에 지금 가장 중요한 경보 하나가 떠요. 색은 <b>알람 빨강 · 경고 주황 · 주의 노랑</b>이고, 오른쪽 숫자는 지금 걸려 있는 경보 개수예요. 확인(ACK)하지 않은 알람은 깜빡여요.",
+      say: "연습용 경보를 하나 띄워 두었어요. 지금은 교육 중이라 경보음은 꺼져 있어요. 화면 위쪽 가운데 단추로 언제든 켤 수 있어요.",
+      note: "교육을 시작하면 경보음이 바로 울리지 않게 꺼 둬요. 경보 단계(D10·D11)에서는 저절로 켜져요." },
+    { id: "D9", mood: "think", target: "#abox", before: navi, title: "경보 우선순위 — 알람 · 경고 · 주의",
+      body: "ECDIS 경보는 급한 정도에 따라 셋으로 나눠요.<br><b>알람(Alarm)</b>: 바로 조치해야 하는 위험(좌초, 안전 등심선 횡단 등). 소리가 계속 울리고 깜빡여요.<br><b>경고(Warning)</b>: 곧 조치가 필요한 상황(항로 이탈, 변침점 접근 등). 한 번 울려요.<br><b>주의(Caution)</b>: 알고만 있으면 되는 정보. 소리 없이 표시만 돼요.",
+      say: "그럼 문제! 가장 먼저 대응해야 하는 건 어느 것일까요?",
+      quiz: [["알람 (빨강)", true], ["경고 (주황)", false], ["주의 (노랑)", false]],
+      good: "정답이에요! 빨간 알람은 바로 조치해야 해요.", bad: "다시 볼까요? 바로 조치해야 하는 건 빨간색 알람이에요." },
+    { id: "D10", mood: "caution", target: "#abox", cursor: true, sound: true, before: () => { navi(); eduAlert(true); }, title: "경보 목록 — 확인(ACK)",
+      body: "경보 상자를 누르면 <b>경보 목록</b>이 열려요. 경보마다 종류, 발생 시각, 상태(발생·해소)가 보이고, 하나씩 '확인'하거나 '모두 확인'으로 한꺼번에 확인해요. 확인하면 소리와 깜빡임이 멈춰요.",
+      say: "이제 경보음을 켰어요. 경보 상자를 눌러 목록을 열고 확인해 볼까요?",
+      task: "경보 상자를 눌러 경보 목록을 열고, '확인' 또는 '모두 확인'을 눌러 보세요.",
+      check: () => Tutor.clicked('#ackAll, [data-ack], [data-act="ack"]') && S.alerts.filter((a) => a.id === "edu").every((a) => a.ack),
+      good: "확인했어요! 확인은 '봤다'는 뜻이지, 위험이 사라졌다는 뜻은 아니에요.", bad: "경보 상자를 눌러 목록을 연 뒤 '확인'을 눌러 주세요." },
+    { id: "D11", mood: "explain", target: '[data-act="log"]', cursor: true, sound: true, optTarget: true, before: () => { navi(); eduAlert(false); }, title: "경보 기록 (Alert log)",
+      body: "언제 어떤 경보가 생기고 해소됐는지는 <b>경보 기록</b>에 남아요. 경보 목록 아래 '경보 로그' 단추나 기록 메뉴에서 열 수 있어요. 당직 교대 때나 사고 뒤에 경위를 확인할 때 써요.",
+      say: "방금 확인한 연습 경보가 기록에 남았는지 볼까요?",
+      task: "기록 메뉴(또는 경보 목록의 '경보 로그')에서 '경보 로그'를 열어 보세요.",
+      check: () => Tutor.clicked("#alLog") || Tutor.clicked(".pop", "경보 로그") || Tutor.clicked(".pop", "Alert log"),
+      good: "연습 경보가 '발생'과 '해소'로 남아 있지요?", bad: "기록 메뉴를 눌러 '경보 로그'를 골라 보세요." },
+    { id: "D12", mood: "caution", target: '[data-act="settings"]', optTarget: true, before: navi, title: "경보음 설정",
+      body: "경보음은 <b>설정 → 경보 → 경보음</b>에서 켜고 끌 수 있어요. 이 시뮬레이터에서는 연습을 위해 끌 수 있게 해 두었지만, 실제 선박에서 알람 소리를 끄는 건 위험해요.",
+      say: "교육 중에는 화면 위쪽 가운데 단추로 경보음을 켜고 끌 수 있어요. 끝나면 원래 설정대로 돌아가요." },
+    { id: "D13", mood: "explain", target: "#bLvl", before: navi, title: "상대선 단계 · 해도 수정 잠금",
       body: "연습 난이도(조우선 수)와, 실수로 해도를 건드리지 않게 막는 잠금이에요.", say: "처음에는 상대선을 '쉬움'으로 두고 연습해 보세요." },
-    { id: "D10", mood: "happy", target: '[data-act="help"]', before: navi, title: "도움말",
+    { id: "D14", mood: "happy", target: '[data-act="help"]', before: navi, title: "도움말",
       body: "도움말에는 메뉴 설명과 약어 목록이 있어요. 이 교육은 상단 '기타 → 교육 과정'에서 언제든 다시 열 수 있어요.",
       say: "화면 둘러보기 끝! 이제 진짜 항로를 짜러 가요." }
   );
