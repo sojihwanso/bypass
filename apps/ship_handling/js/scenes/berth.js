@@ -56,12 +56,12 @@ const sagPts = (a, b, sag, n = 14) => { const p = []; for (let i = 0; i <= n; i+
 
 /* 계선줄: 배 쪽 x, 부두 쪽 x (L 단위, 배 무게중심 기준), 어느 끝(선수 bow / 선미 stern / 가운데 mid)에서 내는가, 그 끝에서 몇 번째인가 */
 const MOOR = [
-  { n: 'Fore spring (back spring)', sx: 0.22, qx: -0.02, end: 'bow', k: 0 },
+  { n: 'Back spring', sx: 0.22, qx: -0.02, end: 'bow', k: 0 },
   { n: 'Head line', sx: 0.47, qx: 0.69, end: 'bow', k: 1 },
   { n: 'After spring', sx: -0.22, qx: 0.02, end: 'stern', k: 0 },
   { n: 'Stern line', sx: -0.45, qx: -0.67, end: 'stern', k: 1 },
-  { n: 'Fore breast line', sx: 0.36, qx: 0.36, end: 'mid', k: 0 },
-  { n: 'After breast line', sx: -0.36, qx: -0.36, end: 'mid', k: 1 }
+  { n: 'Fore breast', sx: 0.36, qx: 0.36, end: 'mid', k: 0 },
+  { n: 'After breast', sx: -0.36, qx: -0.36, end: 'mid', k: 1 }
 ];
 const HL_GAP = 30, HL_FLY = 12, PAY = 30; /* 히빙 라인을 던지는 거리(m), 날아가는 시간, 계선줄이 부두까지 건너가는 시간(초) */
 
@@ -73,7 +73,7 @@ export default {
     { k: 'lv', label: '후진 기관', type: 'seg', opts: Object.entries(ASTERN).map(([k, v]) => [k, v[0]]), val: 'ds' }
   ],
   cam: { r: 1500, th: 2.3, ph: 0.75, follow: true }, water: { alpha: 0.55, amp: 0.15 }, parts: ['propeller', 'rudder'],
-  legend: [['deck', '지나온 길'], ['amber', '예정 정지점 · 예선 추력'], ['bad', '오버런'], ['sand', '부두'], ['warm', '히빙 라인'], ['info', '계선줄']],
+  legend: [['deck', '지나온 길'], ['amber', '예정 정지점 · 예선 추력'], ['bad', '오버런'], ['sand', '부두'], ['warn', '히빙 라인'], ['info', '계선줄']],
   chartTitle: '예정 정지점까지 거리에 따른 접근 속력 지침 (모델 값)',
   /* 재생 시간 ↔ 실제 시간: 멈추기까지는 빠르게, 접안 작업은 천천히 보이도록 구간마다 배율이 다르다 */
   get scale() { const t = this.tAnim || 0; return t > 0 ? this.realAt(t) / t : (this.R ? this.R[1] / this.A[1] : 1); },
@@ -111,12 +111,12 @@ export default {
     });
     /* 히빙 라인 셋(선수·선미·가운데): 끝에 원숭이 주먹 매듭(모래주머니) */
     this.hl = ['bow', 'stern', 'mid'].map(end => {
-      const l = Rope(T3, P.warm, 0.25); l.visible = false; ctx.fxW.add(l);
-      const fist = Dot(P.warm, 1.2); fist.visible = false; ctx.fxW.add(fist);
+      const l = Rope(T3, P.warn, 0.25); l.visible = false; ctx.fxW.add(l);
+      const fist = Dot(P.warn, 1.2); fist.visible = false; ctx.fxW.add(fist);
       const m = MOOR.find(x => x.end === end && x.k === 0);
       return { end, l, fist, sx: m.sx, q: V3(xs + m.qx * SH.L, 9.5, zq - 6), t0: end === 'bow' ? this.tHLb : end === 'stern' ? this.tHLs : this.tMid - HL_FLY };
     });
-    this.hlL = ctx.label('<b style="color:var(--warm)">히빙 라인</b>', 'dim', v => { const h = this.hlNow; return h ? v.copy(h).setY(h.y + 8) : null; });
+    this.hlL = ctx.label('<b style="color:var(--warn)">히빙 라인</b>', 'dim', v => { const h = this.hlNow; return h ? v.copy(h).setY(h.y + 8) : null; });
     ctx.fxW.add(Line([V3(0, 1, zq), V3(0, 1, 120)], P.amber, { top: true }));
     ctx.label('<b style="color:var(--amber)">예정 정지점</b>', 'dim', o => o.set(0, 20, 130));
     const g = []; for (let i = 0; i < run.x.length; i += 5) g.push([run.x[i] - D, 0]); g.push([run.S - D, 0]); this.rib = Ribbon(g, 6, P.deck, 0.6, 0.85); ctx.fxW.add(this.rib);

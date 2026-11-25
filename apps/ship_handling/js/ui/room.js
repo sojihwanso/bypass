@@ -53,9 +53,8 @@ export async function openRoom(app, id, { progress, onSeen }) {
             <div class="st-tools st-tl" id="stModes"></div>
           </div>
           <div class="st-tools st-bl" role="group" aria-label="보이기">
-            <button type="button" class="chip on" id="tgWater" aria-pressed="true">수면</button><button type="button" class="chip on" id="tgFlow" aria-pressed="true">흐름선</button><button type="button" class="chip on" id="tgLabel" aria-pressed="true">이름표</button><button type="button" class="chip" id="tgHull" aria-pressed="false" title="선체를 윤곽선만 남겨 타와 프로펠러가 가려지지 않게 한다">선체 윤곽</button><button type="button" class="chip" id="tgPad" aria-pressed="false" title="화면에 시점 조작 패드를 보이거나 숨긴다">조작 패드</button>
+            <button type="button" class="chip on" id="tgWater" aria-pressed="true">수면</button><button type="button" class="chip on" id="tgFlow" aria-pressed="true">흐름선</button><button type="button" class="chip on" id="tgLabel" aria-pressed="true">이름표</button><button type="button" class="chip" id="tgHull" aria-pressed="false" title="선체를 윤곽선만 남겨 타와 프로펠러가 가려지지 않게 한다">선체 윤곽</button><button type="button" class="chip" id="tgPad" aria-pressed="false" title="화면에 시점 조작 패드를 보이거나 숨긴다">조작 패드</button><p class="st-hint">끌어서 돌리기 · 휠·두 손가락으로 확대<br>오른쪽 단추로 끌면 시점 이동</p>
           </div>
-          <p class="st-hint">끌어서 돌리기, 휠이나 두 손가락으로 확대, 오른쪽 단추로 끌면 시점 이동</p>
           <div class="st-tools st-pad" id="camPad" role="group" aria-label="시점 조작 패드" hidden>
             <div class="pad-head"><b>시점 조작</b><button type="button" class="pad-x" id="padHide" aria-label="조작 패드 접기" title="접기">×</button></div>
             <div class="pad-body">
