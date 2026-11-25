@@ -39,7 +39,7 @@
 .st-bl { left: 12px; bottom: 12px; }
 .st-cap { border: 0; font-family: inherit; cursor: default; gap: 4px; display: inline-flex; align-items: center; min-height: 38px; padding: 0 12px; white-space: nowrap; border-radius: 999px; background: color-mix(in srgb, var(--surface) 82%, transparent); font-size: var(--s-13); font-weight: 700; color: var(--muted); }
 .st-cap .cm-ch { display: none; }
-.st-hint { position: absolute; right: 12px; bottom: 12px; font-size: var(--s-13); color: var(--muted); background: color-mix(in srgb, var(--surface) 82%, transparent); border-radius: 999px; padding: 6px 12px; margin: 0; }
+.st-hint { position: absolute; right: 12px; bottom: 60px; max-width: calc(100% - 24px); font-size: var(--s-13); color: var(--muted); background: color-mix(in srgb, var(--surface) 82%, transparent); border-radius: 999px; padding: 6px 12px; margin: 0; }
 .chip { min-height: 38px; padding: 0 15px; white-space: nowrap; border-radius: 999px; border: 1px solid var(--rule); background: color-mix(in srgb, var(--surface) 92%, transparent); font-size: var(--s-13); font-weight: 600; cursor: pointer; color: var(--ink); }
 .chip:hover { border-color: var(--muted); }
 .chip.on { background: var(--accent-bg); color: var(--deck); border-color: color-mix(in srgb, var(--deck) 45%, transparent); }
