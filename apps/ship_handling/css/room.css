@@ -36,10 +36,10 @@
 .st-top { position: absolute; left: 12px; top: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; z-index: 2; pointer-events: none; }
 .st-top > .st-tools { position: static; pointer-events: auto; }
 .st-tl:empty { display: none; }
-.st-bl { left: 12px; bottom: 12px; }
+.st-bl { left: 12px; bottom: 12px; max-width: calc(100% - 270px); } /* 오른쪽 아래 안내 문구 자리를 비운다 */
 .st-cap { border: 0; font-family: inherit; cursor: default; gap: 4px; display: inline-flex; align-items: center; min-height: 38px; padding: 0 12px; white-space: nowrap; border-radius: 999px; background: color-mix(in srgb, var(--surface) 82%, transparent); font-size: var(--s-13); font-weight: 700; color: var(--muted); }
 .st-cap .cm-ch { display: none; }
-.st-hint { margin: 0; align-self: center; font-size: 12px; line-height: 1.4; color: var(--muted); background: color-mix(in srgb, var(--surface) 82%, transparent); border-radius: 12px; padding: 5px 12px; }
+.st-hint { position: absolute; right: 12px; bottom: 12px; z-index: 2; margin: 0; text-align: right; font-size: 12px; line-height: 1.4; color: var(--muted); background: color-mix(in srgb, var(--surface) 82%, transparent); border-radius: 12px; padding: 5px 12px; }
 .st-hint[hidden] { display: none; }
 .chip { min-height: 38px; padding: 0 15px; white-space: nowrap; border-radius: 999px; border: 1px solid var(--rule); background: color-mix(in srgb, var(--surface) 92%, transparent); font-size: var(--s-13); font-weight: 600; cursor: pointer; color: var(--ink); }
 .chip:hover { border-color: var(--muted); }
@@ -211,6 +211,7 @@
   .room { padding-top: 72px; }
   .stage { height: 58vh; min-height: 320px; border-radius: 12px; }
   .st-hint { display: none; }
+  .st-bl { max-width: none; }
   .st-cap { cursor: pointer; color: var(--ink); border: 1px solid var(--rule); background: color-mix(in srgb, var(--surface) 92%, transparent); }
   .st-cap .cm-ch { display: block; transition: transform .2s; }
   .st-tr.open .st-cap .cm-ch { transform: rotate(180deg); }
