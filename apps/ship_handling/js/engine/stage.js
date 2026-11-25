@@ -97,6 +97,18 @@ export function createStage(el, { onPart } = {}) {
     }
     follow.last.copy(o.position); follow.lastYaw = o.rotation.y;
   }
+  /* 조작 패드·키보드: 누르고 있는 동안 계속 움직인다. 값은 -1..1
+     yaw: 좌우 돌기, pitch: 위아래 기울기, fwd: 앞뒤 이동, side: 좌우 이동, lift: 높이, zoom: 확대(-)·축소(+) */
+  const nav = { yaw: 0, pitch: 0, fwd: 0, side: 0, lift: 0, zoom: 0 };
+  const navOn = () => nav.yaw || nav.pitch || nav.fwd || nav.side || nav.lift || nav.zoom;
+  function navStep(dt) {
+    if (!navOn()) return false; dt = Math.min(dt, 0.05); orb.anim = null;
+    orb.th += nav.yaw * 1.5 * dt; orb.ph = clamp(orb.ph - nav.pitch * 1.1 * dt, 0.03, Math.PI - 0.03);
+    const v = Math.max(orb.r, 40) * 0.9 * dt, fx = -Math.cos(orb.th), fz = -Math.sin(orb.th);
+    orb.target.x += (fx * nav.fwd - fz * nav.side) * v; orb.target.z += (fz * nav.fwd + fx * nav.side) * v;
+    orb.target.y = clamp(orb.target.y + nav.lift * v * 0.6, -120, 1500);
+    orb.r = clamp(orb.r * Math.exp(nav.zoom * 1.3 * dt), 12, 9000); return true;
+  }
   const ptrs = new Map(); let gest = null;
   canvas.addEventListener('contextmenu', e => e.preventDefault());
   canvas.addEventListener('pointerdown', e => {
@@ -202,15 +214,16 @@ export function createStage(el, { onPart } = {}) {
   return {
     ok: true, THREE, scene, camera, renderer, ocean, oceanMat, seabed, el, canvas, orb, follow,
     get palette() { return P; }, applyTheme,
+    nav, setZoom(r) { orb.anim = null; orb.r = clamp(r, 12, 9000); dirty = true; },
     camTo, addLabel, clearLabels, setLabelsOn(b) { labelsOn = b; }, setObstacles(fn) { obstacles = fn; }, setMarkers(fn) { markers = fn; }, registerPart, unregister, setAllowedParts(list) { allowed = new Set(list); },
     setWater({ alpha = 0.6, amp = 0.3, visible = true } = {}) { oceanMat.uniforms.uAlpha.value = alpha; oceanMat.uniforms.uAmp.value = amp; ocean.visible = visible; },
     setSeabed(depth) { if (depth == null) { seabed.visible = false; return; } seabed.visible = true; seabed.position.y = -depth; },
     invalidate: touch,
     frame(dt, playing) {
-      if (!playing && !dirty && !orb.anim && !(follow.on && follow.obj && (!follow.last.equals(follow.obj.position) || follow.lastYaw !== follow.obj.rotation.y))) return;
+      if (!playing && !dirty && !orb.anim && !navOn() && !(follow.on && follow.obj && (!follow.last.equals(follow.obj.position) || follow.lastYaw !== follow.obj.rotation.y))) return;
       dirty = false;
       if (playing) oceanMat.uniforms.uTime.value += dt;
-      followStep();
+      followStep(); navStep(dt);
       camStep(dt); camUpdate();
       ocean.position.set(Math.round(orb.target.x / 500) * 500, 0, Math.round(orb.target.z / 500) * 500);
       seabed.position.x = Math.round(orb.target.x / 100) * 100; seabed.position.z = Math.round(orb.target.z / 100) * 100;

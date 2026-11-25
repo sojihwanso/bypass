@@ -53,9 +53,21 @@ export async function openRoom(app, id, { progress, onSeen }) {
             <div class="st-tools st-tl" id="stModes"></div>
           </div>
           <div class="st-tools st-bl" role="group" aria-label="보이기">
-            <button type="button" class="chip on" id="tgWater" aria-pressed="true">수면</button><button type="button" class="chip on" id="tgFlow" aria-pressed="true">흐름선</button><button type="button" class="chip on" id="tgLabel" aria-pressed="true">이름표</button><button type="button" class="chip" id="tgHull" aria-pressed="false" title="선체를 윤곽선만 남겨 타와 프로펠러가 가려지지 않게 한다">선체 윤곽</button>
+            <button type="button" class="chip on" id="tgWater" aria-pressed="true">수면</button><button type="button" class="chip on" id="tgFlow" aria-pressed="true">흐름선</button><button type="button" class="chip on" id="tgLabel" aria-pressed="true">이름표</button><button type="button" class="chip" id="tgHull" aria-pressed="false" title="선체를 윤곽선만 남겨 타와 프로펠러가 가려지지 않게 한다">선체 윤곽</button><button type="button" class="chip" id="tgPad" aria-pressed="false" title="화면에 시점 조작 패드를 보이거나 숨긴다">조작 패드</button>
           </div>
           <p class="st-hint">끌어서 돌리기, 휠이나 두 손가락으로 확대, 오른쪽 단추로 끌면 시점 이동</p>
+          <div class="st-tools st-pad" id="camPad" role="group" aria-label="시점 조작 패드" hidden>
+            <div class="pad-head"><b>시점 조작</b><button type="button" class="pad-x" id="padHide" aria-label="조작 패드 접기" title="접기">×</button></div>
+            <div class="pad-body">
+              <div class="pad-cell"><div class="joy" id="padJoy" role="slider" aria-label="끌어서 시점 돌리기(좌우)와 기울이기(위아래)" aria-valuetext="가운데" tabindex="-1"><span class="knob"></span></div><small>돌리기·기울기</small></div>
+              <div class="pad-cell"><div class="dpad"><button type="button" data-nav="fwd:1" class="u" aria-label="앞으로 이동">▲</button><button type="button" data-nav="side:-1" class="l" aria-label="왼쪽으로 이동">◀</button><button type="button" data-nav="side:1" class="r" aria-label="오른쪽으로 이동">▶</button><button type="button" data-nav="fwd:-1" class="d" aria-label="뒤로 이동">▼</button></div><small>앞뒤·좌우</small></div>
+              <div class="pad-cell"><div class="lift"><button type="button" data-nav="lift:1" aria-label="위로 올라가기">위</button><button type="button" data-nav="lift:-1" aria-label="아래로 내려가기">아래</button></div><small>높이</small></div>
+              <div class="pad-cell"><input type="range" class="zoom" id="padZoom" min="0" max="1000" value="500" aria-label="확대·축소"><small>확대</small></div>
+            </div>
+            <div class="pad-foot"><button type="button" class="pad-reset" data-cam="home">⟲ 시점 초기화</button><span class="pad-keys">키보드 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 이동 · <kbd>Q</kbd><kbd>E</kbd> 돌기 · <kbd>R</kbd><kbd>F</kbd> 높이 · <kbd>Z</kbd><kbd>X</kbd> 기울기 · <kbd>+</kbd><kbd>−</kbd> 확대</span></div>
+          </div>
+          <div class="pad-coach" id="padCoach" hidden><b>새 기능 · 시점 조작 패드</b><span>패드로 돌리고, 기울이고, 앞뒤·좌우·위아래로 움직이고, 확대할 수 있어요. 키보드는 W A S D · Q E · R F · Z X · + −</span><button type="button" class="chip" id="padCoachOk">알겠어요</button></div>
+
         </div>
         <div class="legend" id="legend"></div>
         <div class="player" id="player">
@@ -106,12 +118,12 @@ export async function openRoom(app, id, { progress, onSeen }) {
     return { dispose() { stopVideo(); uncount(); }, applyTheme() {} };
   }
 
-  let ctx = null, ship = null, flow = null, tug = null;
+  let ctx = null, ship = null, flow = null, tug = null, tug2 = null;
   if (stage.ok) {
     const THREE = stage.THREE;
     ship = createShip(stage); flow = createFlow(760, 16); flow.setPalette(stage.palette); ship.yaw.add(flow.obj);
     const fxW = new THREE.Group(), fxY = new THREE.Group(), fxR = new THREE.Group(); stage.scene.add(fxW); ship.yaw.add(fxY); ship.root.add(fxR);
-    ctx = { THREE, stage, ship, flow, fxW, fxY, fxR, get P() { return stage.palette; }, get tug() { return tug || (tug = makeTug(stage)); }, V3, label: stage.addLabel };
+    ctx = { THREE, stage, ship, flow, fxW, fxY, fxR, get P() { return stage.palette; }, get tug() { return tug || (tug = makeTug(stage)); }, get tug2() { return tug2 || (tug2 = makeTug(stage)); }, V3, label: stage.addLabel };
     stage.follow.obj = ship.yaw;
     /* 멀리서 볼 때 배 위치 표식 */
     const mB = V3(), mS = V3();
@@ -135,8 +147,8 @@ export async function openRoom(app, id, { progress, onSeen }) {
   }
 
   function clearFx() {
-    for (const g of [ctx.fxW, ctx.fxY, ctx.fxR]) for (let i = g.children.length - 1; i >= 0; i--) { const c = g.children[i]; g.remove(c); if (c !== tug) { stage.unregister(c); c.traverse(o => { if (o.geometry) o.geometry.dispose(); }); } }
-    if (tug) { tug.visible = false; stage.scene.add(tug); }
+    for (const g of [ctx.fxW, ctx.fxY, ctx.fxR]) for (let i = g.children.length - 1; i >= 0; i--) { const c = g.children[i]; g.remove(c); if (c !== tug && c !== tug2) { stage.unregister(c); c.traverse(o => { if (o.geometry) o.geometry.dispose(); }); } }
+    for (const t of [tug, tug2]) if (t) { t.visible = false; stage.scene.add(t); }
     stage.clearLabels(true); ship.reset(); stage.setSeabed(null);
   }
   function build(keep) {
@@ -207,7 +219,7 @@ export async function openRoom(app, id, { progress, onSeen }) {
   }
 
   /* ---------- 조작 ---------- */
-  let waterOn = true, hullOutline = false;
+  let waterOn = true, hullOutline = false, padZoomSync = () => {}, navKeysOff = () => {};
   if (stage.ok) {
     app.querySelectorAll('[data-cam]').forEach(b => b.addEventListener('click', () => {
       const m = b.dataset.cam; if (m === 'home') return camHome();
@@ -243,6 +255,55 @@ export async function openRoom(app, id, { progress, onSeen }) {
     tog('#tgFlow', on => { flowOn = on; flow.obj.visible = on && !!scene.field; });
     tog('#tgLabel', on => stage.setLabelsOn(on));
     tog('#tgHull', on => { hullOutline = on; ship.setOutline(on); });
+    padSetup();
+  }
+  /* ---------- 시점 조작 패드 · 키보드 ---------- */
+  function padSetup() {
+    const pad = $('#camPad'), nav = stage.nav, btn = $('#tgPad'), hint = app.querySelector('.st-hint');
+    const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
+    const showPad = on => { pad.hidden = !on; btn.classList.toggle('on', on); btn.setAttribute('aria-pressed', on); if (hint) hint.hidden = on; store('shs-pad', on ? '1' : '0'); stage.invalidate(); };
+    const saved = store('shs-pad');
+    showPad(saved == null ? !matchMedia('(max-width: 720px)').matches : saved === '1');
+    btn.addEventListener('click', () => showPad(pad.hidden));
+    $('#padHide').addEventListener('click', () => showPad(false));
+    /* 처음 한 번만 안내 */
+    const coach = $('#padCoach');
+    if (!store('shs-padcoach')) { coach.hidden = false; const ok = () => { coach.hidden = true; store('shs-padcoach', '1'); }; $('#padCoachOk').addEventListener('click', ok); setTimeout(ok, 12000); }
+    /* 누르고 있는 동안 움직이는 단추 */
+    pad.querySelectorAll('[data-nav]').forEach(b => {
+      const [k, v] = b.dataset.nav.split(':'), on = e => { e.preventDefault(); b.setPointerCapture && b.setPointerCapture(e.pointerId); nav[k] = +v; b.classList.add('on'); }, off = () => { if (nav[k] === +v) nav[k] = 0; b.classList.remove('on'); };
+      b.addEventListener('pointerdown', on); for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) b.addEventListener(ev, off);
+      b.addEventListener('contextmenu', e => e.preventDefault());
+    });
+    /* 조이스틱: 가운데에서 끈 만큼 좌우로 돌고 위아래로 기운다 */
+    const joy = $('#padJoy'), knob = joy.querySelector('.knob'); let jid = null;
+    const joyMove = e => {
+      const r = joy.getBoundingClientRect(), R = r.width / 2 - 8; let dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      const d = Math.hypot(dx, dy); if (d > R) { dx *= R / d; dy *= R / d; }
+      knob.style.transform = `translate(${dx}px,${dy}px)`; const dz = k => Math.abs(k) < 0.12 ? 0 : k;
+      nav.yaw = dz(dx / R); nav.pitch = dz(dy / R);
+    };
+    const joyEnd = () => { jid = null; nav.yaw = 0; nav.pitch = 0; knob.style.transform = ''; joy.classList.remove('on'); };
+    joy.addEventListener('pointerdown', e => { e.preventDefault(); jid = e.pointerId; joy.setPointerCapture(e.pointerId); joy.classList.add('on'); joyMove(e); });
+    joy.addEventListener('pointermove', e => { if (e.pointerId === jid) joyMove(e); });
+    for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) joy.addEventListener(ev, e => { if (e.pointerId === jid) joyEnd(); });
+    /* 확대 막대: 위로 올릴수록 가깝게(로그 눈금) */
+    const zr = $('#padZoom'), RMIN = 12, RMAX = 9000, L = Math.log(RMIN / RMAX); let zDrag = false;
+    zr.addEventListener('pointerdown', () => { zDrag = true; }); for (const ev of ['pointerup', 'pointercancel', 'change']) zr.addEventListener(ev, () => { zDrag = false; });
+    zr.addEventListener('input', () => stage.setZoom(RMAX * Math.exp(L * zr.value / 1000)));
+    padZoomSync = () => { if (!zDrag && !pad.hidden) { const v = Math.round(1000 * Math.log(stage.orb.r / RMAX) / L); if (+zr.value !== v) zr.value = v; } };
+    /* 키보드: 누르고 있는 동안 */
+    const KEYS = { KeyW: ['fwd', 1], KeyS: ['fwd', -1], KeyA: ['side', -1], KeyD: ['side', 1], KeyQ: ['yaw', -1], KeyE: ['yaw', 1], KeyR: ['lift', 1], KeyF: ['lift', -1], KeyZ: ['pitch', 1], KeyX: ['pitch', -1], Equal: ['zoom', -1], NumpadAdd: ['zoom', -1], Minus: ['zoom', 1], NumpadSubtract: ['zoom', 1] };
+    const kd = e => {
+      const m = KEYS[e.code]; if (!m || e.ctrlKey || e.metaKey || e.altKey) return;
+      if (document.querySelector('.dlg.open, .toc.open')) return;
+      const tag = (e.target.tagName || '').toLowerCase(); if ((tag === 'input' && e.target.type !== 'range') || tag === 'textarea' || e.target.isContentEditable) return;
+      e.preventDefault(); nav[m[0]] = m[1];
+    };
+    const ku = e => { const m = KEYS[e.code]; if (m && nav[m[0]] === m[1]) nav[m[0]] = 0; };
+    const clear = () => { for (const k in nav) nav[k] = 0; };
+    document.addEventListener('keydown', kd); document.addEventListener('keyup', ku); addEventListener('blur', clear);
+    navKeysOff = () => { document.removeEventListener('keydown', kd); document.removeEventListener('keyup', ku); removeEventListener('blur', clear); clear(); };
   }
   const onKey = e => {
     if (document.querySelector('.dlg.open, .toc.open')) return;
@@ -273,6 +334,7 @@ export async function openRoom(app, id, { progress, onSeen }) {
         if (scene.tick) scene.tick(dt * player.rate, ctx);
       }
       stage.frame(dt, player.playing);
+      padZoomSync();
     }
     update(false);
     raf = requestAnimationFrame(frame);
@@ -281,7 +343,7 @@ export async function openRoom(app, id, { progress, onSeen }) {
 
   return {
     applyTheme() { if (!stage.ok) return; stage.applyTheme(); build(true); },
-    dispose() { stopVideo(); uncount(); disposed = true; cancelAnimationFrame(raf); document.removeEventListener('keydown', onKey); if (scene.dispose) scene.dispose(); if (stage.ok) stage.dispose(); }
+    dispose() { stopVideo(); uncount(); disposed = true; cancelAnimationFrame(raf); document.removeEventListener('keydown', onKey); navKeysOff(); if (scene.dispose) scene.dispose(); if (stage.ok) stage.dispose(); }
   };
 }
 export { UNITS };
