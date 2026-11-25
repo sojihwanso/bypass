@@ -223,6 +223,9 @@ article.doc{max-width:760px;min-width:0}
 .body .steps{counter-reset:s;list-style:none;padding:0}
 .body .steps li{counter-increment:s;padding-left:34px;position:relative;margin:8px 0}
 .body .steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;background:var(--acbg);color:var(--ac);font-family:var(--f-mono);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.body .fig.model{padding:0;overflow:hidden}
+.body .fig.model iframe{display:block;width:100%;height:640px;border:0;background:transparent}
+.body .fig.model figcaption{padding:10px 16px 14px}
 .body .fig{margin:16px 0;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:14px 16px;overflow-x:auto}
 .body .fig svg{display:block;max-width:100%;height:auto;margin:0 auto}
 .body .fig figcaption{font-size:12.5px;color:var(--muted);margin-top:8px}
@@ -523,7 +526,7 @@ footer .disclaimer b{color:var(--warn);margin-right:6px}
       <a href="#quiz" data-r="quiz">무작위 퀴즈</a>
       <a href="#exam" data-r="exam" class="star">★ 2026.2학기 중간고사</a>
     </nav>
-    <button class="ver" type="button" data-ver aria-label="버전 2.1.5">v2.1.5</button>
+    <button class="ver" type="button" data-ver aria-label="버전 2.2.0">v2.2.0</button>
     <a class="tb-home" href="https://teambypass.vercel.app/" aria-label="Team Bypass 메인 페이지로 이동" title="Team Bypass"><svg viewBox="0 0 132 132" width="30" height="30" aria-hidden="true"><path d="M66 4L128 66L66 128L4 66Z" fill="#1C211E" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/><path d="M66 12L120 66L66 120L12 66Z" fill="#EE6A1F"/><path d="M66 18L114 66L66 114L18 66Z" fill="#1C211E"/><path d="M66 25L107 66L66 107L25 66Z" fill="#EE6A1F"/><g transform="translate(36 34) scale(0.6)" fill="#1C211E"><ellipse cx="44" cy="60" rx="27" ry="23"/><path d="M51 45C55 37 58 31 61 25L72 30C68 36 66 44 64 53Z"/><circle cx="66" cy="26" r="10"/><path d="M72 20C83 19 93 24 95 32C96 38 91 41 88 37C86 34 82 33 74 33Z"/><path d="M19 52C10 47 7 40 11 34C14 43 20 46 23 46Z"/><path d="M37 80L35 92L27 95L41 95L42 81Z"/><path d="M51 80L51 92L44 95L58 95L56 81Z"/><circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/><path d="M32 55C40 50 51 54 54 64" fill="none" stroke="#EE6A1F" stroke-width="2.6" stroke-linecap="round"/></g></svg></a>
   </div>
 </header>
@@ -532,7 +535,7 @@ footer .disclaimer b{color:var(--warn);margin-right:6px}
   <div class="wrap">특수선 운용학(항해정보시스템학부) 1~5강 강의자료와 필기를 바탕으로 정리한 학습용 요약입니다. 강의 범위 안에서 전문 설명이 더 필요한 곳만 교재 『탱커 기초교육』을 참고했고, 그 부분은 <span class="net">교재 보완</span>으로 표시했습니다. 강의 필기와 교재가 다른 곳은 본문 아래 파란 상자에 따로 적었습니다. <span class="net web">인터넷 보완</span>은 IMO 공개자료 등으로 보충한 내용입니다.
     <p class="book"><b>참고 서적</b>윤귀호·배병덕·김종성·이형기, 『탱커 기초교육』, 도서출판 상학당, 1판 4쇄 2023.2.25, ISBN 978-89-6587-037-1. 본문의 “교재 p.○○”은 이 책의 인쇄 쪽수입니다. 저작권은 저자에게 있으며, 본 위키는 그 내용을 학습용으로 요약·재구성했습니다.</p>
     <p class="disclaimer" role="note"><b>⚠ 안내</b>본 위키는 참고용이며, 3D 모형과 계통도는 구조를 이해하기 위한 개략도로 실제 선박의 치수·배관과 다릅니다.<br>시험·실무 전에는 강의자료와 선박의 실제 도면·매뉴얼로 확인하세요.</p>
-    <div class="ver-row"><button class="ver" type="button" data-ver aria-label="버전 2.1.5">v2.1.5</button></div>
+    <div class="ver-row"><button class="ver" type="button" data-ver aria-label="버전 2.2.0">v2.2.0</button></div>
   </div>
 </footer>
 
@@ -1668,6 +1671,7 @@ const DOCS = [
  sum:'임펠러가 고속 회전하면 유체가 원심력으로 바깥으로 밀려나며 속도를 얻고, 볼류트(나선 케이싱)를 지나며 그 속도가 압력으로 바뀐다. 원유선 화물펌프의 표준이다.',
  body:`
 <div class="fig">{{fig:centrifugal}}<figcaption>원심펌프 정면 단면. 유체는 중심(Impeller eye)으로 들어와 임펠러 날개를 따라 바깥으로 던져지고, 점점 넓어지는 볼류트를 돌며 속도가 압력으로 바뀐 뒤 토출된다. 4강 p.22 그림을 다시 그림.</figcaption></div>
+<div class="fig model"><iframe data-model="centrifugal-pump" title="원심 펌프 인터랙티브 모형" loading="lazy"></iframe><figcaption>인터랙티브 모형(실험). 증기 밸브 슬라이더로 회전수를 바꾸면 임펠러·투명관 속 흐름·압력계가 함께 움직인다. 드래그로 시점을 돌리고 휠·핀치로 확대한다. 수치는 이해를 돕기 위한 임의 값이다.</figcaption></div>
 <p>4강 필기: 상부가 굽은 형태의 임펠러(blade)가 고속 회전하여 <b>원심력</b>으로 압력을 형성한다. 선풍기가 바람을 “걷어낸다”는 식으로 쓰지 말고 <b>원심력을 이용한다</b>고 표현할 것. 대부분의 펌프(B/W, Cargo, G/S…)가 원심펌프이고, 임펠러를 여러 개 이어 다단으로 구성할 수 있다.</p>
 <h3>탱커 화물펌프로서 ${BK}</h3>
 <ul>
@@ -3016,6 +3020,7 @@ function doc(id){
     ${qn ? `<div class="doc-quiz"><span>이 문서 문제 <b>${qn}</b>개</span><button class="btn pri" id="docQuiz" type="button">이 문서 퀴즈 풀기</button></div>` : ''}
     <div class="doc-foot">${prev?`<a href="#${prev.id}"><small>← 이전</small>${prev.t}</a>`:''}${next?`<a class="nx" href="#${next.id}"><small>다음 →</small>${next.t}</a>`:''}</div>
   </article></div>`;
+  mountModels($app);
   const b = document.getElementById('docQuiz');
   if (b) b.onclick = () => { quizState = makeRun(QUIZ.filter(q => q.d === id), d.t); location.hash = 'quiz'; };
   window.scrollTo(0,0);
@@ -3097,8 +3102,28 @@ function route(){
 window.addEventListener('hashchange', route);
 window.addEventListener('tv-ready', () => { if (current === 'home' && window.__tvPending && document.body.contains(window.__tvPending)) window.TV.mount(window.__tvPending); });
 
+/* 인터랙티브 모형(anatomy 그림): 위키 테마를 따라가고, 높이는 모형이 알려 준 값으로 맞춘다 */
+const modelTheme = () => {
+  const t = document.documentElement.getAttribute('data-theme');
+  if (t === 'dark' || t === 'light') return t;
+  return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+};
+function mountModels(root){
+  root.querySelectorAll('iframe[data-model]:not([src])').forEach(f => {
+    f.src = 'models/' + f.dataset.model + '.html?embed&theme=' + modelTheme();
+  });
+}
+const pushModelTheme = () => document.querySelectorAll('iframe[data-model][src]').forEach(f => { try { f.contentWindow.postMessage({pvTheme: modelTheme()}, '*'); } catch(e){} });
+new MutationObserver(pushModelTheme).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', pushModelTheme);
+window.addEventListener('message', e => {
+  const m = e.data;
+  if (!m || !m.pvModel || !(m.height > 0)) return;
+  document.querySelectorAll('iframe[data-model="' + m.pvModel + '"]').forEach(f => { if (f.contentWindow === e.source) f.style.height = m.height + 'px'; });
+});
+
 /* 버전 · 이스터 에그: 버전 버튼을 1.5초 안에 5번 */
-const VERSION = '2.1.5';
+const VERSION = '2.2.0';
 let eggN = 0, eggT = 0;
 document.addEventListener('click', e => {
   if (!e.target.closest('[data-ver]')) return;
