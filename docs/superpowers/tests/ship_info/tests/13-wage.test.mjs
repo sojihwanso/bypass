@@ -36,12 +36,12 @@ export default [
  })},
  {name:'wage-names-paren', fn: () => withPage({hash:'#wage'}, async p => {
    await ready(p);
-   const names = (await rowsOf(p)).map(r => r[0].replace('표본 적음', '').trim());
+   const names = await p.$$eval('#wage-main tbody tr.wrow', trs => trs.map(tr => (tr.querySelector('.wbtn') || tr.cells[0].firstChild).textContent.trim()));
    assert(names.includes('벌크선 (잡화)'), JSON.stringify(names));
    assert(names.includes('원유운반선·석유제품선/케미컬선 (유조)'), JSON.stringify(names));
    assert(names.includes('냉동'), JSON.stringify(names));
    await p.click('#v-wage .seg button:text-is("내항선")'); await p.waitForTimeout(300);
-   const n2 = (await rowsOf(p)).map(r => r[0].replace('표본 적음', '').trim());
+   const n2 = await p.$$eval('#wage-main tbody tr.wrow', trs => trs.map(tr => (tr.querySelector('.wbtn') || tr.cells[0].firstChild).textContent.trim()));
    assert(n2.includes('벌크선·시멘트선/연안선 (잡화)'), JSON.stringify(n2));
  })},
  {name:'wage-sort-keeps-place', fn: () => withPage({hash:'#wage', width:390, height:844}, async p => {

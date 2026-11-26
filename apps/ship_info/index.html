@@ -457,6 +457,13 @@ legend{font-size:13px;font-weight:600;padding:0 4px}
 .cmp td + td,.cmp th + th{border-left:1px solid var(--rule)}
 .cmp ul{margin:0;padding-left:16px}
 .cmp-x{font-size:12px;background:none;border:1px solid var(--rule);color:var(--muted);padding:0 8px;margin-left:8px;cursor:pointer;border-radius:var(--r-tag)}
+.cmp-empty p{margin:0}
+.cmp-go{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.cmp-go a{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:4px 12px;border:1px solid var(--rule);border-radius:var(--r-in);color:var(--ink);text-decoration:none;background:var(--paper)}
+.cmp-go a:hover{border-color:var(--ink)}
+.wtype{margin-left:8px;font-size:12px;font-weight:400}
+.wtype a{color:var(--muted)}
+.wtype a:hover{color:var(--ink)}
 .cmp-empty{padding:26px;background:var(--sheet);border:1px solid var(--rule);border-radius:var(--r-card);color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--sheet);color:var(--ink);border:1px solid var(--ink);border-radius:var(--r-in);padding:11px 16px;font-size:13.5px;z-index:30;max-width:90vw;box-shadow:0 6px 20px rgba(0,0,0,.2)}
 .toast[hidden]{display:none}
@@ -1344,11 +1351,11 @@ function wageRowsHtml(rows, ranks){
     '</tbody></table><p class="note" style="margin:6px 0 0">단위 천 원. 원본 표 그대로입니다. '+WAGE_SAME_NOTE+'</p>';
 }
 /* 임금 한 줄 + 펼침 줄. label: 업종 칸 글자 */
-function wageLine(w, label, t, key){
+function wageLine(w, label, t, key, extra = ''){
   const n = t.rows[0][0];
   const cells = WAGE_COLS.map(k => '<td>'+man(t.rows[ridx(w,k)][1])+'</td>').join('');
   return '<tr class="wrow"><td><button type="button" class="wbtn" aria-expanded="false" aria-controls="wd-'+key+'">'+esc(label)+'</button>'+
-    (smallSample(t.vessels, n || 0) ? '<span class="note">표본 적음</span>' : '')+'</td>'+cells+'<td>'+fmtN(t.vessels)+'</td></tr>'+
+    (smallSample(t.vessels, n || 0) ? '<span class="note">표본 적음</span>' : '')+extra+'</td>'+cells+'<td>'+fmtN(t.vessels)+'</td></tr>'+
     '<tr class="wdet" id="wd-'+key+'" hidden><td colspan="'+(WAGE_COLS.length+2)+'">'+wageRowsHtml(t.rows, w.ranks)+'</td></tr>';
 }
 function wageHead(first){
@@ -1385,6 +1392,11 @@ function renderTypeWage(id){
   });
 }
 /* 통계 선종 → 그 선종을 쓰는 앱 선종 이름 */
+/* 임금 줄 → 그 통계 선종을 쓰는 앱 선종 화면으로 */
+function wageTypeLinks(b, s){
+  const apps = Object.keys(TYPE_MAP).filter(id => TYPE_MAP[id].biz.includes(b) && TYPE_MAP[id].stat.includes(s));
+  return apps.length ? '<span class="wtype">'+apps.map(id => '<a href="#type-'+id+'" aria-label="'+esc(TYPE_BY_ID[id].name)+' 선사 표 보기">'+esc(TYPE_BY_ID[id].name.split('/')[0])+' 표 ›</a>').join(' ')+'</span>' : '';
+}
 function wageName(b, s){
   const apps = Object.keys(TYPE_MAP).filter(id => TYPE_MAP[id].biz.includes(b) && TYPE_MAP[id].stat.includes(s));
   return apps.length ? apps.map(id => TYPE_BY_ID[id].name).join('·')+' ('+s+')' : s;
@@ -1408,7 +1420,7 @@ function renderWage(qs, focusSel){
     const main = '<table class="wt" id="wage-main"><thead><tr><th>선종 (통계 이름)</th>'+WAGE_COLS.map(th).join('')+th('vessels')+'</tr></thead><tbody>'+
       items.map(({s, t}, i) => t.note
         ? '<tr class="wrow"><td>'+esc(wageName(biz, s))+'<span class="note">'+esc(t.note)+'</span></td>'+WAGE_COLS.map(() => '<td>-</td>').join('')+'<td>'+fmtN(t.vessels)+'</td></tr>'
-        : wageLine(w, wageName(biz, s), t, 'w-'+biz+'-'+i)).join('')+'</tbody></table>';
+        : wageLine(w, wageName(biz, s), t, 'w-'+biz+'-'+i, wageTypeLinks(biz, s))).join('')+'</tbody></table>';
     el.innerHTML =
       '<div class="crumb"><a href="#home">처음</a> &rsaquo; 임금</div>'+
       '<div class="co-head"><div><h1>선원 월평균 임금</h1><div class="tags"><span class="ctag s">통계</span></div></div></div>'+
@@ -2281,7 +2293,7 @@ function renderCompare(){
   const box = $('#cmp-table');
   if (state.cmpTab === 'co'){
     const cos = cmp.co.map(n => CO_BY[n]).filter(Boolean);
-    if (!cos.length){ box.innerHTML = '<p class="cmp-empty">비교할 선사가 없습니다. 선종 화면에서 회사 왼쪽 칸을 체크하면 '+LIMIT+'곳까지 담을 수 있습니다.</p>'; return; }
+    if (!cos.length){ box.innerHTML = '<div class="cmp-empty"><p>비교할 선사가 없습니다. 선종 화면에서 회사 왼쪽 칸을 체크하면 '+LIMIT+'곳까지 담을 수 있습니다.</p>'+'<span class="cmp-go">'+TYPES.map(t => '<a href="#type-'+t.id+'">'+sym(t.id)+esc(t.name)+'</a>').join('')+'</span>'+'</div>'; return; }
     const rows = [
       ['구분', c => (c.kind==='owner'?'선주사':'관리선사')+(c.foreign?', 외국계 한국지사':'')],
       ['2027 실습생', c => c.job ? c.job.cadet : '자료 없음'],
@@ -2302,7 +2314,7 @@ function renderCompare(){
       rows.map(r => '<tr><th scope="row">'+r[0]+'</th>'+cos.map(c => '<td>'+(r[2] ? r[1](c) : esc(r[1](c)))+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
   } else {
     const tys = cmp.ty.map(id => TYPE_BY_ID[id]).filter(Boolean);
-    if (!tys.length){ box.innerHTML = '<p class="cmp-empty">비교할 선종이 없습니다. 홈의 선종 목록에서 오른쪽 체크를 누르면 '+LIMIT+'개까지 담을 수 있습니다.</p>'; return; }
+    if (!tys.length){ box.innerHTML = '<div class="cmp-empty"><p>비교할 선종이 없습니다. 홈의 선종 목록이나 각 선종 화면 오른쪽 위의 \'비교에 담기\'로 '+LIMIT+'개까지 담을 수 있습니다.</p>'+'<span class="cmp-go">'+TYPES.map(t => '<a href="#type-'+t.id+'">'+sym(t.id)+esc(t.name)+'</a>').join('')+'</span>'+'</div>'; return; }
     const rows = [
       ['한 줄 설명', t => esc(t.short)],
       ['선사 수', t => { const l = companiesOf(t.id), o = l.filter(c => c.kind==='owner').length; return l.length+'곳 (선주 '+o+', 관리 '+(l.length-o)+')'; }],
