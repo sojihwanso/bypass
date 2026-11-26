@@ -15,6 +15,7 @@ import { initConning } from './conning.js';
 import { initKeys, KEYMAP } from './keys.js';
 import { drawOverlay } from './overlay.js';
 import { t, lang } from './i18n.js';
+import { initStart } from './start.js';
 
 const TEST = new URLSearchParams(location.search).has('test');
 loadSettings();
@@ -360,16 +361,22 @@ addEventListener('pagehide', saveNow);
 /* ---------- 외부 모듈(시나리오·도움말)이 쓸 창구 ---------- */
 window.Radar = { startWorld, freeDef, setRadar, get world() { return W; }, setLog(fn) { logFn = fn; }, setScenarioTick(fn) { onScenarioTick = fn; }, alerts: () => alerts, ais: () => ais, tracker: () => tracker, route: () => route, tools: () => tools, saveNow, resume, hasResume: () => !!localStorage.getItem(RESUME), setPaused: (p) => { paused = p; }, pointInLand };
 
-/* 시작: 시나리오 모듈이 있으면 그쪽 시작 화면, 없으면 자유 항해 */
+/* 빠른 진행(테스트·검증): 그리지 않고 물리·기록만 */
+function tickSim(sec) { if (!W) return; const n = Math.ceil(sec / 0.25); for (let i = 0; i < n; i++) { if (paused) return; const h = sec / n; W.t += h; stepShip(W.own, h, W.weather.current); for (const g of W.targets) stepTarget(g, h, W.t); if (onScenarioTick) onScenarioTick(W, h); if (logFn) logFn(W); } }
+
+/* 시작: 배경에 자유 항해를 띄우고 시나리오 화면을 연다 */
 startWorld(freeDef({ targets: [{ brg: 40, rng: 4, hdg: 230, kn: 11 }, { brg: 300, rng: 5, hdg: 100, kn: 8 }] }));
 setRange(S.disp.rangeNM);
+const starter = initStart(ui);
 requestAnimationFrame(frame);
+if (!TEST) starter.openStart();
 if (TEST) {
   window.RadarTest = {
     ready: true, S, ppi, view: () => V, setView: (o) => Object.assign(V, o), setRange: (r) => { S.disp.rangeNM = r; V.rangeNM = r; }, frames: () => frames, tick, frameAt, own, paused: () => paused || hiddenPause, setPaused: (p) => { paused = p; }, KEYMAP, keyHandlers,
     radar: { set: setRadar, toggle: toggleTx, get state() { return radar.state; } }, world: () => W, tracker: { targets: () => tracker.targets() },
     newWorld: (o) => startWorld(freeDef(o)), tgtScreen: (id) => { const g = W.targets.find((x) => x.id === id), r = relOf(P.x(g.lon), P.y(g.lat)), p = ppi.toScreen(r.brg, r.rng); return { sx: p.x, sy: p.y }; },
     cursorAct, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,
+    startScenario: (id, o) => starter.startScenario(id, o), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), tickSim, sim: { setAuto, setRudderOrder, setTelegraph },
   };
   setRadar('tx');
 }
