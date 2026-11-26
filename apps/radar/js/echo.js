@@ -217,3 +217,23 @@ export function processLine(raw, c, ctx) {
   return lv;
 }
 function movingMean(v, w) { const n = v.length, m = new Float32Array(n); let s = 0; for (let i = 0; i < Math.min(n, w); i++) s += v[i]; for (let i = 0; i < n; i++) { const a = i - w - 1, b = i + w; if (b < n) s += v[b]; if (a >= 0) s -= v[a]; const lo = Math.max(0, i - w), hi = Math.min(n - 1, i + w); m[i] = s / (hi - lo + 1); } return m; }
+
+/* TT용 탐지(스캔마다 1회): 보이는 물표 중 문턱·클러터를 넘는 것만, 자선 기준 NM 좌표(x 동, y 북)에 측정 잡음을 얹어 돌려줌.
+   물표 정체(id)는 넘기지 않음 — 추적기는 실제 ARPA처럼 위치만 봄 */
+export function detect(sc, c, rnd = Math.random) {
+  if (!c.tx || c.gain <= 0) return [];
+  const g = () => Math.sqrt(-2 * Math.log(Math.max(1e-12, rnd()))) * Math.cos(2 * Math.PI * rnd());
+  const band = BANDS[sc.band] || BANDS.X, pulseUs = PULSES[sc.pulse] || 0.3, pg = 10 * Math.log10(pulseUs / 0.3);
+  const tl = c.tune && !c.tune.auto ? 6 * ((c.tune.val - 50) / 40) ** 2 : 0, thr = 40 - 0.4 * c.gain + tl;
+  const out = [];
+  for (const t of sc.tg) {
+    if (!t.visible) continue;
+    const db = t.db0 + pg, sea = sc.weather.sea > 0 && t.R < 0.6 + 0.7 * sc.weather.sea + 1 ? 4.2 * sc.weather.sea - 30 * Math.log10(Math.max(t.R, 0.05)) : -99;
+    const Rs = 0.5 + 0.4 * (c.stcRange ?? 5), stc = c.sea && !c.sea.auto && c.sea.val > 0 ? (c.sea.val / 100) * 45 * Math.max(0, 1 - t.R / Rs) ** ((c.stcCurve ?? 3) / 3) : 0;
+    if (db - stc <= thr || db <= sea + 3) continue;
+    if (sc.grid && sc.grid.any) { const sb = Math.sin(t.brg * D2R), cb = Math.cos(t.brg * D2R); let hid = false; for (let r = 0.05; r < t.R; r += 0.03) if (landAt(sc.grid, sc.ox + r * sb, sc.oy + r * cb)) { hid = true; break; } if (hid) continue; }
+    const R = t.R + g() * (rangeResM(pulseUs) / 2 / NM_M), b = (t.brg + g() * (band.beamDeg / 6)) * D2R;
+    out.push({ x: R * Math.sin(b), y: R * Math.cos(b), strength: db - thr });
+  }
+  return out;
+}
