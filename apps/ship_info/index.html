@@ -1232,7 +1232,38 @@ const STAT_TO_KOS = {'급유':'급유선','냉동':'냉동냉장'};
 const typeLabel = id => TYPE_BY_ID[id].name+' ('+TYPE_MAP[id].label+')';
 const man = k => k == null ? '-' : Math.round(k/10).toLocaleString('ko-KR');
 const BIZ_KEYS = ['ocean','coastal','deepsea','nearsea','fmerchant','ffish'];
+const MANAGED_BY = {'현대글로비스':'지마린서비스','우진선박':'오션제이드쉬핑','우양상선':'코리아쉽메니져스'};
 const KOS_BIZ = {ocean:'외항상선', coastal:'내항상선', deepsea:'원양어선', nearsea:'연근해어선', fmerchant:'해외취업상선', ffish:'해외취업어선'};
+/* ---------- 통합 회사 목록: 선사 자료(CO) + KOSWEC 등록 자료만 있는 회사 ---------- */
+let UNI = [], UNI_BY = {}, UNI_K = null, UNI_P = null;
+/* 등록 선박 하나가 어느 앱 선종에 드는지 (선박별 업종 기준) */
+function shipAppTypes(s, k){
+  const kos = k.typeNames[s[3]], biz = k.bizNames[s[2]];
+  return TYPES.map(t => t.id).filter(id => TYPE_MAP[id].kos.includes(kos) && TYPE_MAP[id].biz.some(b => KOS_BIZ[b] === biz));
+}
+function firmAppTypes(f, k){
+  const set = new Set(); f.ships.forEach(s => shipAppTypes(s, k).forEach(id => set.add(id)));
+  return TYPES.map(t => t.id).filter(id => set.has(id));
+}
+function typeShipCount(u, typeId, k = UNI_K){
+  return u.firm ? u.firm.ships.filter(s => shipAppTypes(s, k).includes(typeId)).length : 0;
+}
+function buildUni(k){
+  const byApp = Object.fromEntries(k.firms.filter(f => f.app).map(f => [f.app, f]));
+  const co = CO.map(c => { const firm = byApp[c.n] || null;
+    return {n:c.n, co:c, firm, mgr: firm ? null : (MANAGED_BY[c.n] || null), types:c.types, ships: firm ? firm.ships.length : null}; });
+  const only = k.firms.filter(f => !f.app).map(f => ({n:f.n, co:null, firm:f, mgr:null, types:firmAppTypes(f, k), ships:f.ships.length}))
+    .sort((a, b) => b.ships - a.ships || a.n.localeCompare(b.n, 'ko'));
+  return co.concat(only);
+}
+function uniReady(){
+  if (!UNI_P) UNI_P = loadData('koswec').then(k => { UNI_K = k; UNI = buildUni(k); UNI_BY = Object.fromEntries(UNI.map(u => [u.n, u])); }, e => { UNI_P = null; throw e; });
+  return UNI_P;
+}
+function regOnlyFor(typeId){
+  return UNI.filter(u => !u.co && u.types.includes(typeId))
+    .map(u => [u, typeShipCount(u, typeId)]).sort((a, b) => b[1] - a[1] || b[0].ships - a[0].ships || a[0].n.localeCompare(b[0].n, 'ko')).map(x => x[0]);
+}
 const WAGE_COLS = ['total','master','co','o3','ce','e1','e3'];
 const WAGE_COL_NAME = {total:'전체 평균', master:'선장', co:'1항사', o3:'3항사', ce:'기관장', e1:'1기사', e3:'3기사'};
 const smallSample = (vessels, n) => vessels < 10 || n < 10;
@@ -1440,7 +1471,6 @@ function renderDir(qs){
   });
 }
 /* 선사 상세: KOSWEC 등록 선박 칸 (해당 회사만, 실패하면 숨긴 채) */
-const MANAGED_BY = {'현대글로비스':'지마린서비스','우진선박':'오션제이드쉬핑','우양상선':'코리아쉽메니져스'};
 function renderCoReg(name){
   loadData('koswec').then(k => {
     const el = $('#co-reg');
@@ -1584,7 +1614,7 @@ function loadFav(){
   try{
     const v = JSON.parse(localStorage.getItem(FAV_KEY) || 'null');
     if (v && Array.isArray(v.types) && Array.isArray(v.cos))
-      return {types:[...new Set(v.types)].filter(id => typeof id === 'string' && Object.hasOwn(TYPE_BY_ID, id)), cos:[...new Set(v.cos)].filter(n => typeof n === 'string' && Object.hasOwn(CO_BY, n))};
+      return {types:[...new Set(v.types)].filter(id => typeof id === 'string' && Object.hasOwn(TYPE_BY_ID, id)), cos:[...new Set(v.cos)].filter(n => typeof n === 'string' && n.length > 0 && n.length <= 80).slice(0, 50)};
   }catch(e){}
   return {types:[], cos:[]};
 }
@@ -1710,8 +1740,12 @@ function sxMove(d){
 /* ---------- 홈 ---------- */
 function renderFav(){
   const tHtml = fav.types.length ? '<ul class="fav-list">'+fav.types.map(id => '<li><a href="#type-'+id+'">'+sym(id)+esc(TYPE_BY_ID[id].name)+'</a><button type="button" data-unfav="types" data-key="'+id+'" aria-label="'+esc(TYPE_BY_ID[id].name)+' 즐겨찾기 해제">×</button></li>').join('')+'</ul>' : '<p class="fav-empty">담긴 선종 없음</p>';
-  const cHtml = fav.cos.length ? '<ul class="fav-list">'+fav.cos.map(n => '<li><a href="'+coHref(n)+'">'+esc(n)+'</a><button type="button" data-unfav="cos" data-key="'+esc(n)+'" aria-label="'+esc(n)+' 즐겨찾기 해제">×</button></li>').join('')+'</ul>' : '<p class="fav-empty">담긴 선사 없음</p>';
-  const empty = !fav.types.length && !fav.cos.length;
+  /* 선사 자료에 없는 이름은 등록 자료를 불러온 뒤 보여 준다(저장은 그대로) */
+  const later = fav.cos.filter(n => !CO_BY[n] && !UNI_BY[n]);
+  if (later.length && !UNI_K) uniReady().then(() => { if (currentView() === 'home') renderFav(); }, () => {});
+  const favCos = fav.cos.filter(n => CO_BY[n] || UNI_BY[n]);
+  const cHtml = favCos.length ? '<ul class="fav-list">'+favCos.map(n => '<li><a href="'+coHref(n)+'">'+esc(n)+'</a><button type="button" data-unfav="cos" data-key="'+esc(n)+'" aria-label="'+esc(n)+' 즐겨찾기 해제">×</button></li>').join('')+'</ul>' : '<p class="fav-empty">담긴 선사 없음</p>';
+  const empty = !fav.types.length && !favCos.length;
   $('#v-home .fav').classList.toggle('is-empty', empty);
   $('#fav-body').innerHTML = empty
     ? '<p class="fav-empty">담긴 선종·선사 없음. 별표(☆)를 누르면 여기에 모입니다.</p>'
