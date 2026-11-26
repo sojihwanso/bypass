@@ -45,8 +45,14 @@ export default [
    const r = await p.$$eval('.hero-day .ship', a => a.map(i => [getComputedStyle(i).animationName, getComputedStyle(i).opacity]));
    assert(r.every(([n, o]) => n === 'none' && o === '1'), 'reduced '+JSON.stringify(r));
  })},
+ {name:'v36-bp-home', fn: async () => {
+   for (const o of [{width:1440}, {width:390,height:844,theme:'dark'}]) await withPage(o, async p => {
+     const r = await p.$eval('.bp-home', e => { const b = e.getBoundingClientRect(); return {l:b.left, bot:innerHeight-b.bottom, pos:getComputedStyle(e).position, lbl:e.getAttribute('aria-label')}; });
+     assert(r.pos === 'fixed' && r.l === 12 && r.bot === 12 && r.lbl.includes('BYPASS'), JSON.stringify(r));
+   });
+ }},
  {name:'v35-version', fn: () => withPage({}, async p => {
    const t = await p.$eval('#ver-top', e => e.textContent.trim());
-   assert(t === 'v. 3.5.0', t);
+   assert(t === 'v. 3.6.0', t);
  })}
 ];
