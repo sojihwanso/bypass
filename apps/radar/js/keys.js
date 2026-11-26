@@ -31,6 +31,7 @@ export function initKeys(handlers) {
   const norm = (k) => (k.length === 1 ? k.toLowerCase() : k === '=' ? '+' : k);
   addEventListener('keydown', (e) => {
     if (typing(e.target) || typing(document.activeElement) || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key !== 'Escape' && document.querySelector('dialog[open]')) return; // 결과·안내·도움말 창이 떠 있으면 조종 키 무시
     let k = norm(e.key); if (k === '=') k = '+';
     const m = KEYMAP.find((x) => x.key.toLowerCase() === k.toLowerCase() && !!x.shift === (e.shiftKey && x.key.startsWith('Arrow')));
     if (!m || !handlers[m.act]) return;

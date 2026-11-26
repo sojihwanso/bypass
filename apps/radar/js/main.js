@@ -22,15 +22,16 @@ const TEST = new URLSearchParams(location.search).has('test');
 loadSettings();
 try { loadSavedPresets(JSON.parse(localStorage.getItem('radar-presets') || 'null')); } catch (e) {}
 const app = document.getElementById('app');
-const WARM_SEC = 10; // 실제 마그네트론 예열은 약 90 s — 시뮬레이터는 10 s로 줄임(도움말에 적음)
+const WARM_SEC = 5; // 실제 마그네트론 예열은 약 90 s — 시뮬레이터는 5 s로 줄임(도움말에 적음)
 const DEFAULT_PULSE = { 0.125: 'S1', 0.25: 'S1', 0.5: 'S1', 0.75: 'S1', 1.5: 'S2', 3: 'M1', 6: 'M2', 12: 'M3', 24: 'L', 48: 'L', 96: 'L' };
 
 /* ---------- 상태 ---------- */
 let W = null, P = null, scene = null, tracker = createTracker({ max: 100 }), ais = createAIS(), tools = createTools(), trails = createTrails(), route = createRoute();
-let alerts = createAlerts(() => (W ? W.t : 0));
+const realNow = () => performance.now() / 1000;
+let alerts = createAlerts(realNow, () => (W ? W.t : 0));
 const radar = { state: 'stby', warmLeft: 0 };
 const V = { rangeNM: S.disp.rangeNM, orient: S.disp.orient, motion: S.disp.motion, hdg: 0, crs: 0, offset: { x: 0, y: 0 }, palette: S.disp.palette, videoColor: S.disp.videoColor, rings: S.disp.rings, hlHidden: false };
-let paused = false, hiddenPause = false, speed = 1, ant = 0, last = performance.now(), frames = 0, prevRaw = null, prevScan = new Array(N_BRG);
+let antAcc = 0, paused = false, hiddenPause = false, speed = 1, ant = 0, last = performance.now(), frames = 0, prevRaw = null, prevScan = new Array(N_BRG);
 let offCenter = null, tmOff = { x: 0, y: 0 }, cursor = null, selected = [], uiMode = null, rulerA = null, ruler = null, piOn = false, lastUser = performance.now(), trialSet = { course: 0, speed: 14 };
 let logFn = null, onScenarioTick = null, coastScreen = null, coastKey = '';
 const rnd = Math.random;
@@ -51,7 +52,7 @@ export function startWorld(def) {
   if (def.own.state) Object.assign(own, def.own.state, { spec: own.spec, auto: { ...def.own.state.auto } });
   W = { def, name: def.name || '', own, targets: def.targets.map((g) => (g.want ? { ...g, legs: [...(g.legs || [])], want: { ...g.want } } : createTarget(g))), weather: { sea: 0, windFrom: 0, windMs: 0, rain: [], ducting: false, interference: false, current: { set: 0, drift: 0 }, ...(def.weather || {}) }, aids: def.aids || [], marks: def.marks || [], t: def.t || 0, land: { rings: [], ok: false, heightM: 100 }, needsCoast: !!def.needsCoast };
   P = makeProj(def.own.lat, def.own.lon);
-  tracker = createTracker({ max: 100 }); ais = createAIS(); alerts = createAlerts(() => W.t); tools = createTools(); route = createRoute(); trails.reset(V.rangeNM, S.disp.trails.mode);
+  tracker = createTracker({ max: 100 }); ais = createAIS(); alerts = createAlerts(realNow, () => W.t); tools = createTools(); route = createRoute(); trails.reset(V.rangeNM, S.disp.trails.mode);
   selected = []; tmOff = { x: 0, y: 0 }; ruler = null; rulerA = null; uiMode = null; azZones = []; piOn = false; speed = 1; offCenter = null; prevScan = new Array(N_BRG); prevRaw = null; ppi.clear();
   scene = buildScene({ own: ownScene(), targets: W.targets, weather: W.weather, aids: W.aids, band: S.ctrl.band, pulse: S.ctrl.pulse, seed: (Math.random() * 1e6) | 0 });
   trialSet = { course: own.hdg, speed: own.stw };
@@ -99,7 +100,7 @@ function tick(dt) {
   // 안테나 스윕(실시간 2.5 s/회전)
   // 버퍼 거리는 오프셋 크기와 상관없이 고정(매 프레임 바뀌면 PPI가 매번 지워짐) — 오프셋 최대 0.75 R
   const bufR = V.rangeNM * (V.motion === 'TM' || offCenter ? 1.75 : 1);
-  const nl = Math.round((dt / 2.5) * N_BRG), oxy = ownXY(), trailOn = S.disp.trails.time > 0, tl = S.disp.trails.level;
+  antAcc += (dt / 2.5) * N_BRG; const nl = Math.floor(antAcc); antAcc -= nl; const oxy = ownXY(), trailOn = S.disp.trails.time > 0, tl = S.disp.trails.level;
   for (let k = 0; k < nl; k++) {
     const bi = (ant + k) & (N_BRG - 1), raw = rawLine(scene, bi, 512, bufR);
     const lv = processLine(raw, S.ctrl, { brgIdx: bi, prevRaw, prevScan: prevScan[bi], maxRng: bufR, nBins: 512 });
@@ -211,7 +212,7 @@ function refreshUI() {
     cursor: cur, ebl: tools.ebl.map((e, i) => ({ on: e.on, brg: S.disp.eblRef === 'REL' ? wrap360(tools.eblTrue(i, o.hdg) - o.hdg) : tools.eblTrue(i, o.hdg) })),
     vrm: tools.vrm.map((v) => ({ on: v.on, rng: toUnit(v.rng, S.disp.vrmUnit), ttg: S.disp.vrmTTG && v.on ? vrmTTG(v.rng, o.sog) : null })),
     tgt: [slot(selected[0]), slot(selected[1])], ttN: tracker.targets().filter((g) => g.state !== 'lost').length, aisN: ais.list().filter((a) => a.status !== 'lost').length,
-    alertTop: top ? { ...top, time: `${pad(((top.t0 % 86400) / 3600) | 0)}:${pad(((top.t0 % 3600) / 60) | 0)}:${pad((top.t0 % 60) | 0)}` } : null, alertN: alerts.list().length, scnName: W.name,
+    alertTop: top ? { ...top, time: `${pad(((top.tSim % 86400) / 3600) | 0)}:${pad(((top.tSim % 3600) / 60) | 0)}:${pad((top.tSim % 60) | 0)}` } : null, alertN: alerts.list().length, scnName: W.name,
   });
   conn && conn.refresh();
   const tb = document.getElementById('bxTrial'); if (tb) { tb.hidden = S.tt.trialMode === 'OFF'; tb.querySelector('#trC').textContent = trialSet.course.toFixed(0).padStart(3, '0') + '°'; tb.querySelector('#trS').textContent = trialSet.speed.toFixed(1) + ' kn'; tb.querySelector('#trD').textContent = S.tt.trialDelay + ' min'; }
@@ -223,8 +224,9 @@ function cursorInfo(c) {
 
 /* ---------- 경보음 ---------- */
 let actx = null;
+const shouldBeep = () => !(paused || hiddenPause) && S.alert.volume !== 'OFF' && alerts.sounding();
 function beep() {
-  if (!alerts.sounding() || S.alert.volume === 'OFF' || TEST) return;
+  if (TEST || !shouldBeep()) return;
   try { actx ||= new AudioContext(); const os = actx.createOscillator(), gn = actx.createGain(); os.frequency.value = 1050; gn.gain.value = { LOW: 0.04, MID: 0.09, HIGH: 0.18 }[S.alert.volume] || 0.09; os.connect(gn).connect(actx.destination); os.start(); os.stop(actx.currentTime + 0.18); } catch (e) {}
 }
 
@@ -249,7 +251,7 @@ const PRESET_ORDER = ['NEAR', 'FAR', 'ROUGH SEA', 'SHIP', 'HARBOR', 'COAST', 'CU
 const TRAIL_ORDER = [0, 30, 180, 360, 900];
 Object.assign(actions, {
   tx: toggleTx,
-  mode: () => { const o = ['HU', 'CU', 'NU']; S.disp.orient = o[(o.indexOf(S.disp.orient) + 1) % 3]; V.crs = W ? W.own.hdg : 0; tmOff = { x: 0, y: 0 }; ppi.clear(); saveSettings(); },
+  mode: () => { const o = S.disp.motion === 'TM' ? ['CU', 'NU'] : ['HU', 'CU', 'NU']; S.disp.orient = o[(o.indexOf(S.disp.orient) + 1) % 3]; V.crs = W ? W.own.hdg : 0; tmOff = { x: 0, y: 0 }; ppi.clear(); saveSettings(); },
   motion: () => { S.disp.motion = S.disp.motion === 'RM' ? 'TM' : 'RM'; tmOff = { x: 0, y: 0 }; if (S.disp.motion === 'TM' && S.disp.orient === 'HU') S.disp.orient = 'NU'; saveSettings(); },
   off: () => { offCenter = offCenter ? null : { x: 0, y: 0.5 }; },
   preset: () => { const i = PRESET_ORDER.indexOf(S.ctrl.preset); applyPreset(S, PRESET_ORDER[(i + 1) % PRESET_ORDER.length]); saveSettings(); },
@@ -375,10 +377,10 @@ if (!TEST) starter.openStart();
 if (TEST) {
   window.RadarTest = {
     ready: true, S, ppi, view: () => V, setView: (o) => Object.assign(V, o), setRange: (r) => { S.disp.rangeNM = r; V.rangeNM = r; }, frames: () => frames, tick, frameAt, own, paused: () => paused || hiddenPause, setPaused: (p) => { paused = p; }, KEYMAP, keyHandlers,
-    radar: { set: setRadar, toggle: toggleTx, get state() { return radar.state; } }, world: () => W, tracker: { targets: () => tracker.targets() },
+    radar: { set: setRadar, toggle: toggleTx, get state() { return radar.state; }, get warmLeft() { return radar.warmLeft; } }, world: () => W, tracker: { targets: () => tracker.targets() },
     newWorld: (o) => startWorld(freeDef(o)), tgtScreen: (id) => { const g = W.targets.find((x) => x.id === id), r = relOf(P.x(g.lon), P.y(g.lat)), p = ppi.toScreen(r.brg, r.rng); return { sx: p.x, sy: p.y }; },
     cursorAct, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,
-    startScenario: (id, o) => starter.startScenario(id, o), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), finishNow: () => starter.finishNow(), relayout: () => { fit(); }, layoutMode: () => ui.layoutMode(), forceState: (o) => { if (o.az) { azZones = o.az; tracker.setZones(o.az); } if (o.speed) speed = o.speed; if (o.pi !== undefined) piOn = o.pi; }, uiState: () => ({ az: azZones.length > 0, speed, pi: piOn, off: !!offCenter }), tickSim, sim: { setAuto, setRudderOrder, setTelegraph }, menuItems: () => MENU.flatMap((m) => m.items.map((i) => (lang() === 'en' ? i.en : i.ko))),
+    startScenario: (id, o) => starter.startScenario(id, o), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), finishNow: () => starter.finishNow(), shouldBeep, antenna: () => ant, relayout: () => { fit(); }, layoutMode: () => ui.layoutMode(), forceState: (o) => { if (o.az) { azZones = o.az; tracker.setZones(o.az); } if (o.speed) speed = o.speed; if (o.pi !== undefined) piOn = o.pi; }, uiState: () => ({ az: azZones.length > 0, speed, pi: piOn, off: !!offCenter }), tickSim, sim: { setAuto, setRudderOrder, setTelegraph }, menuItems: () => MENU.flatMap((m) => m.items.map((i) => (lang() === 'en' ? i.en : i.ko))),
   };
   setRadar('tx');
 }

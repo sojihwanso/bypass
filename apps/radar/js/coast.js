@@ -39,13 +39,20 @@ export function ringsToLonLat(ci, rj, rings) {
 
 function bboxOf(r) { let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; for (let i = 0; i < r.length; i += 2) { if (r[i] < x0) x0 = r[i]; if (r[i] > x1) x1 = r[i]; if (r[i + 1] < y0) y0 = r[i + 1]; if (r[i + 1] > y1) y1 = r[i + 1]; } return { x0, x1, y0, y1 }; }
 
+/* 열 해독 결과 캐시: 불러오는 함수마다 따로(테스트·실패 대체 함수가 섞이지 않게). 실패는 저장하지 않음 */
+const CACHE = new WeakMap();
+function column(fetchText, ci) {
+  let m = CACHE.get(fetchText); if (!m) CACHE.set(fetchText, (m = new Map()));
+  if (!m.has(ci)) m.set(ci, Promise.resolve(fetchText(ci)).then(decodeColumn).catch((e) => { m.delete(ci); throw e; }));
+  return m.get(ci);
+}
 /* bbox 안 육지 고리만 모아 돌려줌. 불러오기 실패해도 reject하지 않음 */
 export async function loadLand(bbox, fetchText = defaultFetch) {
   const out = [];
   try {
     const c0 = Math.floor((bbox.lon0 + 180) / 10), c1 = Math.floor((bbox.lon1 + 180) / 10);
     for (let c = c0; c <= c1; c++) {
-      const ci = ((c % 36) + 36) % 36, tiles = decodeColumn(await fetchText(ci));
+      const ci = ((c % 36) + 36) % 36, tiles = await column(fetchText, ci);
       for (let rj = Math.floor((bbox.lat0 + 90) / 10); rj <= Math.floor((bbox.lat1 + 90) / 10); rj++) {
         if (!tiles[rj]) continue;
         for (const r of ringsToLonLat(ci, rj, tiles[rj])) {
