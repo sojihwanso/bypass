@@ -1445,7 +1445,7 @@ function renderCoReg(name){
     if (!own && !mg) return;
     if (own){
       el.innerHTML = '<h2>KOSWEC 등록 선박 '+own.ships.length+'척 <span class="ctag r">등록</span></h2><div class="in">'+
-        '<p>선대 규모(위 숫자)와 기준이 다릅니다. 한국선원복지고용센터에 등록된 배만 셉니다.</p>'+
+        '<p>선단 규모(위 숫자)와 기준이 다릅니다. 한국선원복지고용센터에 등록된 배만 셉니다.</p>'+
         '<p class="note">'+firmTopTypes(own, 99).map(([i, n]) => esc(k.typeNames[i])+' '+n).join(', ')+'</p>'+
         '<p><a href="'+firmHref(own.id)+'">등록 선박 목록 보기</a></p></div>';
     } else {
