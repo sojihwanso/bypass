@@ -954,6 +954,7 @@ async function show(a, e) {
     if (zoom > 1.01 && f) { zx = f[0]; zy = f[1]; }
     bindView(svg);
     sayView();
+    prefetchAround();
   } catch (err) {
     viewOut.textContent = !GZ && location.protocol === "file:" ? "시점 전환은 웹 서버에서 열어야 됩니다" : "시점을 불러오지 못했습니다";
   }
@@ -1055,9 +1056,15 @@ function startViewer() {
   const f0 = FOCUS[keyOf(ai, ei)];
   if (3.2 > 1.01 && f0) { zoom = 3.2; zx = f0[0]; zy = f0[1]; applyZoom(); }
   sayView();
-  // 나머지 시점은 한가할 때 미리 받아 둔다
-  const idle = window.requestIdleCallback || ((f) => setTimeout(f, 400));
-  idle(async () => { for (let e = 0; e < ELS.length; e++) for (let a = 0; a < AZS.length; a++) { if (keyOf(a, e) === keyOf(8, 3)) continue; try { await viewAt(a, e); } catch { return; } } });
+  prefetchAround();
+}
+// 지금 시점의 바로 옆(좌우 한 칸, 위아래 한 칸)만 한가할 때 미리 받아 둔다. 전부 미리 받지 않아 방문자 전송량을 줄인다
+function prefetchAround() {
+  if (GZ) return;
+  const idle = window.requestIdleCallback || ((f) => setTimeout(f, 300));
+  const a0 = ai, e0 = ei, n = AZS.length;
+  const near = [[(a0 + 1) % n, e0], [(a0 + n - 1) % n, e0], [a0, e0 + 1], [a0, e0 - 1]].filter(([, e]) => e >= 0 && e < ELS.length);
+  idle(async () => { for (const [a, e] of near) { if (cache.has(keyOf(a, e))) continue; try { await viewAt(a, e); } catch { return; } } });
 }
 
 
