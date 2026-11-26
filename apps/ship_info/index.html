@@ -76,7 +76,7 @@ button{font:inherit;color:inherit}
 .cmp-top:hover{background:var(--accent-bg);color:#16181d;border-color:var(--accent-bg)}
 .cmp-top small{font-weight:400;font-size:12px;color:var(--muted)}
 .cmp-top:hover small{color:#16181d}
-.mast-top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 28px;padding:20px 24px 16px}
+.mast-top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 28px;padding:11px 24px 10px}
 .logo{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;text-decoration:none;color:var(--ink)}
 .logo b{color:var(--ink);white-space:nowrap;font-size:36px;font-weight:700;letter-spacing:-0.02em;line-height:1}
 .logo span{font-size:15px;color:var(--muted);font-weight:500}
@@ -398,6 +398,10 @@ dl.kv dd{margin:0}
 .rankline a{display:inline-flex;align-items:center;gap:8px;color:var(--ink);font-weight:600;text-decoration:none}
 .rankline .sym{width:34px;height:20px}
 .co-side{display:grid;gap:18px}
+/* 넓은 화면: 짧은 옆 칸이 따라 내려오게 (화면보다 길면 고정하지 않음) */
+@media (min-width:961px) and (min-height:760px){
+  .co-side{position:sticky;top:16px;align-self:start;max-height:calc(100vh - 32px);overflow:auto;scrollbar-width:thin}
+}
 .linklist{list-style:none;margin:0;padding:0}
 .linklist li{padding:7px 0;border-bottom:1px dashed var(--rule);font-size:14px}
 .linklist li:last-child{border-bottom:0}
@@ -2089,8 +2093,10 @@ function syncHash(){
 }
 /* ---------- 선종 표 아래: 등록 선박만 있는 회사 (기본 접힘) ---------- */
 const REG_BLOCK_FILTERS = ['kind','fleet','routes','cadet','reserve'];
+let regShown = 20, regShownFor = '';
 function renderRegGroup(typeId, topCount){
   const el = $('#reg-group');
+  if (regShownFor !== typeId){ regShown = 20; regShownFor = typeId; }
   if (!UNI_K){ el.hidden = true; uniReady().then(() => { if (currentType === typeId && currentView() === 'type'){ renderRegGroup(typeId, topCount); renderTypeHead(TYPE_BY_ID[typeId]); } }, () => {}); return; }
   const all = regOnlyFor(typeId);
   if (!all.length){ el.hidden = true; el.innerHTML = ''; return; }
@@ -2106,11 +2112,13 @@ function renderRegGroup(typeId, topCount){
   el.innerHTML =
     '<div class="rg-head"><button type="button" class="rg-btn" aria-expanded="'+open+'" aria-controls="reg-list">등록 선박만 있는 회사 '+all.length+'곳</button>'+
       (q ? '<span class="note">검색어에 맞는 회사 '+list.length+'곳</span>' : '')+'</div>'+
-    '<p class="note rg-desc">선사 자료 없이 한국선원복지고용센터 등록 선박만 있는 회사입니다. 이 선종 등록 척수가 많은 순입니다. <span class="ctag r">등록</span></p>'+
+    '<p class="note rg-desc">선사 자료 없이 한국선원복지고용센터 등록 선박만 있는 회사입니다. 이 선종 등록 척수가 많은 순이며, 위 필터 가운데 회사 이름 검색만 이 묶음에 적용됩니다. <span class="ctag r">등록</span></p>'+
     (list.length ? '<div class="table-scroll" id="reg-list"'+(open ? '' : ' hidden')+'><table class="wt"><thead><tr><th>회사</th><th>업종</th><th>이 선종</th><th>전체 등록</th><th>전화</th></tr></thead><tbody>'+
-      list.map(u => { const n = typeShipCount(u, typeId);
-        return '<tr data-n="'+n+'"><td><a href="'+coHref(u.n)+'" data-from-reg="'+esc(u.n)+'">'+esc(u.n)+'</a></td><td>'+esc(UNI_K.bizNames[u.firm.b])+'</td><td>'+n+'척</td><td>'+u.ships+'척</td><td class="mono">'+esc(u.firm.tel || '')+'</td></tr>'; }).join('')+
-      '</tbody></table></div>' : '<div id="reg-list" hidden></div>');
+      list.map((u, i) => { const n = typeShipCount(u, typeId);
+        return '<tr data-n="'+n+'"'+(i >= regShown ? ' hidden' : '')+'><td><a href="'+coHref(u.n)+'" data-from-reg="'+esc(u.n)+'">'+esc(u.n)+'</a></td><td>'+esc(UNI_K.bizNames[u.firm.b])+'</td><td>'+n+'척</td><td>'+u.ships+'척</td><td class="mono">'+esc(u.firm.tel || '')+'</td></tr>'; }).join('')+
+      '</tbody></table>'+(list.length > regShown ? '<button type="button" class="linkbtn more ships-more" data-reg-more>나머지 '+(list.length - regShown)+'곳 보기</button>' : '')+'</div>' : '<div id="reg-list" hidden></div>');
+  const rmb = el.querySelector('[data-reg-more]');
+  if (rmb) rmb.addEventListener('click', () => { regShown += 50; renderRegGroup(typeId, topCount); const b = el.querySelector('[data-reg-more]'); (b || el.querySelector('.rg-btn')).focus(); });
   el.querySelector('.rg-btn').addEventListener('click', () => {
     state.more = el.querySelector('.rg-btn').getAttribute('aria-expanded') !== 'true' ? 1 : -1;
     syncHash(); renderRegGroup(typeId, topCount);
