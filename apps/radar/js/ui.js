@@ -98,7 +98,6 @@ export function initUI(root, actions) {
       <button type="button" class="tg" data-act="vrm1">VRM1</button><span class="vv" id="vVrm1" data-wheel="vrm1">-</span><span class="lb" id="vTtg1"></span>
       <button type="button" class="tg" data-act="vrm2">VRM2</button><span class="vv" id="vVrm2" data-wheel="vrm2">-</span><span class="lb" id="vTtg2"></span></div></div>
     <div class="side side-l" id="sideL"></div><div class="side side-r" id="sideR"></div>
-    <button class="ver-foot" type="button" id="verFoot" aria-label="버전 ${VERSION}">v${VERSION}</button>
   </section>
   <aside class="rp" id="rp">
     <div class="sec" id="pnOwn"><h3><span data-t="own"></span><span class="num" id="vClock"></span></h3>
@@ -219,7 +218,7 @@ export function initUI(root, actions) {
   let taps = 0, tapT = 0;
   const eggTap = () => { const n = performance.now(); taps = n - tapT < 1500 ? taps + 1 : 1; tapT = n; if (taps >= 5) { taps = 0; openEgg(); } };
   function openEgg() { $('#eggBody').innerHTML = `${window.EGG_IMG ? `<img class="egg-img" src="${window.EGG_IMG}" alt="선교에서 바라본 석양">` : ''}<p>${esc(t('eggMsg'))}</p>`; $('#eggDlg').showModal(); }
-  $('#verTop').addEventListener('click', eggTap); $('#verFoot').addEventListener('click', eggTap);
+  $('#verTop').addEventListener('click', eggTap); /* 이 앱은 하단 버전 표시 없음(사용자 결정) */
 
   applyLang(); applyTheme();
 

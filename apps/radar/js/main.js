@@ -38,6 +38,7 @@ let offCenter = null, tmOff = { x: 0, y: 0 }, cursor = null, selected = [], uiMo
 let logFn = null, onScenarioTick = null, coastScreen = null, coastKey = '';
 const rnd = Math.random;
 const SPEEDS = [1, 2, 4, 8, 16, 32], MARKS = ['tri', 'circle', 'square', 'cross', 'anchor'], MARK_SYM = { tri: '▲', circle: '○', square: '□', cross: '✕', anchor: '⚓' };
+let lastClick = null, eduKey = '';
 let markShape = 0, tgtSort = 'rng', tgtTimer = null;
 let wxRun = null, wxPend = [], wxN = 0;
 
@@ -106,7 +107,7 @@ function weatherTick(run) {
 }
 function freeDef(o = {}) {
   const lat = o.lat ?? 34.35, lon = o.lon ?? 125.6, Pq = makeProj(lat, lon), at = (b, r) => ({ lat: Pq.lat(r * Math.cos(b * D)), lon: Pq.lon(r * Math.sin(b * D)) });
-  return { name: o.name || '', own: { lat, lon, hdg: o.hdg ?? 0, tele: o.tele }, targets: (o.targets || []).map((x, i) => ({ id: x.id || 't' + i, ...at(x.brg, x.rng), hdg: x.hdg, kn: x.kn, L: x.L ?? 120, ais: x.ais ?? true, name: x.name || 'SHIP ' + (i + 1), legs: x.legs || [] })), weather: o.weather || { sea: 2 }, aids: o.aids || [] };
+  return { name: o.name || '', own: { lat, lon, hdg: o.hdg ?? 0, tele: o.tele }, targets: (o.targets || []).map((x, i) => ({ id: x.id || 't' + i, ...at(x.brg, x.rng), hdg: x.hdg, kn: x.kn, L: x.L ?? 120, rcs: x.rcs ?? null, h: x.h ?? null, ais: x.ais ?? true, name: x.name || 'SHIP ' + (i + 1), mmsi: x.mmsi, legs: x.legs || [] })), weather: o.weather || { sea: 2 }, aids: o.aids || [] };
 }
 const D = Math.PI / 180;
 
@@ -374,7 +375,7 @@ const ov = ui.overCanvas;
 ov.addEventListener('pointermove', (e) => { const r = ov.getBoundingClientRect(); cursor = { x: e.clientX - r.left, y: e.clientY - r.top }; if (uiMode === 'ruler' && rulerA) { const b = screenToWorld(cursor), d = brgRng(rulerA.x, rulerA.y, b.x, b.y); ruler = { a: relOf(rulerA.x, rulerA.y), b: relOf(b.x, b.y), label: `${d.brg.toFixed(1)}° ${d.rng.toFixed(3)} NM` }; } });
 ov.addEventListener('pointerleave', () => { cursor = null; });
 ov.addEventListener('click', (e) => {
-  if (!W) return; const r = ov.getBoundingClientRect(), pos = { x: e.clientX - r.left, y: e.clientY - r.top }, w = screenToWorld(pos);
+  if (!W) return; const r = ov.getBoundingClientRect(), pos = { x: e.clientX - r.left, y: e.clientY - r.top }, w = screenToWorld(pos); lastClick = { brg: w.brg, rng: w.rng };
   if (uiMode === 'az1') { azStart = w; uiMode = 'az2'; return; }
   if (uiMode === 'az2') { const a = azStart, z = { brg0: a.brg, brg1: w.brg, rng0: Math.min(a.rng, w.rng), rng1: Math.max(a.rng, w.rng) }; azZones = [...azZones, z].slice(-2); tracker.setZones(azZones); uiMode = null; return; }
   if (uiMode === 'mark') { if (W.userMarks.length < 50) W.userMarks.push({ lat: w.lat, lon: w.lon, shape: MARKS[markShape] }); uiMode = null; return; }
@@ -435,6 +436,34 @@ setRange(S.disp.rangeNM);
 const starter = initStart(ui);
 initHelp();
 requestAnimationFrame(frame);
+/* 교육 과정 창구(edu-steps.js가 화면을 맞추고 판정을 읽음) */
+function eduSetup(o = {}, key = '') {
+  const lat = o.lat ?? 33.45, lon = o.lon ?? 124.55, hdg = o.hdg ?? 0, kn = 14, Pq = makeProj(lat, lon);
+  const at = (b, r) => ({ lat: Pq.lat(r * Math.cos(b * D)), lon: Pq.lon(r * Math.sin(b * D)) });
+  const tg = (o.targets || []).map((x) => {
+    if (!x.collide) return x; const { brg, rng, min } = x.collide, h = min / 60, ov = velXY(hdg, kn), sx = rng * Math.sin(brg * D), sy = rng * Math.cos(brg * D), vx = (ov.vx * h - sx) / h, vy = (ov.vy * h - sy) / h;
+    return { ...x, brg, rng, hdg: wrap360(Math.atan2(vx, vy) / D), kn: Math.hypot(vx, vy) };
+  });
+  const wx = { kind: 'clear', sea: 1, windFrom: 0, windMs: 3, ...(o.weather || {}) }; wx.rain = (wx.rain || []).map((c) => (c.brg !== undefined ? { ...c, ...at(c.brg, c.rng) } : c));
+  startWorld(freeDef({ lat, lon, hdg, targets: tg, weather: wx, aids: (o.aids || []).map((a) => ({ ...a, ...at(a.brg, a.rng) })) }));
+  W.weather.fixed = true; logFn = null; onScenarioTick = null; wxRun = null; paused = false; speed = 1;
+  Object.assign(S.ctrl, { gain: 65, sea: { auto: false, val: 30 }, rain: { auto: false, val: 0 }, tune: { auto: true, val: 50 }, band: 'X', ir: 2, es: 0, eav: 0, ace: false, secondRej: false }, o.ctrl || {});
+  if (o.tt) Object.assign(S.tt, o.tt);
+  setRange(o.range || 6); setRadar(o.tx === false ? 'stby' : 'tx'); eduKey = key;
+}
+const eduTgt = (id) => W && W.targets.find((g) => g.id === id);
+window.RadarEdu = {
+  S, setup: eduSetup, ensure: (key, o) => { if (eduKey !== key || !W) eduSetup(o, key); }, key: () => eduKey, world: () => W, radar: () => radar.state,
+  rel: (id) => { const g = eduTgt(id); return g ? relOf(P.x(g.lon), P.y(g.lat)) : null; },
+  cursorRel: () => (cursor && W ? ppi.fromScreen(cursor.x, cursor.y) : null), lastClick: () => lastClick,
+  ebl: (i) => ({ on: tools.ebl[i].on, brg: tools.eblTrue(i, W.own.hdg) }), vrm: (i) => ({ on: tools.vrm[i].on, rng: tools.vrm[i].rng }),
+  acquire: (id) => { const g = eduTgt(id); if (!g) return null; const tid = tracker.acquire(P.x(g.lon), P.y(g.lat), W.t); if (tid) select(tid); return tid; },
+  detects: (id) => { const g = eduTgt(id); if (!g || !scene) return false; const q = relOf(P.x(g.lon), P.y(g.lat)), x = q.rng * Math.sin(q.brg * D), y = q.rng * Math.cos(q.brg * D); return detect(scene, S.ctrl, rnd).some((d) => Math.hypot(d.x - x, d.y - y) < 0.25); },
+  tracker: () => tracker, ais: () => ais, alerts: () => alerts, tools: () => tools, speed: () => speed, piOn: () => piOn, selected: () => selected, trialSet: () => trialSet,
+  marks: () => (W ? W.userMarks.length : 0), conn: () => ({ shown: conn && conn.shown, rudderOrder: W.own.rudderOrder, auto: { ...W.own.auto } }),
+  startScenario: (id, o) => starter.startScenario(id, o), finishNow: () => starter.finishNow(), lastResult: () => starter.lastResult(), ctrl: (o) => Object.assign(S.ctrl, o),
+  setTx: () => { if (radar.state === 'stby') setRadar('tx'); }, setSpeed: (n) => setSpeed(n), setRange: (r) => setRange(r),
+};
 if (!TEST) starter.openStart();
 if (TEST) {
   window.RadarTest = {
