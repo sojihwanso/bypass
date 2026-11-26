@@ -48,11 +48,14 @@ img { max-width: 100%; display: block; }
 body .bp-home { bottom: calc(max(16px, env(safe-area-inset-bottom)) + 4px); } /* 목차 단추(48px)와 가운데 줄 맞춤 */
 body .bp-home span { animation: none; }
 .toc-btn { transition: transform .25s; }
-body:has(.bp-home:hover) .toc-btn, body:has(.bp-home:focus-visible) .toc-btn { transform: translateX(52px); }
+@media (hover: hover) { body:has(.bp-home:hover) .toc-btn { transform: translateX(52px); } } /* 터치 기기에서 hover가 남아 밀려 있지 않게 */
+body:has(.bp-home:focus-visible) .toc-btn { transform: translateX(52px); }
 @media (prefers-reduced-motion: reduce) { .toc-btn { transition: none; } }
 :root[data-theme="dark"] .toc-btn { background: #E6EEF2; color: #08131C; }
 .toc-btn svg { width: 20px; height: 20px; }
 .toc-btn .cnt { font-size: var(--s-13); font-weight: 500; opacity: .8; font-variant-numeric: tabular-nums; }
+/* 아주 좁은 화면(380px 이하)에서는 목차 단추의 '1/44'를 숨겨 오른쪽 진도 표시와 겹치지 않게 한다(같은 정보가 진도 표시에 있다) */
+@media (max-width: 380px) { .toc-btn .cnt { display: none; } }
 
 /* 진도 띠 */
 .progress { position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 39; display: flex; align-items: center; gap: 12px; height: 48px; padding: 0 18px; border-radius: 999px; background: color-mix(in srgb, var(--surface) 92%, transparent); border: 1px solid var(--rule); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); font-size: var(--s-13); color: var(--muted); box-shadow: var(--shadow); }
