@@ -14,7 +14,7 @@ export default [
  })},
  {name:'mobile-header-dark-filled', fn: async () => {
    for (const theme of ['light','dark']) await withPage({width:390,height:844,theme,init:{fn: () => localStorage.setItem('sasarok-cmp-v1', JSON.stringify({co:['HMM','팬오션'], ty:['lng']}))}}, async p => {
-     const r = await p.evaluate(() => ({w: document.documentElement.scrollWidth, logo: document.querySelector('.bp-logo').getBoundingClientRect().right}));
+     const r = await p.evaluate(() => ({w: document.documentElement.scrollWidth, logo: document.querySelector('.home-logo').getBoundingClientRect().right}));
      assert(r.w <= 390 && r.logo <= 390, theme+' '+JSON.stringify(r));
    });
  }}

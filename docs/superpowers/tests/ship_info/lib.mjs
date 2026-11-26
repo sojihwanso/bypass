@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { chromium } = require('/Users/turo/.npm/_npx/9833c18b2d85bc59/node_modules/playwright-core');
-export const BASE = 'http://127.0.0.1:8765/apps/ship_info/index.html';
+export const BASE = process.env.SASAROK_BASE || 'http://127.0.0.1:8765/apps/ship_info/index.html';
 let browser;
 export async function getBrowser(){ if(!browser) browser = await chromium.launch({ channel:'chrome', headless:true }); return browser; }
 export async function closeBrowser(){ if(browser) await browser.close(); browser = null; }
