@@ -62,7 +62,8 @@
 ### 함수 `ship-news`
 - GET 하나. 로그인 필요 없음(공개 소식), 대시보드에서 'Verify JWT' 끔. CORS는 BYPASS 주소만(market과 같은 목록).
 - 동작: `last_fetch`가 24시간 넘었으면 먼저 `last_fetch`를 지금으로 바꾸고(동시에 여러 번 수집하지 않게) 수집·저장한 뒤 돌려준다. 아니면 표에서 바로 돌려준다.
-- 응답: `{updated:'ISO 시각', items:[{d,c,t,s,u,p}]}` — 최근 30일, 최신순, 최대 200건(용량 항목 참고).
+- 응답: `{updated:'ISO 시각', items:[{d,c,t,s,u,p}]}`. 주소에 `?since=<ISO 시각>`이 있으면 그 뒤에 새로 들어온 소식만(최대 300건), 없으면 최신 150건. (실제 수집량이 3일에 약 600건으로 예상보다 많아 구현 중 바꿈, 내 판단)
+- 구글 뉴스는 검색어마다 최신 10건만 받는다. 카고뉴스는 항공 화물 기사가 섞여 해운 낱말로 거른다.
 
 ### 앱 (선사록 v3.1.0)
 - `NEWS_FEED.url = 'https://itzdjdgjqcpmxdfssfel.supabase.co/functions/v1/ship-news'`.
