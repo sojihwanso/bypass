@@ -84,6 +84,7 @@ header.top .bar{height:100%;display:flex;align-items:center;gap:14px;padding-lef
 .sbb.dd::after,.iab.dd::after{content:"";position:absolute;right:3px;bottom:3px;border:4px solid transparent;border-right-color:currentColor;border-bottom-color:currentColor;opacity:.6}
 .sbb.ic{padding:0 8px;min-width:30px;justify-content:center}
 .sbb.sfb b{margin-left:4px}
+.cnt-in{display:flex;align-items:center;gap:8px}.cnt-in input{width:90px}.cnt-in small{color:var(--muted);font-size:11.5px;white-space:nowrap}
 .sf-zones{display:grid;gap:6px}.sf-zones>div{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:10px;font-size:13px}.sf-zones i{display:block;width:28px;height:18px;border:1px solid var(--rule);border-radius:3px}.sf-zones span{color:var(--muted)}
 .sbb.ic svg{width:15px;height:15px}
 .sbg{display:inline-flex;gap:2px;flex:0 0 auto}
@@ -928,7 +929,7 @@ setRud:"타각 지시 (−좌현 / +우현)",setRpm:"기관 RPM 지시",evEng:"�
 shipType:"선종",container:"컨테이너선",loadCond:"적재 상태",fullLoad:"만재 (Full load)",breadth:"형폭",depthMld:"형심",ccrpV:"선미에서 {0} m (선교)",speedTable:"기관 속력표",order:"명령",
 ownNote:"치수와 조종 성능은 첨부 일반배치도와 선회권(만재) 자료를 바탕으로 했습니다. 선회 성능은 자료에 맞춘 근사 모델이며 실제 선박과 다를 수 있습니다.",
 foot:"ECDIS(전자해도표시정보시스템) 조작을 연습하기 위한 학습용 시뮬레이터입니다. 화면 구성과 메뉴 이름은 상용 ECDIS 운용자 매뉴얼의 항해 화면을 참고해 단순화했으며, 특정 제조사의 상표와 제품명은 표시하지 않았습니다. 해도는 <b>전 세계</b>(WGS84 · 메르카토르)이며, 해안선은 <b>GSHHG 2.3.7</b>(Wessel &amp; Smith, LGPL) 고해상도 자료를 축척에 따라 단계별로 씁니다. 수심은 해안 거리와 대륙붕 범위로 근사한 값이고, 항로표지·위험물·AIS/TT 물표와 시작 위치는 시나리오마다 <b>무작위로 생성</b>됩니다. 자선은 컨테이너선(LOA 185.98 m, 만재 흘수 11.0 m)이며 첨부 선회권과 속력표로 조종 성능을 맞췄습니다.",
-footBook:"<b>참고 자료</b>상용 ECDIS 운용자 매뉴얼 (IEC 62923-1/2 적합 장비), IHO S-52 · IEC 62288 · IEC 61174. 해안선: Wessel, P. &amp; W. H. F. Smith, GSHHG 2.3.7 (LGPL). 지명: Natural Earth (퍼블릭 도메인). 기호와 색상은 표준을 바탕으로 근사했으며 실제 장비 화면과 다를 수 있습니다.",
+footBook:"<b>참고 자료</b>상용 ECDIS 운용자 매뉴얼 (IEC 62923-1/2 적합 장비), IHO S-52 · IEC 62288 · IEC 61174. 해안선: Wessel, P. &amp; W. H. F. Smith, GSHHG 2.3.7 (LGPL). 지명: Natural Earth (퍼블릭 도메인). 기호와 색상은 표준을 바탕으로 근사했으며 실제 장비 화면과 다를 수 있습니다. <b>교육 과정 근거</b>조익순·김대해, 『항해사를 위한 ECDIS 기초』(17.3·17.4 알람·안전값, 20.1 알람 확인 절차, 21장 수심 및 등심선 알람, 26장 항로 계획의 안전성 점검) · IMO MSC.232(82) ECDIS 성능기준 5.8·5.9·11.2 · IMO MSC.302(87) 선교 경보 관리(BAM) 7.3·7.5·7.6·9.18 · IMO A.893(21) 항해 계획 지침 · UKHO ADMIRALTY, ‘Understanding ECDIS: beyond the default 30 m safety contour’(2026) · Marine Insight, ‘Proper Use Of ECDIS Safety Settings’. 얕은 등심선 = 흘수, 깊은 등심선 = 흘수 × 2는 업계 관행이며 회사 규정이 우선합니다.",
 loadingW:"전 세계 해안선 준비 중…",ctlMini:"작게 / 크게"
 });
 Object.assign(I18N.en,{
@@ -941,7 +942,7 @@ setRud:"Rudder order (−port / +stbd)",setRpm:"Engine RPM order",evEng:"Engine 
 shipType:"Type",container:"Container ship",loadCond:"Loading",fullLoad:"Full load",breadth:"Breadth (mld)",depthMld:"Depth (mld)",ccrpV:"{0} m from stern (bridge)",speedTable:"Engine speed table",order:"Order",
 ownNote:"Dimensions and handling follow the attached general arrangement and full-load turning-circle data. Turning is an approximate fitted model and may differ from the real ship.",
 foot:"A training simulator for practising ECDIS operation. The screen layout and menu names follow a simplified version of the voyage navigation screen described in a commercial ECDIS operator's manual; manufacturer trademarks and product names are not shown. The chart covers <b>the whole world</b> (WGS84 · Mercator). Coastlines use <b>GSHHG 2.3.7</b> (Wessel &amp; Smith, LGPL) at levels of detail matched to the display scale. Depths are approximated from distance to the coast and shelf extent; aids to navigation, hazards, AIS/TT targets and the start position are <b>randomly generated</b> for every scenario. Own ship is a container ship (LOA 185.98 m, full-load draught 11.0 m) tuned to the attached turning circle and speed table.",
-footBook:"<b>References</b>Commercial ECDIS operator's manual (IEC 62923-1/2 type-approved equipment), IHO S-52, IEC 62288, IEC 61174. Shorelines: Wessel, P. &amp; W. H. F. Smith, GSHHG 2.3.7 (LGPL). Place names: Natural Earth (public domain). Symbols and colours are approximations and may differ from real equipment.",
+footBook:"<b>References</b>Commercial ECDIS operator's manual (IEC 62923-1/2 type-approved equipment), IHO S-52, IEC 62288, IEC 61174. Shorelines: Wessel, P. &amp; W. H. F. Smith, GSHHG 2.3.7 (LGPL). Place names: Natural Earth (public domain). Symbols and colours are approximations and may differ from real equipment. <b>Training references</b>Cho &amp; Kim, <i>ECDIS Basics for Navigators</i> (Korean; alarms and safety values 17.3–17.4, alarm procedure 20.1, depth and contour alarms ch. 21, route safety check ch. 26) · IMO MSC.232(82) ECDIS performance standards 5.8, 5.9, 11.2 · IMO MSC.302(87) Bridge Alert Management 7.3, 7.5, 7.6, 9.18 · IMO A.893(21) Guidelines for voyage planning · UKHO ADMIRALTY, ‘Understanding ECDIS: beyond the default 30 m safety contour’ (2026) · Marine Insight, ‘Proper Use Of ECDIS Safety Settings’. Shallow contour = draught and deep contour = 2 × draught are common conventions; company rules take precedence.",
 loadingW:"Preparing world shorelines…",ctlMini:"Compact / full"
 });
 /* 메뉴별 도움말: 자선 조종 항목 교체 */
@@ -976,7 +977,7 @@ evFree:"Free sailing started (seed {0})",evResume:"Resumed saved scenario",loadi
 
 /* ---- v1.5 ---- */
 Object.assign(I18N.ko,{
-sb_ownc:"자선으로",sb_safe:"안전 수심선",safeTip:"안전 수심선 설정 (얕은·안전·깊은 등심선, 안전 수심)",sfTitle:"안전 수심선 설정",sfShip:"자선 흘수 {0} m · UKC 기준 흘수의 {1}%",sfDraft:"현재 흘수 · Draught (m)",sfDraftS:"적하·밸러스트로 흘수가 바뀌면 여기서 고쳐요 (2~22 m)",sfUkcNow:"UKC 기준: 흘수의 {0}% (자선 정보에서 변경)",sfRec:"흘수 기준 추천값 넣기",sfRecNote:"얕은 = 흘수 {0} m → {1} m · 안전 = 흘수 + UKC {2} m → {3} m · 깊은 = 흘수 × 2 {4} m → {5} m (해도에 없는 값은 다음 깊은 등심선)",sfRecDone:"흘수 기준 추천값을 넣었습니다.",sfApplied:"적용 중인 안전 등심선: {0} m",sfZones:"수심 색 구분",z_sh:"얕은 물 · Shallow water",z_nn:"항해 불가 수역 · Non-navigable water",z_nv:"항해 가능 수역 · Navigable water",z_dw:"깊은 물 · Deep water",sfNone:"없음 (얕은 등심선 = 안전 등심선)",sfNote:"깊은 등심선 = 흘수 × 2는 통상적인 기준이에요. 회사 SMS 규정이 있으면 그 값을 따르세요. 경보를 줄이려고 값을 흘수보다 낮추면 안 돼요.",owncTip:"자선을 화면 중앙으로",upTip_NU:"N UP · 진북 위",upTip_HU:"H UP · 선수 방향 위",upTip_CU:"C UP · 침로(COG) 위",
+sb_ownc:"자선으로",sb_safe:"안전 수심선",cntApplied:"적용 {0} m",safeTip:"안전 수심선 설정 (얕은·안전·깊은 등심선, 안전 수심)",sfTitle:"안전 수심선 설정",sfShip:"자선 흘수 {0} m · UKC 기준 흘수의 {1}%",sfDraft:"현재 흘수 · Draught (m)",sfDraftS:"적하·밸러스트로 흘수가 바뀌면 여기서 고쳐요 (2~22 m)",sfUkcNow:"UKC 기준: 흘수의 {0}% (자선 정보에서 변경)",sfRec:"흘수 기준 추천값 넣기",sfRecNote:"얕은 = 흘수 {0} m → {1} m · 안전 = 흘수 + UKC {2} m → {3} m · 깊은 = 흘수 × 2 {4} m → {5} m (해도에 없는 값은 다음 깊은 등심선)",sfRecDone:"흘수 기준 추천값을 넣었습니다.",sfApplied:"적용 중인 안전 등심선: {0} m",sfZones:"수심 색 구분",z_sh:"얕은 물 · Shallow water",z_nn:"항해 불가 수역 · Non-navigable water",z_nv:"항해 가능 수역 · Navigable water",z_dw:"깊은 물 · Deep water",sfNone:"없음 (얕은 등심선 = 안전 등심선)",sfNote:"깊은 등심선 = 흘수 × 2는 통상적인 기준이에요. 회사 SMS 규정이 있으면 그 값을 따르세요. 경보를 줄이려고 값을 흘수보다 낮추면 안 돼요.",owncTip:"자선을 화면 중앙으로",upTip_NU:"N UP · 진북 위",upTip_HU:"H UP · 선수 방향 위",upTip_CU:"C UP · 침로(COG) 위",
 ia_llroute:"위경도<br>입력",llTitle:"위경도로 항로 만들기",dragTip:"끌어서 순서 바꾸기",rtCount:"저장 항로 {0} / {1}",rtGen:"시나리오",rtLL:"위경도",rtGo:"시작",rtMax:"항로는 최대 {0}개까지 저장됩니다. 항로 관리에서 하나를 지운 뒤 다시 시도하세요.",
 llNote:"도°분.분′ 형식(커서 표시와 같음). 60분 = 1도. N/S·E/W 버튼을 누르면 반구가 바뀝니다.",llCursor:"+ 커서 위치",llOwn:"+ 자선 위치",rtLLEdit:"위경도로 항로 편집",llSaveGo:"저장 후 이 항로로 시작",llBad:"빨간 행의 위경도를 확인하세요 (도는 정수, 분은 0~59.999).",
 scFreeP:"정해진 목표 없이 자유롭게 항해합니다. 저장된 항로를 골라 그 항로에서 시작할 수도 있습니다.",scRoute:"항로",scNoRoute:"없음",scNoLib:"저장된 항로 없음 (항로계획 → 위경도 입력)",scStartPos:"시작 위치",scTraffic:"교통량",scLevel:"난이도",
@@ -987,7 +988,7 @@ gTitle:"목표 도달",gP:"GOAL WPT 0.3 NM 안에 들어왔습니다. 시나리�
 evGoal:"목표 WPT 도달",evLevel:"난이도 {0}"
 });
 Object.assign(I18N.en,{
-sb_ownc:"OWN SHIP",sb_safe:"Safety contour",safeTip:"Safety contour settings (shallow, safety, deep contours, safety depth)",sfTitle:"Safety contour settings",sfShip:"Own ship draught {0} m · UKC policy {1}% of draught",sfDraft:"Current draught (m)",sfDraftS:"Update it when loading or ballasting changes the draught (2–22 m)",sfUkcNow:"UKC policy: {0}% of draught (change in Own ship info)",sfRec:"Fill from draught",sfRecNote:"Shallow = draught {0} m → {1} m · Safety = draught + UKC {2} m → {3} m · Deep = 2 × draught {4} m → {5} m (values not in the chart use the next deeper contour)",sfRecDone:"Recommended values from the draught applied.",sfApplied:"Safety contour in use: {0} m",sfZones:"Depth shades",z_sh:"Shallow water",z_nn:"Non-navigable water",z_nv:"Navigable water",z_dw:"Deep water",sfNone:"None (shallow contour = safety contour)",sfNote:"Deep contour = 2 × draught is a common convention. Follow your company SMS if it sets other values. Never lower the values below the draught to silence alarms.",owncTip:"Centre own ship",upTip_NU:"N UP · true north up",upTip_HU:"H UP · heading up",upTip_CU:"C UP · course (COG) up",
+sb_ownc:"OWN SHIP",sb_safe:"Safety contour",cntApplied:"in use {0} m",safeTip:"Safety contour settings (shallow, safety, deep contours, safety depth)",sfTitle:"Safety contour settings",sfShip:"Own ship draught {0} m · UKC policy {1}% of draught",sfDraft:"Current draught (m)",sfDraftS:"Update it when loading or ballasting changes the draught (2–22 m)",sfUkcNow:"UKC policy: {0}% of draught (change in Own ship info)",sfRec:"Fill from draught",sfRecNote:"Shallow = draught {0} m → {1} m · Safety = draught + UKC {2} m → {3} m · Deep = 2 × draught {4} m → {5} m (values not in the chart use the next deeper contour)",sfRecDone:"Recommended values from the draught applied.",sfApplied:"Safety contour in use: {0} m",sfZones:"Depth shades",z_sh:"Shallow water",z_nn:"Non-navigable water",z_nv:"Navigable water",z_dw:"Deep water",sfNone:"None (shallow contour = safety contour)",sfNote:"Deep contour = 2 × draught is a common convention. Follow your company SMS if it sets other values. Never lower the values below the draught to silence alarms.",owncTip:"Centre own ship",upTip_NU:"N UP · true north up",upTip_HU:"H UP · heading up",upTip_CU:"C UP · course (COG) up",
 ia_llroute:"Lat/Lon<br>Entry",llTitle:"New route by lat/lon",dragTip:"Drag to reorder",rtCount:"Saved routes {0} / {1}",rtGen:"scenario",rtLL:"Lat/Lon",rtGo:"Start",rtMax:"Up to {0} routes can be saved. Delete one in Manage Data and try again.",
 llNote:"deg°min.min′ format, same as the cursor readout. 60 min = 1°. Tap N/S or E/W to switch hemisphere.",llCursor:"+ Cursor",llOwn:"+ Own ship",rtLLEdit:"Edit route by lat/lon",llSaveGo:"Save and start on this route",llBad:"Check the red rows (whole degrees, minutes 0–59.999).",
 scFreeP:"Sail freely with no set goal. You can pick a saved route to start on it.",scRoute:"Route",scNoRoute:"None",scNoLib:"No saved routes (PLAN → Lat/Lon entry)",scStartPos:"Start",scTraffic:"Traffic",scLevel:"Difficulty",
@@ -2951,7 +2952,7 @@ function dlgUCSelect(){const cur=S.ucActive||[];
 /* ================= UI ================= */
 const VERSION="2.9.0";
 const PATCH_NOTES=[
-{v:"2.9.0",d:"2026-11-26",ko:["경보 상자에 '소리 끄기' 단추 추가: 경보음만 30초 동안 멈추고, 그 사이 확인하지 않으면 다시 울림, 새 경보는 바로 울림(IMO MSC.302(87) 7.3.5)","과정 1에 알람 보는 법·끄는 법 5단계 추가: 상자 읽는 법, 경보 상태 네 가지, 대응 순서와 소리 끄기 해 보기, 확인했는데 안 사라지는 이유, 올바르게 끄는 방법 퀴즈"],en:["New SILENCE button in the alert box: mutes the buzzer for 30 s; it sounds again unless acknowledged, and new alerts sound at once (IMO MSC.302(87) 7.3.5)","Course 1 adds 5 steps on reading and handling alarms (Korean)"]},
+{v:"2.9.0",d:"2026-11-26",ko:["안전 수심선 값(얕은·안전·깊은 등심선, 안전 수심)을 목록 대신 키보드로 직접 입력, 해도에 없는 값은 다음 깊은 등심선이 적용되며 칸 옆에 적용 값 표시","교육 창의 근거 표시를 빼고 사이트 맨 아래 '교육 과정 근거'로 모음","경보 상자에 '소리 끄기' 단추 추가: 경보음만 30초 동안 멈추고, 그 사이 확인하지 않으면 다시 울림, 새 경보는 바로 울림(IMO MSC.302(87) 7.3.5)","과정 1에 알람 보는 법·끄는 법 5단계 추가: 상자 읽는 법, 경보 상태 네 가지, 대응 순서와 소리 끄기 해 보기, 확인했는데 안 사라지는 이유, 올바르게 끄는 방법 퀴즈"],en:["Safety contour values are typed in instead of picked from a list; the contour in use is shown next to each field","Training references moved to the page footer","New SILENCE button in the alert box: mutes the buzzer for 30 s; it sounds again unless acknowledged, and new alerts sound at once (IMO MSC.302(87) 7.3.5)","Course 1 adds 5 steps on reading and handling alarms (Korean)"]},
 {v:"2.8.0",d:"2026-11-26",ko:["흘수나 UKC 기준을 바꾸면, 그리고 시나리오를 시작할 때 얕은·안전·깊은 등심선과 안전 수심을 기준대로 자동으로 맞춤(얕은 = 흘수, 안전 = 흘수 + UKC, 깊은 = 흘수 × 2)","자선 정보 제원표의 흘수를 현재 흘수로 표시"],en:["Shallow, safety and deep contours and safety depth now follow the draught and UKC policy automatically (also at scenario start)","Own ship data shows the current draught"]},
 {v:"2.7.0",d:"2026-11-26",ko:["안전 수심선 설정 창에서 현재 흘수를 바로 입력: 추천값·UKC 계산·좌초 판정이 모두 이 흘수를 따름"],en:["Enter the current draught directly in the Safety contour window; recommendations, UKC and grounding all follow it"]},
 {v:"2.6.1",d:"2026-11-26",ko:["항로 보고서의 UKC 계산이 고정 흘수(11 m) 대신 설정에서 정한 현재 흘수를 쓰도록 수정"],en:["Route report UKC now uses the current draught set in Settings instead of the fixed 11 m"]},
@@ -3140,7 +3141,7 @@ function renderNavPage(){
   else if(p==="rings")h=`<div class="fr"><label>${t("rings")}</label>${sw("rings",st.rings)}</div><div class="fr"><label>${t("ringInt")}</label>${sel("ringInt",[0.25,0.5,1,2,3,5],st.ringInt)}</div><div class="fr"><label>${t("ringN")}</label>${sel("ringN",[2,3,4,5,6,8,10],st.ringN)}</div>`;
   else if(p==="pred")h=`<div class="fr"><label>${t("predictor")}</label>${sw("predictor",st.predictor)}</div><div class="fr"><label>${t("predTime")}</label>${sel("predTime",[1,2,3,5],st.predTime)}</div><p class="muted" style="font-size:11px;margin:4px 0 0;color:var(--muted)">${t("predNote")}</p>`;
   else if(p==="past")h=`<div class="fr"><label>${t("pastTrack")}</label>${sw("pastTrack",st.pastTrack)}</div><div class="fr"><label>${t("pastLen")}</label>${sel("pastLen",[10,30,60,120,240],st.pastLen)}</div><div class="osrow" style="margin-top:3px"><button class="mini" data-act="clrtrack">${t("clrTrack")}</button></div>`;
-  else if(p==="look")h=`<div class="fr"><label>${t("showLook")}</label>${sw("showLook",st.showLook)}</div><div class="fr"><label>${t("lookTime")}</label>${sel("lookTime",[1,2,3,6,10,15,20],st.lookTime)}</div><div class="fr"><label>${t("lookWidth")}</label>${sel("lookWidth",[0.05,0.1,0.15,0.2,0.3,0.5],st.lookWidth)}</div><div class="fr"><label>${t("safetyC")}</label>${sel("safetyContour",[2,5,10,20,30,50],st.safetyContour)}</div>`;
+  else if(p==="look")h=`<div class="fr"><label>${t("showLook")}</label>${sw("showLook",st.showLook)}</div><div class="fr"><label>${t("lookTime")}</label>${sel("lookTime",[1,2,3,6,10,15,20],st.lookTime)}</div><div class="fr"><label>${t("lookWidth")}</label>${sel("lookWidth",[0.05,0.1,0.15,0.2,0.3,0.5],st.lookWidth)}</div><div class="fr"><label>${t("safetyC")}</label>${cntIn("safetyContour","data-act=\"setcnt\" data-v")}</div>`;
   $("#pgBody").innerHTML=h;
 }
 function updateHelmStatic(){
@@ -3536,7 +3537,7 @@ document.addEventListener("click",e=>{
   if(b.tagName==="SELECT")return;
   const f=ACT[b.dataset.act];if(f){f(b,e);if(S.own)upd()}
 });
-document.addEventListener("change",e=>{const s=e.target.closest('select[data-act="setsel"]');if(s){setSetting(s.dataset.v,+s.value);renderNavPage()}});
+document.addEventListener("change",e=>{const s=e.target.closest('select[data-act="setsel"]');if(s){setSetting(s.dataset.v,+s.value);renderNavPage()}const c=e.target.closest('input[data-act="setcnt"]');if(c){setCnt(c.dataset.v,c.value);renderNavPage()}});
 document.addEventListener("click",e=>{if(e.target.closest(".ia-min .ia")){$("#ecdis").classList.remove("ia-min");chartDirty=true}},true);
 
 /* 누르고 있으면 반복되는 증감 버튼 + 휠 */
@@ -3712,13 +3713,19 @@ function dlgHelp(tab="menu"){
 }
 /* ---------- 안전 수심선 (Safety contour) ---------- */
 const CONTOURS=[2,5,10,20,30,50,100,200];
+/* 안전 수심선 값 입력칸: 입력값 그대로 저장, 해도에 없는 값은 다음 깊은 등심선이 적용됨 */
+const ceil1=v=>Math.ceil(v*10-1e-6)/10;
+const CNT_RANGE={shallowContour:[0.5,100],safetyContour:[0.5,200],deepContour:[1,500],safetyDepth:[0.5,100]};
+function appliedOf(k){const sc=safetyLevel(S.set.safetyContour);return k==="safetyContour"?sc:k==="shallowContour"?shallowLevel(S.set.shallowContour,sc):k==="deepContour"?deepLevel(S.set.deepContour,sc):null}
+function cntIn(k,attr){const a=appliedOf(k);return `<span class="cnt-in"><input type="number" ${attr||"data-k"}="${k}" inputmode="decimal" step="0.1" min="${CNT_RANGE[k][0]}" max="${CNT_RANGE[k][1]}" value="${+S.set[k]}"><small data-app="${k}">${a!=null?t("cntApplied",[a]):"m"}</small></span>`}
+function setCnt(k,v){v=+v;if(!isFinite(v)||v<=0)return false;setSetting(k,ceil1(clamp(v,...CNT_RANGE[k])));return true}
 function ownDraft(){return (S.own&&S.own.draft)||SHIP.draft}
 function setOwnDraft(v){v=Math.round(clamp(+v||ownDraft(),2,22)*10)/10;if(S.own)S.own.draft=v;else SHIP.draft=v;chartDirty=true;syncContours();return v}
 /* 흘수·UKC 기준이 바뀌면 얕은 = 흘수, 안전 = 흘수 + UKC, 깊은 = 흘수 × 2(각각 다음 깊은 등심선), 안전 수심 = 흘수 + UKC로 맞춤 */
 function syncContours(){const r=safetyRec();setSetting("shallowContour",r.sh);setSetting("safetyContour",r.sc);setSetting("deepContour",r.dp);setSetting("safetyDepth",r.sd);if(S.own&&$("#pgBody"))renderNavPage()}
 function ceilContour(v){for(const c of CONTOURS)if(c>=v-1e-9)return c;return CONTOURS[CONTOURS.length-1]}
 function safetyRec(){const d=ownDraft(),u=S.set.ukcPct??10,need=d*(1+u/100);
-  return{d,u,need,sh:ceilContour(d),sc:ceilContour(need),dp:ceilContour(d*2),sd:[2,5,8,10,12,15,20,25,30].find(v=>v>=need-1e-9)??30}}
+  return{d,u,need,sh:ceil1(d),sc:ceil1(need),dp:ceil1(d*2),sd:ceil1(need)}}
 function dlgSafety(){
   const sel=(k,opts)=>`<select data-k="${k}">${opts.map(v=>`<option${+v===+S.set[k]?" selected":""}>${v}</option>`).join("")}</select>`;
   const zones=()=>{const P=PAL[S.set.palette]||PAL.day,sc=safetyLevel(S.set.safetyContour),sh=shallowLevel(S.set.shallowContour,sc),dp=deepLevel(S.set.deepContour,sc),four=S.set.shades===4;
@@ -3727,10 +3734,10 @@ function dlgSafety(){
   const body=()=>{const r=safetyRec();return `<div class="form">
       <label>${t("sfDraft")}<small>${t("sfDraftS")}</small></label><input type="number" id="sfDraft" inputmode="decimal" min="2" max="22" step="0.1" value="${r.d.toFixed(1)}">
       <label></label><small style="color:var(--muted)">${t("sfUkcNow",[r.u])}</small>
-      <label>${t("shallowC")}<small>${t("shallowCS")}</small></label>${sel("shallowContour",[2,5,10,20,30])}
-      <label>${t("safetyC")}<small>${t("safetyCS")}</small></label>${sel("safetyContour",[2,5,10,20,30,50])}
-      <label>${t("deepC")}<small>${t("deepCS")}</small></label>${sel("deepContour",[10,20,30,50,100,200])}
-      <label>${t("safetyD")}<small>${t("safetyDS")}</small></label>${sel("safetyDepth",[2,5,8,10,12,15,20,25,30])}
+      <label>${t("shallowC")}<small>${t("shallowCS")}</small></label>${cntIn("shallowContour")}
+      <label>${t("safetyC")}<small>${t("safetyCS")}</small></label>${cntIn("safetyContour")}
+      <label>${t("deepC")}<small>${t("deepCS")}</small></label>${cntIn("deepContour")}
+      <label>${t("safetyD")}<small>${t("safetyDS")}</small></label>${cntIn("safetyDepth")}
       <label>${t("shades")}</label><span class="seg">${[[4,t("shade4")],[2,t("shade2")]].map(([v,l])=>`<button type="button" data-sh="${v}" class="${S.set.shades===v?"on":""}">${l}</button>`).join("")}</span>
     </div>
     <p style="margin:10px 0 4px"><button class="btn" id="sfRec">${t("sfRec")}</button></p>
@@ -3740,7 +3747,7 @@ function dlgSafety(){
     <p class="note" style="margin:10px 0 0">${t("sfNote")}</p>`};
   openDlg(t("sfTitle"),`<div id="sfBody">${body()}</div>`,{sub:"Safety contour · Depth settings",onMount:(d)=>{
     const redraw=()=>{d.querySelector("#sfBody").innerHTML=body()};
-    d.addEventListener("change",e=>{if(e.target.id==="sfDraft"){setOwnDraft(e.target.value);redraw();return}const s=e.target.closest("select[data-k]");if(s){setSetting(s.dataset.k,+s.value);redraw();renderNavPage()}});
+    d.addEventListener("change",e=>{if(e.target.id==="sfDraft"){setOwnDraft(e.target.value);redraw();return}const s=e.target.closest("input[data-k]");if(s){setCnt(s.dataset.k,s.value);redraw();renderNavPage()}});
     d.addEventListener("click",e=>{const b=e.target.closest("[data-sh]");if(b){setSetting("shades",+b.dataset.sh);redraw();return}
       if(e.target.closest("#sfRec")){syncContours();redraw();toast(t("sfRecDone"))}});
   }});
@@ -3766,10 +3773,10 @@ function dlgSettings(tab){
     </div>`,
     chart:`<div class="form">
       <h5>${t("depthSet")}</h5>
-      <label>${t("shallowC")}<small>${t("shallowCS")}</small></label>${sel("shallowContour",[2,5,10,20,30])}
-      <label>${t("safetyC")}<small>${t("safetyCS")}</small></label>${sel("safetyContour",[2,5,10,20,30,50])}
-      <label>${t("deepC")}<small>${t("deepCS")}</small></label>${sel("deepContour",[10,20,30,50,100,200])}
-      <label>${t("safetyD")}<small>${t("safetyDS")}</small></label>${sel("safetyDepth",[2,5,8,10,12,15,20,25,30])}
+      <label>${t("shallowC")}<small>${t("shallowCS")}</small></label>${cntIn("shallowContour")}
+      <label>${t("safetyC")}<small>${t("safetyCS")}</small></label>${cntIn("safetyContour")}
+      <label>${t("deepC")}<small>${t("deepCS")}</small></label>${cntIn("deepContour")}
+      <label>${t("safetyD")}<small>${t("safetyDS")}</small></label>${cntIn("safetyDepth")}
       <label>${t("shades")}</label>${seg("shades",[[4,t("shade4")],[2,t("shade2")]])}
       <h5>${t("dispCat")}</h5>
       <label>Display base</label>${seg("dbase",[["BASE","BASE"],["STD","STD"],["ALL","ALL"]])}
@@ -3796,7 +3803,7 @@ function dlgSettings(tab){
         const sb=e.target.closest(".seg button[data-k]");if(sb){let v=sb.dataset.v;v=v==="true"?true:v==="false"?false:isNaN(+v)?v:+v;setSetting(sb.dataset.k,v);sb.parentNode.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===sb));if(sb.dataset.k==="palette")buildIA();if(sb.dataset.k==="dbase")buildSB();renderNavPage()}
         const lb=e.target.closest("[data-lang]");if(lb){LANG=lb.dataset.lang;try{localStorage.setItem("ecdis-sim-lang",LANG)}catch(er){}applyLang();close();dlgSettings(tab)}
       });
-      d.addEventListener("change",e=>{const s=e.target.closest("select[data-k]");if(s){setSetting(s.dataset.k,+s.value);renderNavPage()}const i=e.target.closest("[data-own]");if(i){i.value=setOwnDraft(i.value)}});
+      d.addEventListener("change",e=>{const ci=e.target.closest("input[data-k]");if(ci&&CNT_RANGE[ci.dataset.k]){setCnt(ci.dataset.k,ci.value);ci.value=S.set[ci.dataset.k];const ap=ci.parentNode.querySelector("[data-app]"),a=appliedOf(ci.dataset.k);if(ap&&a!=null)ap.textContent=t("cntApplied",[a]);renderNavPage()}const s=e.target.closest("select[data-k]");if(s){setSetting(s.dataset.k,+s.value);renderNavPage()}const i=e.target.closest("[data-own]");if(i){i.value=setOwnDraft(i.value)}});
       d.querySelector("#setDef").onclick=()=>{const keep={palette:S.set.palette};S.set=Object.assign({},DEF_SET,keep);saveSet();syncContours();chartDirty=true;buildSB();buildIA();renderNavPage();close();dlgSettings(tab);toast(t("defDone"))};
     }});
 }
