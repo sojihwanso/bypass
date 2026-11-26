@@ -1324,7 +1324,7 @@ function bindRoutes(svg) {
   if (PIN_EL) PIN_EL.innerHTML = PINS.filter(([, p]) => !hidden(p)).map(([n, p]) => { const q = iso(p, PV); return '<g class="pin" transform="translate(' + f1(q[0]) + " " + f1(q[1]) + ')"><circle r="4.2"/><text y="1.9">' + n + "</text></g>"; }).join("");
 }
 function drawRoutes(phase, cyc, running) {
-  const step = 16, off = phase % step;
+  const step = 32, off = phase % step;   // 화살촉 간격(2026-11-26 16→32, 밀도 절반)
   const out = {};
   for (const [name, segs] of Object.entries(ROUTES)) {
     if (!ROUTE_EL[name]) continue;
@@ -1657,7 +1657,7 @@ function redraw() {
   if (valsEl.innerHTML !== vals) valsEl.innerHTML = vals;
 }
 function routeChevs(names, size = 2.4) {
-  let s = ""; const step = 15;
+  let s = ""; const step = 30;   // 화살촉 간격(2026-11-26 15→30, 밀도 절반)
   for (const name of names) { const r = ALL[name]; if (!r || !active(name)) continue; const tot = r.L[r.L.length - 1], off = chevPhase % step; for (let d = off; d < tot - 2; d += step) { const a = along(r, d); s += '<path class="chev" data-c="' + COL[name] + '" d="' + chev(a.p, a.tan, size) + '"/>'; } }
   return s;
 }

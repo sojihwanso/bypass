@@ -1377,7 +1377,7 @@ function redraw() {
   if (mode && a > 0.02) {
     const tail = 4 + 6 * Math.abs(u);
     for (const st of STREAMS[mode]) {
-      const gapS = st.kind === "in" ? 16 : 11;
+      const gapS = st.kind === "in" ? 32 : 22;   // 간격(2026-11-26 두 배, 밀도 절반)
       for (let s0 = 0; s0 < st.total + gapS; s0 += gapS) {
         const s = (s0 + phase) % (st.total + gapS);
         const sb = s - tail;
