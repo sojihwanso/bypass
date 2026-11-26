@@ -6,7 +6,6 @@ export default [
    const t = await p.$eval('#co-reg', e => e.textContent);
    assert(t.includes('65척'), t);
    assert(t.includes('기준이 다릅니다'), t);
-   assert(await p.$('#co-reg a[href="#firm-%EC%97%90%EC%9D%B4%EC%B9%98%EC%97%A0%EC%97%A0"]'), 'firm link');
  })},
  {name:'co-reg-managed', fn: () => withPage({hash:'#co-현대글로비스'}, async p => {
    await regReady(p);

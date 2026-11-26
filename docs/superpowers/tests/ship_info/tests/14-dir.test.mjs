@@ -47,22 +47,13 @@ export default [
    await ready(p);
    assert((await rowsOf(p)).length === 50, 'reset');
  })},
- {name:'firm-hmm', fn: () => withPage({hash:'#firm-에이치엠엠'}, async p => {
-   await p.waitForSelector('#firm-ships tbody tr', {timeout:4000});
-   assert((await p.$$('#firm-ships tbody tr')).length === 65, 'ship rows');
-   assert(await p.$eval('#v-firm a:text-is("선사록 선사 정보 보기")', a => a.getAttribute('href')) === '#co-HMM', 'co link');
-   assert(!(await p.$eval('#v-firm', e => e.textContent)).includes('대표'), '대표 shown');
-   assert(await p.title() === '에이치엠엠(주) | 선사록', await p.title());
+ {name:'co-no-rep-name', fn: () => withPage({hash:'#co-HMM'}, async p => {
+   await p.waitForSelector('#co-ships tbody tr', {timeout:4000});
+   assert(!(await p.$eval('#v-co', e => e.textContent)).includes('대표'), '대표 shown');
  })},
- {name:'firm-missing', fn: () => withPage({hash:'#firm-없는회사'}, async (p, errors) => {
-   await p.waitForSelector('#v-firm .cmp-empty', {timeout:4000});
-   assert((await p.$eval('#v-firm', e => e.textContent)).includes('찾는 업체가 없습니다'), 'text');
-   assert(await p.$('#v-firm a[href="#dir"]'), 'dir link');
-   assert(errors.length === 0, errors.join('; '));
- })},
- {name:'firm-no-mobile', fn: () => withPage({hash:'#firm-소스코리아'}, async p => {
-   await p.waitForSelector('#firm-ships tbody tr', {timeout:4000});
-   assert(!/01[016789]-?\d{3,4}-?\d{4}/.test(await p.$eval('#v-firm', e => e.textContent)), 'mobile shown');
+ {name:'co-no-mobile', fn: () => withPage({hash:'#co-' + encodeURIComponent('소스코리아(주)')}, async p => {
+   await p.waitForSelector('#co-ships tbody tr', {timeout:4000});
+   assert(!/01[016789]-?\d{3,4}-?\d{4}/.test(await p.$eval('#v-co', e => e.textContent)), 'mobile shown');
  })},
  {name:'dir-mobile-filters', fn: () => withPage({hash:'#dir', width:390, height:844}, async p => {
    await ready(p);
@@ -73,8 +64,8 @@ export default [
    assert(await p.getAttribute('#dir-ftoggle', 'aria-expanded') === 'true', 'aria-expanded');
  })},
  {name:'dir-mobile-no-hscroll', fn: async () => {
-   for (const theme of ['light','dark']) for (const hash of ['#dir', '#firm-에이치엠엠']) await withPage({hash, width:390, height:844, theme}, async p => {
-     await p.waitForSelector(hash === '#dir' ? '#dir-list li.firm' : '#firm-ships tbody tr', {timeout:4000});
+   for (const theme of ['light','dark']) for (const hash of ['#dir']) await withPage({hash, width:390, height:844, theme}, async p => {
+     await p.waitForSelector('#dir-list li.firm', {timeout:4000});
      const w = await p.evaluate(() => document.documentElement.scrollWidth);
      assert(w <= 390, theme+' '+hash+' scrollWidth '+w);
    });

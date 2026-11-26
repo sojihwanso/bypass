@@ -272,6 +272,9 @@ select,.fgroup input[type="search"]{font:inherit;font-size:13.5px;padding:6px 10
 .ctag.s,.ctag.r{border-style:solid;color:var(--ink);background:color-mix(in srgb,var(--ink) 9%,transparent)}
 .ctag.r{border-style:double;border-width:3px;padding:0 4px;line-height:1.1}
 .load-fail{color:var(--muted);font-size:14px}
+#co-wage,#co-reg{margin-top:0}
+.ships-more{margin-top:10px;min-height:36px;cursor:pointer}
+dl.kv.kv-side{grid-template-columns:3em 1fr;font-size:14px}
 /* 임금 표 */
 #type-wage{margin-top:16px}
 .wt{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
@@ -318,9 +321,9 @@ select,.fgroup input[type="search"]{font:inherit;font-size:13.5px;padding:6px 10
 #dir-count{margin:0 0 8px}
 #dir-foot{margin-top:14px}
 #dir-foot .more{min-height:40px;cursor:pointer}
-#firm-ships td:first-child{color:var(--muted)}
-#firm-ships td,#firm-ships th{text-align:left}
-#firm-ships td:nth-child(3),#firm-ships th:nth-child(3){text-align:right}
+#co-ships td:first-child{color:var(--muted)}
+#co-ships td,#co-ships th{text-align:left}
+#co-ships td:nth-child(3),#co-ships th:nth-child(3){text-align:right}
 @media (max-width:640px){
   .dir-list li{grid-template-columns:1fr auto;padding:12px 14px}
   .dir-list .fl{grid-column:1/-1}
@@ -754,7 +757,6 @@ footer .readme-h{display:block;margin-bottom:10px}
 
   <!-- KOSWEC 등록 업체 목록·상세 -->
   <div class="view" id="v-dir" hidden></div>
-  <div class="view" id="v-firm" hidden></div>
 
   <!-- 제보 게시판 -->
   <div class="view" id="v-board" hidden>
@@ -1201,9 +1203,9 @@ function loadData(name){
   return DATA_CACHE[name];
 }
 function dataBox(el, name, render){
-  if (DATA_READY[name]){ render(DATA_READY[name]); return; }
+  if (name === 'uni' ? UNI_K : DATA_READY[name]){ render(name === 'uni' ? UNI_K : DATA_READY[name]); return; }
   el.innerHTML = '<p class="load-fail" aria-live="polite">불러오는 중</p>';
-  loadData(name).then(d => { if (el.isConnected) render(d); }, () => {
+  (name === 'uni' ? uniReady().then(() => UNI_K) : loadData(name)).then(d => { if (el.isConnected) render(d); }, () => {
     el.innerHTML = '<p class="load-fail">자료를 불러오지 못했습니다. <button type="button" class="linkbtn" data-retry>다시 시도</button></p>';
     el.querySelector('[data-retry]').addEventListener('click', () => dataBox(el, name, render));
   });
@@ -1471,54 +1473,102 @@ function renderDir(qs){
   });
 }
 /* 선사 상세: KOSWEC 등록 선박 칸 (해당 회사만, 실패하면 숨긴 채) */
-function renderCoReg(name){
-  loadData('koswec').then(k => {
-    const el = $('#co-reg');
-    let cur = ''; try{ cur = decodeURIComponent((location.hash || '').slice(4).split('?')[0]); }catch(e){}
-    if (!el || currentView() !== 'co' || cur !== name) return;
-    const own = k.firms.find(f => f.app === name);
-    const mg = !own && MANAGED_BY[name] ? k.firms.find(f => f.app === MANAGED_BY[name]) : null;
-    if (!own && !mg) return;
-    if (own){
-      el.innerHTML = '<h2>KOSWEC 등록 선박 '+own.ships.length+'척 <span class="ctag r">등록</span></h2><div class="in">'+
-        '<p>선단 규모(위 숫자)와 기준이 다릅니다. 한국선원복지고용센터에 등록된 배만 셉니다.</p>'+
-        '<p class="note">'+firmTopTypes(own, 99).map(([i, n]) => esc(k.typeNames[i])+' '+n).join(', ')+'</p>'+
-        '<p><a href="'+firmHref(own.id)+'">등록 선박 목록 보기</a></p></div>';
-    } else {
-      el.innerHTML = '<h2>KOSWEC 등록 선박 <span class="ctag r">등록</span></h2><div class="in">'+
-        '<p>이 회사 배는 관리선사 '+esc(MANAGED_BY[name])+' 이름으로 등록돼 있습니다.</p>'+
-        '<p><a href="'+firmHref(mg.id)+'">'+esc(mg.n)+' 등록 업체 정보 보기</a></p></div>';
-    }
-    el.hidden = false;
+/* ---------- 회사 화면: 등록 선박·임금·연락처 칸 ---------- */
+const KOS_TO_STAT = Object.fromEntries(Object.entries(STAT_TO_KOS).map(([a, b]) => [b, a]));
+const BIZKEY_OF = Object.fromEntries(Object.entries(KOS_BIZ).map(([key, name]) => [name, key]));
+function curCoName(){
+  if (currentView() !== 'co') return null;
+  try{ return decodeURIComponent((location.hash || '').slice(4).split('?')[0]); }catch(e){ return null; }
+}
+function coShipsHtml(f, k){
+  const T = k.typeNames, BN = k.bizNames;
+  return '<div class="table-scroll"><table class="wt" id="co-ships">'+
+    '<thead><tr><th>#</th><th>선박명</th><th>총톤수</th><th>업종</th><th>선종</th><th>선박 국적</th><th>선주 국적</th></tr></thead><tbody>'+
+    f.ships.map((s, i) => '<tr'+(i >= SHIPS_SHOW ? ' hidden' : '')+'><td class="mono">'+(i + 1)+'</td><td>'+esc(s[0])+'</td><td>'+(s[1] == null ? '-' : s[1].toLocaleString('ko-KR')+'톤')+'</td><td>'+esc(BN[s[2]])+'</td><td>'+esc(T[s[3]])+'</td><td>'+esc(s[4])+'</td><td>'+esc(s[5])+'</td></tr>').join('')+
+    '</tbody></table></div>'+
+    (f.ships.length > SHIPS_SHOW ? '<button type="button" class="linkbtn more ships-more" data-ships-more aria-expanded="false" aria-controls="co-ships">나머지 '+(f.ships.length - SHIPS_SHOW)+'척 보기</button>' : '');
+}
+const SHIPS_SHOW = 10;
+function coRegHtml(u, k){
+  if (u.firm){
+    const f = u.firm;
+    return '<h2>등록 선박 '+f.ships.length+'척 <span class="ctag r">등록</span></h2><div class="in">'+
+      '<p>'+(u.co ? '선단 규모(위 숫자)와 기준이 다릅니다. 한국선원복지고용센터에 등록된 배만 셉니다.' : '한국선원복지고용센터에 등록된 배입니다.')+'</p>'+
+      '<p class="note">'+firmTopTypes(f, 99).map(([i, n]) => esc(k.typeNames[i])+' '+n).join(', ')+'</p>'+
+      coShipsHtml(f, k)+'<p class="note" style="margin-top:10px">'+esc(KOS_SRC)+'</p></div>';
+  }
+  if (u.mgr) return '<h2>등록 선박 <span class="ctag r">등록</span></h2><div class="in">'+
+    '<p>이 회사 배는 관리선사 '+esc(u.mgr)+' 이름으로 등록돼 있습니다.</p><p><a href="'+coHref(u.mgr)+'">'+esc(u.mgr)+' 화면에서 등록 선박 보기</a></p></div>';
+  return '';
+}
+/* 임금 줄로 쓸 (업종 key, 통계 선종) 조합: 등록 선박이 있으면 선박 기준(척수 많은 순), 없으면 앱 선종 기준 */
+function coWageCombos(u, k, w){
+  const ok = (b, s) => w.biz[b] && w.biz[b].types[s] && w.biz[b].types[s].rows[0][0] > 0;
+  const out = [];
+  if (u.firm){
+    const c = {};
+    u.firm.ships.forEach(s => { const b = BIZKEY_OF[k.bizNames[s[2]]], kos = k.typeNames[s[3]], st = KOS_TO_STAT[kos] || kos;
+      if (b && ok(b, st)){ const key = b+'|'+st; c[key] = (c[key] || 0) + 1; } });
+    Object.entries(c).sort((a, b) => b[1] - a[1]).forEach(([key]) => out.push(key.split('|')));
+  } else {
+    u.types.forEach(id => TYPE_MAP[id].biz.forEach(b => TYPE_MAP[id].stat.forEach(s => {
+      if (ok(b, s) && !out.some(x => x[0] === b && x[1] === s)) out.push([b, s]); })));
+  }
+  return out.slice(0, 6);
+}
+function coWageHtml(u, k, w){
+  const combos = coWageCombos(u, k, w);
+  if (!combos.length) return '';
+  return '<h2>이 회사 배의 월평균 임금 <span class="ctag s">통계</span></h2><div class="in">'+
+    '<p class="note">'+(u.firm ? '등록 선박의 업종·선종에 해당하는 통계입니다.' : '이 회사 선종에 해당하는 통계입니다.')+' 업종·선종 평균이며 이 회사 급여가 아닙니다. 단위 만 원.</p>'+
+    '<div class="table-scroll"><table class="wt">'+wageHead('업종 · 통계 선종')+'<tbody>'+
+    combos.map(([b, s], i) => wageLine(w, w.biz[b].name+' · '+s, w.biz[b].types[s], 'c-'+i)).join('')+
+    '</tbody></table></div><div class="wage-foot"><p><a href="#wage?biz='+combos[0][0]+'">임금 화면에서 다른 선종과 비교</a></p></div></div>';
+}
+function coContactHtml(f){
+  if (!f || !(f.tel || f.fax || f.addr)) return '';
+  return '<h2>연락처 <span class="ctag r">등록</span></h2><div class="in"><dl class="kv kv-side">'+
+    (f.tel ? '<dt>전화</dt><dd class="mono">'+esc(f.tel)+'</dd>' : '')+
+    (f.fax ? '<dt>팩스</dt><dd class="mono">'+esc(f.fax)+'</dd>' : '')+
+    (f.addr ? '<dt>주소</dt><dd>'+esc(f.addr)+'</dd>' : '')+'</dl></div>';
+}
+function fillSec(sel, html){ const el = $(sel); if (!el) return; el.innerHTML = html; el.hidden = !html; }
+function fillCoWage(name, u){
+  loadData('wage').then(w => {
+    if (curCoName() !== name) return;
+    fillSec('#co-wage', coWageHtml(u, UNI_K, w));
+    const el = $('#co-wage'); if (el) bindWageToggle(el);
   }, () => {});
 }
-function renderFirm(id){
-  const el = $('#v-firm');
-  dataBox(el, 'koswec', k => {
-    const f = k.firms.find(x => x.id === id);
-    if (!f){
-      el.innerHTML = '<div class="crumb"><a href="#home">처음</a> &rsaquo; <a href="#dir">등록 업체</a></div><p class="cmp-empty">찾는 업체가 없습니다. <a href="#dir">등록 업체 목록</a>에서 다시 찾아보시기 바랍니다.</p>';
-      return;
-    }
-    document.title = f.n+' | 선사록';
-    const T = k.typeNames, BN = k.bizNames;
-    const byType = firmTopTypes(f, 99);
-    el.innerHTML =
-      '<div class="crumb"><a href="#home">처음</a> &rsaquo; <a href="#dir">등록 업체</a> &rsaquo; '+esc(f.n)+'</div>'+
-      '<div class="co-head"><div><h1>'+esc(f.n)+'</h1><div class="tags"><span class="ctag r">등록</span></div></div>'+
-        (f.app ? '<div class="acts"><a class="btn ghost" href="'+coHref(f.app)+'">선사록 선사 정보 보기</a></div>' : '')+'</div>'+
-      '<section class="sheet blk"><h2>기본 정보</h2><div class="in"><dl class="kv">'+
-        '<dt>업종</dt><dd>'+esc(BN[f.b])+'</dd>'+
-        (f.tel ? '<dt>전화</dt><dd class="mono">'+esc(f.tel)+'</dd>' : '')+
-        (f.fax ? '<dt>팩스</dt><dd class="mono">'+esc(f.fax)+'</dd>' : '')+
-        (f.addr ? '<dt>주소</dt><dd>'+esc(f.addr)+'</dd>' : '')+
-        '<dt>등록 선박</dt><dd>'+f.ships.length+'척 ('+byType.map(([i, n]) => esc(T[i])+' '+n).join(', ')+')</dd>'+
-      '</dl></div></section>'+
-      '<section class="sheet blk" style="margin-top:16px"><h2>등록 선박 '+f.ships.length+'척</h2><div class="in"><div class="table-scroll"><table class="wt" id="firm-ships">'+
-        '<thead><tr><th>#</th><th>선박명</th><th>총톤수</th><th>업종</th><th>선종</th><th>선박 국적</th><th>선주 국적</th></tr></thead><tbody>'+
-        f.ships.map((s, i) => '<tr><td class="mono">'+(i + 1)+'</td><td>'+esc(s[0])+'</td><td>'+(s[1] == null ? '-' : s[1].toLocaleString('ko-KR')+'톤')+'</td><td>'+esc(BN[s[2]])+'</td><td>'+esc(T[s[3]])+'</td><td>'+esc(s[4])+'</td><td>'+esc(s[5])+'</td></tr>').join('')+
-      '</tbody></table></div><p class="note" style="margin-top:10px">'+esc(KOS_SRC)+'</p></div></section>';
-  });
+/* 선사 자료 회사: 본문은 바로, 등록·임금·연락처 칸은 등록 자료를 불러온 뒤 */
+function fillCoExtras(name){
+  uniReady().then(() => {
+    if (curCoName() !== name) return;
+    const u = UNI_BY[name]; if (!u) return;
+    fillSec('#co-reg', coRegHtml(u, UNI_K));
+    fillSec('#co-contact', coContactHtml(u.firm));
+    fillCoWage(name, u);
+  }, () => {});
+}
+/* 등록 자료만 있는 회사 화면 */
+function renderRegOnly(u){
+  const f = u.firm, k = UNI_K;
+  $('#v-co').innerHTML =
+    '<div class="crumb"><a href="#home">처음</a> &rsaquo; <a href="#dir">선사 목록</a> &rsaquo; '+esc(u.n)+'</div>'+
+    '<div class="co-head"><div><h1>'+esc(u.n)+'</h1><div class="tags"><span class="ctag r">등록</span> <span class="kind">'+esc(k.bizNames[f.b])+'</span></div></div>'+
+      '<div class="acts">'+starBtn('cos', u.n, u.n)+'</div></div>'+
+    '<div class="co-grid"><div class="co-main">'+
+      '<section class="sheet blk" id="co-reg">'+coRegHtml(u, k)+'</section>'+
+      '<section class="sheet blk" id="co-wage" hidden></section>'+
+      '<p class="note">선사 자료(선단 규모, 항로, 실습과 채용)가 아직 없는 회사입니다. 아는 내용이 있으면 정보 제보 게시판으로 알려 주시기 바랍니다.</p>'+
+    '</div><aside class="co-side">'+
+      '<section class="sheet blk" id="co-contact"'+(coContactHtml(f) ? '' : ' hidden')+'>'+coContactHtml(f)+'</section>'+
+      '<section class="sheet blk"><h2>바로 가기</h2><div class="in"><ul class="linklist">'+
+        '<li><a href="https://www.seanet.co.kr/" target="_blank" rel="noopener">씨넷 구인 공고 ↗</a><span>해기사 채용 정보</span></li>'+
+        '<li><a href="https://www.koswec.or.kr/" target="_blank" rel="noopener">한국선원복지고용센터 ↗</a><span>선원 구인구직</span></li>'+
+        '<li><a href="#board">이 회사 정보 제보</a><span>틀린 내용이나 후기</span></li></ul></div></section>'+
+    '</aside></div>';
+  fillCoWage(u.n, u);
 }
 const LIMIT = 5;
 const state = {kind:'all', fleet:'all', foreign:true, q:'', routes:new Set(), cadet:false, reserve:false, newsCat:'all', newsRange:'all', newsFrom:'', newsTo:'', newsQ:'', cmpTab:'co', sort:'rank'};
@@ -1966,7 +2016,14 @@ function backCrumb(c){
 function renderCo(name){
   const c = CO_BY[name];
   const box = $('#v-co');
-  if (!c){ box.innerHTML = '<div class="crumb"><a href="#home">처음</a></div><p class="cmp-empty">찾는 선사가 없습니다. 검색창에서 다시 찾아보시기 바랍니다.</p>'; return; }
+  if (!c){
+    dataBox(box, 'uni', () => {
+      if (curCoName() !== name) return;
+      if (UNI_BY[name]) renderRegOnly(UNI_BY[name]);
+      else box.innerHTML = '<div class="crumb"><a href="#home">처음</a></div><p class="cmp-empty">찾는 선사가 없습니다. 검색창이나 <a href="#dir">선사 목록</a>에서 다시 찾아보시기 바랍니다.</p>';
+    });
+    return;
+  }
   const rel = relatedOf(c);
   const more = MORE[c.n];
   const picked = cmp.co.includes(c.n);
@@ -1995,15 +2052,17 @@ function renderCo(name){
         '<dt>주요 항로</dt><dd>'+(c.routes.length ? esc(c.routes.join(', ')) : (c.kind==='manager' ? '선주사 배치에 따라 다름' : '확인 필요'))+'</dd>'+
         '<dt>자료 출처</dt><dd>'+(c.src==='web' ? '언론 보도와 회사 발표' : '회사 제출 자료 (2026 목포해양대 취업박람회)')+'<span class="src-tag">'+(c.src==='web'?'보도':'회사 제출')+'</span></dd>'+
       '</dl></div></section>'+
-      '<section class="sheet blk" id="co-reg" hidden></section>'+
       '<section class="sheet blk"><h2>선종별 위치</h2><div class="in">'+typeLines+'<p class="note" style="margin-top:10px">순위는 선종 화면 정렬 기준과 같음. 환산, 추정 값은 순서를 가늠하는 용도</p></div></section>'+
       '<section class="sheet blk"><h2>실습과 채용 (2027년 계획)</h2><div class="in"><dl class="kv">'+jobDl(c)+'</dl></div></section>'+
+      '<section class="sheet blk" id="co-reg" hidden></section>'+
+      '<section class="sheet blk" id="co-wage" hidden></section>'+
       '<section class="sheet blk"><h2>지원 전에 확인할 것</h2><div class="in"><ul class="pts">'+
         '<li>'+(c.kind==='owner' ? '직접 선원을 뽑는지, 관리선사를 통해 뽑는지 공고에서 확인할 것' : '승선하게 될 배의 실제 선주, 선종, 선령을 면접에서 확인할 것')+'</li>'+
         '<li>승선근무예비역, 산업기능요원 편입 가능 여부는 공고 시점마다 달라질 수 있음</li>'+
         '<li>승선 기간, 휴가 보전, 선내 인터넷 같은 조건은 계약서 기준으로 확인할 것</li>'+
         '<li>최신 구인 공고는 씨넷과 한국선원복지고용센터에서 확인할 것</li></ul></div></section>'+
     '</div><aside class="co-side">'+
+      '<section class="sheet blk" id="co-contact" hidden></section>'+
       '<section class="sheet blk"><h2>바로 가기</h2><div class="in"><ul class="linklist">'+
         (c.site ? '<li><a href="'+c.site+'" target="_blank" rel="noopener">공식 누리집 ↗</a><span>'+esc(c.site.replace(/^https?:\/\//,'').replace(/\/$/,''))+'</span></li>' : '')+
         '<li><a href="https://www.seanet.co.kr/" target="_blank" rel="noopener">씨넷 구인 공고 ↗</a><span>해기사 채용 정보</span></li>'+
@@ -2011,6 +2070,7 @@ function renderCo(name){
         '<li><a href="#board">이 회사 정보 제보</a><span>틀린 내용이나 후기</span></li></ul></div></section>'+
       (rel.length ? '<section class="sheet blk"><h2>관련 회사</h2><div class="in"><ul class="linklist">'+rel.map(x => '<li><a href="'+coHref(x.n)+'">'+esc(x.n)+'</a><span>'+(x.kind==='owner'?'선주사':'관리선사')+', '+esc(x.types.map(id => TYPE_BY_ID[id].name).join(', '))+'</span></li>').join('')+'</ul></div></section>' : '')+
     '</aside></div>';
+  fillCoExtras(c.n);
 }
 
 /* ---------- 비교 ---------- */
@@ -2129,7 +2189,7 @@ function route(){
   const qs = qpos < 0 ? '' : hash.slice(qpos + 1);
   const changed = hash !== lastHash;
   lastHash = hash;
-  const ids = ['home','news','type','co','board','compare','wage','dir','firm'];
+  const ids = ['home','news','type','co','board','compare','wage','dir'];
   ids.forEach(id => $('#v-'+id).hidden = true);
   $('#hero').hidden = true;
   sxClose();
@@ -2149,7 +2209,7 @@ function route(){
   } else if (h.startsWith('co-')){
     try{ const f = sessionStorage.getItem('sasarok-from-table'); let n0 = ''; try{ n0 = decodeURIComponent(h.slice(3)); }catch(e){} if (f && f !== n0) sessionStorage.removeItem('sasarok-from-table'); }catch(e){}
     let n = ''; try{ n = decodeURIComponent(h.slice(3)); }catch(e){}
-    $('#v-co').hidden = false; renderCo(n); if (CO_BY[n]) renderCoReg(n);
+    $('#v-co').hidden = false; renderCo(n);
     title = (n || '선사')+' | 선사록';
   } else if (h === 'news'){
     $('#v-news').hidden = false; renderNews(); title = '해운 소식 | 선사록';
@@ -2162,8 +2222,17 @@ function route(){
   } else if (h === 'dir'){
     $('#v-dir').hidden = false; renderDir(qs); title = '등록 업체 | 선사록';
   } else if (h.startsWith('firm-')){
+    /* v2 주소: 같은 회사 화면으로 넘긴다 */
     let id = ''; try{ id = decodeURIComponent(h.slice(5)); }catch(e){}
-    $('#v-firm').hidden = false; renderFirm(id); title = '등록 업체 | 선사록';
+    const box = $('#v-co'); box.hidden = false;
+    dataBox(box, 'uni', () => {
+      if (!location.hash.startsWith('#firm-')) return;
+      const u = UNI.find(x => x.firm && x.firm.id === id);
+      if (!u){ box.innerHTML = '<div class="crumb"><a href="#home">처음</a></div><p class="cmp-empty">찾는 선사가 없습니다. 검색창이나 <a href="#dir">선사 목록</a>에서 다시 찾아보시기 바랍니다.</p>'; return; }
+      history.replaceState(null, '', coHref(u.n)); lastHash = location.hash;
+      renderCo(u.n); document.title = u.n+' | 선사록';
+    });
+    title = '선사 | 선사록';
   } else {
     $('#v-home').hidden = false; $('#hero').hidden = false; renderHome();
   }
@@ -2177,6 +2246,14 @@ function route(){
 function markFromTable(n){ try{ sessionStorage.setItem('sasarok-from-table', n); }catch(e){} }
 document.addEventListener('click', e => {
   const t = e.target;
+  const sm = t.closest('button[data-ships-more]');
+  if (sm){
+    const open = sm.getAttribute('aria-expanded') !== 'true';
+    document.querySelectorAll('#co-ships tbody tr').forEach((tr, i) => { tr.hidden = !open && i >= SHIPS_SHOW; });
+    sm.setAttribute('aria-expanded', String(open));
+    sm.textContent = open ? '접기' : '나머지 '+(document.querySelectorAll('#co-ships tbody tr').length - SHIPS_SHOW)+'척 보기';
+    return;
+  }
   const tl = t.closest('#reg-body tr.row a[href^="#co-"]');
   if (tl) markFromTable(tl.closest('tr.row').dataset.co);
   const sx = t.closest('#sx');

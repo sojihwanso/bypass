@@ -10,7 +10,7 @@ export default [
  })},
  {name:'no-ai-tells', fn: async () => {
    const bad = /[!]|한눈에|완벽|해보세요|\p{Extended_Pictographic}/u;
-   for (const [hash, sel] of [['#wage','#v-wage'], ['#dir','#v-dir'], ['#type-bulk','#type-wage'], ['#co-HMM','#co-reg'], ['#firm-에이치엠엠','#v-firm']]) await withPage({hash}, async p => {
+   for (const [hash, sel] of [['#wage','#v-wage'], ['#dir','#v-dir'], ['#type-bulk','#type-wage'], ['#co-HMM','#co-reg'], ['#co-'+encodeURIComponent('씨엠에스마리타임(주)'),'#v-co .co-main']]) await withPage({hash}, async p => {
      await p.waitForTimeout(800);
      const t = await p.$eval(sel, e => e.textContent);
      assert(t.length > 20, hash+' empty');
