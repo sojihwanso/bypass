@@ -283,6 +283,8 @@ select,.fgroup input[type="search"]{font:inherit;font-size:13.5px;padding:6px 10
 .reg-group .rg-desc .ctag{margin-left:4px}
 #reg-list{margin-top:12px}
 #reg-list .wt th:nth-child(2),#reg-list .wt td:nth-child(2),#reg-list .wt th:last-child,#reg-list .wt td:last-child{text-align:left}
+.co-newslist{list-style:none;margin:0;padding:0}
+.co-newslist li{grid-template-columns:5.5em 1fr}
 .ships-more{margin-top:10px;min-height:36px;cursor:pointer}
 dl.kv.kv-side{grid-template-columns:3em 1fr;font-size:14px}
 /* 임금 표 */
@@ -612,7 +614,7 @@ footer .readme-h{display:block;margin-bottom:10px}
         <span id="m-count"></span>
         <a class="cmp-top" href="#compare" id="cmp-top">비교 <small id="cmp-n"></small></a>
         <button type="button" class="theme-btn" id="theme-btn" aria-pressed="false">다크모드</button>
-        <button type="button" class="mver" id="ver-top" title="버전" aria-label="버전 정보">v. 3.1.0</button>
+        <button type="button" class="mver" id="ver-top" title="버전" aria-label="버전 정보">v. 3.2.0</button>
         <a class="home-logo" href="https://teambypass.vercel.app/" target="_top" title="Team Bypass 메인 페이지" aria-label="Team Bypass 메인 페이지"><img src="/assets/favicon.svg" alt="" width="30" height="30"></a>
       </div>
     </div>
@@ -899,7 +901,7 @@ footer .readme-h{display:block;margin-bottom:10px}
       <li><span class="lines"><span>이 사이트는 개인이 만든 자료 모음이며 회사나 학교와 관계가 없습니다.</span><span>틀린 내용은 정보 제보 게시판으로 알려 주시기 바랍니다.</span></span></li>
     </ul>
     </div>
-    <p class="foot-ver"><button type="button" class="ver" id="ver-foot" title="버전" aria-label="버전 정보">v. 3.1.0 · TEAM BYPASS</button></p>
+    <p class="foot-ver"><button type="button" class="ver" id="ver-foot" title="버전" aria-label="버전 정보">v. 3.2.0 · TEAM BYPASS</button></p>
   </div>
 </footer>
 
@@ -1569,6 +1571,23 @@ function coContactHtml(f){
     (f.fax ? '<dt>팩스</dt><dd class="mono">'+esc(f.fax)+'</dd>' : '')+
     (f.addr ? '<dt>주소</dt><dd>'+esc(f.addr)+'</dd>' : '')+'</dl></div>';
 }
+/* ---------- 회사 화면: 관련 소식 (제목에 회사 이름이 들어간 소식, 최신 5건) ---------- */
+function coNewsNames(name){
+  const c = CO_BY[name], out = new Set();
+  const add = s => { s = String(s || '').replace(/\((주|유|합)\)|㈜|주식회사/g, '').replace(/^구\s*/, '').trim(); if (s.length >= 3 || /^[A-Z]{2,}/.test(s)) out.add(s); };
+  add(name);
+  if (c && c.sub) c.sub.split(/[,·]/).forEach(add);
+  return [...out];
+}
+function coNewsHtml(name){
+  const names = coNewsNames(name);
+  if (!names.length) return '';
+  const hits = NEWS_ALL.filter(n => names.some(k => n.t.includes(k))).slice(0, 5);
+  if (!hits.length) return '';
+  return '<h2>관련 소식</h2><div class="in"><ul class="newsfull co-newslist">'+hits.map(n => renderNewsItem(n, true)).join('')+'</ul>'+
+    '<p class="note" style="margin-top:8px">제목에 회사 이름이 들어간 소식입니다. <a href="#news" data-news-q="'+esc(names[0])+'">해운 소식에서 더 보기</a></p></div>';
+}
+function fillCoNews(name){ if (name != null && curCoName() === name) fillSec('#co-news', coNewsHtml(name)); }
 function fillSec(sel, html){ const el = $(sel); if (!el) return; el.innerHTML = html; el.hidden = !html; }
 function fillCoWage(name, u){
   loadData('wage').then(w => {
@@ -1597,6 +1616,7 @@ function renderRegOnly(u){
     '<div class="co-grid"><div class="co-main">'+
       '<section class="sheet blk" id="co-reg">'+coRegHtml(u, k)+'</section>'+
       '<section class="sheet blk" id="co-wage" hidden></section>'+
+      '<section class="sheet blk" id="co-news" hidden></section>'+
       '<p class="note">선사 자료(선단 규모, 항로, 실습과 채용)가 아직 없는 회사입니다. 아는 내용이 있으면 정보 제보 게시판으로 알려 주시기 바랍니다.</p>'+
     '</div><aside class="co-side">'+
       '<section class="sheet blk" id="co-contact"'+(coContactHtml(f) ? '' : ' hidden')+'>'+coContactHtml(f)+'</section>'+
@@ -1606,6 +1626,7 @@ function renderRegOnly(u){
         '<li><a href="#board">이 회사 정보 제보</a><span>틀린 내용이나 후기</span></li></ul></div></section>'+
     '</aside></div>';
   fillCoWage(u.n, u);
+  fillCoNews(u.n);
 }
 const LIMIT = 5;
 const state = {more:0, kind:'all', fleet:'all', foreign:true, q:'', routes:new Set(), cadet:false, reserve:false, newsCat:'all', newsRange:'all', newsFrom:'', newsTo:'', newsQ:'', cmpTab:'co', sort:'rank'};
@@ -1652,18 +1673,25 @@ function normDate(d){
   const m = String(d||'').trim().match(/^(\d{4})[-.\/](\d{1,2})[-.\/](\d{1,2})/);
   return m ? m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0') : null;
 }
+/* 자동 수집 잡음: 통계·블로그 결과는 빼고, 제목 꼬리말은 지움 */
+const NEWS_NOISE_SRC = /^(IndexBox|Naver Blog|네이버 블로그|티스토리|Tistory|브런치|다음 블로그)/i;
+const NEWS_TITLE_TAIL = /\s*[-–:|]\s*(뉴스 및 통계|네이버 블로그|Naver Blog|티스토리 블로그|티스토리)\s*$/;
+/* 해외 선사 이름이 나오면 원래 분류에 더해 '해외 해운사'로도 보이게 */
+const FOREIGN_CARRIER = /머스크|MSC|CMA ?CGM|코스코|COSCO|하파그로이드|하팍로이드|에버그린|양밍|오션 네트워크|짐라인|ZIM|ONE\b/;
 function mergeNews(items, auto){
   const map = new Map(NEWS_ALL.map(n => [n.u, n]));
   let added = 0;
   (items || []).forEach(x => {
     if (!x || typeof x !== 'object') return;
-    const d = normDate(x.d || x.date), t = String(x.t || x.title || '').trim(), u = String(x.u || x.url || '').trim();
+    const d = normDate(x.d || x.date), t = String(x.t || x.title || '').trim().replace(NEWS_TITLE_TAIL, ''), u = String(x.u || x.url || '').trim();
+    if (NEWS_NOISE_SRC.test(String(x.s || x.source || '').trim())) return;
     if (!d || !t || !/^https?:\/\//.test(u)) return;
     const c = String(x.c || x.category || '기업 소식').trim();
     if (!NEWS_CATS.includes(c)) NEWS_CATS.push(c);
     if (!map.has(u)) added++;
     const prev = map.get(u);
-    map.set(u, {d, c, t, u, s:String(x.s || x.source || '').trim(), p:String(x.p || x.summary || '').trim(), auto: prev ? !!prev.auto && !!auto : !!auto});
+    map.set(u, {d, c, t, u, s:String(x.s || x.source || '').trim(), p:String(x.p || x.summary || '').trim(), auto: prev ? !!prev.auto && !!auto : !!auto,
+      c2: c !== '해외 해운사' && FOREIGN_CARRIER.test(t) ? '해외 해운사' : ''});
   });
   NEWS_ALL = [...map.values()].sort((a,b) => b.d.localeCompare(a.d) || a.t.localeCompare(b.t,'ko'));
   return added;
@@ -1675,7 +1703,7 @@ function readNewsCache(){
 }
 { const c = readNewsCache(); if (c) mergeNews(c.items, true); }
 function feedTimeText(iso){ const d = new Date(iso); return Number.isFinite(d.getTime()) ? (d.getMonth()+1)+'월 '+d.getDate()+'일 '+d.getHours()+'시' : ''; }
-function rerenderNews(){ const v = currentView(); if (v === 'home') renderHome(); else if (v === 'news') renderNews(); }
+function rerenderNews(){ const v = currentView(); if (v === 'co') fillCoNews(curCoName()); if (v === 'home') renderHome(); else if (v === 'news') renderNews(); }
 async function fetchFeed(){
   if (!NEWS_FEED.url){ feedStatus = '지금은 사이트에 들어 있는 소식만 보여 줍니다.'; return; }
   const cache = readNewsCache();
@@ -1855,7 +1883,7 @@ function renderFav(){
 }
 function renderNewsItem(n, full){
   const dd = full ? n.d.replace(/-/g,'.') : n.d.slice(5).replace('-','.');
-  return '<li><span class="d">'+dd+'</span><div><a class="t" href="'+esc(n.u)+'" target="_blank" rel="noopener">'+esc(n.t)+'</a>'+(n.p?'<p>'+esc(n.p)+'</p>':'')+'<div class="meta"><span class="cat">'+esc(n.c)+'</span><span>'+esc(n.s)+'</span>'+(n.auto ? '<span class="auto">자동 수집</span>' : '')+'</div></div></li>';
+  return '<li><span class="d">'+dd+'</span><div><a class="t" href="'+esc(n.u)+'" target="_blank" rel="noopener">'+esc(n.t)+'</a>'+(n.p?'<p>'+esc(n.p)+'</p>':'')+'<div class="meta"><span class="cat">'+esc(n.c)+'</span>'+(n.c2 ? '<span class="cat">'+esc(n.c2)+'</span>' : '')+'<span>'+esc(n.s)+'</span>'+(n.auto ? '<span class="auto">자동 수집</span>' : '')+'</div></div></li>';
 }
 function newsFade(el){ el.classList.toggle('at-end', el.scrollTop + el.clientHeight >= el.scrollHeight - 4); }
 function renderHome(){
@@ -1890,7 +1918,7 @@ function renderNews(){
   const q = state.newsQ.trim().toLowerCase();
   const base = NEWS_ALL.filter(n => (!w.from || n.d >= w.from) && (!w.to || n.d <= w.to) && (!q || (n.t+' '+n.p+' '+n.s+' '+n.c).toLowerCase().includes(q)));
   const counts = {all:base.length};
-  NEWS_CATS.forEach(c => counts[c] = base.filter(n => n.c === c).length);
+  NEWS_CATS.forEach(c => counts[c] = base.filter(n => n.c === c || n.c2 === c).length);
   $('#news-cats').innerHTML = ['all'].concat(NEWS_CATS).map(c =>
     '<button type="button" class="chip" data-cat="'+esc(c)+'" aria-pressed="'+(state.newsCat===c)+'">'+(c==='all'?'전체':esc(c))+'<small>'+counts[c]+'</small></button>').join('');
   document.querySelectorAll('#nf-range button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === state.newsRange)));
@@ -1899,7 +1927,7 @@ function renderNews(){
   const qbox = $('#nf-q');
   if (q){ qbox.hidden = false; qbox.innerHTML = '검색어 <b>'+esc(state.newsQ.trim())+'</b> 결과 '+base.length+'건 <button type="button" class="linkbtn" id="nf-q-clear">검색 지우기</button>'; }
   else qbox.hidden = true;
-  const list = base.filter(n => state.newsCat === 'all' || n.c === state.newsCat);
+  const list = base.filter(n => state.newsCat === 'all' || n.c === state.newsCat || n.c2 === state.newsCat);
   $('#news-full').innerHTML = list.length ? list.map(n => renderNewsItem(n, true)).join('') : '<li><span></span><div>조건에 맞는 소식이 없습니다. 기간이나 분류를 바꿔 보시기 바랍니다.</div></li>';
   $('#feed-state').textContent = feedStatus;
 }
@@ -2141,6 +2169,7 @@ function renderCo(name){
       '<section class="sheet blk"><h2>실습과 채용 (2027년 계획)</h2><div class="in"><dl class="kv">'+jobDl(c)+'</dl></div></section>'+
       '<section class="sheet blk" id="co-reg" hidden></section>'+
       '<section class="sheet blk" id="co-wage" hidden></section>'+
+      '<section class="sheet blk" id="co-news" hidden></section>'+
       '<section class="sheet blk"><h2>지원 전에 확인할 것</h2><div class="in"><ul class="pts">'+
         '<li>'+(c.kind==='owner' ? '직접 선원을 뽑는지, 관리선사를 통해 뽑는지 공고에서 확인할 것' : '승선하게 될 배의 실제 선주, 선종, 선령을 면접에서 확인할 것')+'</li>'+
         '<li>승선근무예비역, 산업기능요원 편입 가능 여부는 공고 시점마다 달라질 수 있음</li>'+
@@ -2156,6 +2185,7 @@ function renderCo(name){
       (rel.length ? '<section class="sheet blk"><h2>관련 회사</h2><div class="in"><ul class="linklist">'+rel.map(x => '<li><a href="'+coHref(x.n)+'">'+esc(x.n)+'</a><span>'+(x.kind==='owner'?'선주사':'관리선사')+', '+esc(x.types.map(id => TYPE_BY_ID[id].name).join(', '))+'</span></li>').join('')+'</ul></div></section>' : '')+
     '</aside></div>';
   fillCoExtras(c.n);
+  fillCoNews(c.n);
 }
 
 /* ---------- 비교 ---------- */
@@ -2332,6 +2362,8 @@ function route(){
 function markFromTable(n){ try{ sessionStorage.setItem('sasarok-from-table', n); }catch(e){} }
 document.addEventListener('click', e => {
   const t = e.target;
+  const nq = t.closest('a[data-news-q]');
+  if (nq){ e.preventDefault(); state.newsQ = nq.dataset.newsQ; state.newsCat = 'all'; state.newsRange = 'all'; location.hash = 'news'; return; }
   const sm = t.closest('button[data-ships-more]');
   if (sm){
     const open = sm.getAttribute('aria-expanded') !== 'true';
@@ -2458,8 +2490,13 @@ $('#nf-from').addEventListener('change', e => { const w = newsWindow(); state.ne
 $('#nf-to').addEventListener('change', e => { const w = newsWindow(); state.newsFrom = w.from; state.newsTo = e.target.value; state.newsRange = 'custom'; renderNews(); });
 
 /* ---------- 버전, 패치노트, 이스터에그 ---------- */
-const VERSION = '3.1.0';   // 첫째 자리 큰 기능·개편, 둘째 자리 작은 기능, 셋째 자리 버그·오타 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '3.2.0';   // 첫째 자리 큰 기능·개편, 둘째 자리 작은 기능, 셋째 자리 버그·오타 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  {v:'3.2.0', d:'2026-11-26', i:[
+    '회사 화면에 관련 소식을 붙였습니다. 제목에 회사 이름이 들어간 해운 소식을 최신 5건까지 보여 주고, 해운 소식 화면에서 더 볼 수 있습니다.',
+    '자동 수집 소식에서 통계 사이트·블로그 결과를 빼고, 제목 끝에 붙은 꼬리말을 지웠습니다.',
+    '해외 선사 이름이 나오는 소식은 원래 분류와 함께 \'해외 해운사\'에서도 보입니다.'
+  ]},
   {v:'3.1.0', d:'2026-11-26', i:[
     '해운 소식을 하루 한 번 자동으로 받습니다. 해운 전문지 4곳과 구글 뉴스 검색에서 해운·조선·항만·해외 해운사·선원 소식을 모읍니다.',
     '분류에 조선, 항만, 해외 해운사를 더했고, 자동으로 모은 소식에는 \'자동 수집\' 표시가 붙습니다.',
