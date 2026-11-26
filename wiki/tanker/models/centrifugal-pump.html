@@ -1147,7 +1147,7 @@ stage.addEventListener("pointermove", (e) => {
     cy = dragFrom.cy - dy * (H / zoom) / box.height;
     applyZoom();
   } else {
-    show(dragFrom.ai - Math.round(dx / 46), dragFrom.ei + Math.round(dy / 52));
+    show(dragFrom.ai + Math.round(dx / 46), dragFrom.ei + Math.round(dy / 52));   // 오른쪽으로 끌면 ▶와 같은 쪽
   }
 });
 const lift = (e) => { pointers.delete(e.pointerId); if (pointers.size < 2) pinchFrom = 0; if (!pointers.size) dragFrom = null; };
@@ -1163,8 +1163,9 @@ stage.addEventListener("wheel", (e) => {
 }, { passive: false });
 stage.addEventListener("keydown", (e) => {
   const k = e.key;
-  if (k === "ArrowLeft") show(ai + 1, ei);
-  else if (k === "ArrowRight") show(ai - 1, ei);
+  // ←/→ 키는 ◀/▶ 버튼과 같은 쪽으로 돈다(◀·← −1, ▶·→ +1)
+  if (k === "ArrowLeft") show(ai - 1, ei);
+  else if (k === "ArrowRight") show(ai + 1, ei);
   else if (k === "ArrowUp") show(ai, ei + 1);
   else if (k === "ArrowDown") show(ai, ei - 1);
   else if (k === "+" || k === "=") zoomAt(1.25);
