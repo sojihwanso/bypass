@@ -237,14 +237,19 @@ export function initUI(root, actions) {
     const RIn = Math.min(full, (wIn - QIN_R - 170) / 2 - LBL), wantIn = r.width > 0 && h >= 560 && RIn >= 0.85 * full;
     if (wantIn !== qIn) { qIn = wantIn; document.documentElement.dataset.qb = qIn ? 'in' : 'out'; if (qIn) wrap.append(qbar); else main.prepend(qbar); }
     wrap.classList.toggle('compact', qIn && h < 760);
+    /* 방위 눈금 글자가 모서리 상자에 가리지 않게: 상자와 원 사이 28px 이상이 되도록 원을 줄임 */
+    const wr = wrap.getBoundingClientRect(), boxes = [...wrap.querySelectorAll('.tl > *, .tr > *, #bxEbl, #bxVrm, #bxPi, #bxTgtTools')].filter((e) => e.offsetWidth > 0).map((e) => { const q = e.getBoundingClientRect(); return [q.left - wr.left, q.top - wr.top, q.right - wr.left, q.bottom - wr.top]; });
+    const roomFor = (cx, cy) => Math.min(...boxes.map(([l, t, rr, bb]) => Math.hypot(Math.max(l, Math.min(cx, rr)) - cx, Math.max(t, Math.min(cy, bb)) - cy))) - 28;
     let colW, next;
     if (qIn) {
-      const cx = Math.min(Math.max(wIn / 2, QIN_R + LBL + RIn), wIn - 170 - LBL - RIn);
-      colW = Math.min(300, wIn - 12 - (cx + RIn + LBL) - 8); shift = wIn / 2 - cx; rmax = RIn; next = 'rside';
+      let R = RIn, cx = 0;
+      for (let k = 0; k < 30; k++) { cx = Math.min(Math.max(wIn / 2, QIN_R + LBL + R), wIn - 170 - LBL - R); const room = roomFor(cx, h / 2); if (room >= R) break; R = Math.max(40, room); }
+      colW = Math.min(300, wIn - 12 - (cx + R + LBL) - 8); shift = wIn / 2 - cx; rmax = R; next = 'rside';
     } else {
       const w = r.width, dia = Math.min(w, h) - 72, g = (w - dia) / 2; rmax = Infinity;
       colW = Math.min(300, Math.max(150, g - 46)); shift = Math.max(0, colW + 46 - g);
       next = r.width > 0 && g - shift >= 40 ? 'rside' : 'bar'; if (next === 'bar') shift = 0;
+      if (boxes.length) { const room = roomFor(w / 2 - shift, h / 2); if (room < dia / 2) rmax = Math.max(40, room); }
     }
     if (next !== mode) {
       mode = next; document.documentElement.dataset.layout = mode;

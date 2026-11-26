@@ -1,5 +1,5 @@
 /* 레이더 시뮬레이터 진입점: 세계(자선·타선·날씨) → 선박 운동 → 안테나 스윕 → 영상 → TT·AIS·경보 → PPI·위층·UI */
-import { S, loadSettings, saveSettings, resetSettings, on } from './state.js';
+import { S, loadSettings, saveSettings, resetSettings, on, emit } from './state.js';
 import { createPPI } from './ppi.js';
 import { buildScene, updateScene, rawLine, processLine, detect, N_BRG, RANGES, RING_INT, PULSE_BY_RANGE } from './echo.js';
 import { createShip, createTarget, stepShip, stepTarget, sensors, setRudderOrder, setTelegraph, setAuto, TELEGRAPH } from './sim.js';
@@ -18,7 +18,7 @@ import { t, lang } from './i18n.js';
 import { initStart } from './start.js';
 import { initHelp } from './help.js';
 import { COL, piColor } from './overlay.js';
-import { stepWeather, windDrift, speedLoss, weatherLabel } from './weather.js';
+import { createWeatherRun, stepWeather, windDrift, speedLoss, weatherLabel } from './weather.js';
 
 const TEST = new URLSearchParams(location.search).has('test');
 loadSettings();
@@ -77,6 +77,8 @@ function shipEnv() {
   const vx = c.drift * Math.sin(c.set * D2) + w.drift * Math.sin(w.set * D2), vy = c.drift * Math.cos(c.set * D2) + w.drift * Math.cos(w.set * D2);
   return { set: wrap360(Math.atan2(vx, vy) / D2), drift: Math.hypot(vx, vy), loss: speedLoss(W.weather.sea || 0) };
 }
+/* 날씨 변화 켬/끔(헤더·메뉴 공통): 끄면 시나리오 고정 날씨가 아닌 한 바로 잔잔하게 */
+function applyWeatherOn() { saveSettings(); if (wxRun) wxRun.enabled = S.sim.weatherOn; if (!S.sim.weatherOn && W && !W.weather.fixed) { Object.assign(W.weather, { kind: 'clear', fog: false, sea: 1, windMs: 3, rain: [], ducting: false }); syncSceneWeather(); } }
 function syncSceneWeather() { if (scene) Object.assign(scene.weather, W.weather); }
 /* 물표 목록(TGT LIST): TT·AIS 전부, 정렬, 위험은 빨강, 줄 누르면 선택. 열려 있는 동안 1초마다 갱신 */
 function tgtRows() {
@@ -305,7 +307,7 @@ Object.assign(actions, {
   tgtList: () => openTgtList(), tgtSort: (el) => { tgtSort = el.dataset.sort; openTgtList(); }, tgtSel: (el) => { select(el.dataset.id); openTgtList(); },
   pause: () => { paused = !paused; }, speed: () => ui.speedPop(SPEEDS, speed), spd: (el) => { setSpeed(+el.dataset.spd); ui.speedPop(null); },
   faster: () => setSpeed(SPEEDS[Math.min(SPEEDS.length - 1, SPEEDS.indexOf(speed) + 1)]), slower: () => setSpeed(SPEEDS[Math.max(0, SPEEDS.indexOf(speed) - 1)]),
-  wx: () => { S.sim.weatherOn = !S.sim.weatherOn; saveSettings(); if (wxRun) wxRun.enabled = S.sim.weatherOn; if (!S.sim.weatherOn && W && !W.weather.fixed) { Object.assign(W.weather, { kind: 'clear', fog: false, sea: 1, windMs: 3, rain: [], ducting: false }); syncSceneWeather(); } },
+  wx: () => { S.sim.weatherOn = !S.sim.weatherOn; applyWeatherOn(); },
   conn: () => conn.toggle(),
   shot: () => { const c = document.createElement('canvas'), a = ui.echoCanvas, b = ui.overCanvas; c.width = b.width; c.height = b.height; const g = c.getContext('2d'); g.fillStyle = '#0A131A'; g.fillRect(0, 0, c.width, c.height); g.drawImage(a, 0, 0, c.width, c.height); g.drawImage(b, 0, 0); const l = document.createElement('a'); l.download = `radar-${Date.now()}.png`; l.href = c.toDataURL('image/png'); l.click(); },
   rangeUp: () => rangeStep(1), rangeDn: () => rangeStep(-1),
@@ -383,7 +385,7 @@ ov.addEventListener('click', (e) => {
   else if (S.tt.select.startsWith('MANUAL') && e.detail === 2) acquireAt(pos);
 });
 let azStart = null;
-on('settings', () => { V.palette = S.disp.palette; if (wxRun) wxRun.enabled = S.sim.weatherOn; saveSettings(); });
+on('settings', (path) => { V.palette = S.disp.palette; if (path === 'sim.weatherOn') applyWeatherOn(); saveSettings(); });
 addEventListener('pointerdown', () => { lastUser = performance.now(); alerts.resolve('watch'); }, true);
 addEventListener('keydown', () => { lastUser = performance.now(); alerts.resolve('watch'); }, true);
 function setHidden(h) { hiddenPause = h; last = performance.now(); }
@@ -417,7 +419,7 @@ initKeys(keyHandlers);
 const RESUME = 'radar-resume';
 function snapshot() { const o = W.own; return { def: { ...W.def, t: W.t, own: { lat: o.lat, lon: o.lon, hdg: o.hdg, tele: o.tele, state: { stw: o.stw, sog: o.sog, cog: o.cog, rudder: o.rudder, rudderOrder: o.rudderOrder, r: o.r, rot: o.rot, auto: { ...o.auto } } }, targets: W.targets.map((g) => ({ ...g })), weather: W.weather }, radar: radar.state }; }
 function saveNow() { if (!W) return; try { localStorage.setItem(RESUME, JSON.stringify(snapshot())); } catch (e) {} }
-function resume() { try { const s = JSON.parse(localStorage.getItem(RESUME) || 'null'); if (!s || !s.def) return false; startWorld(s.def); setRadar('stby'); return true; } catch (e) { return false; } }
+function resume() { try { const s = JSON.parse(localStorage.getItem(RESUME) || 'null'); if (!s || !s.def) return false; startWorld(s.def); setRadar('stby'); wxRun = createWeatherRun({ rnd: Math.random, enabled: S.sim.weatherOn }); wxPend = []; return true; } catch (e) { return false; } }
 setInterval(() => { if (W && !paused) saveNow(); }, 15000);
 addEventListener('pagehide', saveNow);
 
@@ -436,7 +438,7 @@ requestAnimationFrame(frame);
 if (!TEST) starter.openStart();
 if (TEST) {
   window.RadarTest = {
-    ready: true, S, ppi, scene: () => scene, colors: () => COL, piColor, selected: () => selected, menuPaths: () => MENU.flatMap((x) => x.items.map((i) => i.path)), menuOpts: (p) => (MENU.flatMap((x) => x.items).find((i) => i.path === p) || { opts: [] }).opts, setSpeed, speed: () => speed, proj: makeProj, view: () => V, setView: (o) => Object.assign(V, o), setRange: (r) => { S.disp.rangeNM = r; V.rangeNM = r; }, frames: () => frames, tick, frameAt, own, paused: () => paused || hiddenPause, setPaused: (p) => { paused = p; }, KEYMAP, keyHandlers,
+    ready: true, S, ppi, emit, weatherRun: () => wxRun, scene: () => scene, colors: () => COL, piColor, selected: () => selected, menuPaths: () => MENU.flatMap((x) => x.items.map((i) => i.path)), menuOpts: (p) => (MENU.flatMap((x) => x.items).find((i) => i.path === p) || { opts: [] }).opts, setSpeed, speed: () => speed, proj: makeProj, view: () => V, setView: (o) => Object.assign(V, o), setRange: (r) => { S.disp.rangeNM = r; V.rangeNM = r; }, frames: () => frames, tick, frameAt, own, paused: () => paused || hiddenPause, setPaused: (p) => { paused = p; }, KEYMAP, keyHandlers,
     radar: { set: setRadar, toggle: toggleTx, get state() { return radar.state; }, get warmLeft() { return radar.warmLeft; } }, world: () => W, tracker: { targets: () => tracker.targets() },
     newWorld: (o) => startWorld(freeDef(o)), tgtScreen: (id) => { const g = W.targets.find((x) => x.id === id), r = relOf(P.x(g.lon), P.y(g.lat)), p = ppi.toScreen(r.brg, r.rng); return { sx: p.x, sy: p.y }; },
     cursorAct, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,
