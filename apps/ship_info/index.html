@@ -597,7 +597,7 @@ footer .readme-h{display:block;margin-bottom:10px}
         <span id="m-count"></span>
         <a class="cmp-top" href="#compare" id="cmp-top">비교 <small id="cmp-n"></small></a>
         <button type="button" class="theme-btn" id="theme-btn" aria-pressed="false">다크모드</button>
-        <button type="button" class="mver" id="ver-top" title="버전" aria-label="버전 정보">v. 1.0.3</button>
+        <button type="button" class="mver" id="ver-top" title="버전" aria-label="버전 정보">v. 2.0.0</button>
         <a class="home-logo" href="https://teambypass.vercel.app/" target="_top" title="Team Bypass 메인 페이지" aria-label="Team Bypass 메인 페이지"><img src="/assets/favicon.svg" alt="" width="30" height="30"></a>
       </div>
     </div>
@@ -878,11 +878,13 @@ footer .readme-h{display:block;margin-bottom:10px}
       <li><span class="lines"><span>선종 화면은 컨테이너선은 총 선복량(TEU), 나머지는 재화중량(dwt)이 큰 순서로 정렬합니다.</span></span></li>
       <li><span class="lines"><span>규모 칸의 보도는 발표 수치, 환산은 선박 수에 대표 선형을 곱한 값, 추정은 대략적인 짐작입니다.</span><span>환산과 추정은 순서를 가늠하는 용도로만 봐 주시기 바랍니다.</span></span></li>
       <li><span class="lines"><span>선종별 장단점은 현직자 후기, 실습 후기, 인터뷰에서 자주 나오는 이야기를 정리한 것으로, 회사와 배마다 사정이 다를 수 있습니다.</span></span></li>
+      <li><span class="lines"><span>임금은 「2026년 한국선원통계연보」 임금현황(227~297쪽)의 업종·선종별 월평균 값입니다.</span><span>승선원 전체 평균이라 회사별 급여와 다르고, 승선원이나 척수가 10 미만인 줄은 표본 적음으로 표시했습니다.</span></span></li>
+      <li><span class="lines"><span>등록 업체는 한국선원복지고용센터 업체조회(koswec.or.kr, 2026년 11월 26일 수집)에서 선박 3척 이상인 상선 회사만 옮겼고, 대표자 이름과 휴대폰 번호는 싣지 않았습니다.</span></span></li>
       <li><span class="lines"><span>외국계는 한국에 선원 관리 조직이나 법인이 있는 곳만 담았고, 연락사무소 수준의 지사와 영업법인은 제외했습니다.</span></span></li>
       <li><span class="lines"><span>이 사이트는 개인이 만든 자료 모음이며 회사나 학교와 관계가 없습니다.</span><span>틀린 내용은 정보 제보 게시판으로 알려 주시기 바랍니다.</span></span></li>
     </ul>
     </div>
-    <p class="foot-ver"><button type="button" class="ver" id="ver-foot" title="버전" aria-label="버전 정보">v. 1.0.3 · TEAM BYPASS</button></p>
+    <p class="foot-ver"><button type="button" class="ver" id="ver-foot" title="버전" aria-label="버전 정보">v. 2.0.0 · TEAM BYPASS</button></p>
   </div>
 </footer>
 
@@ -1312,7 +1314,7 @@ function renderWage(qs){
       '<div class="crumb"><a href="#home">처음</a> &rsaquo; 임금</div>'+
       '<div class="co-head"><div><h1>선원 월평균 임금</h1><div class="tags"><span class="ctag s">통계</span></div></div></div>'+
       '<section class="sheet blk"><h2>업종별 총괄</h2><div class="in"><div class="table-scroll">'+sum+'</div>'+
-        '<p class="note" style="margin-top:8px">전체 평균은 그 업종 승선원 전체의 평균, 단위 만 원.'+(w.biz.fmerchant ? ' 해외취업 표는 한국인 선원만 집계한 것입니다.' : '')+'</p></div></section>'+
+        '<p class="note" style="margin-top:8px">전체 평균은 그 업종 승선원 전체의 평균, 단위 만 원.</p></div></section>'+
       '<section class="sheet blk" style="margin-top:16px"><h2>선종별 · 직책별</h2><div class="in">'+
         '<div class="seg-scroll"><div class="seg" role="group" aria-label="업종">'+BIZ_KEYS.map(k => '<button type="button" data-wbiz="'+k+'" aria-pressed="'+(k === biz)+'">'+esc(w.biz[k].name)+'</button>').join('')+'</div></div>'+
         '<p class="note" style="margin:10px 0">'+esc(B.name)+' '+fmtN(B.vessels)+'척 기준. 단위 만 원, 열 머리를 누르면 그 열이 큰 순으로, 줄을 누르면 직책별 원값(천 원)이 펼쳐집니다. 승선원이나 척수가 10 미만이면 표본 적음으로 표시합니다.</p>'+
@@ -2244,8 +2246,15 @@ $('#nf-from').addEventListener('change', e => { const w = newsWindow(); state.ne
 $('#nf-to').addEventListener('change', e => { const w = newsWindow(); state.newsFrom = w.from; state.newsTo = e.target.value; state.newsRange = 'custom'; renderNews(); });
 
 /* ---------- 버전, 패치노트, 이스터에그 ---------- */
-const VERSION = '1.0.3';   // 첫째 자리 큰 기능·개편, 둘째 자리 작은 기능, 셋째 자리 버그·오타 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '2.0.0';   // 첫째 자리 큰 기능·개편, 둘째 자리 작은 기능, 셋째 자리 버그·오타 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  {v:'2.0.0', d:'2026-11-26', i:[
+    '선종 화면에 「2026년 한국선원통계연보」의 업종별 월평균 임금 칸을 넣었습니다. 줄을 누르면 직책별 원값이 펼쳐집니다.',
+    '새 메뉴 \'임금\'에서 업종 6개(외항선, 내항선, 원양어선, 연근해어선, 해외취업상선, 해외취업어선)의 선종별·직책별 임금을 열마다 정렬해 볼 수 있습니다.',
+    '새 메뉴 \'등록 업체\'에 한국선원복지고용센터(KOSWEC)에 선박 3척 이상을 등록한 상선 회사 371곳과 선박 3,248척을 실었습니다. 회사·선박 이름, 업종, 선종, 지역으로 찾을 수 있습니다.',
+    '선사 상세 화면에 KOSWEC 등록 선박 칸을 넣었습니다. 선단 규모와는 집계 기준이 다릅니다.',
+    '위쪽 검색창에서 등록 업체도 찾을 수 있고, 도움말 바로 가기에 임금과 등록 업체를 더했습니다.'
+  ]},
   {v:'1.0.3', d:'2026-11-25', i:[
     '이스터에그 창 맨 위에 도도 마스코트가 해운 뉴스 신문을 읽는 그림을 넣었습니다.'
   ]},
