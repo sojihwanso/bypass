@@ -23,12 +23,13 @@ export default [
    const rows = await p.$$eval('#reg-body tr.row', e => e.length);
    const txt = await p.$eval('#r-count', e => e.textContent);
    assert(txt.endsWith(rows+'곳 표시'), 'count '+txt+' rows '+rows);
+   if (await p.$eval('#f-more', b => b.getAttribute('aria-expanded')) !== 'true') await p.click('#f-more');
    await p.click('#f-routes .chip[data-r="미주"]');
    const h = await p.evaluate(() => decodeURIComponent(location.hash));
    assert(h.includes('r=미주') && h.includes('kind=owner'), 'hash '+h);
  })},
  {name:'keep-filters-across-types', fn: () => withPage({hash:T}, async p => {
-   await p.check('#f-cadet'); await p.click('#f-routes .chip[data-r="미주"]');
+   await p.check('#f-cadet'); await p.click('#f-more'); await p.click('#f-routes .chip[data-r="미주"]');
    await p.evaluate(() => location.hash = 'type-lng'); await p.waitForTimeout(200);
    assert(await p.$eval('#f-cadet', c => c.checked), 'cadet lost');
    assert(await p.$$eval('#f-routes .chip[aria-pressed="true"]', e => e.length) === 0, 'routes kept');
