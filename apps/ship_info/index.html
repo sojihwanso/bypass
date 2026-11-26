@@ -321,6 +321,12 @@ dl.kv.kv-side{grid-template-columns:3em 1fr;font-size:14px}
 .seg-scroll{overflow-x:auto;max-width:100%;padding-bottom:2px}
 /* 등록 업체 */
 .dir-src{max-width:72ch;margin:4px 0 0}
+.dir-src b{color:var(--ink)}
+.dir-basis{margin:6px 0 0;font-size:13px;max-width:72ch}
+.dir-basis summary{cursor:pointer;color:var(--muted)}
+.reg-only{margin:8px 0 0;font-size:13.5px;color:var(--muted)}
+.ready{font-size:11px;border:1px dashed var(--rule);border-radius:var(--r-tag);padding:0 5px;color:var(--muted)}
+.cmp-off:disabled{opacity:.55;cursor:not-allowed}
 .dir-search{margin-top:18px;max-width:360px}
 .dir-filters{padding-top:14px}
 .dir-filters .dir-types{flex-basis:100%}
@@ -642,7 +648,7 @@ footer .readme-h{display:block;margin-bottom:10px}
         <div class="sx-panel" id="sx-panel" hidden></div>
       </div>
       <div class="mast-meta">
-        <span>2026.11.24 기준</span>
+        <span title="선사 자료는 2026년 11월 24일, 등록 업체 자료는 11월 26일 기준입니다">선사 자료 2026.11.24 기준</span>
         <span id="m-count"></span>
         <a class="cmp-top" href="#compare" id="cmp-top">비교 <small id="cmp-n"></small></a>
         <button type="button" class="theme-btn" id="theme-btn" aria-pressed="false">다크모드</button>
@@ -1325,6 +1331,7 @@ function regOnlyFor(typeId){
     .map(u => [u, typeShipCount(u, typeId)]).sort((a, b) => b[1] - a[1] || b[0].ships - a[0].ships || a[0].n.localeCompare(b[0].n, 'ko')).map(x => x[0]);
 }
 const WAGE_COLS = ['total','master','co','o3','ce','e1','e3'];
+const WAGE_SAME_NOTE = '선종별 표에서는 1항사와 1기사, 3항사와 3기사처럼 같은 급의 항해사·기관사가 원본에서도 같은 값인 경우가 많습니다.';
 const WAGE_COL_NAME = {total:'전체 평균', master:'선장', co:'1항사', o3:'3항사', ce:'기관장', e1:'1기사', e3:'3기사'};
 const smallSample = (vessels, n) => vessels < 10 || n < 10;
 let WAGE_RIDX = null;
@@ -1334,7 +1341,7 @@ const fmtN = v => v == null ? '-' : v.toLocaleString('ko-KR');
 function wageRowsHtml(rows, ranks){
   return '<table class="wt sub"><thead><tr><th>직책</th><th>승선원(명)</th><th>계</th><th>기본임금</th><th>시간외수당</th><th>상여금</th><th>기타</th></tr></thead><tbody>'+
     rows.map((r, i) => '<tr'+(/total|off|rat/.test(ranks[i][0]) ? ' class="tot"' : '')+'><td>'+esc(ranks[i][1])+'</td>'+r.map(v => '<td>'+fmtN(v)+'</td>').join('')+'</tr>').join('')+
-    '</tbody></table><p class="note" style="margin:6px 0 0">단위 천 원. 원본 표 그대로</p>';
+    '</tbody></table><p class="note" style="margin:6px 0 0">단위 천 원. 원본 표 그대로입니다. '+WAGE_SAME_NOTE+'</p>';
 }
 /* 임금 한 줄 + 펼침 줄. label: 업종 칸 글자 */
 function wageLine(w, label, t, key){
@@ -1411,7 +1418,7 @@ function renderWage(qs, focusSel){
         '<div class="seg-scroll"><div class="seg" role="group" aria-label="업종">'+BIZ_KEYS.map(k => '<button type="button" data-wbiz="'+k+'" aria-pressed="'+(k === biz)+'">'+esc(w.biz[k].name)+'</button>').join('')+'</div></div>'+
         '<p class="note" style="margin:10px 0">'+esc(B.name)+' '+fmtN(B.vessels)+'척 기준. 단위 만 원, 열 머리를 누르면 그 열이 큰 순으로, 줄을 누르면 직책별 원값(천 원)이 펼쳐집니다. 승선원이나 척수가 10 미만이면 표본 적음으로 표시합니다.</p>'+
         '<div class="table-scroll">'+main+'</div>'+
-        '<div class="wage-foot"><p class="note">'+esc('2026년 한국선원통계연보 임금현황('+w.source.pages+'), 원본 단위 천 원. 월평균 임금은 업종별 총승선원의 평균값이며 회사별 급여가 아닙니다.')+'</p></div></div></section>';
+        '<div class="wage-foot"><p class="note">'+esc('2026년 한국선원통계연보 임금현황('+w.source.pages+'), 원본 단위 천 원. 월평균 임금은 업종별 총승선원의 평균값이며 회사별 급여가 아닙니다. '+WAGE_SAME_NOTE)+'</p></div></div></section>';
     bindWageToggle(el);
     /* 같은 화면 안에서 바꿀 때는 주소만 바꾸고 다시 그림 (맨 위로 튀지 않게, 포커스 유지) */
     const go = (q, sel) => { history.replaceState(null, '', '#wage?'+q); lastHash = location.hash; renderWage(q, sel); };
@@ -1459,7 +1466,8 @@ function renderDir(qs){
     el.innerHTML =
       '<div class="crumb"><a href="#home">처음</a> &rsaquo; 선사 목록</div>'+
       '<div class="co-head"><div><h1>선사 '+UNI.length.toLocaleString('ko-KR')+'곳 · 등록 선박 '+total.toLocaleString('ko-KR')+'척</h1></div></div>'+
-      '<p class="note dir-src">선사 자료가 있는 '+UNI.filter(u => u.co).length+'곳(선단 규모, 항로, 실습과 채용)과 한국선원복지고용센터 등록 자료만 있는 회사를 함께 실었습니다. '+esc(KOS_SRC)+' '+esc(KOS_RULE)+'</p>'+
+      '<p class="note dir-src"><b>'+UNI.filter(u => u.co).length+'곳</b>은 선사 자료(선단 규모, 항로, 실습과 채용)가 있고, 나머지는 한국선원복지고용센터 등록 자료만 있습니다.</p>'+
+      '<details class="dir-basis"><summary>자료 기준</summary><p class="note">'+esc(KOS_SRC)+' '+esc(KOS_RULE)+'</p></details>'+
       '<div class="fgroup dir-search"><label for="dir-q"><span class="note">회사 이름, 선박 이름</span></label><input type="search" id="dir-q" autocomplete="off" placeholder="예: HMM, 프리즘"></div>'+
       '<label class="check dir-co"><input type="checkbox" id="dir-co"> 선사 자료 있는 회사만</label>'+
       '<button type="button" class="f-toggle" id="dir-ftoggle" aria-expanded="false" aria-controls="dir-filters">업종 · 지역 · 선종 필터</button>'+
@@ -1645,8 +1653,9 @@ function renderRegOnly(u){
   const f = u.firm, k = UNI_K;
   $('#v-co').innerHTML =
     '<div class="crumb"><a href="#home">처음</a> &rsaquo; '+(backCrumb(u) || '<a href="#dir">선사 목록</a> &rsaquo; ')+esc(u.n)+'</div>'+
-    '<div class="co-head"><div><h1>'+esc(u.n)+'</h1><div class="tags"><span class="ctag r">등록</span> <span class="kind">'+esc(k.bizNames[f.b])+'</span></div></div>'+
-      '<div class="acts">'+starBtn('cos', u.n, u.n)+'</div></div>'+
+    '<div class="co-head"><div><h1>'+esc(u.n)+'</h1><div class="tags"><span class="ctag r">등록</span> <span class="kind">'+esc(k.bizNames[f.b])+'</span></div>'+
+      '<p class="reg-only">선사 자료 없음 · 등록 선박과 업종 평균 임금만 있어 다른 회사와 비교할 수 없습니다.</p></div>'+
+      '<div class="acts">'+starBtn('cos', u.n, u.n)+'<button type="button" class="btn ghost cmp-off" disabled title="선사 자료가 없어 비교할 수 없습니다">비교 불가</button></div></div>'+
     '<div class="co-grid"><div class="co-main">'+
       '<section class="sheet blk" id="co-reg">'+coRegHtml(u, k)+'</section>'+
       '<section class="sheet blk" id="co-wage" hidden></section>'+
@@ -1657,7 +1666,7 @@ function renderRegOnly(u){
       '<section class="sheet blk"><h2>바로 가기</h2><div class="in"><ul class="linklist">'+
         '<li><a href="https://www.seanet.co.kr/" target="_blank" rel="noopener">씨넷 구인 공고 ↗</a><span>해기사 채용 정보</span></li>'+
         '<li><a href="https://www.koswec.or.kr/" target="_blank" rel="noopener">한국선원복지고용센터 ↗</a><span>선원 구인구직</span></li>'+
-        '<li><a href="#board">이 회사 정보 제보</a><span>틀린 내용이나 후기</span></li></ul></div></section>'+
+        '<li><a href="#board">이 회사 정보 제보</a> <span class="ready">준비 중</span><span>틀린 내용이나 후기 (아직 저장되지 않음)</span></li></ul></div></section>'+
     '</aside></div>';
   fillCoWage(u.n, u);
   fillCoNews(u.n);
@@ -2020,7 +2029,7 @@ function pcSection(cls, title, word, items){
     (more > 0 ? '<button type="button" class="linkbtn pc-more" aria-expanded="false" data-more="'+word+' '+more+'개 더 보기">'+word+' '+more+'개 더 보기</button>' : '')+'</section>';
 }
 function renderTypeSwitch(cur){
-  $('#type-switch').innerHTML = TYPES.map(t => '<a href="#type-'+t.id+'"'+(t.id === cur ? ' aria-current="page"' : '')+'>'+sym(t.id)+'<span>'+esc(t.name.split('/')[0])+'</span></a>').join('');
+  $('#type-switch').innerHTML = TYPES.map(t => '<a href="#type-'+t.id+'"'+(t.id === cur ? ' aria-current="page"' : '')+'>'+sym(t.id)+'<span>'+esc(t.name)+'</span></a>').join('');
 }
 function renderRoutes(){
   $('#f-routes').innerHTML = ROUTES.map(r => '<button type="button" class="chip" data-r="'+r+'" aria-pressed="'+state.routes.has(r)+'">'+r+'</button>').join('');
@@ -2224,7 +2233,7 @@ function renderCo(name){
     const full = sortedFor(id), r = full.findIndex(x => x.n === c.n) + 1;
     const cap = capOf(id, c);
     const capTxt = id === 'heavy' ? (c.fleet != null ? '운영 척수 '+c.fleet+'척' : '척수 미공개') : (cap ? '<span class="cap cap-'+cap.k+'">'+esc(capText(id,cap))+'</span> '+capTag(cap.k)+' <span class="note">'+esc(cap.m||'')+'</span>' : '<span class="none">규모 수치를 찾지 못함</span>');
-    return '<div class="rankline"><a href="#type-'+id+'">'+sym(id)+esc(TYPE_BY_ID[id].name)+'</a><span class="mono">'+r+'위 / '+full.length+'곳</span><span>'+capTxt+'</span></div>';
+    return '<div class="rankline"><a href="#type-'+id+'">'+sym(id)+esc(TYPE_BY_ID[id].name)+'</a><span class="mono">'+(id === 'heavy' || cap ? r+'위 / '+full.length+'곳' : full.length+'곳 중 순위 없음')+'</span><span>'+capTxt+'</span></div>';
   }).join('');
   box.innerHTML =
     '<div class="crumb"><a href="#home">처음</a> &rsaquo; '+backCrumb(c)+'선사</div>'+
@@ -2258,7 +2267,7 @@ function renderCo(name){
         (c.site ? '<li><a href="'+c.site+'" target="_blank" rel="noopener">공식 누리집 ↗</a><span>'+esc(c.site.replace(/^https?:\/\//,'').replace(/\/$/,''))+'</span></li>' : '')+
         '<li><a href="https://www.seanet.co.kr/" target="_blank" rel="noopener">씨넷 구인 공고 ↗</a><span>해기사 채용 정보</span></li>'+
         '<li><a href="https://www.koswec.or.kr/" target="_blank" rel="noopener">한국선원복지고용센터 ↗</a><span>선원 구인구직</span></li>'+
-        '<li><a href="#board">이 회사 정보 제보</a><span>틀린 내용이나 후기</span></li></ul></div></section>'+
+        '<li><a href="#board">이 회사 정보 제보</a> <span class="ready">준비 중</span><span>틀린 내용이나 후기 (아직 저장되지 않음)</span></li></ul></div></section>'+
       (rel.length ? '<section class="sheet blk"><h2>관련 회사</h2><div class="in"><ul class="linklist">'+rel.map(x => '<li><a href="'+coHref(x.n)+'">'+esc(x.n)+'</a><span>'+(x.kind==='owner'?'선주사':'관리선사')+', '+esc(x.types.map(id => TYPE_BY_ID[id].name).join(', '))+'</span></li>').join('')+'</ul></div></section>' : '')+
     '</aside></div>';
   fillCoExtras(c.n);
