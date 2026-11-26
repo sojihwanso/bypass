@@ -42,7 +42,7 @@ export function stepShip(s, dt, env = { set: 0, drift: 0 }) {
   }
   const dr = s.rudderOrder - s.rudder, step = sp.rudderRate * dt;
   s.rudder = Math.abs(dr) <= step ? s.rudderOrder : s.rudder + Math.sign(dr) * step;
-  const target = TELEGRAPH[s.tele].kn;
+  const tk = TELEGRAPH[s.tele].kn, target = Math.sign(tk) * Math.max(0, Math.abs(tk) - (env.loss || 0)); // 높은 파도: 속력 손실
   s.stw += (target - s.stw) * (1 - Math.exp(-dt / sp.speedTau));
   s.rpm = (target / sp.V0) * sp.maxRpm;
   const K = sp.K * (s.stw / sp.V0);

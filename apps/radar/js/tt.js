@@ -21,7 +21,7 @@ export function createTracker({ max = 100 } = {}) {
     for (const g of list) {
       if (g.state === 'lost') continue;
       const dt = Math.max(1e-6, (t - g.lastT) / 3600), px = g.x + g.fvx * dt, py = g.y + g.fvy * dt;
-      let best = null, bd = g.k < 3 ? GATE0 : GATE;
+      let best = null, bd = Math.min(1.5, (g.k < 3 ? GATE0 : GATE) + 0.25 * Math.max(0, (t - g.lastT) / 60 - 0.05)); /* 배속이 크면 스캔 사이 시간이 길어 게이트를 넓힘 */
       for (const d of abs) if (!d.used) { const r = Math.hypot(d.x - px, d.y - py); if (r < bd) { bd = r; best = d; } }
       if (best) {
         best.used = true; g.k++;

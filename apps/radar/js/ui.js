@@ -20,6 +20,7 @@ export const ICON = {
   az: P('<path d="M12 20L5.5 8.5a8 8 0 0 1 13 0z"/><path d="M8.5 13.5a5 5 0 0 1 7 0"/>'),
   pause: P('<path d="M9 5v14M15 5v14"/>'),
   speed: P('<path d="M4 6l7 6-7 6zM12 6l7 6-7 6z"/>'),
+  wx: P('<path d="M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z"/>'),
   pal: P('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),
   menu: P('<path d="M4 7h16M4 12h16M4 17h16"/>'),
   conn: P('<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v8M12 14v8M2 12h8M14 12h8"/>'),
@@ -45,7 +46,7 @@ export const ICON = {
    실제와 똑같지 않게 두 쌍만 한 칸씩 바꿈: 펄스↔튜닝, MAP↔HL. 그 아래는 시뮬레이터 전용 묶음 */
 const QB = [['tx', 'q_tx'], ['tune', 'q_tune'], ['pulse', 'q_pulse'], ['ir', 'q_ir'], ['es', 'q_es'], ['eav', 'q_eav'], ['ace', 'q_ace'], ['sep'], ['hl', 'q_hl'], ['map', 'q_map'], ['cureset', 'q_cureset'], ['ownais', 'q_ownais'], ['aismsg', 'q_aismsg'], ['pal', 'q_pal']];
 /* 실제 레이더에 없는 시뮬레이터 전용 단추는 헤더에 */
-const HB = [['scn', 'q_scn'], ['pause', 'q_pause'], ['speed', 'q_speed'], ['conn', 'q_conn'], ['shot', 'q_shot']];
+const HB = [['scn', 'q_scn'], ['pause', 'q_pause'], ['speed', 'q_speed'], ['wx', 'q_wx'], ['conn', 'q_conn'], ['shot', 'q_shot']];
 
 export function initUI(root, actions) {
   root.innerHTML = `
@@ -275,6 +276,7 @@ export function initUI(root, actions) {
     qv('ir', S.ctrl.ir ? String(S.ctrl.ir) : 'OFF', S.ctrl.ir > 0); qv('es', S.ctrl.es ? String(S.ctrl.es) : 'OFF', S.ctrl.es > 0); qv('eav', S.ctrl.eav ? String(S.ctrl.eav) : 'OFF', S.ctrl.eav > 0); qv('ace', S.ctrl.ace ? 'ON' : 'OFF', S.ctrl.ace);
     qv('hl', 'OFF'); qv('map', S.disp.map.on ? 'ON' : 'OFF', S.disp.map.on); qv('cureset', d.orient === 'CU' || d.motion === 'TM' ? 'RESET' : '-'); qv('ownais', ''); qv('aismsg', d.msgN ? String(d.msgN) : '');
     qv('pal', t('pal_' + S.disp.palette));
+    if (d.wx) { $('#hv_wx').textContent = d.wx.on ? d.wx.label : (lang() === 'en' ? 'OFF' : '꺼짐'); $('#hb_wx').classList.toggle('on', d.wx.on); $('#hb_wx').title = lang() === 'en' ? 'Weather changes on/off' : '날씨 변화 켜기/끄기'; }
     $('#hv_speed').textContent = '×' + d.speed; $('#hb_pause').classList.toggle('on', !!d.paused); $('#hb_conn').classList.toggle('on', !!d.connOn); $('#hb_speed').classList.toggle('on', d.speed > 1);
     $('#vPict').textContent = S.ctrl.preset; $('#vOff').classList.toggle('on', !!d.offCenter); $('#vRef').textContent = d.ref || 'CCRP';
     $('#vPi').classList.toggle('on', !!d.piOn); $('#vPiV').textContent = d.piOn ? d.piText || '' : ''; $('#vAz').classList.toggle('on', !!d.azOn); $('#vTrial').classList.toggle('on', S.tt.trialMode !== 'OFF');
@@ -297,5 +299,13 @@ export function initUI(root, actions) {
     const chip = $('#scnChip'); chip.hidden = !d.scnName; chip.textContent = d.scnName || '';
   }
   function dialog(title, html, foot = '') { $('#genT').textContent = title; $('#genB').innerHTML = html; $('#genF').innerHTML = foot; const g = $('#genDlg'); if (!g.open) g.showModal(); return g; }
-  return { refresh, applyLang, applyTheme, renderMenu, dialog, relayout, layoutMode: () => mode, qbInside: () => qIn, shift: () => shift, rmax: () => rmax, closeAll() { menuEl.hidden = true; cm.hidden = true; }, echoCanvas: $('#cvEcho'), overCanvas: $('#cvOver') };
+  /* 배속 고르기: 헤더 배속 단추 아래 작은 목록 */
+  function speedPop(list, cur) {
+    let pop = $('#spdPop'); if (pop) pop.remove(); if (!list) return;
+    pop = document.createElement('div'); pop.id = 'spdPop'; pop.className = 'spd-pop'; pop.setAttribute('role', 'menu');
+    pop.innerHTML = list.map((n) => `<button type="button" role="menuitemradio" aria-checked="${n === cur}" class="${n === cur ? 'on' : ''}" data-act="spd" data-spd="${n}">×${n}</button>`).join('');
+    const r = $('#hb_speed').getBoundingClientRect(); pop.style.left = r.left + 'px'; pop.style.top = r.bottom + 4 + 'px'; root.append(pop);
+    setTimeout(() => addEventListener('pointerdown', function off(e) { if (!e.target.closest('#spdPop,#hb_speed')) { pop.remove(); removeEventListener('pointerdown', off); } }), 0);
+  }
+  return { refresh, speedPop, applyLang, applyTheme, renderMenu, dialog, relayout, layoutMode: () => mode, qbInside: () => qIn, shift: () => shift, rmax: () => rmax, closeAll() { menuEl.hidden = true; cm.hidden = true; }, echoCanvas: $('#cvEcho'), overCanvas: $('#cvOver') };
 }

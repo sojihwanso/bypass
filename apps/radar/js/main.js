@@ -17,6 +17,7 @@ import { drawOverlay } from './overlay.js';
 import { t, lang } from './i18n.js';
 import { initStart } from './start.js';
 import { initHelp } from './help.js';
+import { stepWeather, windDrift, speedLoss, weatherLabel } from './weather.js';
 
 const TEST = new URLSearchParams(location.search).has('test');
 loadSettings();
@@ -35,6 +36,8 @@ let antAcc = 0, paused = false, hiddenPause = false, speed = 1, ant = 0, last = 
 let offCenter = null, tmOff = { x: 0, y: 0 }, cursor = null, selected = [], uiMode = null, rulerA = null, ruler = null, piOn = false, lastUser = performance.now(), trialSet = { course: 0, speed: 14 };
 let logFn = null, onScenarioTick = null, coastScreen = null, coastKey = '';
 const rnd = Math.random;
+const SPEEDS = [1, 2, 4, 8, 16, 32];
+let wxRun = null, wxPend = [], wxN = 0;
 
 /* ---------- UI ---------- */
 const actions = {};
@@ -63,6 +66,23 @@ export function startWorld(def) {
 }
 const ownScene = () => ({ lat: W.own.lat, lon: W.own.lon, hdg: W.own.hdg, antH: W.own.antH });
 const ownXY = () => ({ x: P.x(W.own.lon), y: P.y(W.own.lat) });
+function setSpeed(n) { if (SPEEDS.includes(n)) speed = n; }
+/* 배에 미치는 바깥 힘: 조류 + (날씨 켬 또는 시나리오 고정 날씨일 때) 바람 표류·높은 파도 속력 손실 */
+function shipEnv() {
+  const c = W.weather.current || { set: 0, drift: 0 }, wxOn = S.sim.weatherOn || W.weather.fixed;
+  if (!wxOn) return { set: c.set, drift: c.drift, loss: 0 };
+  const w = windDrift(W.weather.windFrom || 0, W.weather.windMs || 0, W.own.hdg), D2 = Math.PI / 180;
+  const vx = c.drift * Math.sin(c.set * D2) + w.drift * Math.sin(w.set * D2), vy = c.drift * Math.cos(c.set * D2) + w.drift * Math.cos(w.set * D2);
+  return { set: wrap360(Math.atan2(vx, vy) / D2), drift: Math.hypot(vx, vy), loss: speedLoss(W.weather.sea || 0) };
+}
+function syncSceneWeather() { if (scene) Object.assign(scene.weather, W.weather); }
+function weatherTick(run) {
+  if (!wxRun) return;
+  const ev = stepWeather(wxRun, W.weather, run, W.own);
+  if (ev.length || W.weather.rain.length) syncSceneWeather();
+  for (const e of ev) { const id = 'wx:' + (++wxN); alerts.raise(id, 'C', lang() === 'en' ? e.en : e.ko); wxPend.push({ id, t: W.t + 60 }); }
+  wxPend = wxPend.filter((p) => { if (W.t < p.t) return true; alerts.resolve(p.id); return false; });
+}
 function freeDef(o = {}) {
   const lat = o.lat ?? 34.35, lon = o.lon ?? 125.6, Pq = makeProj(lat, lon), at = (b, r) => ({ lat: Pq.lat(r * Math.cos(b * D)), lon: Pq.lon(r * Math.sin(b * D)) });
   return { name: o.name || '', own: { lat, lon, hdg: o.hdg ?? 0, tele: o.tele }, targets: (o.targets || []).map((x, i) => ({ id: x.id || 't' + i, ...at(x.brg, x.rng), hdg: x.hdg, kn: x.kn, L: x.L ?? 120, ais: x.ais ?? true, name: x.name || 'SHIP ' + (i + 1), legs: x.legs || [] })), weather: o.weather || { sea: 2 }, aids: o.aids || [] };
@@ -82,8 +102,9 @@ function tick(dt) {
   if (radar.state === 'warm') { radar.warmLeft -= dt; if (radar.warmLeft <= 0) setRadar('tx'); }
   const run = paused || hiddenPause ? 0 : dt * speed;
   // 물리: 0.2 s 이하로 나눠 적분
-  const n = Math.ceil(run / 0.2);
-  for (let i = 0; i < n; i++) { const h = run / n; W.t += h; stepShip(W.own, h, W.weather.current); for (const g of W.targets) stepTarget(g, h, W.t); }
+  const n = Math.ceil(run / 0.2), env = shipEnv();
+  for (let i = 0; i < n; i++) { const h = run / n; W.t += h; stepShip(W.own, h, env); for (const g of W.targets) stepTarget(g, h, W.t); }
+  if (run > 0) weatherTick(run);
   if (run > 0 && onScenarioTick) onScenarioTick(W, run);
   if (run > 0 && logFn) logFn(W);
   V.hdg = W.own.hdg; V.rangeNM = S.disp.rangeNM; V.orient = S.disp.orient; V.motion = S.disp.motion; V.palette = S.disp.palette; V.videoColor = S.disp.videoColor; V.rings = S.disp.rings;
@@ -207,6 +228,7 @@ function refreshUI() {
   const top = alerts.top(), el = W.t, d = new Date();
   const cur = cursor && cursorInfo(cursor);
   ui.refresh({
+    wx: { on: S.sim.weatherOn || !!W.weather.fixed, label: weatherLabel(W.weather, lang()) },
     rangeNM: V.rangeNM, ringInt: RING_INT[V.rangeNM], orient: V.orient, motion: V.motion, tx: radar.state, warmLeft: radar.warmLeft, speed, paused: paused || hiddenPause, offCenter: !!offCenter, piOn, azOn: azZones.length > 0, connOn: conn && conn.shown,
     own: { hdg: sn.hdg, stw: sn.stw, sog: sn.sog, cog: sn.cog, rot: o.rot, lat: sn.lat, lon: sn.lon }, clock: `${pad(d.getHours())}:${pad(d.getMinutes())}`, elapsed: `${pad((el / 3600) | 0)}:${pad(((el % 3600) / 60) | 0)}:${pad((el % 60) | 0)}`,
     cursor: cur, ebl: tools.ebl.map((e, i) => ({ on: e.on, brg: S.disp.eblRef === 'REL' ? wrap360(tools.eblTrue(i, o.hdg) - o.hdg) : tools.eblTrue(i, o.hdg) })),
@@ -258,7 +280,9 @@ Object.assign(actions, {
   trail: () => { const i = TRAIL_ORDER.indexOf(S.disp.trails.time); S.disp.trails.time = TRAIL_ORDER[(i + 1) % TRAIL_ORDER.length]; trails.reset(V.rangeNM, S.disp.trails.mode, S.disp.trails.mode === 'TRUE' ? ownXY() : undefined); saveSettings(); },
   pi: () => { piOn = !piOn; if (piOn) tools.pi.brg = Math.round(W.own.hdg); },
   az: () => { if (azZones.length) { azZones = []; tracker.setZones([]); } else uiMode = 'az1'; },
-  pause: () => { paused = !paused; }, speed: () => { speed = speed >= 8 ? 1 : speed * 2; },
+  pause: () => { paused = !paused; }, speed: () => ui.speedPop(SPEEDS, speed), spd: (el) => { setSpeed(+el.dataset.spd); ui.speedPop(null); },
+  faster: () => setSpeed(SPEEDS[Math.min(SPEEDS.length - 1, SPEEDS.indexOf(speed) + 1)]), slower: () => setSpeed(SPEEDS[Math.max(0, SPEEDS.indexOf(speed) - 1)]),
+  wx: () => { S.sim.weatherOn = !S.sim.weatherOn; saveSettings(); if (wxRun) wxRun.enabled = S.sim.weatherOn; if (!S.sim.weatherOn && W && !W.weather.fixed) { Object.assign(W.weather, { kind: 'clear', fog: false, sea: 1, windMs: 3, rain: [], ducting: false }); syncSceneWeather(); } },
   conn: () => conn.toggle(),
   shot: () => { const c = document.createElement('canvas'), a = ui.echoCanvas, b = ui.overCanvas; c.width = b.width; c.height = b.height; const g = c.getContext('2d'); g.fillStyle = '#0A131A'; g.fillRect(0, 0, c.width, c.height); g.drawImage(a, 0, 0, c.width, c.height); g.drawImage(b, 0, 0); const l = document.createElement('a'); l.download = `radar-${Date.now()}.png`; l.href = c.toDataURL('image/png'); l.click(); },
   rangeUp: () => rangeStep(1), rangeDn: () => rangeStep(-1),
@@ -349,7 +373,7 @@ const keyHandlers = {
   steerR10: () => own() && (own().auto.on ? setAuto(own(), true, own().auto.setHdg + 10) : setRudderOrder(own(), own().rudderOrder + 10)),
   mid: () => own() && (setAuto(own(), false), setRudderOrder(own(), 0)),
   teleUp: () => own() && setTelegraph(own(), own().tele + 1), teleDn: () => own() && setTelegraph(own(), own().tele - 1),
-  pause: () => { paused = !paused; }, ack: () => actions.ack(), rangeUp: () => rangeStep(1), rangeDn: () => rangeStep(-1),
+  pause: () => { paused = !paused; }, faster: () => actions.faster(), slower: () => actions.slower(), ack: () => actions.ack(), rangeUp: () => rangeStep(1), rangeDn: () => rangeStep(-1),
   ebl1: () => actions.ebl1(), vrm1: () => actions.vrm1(),
   acqCursor: () => cursor && cursorAct('acq', cursor), cancelCursor: () => cursor && cursorAct('cancel', cursor),
   off: () => actions.off(), mode: () => actions.mode(), vecMode: () => { S.tt.vector = S.tt.vector === 'TRUE' ? 'REL' : 'TRUE'; saveSettings(); },
@@ -368,10 +392,10 @@ setInterval(() => { if (W && !paused) saveNow(); }, 15000);
 addEventListener('pagehide', saveNow);
 
 /* ---------- 외부 모듈(시나리오·도움말)이 쓸 창구 ---------- */
-window.Radar = { startWorld, freeDef, setRadar, get world() { return W; }, setLog(fn) { logFn = fn; }, setScenarioTick(fn) { onScenarioTick = fn; }, alerts: () => alerts, ais: () => ais, tracker: () => tracker, route: () => route, tools: () => tools, saveNow, resume, hasResume: () => { try { return !!localStorage.getItem(RESUME); } catch (e) { return false; } }, setPaused: (p) => { paused = p; }, pointInLand };
+window.Radar = { startWorld, freeDef, setRadar, get world() { return W; }, setLog(fn) { logFn = fn; }, setScenarioTick(fn) { onScenarioTick = fn; }, alerts: () => alerts, ais: () => ais, tracker: () => tracker, route: () => route, tools: () => tools, saveNow, resume, hasResume: () => { try { return !!localStorage.getItem(RESUME); } catch (e) { return false; } }, setPaused: (p) => { paused = p; }, pointInLand, setWeatherRun: (r) => { wxRun = r; wxPend = []; } };
 
 /* 빠른 진행(테스트·검증): 그리지 않고 물리·기록만 */
-function tickSim(sec) { if (!W) return; const n = Math.ceil(sec / 0.25); for (let i = 0; i < n; i++) { if (paused) return; const h = sec / n; W.t += h; stepShip(W.own, h, W.weather.current); for (const g of W.targets) stepTarget(g, h, W.t); if (onScenarioTick) onScenarioTick(W, h); if (logFn) logFn(W); } }
+function tickSim(sec) { if (!W) return; const n = Math.ceil(sec / 0.25); for (let i = 0; i < n; i++) { if (paused) return; const h = sec / n; W.t += h; stepShip(W.own, h, shipEnv()); weatherTick(h); for (const g of W.targets) stepTarget(g, h, W.t); if (onScenarioTick) onScenarioTick(W, h); if (logFn) logFn(W); } }
 
 /* 시작: 배경에 자유 항해를 띄우고 시나리오 화면을 연다 */
 startWorld(freeDef({ targets: [{ brg: 40, rng: 4, hdg: 230, kn: 11 }, { brg: 300, rng: 5, hdg: 100, kn: 8 }] }));
@@ -382,7 +406,7 @@ requestAnimationFrame(frame);
 if (!TEST) starter.openStart();
 if (TEST) {
   window.RadarTest = {
-    ready: true, S, ppi, scene: () => scene, view: () => V, setView: (o) => Object.assign(V, o), setRange: (r) => { S.disp.rangeNM = r; V.rangeNM = r; }, frames: () => frames, tick, frameAt, own, paused: () => paused || hiddenPause, setPaused: (p) => { paused = p; }, KEYMAP, keyHandlers,
+    ready: true, S, ppi, scene: () => scene, setSpeed, speed: () => speed, proj: makeProj, view: () => V, setView: (o) => Object.assign(V, o), setRange: (r) => { S.disp.rangeNM = r; V.rangeNM = r; }, frames: () => frames, tick, frameAt, own, paused: () => paused || hiddenPause, setPaused: (p) => { paused = p; }, KEYMAP, keyHandlers,
     radar: { set: setRadar, toggle: toggleTx, get state() { return radar.state; }, get warmLeft() { return radar.warmLeft; } }, world: () => W, tracker: { targets: () => tracker.targets() },
     newWorld: (o) => startWorld(freeDef(o)), tgtScreen: (id) => { const g = W.targets.find((x) => x.id === id), r = relOf(P.x(g.lon), P.y(g.lat)), p = ppi.toScreen(r.brg, r.rng); return { sx: p.x, sy: p.y }; },
     cursorAct, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,

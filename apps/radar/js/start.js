@@ -1,6 +1,10 @@
 /* 시작 화면(시나리오 5개·자유 항해·이어 하기) · 시나리오 안내 · 결과 화면 */
 import { SCENARIOS, freeSetup, createLog, evaluate } from './scenarios.js';
-import { loadLand } from './coast.js';
+import { loadLand, pointInLand } from './coast.js';
+import { REGIONS, pickStart } from './place.js';
+import { makeTraffic, LEVELS } from './traffic.js';
+import { rollWeather, createWeatherRun } from './weather.js';
+import { S, saveSettings } from './state.js';
 import { makeProj, velXY, cpaTcpa } from './geo.js';
 import { t, tl, lang } from './i18n.js';
 
@@ -25,11 +29,10 @@ export async function openStart(o = {}) {
   const card = (s) => `<button type="button" class="scard" data-scn="${s.id}"><span class="sid">${s.id}</span><b>${esc(tl(s))}</b><span class="rule">COLREG ${s.rule}</span><span class="sb">${esc(tl(s.brief))}</span><span class="why" hidden></span></button>`;
   const html = `<div class="start">
     <p class="lead">${en ? 'Pick a collision-avoidance scenario. The radar starts in STANDBY: switch it on and wait for the warm-up.' : '충돌 회피 시나리오를 고르세요. 레이더는 대기(STBY)로 시작해요. 송신을 켜고 예열을 기다리세요.'}</p>
+    <div class="lvl" role="group" aria-label="${en ? 'Difficulty' : '난이도'}"><b>${en ? 'Difficulty (surrounding traffic)' : '난이도(주변 교통량)'}</b>${LEVELS.map((l) => `<button type="button" class="btn${S.sim.level === l ? ' on' : ''}" data-level="${l}">${LVL[l][en ? 1 : 0]}</button>`).join('')}<span class="small">${en ? 'Harder = more ships, and more of them without AIS.' : '어려울수록 배가 많고, AIS 없는 배도 많아져요.'}</span></div>
     <div class="scards">${SCENARIOS.map(card).join('')}</div>
     <div class="free"><b>${en ? 'Free navigation' : '자유 항해'}</b>
-      <label>${en ? 'Sea state' : '해상 상태'} <select id="fSea">${[0, 1, 2, 3, 4, 5, 6].map((v) => `<option${v === 2 ? ' selected' : ''}>${v}</option>`).join('')}</select></label>
       <label>${en ? 'Ships' : '선박 수'} <select id="fN">${[0, 2, 4, 6, 8].map((v) => `<option${v === 4 ? ' selected' : ''}>${v}</option>`).join('')}</select></label>
-      <label><input type="checkbox" id="fRain"> ${en ? 'Rain' : '비'}</label>
       <label>${en ? 'Seed' : '시드'} <input type="number" id="fSeed" value="${(Math.random() * 9999) | 0}" style="width:80px"></label>
       <button class="btn" type="button" data-start="free">${en ? 'Start' : '시작'}</button>
       ${R.hasResume() ? `<button class="btn" type="button" data-start="resume">${en ? 'Resume previous' : '이전 항해 이어 하기'}</button>` : ''}
@@ -43,11 +46,12 @@ export async function openStart(o = {}) {
   dlg.onclose = () => { if (!starting) R.setPaused(false); };
   dlg.onclick = (e) => {
     if (e.target.closest('[data-close]')) { dlg.close(); return; }
+    const lv = e.target.closest('[data-level]'); if (lv) { S.sim.level = lv.dataset.level; saveSettings(); dlg.querySelectorAll('[data-level]').forEach((b) => b.classList.toggle('on', b === lv)); return; }
     starting = true;
     const c = e.target.closest('[data-scn]'); if (c && !c.disabled) { dlg.close(); startScenario(c.dataset.scn); return; }
     const b = e.target.closest('[data-start]'); if (!b) { starting = false; return; }
     if (b.dataset.start === 'resume') { dlg.close(); current = null; R.setLog(null); R.setScenarioTick(null); R.resume(); return; }
-    const scn = freeSetup({ lat: 33.5, lon: 124.6, nTargets: +dlg.querySelector('#fN').value, sea: +dlg.querySelector('#fSea').value, rain: dlg.querySelector('#fRain').checked, seed: +dlg.querySelector('#fSeed').value || 1 });
+    const scn = freeSetup({ lat: 33.5, lon: 124.6, nTargets: +dlg.querySelector('#fN').value, sea: 2, rain: false, seed: +dlg.querySelector('#fSeed').value || 1 });
     dlg.close(); runScenario(scn, { free: true, skipBrief: true });
   };
   // S5: 해안선을 못 불러오면 비활성
@@ -58,19 +62,43 @@ export async function openStart(o = {}) {
 
 export function startScenario(id, o = {}) { const s = SCENARIOS.find((x) => x.id === id); return runScenario(s, o); }
 
-function runScenario(scn, o = {}) {
+const LVL = { none: ['없음', 'None'], easy: ['쉬움', 'Easy'], medium: ['중간', 'Medium'], hard: ['어려움', 'Hard'] };
+const seeded = (s) => () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+const around = (lat, lon) => ({ lat0: lat - 0.6, lat1: lat + 0.6, lon0: lon - 0.75, lon1: lon + 0.75 });
+/* 무작위 해역·침로 배치 + 난이도 교통량 + 날씨. o.place=false면 원래 위치, o.level로 난이도 덮어쓰기, o.seed로 재현 */
+async function prepare(scn, o) {
+  const rnd = seeded((o.seed ?? Math.random() * 4294967295) >>> 0 || 1);
+  let def = scn, region = null;
+  if (o.place !== false && !scn.needsCoast) {
+    const cand = o.region ? REGIONS.find((r) => r.id === o.region) : REGIONS[Math.floor(rnd() * REGIONS.length)];
+    const L = await loadLand(around((cand.box.lat0 + cand.box.lat1) / 2, (cand.box.lon0 + cand.box.lon1) / 2), o.fetchText);
+    if (L.ok) { const p = pickStart({ def: scn, region: cand, rings: L.rings, rnd }); if (p.ok) { def = p.def; region = cand; } }
+  }
+  const L2 = await loadLand(around(def.own.lat, def.own.lon), o.fetchText), P = makeProj(def.own.lat, def.own.lon);
+  const onLand = (lat, lon) => L2.ok && pointInLand(L2.rings, lat, lon);
+  const bg = makeTraffic({ level: o.level ?? S.sim.level, own: { ...def.own, kn: def.own.kn ?? 14 }, rnd }).filter((g) => [0, 0.25, 0.5].every((h) => { const v = velXY(g.hdg, g.kn), x = P.x(g.lon) + v.vx * h, y = P.y(g.lat) + v.vy * h; return !onLand(P.lat(y), P.lon(x)); }));
+  const wxOn = S.sim.weatherOn || scn.fixedWeather;
+  const weather = wxOn ? rollWeather(rnd, scn.fixedWeather ? def.weather : null, def.own) : { kind: 'clear', fog: false, visNM: 10, sea: 1, windFrom: Math.round(rnd() * 360), windMs: 3, rain: [], ducting: false, interference: false };
+  if (def.weather && def.weather.current) weather.current = { ...def.weather.current };
+  return { def: { ...def, targets: [...def.targets, ...bg] }, weather, region, rnd };
+}
+
+async function runScenario(scn, o = {}) {
   const R = window.Radar, en = lang() === 'en';
-  lastResult = null; current = scn; R.setPaused(false);
-  R.startWorld({ name: o.free ? (en ? 'Free navigation' : '자유 항해') : `${scn.id} · ${tl(scn)}`, own: scn.own, targets: scn.targets, weather: scn.weather, aids: scn.aids, marks: scn.marks || [], needsCoast: !!scn.needsCoast });
+  lastResult = null; current = scn;
+  const pr = await prepare(scn, o), def = pr.def; R.setPaused(false);
+  const where = pr.region ? ` · ${tl(pr.region)}` : '';
+  R.startWorld({ name: (o.free ? (en ? 'Free navigation' : '자유 항해') : `${scn.id} · ${tl(scn)}`) + where, own: def.own, targets: def.targets, weather: pr.weather, aids: def.aids, marks: def.marks || [], needsCoast: !!scn.needsCoast });
+  R.setWeatherRun(createWeatherRun({ rnd: pr.rnd, enabled: S.sim.weatherOn }));
   R.setRadar('stby'); /* 어떻게 시작하든 STBY(송신 → 예열 5초) */
   if (scn.message) R.ais().addMessage({ ...scn.message, t: 0 });
   if (o.free) { R.setLog(null); R.setScenarioTick(null); return; }
-  const log = createLog(scn); curLog = log; let lastS = -1;
+  const log = createLog(def); curLog = log; let lastS = -1;
   R.setLog((w) => { if (w.t - lastS >= 1) { lastS = w.t; log.sample(w); } });
   R.setScenarioTick((w) => {
     if (lastResult) return; const r = log.result();
     const P = makeProj(w.own.lat, w.own.lon), ov = velXY(w.own.cog, w.own.sog);
-    const clear = w.t > 300 && w.targets.every((g) => { const x = P.x(g.lon), y = P.y(g.lat); return Math.hypot(x, y) > 2 && cpaTcpa({ x: 0, y: 0 }, ov, { x, y }, velXY(g.cog, g.sog)).tcpa < 0; });
+    const clear = w.t > 300 && w.targets.filter((g) => !String(g.id).startsWith('bg')).every((g) => { const x = P.x(g.lon), y = P.y(g.lat); return Math.hypot(x, y) > 2 && cpaTcpa({ x: 0, y: 0 }, ov, { x, y }, velXY(g.cog, g.sog)).tcpa < 0; });
     if (r.collision || r.grounding || clear || w.t >= scn.durationMin * 60) finish(evaluate(r));
   });
   if (!o.skipBrief) {

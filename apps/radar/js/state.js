@@ -29,6 +29,7 @@ export const DEFAULTS = {
     volume: 'MID', watch: 0, anchorOn: false, anchorR: 0.3,
     ta1On: false, ta1Mode: 'IN', ta2On: false, ta2Mode: 'IN', taLevel: 2,
   },
+  sim: { level: 'easy', weatherOn: true },
   ui: { lang: 'ko', conning: { x: null, y: null, hidden: false }, speed: 1, fkeys: { F1: 'NEAR', F2: 'FAR', F3: 'ROUGH SEA', F4: 'HARBOR' } },
 };
 const clone = (o) => JSON.parse(JSON.stringify(o));
@@ -60,6 +61,7 @@ function validate() {
   if (!RANGES.includes(S.disp.rangeNM)) S.disp.rangeNM = DEFAULTS.disp.rangeNM;
   if (!['HU', 'CU', 'NU'].includes(S.disp.orient)) S.disp.orient = DEFAULTS.disp.orient;
   if (!['RM', 'TM'].includes(S.disp.motion)) S.disp.motion = DEFAULTS.disp.motion;
+  if (!['none', 'easy', 'medium', 'hard'].includes(S.sim.level)) S.sim.level = DEFAULTS.sim.level;
   for (const k of ['gain']) S.ctrl[k] = Math.min(100, Math.max(0, S.ctrl[k]));
   for (const k of ['sea', 'rain', 'tune']) S.ctrl[k].val = Math.min(100, Math.max(0, S.ctrl[k].val));
 }

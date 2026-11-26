@@ -24,6 +24,8 @@ export const KEYMAP = [
   { key: 'F2', act: 'f2', ko: '기능 키 2', en: 'Function key 2' },
   { key: 'F3', act: 'f3', ko: '기능 키 3', en: 'Function key 3' },
   { key: 'F4', act: 'f4', ko: '기능 키 4', en: 'Function key 4' },
+  { key: '[', act: 'slower', ko: '배속 한 단계 낮추기', en: 'Sim speed down' },
+  { key: ']', act: 'faster', ko: '배속 한 단계 올리기', en: 'Sim speed up' },
   { key: 'Escape', act: 'esc', ko: '메뉴·창 닫기', en: 'Close menus' },
 ];
 const typing = (el) => el && (el.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName));
