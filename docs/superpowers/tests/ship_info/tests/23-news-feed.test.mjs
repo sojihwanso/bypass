@@ -46,7 +46,7 @@ export default [
  })},
  {name:'feed-fail-status', fn: () => withPage({}, async p => {
    await open(p, '#news', r => r.fulfill({status:500, body:''}));
-   assert((await p.$eval('#feed-state', e => e.textContent)).includes('연결하지 못해'), 'fail text');
+   assert((await p.$eval('#feed-state', e => e.textContent)).includes('불러오지 못해'), 'fail text');
    await open(p, '#news', r => r.fulfill({status:404, body:''}));
    assert((await p.$eval('#feed-state', e => e.textContent)).includes('준비하고 있습니다'), '404 text');
  })},

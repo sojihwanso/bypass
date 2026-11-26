@@ -535,6 +535,9 @@ footer li::before{content:"-";color:var(--muted)}
 .nf-q{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
 .nf-q b{color:var(--ink)}
 .feed-state{font-size:12.5px;color:var(--muted);margin:10px 0 0}
+.home-feed{margin:0;padding:8px 20px 0}
+.chip:disabled{opacity:.45;cursor:default}
+.chip:disabled:hover{border-color:var(--rule)}
 .newsfull .d{white-space:nowrap}
 footer li{text-wrap:pretty}
 .sx-box{border-color:var(--rule)}
@@ -687,6 +690,7 @@ footer .readme-h{display:block;margin-bottom:10px}
       </section>
       <section class="sheet news" aria-labelledby="news-h">
         <div class="card-h"><h2 id="news-h">해운 소식 <span class="news-new" id="news-new"></span></h2><a class="more" href="#news">더보기 &rsaquo;</a></div>
+        <p class="feed-state home-feed" id="home-feed"></p>
         <ol id="news-list"></ol>
       </section>
       <section class="sheet bshell" aria-labelledby="bs-h">
@@ -1758,7 +1762,7 @@ async function fetchFeed(){
     try{ localStorage.setItem(NEWS_FEED.cacheKey, JSON.stringify({at: Date.now(), updated, items})); }catch(e){}
     feedStatus = okText(updated);
   }catch(e){
-    feedStatus = '소식 서버에 연결하지 못해 저장된 소식을 보여 줍니다.';
+    feedStatus = '소식 서버에서 새 소식을 불러오지 못해 저장된 소식을 보여 줍니다.';
   }
   rerenderNews();
 }
@@ -1885,7 +1889,8 @@ function sxOpen(helpMode){
     const all = co.map(c => '<a class="sx-item" href="'+coHref(c.n)+'"><span>'+esc(c.n)+(c.sub?' <span class="note">'+esc(c.sub)+'</span>':'')+'</span><small>'+(c.kind==='owner'?'선주사':'관리선사')+'</small></a>')
       .concat(reg.map(u => '<a class="sx-item" href="'+coHref(u.n)+'"><span>'+esc(u.n)+'</span><small>'+u.ships+'척 등록</small></a>'));
     if (all.length) html += '<div class="sx-sec">선사</div>' + all.slice(0, 12).join('') + (all.length > 12 ? '<div class="sx-empty">'+(all.length-12)+'곳 더 있습니다. 검색어를 좁히거나 <a href="#dir?q='+encodeURIComponent(raw)+'">선사 목록</a>에서 찾아보시기 바랍니다.</div>' : '');
-    if (hp.length) html += '<div class="sx-sec">도움말</div>' + hp.map(h => '<div class="sx-help"><b>'+esc(h.t)+'</b><span>'+esc(h.d)+'</span></div>').join('');
+    if (!ty.length && !all.length) html = '<div class="sx-empty">"'+esc(raw)+'"와 일치하는 회사나 선종이 없습니다. <a class="sx-item" href="#dir?q='+encodeURIComponent(raw)+'">선사 목록에서 이름·선박명으로 찾기</a></div>' + html;
+    if (hp.length) html += '<div class="sx-sec">'+(ty.length || all.length ? '도움말' : '관련 도움말')+'</div>' + hp.map(h => '<div class="sx-help"><b>'+esc(h.t)+'</b><span>'+esc(h.d)+'</span></div>').join('');
     if (!html) html = '<div class="sx-empty">일치하는 회사나 선종이 없습니다. 철자를 바꾸거나 정보 제보 게시판으로 알려 주시기 바랍니다.</div>';
   }
   panel.innerHTML = html; panel.hidden = false; sxActive = -1;
@@ -1954,6 +1959,7 @@ function renderHome(){
   $('#hero-lead').textContent = '선사 '+UNI_TOTAL+'곳, 선종 '+TYPES.length+'개. 2027 실습생 선발 여부까지 한 표에서 확인합니다.';
   $('#news-list').innerHTML = groupNews(NEWS_ALL.slice(0, 40)).slice(0, 12).map(g => renderNewsGroup(g)).join('');
   const nNew = NEWS_ALL.filter(isNewNews).length;
+  const hf = $('#home-feed'); if (hf) hf.textContent = feedStatus.replace('하루 한 번 자동으로 새 소식을 받습니다. ', '자동 수집 · ').replace(' 지금은 사이트에 들어 있는 소식만 보여 줍니다.', '');
   $('#news-new').textContent = nNew ? '새 소식 '+nNew+'건' : '';
   newsFade($('#news-list'));
   $('#type-list').innerHTML = TYPES.map(t => {
@@ -1985,7 +1991,7 @@ function renderNews(){
   const counts = {all:base.length};
   NEWS_CATS.forEach(c => counts[c] = base.filter(n => n.c === c || n.c2 === c).length);
   $('#news-cats').innerHTML = ['all'].concat(NEWS_CATS).map(c =>
-    '<button type="button" class="chip" data-cat="'+esc(c)+'" aria-pressed="'+(state.newsCat===c)+'">'+(c==='all'?'전체':esc(c))+'<small>'+counts[c]+'</small></button>').join('');
+    '<button type="button" class="chip" data-cat="'+esc(c)+'" aria-pressed="'+(state.newsCat===c)+'"'+(counts[c] === 0 && state.newsCat !== c ? ' disabled' : '')+'>'+(c==='all'?'전체':esc(c))+'<small>'+counts[c]+'</small></button>').join('');
   document.querySelectorAll('#nf-range button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === state.newsRange)));
   $('#nf-from').value = w.from || '';
   $('#nf-to').value = w.to || '';
@@ -2682,7 +2688,7 @@ $('#m-count').textContent = '선사 '+UNI_TOTAL+'곳, 선종 '+TYPES.length+'개
 applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
 setupBoard();
 route();
-fetchFeed().then(() => { if (currentView() === 'news') renderNews(); });
+fetchFeed().then(() => rerenderNews());
 if (NEWS_FEED.url) setInterval(fetchFeed, Math.max(5, NEWS_FEED.refreshMinutes) * 60000);
 
 </script>
