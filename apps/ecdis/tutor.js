@@ -206,7 +206,7 @@
 
   function onClick(e) {
     const q = e.target.closest("[data-q]");
-    if (q) { const ok = !!stepObj().quiz[+q.dataset.q][1]; q.classList.add(ok ? "ok" : "no"); react(ok ? "good" : "bad"); return; }
+    if (q) { const st = stepObj(), ok = !!st.quiz[+q.dataset.q][1]; q.classList.add(ok ? "ok" : "no"); if (ok && st.onGood) { try { st.onGood(); } catch (er) {} } react(ok ? "good" : "bad"); return; }
     const b = e.target.closest("[data-tu]"); if (!b) return;
     const a = b.dataset.tu;
     if (a === "clip") { const box = $(".tu-vid", pop), open = !box.firstChild; box.innerHTML = open ? `<video src="edu/clips/${stepObj().clip}.mp4" autoplay muted loop playsinline preload="auto" aria-label="시연 영상"></video>` : ""; b.textContent = open ? "■ 시연 닫기" : "▶ 시연 보기"; b.setAttribute("aria-expanded", open); place(); return; }
@@ -282,7 +282,9 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
   const btnText = (txt) => () => [...document.querySelectorAll("button")].find((b) => b.textContent.replace(/\s+/g, "") === txt && b.getBoundingClientRect().width);
   const navi = () => { try { if (S.mode !== "NAVI") setMode("NAVI"); } catch (e) {} };
   // 경보 단계용 연습 경보(경고 등급). 켜면 목록에 뜨고, 끄면 해소 처리돼 기록에 남는다
-  const eduAlert = (on) => { try { if (on) S.alerts = S.alerts.filter((x) => x.id !== "edu"); setAlert("edu", on, "W", "alEdu"); uiAlertChanged = true; } catch (e) {} };
+  const eduAlert = (on, pri) => { try { if (on) S.alerts = S.alerts.filter((x) => x.id !== "edu"); setAlert("edu", on, pri || "W", "alEdu"); uiAlertChanged = true; } catch (e) {} };
+  // 연습 경보를 '확인함' 상태로 남겨 둠 (원인은 아직 있음)
+  const eduAcked = () => { try { let a = S.alerts.find((x) => x.id === "edu" && x.active); if (!a) { eduAlert(true); a = S.alerts.find((x) => x.id === "edu"); } if (a) ackAlert(a); } catch (e) {} };
   let sawOther = false;
   Tutor.STEPS.D.push(
     { id: "D1", mood: "explain", target: "#cvChart", before: navi, title: "해도 화면", cursor: false,
@@ -312,18 +314,38 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
     { id: "D8", mood: "caution", target: "#abox", before: () => { navi(); eduAlert(true); }, title: "경보 상자",
       body: "해도 오른쪽 위의 이 상자에 지금 가장 중요한 경보 하나가 떠요. 색은 <b>알람 빨강 · 경고 주황 · 주의 노랑</b>이고, 오른쪽 숫자는 지금 걸려 있는 경보 개수예요. 확인(ACK)하지 않은 알람은 깜빡여요.",
       say: "연습용 경보를 하나 띄워 두었어요. 지금은 교육 중이라 경보음은 꺼져 있어요. 화면 위쪽 가운데 단추로 언제든 켤 수 있어요.",
-      note: "교육을 시작하면 경보음이 바로 울리지 않게 꺼 둬요. 경보 단계(D10·D11)에서는 저절로 켜져요." },
+      note: "교육을 시작하면 경보음이 바로 울리지 않게 꺼 둬요. 알람이 울리는 단계(대응 순서·경보 목록·경보 기록)에서는 저절로 켜져요." },
+    { id: "AL1", mood: "explain", target: "#abox", before: () => { navi(); if (!S.alerts.some((x) => x.id === "edu" && x.active)) eduAlert(true); }, title: "경보 상자 읽는 법",
+      body: "경보 상자는 왼쪽부터 이렇게 읽어요.<br>① <b>기호</b>: ! 알람 · W 경고 · C 주의<br>② <b>굵은 글씨</b>: 무슨 경보인지 (예: 안전 등심선 횡단)<br>③ <b>작은 글씨</b>: 우선순위 · 상태 · 발생 시각(UTC). 원인이 없어졌으면 '해소됨'이 붙어요<br>④ <b>숫자</b>: 지금 걸려 있는 경보 개수. 1보다 크면 목록에 더 있어요<br>⑤ <b>단추</b>: 아직 확인하지 않은 경보에는 '소리 끄기'와 '확인'이 보여요",
+      say: "숫자가 2 이상이면 상자에 보이는 건 가장 급한 하나뿐이에요. 나머지는 목록을 열어 봐야 해요!" },
     { id: "D9", mood: "think", target: "#abox", before: navi, title: "경보 우선순위 — 알람 · 경고 · 주의",
       body: "ECDIS 경보는 급한 정도에 따라 셋으로 나눠요.<br><b>알람(Alarm)</b>: 바로 조치해야 하는 위험(좌초, 안전 등심선 횡단 등). 소리가 계속 울리고 깜빡여요.<br><b>경고(Warning)</b>: 곧 조치가 필요한 상황(항로 이탈, 변침점 접근 등). 한 번 울려요.<br><b>주의(Caution)</b>: 알고만 있으면 되는 정보. 소리 없이 표시만 돼요.",
       say: "그럼 문제! 가장 먼저 대응해야 하는 건 어느 것일까요?",
       quiz: [["알람 (빨강)", true], ["경고 (주황)", false], ["주의 (노랑)", false]],
       good: "정답이에요! 빨간 알람은 바로 조치해야 해요.", bad: "다시 볼까요? 바로 조치해야 하는 건 빨간색 알람이에요." },
+    { id: "AL2", mood: "think", target: "#abox", before: navi, title: "경보 상태 네 가지",
+      body: "같은 알람도 상태에 따라 보이는 모습이 달라요.<br>① <b>발생 · 미확인</b>: 깜빡이고 소리가 나요<br>② <b>발생 · 확인함</b>: 깜빡임과 소리는 멈추지만, 원인이 남아 있는 동안 계속 켜져 있어요<br>③ <b>해소 · 미확인</b>: 원인은 없어졌지만 아직 확인하지 않아 '해소됨'으로 남아요<br>④ <b>해소 · 확인함</b>: 목록에서 사라져요<br>주의(Caution)는 확인할 필요 없이 원인이 없어지면 저절로 사라져요.",
+      say: "경보가 사라지려면 '확인'과 '원인 해결' 두 가지가 다 필요해요!",
+      note: "근거: IMO MSC.302(87) 선교 경보 관리(BAM) 7.3.3 · 7.3.7~7.3.10 · 7.5.2" },
+    { id: "AL3", mood: "caution", target: () => q('#abox [data-act="silence"]') || q("#abox"), cursor: true, sound: true, before: () => { navi(); eduAlert(true, "A"); }, title: "알람이 울리면 — 대응 순서",
+      body: "교재의 알람 확인 절차예요.<br>① <b>무슨 알람인지 읽어요</b> (상자·목록의 내용)<br>② <b>해도와 계기로 실제 상황을 확인해요</b> (정말 얕은 곳으로 가는지, 상대선이 어디 있는지)<br>③ <b>확인(ACK)</b>을 눌러 소리와 깜빡임을 멈춰요<br>④ <b>원인을 해결해요</b> (변침, 감속, 항로 수정 등). 원인이 없어지면 알람도 사라져요<br>상황을 보는 동안 시끄러우면 <b>'소리 끄기'</b>로 소리만 잠시 끌 수 있어요. 하지만 30초 안에 확인하지 않으면 다시 울려요. 확인하지 않은 경고는 5분 안에 다시 울리거나 알람으로 올라가요.",
+      say: "연습 알람이 울리고 있어요. 시끄럽다고 확인부터 누르지 말고, 먼저 '소리 끄기'로 소리만 멈춰 볼까요?",
+      task: "경보 상자의 '소리 끄기'를 눌러 소리만 잠시 멈춰 보세요.",
+      check: () => Tutor.clicked('[data-act="silence"]') && isSilenced(),
+      good: "소리만 멈췄어요. 깜빡임은 그대로죠? 아직 '확인'하지 않았다는 뜻이에요. 30초 안에 확인해야 해요!", bad: "경보 상자 오른쪽의 '소리 끄기' 단추를 눌러 보세요.",
+      note: "근거: 교재 20.1 그림 20-1 알람 작동 시 확인 절차, IMO MSC.302(87) 7.3.5 · 7.6.2" },
     { id: "D10", mood: "caution", target: "#abox", cursor: true, sound: true, before: () => { navi(); eduAlert(true); }, title: "경보 목록 — 확인(ACK)",
-      body: "경보 상자를 누르면 <b>경보 목록</b>이 열려요. 경보마다 종류, 발생 시각, 상태(발생·해소)가 보이고, 하나씩 '확인'하거나 '모두 확인'으로 한꺼번에 확인해요. 확인하면 소리와 깜빡임이 멈춰요.",
+      body: "경보 상자를 누르면 <b>경보 목록</b>이 열려요. 경보마다 종류, 발생 시각, 상태(발생·해소)가 보이고, 하나씩 '확인'하거나 '모두 확인'으로 한꺼번에 확인해요. 확인하면 소리와 깜빡임이 멈춰요. 경보 상자 오른쪽의 '확인' 단추로도 바로 확인할 수 있어요. 알람은 하나씩 확인하는 게 원칙이에요.",
       say: "이제 경보음을 켰어요. 경보 상자를 눌러 목록을 열고 확인해 볼까요?",
       task: "경보 상자를 눌러 경보 목록을 열고, '확인' 또는 '모두 확인'을 눌러 보세요.",
       check: () => Tutor.clicked('#ackAll, [data-ack], [data-act="ack"]') && S.alerts.filter((a) => a.id === "edu").every((a) => a.ack),
       good: "확인했어요! 확인은 '봤다'는 뜻이지, 위험이 사라졌다는 뜻은 아니에요.", bad: "경보 상자를 눌러 목록을 연 뒤 '확인'을 눌러 주세요." },
+    { id: "AL4", mood: "think", target: "#abox", before: () => { navi(); eduAcked(); }, title: "확인했는데 안 사라져요",
+      body: "방금 확인한 연습 알람이 상자에 그대로 남아 있어요. 깜빡이지는 않지만 꺼지지도 않았죠.",
+      say: "확인을 눌렀는데 알람이 계속 켜져 있어요. 왜 그럴까요?",
+      quiz: [["고장이에요", false], ["원인이 아직 남아 있어서예요", true], ["한 번 더 눌러야 해요", false]],
+      onGood: () => eduAlert(false),
+      good: "맞아요! 확인은 '봤다'는 뜻일 뿐이에요. 지금 연습 알람의 원인을 없앴더니 상자에서 사라졌지요?", bad: "확인은 '봤다'는 표시일 뿐이에요. 원인이 남아 있으면 계속 켜져 있어요." },
     { id: "D11", mood: "explain", target: '[data-act="log"]', cursor: true, sound: true, optTarget: true, before: () => { navi(); eduAlert(false); }, title: "경보 기록 (Alert log)",
       body: "언제 어떤 경보가 생기고 해소됐는지는 <b>경보 기록</b>에 남아요. 경보 목록 아래 '경보 로그' 단추나 기록 메뉴에서 열 수 있어요. 당직 교대 때나 사고 뒤에 경위를 확인할 때 써요.",
       say: "방금 확인한 연습 경보가 기록에 남았는지 볼까요?",
@@ -331,8 +353,13 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
       check: () => Tutor.clicked("#alLog") || Tutor.clicked(".pop", "경보 로그") || Tutor.clicked(".pop", "Alert log"),
       good: "연습 경보가 '발생'과 '해소'로 남아 있지요?", bad: "기록 메뉴를 눌러 '경보 로그'를 골라 보세요." },
     { id: "D12", mood: "caution", target: '[data-act="settings"]', optTarget: true, before: navi, title: "경보음 설정",
-      body: "경보음은 <b>설정 → 경보 → 경보음</b>에서 켜고 끌 수 있어요. 이 시뮬레이터에서는 연습을 위해 끌 수 있게 해 두었지만, 실제 선박에서 알람 소리를 끄는 건 위험해요.",
+      body: "경보음은 <b>설정 → 경보 → 경보음</b>에서 켜고 끌 수 있어요. 이 시뮬레이터에서는 연습을 위해 끌 수 있게 해 두었지만, 실제 선박에서 알람 소리를 끄는 건 위험해요. 경보를 줄이려고 CPA 한계나 안전 등심선 같은 설정값을 낮추는 것도 '끄는 법'이 아니에요. 위험이 안 보이게 될 뿐이에요.",
       say: "교육 중에는 화면 위쪽 가운데 단추로 경보음을 켜고 끌 수 있어요. 끝나면 원래 설정대로 돌아가요." },
+    { id: "AL5", mood: "think", title: "퀴즈 — 알람을 올바르게 끄는 방법",
+      body: "'위험 물표 CPA/TCPA' 알람이 울려요. 올바른 순서는 무엇일까요?",
+      say: "소리를 끄는 것과 위험을 없애는 건 달라요!",
+      quiz: [["경보음 설정을 끈다", false], ["CPA 한계를 0.5 NM으로 낮춘다", false], ["내용 확인 → 상대선 확인 → 확인(ACK) → 피항 조치", true], ["확인(ACK)만 누르고 그대로 간다", false]],
+      good: "정답이에요! 위험을 없애야 알람이 진짜로 사라져요.", bad: "그러면 소리만 멈추거나 위험이 안 보이게 될 뿐이에요. 다시 골라 볼까요?" },
     { id: "D13", mood: "explain", target: "#bLvl", before: navi, title: "상대선 단계 · 해도 수정 잠금",
       body: "연습 난이도(조우선 수)와, 실수로 해도를 건드리지 않게 막는 잠금이에요.", say: "처음에는 상대선을 '쉬움'으로 두고 연습해 보세요." },
     { id: "D14", mood: "happy", target: '[data-act="help"]', before: navi, title: "도움말",

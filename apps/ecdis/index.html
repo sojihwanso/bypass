@@ -249,6 +249,7 @@ header.top .bar{height:100%;display:flex;align-items:center;gap:14px;padding-lef
 .abox .tx small{font-family:var(--f-mono);font-size:10px;opacity:.8}
 .abox .rt{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
 .abox .cnt{font-family:var(--f-mono);font-size:11px;font-weight:600}
+.abox .abtn{display:flex;gap:4px}
 .abox .ack{height:24px;padding:0 8px;border-radius:4px;border:1px solid currentColor;background:transparent;font-family:var(--f-mono);font-size:10.5px;font-weight:700;color:inherit}
 .abox.A{background:var(--bad);color:#fff;border-color:var(--bad)}
 .abox.A .ic{background:rgba(255,255,255,.2);color:#fff}
@@ -611,7 +612,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
     <div class="htools">
       <div class="seg2" role="group" aria-label="Language"><button type="button" data-act="lang" data-v="ko">한</button><button type="button" data-act="lang" data-v="en">EN</button></div>
       <button class="hbtn" type="button" data-act="fs" id="fsBtn" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
-      <button class="ver" type="button" aria-label="버전 2.8.0">v2.8.0</button>
+      <button class="ver" type="button" aria-label="버전 2.9.0">v2.9.0</button>
       <a class="tb-home" href="https://teambypass.vercel.app/" aria-label="Team Bypass 메인 페이지로 이동" title="Team Bypass"><svg viewBox="0 0 132 132" width="30" height="30" aria-hidden="true"><path d="M66 4L128 66L66 128L4 66Z" fill="#1C211E" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/><path d="M66 12L120 66L66 120L12 66Z" fill="#EE6A1F"/><path d="M66 18L114 66L66 114L18 66Z" fill="#1C211E"/><path d="M66 25L107 66L66 107L25 66Z" fill="#EE6A1F"/><g transform="translate(36 34) scale(0.6)" fill="#1C211E"><ellipse cx="44" cy="60" rx="27" ry="23"/><path d="M51 45C55 37 58 31 61 25L72 30C68 36 66 44 64 53Z"/><circle cx="66" cy="26" r="10"/><path d="M72 20C83 19 93 24 95 32C96 38 91 41 88 37C86 34 82 33 74 33Z"/><path d="M19 52C10 47 7 40 11 34C14 43 20 46 23 46Z"/><path d="M37 80L35 92L27 95L41 95L42 81Z"/><path d="M51 80L51 92L44 95L58 95L56 81Z"/><circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/><path d="M32 55C40 50 51 54 54 64" fill="none" stroke="#EE6A1F" stroke-width="2.6" stroke-linecap="round"/></g></svg></a>
     </div>
   </div>
@@ -649,7 +650,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
     <span id="footTxt"></span>
     <p class="book" id="footBook"></p>
     <p class="disclaimer" role="note" id="footDisc"></p>
-    <div class="ver-row"><button class="ver" type="button" aria-label="버전 2.8.0">v2.8.0</button></div>
+    <div class="ver-row"><button class="ver" type="button" aria-label="버전 2.9.0">v2.9.0</button></div>
   </div>
 </footer>
 
@@ -662,7 +663,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
 <div id="dlgRoot"></div>
 
 <script src="egg.js"></script>
-<script src="tutor.js?v=2.8.0"></script>
+<script src="tutor.js?v=2.9.0"></script>
 <script>
 /* ================= I18N ================= */
 let LANG="ko";
@@ -806,7 +807,7 @@ pal_day:"주간",pal_dusk:"박명",pal_night:"야간",
 bxNav:"오버레이·항해 도구",h_man:"수동",h_auto:"자동",simL:"배속",offset:"오프셋",nonEnc:"비공식 해도",
 tmOn:"TM 리셋 켜짐",tmOff:"TM 리셋 꺼짐",rmOn:"상대운동",rmOff:"상대운동 해제",shipOff:"자선 화면 밖",
 ri_route:"항로",ri_pspd:"계획 속력",ri_pcrs:"계획 침로",ri_cts:"조타 침로(CTS)",ri_xtdl:"XTD 한계",ri_xtd:"항로 이탈(XTD)",ri_towp:"목표 WPT",ri_wop:"전타점(WOP)까지",ri_ttg:"소요 시간",ri_rad:"선회 반경",ri_rate:"선회율",ri_nwp:"다음 WPT",ri_ncrs:"다음 침로",ri_end:"종점까지",
-tagOver:"축척 초과",paused:"일시정지",cursor:"커서",pwTitle:"[영구 경고]",callSign:"호출부호",dest:"목적지",sleep:"휴면",activate:"활성",ackB:"확인",ackDone:"확인됨",ackAll:"모두 확인",
+tagOver:"축척 초과",paused:"일시정지",cursor:"커서",pwTitle:"[영구 경고]",callSign:"호출부호",dest:"목적지",sleep:"휴면",activate:"활성",silenceB:"소리 끄기",silenceTip:"경보음만 30초 동안 끄기 · 확인하지 않으면 다시 울려요",silenced:"소리 꺼짐(30초)",silenceDone:"경보음을 30초 동안 껐습니다. 내용을 확인하고 '확인'을 누르세요.",ackB:"확인",ackDone:"확인됨",ackAll:"모두 확인",
 pri_A:"알람",pri_W:"경고",pri_C:"주의",rectified:"해소",activeS:"발생",monInfo:"감시 정보",navLog:"항해 기록(NAV)",gotoT:"WGS84 · 위치로 이동",
 presS_NU:"북쪽위",presS_CU:"침로위",presS_HU:"선수위",presS_RU:"항로위",mot_TM:"진운동",mot_RM:"상대운동",
 gridL:"위경도 격자",gridS:"WGS84 위도·경도선과 눈금",cellBndL:"해도 셀 경계 표시",
@@ -822,7 +823,7 @@ pal_day:"Day",pal_dusk:"Dusk",pal_night:"Night",
 bxNav:"",h_man:"MAN",h_auto:"AUTO",simL:"SIM",offset:"Offset",nonEnc:"Non-ENC data",
 tmOn:"TM/CU Reset",tmOff:"TM Reset off",rmOn:"RM",rmOff:"RM(OFF)",shipOff:"Ship off screen",
 ri_route:"Route",ri_pspd:"Plan Speed",ri_pcrs:"Plan Course",ri_cts:"Course to Steer",ri_xtdl:"XTD Limit",ri_xtd:"XTD",ri_towp:"To WPT",ri_wop:"DIST to WOP",ri_ttg:"Time to Go",ri_rad:"Turn RAD",ri_rate:"Turn Rate",ri_nwp:"Next WPT",ri_ncrs:"Next Course",ri_end:"DIST to END",
-tagOver:"Overscale",paused:"PAUSED",cursor:"CURSOR",pwTitle:"[Permanent Warning]",callSign:"Call Sign",dest:"Dest",sleep:"Sleep",activate:"Activate",ackB:"ACK",ackDone:"ACK",ackAll:"ACK ALL",
+tagOver:"Overscale",paused:"PAUSED",cursor:"CURSOR",pwTitle:"[Permanent Warning]",callSign:"Call Sign",dest:"Dest",sleep:"Sleep",activate:"Activate",silenceB:"SILENCE",silenceTip:"Silence the buzzer for 30 s · it sounds again unless acknowledged",silenced:"Silenced (30 s)",silenceDone:"Buzzer silenced for 30 s. Check the alert and acknowledge it.",ackB:"ACK",ackDone:"ACK",ackAll:"ACK ALL",
 pri_A:"ALARM",pri_W:"WARNING",pri_C:"CAUTION",rectified:"RECTIFIED",activeS:"ACTIVE",monInfo:"Monitor INFO",navLog:"NAV log",gotoT:"WGS84 · Go To",
 presS_NU:"NU",presS_CU:"CU",presS_HU:"HU",presS_RU:"RU",mot_TM:"true motion",mot_RM:"relative motion",
 gridL:"Lat/lon grid",gridS:"WGS84 parallels, meridians and labels",cellBndL:"Show chart cell limits",
@@ -2541,8 +2542,8 @@ const PRI={A:3,W:2,C:1};
 function setAlert(id,on,pri,key,args){
   let a=S.alerts.find(x=>x.id===id);
   if(on){
-    if(!a){a={id,pri,key,args:args||[],t:S.time,ack:false,active:true};S.alerts.push(a);S.alog.unshift({t:S.time,pri,key,args:a.args,ev:"on"});if(S.alog.length>200)S.alog.pop();if(pri!=="C")buzz(pri,true);uiAlertChanged=true}
-    else{a.args=args||a.args;if(!a.active){a.active=true;a.ack=false;a.t=S.time;S.alog.unshift({t:S.time,pri,key,args:a.args,ev:"on"});if(pri!=="C")buzz(pri,true);uiAlertChanged=true}}
+    if(!a){a={id,pri,key,args:args||[],t:S.time,ack:false,active:true};S.alerts.push(a);if(pri!=="C")S.silenceUntil=0;S.alog.unshift({t:S.time,pri,key,args:a.args,ev:"on"});if(S.alog.length>200)S.alog.pop();if(pri!=="C")buzz(pri,true);uiAlertChanged=true}
+    else{a.args=args||a.args;if(!a.active){a.active=true;a.ack=false;a.t=S.time;if(pri!=="C")S.silenceUntil=0;S.alog.unshift({t:S.time,pri,key,args:a.args,ev:"on"});if(pri!=="C")buzz(pri,true);uiAlertChanged=true}}
   }else if(a&&a.active){a.active=false;S.alog.unshift({t:S.time,pri:a.pri,key:a.key,args:a.args,ev:"off"});if(a.ack)S.alerts=S.alerts.filter(x=>x!==a);uiAlertChanged=true}
 }
 function ackAlert(a){if(!a)return;a.ack=true;if(a.id==="cpa")S.tgts.forEach(t=>{if(t.dang)t.dangAck=true});if(!a.active)S.alerts=S.alerts.filter(x=>x!==a);uiAlertChanged=true}
@@ -2948,8 +2949,9 @@ function dlgUCSelect(){const cur=S.ucActive||[];
     d.querySelector("#usOk").onclick=()=>{S.ucActive=ucReadChecks(d,"ucsel");logEv("evUcSel",[S.ucActive.length]);chartDirty=true;lookAheadSafe();close()}}})}
 
 /* ================= UI ================= */
-const VERSION="2.8.0";
+const VERSION="2.9.0";
 const PATCH_NOTES=[
+{v:"2.9.0",d:"2026-11-26",ko:["경보 상자에 '소리 끄기' 단추 추가: 경보음만 30초 동안 멈추고, 그 사이 확인하지 않으면 다시 울림, 새 경보는 바로 울림(IMO MSC.302(87) 7.3.5)","과정 1에 알람 보는 법·끄는 법 5단계 추가: 상자 읽는 법, 경보 상태 네 가지, 대응 순서와 소리 끄기 해 보기, 확인했는데 안 사라지는 이유, 올바르게 끄는 방법 퀴즈"],en:["New SILENCE button in the alert box: mutes the buzzer for 30 s; it sounds again unless acknowledged, and new alerts sound at once (IMO MSC.302(87) 7.3.5)","Course 1 adds 5 steps on reading and handling alarms (Korean)"]},
 {v:"2.8.0",d:"2026-11-26",ko:["흘수나 UKC 기준을 바꾸면, 그리고 시나리오를 시작할 때 얕은·안전·깊은 등심선과 안전 수심을 기준대로 자동으로 맞춤(얕은 = 흘수, 안전 = 흘수 + UKC, 깊은 = 흘수 × 2)","자선 정보 제원표의 흘수를 현재 흘수로 표시"],en:["Shallow, safety and deep contours and safety depth now follow the draught and UKC policy automatically (also at scenario start)","Own ship data shows the current draught"]},
 {v:"2.7.0",d:"2026-11-26",ko:["안전 수심선 설정 창에서 현재 흘수를 바로 입력: 추천값·UKC 계산·좌초 판정이 모두 이 흘수를 따름"],en:["Enter the current draught directly in the Safety contour window; recommendations, UKC and grounding all follow it"]},
 {v:"2.6.1",d:"2026-11-26",ko:["항로 보고서의 UKC 계산이 고정 흘수(11 m) 대신 설정에서 정한 현재 흘수를 쓰도록 수정"],en:["Route report UKC now uses the current draught set in Settings instead of the fixed 11 m"]},
@@ -3243,8 +3245,9 @@ function updAlertBox(){
   const a=topAlert(),bx=$("#abox"),n=S.alerts.length;
   bx.className="abox"+(a?" "+a.pri+(a.pri==="A"&&!a.ack?" blink":""):"");
   if(!a){bx.innerHTML=`<span class="ic">✓</span><span class="tx"><b>${t("noAlert")}</b><small>ECDIS</small></span><span class="rt"><span class="cnt">0</span></span>`;return}
-  const k=`${a.id}|${a.ack}|${a.active}|${alertText(a)}|${n}|${LANG}`;if(bx._k===k)return;bx._k=k;
-  bx.innerHTML=`<span class="ic">${a.pri==="A"?"!":a.pri==="W"?"W":"C"}</span><span class="tx"><b>${esc(alertText(a))}</b><small>${t("pri_"+a.pri)} · ${a.active?"":t("rectified")+" · "}${new Date(a.t).toISOString().slice(11,19)}</small></span><span class="rt"><span class="cnt">${n}</span>${!a.ack?`<button class="ack" data-act="ack">${t("ackB")}</button>`:""}</span>`;
+  const sil=isSilenced(),canSil=!a.ack&&a.active&&a.pri!=="C";
+  const k=`${a.id}|${a.ack}|${a.active}|${alertText(a)}|${n}|${LANG}|${sil}`;if(bx._k===k)return;bx._k=k;
+  bx.innerHTML=`<span class="ic">${a.pri==="A"?"!":a.pri==="W"?"W":"C"}</span><span class="tx"><b>${esc(alertText(a))}</b><small>${t("pri_"+a.pri)} · ${a.active?"":t("rectified")+" · "}${sil&&canSil?t("silenced")+" · ":""}${new Date(a.t).toISOString().slice(11,19)}</small></span><span class="rt"><span class="cnt">${n}</span><span class="abtn">${canSil&&!sil?`<button class="ack sil" data-act="silence" title="${esc(t("silenceTip"))}">${t("silenceB")}</button>`:""}${!a.ack?`<button class="ack" data-act="ack">${t("ackB")}</button>`:""}</span></span>`;
 }
 function clsName(c){return t("cls_"+c)}
 
@@ -3306,6 +3309,9 @@ function buzz(pri,force){
     const n=pri==="A"?3:1;for(let i=0;i<n;i++){const o=AC.createOscillator(),g=AC.createGain();o.type="square";o.frequency.value=pri==="A"?1900:1300;g.gain.value=.0001;o.connect(g);g.connect(AC.destination);const t0=AC.currentTime+i*.22;g.gain.setValueAtTime(.05,t0);g.gain.setValueAtTime(.0001,t0+.12);o.start(t0);o.stop(t0+.14)}}catch(e){}
 }
 let lastBuzz=0;
+/* 소리만 잠시 끄기(IMO MSC.302(87) 7.3.5): 30초 동안 반복음 멈춤, 그 사이 확인하지 않으면 다시 울림, 새 경보는 바로 울림 */
+const SILENCE_MS=30000;
+function isSilenced(){return (S.silenceUntil||0)>performance.now()}
 
 /* ---------- 액션 ---------- */
 function setMode(m){
@@ -3508,6 +3514,7 @@ const ACT={
   evtog:(b,e)=>{if(e.target.closest("button"))return;const k=b.dataset.k,i=+b.dataset.i;const X=S[k][i];X.on=!X.on;if(X.on&&k==="vrm"&&X.r<.05)X.r=1},
   ack:(b,e)=>{e.stopPropagation();ackAlert(topAlert())},
   alist:()=>dlgAlerts(),
+  silence:()=>{S.silenceUntil=performance.now()+SILENCE_MS;$("#abox")._k="";toast(t("silenceDone"))},
   sensor:b=>{const v=b.dataset.v;
     if(v==="POSN"){const now=Date.now();posTap=(now-posTapT<600)?posTap+1:1;posTapT=now;clearTimeout(posTapTm);
       if(posTap>=4){posTap=0;closePop();dlgSetPos();return}
@@ -4144,7 +4151,7 @@ function loop(ts){
     if(S.time-navT>=360000){navT=S.time;const o=S.own;S.navlog.unshift({t:S.time,lat:fmtLat(o.y),lon:fmtLon(o.x),hdg:o.hdg.toFixed(1),cog:o.cog.toFixed(1),sog:o.sog.toFixed(1)});if(S.navlog.length>200)S.navlog.pop()}
   }
   // 경보음 반복
-  const ta=topAlert();if(ta&&ta.pri==="A"&&!ta.ack&&ta.active&&ts-lastBuzz>2600){lastBuzz=ts;buzz("A")}
+  const ta=topAlert();if(ta&&ta.pri==="A"&&!ta.ack&&ta.active&&ts-lastBuzz>2600&&!isSilenced()){lastBuzz=ts;buzz("A")}
   if(ts-frameT<28)return;frameT=ts;
   updateView();
   const v=S.view,key=[Math.round(v.cx*v.k*2),Math.round(v.cy*v.k*2),v.k.toFixed(4),v.rot.toFixed(1),cw,chh,S.set.palette,S.mode,LANG].join("|");
