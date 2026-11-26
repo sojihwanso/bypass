@@ -10,7 +10,7 @@ import { createPlayer, bindPlayerUI } from '../engine/player.js';
 import { V3 } from '../engine/draw.js';
 import { SH } from '../physics/ship.js';
 import { lineChart, chartBegin } from './chart.js';
-import { renderBlocks, renderExam, renderSources } from './blocks.js';
+import { renderBlocks, renderExam, renderSources, mountModels } from './blocks.js';
 import { openDialog, esc } from './chrome.js';
 import { videoHTML, bindVideo } from './video.js';
 
@@ -102,6 +102,7 @@ export async function openRoom(app, id, { progress, onSeen }) {
   progress.mark(id); onSeen && onSeen();
   window.__shsRooms = (window.__shsRooms || 0) + 1; let counted = true; const uncount = () => { if (counted) { counted = false; window.__shsRooms--; } };
   const stopVideo = bindVideo(app);
+  mountModels(app);
   if (!scene) return { dispose() { stopVideo(); uncount(); }, applyTheme() {} };
 
   /* ---------- 무대 ---------- */

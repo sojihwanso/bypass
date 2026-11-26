@@ -134,6 +134,9 @@
 .b-formula div + div { margin-top: 6px; }
 .b-formula small { display: block; font-size: var(--s-13); color: var(--muted); margin-top: 8px; }
 .b-figure { margin: 10px 0 22px; }
+.b-model { margin: 10px 0 22px; }
+.b-model iframe { display: block; width: 100%; height: 760px; border: 0; background: transparent; }
+.b-model figcaption { font-size: var(--s-13); color: var(--muted); margin-top: 8px; }
 .b-figure svg { width: 100%; height: auto; display: block; color: var(--ink); }
 .b-note { background: var(--info-bg); border-radius: 14px; padding: 16px 20px; margin: 6px 0 18px; }
 .b-note.warn { background: var(--warn-bg); }
