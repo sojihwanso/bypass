@@ -283,6 +283,12 @@ select,.fgroup input[type="search"]{font:inherit;font-size:13.5px;padding:6px 10
 .reg-group .rg-desc .ctag{margin-left:4px}
 #reg-list{margin-top:12px}
 #reg-list .wt th:nth-child(2),#reg-list .wt td:nth-child(2),#reg-list .wt th:last-child,#reg-list .wt td:last-child{text-align:left}
+.meta .new{font-size:11px;font-weight:700;color:#16181d;background:var(--accent-bg);border-radius:var(--r-tag);padding:0 5px}
+.news-new{font-size:12px;font-weight:600;color:var(--accent);margin-left:6px}
+.grp-more{display:inline-block;margin-top:6px;font-size:12.5px;cursor:pointer}
+.grp{list-style:none;margin:6px 0 0;padding:0 0 0 10px;border-left:2px solid var(--rule);font-size:13px}
+.grp li{padding:3px 0;display:block;border:0}
+.grp a{color:var(--ink)}
 .co-newslist{list-style:none;margin:0;padding:0}
 .co-newslist li{grid-template-columns:5.5em 1fr}
 .ships-more{margin-top:10px;min-height:36px;cursor:pointer}
@@ -614,7 +620,7 @@ footer .readme-h{display:block;margin-bottom:10px}
         <span id="m-count"></span>
         <a class="cmp-top" href="#compare" id="cmp-top">비교 <small id="cmp-n"></small></a>
         <button type="button" class="theme-btn" id="theme-btn" aria-pressed="false">다크모드</button>
-        <button type="button" class="mver" id="ver-top" title="버전" aria-label="버전 정보">v. 3.2.0</button>
+        <button type="button" class="mver" id="ver-top" title="버전" aria-label="버전 정보">v. 3.3.0</button>
         <a class="home-logo" href="https://teambypass.vercel.app/" target="_top" title="Team Bypass 메인 페이지" aria-label="Team Bypass 메인 페이지"><img src="/assets/favicon.svg" alt="" width="30" height="30"></a>
       </div>
     </div>
@@ -657,7 +663,7 @@ footer .readme-h{display:block;margin-bottom:10px}
         <div class="fav-grid" id="fav-body"></div>
       </section>
       <section class="sheet news" aria-labelledby="news-h">
-        <div class="card-h"><h2 id="news-h">해운 소식</h2><a class="more" href="#news">더보기 &rsaquo;</a></div>
+        <div class="card-h"><h2 id="news-h">해운 소식 <span class="news-new" id="news-new"></span></h2><a class="more" href="#news">더보기 &rsaquo;</a></div>
         <ol id="news-list"></ol>
       </section>
       <section class="sheet bshell" aria-labelledby="bs-h">
@@ -901,7 +907,7 @@ footer .readme-h{display:block;margin-bottom:10px}
       <li><span class="lines"><span>이 사이트는 개인이 만든 자료 모음이며 회사나 학교와 관계가 없습니다.</span><span>틀린 내용은 정보 제보 게시판으로 알려 주시기 바랍니다.</span></span></li>
     </ul>
     </div>
-    <p class="foot-ver"><button type="button" class="ver" id="ver-foot" title="버전" aria-label="버전 정보">v. 3.2.0 · TEAM BYPASS</button></p>
+    <p class="foot-ver"><button type="button" class="ver" id="ver-foot" title="버전" aria-label="버전 정보">v. 3.3.0 · TEAM BYPASS</button></p>
   </div>
 </footer>
 
@@ -1691,7 +1697,8 @@ function mergeNews(items, auto){
     if (!map.has(u)) added++;
     const prev = map.get(u);
     map.set(u, {d, c, t, u, s:String(x.s || x.source || '').trim(), p:String(x.p || x.summary || '').trim(), auto: prev ? !!prev.auto && !!auto : !!auto,
-      c2: c !== '해외 해운사' && FOREIGN_CARRIER.test(t) ? '해외 해운사' : ''});
+      c2: c !== '해외 해운사' && FOREIGN_CARRIER.test(t) ? '해외 해운사' : '',
+      f: Number(x.f) || (prev && prev.f) || 0});
   });
   NEWS_ALL = [...map.values()].sort((a,b) => b.d.localeCompare(a.d) || a.t.localeCompare(b.t,'ko'));
   return added;
@@ -1716,10 +1723,12 @@ async function fetchFeed(){
     if (!r.ok) throw new Error(String(r.status));
     const j = await r.json();
     const arr = (Array.isArray(j) ? j : (j && Array.isArray(j.items) ? j.items : [])).filter(x => x && typeof x === 'object' && /^https?:\/\//.test(String(x.u || '')) && normDate(x.d));
-    mergeNews(arr, true);
     /* 캐시는 쌓는다: 예전 것 + 새것, 주소 기준 하나, 90일·500건 */
     const cut = new Date(Date.now() - NEWS_FEED.keepDays * 86400000).toISOString().slice(0, 10);
-    const byU = new Map(((cache && cache.items) || []).concat(arr).map(x => [x.u, {d:normDate(x.d), c:x.c, t:x.t, s:x.s, u:x.u, p:x.p}]));
+    const nowMs = Date.now(), old = new Map(((cache && cache.items) || []).map(x => [x.u, x]));
+    arr.forEach(x => { x.f = (old.get(x.u) && old.get(x.u).f) || nowMs; });   /* 이 기기에서 처음 본 시각 → '새' 표시 */
+    mergeNews(arr, true);
+    const byU = new Map(((cache && cache.items) || []).concat(arr).map(x => [x.u, {d:normDate(x.d), c:x.c, t:x.t, s:x.s, u:x.u, p:x.p, f:x.f || 0}]));
     const items = [...byU.values()].filter(x => x.d && x.d >= cut).sort((a, b) => b.d.localeCompare(a.d)).slice(0, NEWS_FEED.keepMax);
     const updated = j && typeof j.updated === 'string' ? j.updated : (cache && cache.updated) || '';
     try{ localStorage.setItem(NEWS_FEED.cacheKey, JSON.stringify({at: Date.now(), updated, items})); }catch(e){}
@@ -1881,15 +1890,47 @@ function renderFav(){
     ? '<p class="fav-empty">담긴 선종·선사 없음. 별표(☆)를 누르면 여기에 모입니다.</p>'
     : '<div><h3>선종</h3>'+tHtml+'</div><div><h3>선사</h3>'+cHtml+'</div>';
 }
+/* ---------- 새 소식 표시: 지난번 해운 소식을 본 뒤 이 기기에 새로 들어온 것 ---------- */
+const NEWS_VISIT_KEY = 'sasarok-news-visit-v1';
+const PREV_NEWS_VISIT = (() => { try{ const v = Number(localStorage.getItem(NEWS_VISIT_KEY)); if (v > 0) return v; localStorage.setItem(NEWS_VISIT_KEY, String(Date.now())); }catch(e){} return Infinity; })();
+const isNewNews = n => !!n.f && n.f > PREV_NEWS_VISIT;
+function markNewsSeen(){ try{ localStorage.setItem(NEWS_VISIT_KEY, String(Date.now())); }catch(e){} }
+/* ---------- 같은 사건 기사 묶기: 이틀 안, 제목 주요 낱말 대부분이 겹치면 한 묶음 ---------- */
+/* 어느 기사에나 나오는 흔한 낱말·연도는 비교에서 뺌 */
+const NEWS_STOP = new Set(['실시','개최','정기','협력','양성','참가','선정','발표','전달','선임','위해','위한','관련','대한','통해','추진','진행','지원','강화','확대','가져','성료','기념','행사','인사']);
+function newsTokens(t){
+  return t.replace(/\[[^\]]*\]|\([^)]*\)/g, ' ').replace(/[^0-9A-Za-z가-힣]+/g, ' ').split(' ')
+    .filter(w => w.length >= 2 && !NEWS_STOP.has(w) && !/^\d+(년|년도|월|일)?$/.test(w));
+}
+function sameStory(a, b){
+  if (Math.abs(Date.parse(a.d) - Date.parse(b.d)) > 2 * 86400000) return false;
+  const ta = a.tk || (a.tk = newsTokens(a.t)), tb = b.tk || (b.tk = newsTokens(b.t));
+  const m = ta.filter(x => tb.some(y => x.startsWith(y) || y.startsWith(x))).length;
+  return m >= 3 && m / Math.min(ta.length, tb.length) >= 0.6;
+}
+function groupNews(list){
+  const groups = [];
+  list.forEach(n => { const g = groups.find(g => sameStory(g[0], n)); if (g) g.push(n); else groups.push([n]); });
+  return groups;
+}
+function renderNewsGroup(g, full){
+  const html = renderNewsItem(g[0], full);
+  if (g.length < 2) return html;
+  const more = '<button type="button" class="linkbtn grp-more" data-grp aria-expanded="false">같은 소식 '+(g.length - 1)+'건 더</button>'+
+    '<ul class="grp" hidden>'+g.slice(1).map(n => '<li><a href="'+esc(n.u)+'" target="_blank" rel="noopener">'+esc(n.t)+'</a> <span class="note">'+esc(n.s)+'</span></li>').join('')+'</ul>';
+  return html.replace(/<\/div><\/li>$/, more+'</div></li>');
+}
 function renderNewsItem(n, full){
   const dd = full ? n.d.replace(/-/g,'.') : n.d.slice(5).replace('-','.');
-  return '<li><span class="d">'+dd+'</span><div><a class="t" href="'+esc(n.u)+'" target="_blank" rel="noopener">'+esc(n.t)+'</a>'+(n.p?'<p>'+esc(n.p)+'</p>':'')+'<div class="meta"><span class="cat">'+esc(n.c)+'</span>'+(n.c2 ? '<span class="cat">'+esc(n.c2)+'</span>' : '')+'<span>'+esc(n.s)+'</span>'+(n.auto ? '<span class="auto">자동 수집</span>' : '')+'</div></div></li>';
+  return '<li><span class="d">'+dd+'</span><div><a class="t" href="'+esc(n.u)+'" target="_blank" rel="noopener">'+esc(n.t)+'</a>'+(n.p?'<p>'+esc(n.p)+'</p>':'')+'<div class="meta">'+(isNewNews(n) ? '<span class="new">새</span>' : '')+'<span class="cat">'+esc(n.c)+'</span>'+(n.c2 ? '<span class="cat">'+esc(n.c2)+'</span>' : '')+'<span>'+esc(n.s)+'</span>'+(n.auto ? '<span class="auto">자동 수집</span>' : '')+'</div></div></li>';
 }
 function newsFade(el){ el.classList.toggle('at-end', el.scrollTop + el.clientHeight >= el.scrollHeight - 4); }
 function renderHome(){
   renderFav();
   $('#hero-lead').textContent = '선사 '+UNI_TOTAL+'곳, 선종 '+TYPES.length+'개. 2027 실습생 선발 여부까지 한 표에서 확인합니다.';
-  $('#news-list').innerHTML = NEWS_ALL.slice(0,12).map(n => renderNewsItem(n)).join('');
+  $('#news-list').innerHTML = groupNews(NEWS_ALL.slice(0, 40)).slice(0, 12).map(g => renderNewsGroup(g)).join('');
+  const nNew = NEWS_ALL.filter(isNewNews).length;
+  $('#news-new').textContent = nNew ? '새 소식 '+nNew+'건' : '';
   newsFade($('#news-list'));
   $('#type-list').innerHTML = TYPES.map(t => {
     const list = companiesOf(t.id);
@@ -1928,7 +1969,8 @@ function renderNews(){
   if (q){ qbox.hidden = false; qbox.innerHTML = '검색어 <b>'+esc(state.newsQ.trim())+'</b> 결과 '+base.length+'건 <button type="button" class="linkbtn" id="nf-q-clear">검색 지우기</button>'; }
   else qbox.hidden = true;
   const list = base.filter(n => state.newsCat === 'all' || n.c === state.newsCat || n.c2 === state.newsCat);
-  $('#news-full').innerHTML = list.length ? list.map(n => renderNewsItem(n, true)).join('') : '<li><span></span><div>조건에 맞는 소식이 없습니다. 기간이나 분류를 바꿔 보시기 바랍니다.</div></li>';
+  markNewsSeen();
+  $('#news-full').innerHTML = list.length ? groupNews(list).map(g => renderNewsGroup(g, true)).join('') : '<li><span></span><div>조건에 맞는 소식이 없습니다. 기간이나 분류를 바꿔 보시기 바랍니다.</div></li>';
   $('#feed-state').textContent = feedStatus;
 }
 
@@ -2362,6 +2404,8 @@ function route(){
 function markFromTable(n){ try{ sessionStorage.setItem('sasarok-from-table', n); }catch(e){} }
 document.addEventListener('click', e => {
   const t = e.target;
+  const gb = t.closest('button[data-grp]');
+  if (gb){ const ul = gb.nextElementSibling; const open = gb.getAttribute('aria-expanded') !== 'true'; gb.setAttribute('aria-expanded', String(open)); if (ul) ul.hidden = !open; return; }
   const nq = t.closest('a[data-news-q]');
   if (nq){ e.preventDefault(); state.newsQ = nq.dataset.newsQ; state.newsCat = 'all'; state.newsRange = 'all'; location.hash = 'news'; return; }
   const sm = t.closest('button[data-ships-more]');
@@ -2490,8 +2534,12 @@ $('#nf-from').addEventListener('change', e => { const w = newsWindow(); state.ne
 $('#nf-to').addEventListener('change', e => { const w = newsWindow(); state.newsFrom = w.from; state.newsTo = e.target.value; state.newsRange = 'custom'; renderNews(); });
 
 /* ---------- 버전, 패치노트, 이스터에그 ---------- */
-const VERSION = '3.2.0';   // 첫째 자리 큰 기능·개편, 둘째 자리 작은 기능, 셋째 자리 버그·오타 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '3.3.0';   // 첫째 자리 큰 기능·개편, 둘째 자리 작은 기능, 셋째 자리 버그·오타 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  {v:'3.3.0', d:'2026-11-26', i:[
+    '같은 사건을 여러 매체가 쓴 기사는 하나로 묶고, \'같은 소식 n건 더\'를 누르면 다른 매체 기사를 볼 수 있습니다.',
+    '지난번 해운 소식을 본 뒤 새로 들어온 소식에 \'새\' 표시를 붙이고, 홈 해운 소식 칸에 새 소식 수를 보여 줍니다.'
+  ]},
   {v:'3.2.0', d:'2026-11-26', i:[
     '회사 화면에 관련 소식을 붙였습니다. 제목에 회사 이름이 들어간 해운 소식을 최신 5건까지 보여 주고, 해운 소식 화면에서 더 볼 수 있습니다.',
     '자동 수집 소식에서 통계 사이트·블로그 결과를 빼고, 제목 끝에 붙은 꼬리말을 지웠습니다.',
