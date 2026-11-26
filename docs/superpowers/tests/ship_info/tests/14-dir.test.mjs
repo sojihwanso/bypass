@@ -6,9 +6,9 @@ export default [
    await ready(p);
    let rows = await rowsOf(p);
    assert(rows.length === 50, 'rows '+rows.length);
-   assert(rows[0].n === '포스에스엠(주)' && rows[0].ships === 128, JSON.stringify(rows[0]));
+   assert(rows[0].n === '포스에스엠' && rows[0].ships === 128, JSON.stringify(rows[0]));
    assert(rows.every((r, i) => i === 0 || rows[i-1].ships >= r.ships), 'not sorted by ships');
-   assert((await p.$eval('#v-dir h1', e => e.textContent)).includes('371곳'), 'head count');
+   assert((await p.$eval('#v-dir h1', e => e.textContent)).includes('385곳'), 'head count');
    await p.click('#dir-more');
    rows = await rowsOf(p);
    assert(rows.length === 100, 'after more '+rows.length);
@@ -17,8 +17,8 @@ export default [
    await ready(p);
    const rows = await rowsOf(p);
    assert(rows.length > 0 && rows.length <= 26, 'rows '+rows.length);
-   const ok = await p.evaluate(async names => { const k = await loadData('koswec'); const li = k.typeNames.indexOf('LNG');
-     return names.every(n => k.firms.find(f => f.n === n).ships.some(s => s[3] === li)); }, rows.map(r => r.n));
+   const ok = await p.evaluate(async names => { await uniReady(); const li = UNI_K.typeNames.indexOf('LNG');
+     return names.every(n => UNI_BY[n].firm && UNI_BY[n].firm.ships.some(s => s[3] === li)); }, rows.map(r => r.n));
    assert(ok, 'firm without LNG');
  })},
  {name:'dir-cement-link', fn: () => withPage({hash:'#dir?type=잡화,기타&biz=내항상선'}, async p => {
@@ -31,7 +31,7 @@ export default [
    await p.fill('#dir-q', '프리즘 다이버시티');
    await p.waitForTimeout(400);
    const rows = await rowsOf(p);
-   assert(rows.length === 1 && rows[0].n === '케이엘엔지(주)', JSON.stringify(rows));
+   assert(rows.length === 1 && rows[0].n === 'K-LNG', JSON.stringify(rows));
    assert(rows[0].text.includes('선박: 프리즘 다이버시티'), rows[0].text);
    assert((await p.evaluate(() => location.hash)).includes('q='), 'q not in url');
  })},
@@ -42,7 +42,7 @@ export default [
  })},
  {name:'dir-empty-reset', fn: () => withPage({hash:'#dir?q=절대없는이름zz'}, async p => {
    await p.waitForSelector('#dir-empty', {timeout:4000});
-   assert((await p.$eval('#dir-empty', e => e.textContent)).includes('조건에 맞는 업체가 없습니다'), 'empty text');
+   assert((await p.$eval('#dir-empty', e => e.textContent)).includes('조건에 맞는 회사가 없습니다'), 'empty text');
    await p.click('#dir-empty button');
    await ready(p);
    assert((await rowsOf(p)).length === 50, 'reset');

@@ -30,7 +30,7 @@ export default [
  })},
  {name:'search-firm', fn: () => withPage({hash:'#home'}, async p => {
    await p.fill('#q-all', '흥아마린');
-   await p.waitForSelector('#sx-panel .sx-item[href^="#firm-"]', {timeout:4000});
+   await p.waitForSelector('#sx-panel .sx-item[href="#co-'+encodeURIComponent('흥아마린(주)')+'"]', {timeout:4000});
  })},
  {name:'search-help-links', fn: () => withPage({hash:'#home'}, async p => {
    await p.fill('#q-all', '?');
