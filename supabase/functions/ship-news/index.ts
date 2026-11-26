@@ -124,4 +124,95 @@ export function dedupe(items: Item[]): Item[] {
   return out;
 }
 
+// ---------- 서버 ----------
+type Env = (k: string) => string | undefined;
+type Deps = { env: Env; http: typeof fetch; now: () => number };
+
+function cors(req: Request) {
+  const origin = req.headers.get('origin') ?? '';
+  return {
+    'Access-Control-Allow-Origin': ALLOWED_ORIGINS.includes(origin) || PREVIEW_ORIGIN.test(origin) ? origin : ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Headers': 'authorization, content-type, apikey, x-client-info',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Vary': 'Origin',
+  };
+}
+function reply(req: Request, status: number, body: unknown, extra: Record<string, string> = {}) {
+  return new Response(JSON.stringify(body), { status, headers: { ...cors(req), 'Content-Type': 'application/json; charset=utf-8', ...extra } });
+}
+
+async function getText(http: typeof fetch, url: string): Promise<string> {
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), TIMEOUT_MS);
+  try {
+    const r = await http(url, { headers: { 'user-agent': UA, accept: 'application/rss+xml, application/xml, text/xml' }, signal: ac.signal });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.text();
+  } finally { clearTimeout(timer); }
+}
+
+/** 모든 수집처에서 받아 고르고 중복을 없앤 목록 + 실패한 수집처 이름 */
+export async function collect(http: typeof fetch): Promise<{ items: Item[]; failed: string[] }> {
+  const failed: string[] = [];
+  const lists = await Promise.all(SOURCES.map(async (s) => {
+    try {
+      const raws = parseRss(await getText(http, s.url), s.search ? '구글 뉴스' : s.name);
+      return pickItems(raws, s.search || !!s.filter, s.search ? 10 : Infinity);
+    } catch { failed.push(s.name); return [] as Item[]; }
+  }));
+  // 전문지를 먼저 두어, 같은 기사면 전문지 쪽(원문 주소)이 남게
+  return { items: dedupe(lists.flat()), failed };
+}
+
+export async function handle(req: Request, deps?: Partial<Deps>): Promise<Response> {
+  const env: Env = deps?.env ?? ((k) => (typeof Deno !== 'undefined' ? Deno.env.get(k) : undefined));
+  const http = deps?.http ?? fetch;
+  const now = deps?.now ?? Date.now;
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(req) });
+  if (req.method !== 'GET') return reply(req, 405, { error: 'GET만 받습니다.' });
+
+  const base = env('SUPABASE_URL') ?? '', key = env('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+  const H = { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' };
+  const rest = (path: string, init: RequestInit = {}) => http(`${base}/rest/v1/${path}`, { ...init, headers: { ...H, ...(init.headers || {}) } });
+  const putMeta = (row: Record<string, unknown>) => rest('ship_news_meta?on_conflict=id', {
+    method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ id: 1, ...row }),
+  });
+
+  try {
+    // 1) 24시간 지났으면 새로 모음 (먼저 last_fetch를 바꿔 동시에 여러 번 모으지 않게)
+    let last = 0, lastOk = '';
+    const mr = await rest('ship_news_meta?select=last_fetch,last_ok&id=eq.1');
+    if (mr.ok) { const row = (await mr.json() as { last_fetch?: string; last_ok?: string }[])[0]; last = row?.last_fetch ? Date.parse(row.last_fetch) : 0; lastOk = row?.last_ok ?? ''; }
+    if (!last || now() - last >= REFRESH_MS) {
+      const startedAt = new Date(now()).toISOString();
+      await putMeta({ last_fetch: startedAt });
+      const { items, failed } = await collect(http);
+      if (items.length) {
+        await rest('ship_news?on_conflict=u', {
+          method: 'POST', headers: { Prefer: 'resolution=ignore-duplicates,return=minimal' },
+          body: JSON.stringify(items.map(({ d, c, t, s, u, p, k }) => ({ d, c, t, s, u, p, k, fetched_at: startedAt }))),
+        });
+      }
+      const cut = new Date(now() - KEEP_DAYS * 86400e3).toISOString().slice(0, 10);
+      await rest('ship_news?d=lt.' + cut, { method: 'DELETE', headers: { Prefer: 'return=minimal' } });
+      lastOk = startedAt;
+      await putMeta({ last_ok: startedAt, last_error: failed.length ? '받지 못한 곳: ' + failed.join(', ') : null });
+    }
+
+    // 2) 돌려줄 소식: since 뒤에 새로 들어온 것(최대 300) 또는 최신 150
+    const sinceRaw = new URL(req.url).searchParams.get('since') ?? '';
+    const since = /^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(sinceRaw) && Number.isFinite(Date.parse(sinceRaw)) ? sinceRaw : '';
+    const q = 'ship_news?select=d,c,t,s,u,p&order=fetched_at.desc,d.desc' + (since ? '&fetched_at=gt.' + encodeURIComponent(since) + '&limit=300' : '&limit=150');
+    const sr = await rest(q);
+    const rows = sr.ok ? await sr.json() as Raw[] & { c: string }[] : [];
+    const items = rows.map((r: any) => ({ d: r.d, c: r.c, t: r.t, s: r.s, u: r.u, p: r.p || '' }));
+    return reply(req, 200, { updated: lastOk || new Date(now()).toISOString(), items }, { 'Cache-Control': 'public, max-age=600' });
+  } catch (e) {
+    if (typeof process !== 'undefined' && process.env.SHIP_NEWS_DEBUG) console.error(e);
+    return reply(req, 502, { error: '소식을 불러오지 못했습니다.' });
+  }
+}
+
 declare const Deno: any;
+declare const process: any;
+if (typeof Deno !== 'undefined' && !Deno.env.get('BYPASS_TEST')) Deno.serve((req: Request) => handle(req));
