@@ -24,7 +24,7 @@ const O5 = { lat: 34.52, lon: 125.29, hdg: 0, kn: 11 };
 
 export const SCENARIOS = [
   { id: 'S1', ko: '마주치는 상태', en: 'Head-on situation', rule: '14', durationMin: 25,
-    brief: { ko: '맑은 낮, 넓은 바다입니다. 정선수 쪽에서 큰 배 한 척이 거의 반대 침로로 다가와요. 상대선은 피하지 않습니다. 레이더를 켜고 EBL·VRM과 TT로 위험을 확인한 뒤, 제14조에 따라 우현으로 피하세요.', en: 'Clear day, open sea. A large vessel approaches nearly reciprocal, dead ahead, and will not give way. Switch on the radar, confirm risk with EBL/VRM and TT, then alter to starboard under Rule 14.' },
+    brief: { ko: '넓은 바다입니다. 정선수 쪽에서 큰 배 한 척이 거의 반대 침로로 다가와요. 상대선은 피하지 않습니다. 레이더를 켜고 EBL·VRM과 TT로 위험을 확인한 뒤, 제14조에 따라 우현으로 피하세요.', en: 'Open sea. A large vessel approaches nearly reciprocal, dead ahead, and will not give way. Switch on the radar, confirm risk with EBL/VRM and TT, then alter to starboard under Rule 14.' },
     own: { ...O1, tele: tele('FA') }, weather: { sea: 2, windFrom: 30, windMs: 6, rain: [] }, aids: [],
     targets: [T(O1, 'h1', { name: 'OCEAN PIONEER', mmsi: 440211000, tcMin: 18, hdg: 181, kn: 12, L: 200 }), T(O1, 'n1', { name: '', tcMin: 14, hdg: 120, kn: 4, L: 14, rcs: 5, h: 3, ais: false, side: -2.6 })] },
   { id: 'S2', ko: '우현 횡단선 · 본선 피항선', en: 'Crossing from starboard · give-way', rule: '15·16', durationMin: 30,
