@@ -316,3 +316,38 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--rule);border
 .lvl b{margin-right:4px}
 .lvl .btn.on{background:var(--accent-bg);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
 .lvl .small{color:var(--muted);font-size:12px;flex-basis:100%}
+
+/* 단추줄을 PPI 영역 왼쪽 가장자리에(실제 화면처럼 위 묶음·아래 묶음) */
+.qgrp{display:flex;flex-direction:column;gap:1px}
+[data-qb="in"] .qbar{position:absolute;left:8px;top:12px;bottom:12px;width:66px;display:flex;flex-direction:column;justify-content:space-between;gap:8px;padding:0;background:none;border:0;overflow:visible;z-index:3}
+[data-qb="in"] .qbar .qsep{display:none}
+[data-qb="in"] .qgrp{gap:3px}
+[data-qb="in"] .tl{left:84px}
+[data-qb="in"] .bl{left:84px}
+[data-qb="in"] #bxPi{left:84px!important}
+[data-qb="in"] .qb{background:var(--c-panel);border-color:var(--c-line);color:var(--c-dim);padding:4px 2px}
+[data-qb="in"] .qb .qv{color:var(--c-ink)}
+[data-qb="in"] .qb:hover{border-color:var(--c-hi);color:var(--c-hi)}
+[data-qb="in"] .qb.on{background:rgba(127,211,255,.14);border-color:var(--c-hi);color:var(--c-hi)}
+[data-qb="in"] .qb.on .qv{color:var(--c-hi)}
+.compact .qb svg{display:none}
+.compact .qb{padding:3px 2px}
+/* 물표 목록 */
+.tgl-sort{display:flex;gap:6px;align-items:center;margin:0 0 8px;font-size:12px;color:var(--muted)}
+.tgl-sort .btn.on{background:var(--accent-bg);color:var(--accent)}
+.tgl{width:100%;border-collapse:collapse;font-family:var(--f-mono);font-size:12px}
+.tgl th{text-align:right;font-weight:500;color:var(--muted);border-bottom:1px solid var(--rule);padding:4px 6px}
+.tgl td{text-align:right;padding:4px 6px;border-bottom:1px solid var(--soft)}
+.tgl th:first-child,.tgl td:first-child{text-align:left}
+.tgl tbody tr{cursor:pointer}
+.tgl tbody tr:hover{background:var(--soft)}
+.tgl tr.sel{background:var(--accent-bg)}
+.tgl tr.danger td{color:#C62F25;font-weight:600}
+
+/* 헤더가 좁을 때: 줄바꿈 없이, 작은 부제는 숨김 */
+.hb{white-space:nowrap;flex:0 0 auto}
+#hv_wx{max-width:150px;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:1600px){.brand [data-t="sub"]{display:none}}
+@media (max-width:1366px){.hb [data-t]{display:none}}
+/* 왼쪽 아래 커뮤니티 단추(bp-home) 자리를 비움 */
+[data-qb="in"] .qbar{bottom:60px}

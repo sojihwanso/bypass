@@ -5,12 +5,15 @@ import { wrap360, D2R } from './geo.js';
 
 export const NB = 512;
 const VIDEO = { amber: [255, 176, 40], yellow: [250, 236, 80], green: [90, 255, 120] };
+/* 색 조합: 바탕·영상(실제 장비처럼 여러 조합, 색값은 자체) */
+export const COLOR_SETS = { C1: { bg: [13, 10, 7], echo: [255, 176, 40] }, C2: { bg: [8, 8, 8], echo: [250, 230, 60] }, C3: { bg: [18, 30, 96], echo: [255, 236, 70] }, C4: { bg: [6, 10, 8], echo: [90, 240, 110] }, C5: { bg: [8, 40, 48], echo: [120, 250, 140] }, C6: { bg: [42, 54, 68], echo: [255, 220, 90] } };
 
 export function createPPI(canvas, overlay) {
   const g = canvas.getContext('2d');
   const buf = new Uint8Array(N_BRG * NB), written = new Float64Array(N_BRG);
   const st = { canvas, overlay, stats: { clears: 0, renders: 0, litPixels: 0 }, persistence: 2 };
   let W = 0, H = 0, dpr = 1, img = null, px = null, lutA = null, lutB = null, lutKey = '', pal = null, palKey = '';
+  let bgPx = 0xff0d0a07;
   let geom = { cx: 0, cy: 0, R: 0, ox: 0, oy: 0 }, lastRange = null, bufRange = 1, view = null, shift = 0, rmax = Infinity;
 
   function resize() {
@@ -44,9 +47,10 @@ export function createPPI(canvas, overlay) {
     }
   }
   function palette(v) {
-    const key = (v.videoColor || 'amber') + (v.palette || 'day');
+    const set = COLOR_SETS[v.colorSet] || COLOR_SETS.C1, key = (v.colorSet || 'C1') + (v.palette || 'day');
     if (key === palKey) return; palKey = key;
-    const c = VIDEO[v.videoColor] || VIDEO.amber, night = v.palette === 'night' ? 0.55 : v.palette === 'dusk' ? 0.8 : 1;
+    const c = set.echo, night = v.palette === 'night' ? 0.55 : v.palette === 'dusk' ? 0.8 : 1;
+    bgPx = (255 << 24) | (Math.round(set.bg[2] * night) << 16) | (Math.round(set.bg[1] * night) << 8) | Math.round(set.bg[0] * night);
     pal = new Uint32Array(16 * 4);
     for (let a = 0; a < 4; a++) for (let l = 0; l < 16; l++) {
       if (!l) { pal[a * 16] = 0; continue; }
@@ -63,7 +67,7 @@ export function createPPI(canvas, overlay) {
     layout(v); buildLut(v); palette(v);
     const rot = Math.round((upBrg(v) / 360) * N_BRG), now = performance.now(), per = (st.persistence || 2) * 2500;
     const age = new Uint8Array(N_BRG); for (let i = 0; i < N_BRG; i++) { const a = (now - written[i]) / per; age[i] = a < 0.5 ? 0 : a < 1 ? 1 : a < 1.6 ? 2 : 3; }
-    const bg = v.palette === 'night' ? 0xff050302 : 0xff0d0a07;
+    const bg = bgPx;
     let lit = 0;
     for (let p = 0, n = W * H; p < n; p++) {
       const a = lutA[p];
@@ -85,5 +89,5 @@ export function createPPI(canvas, overlay) {
     return { brg: wrap360(Math.atan2(ex, -ey) / D2R + upBrg(view)), rng: Math.hypot(ex, ey) * k };
   }
   function inside(x, y) { return Math.hypot(x * dpr - geom.cx, y * dpr - geom.cy) <= geom.R; }
-  return Object.assign(st, { resize, clear, writeLine, render, toScreen, fromScreen, inside, setPersistence: (s) => (st.persistence = s), setShift: (px, rm = Infinity) => { if (px !== shift || rm !== rmax) { shift = px; rmax = rm; lutKey = ''; } }, geom: () => ({ ...geom, dpr }), upBrg: () => upBrg(view) });
+  return Object.assign(st, { resize, clear, writeLine, render, toScreen, fromScreen, inside, setPersistence: (s) => (st.persistence = s), setShift: (px, rm = Infinity) => { if (px !== shift || rm !== rmax) { shift = px; rmax = rm; lutKey = ''; } }, geom: () => ({ ...geom, dpr }), levelAt: (brg, rng) => { const bi = Math.round((((brg % 360) + 360) % 360) / 360 * N_BRG) & (N_BRG - 1), i = Math.floor((rng / bufRange) * NB); return i >= 0 && i < NB ? buf[bi * NB + i] : 0; }, upBrg: () => upBrg(view) });
 }

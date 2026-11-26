@@ -9,7 +9,7 @@ export const DEFAULTS = {
     stcCurve: 3, stcRange: 5, wiper: 0, sart: false, preset: 'CUSTOM1',
   },
   disp: {
-    rangeNM: 6, orient: 'HU', motion: 'RM', rings: true, palette: 'day', videoColor: 'amber',
+    rangeNM: 6, orient: 'HU', motion: 'RM', rings: true, palette: 'day', videoColor: 'amber', colorSet: 'C1', iala: 'A',
     trails: { mode: 'REL', time: 180, grad: 'MULTI', level: 2, os: false, suppressOS: false },
     stern: false, osMark: 'SCALED', grid: false,
     map: { on: true, coast: true, marks: true }, route: true,

@@ -4,9 +4,11 @@ import { wrap360, D2R } from './geo.js';
 import { RING_INT } from './echo.js';
 import { piLines } from './tools.js';
 
-const COL = {
-  day: { scale: '#7E93A3', ring: 'rgba(140,170,190,.38)', hl: '#D6E2EA', tt: '#5BD68A', ais: '#7FD3FF', bad: '#FF6B5E', tool: '#F2D16B', map: 'rgba(160,190,210,.6)', route: '#E58CFF', cur: '#D6E2EA', trail: [255, 176, 40] },
-  night: { scale: '#4E6070', ring: 'rgba(90,115,135,.35)', hl: '#8C9DAA', tt: '#3E8F5E', ais: '#4F8FB3', bad: '#B9544B', tool: '#A8912F', map: 'rgba(90,115,135,.6)', route: '#9C62B0', cur: '#8C9DAA', trail: [181, 122, 28] },
+/* PI 선 색: IALA A = 왼쪽 빨강·오른쪽 초록, B = 반대. offset < 0 이 왼쪽 */
+export const piColor = (offset, iala) => (Math.abs(offset) < 1e-9 ? null : (offset < 0) === (iala !== 'B') ? '#E0443A' : '#34B35A');
+export const COL = {
+  day: { scale: '#7E93A3', ring: 'rgba(140,170,190,.38)', hl: '#D6E2EA', tt: '#5BD68A', ais: '#7FD3FF', bad: '#FF6B5E', tool: '#F2D16B', map: 'rgba(160,190,210,.6)', route: '#E58CFF', cur: '#D6E2EA', trail: [61, 139, 255] },
+  night: { scale: '#4E6070', ring: 'rgba(90,115,135,.35)', hl: '#8C9DAA', tt: '#3E8F5E', ais: '#4F8FB3', bad: '#B9544B', tool: '#A8912F', map: 'rgba(90,115,135,.6)', route: '#9C62B0', cur: '#8C9DAA', trail: [34, 84, 160] },
 };
 const SYM = { GRN: '#5BD68A', BLU: '#6FA8FF', CYA: '#7FD3FF', MAG: '#FF7FE1', WHT: '#E8EEF2' };
 
@@ -21,7 +23,7 @@ export function drawOverlay(cv, ppi, V, M) {
   // 위경도 격자
   if (M.grid) { g.strokeStyle = C.ring; g.setLineDash([2, 4]); for (const l of M.grid) { g.beginPath(); l.forEach((p, i) => { const s = sc(p.brg, p.rng); i ? g.lineTo(s.x, s.y) : g.moveTo(s.x, s.y); }); g.stroke(); } g.setLineDash([]); }
   // 항적(래스터)
-  if (M.trails) { const [r, gg, b] = C.trail, cell = Math.max(1.2, M.trails.cell * k); M.trails.cells((x, y, age) => { const p = { x: O.x + rot(x, y, up).x * k, y: O.y - rot(x, y, up).y * k }; g.fillStyle = `rgba(${r},${gg},${b},${(M.trails.multi ? (1 - age) : 1) * 0.55})`; g.fillRect(p.x - cell / 2, p.y - cell / 2, cell, cell); }); }
+  if (M.trails) { const [r, gg, b] = C.trail, cell = Math.max(1.2, M.trails.cell * k); M.trails.cells((x, y, age) => { if (ppi.levelAt(Math.atan2(x, y) / D2R, Math.hypot(x, y)) > 0) return; /* 지금 영상이 있는 곳은 항적을 그리지 않음(영상 위를 덮지 않게) */ const p = { x: O.x + rot(x, y, up).x * k, y: O.y - rot(x, y, up).y * k }; g.fillStyle = `rgba(${r},${gg},${b},${(M.trails.multi ? (1 - age) : 1) * 0.55})`; g.fillRect(p.x - cell / 2, p.y - cell / 2, cell, cell); }); }
   // 거리환
   if (V.rings) { g.strokeStyle = C.ring; const iv = RING_INT[V.rangeNM] || V.rangeNM / 6; for (let r = iv; r <= V.rangeNM * 1.6 + 1e-9; r += iv) { g.beginPath(); g.arc(O.x, O.y, r * k, 0, Math.PI * 2); g.stroke(); } }
   // 레이더 맵: 해안선·마크
@@ -32,7 +34,7 @@ export function drawOverlay(cv, ppi, V, M) {
   // 구역(표적 경보·포착)
   for (const z of M.zones || []) { g.strokeStyle = z.kind === 'az' ? C.tt : C.tool; g.setLineDash(z.kind === 'az' ? [4, 3] : [8, 4]); const a0 = (z.brg0 - up - 90) * D2R, a1 = (z.brg1 - up - 90) * D2R; g.beginPath(); g.arc(O.x, O.y, z.rng1 * k, a0, a1 < a0 ? a1 + Math.PI * 2 : a1); g.arc(O.x, O.y, z.rng0 * k, a1 < a0 ? a1 + Math.PI * 2 : a1, a0, true); g.closePath(); g.stroke(); g.setLineDash([]); }
   // PI선
-  if (M.pi) for (const l of piLines(M.pi)) { const nb = (l.brg + 90) * D2R - up * D2R, dx = Math.sin(nb) * l.offset * k, dy = -Math.cos(nb) * l.offset * k, ub = (l.brg - up) * D2R, L = R * 2.2; g.strokeStyle = C.tool; g.setLineDash([10, 5]); g.beginPath(); g.moveTo(O.x + dx - Math.sin(ub) * L, O.y + dy + Math.cos(ub) * L); g.lineTo(O.x + dx + Math.sin(ub) * L, O.y + dy - Math.cos(ub) * L); g.stroke(); g.setLineDash([]); }
+  if (M.pi) for (const l of piLines(M.pi)) { const nb = (l.brg + 90) * D2R - up * D2R, dx = Math.sin(nb) * l.offset * k, dy = -Math.cos(nb) * l.offset * k, ub = (l.brg - up) * D2R, L = R * 2.2; g.strokeStyle = piColor(l.offset, M.iala) || C.tool; g.setLineDash([10, 5]); g.beginPath(); g.moveTo(O.x + dx - Math.sin(ub) * L, O.y + dy + Math.cos(ub) * L); g.lineTo(O.x + dx + Math.sin(ub) * L, O.y + dy - Math.cos(ub) * L); g.stroke(); g.setLineDash([]); }
   // 선수선·선미·자선
   if (!V.hlHidden) { const e = sc(V.hdg, V.rangeNM * 3); g.strokeStyle = C.hl; g.lineWidth = 1.3; g.beginPath(); g.moveTo(O.x, O.y); g.lineTo(e.x, e.y); g.stroke(); g.lineWidth = 1; }
   if (M.stern) { const e = sc(V.hdg + 180, V.rangeNM * 3); g.strokeStyle = C.hl; g.setLineDash([2, 5]); g.beginPath(); g.moveTo(O.x, O.y); g.lineTo(e.x, e.y); g.stroke(); g.setLineDash([]); }
@@ -44,6 +46,13 @@ export function drawOverlay(cv, ppi, V, M) {
   // 자선 Trial 벡터
   if (M.trial) { const e = { x: O.x + Math.sin((M.trial.course - up) * D2R) * M.trial.speed * (M.vecMin / 60) * k, y: O.y - Math.cos((M.trial.course - up) * D2R) * M.trial.speed * (M.vecMin / 60) * k }; g.strokeStyle = C.tool; g.lineWidth = 2; g.setLineDash([6, 3]); g.beginPath(); g.moveTo(O.x, O.y); g.lineTo(e.x, e.y); g.stroke(); g.setLineDash([]); g.lineWidth = 1; g.fillStyle = C.tool; g.fillText('TRIAL', e.x + 6, e.y); }
   // Drop mark
+  for (const m of M.userMarks || []) { const s = sc(m.brg, m.rng); g.strokeStyle = C.tool; g.lineWidth = 1.5; g.beginPath();
+    if (m.shape === 'tri') { g.moveTo(s.x, s.y - 7); g.lineTo(s.x + 6, s.y + 5); g.lineTo(s.x - 6, s.y + 5); g.closePath(); }
+    else if (m.shape === 'circle') g.arc(s.x, s.y, 6, 0, Math.PI * 2);
+    else if (m.shape === 'square') g.rect(s.x - 5.5, s.y - 5.5, 11, 11);
+    else if (m.shape === 'cross') { g.moveTo(s.x - 6, s.y - 6); g.lineTo(s.x + 6, s.y + 6); g.moveTo(s.x + 6, s.y - 6); g.lineTo(s.x - 6, s.y + 6); }
+    else { g.arc(s.x, s.y + 1, 5, 0.15 * Math.PI, 0.85 * Math.PI); g.moveTo(s.x, s.y - 7); g.lineTo(s.x, s.y + 6); g.moveTo(s.x - 4, s.y - 3); g.lineTo(s.x + 4, s.y - 3); }
+    g.stroke(); g.lineWidth = 1; }
   for (const d of M.drops || []) { const s = sc(d.brg, d.rng); g.strokeStyle = C.tool; g.beginPath(); g.moveTo(s.x - 6, s.y); g.lineTo(s.x + 6, s.y); g.moveTo(s.x, s.y - 6); g.lineTo(s.x, s.y + 6); g.stroke(); }
   // AIS
   const symC = SYM[M.symColor] || C.tt;

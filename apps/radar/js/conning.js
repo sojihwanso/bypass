@@ -3,6 +3,7 @@ import { S, saveSettings } from './state.js';
 import { TELEGRAPH, setRudderOrder, setTelegraph, setAuto } from './sim.js';
 import { t } from './i18n.js';
 
+const TELE_AB = { FA: 'F.Ahead', HA: 'H.Ahead', SA: 'S.Ahead', DSA: 'D.S.Ahead', STOP: 'STOP', DSAH: 'D.S.Astern', SAH: 'S.Astern', HAH: 'H.Astern', FAH: 'F.Astern' };
 const TELE_KO = { FAH: 'Full astern', HAH: 'Half astern', SAH: 'Slow astern', DSAH: 'Dead slow astern', STOP: 'Stop', DSA: 'Dead slow ahead', SA: 'Slow ahead', HA: 'Half ahead', FA: 'Full ahead' };
 const CMD = [['P25', -25], ['P20', -20], ['P15', -15], ['P10', -10], ['P5', -5], ['MID', 0], ['S5', 5], ['S10', 10], ['S15', 15], ['S20', 20], ['S25', 25]]; // 6열: 좌현 줄(+MID) / 우현 줄
 const f = (v, d = 1) => (v == null || !isFinite(v) ? '-' : v.toFixed(d));
@@ -16,7 +17,7 @@ export function initConning(root, getShip, extra = {}) {
   <div class="cn-row"><span class="lb">RUDDER</span><span class="rud"><span class="rz"></span><i id="cnRudA"></i><i class="ord" id="cnRudO"></i></span><span class="num" id="cnRud"></span></div>
   <div class="cmds">${CMD.map(([k, v]) => `<button type="button" data-rud="${v}" class="${v < 0 ? 'p' : v > 0 ? 's' : 'm'}">${k}</button>`).join('')}</div><div class="cmds2"><button type="button" data-rud="-35" class="p">HARD P</button><button type="button" data-steady="1">STEADY</button><button type="button" data-rud="35" class="s">HARD S</button></div>
   <div class="cn-split">
-    <div class="tele">${TELEGRAPH.map((x, i) => `<button type="button" data-tele="${i}" title="${TELE_KO[x.k]}"><span>${x.k}</span><span class="num">${x.kn > 0 ? '+' : ''}${x.kn}</span></button>`).reverse().join('')}</div>
+    <div class="tele">${TELEGRAPH.map((x, i) => `<button type="button" data-tele="${i}" title="${TELE_KO[x.k]}"><span>${TELE_AB[x.k] || x.k}</span><span class="num">${x.kn > 0 ? '+' : ''}${x.kn}</span></button>`).reverse().join('')}</div>
     <div class="cn-data"><dl class="kv"><dt>RPM</dt><dd id="cnRpm"></dd><dt>STW</dt><dd id="cnStw"></dd><dt>SOG</dt><dd id="cnSog"></dd><dt>COG</dt><dd id="cnCog"></dd><dt>WIND</dt><dd id="cnWind"></dd></dl>
       <div class="ap"><div class="seg"><button type="button" data-ap="0">HAND</button><button type="button" data-ap="1">AUTO</button></div>
       <div class="sethd"><span class="lb">SET HDG</span><button type="button" data-sh="-10">−10</button><button type="button" data-sh="-1">−1</button><b class="num" id="cnSet"></b><button type="button" data-sh="1">+1</button><button type="button" data-sh="10">+10</button></div></div>

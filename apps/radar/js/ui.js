@@ -20,6 +20,7 @@ export const ICON = {
   az: P('<path d="M12 20L5.5 8.5a8 8 0 0 1 13 0z"/><path d="M8.5 13.5a5 5 0 0 1 7 0"/>'),
   pause: P('<path d="M9 5v14M15 5v14"/>'),
   speed: P('<path d="M4 6l7 6-7 6zM12 6l7 6-7 6z"/>'),
+  mark: P('<path d="M12 3v18M12 3l7 4-7 4"/>'),
   wx: P('<path d="M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z"/>'),
   pal: P('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),
   menu: P('<path d="M4 7h16M4 12h16M4 17h16"/>'),
@@ -44,8 +45,13 @@ export const ICON = {
 };
 /* 왼쪽 막대: 매뉴얼 1.4.1의 순서(위: 송신·튜닝·펄스·IR·ES·EAV·ACE / 아래: HL·MAP·CU/TM 리셋·자선 AIS·AIS 메시지·밝기).
    실제와 똑같지 않게 두 쌍만 한 칸씩 바꿈: 펄스↔튜닝, MAP↔HL. 그 아래는 시뮬레이터 전용 묶음 */
-const QB = [['tx', 'q_tx'], ['tune', 'q_tune'], ['pulse', 'q_pulse'], ['ir', 'q_ir'], ['es', 'q_es'], ['eav', 'q_eav'], ['ace', 'q_ace'], ['sep'], ['hl', 'q_hl'], ['map', 'q_map'], ['cureset', 'q_cureset'], ['ownais', 'q_ownais'], ['aismsg', 'q_aismsg'], ['pal', 'q_pal']];
+const QB_TOP = [['tx', 'q_tx'], ['tune', 'q_tune'], ['pulse', 'q_pulse'], ['ir', 'q_ir'], ['es', 'q_es'], ['eav', 'q_eav'], ['ace', 'q_ace']];
+/* 아래 묶음: 실제(MAP·HL·CU/TM 리셋·자선 AIS·AIS·밝기·MARK)에서 MAP↔HL, CU/TM 리셋↔자선 AIS를 바꿈 */
+const QB_BOT = [['hl', 'q_hl'], ['map', 'q_map'], ['ownais', 'q_ownais'], ['cureset', 'q_cureset'], ['aismsg', 'q_aismsg'], ['pal', 'q_pal'], ['mark', 'q_mark']];
+const qbBtn = ([k, l]) => `<button type="button" class="qb" data-act="${k}" id="qb_${k}">${ICON[k]}<span data-t="${l}"></span><span class="qv" id="qv_${k}"></span></button>`;
 /* 실제 레이더에 없는 시뮬레이터 전용 단추는 헤더에 */
+/* 약자는 풀어 쓰고, 전체 이름은 title로 */
+const ABBR = { HU: ['H.Up', 'Head Up'], NU: ['N.Up', 'North Up'], CU: ['C.Up', 'Course Up'], RM: ['R.Motion', 'Relative Motion'], TM: ['T.Motion', 'True Motion'] };
 const HB = [['scn', 'q_scn'], ['pause', 'q_pause'], ['speed', 'q_speed'], ['wx', 'q_wx'], ['conn', 'q_conn'], ['shot', 'q_shot']];
 
 export function initUI(root, actions) {
@@ -56,6 +62,7 @@ export function initUI(root, actions) {
   <div class="simbar" role="group" aria-label="시뮬레이터">${HB.map(([k, l]) => `<button type="button" class="hb" data-act="${k}" id="hb_${k}">${ICON[k]}<span data-t="${l}"></span><span class="qv" id="hv_${k}"></span></button>`).join('')}</div>
   <div class="htools">
     <button class="hbtn rp-toggle" type="button" data-act="rp" aria-label="정보창">${ICON.panel}</button>
+    <button class="hbtn" type="button" id="hdrHelp" data-act="help" aria-label="도움말" title="도움말">${ICON.help}</button>
     <div class="seg2" role="group" aria-label="Language"><button type="button" data-act="lang" data-v="ko">한</button><button type="button" data-act="lang" data-v="en">EN</button></div>
     <button class="hbtn" type="button" data-act="fs" aria-label="전체 화면">${ICON.fs}</button>
     <button class="ver" type="button" id="verTop" aria-label="버전 ${VERSION}">v${VERSION}</button>
@@ -63,7 +70,7 @@ export function initUI(root, actions) {
   </div>
 </header>
 <div class="main">
-  <nav class="qbar" id="qbar" aria-label="빠른 조작">${QB.map(([k, l]) => (k === 'sep' ? '<div class="qsep"></div>' : `<button type="button" class="qb" data-act="${k}" id="qb_${k}">${ICON[k]}<span data-t="${l}"></span><span class="qv" id="qv_${k}"></span></button>`)).join('')}</nav>
+  <nav class="qbar" id="qbar" aria-label="빠른 조작"><div class="qgrp" id="qbTop">${QB_TOP.map(qbBtn).join('')}</div><div class="qsep"></div><div class="qgrp" id="qbBot">${QB_BOT.map(qbBtn).join('')}</div></nav>
   <section class="ppi-wrap" id="ppiWrap">
     <canvas id="cvEcho"></canvas><canvas id="cvOver" aria-label="레이더 화면"></canvas>
     <button type="button" class="stby-hint" id="stbyHint" data-act="tx"></button>
@@ -96,9 +103,8 @@ export function initUI(root, actions) {
   <aside class="rp" id="rp">
     <div class="sec" id="pnOwn"><h3><span data-t="own"></span><span class="num" id="vClock"></span></h3>
       <dl class="kv"><dt>HDG</dt><dd class="big" id="vHdg">-</dd><dt>STW</dt><dd id="vStw">-</dd><dt>SOG</dt><dd id="vSog">-</dd><dt>COG</dt><dd id="vCog">-</dd><dt>ROT</dt><dd id="vRot">-</dd><dt data-t="posn"></dt><dd id="vPos">-</dd><dt data-t="elapsed"></dt><dd id="vEl">-</dd></dl></div>
-    <button class="help-btn" type="button" id="btnHelp" data-act="help">${ICON.help}<span data-t="help"></span></button>
     <div class="sec" id="pnTgt"><h3><span data-t="tgt"></span></h3><div class="tslots" id="tSlots"></div></div>
-    <div class="sec" id="pnTT"><h3><span data-t="ttais"></span><span class="num" id="vCounts"></span></h3><dl class="kv" id="vTT"></dl><div class="ttbtns"><button class="btn" type="button" data-act="vecMode" id="vVec">VECTOR</button><button class="btn" type="button" data-act="trail" id="vTrail">TRAIL</button></div></div>
+    <div class="sec" id="pnTT"><h3><span data-t="ttais"></span><span class="num" id="vCounts"></span></h3><dl class="kv" id="vTT"></dl><div class="ttbtns"><button class="btn" type="button" data-act="tgtList" id="vTgtList" data-t="tgtList"></button><button class="btn" type="button" data-act="vecMode" id="vVec">VECTOR</button><button class="btn" type="button" data-act="trail" id="vTrail">TRAIL</button></div></div>
     <div class="sec" id="pnAlert"><h3><span data-t="alert"></span><span class="num" id="vAlN"></span></h3><div id="aBox"></div></div>
     <div id="connSlot"></div>
   </aside>
@@ -114,6 +120,7 @@ export function initUI(root, actions) {
     document.documentElement.lang = lang();
     for (const el of root.querySelectorAll('[data-t]')) el.textContent = t(el.dataset.t);
     for (const b of root.querySelectorAll('[data-act="lang"]')) b.classList.toggle('on', b.dataset.v === lang());
+    $('#hdrHelp').setAttribute('aria-label', t('help')); $('#hdrHelp').title = t('help');
     if (!$('#menuPanel').hidden) renderMenu();
   };
   const applyTheme = () => { document.documentElement.dataset.theme = S.disp.palette; };
@@ -192,7 +199,7 @@ export function initUI(root, actions) {
   for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) hlb.addEventListener(ev, () => actions.hlHold && actions.hlHold(false));
   /* ---- 커서 메뉴(오른쪽 클릭 / 길게 누르기) ---- */
   const cm = $('#cmenu'), over = $('#cvOver');
-  const CM = [['acq', 'cm_acq'], ['cancel', 'cm_cancel'], ['data', 'cm_data'], ['act', 'cm_act'], ['ref', 'cm_ref'], ['-'], ['ebl', 'cm_ebl'], ['vrm', 'cm_vrm'], ['offEbl', 'cm_offEbl'], ['ruler', 'cm_ruler'], ['-'], ['off', 'cm_off'], ['center', 'cm_center'], ['drop', 'cm_drop'], ['anchor', 'cm_anchor']];
+  const CM = [['acq', 'cm_acq'], ['cancel', 'cm_cancel'], ['data', 'cm_data'], ['act', 'cm_act'], ['ref', 'cm_ref'], ['-'], ['ebl', 'cm_ebl'], ['vrm', 'cm_vrm'], ['offEbl', 'cm_offEbl'], ['ruler', 'cm_ruler'], ['-'], ['off', 'cm_off'], ['center', 'cm_center'], ['drop', 'cm_drop'], ['markDel', 'cm_markDel'], ['anchor', 'cm_anchor']];
   let cmPos = null;
   function openCM(x, y) {
     const r = over.getBoundingClientRect(); cmPos = { sx: x - r.left, sy: y - r.top };
@@ -221,14 +228,15 @@ export function initUI(root, actions) {
   rp.insertBefore($('#connSlot'), $('#pnAlert'));
   let mode = null;
   let shift = 0;
-  const qbar = $('#qbar'), tl = wrap.querySelector('.tl'), QB_W = 72, QIN_R = 164, LBL = 36;
+  const qbar = $('#qbar'), QB_W = 72, QIN_R = 84, LBL = 36;
   let qIn = false, rmax = Infinity;
   function relayout() {
-    /* 단추 막대: 화면 높이가 넉넉하면(800px 이상) PPI 왼쪽 안(왼쪽 위 상자 아래)으로 넣고, 원은 막대와 오른쪽 칸 사이에 둠(최대 15%까지 줄임).
-       아니면 왼쪽 막대. 오른쪽 칸 폭 = 150~300px, 칸과 방위 눈금 사이 46px. 모자라면 원을 왼쪽으로 옮김 */
+    /* 단추줄: PPI 영역 높이 560px 이상이면 PPI 영역 왼쪽 가장자리 세로줄(위 묶음 위, 아래 묶음 아래 — 실제 화면 배치)로 넣고, 760px 미만이면 작게.
+       원은 단추줄·오른쪽 칸 사이(최대 15%까지 줄임). 아니면 왼쪽 막대. 오른쪽 칸 폭 = 150~300px */
     const r = wrap.getBoundingClientRect(), h = r.height, wIn = r.width + (qIn ? 0 : QB_W), full = h / 2 - LBL;
-    const RIn = Math.min(full, (wIn - QIN_R - 170) / 2 - LBL), wantIn = r.width > 0 && h >= 800 && RIn >= 0.85 * full;
-    if (wantIn !== qIn) { qIn = wantIn; document.documentElement.dataset.qb = qIn ? 'in' : 'out'; if (qIn) tl.append(qbar); else main.prepend(qbar); }
+    const RIn = Math.min(full, (wIn - QIN_R - 170) / 2 - LBL), wantIn = r.width > 0 && h >= 560 && RIn >= 0.85 * full;
+    if (wantIn !== qIn) { qIn = wantIn; document.documentElement.dataset.qb = qIn ? 'in' : 'out'; if (qIn) wrap.append(qbar); else main.prepend(qbar); }
+    wrap.classList.toggle('compact', qIn && h < 760);
     let colW, next;
     if (qIn) {
       const cx = Math.min(Math.max(wIn / 2, QIN_R + LBL + RIn), wIn - 170 - LBL - RIn);
@@ -256,8 +264,8 @@ export function initUI(root, actions) {
   function refresh(d) {
     $('#vRange').textContent = d.rangeNM < 1 ? d.rangeNM.toString().replace(/^0/, '') : d.rangeNM;
     $('#vRing').textContent = '/' + d.ringInt + ' NM';
-    $('#vOrient').textContent = d.orient;
-    $('#vMotion').textContent = d.motion; $('#vBand').textContent = S.ctrl.band + '-BAND'; $('#vPulse').textContent = S.ctrl.pulse;
+    $('#vOrient').textContent = ABBR[d.orient][0]; $('#vOrient').title = ABBR[d.orient][1];
+    $('#vMotion').textContent = ABBR[d.motion][0]; $('#vMotion').title = ABBR[d.motion][1]; $('#vBand').textContent = S.ctrl.band + '-BAND'; $('#vPulse').textContent = S.ctrl.pulse;
     const tx = $('#bxTx'); tx.classList.toggle('on', d.tx === 'tx'); tx.classList.toggle('warm', d.tx === 'warm');
     $('#vTx').textContent = d.tx === 'tx' ? 'TX' : d.tx === 'warm' ? `${t('warm')} ${Math.ceil(d.warmLeft)}s` : 'STBY';
     const hint = $('#stbyHint'); hint.hidden = d.tx === 'tx';
@@ -275,7 +283,7 @@ export function initUI(root, actions) {
     qv('tx', d.tx === 'tx' ? 'TX' : d.tx === 'warm' ? 'WARM' : 'STBY', d.tx !== 'stby'); qv('tune', S.ctrl.tune.auto ? 'AUTO' : 'MAN', S.ctrl.tune.auto); qv('pulse', S.ctrl.pulse);
     qv('ir', S.ctrl.ir ? String(S.ctrl.ir) : 'OFF', S.ctrl.ir > 0); qv('es', S.ctrl.es ? String(S.ctrl.es) : 'OFF', S.ctrl.es > 0); qv('eav', S.ctrl.eav ? String(S.ctrl.eav) : 'OFF', S.ctrl.eav > 0); qv('ace', S.ctrl.ace ? 'ON' : 'OFF', S.ctrl.ace);
     qv('hl', 'OFF'); qv('map', S.disp.map.on ? 'ON' : 'OFF', S.disp.map.on); qv('cureset', d.orient === 'CU' || d.motion === 'TM' ? 'RESET' : '-'); qv('ownais', ''); qv('aismsg', d.msgN ? String(d.msgN) : '');
-    qv('pal', t('pal_' + S.disp.palette));
+    qv('pal', t('pal_' + S.disp.palette)); if (d.mark) qv('mark', d.mark.sym, d.mark.on); $('#qb_pal').title = lang() === 'en' ? 'Brilliance · long-press: colour set' : '밝기 · 길게 누르면 색 조합';
     if (d.wx) { $('#hv_wx').textContent = d.wx.on ? d.wx.label : (lang() === 'en' ? 'OFF' : '꺼짐'); $('#hb_wx').classList.toggle('on', d.wx.on); $('#hb_wx').title = lang() === 'en' ? 'Weather changes on/off' : '날씨 변화 켜기/끄기'; }
     $('#hv_speed').textContent = '×' + d.speed; $('#hb_pause').classList.toggle('on', !!d.paused); $('#hb_conn').classList.toggle('on', !!d.connOn); $('#hb_speed').classList.toggle('on', d.speed > 1);
     $('#vPict').textContent = S.ctrl.preset; $('#vOff').classList.toggle('on', !!d.offCenter); $('#vRef').textContent = d.ref || 'CCRP';
@@ -307,5 +315,5 @@ export function initUI(root, actions) {
     const r = $('#hb_speed').getBoundingClientRect(); pop.style.left = r.left + 'px'; pop.style.top = r.bottom + 4 + 'px'; root.append(pop);
     setTimeout(() => addEventListener('pointerdown', function off(e) { if (!e.target.closest('#spdPop,#hb_speed')) { pop.remove(); removeEventListener('pointerdown', off); } }), 0);
   }
-  return { refresh, speedPop, applyLang, applyTheme, renderMenu, dialog, relayout, layoutMode: () => mode, qbInside: () => qIn, shift: () => shift, rmax: () => rmax, closeAll() { menuEl.hidden = true; cm.hidden = true; }, echoCanvas: $('#cvEcho'), overCanvas: $('#cvOver') };
+  return { refresh, speedPop, applyLang, applyTheme, renderMenu, dialog, relayout, layoutMode: () => mode, qbInside: () => qIn, ABBR, shift: () => shift, rmax: () => rmax, closeAll() { menuEl.hidden = true; cm.hidden = true; }, echoCanvas: $('#cvEcho'), overCanvas: $('#cvOver') };
 }

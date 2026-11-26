@@ -38,7 +38,9 @@ export const MENU = [
     it('mapCoast', 'disp.map.coast', 'bool', '맵: 해안선', 'MAP: COAST LINE', '레이더 맵의 해안선을 그립니다.', 'Draws the coastline of the radar map.'),
     it('mapMarks', 'disp.map.marks', 'bool', '맵: 마크', 'MAP: MARKS', '레이더 맵의 부표·위험물 마크를 그립니다.', 'Draws buoy and danger marks of the radar map.'),
     it('route', 'disp.route', 'bool', '항로 표시', 'ROUTE', '항로(WPT)를 그립니다.', 'Draws the route and waypoints.'),
-    it('videoColor', 'disp.videoColor', 'enum', '영상 색', 'ECHO COLOR', '레이더 영상의 색입니다.', 'Colour of radar echoes.', { opts: [E('amber', '호박색', 'AMBER'), E('yellow', '노랑', 'YELLOW'), E('green', '초록', 'GREEN')] }),
+    it('colorSet', 'disp.colorSet', 'enum', '색 조합', 'COLOR SET', '화면 바탕과 영상 색의 조합입니다. 왼쪽 아래 밝기 단추를 길게 눌러도 바뀝니다.', 'Background and echo colour set. Long-press the brilliance button to cycle.', { opts: [E('C1', '검정·호박', 'BLACK/AMBER'), E('C2', '검정·노랑', 'BLACK/YELLOW'), E('C3', '남색·노랑', 'NAVY/YELLOW'), E('C4', '검정·초록', 'BLACK/GREEN'), E('C5', '짙은 청록·초록', 'TEAL/GREEN'), E('C6', '회청·노랑', 'SLATE/YELLOW')] }),
+    it('iala', 'disp.iala', 'enum', 'PI 선 색(IALA)', 'PI COLOR (IALA)', 'PI 선의 좌우 색입니다. A: 왼쪽 빨강·오른쪽 초록(한국), B: 반대.', 'PI line colours. A: red left, green right. B: reversed.', { opts: [E('A', 'IALA A', 'IALA A'), E('B', 'IALA B', 'IALA B')] }),
+    it('wxOn', 'sim.weatherOn', 'toggle', '날씨 변화', 'WEATHER CHANGES', '무작위 날씨와 진행 중 날씨 변화, 바람에 밀림을 켜고 끕니다. 헤더 날씨 표시를 눌러도 됩니다.', 'Random weather, changes and wind drift on/off. Also the weather chip in the header.'),
     it('palette', 'disp.palette', 'enum', '화면 밝기 구성', 'BRILL / COLOR', '주간·박명·야간 화면 구성입니다. 밤에는 눈부시지 않게 어둡게 씁니다.', 'Day, dusk and night schemes. Use the dark scheme at night.', { opts: [E('day', '주간', 'DAY'), E('dusk', '박명', 'DUSK'), E('night', '야간', 'NIGHT')] }),
   ] },
   { id: 'nav', ko: '항해 도구(NAV TOOLS)', en: 'NAV TOOLS', items: [

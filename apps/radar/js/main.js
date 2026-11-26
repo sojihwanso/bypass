@@ -17,6 +17,7 @@ import { drawOverlay } from './overlay.js';
 import { t, lang } from './i18n.js';
 import { initStart } from './start.js';
 import { initHelp } from './help.js';
+import { COL, piColor } from './overlay.js';
 import { stepWeather, windDrift, speedLoss, weatherLabel } from './weather.js';
 
 const TEST = new URLSearchParams(location.search).has('test');
@@ -36,7 +37,8 @@ let antAcc = 0, paused = false, hiddenPause = false, speed = 1, ant = 0, last = 
 let offCenter = null, tmOff = { x: 0, y: 0 }, cursor = null, selected = [], uiMode = null, rulerA = null, ruler = null, piOn = false, lastUser = performance.now(), trialSet = { course: 0, speed: 14 };
 let logFn = null, onScenarioTick = null, coastScreen = null, coastKey = '';
 const rnd = Math.random;
-const SPEEDS = [1, 2, 4, 8, 16, 32];
+const SPEEDS = [1, 2, 4, 8, 16, 32], MARKS = ['tri', 'circle', 'square', 'cross', 'anchor'], MARK_SYM = { tri: '▲', circle: '○', square: '□', cross: '✕', anchor: '⚓' };
+let markShape = 0, tgtSort = 'rng', tgtTimer = null;
 let wxRun = null, wxPend = [], wxN = 0;
 
 /* ---------- UI ---------- */
@@ -56,7 +58,7 @@ export function startWorld(def) {
   W = { def, name: def.name || '', own, targets: def.targets.map((g) => (g.want ? { ...g, legs: [...(g.legs || [])], want: { ...g.want } } : createTarget(g))), weather: { sea: 0, windFrom: 0, windMs: 0, rain: [], ducting: false, interference: false, current: { set: 0, drift: 0 }, ...(def.weather || {}) }, aids: def.aids || [], marks: def.marks || [], t: def.t || 0, land: { rings: [], ok: false, heightM: 100 }, needsCoast: !!def.needsCoast };
   P = makeProj(def.own.lat, def.own.lon);
   tracker = createTracker({ max: 100 }); ais = createAIS(); alerts = createAlerts(realNow, () => W.t); tools = createTools(); route = createRoute(); trails.reset(V.rangeNM, S.disp.trails.mode);
-  selected = []; tmOff = { x: 0, y: 0 }; ruler = null; rulerA = null; uiMode = null; azZones = []; piOn = false; speed = 1; offCenter = null; prevScan = new Array(N_BRG); prevRaw = null; ppi.clear();
+  W.userMarks = []; selected = []; tmOff = { x: 0, y: 0 }; ruler = null; rulerA = null; uiMode = null; azZones = []; piOn = false; speed = 1; offCenter = null; prevScan = new Array(N_BRG); prevRaw = null; ppi.clear();
   scene = buildScene({ own: ownScene(), targets: W.targets, weather: W.weather, aids: W.aids, band: S.ctrl.band, pulse: S.ctrl.pulse, seed: (Math.random() * 1e6) | 0 });
   trialSet = { course: own.hdg, speed: own.stw };
   const bb = { lat0: def.own.lat - 0.6, lat1: def.own.lat + 0.6, lon0: def.own.lon - 0.75, lon1: def.own.lon + 0.75 };
@@ -76,6 +78,23 @@ function shipEnv() {
   return { set: wrap360(Math.atan2(vx, vy) / D2), drift: Math.hypot(vx, vy), loss: speedLoss(W.weather.sea || 0) };
 }
 function syncSceneWeather() { if (scene) Object.assign(scene.weather, W.weather); }
+/* 물표 목록(TGT LIST): TT·AIS 전부, 정렬, 위험은 빨강, 줄 누르면 선택. 열려 있는 동안 1초마다 갱신 */
+function tgtRows() {
+  const o = W.own, ov = velXY(o.cog, o.sog), rows = [], f1 = (v, d = 1) => (v === null || v === undefined || !isFinite(v) ? '-' : v.toFixed(d));
+  for (const g of tracker.targets()) { const r = relOf(g.x, g.y), tr = g.state === 'track'; rows.push({ id: g.id, name: 'TT ' + g.no + (g.assoc ? ' · AIS' : ''), brg: r.brg, rng: r.rng, crs: tr ? g.course : null, spd: tr ? g.speed : null, cpa: tr ? g.cpa : null, tcpa: tr ? g.tcpa : null, ais: !!g.assoc, danger: g.danger, state: g.state }); }
+  for (const a of ais.list()) if (a.x !== undefined && a.status !== 'lost') rows.push({ id: 'A:' + a.id, name: a.name || String(a.mmsi || a.id), brg: a.brg, rng: a.rng, crs: a.cog, spd: a.sog, cpa: a.cpa, tcpa: a.tcpa, ais: true, danger: a.status === 'danger', state: a.status });
+  const key = { rng: (x) => x.rng, cpa: (x) => (x.cpa ?? 1e9), tcpa: (x) => (x.tcpa === null || x.tcpa === undefined || x.tcpa < 0 ? 1e9 : x.tcpa) }[tgtSort];
+  rows.sort((a, b) => key(a) - key(b));
+  return { rows, f1 };
+}
+function openTgtList() {
+  if (!W) return; const en = lang() === 'en', { rows, f1 } = tgtRows(), esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const th = (k, ko, e) => `<button type="button" class="btn${tgtSort === k ? ' on' : ''}" data-act="tgtSort" data-sort="${k}">${en ? e : ko}</button>`;
+  const body = `<div class="tgl-sort">${en ? 'Sort' : '정렬'} ${th('rng', '거리', 'Range')}${th('cpa', 'CPA', 'CPA')}${th('tcpa', 'TCPA', 'TCPA')}</div>
+  <table class="tgl"><thead><tr><th>${en ? 'Target' : '물표'}</th><th>BRG</th><th>RNG</th><th>CRS</th><th>SPD</th><th>CPA</th><th>TCPA</th><th>AIS</th></tr></thead><tbody>${rows.map((x) => `<tr class="${x.danger ? 'danger' : ''}${selected.includes(x.id) ? ' sel' : ''}" data-act="tgtSel" data-id="${esc(x.id)}"><td>${esc(x.name)}</td><td>${f1(x.brg)}°</td><td>${f1(x.rng, 2)}</td><td>${x.crs === null ? '-' : f1(x.crs) + '°'}</td><td>${f1(x.spd)}</td><td>${f1(x.cpa, 2)}</td><td>${x.tcpa === null || x.tcpa === undefined ? '-' : f1(x.tcpa)}</td><td>${x.ais ? '●' : '—'}</td></tr>`).join('') || `<tr><td colspan="8">${en ? 'No targets' : '물표가 없어요'}</td></tr>`}</tbody></table>`;
+  const d = ui.dialog(en ? 'Target list' : '물표 목록', body);
+  clearInterval(tgtTimer); tgtTimer = setInterval(() => { if (!d.open) { clearInterval(tgtTimer); return; } openTgtList(); }, 1000);
+}
 function weatherTick(run) {
   if (!wxRun) return;
   const ev = stepWeather(wxRun, W.weather, run, W.own);
@@ -107,7 +126,7 @@ function tick(dt) {
   if (run > 0) weatherTick(run);
   if (run > 0 && onScenarioTick) onScenarioTick(W, run);
   if (run > 0 && logFn) logFn(W);
-  V.hdg = W.own.hdg; V.rangeNM = S.disp.rangeNM; V.orient = S.disp.orient; V.motion = S.disp.motion; V.palette = S.disp.palette; V.videoColor = S.disp.videoColor; V.rings = S.disp.rings;
+  V.hdg = W.own.hdg; V.rangeNM = S.disp.rangeNM; V.orient = S.disp.orient; V.motion = S.disp.motion; V.palette = S.disp.palette; V.videoColor = S.disp.videoColor; V.colorSet = S.disp.colorSet; V.rings = S.disp.rings;
   if (V.orient !== 'CU') V.crs = W.own.hdg;
   // TM: 자선이 화면에서 움직이고, 가장자리 가까우면 되돌림
   if (V.motion === 'TM') {
@@ -199,7 +218,7 @@ function overlayModel() {
     pi: piOn ? { n: S.disp.piMax, brg: tools.pi.brg, interval: tools.pi.interval, mode: S.disp.piMode } : null,
     ebl: tools.ebl.map((e) => ({ on: e.on, brgTrue: tools.eblTrue(tools.ebl.indexOf(e), o.hdg), origin: e.origin ? toBR(e.origin.lat, e.origin.lon) : null })),
     vrm: tools.vrm.map((v) => ({ on: v.on, rng: v.rng, origin: v.origin ? toBR(v.origin.lat, v.origin.lon) : null })),
-    drops: tools.drops.map((d) => toBR(d.lat, d.lon)), tts, ais: aisL, vecRel, vecMin: S.tt.vecMin, symColor: S.tt.symColor,
+    drops: tools.drops.map((d) => toBR(d.lat, d.lon)), userMarks: W.userMarks.map((k) => ({ ...k, ...toBR(k.lat, k.lon) })), iala: S.disp.iala, tts, ais: aisL, vecRel, vecMin: S.tt.vecMin, symColor: S.tt.symColor,
     trial: S.tt.trialMode !== 'OFF' ? trialSet : null, cursor, ruler, grid,
   };
 }
@@ -228,6 +247,7 @@ function refreshUI() {
   const top = alerts.top(), el = W.t, d = new Date();
   const cur = cursor && cursorInfo(cursor);
   ui.refresh({
+    mark: { on: uiMode === 'mark', sym: MARK_SYM[MARKS[markShape]] },
     wx: { on: S.sim.weatherOn || !!W.weather.fixed, label: weatherLabel(W.weather, lang()) },
     rangeNM: V.rangeNM, ringInt: RING_INT[V.rangeNM], orient: V.orient, motion: V.motion, tx: radar.state, warmLeft: radar.warmLeft, speed, paused: paused || hiddenPause, offCenter: !!offCenter, piOn, azOn: azZones.length > 0, connOn: conn && conn.shown,
     own: { hdg: sn.hdg, stw: sn.stw, sog: sn.sog, cog: sn.cog, rot: o.rot, lat: sn.lat, lon: sn.lon }, clock: `${pad(d.getHours())}:${pad(d.getMinutes())}`, elapsed: `${pad((el / 3600) | 0)}:${pad(((el % 3600) / 60) | 0)}:${pad((el % 60) | 0)}`,
@@ -280,6 +300,8 @@ Object.assign(actions, {
   trail: () => { const i = TRAIL_ORDER.indexOf(S.disp.trails.time); S.disp.trails.time = TRAIL_ORDER[(i + 1) % TRAIL_ORDER.length]; trails.reset(V.rangeNM, S.disp.trails.mode, S.disp.trails.mode === 'TRUE' ? ownXY() : undefined); saveSettings(); },
   pi: () => { piOn = !piOn; if (piOn) tools.pi.brg = Math.round(W.own.hdg); },
   az: () => { if (azZones.length) { azZones = []; tracker.setZones([]); } else uiMode = 'az1'; },
+  mark: () => { if (uiMode === 'mark') markShape = (markShape + 1) % MARKS.length; uiMode = 'mark'; },
+  tgtList: () => openTgtList(), tgtSort: (el) => { tgtSort = el.dataset.sort; openTgtList(); }, tgtSel: (el) => { select(el.dataset.id); openTgtList(); },
   pause: () => { paused = !paused; }, speed: () => ui.speedPop(SPEEDS, speed), spd: (el) => { setSpeed(+el.dataset.spd); ui.speedPop(null); },
   faster: () => setSpeed(SPEEDS[Math.min(SPEEDS.length - 1, SPEEDS.indexOf(speed) + 1)]), slower: () => setSpeed(SPEEDS[Math.max(0, SPEEDS.indexOf(speed) - 1)]),
   wx: () => { S.sim.weatherOn = !S.sim.weatherOn; saveSettings(); if (wxRun) wxRun.enabled = S.sim.weatherOn; if (!S.sim.weatherOn && W && !W.weather.fixed) { Object.assign(W.weather, { kind: 'clear', fog: false, sea: 1, windMs: 3, rain: [], ducting: false }); syncSceneWeather(); } },
@@ -324,6 +346,7 @@ function cursorAct(id, pos) {
   if (id === 'ruler') { rulerA = w; uiMode = 'ruler'; return; }
   if (id === 'off') { const G = ppi.geom(), R = G.R / G.dpr, cx = G.cx / G.dpr, cy = G.cy / G.dpr, ox = ((pos.sx ?? pos.x) - cx) / R, oy = ((pos.sy ?? pos.y) - cy) / R, m = Math.hypot(ox, oy); offCenter = m > 0.75 ? { x: (ox / m) * 0.75, y: (oy / m) * 0.75 } : { x: ox, y: oy }; return; }
   if (id === 'center') { offCenter = null; tools.ebl[0].origin = null; tools.vrm[0].origin = null; return; }
+  if (id === 'markDel') { let bi = -1, bd = 20; W.userMarks.forEach((k, i) => { const q = relOf(P.x(k.lon), P.y(k.lat)), s = ppi.toScreen(q.brg, q.rng), d = Math.hypot(s.x - pos.x, s.y - pos.y); if (d < bd) { bd = d; bi = i; } }); if (bi >= 0) W.userMarks.splice(bi, 1); return; }
   if (id === 'drop') { tools.drops.push({ lat: w.lat, lon: w.lon }); if (tools.drops.length > 20) tools.drops.shift(); return; }
   if (id === 'anchor') { tools.anchor = { lat: W.own.lat, lon: W.own.lon }; S.alert.anchorOn = true; return; }
 }
@@ -339,6 +362,11 @@ function menuAction(id) {
   if (id === 'ownData') { const o = W.own; ui.dialog(en ? 'Own ship AIS data' : '자선 AIS 정보', `<dl class="kv"><dt>NAME</dt><dd>BYPASS TRAINER</dd><dt>CALL SIGN</dt><dd>D7BP</dd><dt>MMSI</dt><dd>440123000</dd><dt>COG</dt><dd>${o.cog.toFixed(1)}°</dd><dt>SOG</dt><dd>${o.sog.toFixed(1)} kn</dd><dt>HDG</dt><dd>${o.hdg.toFixed(1)}°</dd><dt>LOA × B</dt><dd>${o.spec.L} × ${o.spec.B} m</dd></dl>`); }
 }
 /* PPI 마우스: 커서·선택·구역·줄자 */
+/* 밝기 단추 길게 누르기 → 색 조합 순환 */
+{ const b = document.getElementById('qb_pal'), SETS = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6']; let tmr = null, long = false;
+  b.addEventListener('pointerdown', () => { long = false; clearTimeout(tmr); tmr = setTimeout(() => { long = true; S.disp.colorSet = SETS[(SETS.indexOf(S.disp.colorSet) + 1) % SETS.length]; saveSettings(); }, 600); });
+  for (const ev of ['pointerup', 'pointerleave']) b.addEventListener(ev, () => clearTimeout(tmr));
+  b.addEventListener('click', (e) => { if (long) { e.stopImmediatePropagation(); long = false; } }, true); }
 const ov = ui.overCanvas;
 ov.addEventListener('pointermove', (e) => { const r = ov.getBoundingClientRect(); cursor = { x: e.clientX - r.left, y: e.clientY - r.top }; if (uiMode === 'ruler' && rulerA) { const b = screenToWorld(cursor), d = brgRng(rulerA.x, rulerA.y, b.x, b.y); ruler = { a: relOf(rulerA.x, rulerA.y), b: relOf(b.x, b.y), label: `${d.brg.toFixed(1)}° ${d.rng.toFixed(3)} NM` }; } });
 ov.addEventListener('pointerleave', () => { cursor = null; });
@@ -346,6 +374,7 @@ ov.addEventListener('click', (e) => {
   if (!W) return; const r = ov.getBoundingClientRect(), pos = { x: e.clientX - r.left, y: e.clientY - r.top }, w = screenToWorld(pos);
   if (uiMode === 'az1') { azStart = w; uiMode = 'az2'; return; }
   if (uiMode === 'az2') { const a = azStart, z = { brg0: a.brg, brg1: w.brg, rng0: Math.min(a.rng, w.rng), rng1: Math.max(a.rng, w.rng) }; azZones = [...azZones, z].slice(-2); tracker.setZones(azZones); uiMode = null; return; }
+  if (uiMode === 'mark') { if (W.userMarks.length < 50) W.userMarks.push({ lat: w.lat, lon: w.lon, shape: MARKS[markShape] }); uiMode = null; return; }
   if (uiMode === 'ruler') { uiMode = null; return; }
   if (uiMode === 'ta1' || uiMode === 'ta2') return;
   const near = nearestTarget(pos);
@@ -353,7 +382,7 @@ ov.addEventListener('click', (e) => {
   else if (S.tt.select.startsWith('MANUAL') && e.detail === 2) acquireAt(pos);
 });
 let azStart = null;
-on('settings', () => { V.palette = S.disp.palette; saveSettings(); });
+on('settings', () => { V.palette = S.disp.palette; if (wxRun) wxRun.enabled = S.sim.weatherOn; saveSettings(); });
 addEventListener('pointerdown', () => { lastUser = performance.now(); alerts.resolve('watch'); }, true);
 addEventListener('keydown', () => { lastUser = performance.now(); alerts.resolve('watch'); }, true);
 function setHidden(h) { hiddenPause = h; last = performance.now(); }
@@ -406,7 +435,7 @@ requestAnimationFrame(frame);
 if (!TEST) starter.openStart();
 if (TEST) {
   window.RadarTest = {
-    ready: true, S, ppi, scene: () => scene, setSpeed, speed: () => speed, proj: makeProj, view: () => V, setView: (o) => Object.assign(V, o), setRange: (r) => { S.disp.rangeNM = r; V.rangeNM = r; }, frames: () => frames, tick, frameAt, own, paused: () => paused || hiddenPause, setPaused: (p) => { paused = p; }, KEYMAP, keyHandlers,
+    ready: true, S, ppi, scene: () => scene, colors: () => COL, piColor, selected: () => selected, menuPaths: () => MENU.flatMap((x) => x.items.map((i) => i.path)), menuOpts: (p) => (MENU.flatMap((x) => x.items).find((i) => i.path === p) || { opts: [] }).opts, setSpeed, speed: () => speed, proj: makeProj, view: () => V, setView: (o) => Object.assign(V, o), setRange: (r) => { S.disp.rangeNM = r; V.rangeNM = r; }, frames: () => frames, tick, frameAt, own, paused: () => paused || hiddenPause, setPaused: (p) => { paused = p; }, KEYMAP, keyHandlers,
     radar: { set: setRadar, toggle: toggleTx, get state() { return radar.state; }, get warmLeft() { return radar.warmLeft; } }, world: () => W, tracker: { targets: () => tracker.targets() },
     newWorld: (o) => startWorld(freeDef(o)), tgtScreen: (id) => { const g = W.targets.find((x) => x.id === id), r = relOf(P.x(g.lon), P.y(g.lat)), p = ppi.toScreen(r.brg, r.rng); return { sx: p.x, sy: p.y }; },
     cursorAct, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,
