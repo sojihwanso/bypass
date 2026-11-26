@@ -16,7 +16,7 @@ const D = {
   },
   en: {
     brand: 'Radar Simulator', sub: 'RADAR SIMULATOR · TRAINING', help: 'Help', menu: 'Menu', close: 'Close', ok: 'OK', cancel: 'Cancel',
-    q_tx: 'TX', q_mode: 'Mode', q_motion: 'Motion', q_off: 'Off-center', q_preset: 'Echo preset', q_trail: 'Trails', q_pi: 'PI lines', q_az: 'Acq zone',
+    q_tx: 'Power', q_mode: 'Mode', q_motion: 'Motion', q_off: 'Off-center', q_preset: 'Echo preset', q_trail: 'Trails', q_pi: 'PI lines', q_az: 'Acq zone',
     q_pause: 'Pause', q_speed: 'Speed', q_pal: 'Display', q_menu: 'Menu', q_conn: 'Conning', q_shot: 'Capture', q_scn: 'Scenario',
     own: 'Own ship', tgt: 'Target data', ttais: 'TT · AIS', alert: 'Alerts', noTgt: 'Click a target to select it', noAlert: 'No alerts',
     posn: 'POSN', time: 'Time', elapsed: 'Elapsed', ack: 'ACK', silence: 'Silence', list: 'List', count: '',

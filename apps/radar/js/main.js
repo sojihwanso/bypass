@@ -333,7 +333,7 @@ document.addEventListener('visibilitychange', () => setHidden(document.hidden));
   document.getElementById('ppiWrap').append(tb); }
 
 /* ---------- Conning·키보드 ---------- */
-const conn = initConning(document.body, own, { wind: () => (W ? { dir: W.weather.windFrom, ms: W.weather.windMs } : null) });
+const conn = initConning(document.getElementById('app'), own, { wind: () => (W ? { dir: W.weather.windFrom, ms: W.weather.windMs } : null) });
 const keyHandlers = {
   steerL: () => own() && (own().auto.on ? setAuto(own(), true, own().auto.setHdg - 1) : setRudderOrder(own(), own().rudderOrder - 5)),
   steerR: () => own() && (own().auto.on ? setAuto(own(), true, own().auto.setHdg + 1) : setRudderOrder(own(), own().rudderOrder + 5)),
