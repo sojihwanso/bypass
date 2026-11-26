@@ -611,7 +611,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
     <div class="htools">
       <div class="seg2" role="group" aria-label="Language"><button type="button" data-act="lang" data-v="ko">한</button><button type="button" data-act="lang" data-v="en">EN</button></div>
       <button class="hbtn" type="button" data-act="fs" id="fsBtn" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
-      <button class="ver" type="button" aria-label="버전 2.5.0">v2.5.0</button>
+      <button class="ver" type="button" aria-label="버전 2.6.0">v2.6.0</button>
       <a class="tb-home" href="https://teambypass.vercel.app/" aria-label="Team Bypass 메인 페이지로 이동" title="Team Bypass"><svg viewBox="0 0 132 132" width="30" height="30" aria-hidden="true"><path d="M66 4L128 66L66 128L4 66Z" fill="#1C211E" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/><path d="M66 12L120 66L66 120L12 66Z" fill="#EE6A1F"/><path d="M66 18L114 66L66 114L18 66Z" fill="#1C211E"/><path d="M66 25L107 66L66 107L25 66Z" fill="#EE6A1F"/><g transform="translate(36 34) scale(0.6)" fill="#1C211E"><ellipse cx="44" cy="60" rx="27" ry="23"/><path d="M51 45C55 37 58 31 61 25L72 30C68 36 66 44 64 53Z"/><circle cx="66" cy="26" r="10"/><path d="M72 20C83 19 93 24 95 32C96 38 91 41 88 37C86 34 82 33 74 33Z"/><path d="M19 52C10 47 7 40 11 34C14 43 20 46 23 46Z"/><path d="M37 80L35 92L27 95L41 95L42 81Z"/><path d="M51 80L51 92L44 95L58 95L56 81Z"/><circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/><path d="M32 55C40 50 51 54 54 64" fill="none" stroke="#EE6A1F" stroke-width="2.6" stroke-linecap="round"/></g></svg></a>
     </div>
   </div>
@@ -649,7 +649,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
     <span id="footTxt"></span>
     <p class="book" id="footBook"></p>
     <p class="disclaimer" role="note" id="footDisc"></p>
-    <div class="ver-row"><button class="ver" type="button" aria-label="버전 2.5.0">v2.5.0</button></div>
+    <div class="ver-row"><button class="ver" type="button" aria-label="버전 2.6.0">v2.6.0</button></div>
   </div>
 </footer>
 
@@ -662,7 +662,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
 <div id="dlgRoot"></div>
 
 <script src="egg.js"></script>
-<script src="tutor.js?v=2.5.0"></script>
+<script src="tutor.js?v=2.6.0"></script>
 <script>
 /* ================= I18N ================= */
 let LANG="ko";
@@ -2948,8 +2948,9 @@ function dlgUCSelect(){const cur=S.ucActive||[];
     d.querySelector("#usOk").onclick=()=>{S.ucActive=ucReadChecks(d,"ucsel");logEv("evUcSel",[S.ucActive.length]);chartDirty=true;lookAheadSafe();close()}}})}
 
 /* ================= UI ================= */
-const VERSION="2.5.0";
+const VERSION="2.6.0";
 const PATCH_NOTES=[
+{v:"2.6.0",d:"2026-11-26",ko:["화면 아래 '안전 수심선' 버튼 추가(NAVI·CHARTS·PLAN 모든 모드): 얕은·안전·깊은 등심선과 안전 수심을 한 창에서 설정, 흘수 기준 추천값 넣기","해도 수심 색 구분 강화: 얕은 물 초록 · 항해 불가 진한 파랑 · 항해 가능 연한 파랑 · 깊은 물 흰색","용어를 얕은 등심선(Shallow contour) · 깊은 등심선(Deep contour)으로 바꾸고 영문 명칭 함께 표기","과정 2에 안전 등심선 교육 9단계 추가: 얕은 = 흘수, 깊은 = 흘수 × 2, 안전 = 흘수 + UKC, 다음 깊은 등심선 적용, 항로는 안전 등심선 얕은 쪽에 들어가면 안 됨"],en:["New Safety contour button in the status bar (all modes): set shallow, safety and deep contours and safety depth in one place, with values filled from the draught","Clearer depth shades: shallow water green, non-navigable dark blue, navigable light blue, deep water white","Course 2 adds 9 safety-contour steps (Korean)"]},
 {v:"2.5.0",d:"2026-11-25",ko:["교육 과정을 시작하면 경보음을 꺼 둠(좌하단 단추로 켜고 끄기, 경보 단계에서는 자동으로 켜짐)","과정 1에 경보 창 교육 5단계 추가: 경보 상자, 우선순위(알람·경고·주의), 경보 목록에서 확인(ACK), 경보 기록, 경보음 설정"],en:["Alarm sound is muted when a training course starts (toggle at bottom-left; turns on automatically in the alert steps)","Course 1 adds 5 alert-window steps: alert box, priorities, ACK in the alert list, alert log, buzzer setting"]},
 {v:"2.4.4",d:"2026-11-25",ko:["브라우저 탭 아이콘을 bypass 로고로"],en:["Browser tab icon is now the bypass logo"]},
 {v:"2.4.3",d:"2026-11-25",ko:["교육 소개정 단계에서 같은 셀을 다시 업데이트해도 정답 처리","화면 버튼 이름 '컨닝'을 'Conning'으로 통일","교육 문구 오타·표현 다듬기, 타각 단계 시연 영상을 S20(S10 두 번)으로 다시 제작"],en:["Small-correction step counts re-updating the same cell","Conning label unified","Training text fixes; rudder demo clip remade for S20"]},
