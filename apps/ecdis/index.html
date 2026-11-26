@@ -83,6 +83,8 @@ header.top .bar{height:100%;display:flex;align-items:center;gap:14px;padding-lef
 .sbb.dd{padding-right:16px}
 .sbb.dd::after,.iab.dd::after{content:"";position:absolute;right:3px;bottom:3px;border:4px solid transparent;border-right-color:currentColor;border-bottom-color:currentColor;opacity:.6}
 .sbb.ic{padding:0 8px;min-width:30px;justify-content:center}
+.sbb.sfb b{margin-left:4px}
+.sf-zones{display:grid;gap:6px}.sf-zones>div{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:10px;font-size:13px}.sf-zones i{display:block;width:28px;height:18px;border:1px solid var(--rule);border-radius:3px}.sf-zones span{color:var(--muted)}
 .sbb.ic svg{width:15px;height:15px}
 .sbg{display:inline-flex;gap:2px;flex:0 0 auto}
 .sb-sp{flex:1 1 0;min-width:4px}
@@ -682,7 +684,7 @@ ownData:"자선 제원",nonEncTip:"시뮬레이터 해도는 공식 ENC가 아�
 pg_ttais:"TT•AIS",pg_rings:"거리환 (Range rings)",pg_pred:"예측 (Predictor)",pg_past:"과거 항적 (Past track)",pg_look:"Look-ahead",
 showTgt:"물표 표시",vecTime:"벡터 시간 (분)",tgtPast:"물표 과거 위치",actAll:"모두 활성",sleepAll:"모두 휴면",
 rings:"거리환",ringInt:"간격 (NM)",ringN:"개수",predictor:"예측 위치",predTime:"예측 시간 (분)",predNote:"현재 선회율(ROT)을 유지할 때 30초 간격 자선 위치를 표시합니다.",
-pastTrack:"자선 항적",pastLen:"항적 길이 (분)",clrTrack:"항적 지우기",showLook:"검사 영역 표시",lookTime:"전방 시간 (분)",lookWidth:"폭 (NM, 편측)",safetyC:"안전 등심선 (m)",
+pastTrack:"자선 항적",pastLen:"항적 길이 (분)",clrTrack:"항적 지우기",showLook:"검사 영역 표시",lookTime:"전방 시간 (분)",lookWidth:"폭 (NM, 편측)",safetyC:"안전 등심선 · Safety contour (m)",
 brg:"방위",rng:"거리",navSt:"항해 상태",dim:"길이×폭",draft:"흘수",
 noCursor:"해도를 누르세요",noAlert:"경보 없음",
 current:"해류 (Set/Drift)",wind:"바람",depthUK:"선저 여유수심 (UKC)",
@@ -713,7 +715,7 @@ helpBody:`<h4>시작 화면 · 시나리오</h4><ul><li><b>없음 (자유 항해
 <!--abbr--><h4>약어</h4><table class="tbl abbr"><tr><th scope="row">CPA</th><td>최근접점 거리 (Closest Point of Approach)</td></tr><tr><th scope="row">TCPA</th><td>최근접점까지 걸리는 시간 (Time to CPA)</td></tr><tr><th scope="row">BCR / BCT</th><td>선수 횡단 거리 / 시간 (Bow Crossing Range / Time)</td></tr><tr><th scope="row">XTD</th><td>항로 이탈 거리 (Cross Track Distance)</td></tr><tr><th scope="row">WOP</th><td>전타 시작점 (Wheel Over Point)</td></tr><tr><th scope="row">CTS</th><td>조타 침로 (Course To Steer)</td></tr><tr><th scope="row">PI</th><td>평행지표선 (Parallel Index)</td></tr><tr><th scope="row">TSS</th><td>통항분리방식 (Traffic Separation Scheme)</td></tr><tr><th scope="row">STW</th><td>대수 속력 (Speed Through Water)</td></tr><tr><th scope="row">SOG</th><td>대지 속력 (Speed Over Ground)</td></tr><tr><th scope="row">COG</th><td>대지 침로 (Course Over Ground)</td></tr><tr><th scope="row">TM / RM</th><td>진운동 / 상대운동 (True / Relative Motion)</td></tr><tr><th scope="row">N UP</th><td>진북 상단 (North Up)</td></tr><tr><th scope="row">H UP</th><td>선수 방향 상단 (Head Up)</td></tr><tr><th scope="row">C UP</th><td>침로 상단 (Course Up)</td></tr><tr><th scope="row">OFF CENT</th><td>자선 위치 고정 (Off Centre)</td></tr><tr><th scope="row">EBL</th><td>전자방위선 (Electronic Bearing Line)</td></tr><tr><th scope="row">VRM</th><td>가변거리환 (Variable Range Marker)</td></tr><tr><th scope="row">MOB</th><td>익수자 (Man Overboard)</td></tr><tr><th scope="row">GOAL</th><td>랜덤 시나리오 목표 WPT</td></tr></table>
 <h4>연습 과제 예시</h4><ul><li>우현에서 접근하는 횡단선(CPA/TCPA 경보)을 찾아 피항하고 원래 항로로 복귀하기 (COLREG 제15·16조)</li><li>자유 항해 → TSS 해역으로 보스포러스·다르다넬스·도버·싱가포르 해협 통항로를 따라 통과하기 (COLREG 제10조)</li><li>상대선을 '어려움'으로 두고 랜덤 시나리오의 GOAL까지 좌초·근접 없이 도착하기</li><li>위경도로 항로를 만들고 PI·인식 반경을 넣은 뒤 Route check로 위험을 찾고 NAVI에서 감시하기</li><li>안전 등심선을 흘수에 맞게 바꾸고 Look-ahead 경보가 어떻게 달라지는지 확인하기</li></ul>`,
 settings:"설정",tGen:"일반",tOwn:"자선",tChart:"해도 표시",tAlert:"경보",lang:"언어",theme:"화면 테마",palette:"화면 모드",paletteS:"주간=라이트, 박명·야간=다크 · 화면 전체에 적용",timeM:"시각 표시",xtdU:"XTD 단위",buzzer:"경보음",buzzerS:"알람·경고 시 짧은 신호음",
-depthSet:"수심 설정",shallowC:"천수 등심선 (m)",safetyCS:"자선이 안전하게 항해할 수 있는 한계. 해도에 없는 값이면 다음 깊은 등심선 사용",deepC:"심수 등심선 (m)",safetyD:"안전 수심 (m)",safetyDS:"이보다 얕은 수심 숫자를 진하게 표시",shades:"수심 색 구분",shade4:"4색",shade2:"2색",dispCat:"표시 범주",overscaleP:"축척 초과 무늬",chartNote:"IMO BASE는 해안선·안전 등심선·고립 장애물 등 최소 정보, STD는 항로표지·구역 등을 더하고, ALL은 수심 숫자·다른 등심선·지명·등질까지 모두 표시합니다.",
+depthSet:"수심 설정",shallowC:"얕은 등심선 · Shallow contour (m)",shallowCS:"보통 흘수로 정해요 (수심 < 흘수)",safetyCS:"자선이 안전하게 항해할 수 있는 한계. 해도에 없는 값이면 다음 깊은 등심선 사용",deepC:"깊은 등심선 · Deep contour (m)",deepCS:"통상 흘수 × 2 (수심 > 흘수 × 2)",safetyD:"안전 수심 · Safety depth (m)",safetyDS:"이보다 얕은 수심 숫자를 진하게 표시",shades:"수심 색 구분",shade4:"4색",shade2:"2색",dispCat:"표시 범주",overscaleP:"축척 초과 무늬",chartNote:"IMO BASE는 해안선·안전 등심선·고립 장애물 등 최소 정보, STD는 항로표지·구역 등을 더하고, ALL은 수심 숫자·다른 등심선·지명·등질까지 모두 표시합니다.",
 limit:"한계",autoAct:"위험 물표 자동 활성",autoActS:"CPA/TCPA 위험 물표를 자동으로 활성 표시",ttRange:"레이더 TT 범위",defaults:"기본값으로",defDone:"기본값으로 되돌렸습니다",
 alertList:"경보 목록",navlogNote:"6분마다 자선 위치를 기록합니다.",
 tgtList:"물표 목록",tgtListNote:"행을 누르면 해당 물표를 선택합니다. 빨간 행은 CPA/TCPA 위험 물표입니다.",
@@ -725,7 +727,7 @@ alCpa:"위험 물표 CPA/TCPA · {0} 외 {1}척",alSafety:"안전 등심선 횡�
 evNew:"새 시나리오 생성 (시드 {0})",evWpt:"WPT {0} 통과, 다음 레그로 전환",evEor:"항로 끝 도착 · {0}",evGround:"좌초",evLost:"AIS 신호 상실 · {0}",evMob:"MOB 표시 · {0}",evMode:"운용 모드 · {0}",evRoute:"항로 감시 시작 · {0}",evRouteStop:"항로 감시 중지",evHelm:"조타 모드 · {0}",evSave:"항로 저장 · {0}",evSensor:"위치 센서 변경 · {0}",evCap:"화면 캡처 · {0}",
 scReady:"시나리오 준비 완료 (시드 {0})",
 pw1:"- 시뮬레이터 해도: 공식 ENC 아님 (Non-ENC)",pw2:"- 수심·항로표지·선박 정보는 가상 자료",
-lg_ownSym:"자선",lgc_ownSym:"OWNSHP · 선수선",lg_aisS:"AIS 휴면 물표",lgc_aisS:"Sleeping target",lg_aisA:"AIS 활성 물표",lgc_aisA:"선수선 · COG/SOG 벡터",lg_aisD:"위험 물표",lgc_aisD:"CPA/TCPA 한계 이내 · 깜빡임",lg_aisL:"상실 물표",lgc_aisL:"Lost target",lg_ttSym:"레이더 추적 물표",lgc_ttSym:"TT (ARPA)",lg_selSym:"선택 표시",lgc_selSym:"Select symbol",lg_routeSym:"감시 항로",lgc_routeSym:"WPT · 레그",lg_safeSym:"안전 등심선",lgc_safeSym:"얕은 쪽(왼쪽) / 깊은 쪽",lg_sndSym:"수심 숫자",lgc_sndSym:"안전수심보다 얕음 / 깊음",
+lg_ownSym:"자선",lgc_ownSym:"OWNSHP · 선수선",lg_aisS:"AIS 휴면 물표",lgc_aisS:"Sleeping target",lg_aisA:"AIS 활성 물표",lgc_aisA:"선수선 · COG/SOG 벡터",lg_aisD:"위험 물표",lgc_aisD:"CPA/TCPA 한계 이내 · 깜빡임",lg_aisL:"상실 물표",lgc_aisL:"Lost target",lg_ttSym:"레이더 추적 물표",lgc_ttSym:"TT (ARPA)",lg_selSym:"선택 표시",lgc_selSym:"Select symbol",lg_routeSym:"감시 항로",lgc_routeSym:"WPT · 레그",lg_safeSym:"안전 등심선",lgc_safeSym:"항해 불가(왼쪽) / 항해 가능",lg_sndSym:"수심 숫자",lgc_sndSym:"안전수심보다 얕음 / 깊음",
 lg_lat1:"좌현 표지",lgc_lat1:"IALA {R} · 캔형",lg_lat2:"우현 표지",lgc_lat2:"IALA {R} · 원추형",lg_carN:"북방위표지",lgc_carN:"표지 북쪽이 가항수역",lg_carE:"동방위표지",lgc_carE:"표지 동쪽이 가항수역",lg_carS:"남방위표지",lgc_carS:"표지 남쪽이 가항수역",lg_carW:"서방위표지",lgc_carW:"표지 서쪽이 가항수역",lg_isdSym:"고립장애표지",lgc_isdSym:"표지 바로 아래 장애물",lg_sawSym:"안전수역표지",lgc_sawSym:"주변 가항수역 · 항로 입구",lg_lightSym:"등대 · 등화",lgc_lightSym:"LIGHTS · 등광 색 플레어",lg_isodgrSym:"고립 장애물",lgc_isodgrSym:"안전수역 안 얕은 위험물",lg_rockSym:"수중암",lgc_rockSym:"UWTROC",lg_wreckSym:"침선",lgc_wreckSym:"WRECKS",lg_obstnSym:"장애물",lgc_obstnSym:"OBSTRN · 최소수심",lg_anchSym:"정박지",lgc_anchSym:"ACHARE",lg_resSym:"제한구역",lgc_resSym:"RESARE · 진입 주의",lg_tssSym:"통항분리방식",lgc_tssSym:"분리대 · 통항 방향"
 },
 en:{
@@ -776,7 +778,7 @@ helpBody:`<h4>Start screen · scenarios</h4><ul><li><b>None (free sailing)</b>: 
 <!--abbr--><h4>Abbreviations</h4><table class="tbl abbr"><tr><th scope="row">CPA</th><td>Closest point of approach</td></tr><tr><th scope="row">TCPA</th><td>Time to CPA</td></tr><tr><th scope="row">BCR / BCT</th><td>Bow crossing range / time</td></tr><tr><th scope="row">XTD</th><td>Cross-track distance</td></tr><tr><th scope="row">WOP</th><td>Wheel-over point</td></tr><tr><th scope="row">CTS</th><td>Course to steer</td></tr><tr><th scope="row">PI</th><td>Parallel index</td></tr><tr><th scope="row">TSS</th><td>Traffic separation scheme</td></tr><tr><th scope="row">STW</th><td>Speed through water</td></tr><tr><th scope="row">SOG</th><td>Speed over ground</td></tr><tr><th scope="row">COG</th><td>Course over ground</td></tr><tr><th scope="row">TM / RM</th><td>True / relative motion</td></tr><tr><th scope="row">N UP</th><td>North up</td></tr><tr><th scope="row">H UP</th><td>Head up</td></tr><tr><th scope="row">C UP</th><td>Course up</td></tr><tr><th scope="row">OFF CENT</th><td>Off centre (own ship fixed on screen)</td></tr><tr><th scope="row">EBL</th><td>Electronic bearing line</td></tr><tr><th scope="row">VRM</th><td>Variable range marker</td></tr><tr><th scope="row">MOB</th><td>Man overboard</td></tr><tr><th scope="row">GOAL</th><td>Random-scenario target WPT</td></tr></table>
 <h4>Practice ideas</h4><ul><li>Find the crossing vessel from starboard (CPA/TCPA alarm), give way and return to the route (COLREG Rules 15 & 16)</li><li>Free sailing → TSS area: transit the Bosphorus, Dardanelles, Dover or Singapore Strait lanes (COLREG Rule 10)</li><li>Set TRAFFIC to Hard and reach the GOAL of a random scenario without grounding or close-quarters</li><li>Build a route by lat/lon with PI and arrival radii, find dangers with Route check, then monitor it in NAVI</li><li>Set the safety contour for your draught and watch how look-ahead alerts change</li></ul>`,
 settings:"Settings",tGen:"General",tOwn:"Own ship",tChart:"Chart display",tAlert:"Alerts",lang:"Language",theme:"Theme",palette:"Display mode",paletteS:"Day = light, Dusk/Night = dark · applies to the whole page",timeM:"Time display",xtdU:"XTD unit",buzzer:"Buzzer",buzzerS:"Short beep on alarms and warnings",
-depthSet:"Depth settings",shallowC:"Shallow contour (m)",safetyCS:"Limit of safe water for own ship. If not in the chart, the next deeper contour is used",deepC:"Deep contour (m)",safetyD:"Safety depth (m)",safetyDS:"Soundings shallower than this are emphasised",shades:"Depth shades",shade4:"4 shades",shade2:"2 shades",dispCat:"Display category",overscaleP:"Overscale pattern",chartNote:"IMO BASE shows the minimum (coastline, safety contour, isolated dangers); STD adds aids to navigation and areas; ALL also shows soundings, other contours, names and light descriptions.",
+depthSet:"Depth settings",shallowC:"Shallow contour (m)",shallowCS:"Usually the draught (depth < draught)",safetyCS:"Limit of safe water for own ship. If not in the chart, the next deeper contour is used",deepC:"Deep contour (m)",deepCS:"Usually 2 × draught (depth > 2 × draught)",safetyD:"Safety depth (m)",safetyDS:"Soundings shallower than this are emphasised",shades:"Depth shades",shade4:"4 shades",shade2:"2 shades",dispCat:"Display category",overscaleP:"Overscale pattern",chartNote:"IMO BASE shows the minimum (coastline, safety contour, isolated dangers); STD adds aids to navigation and areas; ALL also shows soundings, other contours, names and light descriptions.",
 limit:"limit",autoAct:"Auto-activate dangerous targets",autoActS:"Activate targets inside the CPA/TCPA limits",ttRange:"Radar TT range",defaults:"Restore defaults",defDone:"Defaults restored",
 alertList:"Alert list",navlogNote:"Own-ship position is logged every 6 minutes.",
 tgtList:"Target list",tgtListNote:"Tap a row to select the target. Red rows are inside the CPA/TCPA limits.",
@@ -788,7 +790,7 @@ alCpa:"Dangerous target CPA/TCPA · {0} (+{1})",alSafety:"Crossing safety contou
 evNew:"New scenario created (seed {0})",evWpt:"Passed WPT {0}, next leg",evEor:"Arrived at end of route · {0}",evGround:"Grounding",evLost:"AIS signal lost · {0}",evMob:"MOB marked · {0}",evMode:"Operating mode · {0}",evRoute:"Route monitoring started · {0}",evRouteStop:"Route monitoring stopped",evHelm:"Helm mode · {0}",evSave:"Route saved · {0}",evSensor:"Position sensor · {0}",evCap:"Screen captured · {0}",
 scReady:"Scenario ready (seed {0})",
 pw1:"- Simulator chart: not an official ENC (Non-ENC)",pw2:"- Depths, aids and vessel data are synthetic",
-lg_ownSym:"Own ship",lgc_ownSym:"OWNSHP · heading line",lg_aisS:"Sleeping AIS target",lgc_aisS:"Sleeping target",lg_aisA:"Activated AIS target",lgc_aisA:"Heading line · COG/SOG vector",lg_aisD:"Dangerous target",lgc_aisD:"Inside CPA/TCPA · flashing",lg_aisL:"Lost target",lgc_aisL:"Lost target",lg_ttSym:"Radar tracked target",lgc_ttSym:"TT (ARPA)",lg_selSym:"Selected",lgc_selSym:"Select symbol",lg_routeSym:"Monitored route",lgc_routeSym:"WPT · leg",lg_safeSym:"Safety contour",lgc_safeSym:"Shallow side (left) / deep",lg_sndSym:"Soundings",lgc_sndSym:"Shallower / deeper than safety depth",
+lg_ownSym:"Own ship",lgc_ownSym:"OWNSHP · heading line",lg_aisS:"Sleeping AIS target",lgc_aisS:"Sleeping target",lg_aisA:"Activated AIS target",lgc_aisA:"Heading line · COG/SOG vector",lg_aisD:"Dangerous target",lgc_aisD:"Inside CPA/TCPA · flashing",lg_aisL:"Lost target",lgc_aisL:"Lost target",lg_ttSym:"Radar tracked target",lgc_ttSym:"TT (ARPA)",lg_selSym:"Selected",lgc_selSym:"Select symbol",lg_routeSym:"Monitored route",lgc_routeSym:"WPT · leg",lg_safeSym:"Safety contour",lgc_safeSym:"Non-navigable (left) / navigable",lg_sndSym:"Soundings",lgc_sndSym:"Shallower / deeper than safety depth",
 lg_lat1:"Port-hand mark",lgc_lat1:"IALA {R} · can",lg_lat2:"Starboard-hand mark",lgc_lat2:"IALA {R} · conical",lg_carN:"North cardinal",lgc_carN:"Safe water to the north",lg_carE:"East cardinal",lgc_carE:"Safe water to the east",lg_carS:"South cardinal",lgc_carS:"Safe water to the south",lg_carW:"West cardinal",lgc_carW:"Safe water to the west",lg_isdSym:"Isolated danger mark",lgc_isdSym:"Danger directly below",lg_sawSym:"Safe water mark",lgc_sawSym:"Navigable water around · fairway",lg_lightSym:"Light",lgc_lightSym:"LIGHTS · coloured flare",lg_isodgrSym:"Isolated danger",lgc_isodgrSym:"Shallow danger inside safe water",lg_rockSym:"Underwater rock",lgc_rockSym:"UWTROC",lg_wreckSym:"Wreck",lgc_wreckSym:"WRECKS",lg_obstnSym:"Obstruction",lgc_obstnSym:"OBSTRN · least depth",lg_anchSym:"Anchorage",lgc_anchSym:"ACHARE",lg_resSym:"Restricted area",lgc_resSym:"RESARE · caution on entry",lg_tssSym:"Traffic separation scheme",lgc_tssSym:"Separation zone · lane direction"
 }};
 function t(k,args){let s=(I18N[LANG]&&I18N[LANG][k]);if(s==null)s=I18N.en[k];if(s==null)s=I18N.ko[k];if(s==null)return k;
@@ -973,7 +975,7 @@ evFree:"Free sailing started (seed {0})",evResume:"Resumed saved scenario",loadi
 
 /* ---- v1.5 ---- */
 Object.assign(I18N.ko,{
-sb_ownc:"자선으로",owncTip:"자선을 화면 중앙으로",upTip_NU:"N UP · 진북 위",upTip_HU:"H UP · 선수 방향 위",upTip_CU:"C UP · 침로(COG) 위",
+sb_ownc:"자선으로",sb_safe:"안전 수심선",safeTip:"안전 수심선 설정 (얕은·안전·깊은 등심선, 안전 수심)",sfTitle:"안전 수심선 설정",sfShip:"자선 흘수 {0} m · UKC 기준 흘수의 {1}%",sfRec:"흘수 기준 추천값 넣기",sfRecNote:"얕은 = 흘수 {0} m → {1} m · 안전 = 흘수 + UKC {2} m → {3} m · 깊은 = 흘수 × 2 {4} m → {5} m (해도에 없는 값은 다음 깊은 등심선)",sfRecDone:"흘수 기준 추천값을 넣었습니다.",sfApplied:"적용 중인 안전 등심선: {0} m",sfZones:"수심 색 구분",z_sh:"얕은 물 · Shallow water",z_nn:"항해 불가 수역 · Non-navigable water",z_nv:"항해 가능 수역 · Navigable water",z_dw:"깊은 물 · Deep water",sfNone:"없음 (얕은 등심선 = 안전 등심선)",sfNote:"깊은 등심선 = 흘수 × 2는 통상적인 기준이에요. 회사 SMS 규정이 있으면 그 값을 따르세요. 경보를 줄이려고 값을 흘수보다 낮추면 안 돼요.",owncTip:"자선을 화면 중앙으로",upTip_NU:"N UP · 진북 위",upTip_HU:"H UP · 선수 방향 위",upTip_CU:"C UP · 침로(COG) 위",
 ia_llroute:"위경도<br>입력",llTitle:"위경도로 항로 만들기",dragTip:"끌어서 순서 바꾸기",rtCount:"저장 항로 {0} / {1}",rtGen:"시나리오",rtLL:"위경도",rtGo:"시작",rtMax:"항로는 최대 {0}개까지 저장됩니다. 항로 관리에서 하나를 지운 뒤 다시 시도하세요.",
 llNote:"도°분.분′ 형식(커서 표시와 같음). 60분 = 1도. N/S·E/W 버튼을 누르면 반구가 바뀝니다.",llCursor:"+ 커서 위치",llOwn:"+ 자선 위치",rtLLEdit:"위경도로 항로 편집",llSaveGo:"저장 후 이 항로로 시작",llBad:"빨간 행의 위경도를 확인하세요 (도는 정수, 분은 0~59.999).",
 scFreeP:"정해진 목표 없이 자유롭게 항해합니다. 저장된 항로를 골라 그 항로에서 시작할 수도 있습니다.",scRoute:"항로",scNoRoute:"없음",scNoLib:"저장된 항로 없음 (항로계획 → 위경도 입력)",scStartPos:"시작 위치",scTraffic:"교통량",scLevel:"난이도",
@@ -984,7 +986,7 @@ gTitle:"목표 도달",gP:"GOAL WPT 0.3 NM 안에 들어왔습니다. 시나리�
 evGoal:"목표 WPT 도달",evLevel:"난이도 {0}"
 });
 Object.assign(I18N.en,{
-sb_ownc:"OWN SHIP",owncTip:"Centre own ship",upTip_NU:"N UP · true north up",upTip_HU:"H UP · heading up",upTip_CU:"C UP · course (COG) up",
+sb_ownc:"OWN SHIP",sb_safe:"Safety contour",safeTip:"Safety contour settings (shallow, safety, deep contours, safety depth)",sfTitle:"Safety contour settings",sfShip:"Own ship draught {0} m · UKC policy {1}% of draught",sfRec:"Fill from draught",sfRecNote:"Shallow = draught {0} m → {1} m · Safety = draught + UKC {2} m → {3} m · Deep = 2 × draught {4} m → {5} m (values not in the chart use the next deeper contour)",sfRecDone:"Recommended values from the draught applied.",sfApplied:"Safety contour in use: {0} m",sfZones:"Depth shades",z_sh:"Shallow water",z_nn:"Non-navigable water",z_nv:"Navigable water",z_dw:"Deep water",sfNone:"None (shallow contour = safety contour)",sfNote:"Deep contour = 2 × draught is a common convention. Follow your company SMS if it sets other values. Never lower the values below the draught to silence alarms.",owncTip:"Centre own ship",upTip_NU:"N UP · true north up",upTip_HU:"H UP · heading up",upTip_CU:"C UP · course (COG) up",
 ia_llroute:"Lat/Lon<br>Entry",llTitle:"New route by lat/lon",dragTip:"Drag to reorder",rtCount:"Saved routes {0} / {1}",rtGen:"scenario",rtLL:"Lat/Lon",rtGo:"Start",rtMax:"Up to {0} routes can be saved. Delete one in Manage Data and try again.",
 llNote:"deg°min.min′ format, same as the cursor readout. 60 min = 1°. Tap N/S or E/W to switch hemisphere.",llCursor:"+ Cursor",llOwn:"+ Own ship",rtLLEdit:"Edit route by lat/lon",llSaveGo:"Save and start on this route",llBad:"Check the red rows (whole degrees, minutes 0–59.999).",
 scFreeP:"Sail freely with no set goal. You can pick a saved route to start on it.",scRoute:"Route",scNoRoute:"None",scNoLib:"No saved routes (PLAN → Lat/Lon entry)",scStartPos:"Start",scTraffic:"Traffic",scLevel:"Difficulty",
@@ -3015,6 +3017,7 @@ function buildSB(){
   <button class="sbb lvb" data-act="lvl" id="bLvl" title="${esc(t("lvlTip"))}"></button>
   <button class="sbb lockb" data-act="lock" id="bLock" title="${esc(t("lockTip"))}"></button>
   <button class="sbb dd" data-act="dbase" id="bBase">${t("db_"+S.set.dbase)}</button>
+  <button class="sbb sfb" data-act="safety" id="bSafe" title="${esc(t("safeTip"))}"></button>
   <span class="sb-sp"></span>
   <button class="sbb ic" data-act="help" aria-label="Help">${IC.help}</button>
   <button class="sbb upb on" data-act="upcyc" id="bUp" title="${esc(t("upCycTip"))}" aria-label="Orientation">N UP</button>
@@ -3028,7 +3031,8 @@ function buildSB(){
   only.addEventListener("pointerdown",on);["pointerup","pointerleave","pointercancel"].forEach(ev=>only.addEventListener(ev,off));
 }
 
-function updSBState(){const l=$("#bLvl");if(l){const v=(S.traffic&&S.traffic.lvl)||getLevel();l.innerHTML=`${t("sb_lvl")}<b>${t("lv_"+v)}</b>`;l.dataset.v=v}
+function updSBState(){const sf=$("#bSafe");if(sf)sf.innerHTML=`${t("sb_safe")} <b>${safetyLevel(S.set.safetyContour)}m</b>`;
+  const l=$("#bLvl");if(l){const v=(S.traffic&&S.traffic.lvl)||getLevel();l.innerHTML=`${t("sb_lvl")}<b>${t("lv_"+v)}</b>`;l.dataset.v=v}
   const k=$("#bLock");if(k){const on=!!S.set.lock;k.classList.toggle("on",on);k.innerHTML=(on?IC.lock:IC.unlock)+`<span>${t(on?"sb_locked":"sb_lock")}</span>`}}
 function isLocked(){if(S.set&&S.set.lock){toast(t("lockedMsg"));return true}return false}
 /* ---------- Quick access bar ---------- */
@@ -3323,7 +3327,7 @@ function selectRoute(ri){
   S.toWp=best;logEv("evRoute",[S.routes[ri].name]);setAlert("eor",false);updateHelmStatic();
 }
 function stopMon(){S.monRoute=null;S.rinfo=null;if(S.helm==="TRACK")S.helm="AP";["offtrack","wop"].forEach(id=>setAlert(id,false));logEv("evRouteStop");updateHelmStatic()}
-function setSetting(k,v){S.set[k]=v;saveSet();chartDirty=true;if(k==="palette")applyTheme();if(["cpa","tcpa"].includes(k))targetsCPA();if(["lookTime","lookWidth","safetyContour"].includes(k))lookAhead()}
+function setSetting(k,v){S.set[k]=v;saveSet();chartDirty=true;if(k==="palette")applyTheme();if(["cpa","tcpa"].includes(k))targetsCPA();if(["lookTime","lookWidth","safetyContour"].includes(k))lookAhead();if(["safetyContour","shallowContour","deepContour"].includes(k))updSBState()}
 function doMOB(){if(S.planOnly){toast(t("planNoShip"));return}const o=S.own;S.mob={x:o.x,y:o.y,t:S.time};logEv("evMob",[fmtLat(o.y)+" "+fmtLon(o.x)]);toast(t("mobSet"));}
 function capture(){
   const a=$("#cvChart"),b=$("#cvOver"),c=document.createElement("canvas");c.width=a.width;c.height=a.height;const g=c.getContext("2d");g.drawImage(a,0,0);g.drawImage(b,0,0);
@@ -3440,6 +3444,7 @@ const ACT={
   dbase:b=>openPop(b,["BASE","STD","ALL"].map(v=>({label:t("db_"+v)+(LANG==="ko"?" (IMO "+v+")":""),on:S.set.dbase===v,fn:()=>{setSetting("dbase",v);buildSB()}}))),
   help:()=>dlgHelp(),
   settings:()=>dlgSettings("gen"),
+  safety:()=>dlgSafety(),
   tmode:b=>openPop(b,[{label:"UTC",on:S.set.timeMode==="UTC",fn:()=>setSetting("timeMode","UTC")},{label:`LT (UTC${S.sc.W.tz>=0?"+":""}${S.sc.W.tz})`,on:S.set.timeMode==="LT",fn:()=>setSetting("timeMode","LT")}]),
   wk:()=>toast(t("wkTip")),
   panel:()=>{$("#ecdis").classList.toggle("rp-off");chartDirty=true},
@@ -3694,6 +3699,37 @@ function dlgHelp(tab="menu"){
   const names={sys:t("hTabSys"),use:t("hTabUse"),menu:t("hTabMenu"),abbr:t("hTabAbbr")};
   openDlg(t("helpT"),`<div class="tabs">${Object.keys(parts).map(k=>`<button type="button" data-htab="${k}" class="${k===tab?"on":""}">${names[k]}</button>`).join("")}</div><div class="help" id="helpBody">${parts[tab]}</div>`,{wide:true,sub:"ECDIS-SIM "+VERSION,onMount:d=>{d.addEventListener("click",e=>{const b=e.target.closest("[data-htab]");if(!b)return;d.querySelectorAll("[data-htab]").forEach(x=>x.classList.toggle("on",x===b));d.querySelector("#helpBody").innerHTML=parts[b.dataset.htab];d.querySelector(".dlg-b").scrollTop=0})}});
 }
+/* ---------- 안전 수심선 (Safety contour) ---------- */
+const CONTOURS=[2,5,10,20,30,50,100,200];
+function ownDraft(){return (S.own&&S.own.draft)||SHIP.draft}
+function ceilContour(v){for(const c of CONTOURS)if(c>=v-1e-9)return c;return CONTOURS[CONTOURS.length-1]}
+function safetyRec(){const d=ownDraft(),u=S.set.ukcPct??10,need=d*(1+u/100);
+  return{d,u,need,sh:ceilContour(d),sc:ceilContour(need),dp:ceilContour(d*2),sd:[2,5,8,10,12,15,20,25].find(v=>v>=need-1e-9)??25}}
+function dlgSafety(){
+  const sel=(k,opts)=>`<select data-k="${k}">${opts.map(v=>`<option${+v===+S.set[k]?" selected":""}>${v}</option>`).join("")}</select>`;
+  const zones=()=>{const P=PAL[S.set.palette]||PAL.day,sc=safetyLevel(S.set.safetyContour),sh=shallowLevel(S.set.shallowContour,sc),dp=deepLevel(S.set.deepContour,sc),four=S.set.shades===4;
+    const row=(c,n,r)=>`<div><i style="background:${c}"></i><b>${t(n)}</b><span class="mono">${r}</span></div>`;
+    return row(P.depsh,"z_sh",`0 – ${sh} m`)+row(P.depms,"z_nn",sh<sc?`${sh} – ${sc} m`:t("sfNone"))+(four?row(P.depmd,"z_nv",`${sc} – ${dp} m`)+row(P.depdw,"z_dw",`> ${dp} m`):row(P.depdw,"z_nv",`> ${sc} m`))};
+  const body=()=>{const r=safetyRec();return `<p class="note" style="margin:0 0 8px">${t("sfShip",[r.d.toFixed(1),r.u])}</p>
+    <div class="form">
+      <label>${t("shallowC")}<small>${t("shallowCS")}</small></label>${sel("shallowContour",[2,5,10,20,30])}
+      <label>${t("safetyC")}<small>${t("safetyCS")}</small></label>${sel("safetyContour",[2,5,10,20,30,50])}
+      <label>${t("deepC")}<small>${t("deepCS")}</small></label>${sel("deepContour",[10,20,30,50,100,200])}
+      <label>${t("safetyD")}<small>${t("safetyDS")}</small></label>${sel("safetyDepth",[2,5,8,10,12,15,20,25])}
+      <label>${t("shades")}</label><span class="seg">${[[4,t("shade4")],[2,t("shade2")]].map(([v,l])=>`<button type="button" data-sh="${v}" class="${S.set.shades===v?"on":""}">${l}</button>`).join("")}</span>
+    </div>
+    <p style="margin:10px 0 4px"><button class="btn" id="sfRec">${t("sfRec")}</button></p>
+    <p class="note" style="margin:0 0 10px">${t("sfRecNote",[r.d.toFixed(1),r.sh,r.need.toFixed(1),r.sc,(r.d*2).toFixed(1),r.dp])}</p>
+    <h5 style="margin:6px 0">${t("sfZones")} · <span id="sfApp">${t("sfApplied",[safetyLevel(S.set.safetyContour)])}</span></h5>
+    <div class="sf-zones">${zones()}</div>
+    <p class="note" style="margin:10px 0 0">${t("sfNote")}</p>`};
+  openDlg(t("sfTitle"),`<div id="sfBody">${body()}</div>`,{sub:"Safety contour · Depth settings",onMount:(d)=>{
+    const redraw=()=>{d.querySelector("#sfBody").innerHTML=body()};
+    d.addEventListener("change",e=>{const s=e.target.closest("select[data-k]");if(s){setSetting(s.dataset.k,+s.value);redraw()}});
+    d.addEventListener("click",e=>{const b=e.target.closest("[data-sh]");if(b){setSetting("shades",+b.dataset.sh);redraw();return}
+      if(e.target.closest("#sfRec")){const r=safetyRec();setSetting("shallowContour",r.sh);setSetting("safetyContour",r.sc);setSetting("deepContour",r.dp);setSetting("safetyDepth",r.sd);redraw();toast(t("sfRecDone"))}});
+  }});
+}
 function dlgSettings(tab){
   const st=S.set,o=S.own;
   const seg=(k,opts)=>`<span class="seg">${opts.map(([v,l])=>`<button type="button" data-k="${k}" data-v="${v}" class="${String(st[k])===String(v)?"on":""}">${l}</button>`).join("")}</span>`;
@@ -3715,9 +3751,9 @@ function dlgSettings(tab){
     </div>`,
     chart:`<div class="form">
       <h5>${t("depthSet")}</h5>
-      <label>${t("shallowC")}</label>${sel("shallowContour",[2,5,10])}
-      <label>${t("safetyC")}<small>${t("safetyCS")}</small></label>${sel("safetyContour",[2,5,10,20,30])}
-      <label>${t("deepC")}</label>${sel("deepContour",[10,20,30,50,100,200])}
+      <label>${t("shallowC")}<small>${t("shallowCS")}</small></label>${sel("shallowContour",[2,5,10,20,30])}
+      <label>${t("safetyC")}<small>${t("safetyCS")}</small></label>${sel("safetyContour",[2,5,10,20,30,50])}
+      <label>${t("deepC")}<small>${t("deepCS")}</small></label>${sel("deepContour",[10,20,30,50,100,200])}
       <label>${t("safetyD")}<small>${t("safetyDS")}</small></label>${sel("safetyDepth",[2,5,8,10,12,15,20,25])}
       <label>${t("shades")}</label>${seg("shades",[[4,t("shade4")],[2,t("shade2")]])}
       <h5>${t("dispCat")}</h5>
