@@ -276,8 +276,8 @@ select,.fgroup input[type="search"]{font:inherit;font-size:13.5px;padding:6px 10
 .reg-group{margin-top:18px;padding:14px 18px;background:var(--sheet);border:1px solid var(--rule);border-radius:var(--r-card)}
 .reg-group .rg-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px}
 .reg-group .rg-btn{font:inherit;font-weight:600;font-size:14.5px;color:var(--ink);background:none;border:1px solid var(--ink);border-radius:var(--r-in);padding:7px 14px;min-height:40px;cursor:pointer}
-.reg-group .rg-btn::before{content:"+ ";font-family:var(--font-mono);color:var(--muted)}
-.reg-group .rg-btn[aria-expanded="true"]::before{content:"\2212  "}
+.reg-group .rg-btn::before{content:"+ " / "";font-family:var(--font-mono);color:var(--muted)}
+.reg-group .rg-btn[aria-expanded="true"]::before{content:"\2212  " / ""}
 .reg-group .rg-desc{margin:8px 0 0}
 .reg-group .rg-desc .ctag{margin-left:4px}
 #reg-list{margin-top:12px}
@@ -292,8 +292,8 @@ dl.kv.kv-side{grid-template-columns:3em 1fr;font-size:14px}
 .wt th:first-child,.wt td:first-child{text-align:left}
 .wt tr:last-child td{border-bottom:0}
 .wt .wbtn{all:unset;cursor:pointer;color:var(--ink);font-weight:600;display:inline-flex;gap:6px;align-items:baseline;min-height:28px}
-.wt .wbtn::before{content:"+";font-family:var(--font-mono);color:var(--muted);width:10px}
-.wt .wbtn[aria-expanded="true"]::before{content:"\2212"}
+.wt .wbtn::before{content:"+" / "";font-family:var(--font-mono);color:var(--muted);width:10px}
+.wt .wbtn[aria-expanded="true"]::before{content:"\2212" / ""}
 .wt .wbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .wt td .note{margin-left:8px;font-weight:400}
 .wt tr.wdet>td{padding:4px 10px 14px;background:var(--paper);text-align:left}
@@ -611,7 +611,7 @@ footer .readme-h{display:block;margin-bottom:10px}
         <span id="m-count"></span>
         <a class="cmp-top" href="#compare" id="cmp-top">비교 <small id="cmp-n"></small></a>
         <button type="button" class="theme-btn" id="theme-btn" aria-pressed="false">다크모드</button>
-        <button type="button" class="mver" id="ver-top" title="버전" aria-label="버전 정보">v. 3.0.0</button>
+        <button type="button" class="mver" id="ver-top" title="버전" aria-label="버전 정보">v. 3.0.1</button>
         <a class="home-logo" href="https://teambypass.vercel.app/" target="_top" title="Team Bypass 메인 페이지" aria-label="Team Bypass 메인 페이지"><img src="/assets/favicon.svg" alt="" width="30" height="30"></a>
       </div>
     </div>
@@ -898,7 +898,7 @@ footer .readme-h{display:block;margin-bottom:10px}
       <li><span class="lines"><span>이 사이트는 개인이 만든 자료 모음이며 회사나 학교와 관계가 없습니다.</span><span>틀린 내용은 정보 제보 게시판으로 알려 주시기 바랍니다.</span></span></li>
     </ul>
     </div>
-    <p class="foot-ver"><button type="button" class="ver" id="ver-foot" title="버전" aria-label="버전 정보">v. 3.0.0 · TEAM BYPASS</button></p>
+    <p class="foot-ver"><button type="button" class="ver" id="ver-foot" title="버전" aria-label="버전 정보">v. 3.0.1 · TEAM BYPASS</button></p>
   </div>
 </footer>
 
@@ -1221,7 +1221,10 @@ function dataBox(el, name, render){
   (name === 'uni' ? uniReady().then(() => UNI_K) : loadData(name)).then(d => { if (el.isConnected) render(d); }, () => {
     if ((location.hash || '#home').split('?')[0] !== route0) return;   /* 그 사이 다른 화면으로 옮겼으면 덮어쓰지 않음 */
     el.innerHTML = '<p class="load-fail">자료를 불러오지 못했습니다. <button type="button" class="linkbtn" data-retry>다시 시도</button></p>';
-    el.querySelector('[data-retry]').addEventListener('click', () => dataBox(el, name, render));
+    el.querySelector('[data-retry]').addEventListener('click', () => {
+      dataBox(el, name, d => { render(d); const h = el.querySelector('h1, h2'); if (h){ h.tabIndex = -1; h.focus({preventScroll:true}); } });
+      const box = el.querySelector('.load-fail'); if (box){ box.tabIndex = -1; box.focus({preventScroll:true}); }
+    });
   });
 }
 /* 앱 선종 → 통계 선종(stat), KOSWEC 선종(kos). 괄호 안 이름은 label */
@@ -1248,10 +1251,13 @@ const STAT_TO_KOS = {'급유':'급유선','냉동':'냉동냉장'};
 const typeLabel = id => TYPE_BY_ID[id].name+' ('+TYPE_MAP[id].label+')';
 const man = k => k == null ? '-' : Math.round(k/10).toLocaleString('ko-KR');
 const BIZ_KEYS = ['ocean','coastal','deepsea','nearsea','fmerchant','ffish'];
+/* 홈·머리 숫자용(첫 화면에서 koswec.json을 받지 않으려고 미리 센 값). koswec.json을 새로 만들면 테스트 home-type-counts가 어긋남을 알려 줌 */
+const REG_ONLY_COUNT = {lng:1, lpg:9, crude:29, container:11, pctc:4, bulk:63, product:66, cement:131, heavy:109};
+const UNI_TOTAL = 385;
 const MANAGED_BY = {'현대글로비스':'지마린서비스','우진선박':'오션제이드쉬핑','우양상선':'코리아쉽메니져스'};
 const KOS_BIZ = {ocean:'외항상선', coastal:'내항상선', deepsea:'원양어선', nearsea:'연근해어선', fmerchant:'해외취업상선', ffish:'해외취업어선'};
 /* ---------- 통합 회사 목록: 선사 자료(CO) + KOSWEC 등록 자료만 있는 회사 ---------- */
-let UNI = [], UNI_BY = {}, UNI_K = null, UNI_P = null;
+let UNI = [], UNI_BY = {}, UNI_K = null, UNI_P = null, UNI_FAILED = 0;
 /* 등록 선박 하나가 어느 앱 선종에 드는지 (선박별 업종 기준) */
 function shipAppTypes(s, k){
   const kos = k.typeNames[s[3]], biz = k.bizNames[s[2]];
@@ -1273,7 +1279,7 @@ function buildUni(k){
   return co.concat(only);
 }
 function uniReady(){
-  if (!UNI_P) UNI_P = loadData('koswec').then(k => { UNI_K = k; UNI = buildUni(k); UNI_BY = Object.fromEntries(UNI.map(u => [u.n, u])); }, e => { UNI_P = null; throw e; });
+  if (!UNI_P) UNI_P = loadData('koswec').then(k => { UNI_FAILED = 0; UNI_K = k; UNI = buildUni(k); UNI_BY = Object.fromEntries(UNI.map(u => [u.n, u])); }, e => { UNI_P = null; UNI_FAILED = Date.now(); throw e; });
   return UNI_P;
 }
 function regOnlyFor(typeId){
@@ -1583,7 +1589,7 @@ function fillCoExtras(name){
 function renderRegOnly(u){
   const f = u.firm, k = UNI_K;
   $('#v-co').innerHTML =
-    '<div class="crumb"><a href="#home">처음</a> &rsaquo; <a href="#dir">선사 목록</a> &rsaquo; '+esc(u.n)+'</div>'+
+    '<div class="crumb"><a href="#home">처음</a> &rsaquo; '+(backCrumb(u) || '<a href="#dir">선사 목록</a> &rsaquo; ')+esc(u.n)+'</div>'+
     '<div class="co-head"><div><h1>'+esc(u.n)+'</h1><div class="tags"><span class="ctag r">등록</span> <span class="kind">'+esc(k.bizNames[f.b])+'</span></div></div>'+
       '<div class="acts">'+starBtn('cos', u.n, u.n)+'</div></div>'+
     '<div class="co-grid"><div class="co-main">'+
@@ -1796,7 +1802,7 @@ function sxOpen(helpMode){
     const hp = HELP.filter(h => h.k.some(k => k.includes(q) || (q.length >= 2 && q.includes(k))));
     if (ty.length) html += '<div class="sx-sec">선종</div>' + ty.map(t => '<a class="sx-item" href="#type-'+t.id+'">'+sym(t.id)+'<span>'+esc(t.name)+'</span><small>'+companiesOf(t.id).length+'곳</small></a>').join('');
     /* 선사 한 묶음: 선사 자료 회사 먼저, 그다음 등록 자료만 있는 회사 (합쳐 최대 12) */
-    if (!UNI_K) uniReady().then(() => { if (!$('#sx-panel').hidden && $('#q-all').value.trim()) sxOpen(false); }, () => {});
+    if (!UNI_K && Date.now() - UNI_FAILED > 30000) uniReady().then(() => { if (!$('#sx-panel').hidden && $('#q-all').value.trim()) sxOpen(false); }, () => {});
     const reg = UNI_K ? UNI.filter(u => !u.co && u.n.toLowerCase().includes(q)) : [];
     const all = co.map(c => '<a class="sx-item" href="'+coHref(c.n)+'"><span>'+esc(c.n)+(c.sub?' <span class="note">'+esc(c.sub)+'</span>':'')+'</span><small>'+(c.kind==='owner'?'선주사':'관리선사')+'</small></a>')
       .concat(reg.map(u => '<a class="sx-item" href="'+coHref(u.n)+'"><span>'+esc(u.n)+'</span><small>'+u.ships+'척 등록</small></a>'));
@@ -1821,8 +1827,8 @@ function renderFav(){
   const tHtml = fav.types.length ? '<ul class="fav-list">'+fav.types.map(id => '<li><a href="#type-'+id+'">'+sym(id)+esc(TYPE_BY_ID[id].name)+'</a><button type="button" data-unfav="types" data-key="'+id+'" aria-label="'+esc(TYPE_BY_ID[id].name)+' 즐겨찾기 해제">×</button></li>').join('')+'</ul>' : '<p class="fav-empty">담긴 선종 없음</p>';
   /* 선사 자료에 없는 이름은 등록 자료를 불러온 뒤 보여 준다(저장은 그대로) */
   const later = fav.cos.filter(n => !CO_BY[n] && !UNI_BY[n]);
-  if (later.length && !UNI_K) uniReady().then(() => { if (currentView() === 'home') renderFav(); }, () => {});
-  const favCos = fav.cos.filter(n => CO_BY[n] || UNI_BY[n]);
+  if (later.length && !UNI_K && !UNI_FAILED) uniReady().then(() => { if (currentView() === 'home') renderFav(); }, () => { if (currentView() === 'home') renderFav(); });
+  const favCos = fav.cos.filter(n => CO_BY[n] || UNI_BY[n] || UNI_FAILED);
   const cHtml = favCos.length ? '<ul class="fav-list">'+favCos.map(n => '<li><a href="'+coHref(n)+'">'+esc(n)+'</a><button type="button" data-unfav="cos" data-key="'+esc(n)+'" aria-label="'+esc(n)+' 즐겨찾기 해제">×</button></li>').join('')+'</ul>' : '<p class="fav-empty">담긴 선사 없음</p>';
   const empty = !fav.types.length && !favCos.length;
   $('#v-home .fav').classList.toggle('is-empty', empty);
@@ -1837,7 +1843,7 @@ function renderNewsItem(n, full){
 function newsFade(el){ el.classList.toggle('at-end', el.scrollTop + el.clientHeight >= el.scrollHeight - 4); }
 function renderHome(){
   renderFav();
-  $('#hero-lead').textContent = '선사 '+CO.length+'곳, 선종 '+TYPES.length+'개. 2027 실습생 선발 여부까지 한 표에서 확인합니다.';
+  $('#hero-lead').textContent = '선사 '+UNI_TOTAL+'곳, 선종 '+TYPES.length+'개. 2027 실습생 선발 여부까지 한 표에서 확인합니다.';
   $('#news-list').innerHTML = NEWS_ALL.slice(0,12).map(n => renderNewsItem(n)).join('');
   newsFade($('#news-list'));
   $('#type-list').innerHTML = TYPES.map(t => {
@@ -1847,7 +1853,7 @@ function renderHome(){
       starBtn('types', t.id, t.name)+
       sym(t.id)+
       '<div class="tn"><a href="#type-'+t.id+'">'+esc(t.name)+'</a><span class="td">'+esc(t.short)+'</span></div>'+
-      '<div class="tc"><span class="mono">'+list.length+'</span><small>선주 '+o+', 관리 '+m+'</small></div>'+
+      '<div class="tc"><span class="mono">'+(list.length + (REG_ONLY_COUNT[t.id] || 0))+'</span><small>선주 '+o+', 관리 '+m+(REG_ONLY_COUNT[t.id] ? ', 등록만 '+REG_ONLY_COUNT[t.id] : '')+'</small></div>'+
       '<label class="pk"><input type="checkbox" data-pickty="'+t.id+'"'+(cmp.ty.includes(t.id)?' checked':'')+'> 비교에 담기</label></li>';
   }).join('');
 }
@@ -1994,10 +2000,10 @@ function renderRegGroup(typeId, topCount){
     '<div class="rg-head"><button type="button" class="rg-btn" aria-expanded="'+open+'" aria-controls="reg-list">등록 선박만 있는 회사 '+all.length+'곳</button>'+
       (q ? '<span class="note">검색어에 맞는 회사 '+list.length+'곳</span>' : '')+'</div>'+
     '<p class="note rg-desc">선사 자료 없이 한국선원복지고용센터 등록 선박만 있는 회사입니다. 이 선종 등록 척수가 많은 순입니다. <span class="ctag r">등록</span></p>'+
-    (open && list.length ? '<div class="table-scroll" id="reg-list"><table class="wt"><thead><tr><th>회사</th><th>업종</th><th>이 선종</th><th>전체 등록</th><th>전화</th></tr></thead><tbody>'+
+    (list.length ? '<div class="table-scroll" id="reg-list"'+(open ? '' : ' hidden')+'><table class="wt"><thead><tr><th>회사</th><th>업종</th><th>이 선종</th><th>전체 등록</th><th>전화</th></tr></thead><tbody>'+
       list.map(u => { const n = typeShipCount(u, typeId);
-        return '<tr data-n="'+n+'"><td><a href="'+coHref(u.n)+'">'+esc(u.n)+'</a></td><td>'+esc(UNI_K.bizNames[u.firm.b])+'</td><td>'+n+'척</td><td>'+u.ships+'척</td><td class="mono">'+esc(u.firm.tel || '')+'</td></tr>'; }).join('')+
-      '</tbody></table></div>' : '');
+        return '<tr data-n="'+n+'"><td><a href="'+coHref(u.n)+'" data-from-reg="'+esc(u.n)+'">'+esc(u.n)+'</a></td><td>'+esc(UNI_K.bizNames[u.firm.b])+'</td><td>'+n+'척</td><td>'+u.ships+'척</td><td class="mono">'+esc(u.firm.tel || '')+'</td></tr>'; }).join('')+
+      '</tbody></table></div>' : '<div id="reg-list" hidden></div>');
   el.querySelector('.rg-btn').addEventListener('click', () => {
     state.more = el.querySelector('.rg-btn').getAttribute('aria-expanded') !== 'true' ? 1 : -1;
     syncHash(); renderRegGroup(typeId, topCount);
@@ -2319,11 +2325,22 @@ document.addEventListener('click', e => {
   }
   const tl = t.closest('#reg-body tr.row a[href^="#co-"]');
   if (tl) markFromTable(tl.closest('tr.row').dataset.co);
+  const rl = t.closest('#reg-list a[data-from-reg]');
+  if (rl) markFromTable(rl.dataset.fromReg);
   const sx = t.closest('#sx');
   if (!sx) sxClose();
   else if (t.closest('a.sx-item')) { /* 이동은 링크가 처리 */ }
   const star = t.closest('button[data-star]');
-  if (star){ toggleFav(star.dataset.star, star.dataset.key); route(); return; }
+  if (star){
+    /* 화면을 다시 그리지 않고 별 모양과 즐겨찾기 목록만 바꿈 (펼쳐 둔 줄이 접히지 않게) */
+    const kind = star.dataset.star, key = star.dataset.key;
+    toggleFav(kind, key);
+    const on = fav[kind].includes(key);
+    document.querySelectorAll('button[data-star]').forEach(b => { if (b.dataset.star === kind && b.dataset.key === key){ b.setAttribute('aria-pressed', String(on)); b.textContent = on ? '★' : '☆'; } });
+    if (currentView() === 'home') renderFav();
+    renderHeader();
+    return;
+  }
   const unfav = t.closest('button[data-unfav]');
   if (unfav){ toggleFav(unfav.dataset.unfav, unfav.dataset.key); route(); return; }
   const cmpBtn = t.closest('button[data-cmpco]');
@@ -2424,8 +2441,15 @@ $('#nf-from').addEventListener('change', e => { const w = newsWindow(); state.ne
 $('#nf-to').addEventListener('change', e => { const w = newsWindow(); state.newsFrom = w.from; state.newsTo = e.target.value; state.newsRange = 'custom'; renderNews(); });
 
 /* ---------- 버전, 패치노트, 이스터에그 ---------- */
-const VERSION = '3.0.0';   // 첫째 자리 큰 기능·개편, 둘째 자리 작은 기능, 셋째 자리 버그·오타 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '3.0.1';   // 첫째 자리 큰 기능·개편, 둘째 자리 작은 기능, 셋째 자리 버그·오타 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  {v:'3.0.1', d:'2026-11-26', i:[
+    '홈 선종 목록과 맨 위 회사 수에 등록 선박만 있는 회사도 함께 셉니다(선사 385곳).',
+    '별(즐겨찾기)을 눌러도 펼쳐 둔 임금 줄과 등록 선박 목록이 접히지 않습니다.',
+    '선종 표 아래 묶음에서 회사로 들어가면 맨 위에 그 선종 표로 돌아가는 링크가 나옵니다.',
+    '등록 자료를 불러오지 못해도 즐겨찾기한 회사가 홈에 보이고, 검색창이 자료를 계속 다시 받으려 하지 않습니다.',
+    '다시 시도 뒤 화면낭독기 위치, 펼침 기호 읽기, 접힌 목록 연결 같은 접근성 문제를 고쳤습니다.'
+  ]},
   {v:'3.0.0', d:'2026-11-26', i:[
     '선사와 등록 업체를 하나로 합쳤습니다. 회사 화면 한 곳에서 선사 자료, 등록 선박, 그 회사 배의 월평균 임금, 연락처를 함께 봅니다.',
     '선종 화면 표 아래에 등록 선박만 있는 회사를 접어 두었습니다. 누르면 펼쳐지고, 회사 이름으로 검색하면 맞는 회사가 있을 때 저절로 펼쳐집니다.',
@@ -2514,7 +2538,7 @@ $('#news-list').addEventListener('scroll', e => newsFade(e.target));
 heroSrc();
 window.addEventListener('hashchange', route);
 
-$('#m-count').textContent = '선사 '+CO.length+'곳, 선종 '+TYPES.length+'개';
+$('#m-count').textContent = '선사 '+UNI_TOTAL+'곳, 선종 '+TYPES.length+'개';
 applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
 setupBoard();
 route();
