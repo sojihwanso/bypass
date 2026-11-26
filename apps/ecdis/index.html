@@ -611,7 +611,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
     <div class="htools">
       <div class="seg2" role="group" aria-label="Language"><button type="button" data-act="lang" data-v="ko">한</button><button type="button" data-act="lang" data-v="en">EN</button></div>
       <button class="hbtn" type="button" data-act="fs" id="fsBtn" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
-      <button class="ver" type="button" aria-label="버전 2.6.1">v2.6.1</button>
+      <button class="ver" type="button" aria-label="버전 2.7.0">v2.7.0</button>
       <a class="tb-home" href="https://teambypass.vercel.app/" aria-label="Team Bypass 메인 페이지로 이동" title="Team Bypass"><svg viewBox="0 0 132 132" width="30" height="30" aria-hidden="true"><path d="M66 4L128 66L66 128L4 66Z" fill="#1C211E" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/><path d="M66 12L120 66L66 120L12 66Z" fill="#EE6A1F"/><path d="M66 18L114 66L66 114L18 66Z" fill="#1C211E"/><path d="M66 25L107 66L66 107L25 66Z" fill="#EE6A1F"/><g transform="translate(36 34) scale(0.6)" fill="#1C211E"><ellipse cx="44" cy="60" rx="27" ry="23"/><path d="M51 45C55 37 58 31 61 25L72 30C68 36 66 44 64 53Z"/><circle cx="66" cy="26" r="10"/><path d="M72 20C83 19 93 24 95 32C96 38 91 41 88 37C86 34 82 33 74 33Z"/><path d="M19 52C10 47 7 40 11 34C14 43 20 46 23 46Z"/><path d="M37 80L35 92L27 95L41 95L42 81Z"/><path d="M51 80L51 92L44 95L58 95L56 81Z"/><circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/><path d="M32 55C40 50 51 54 54 64" fill="none" stroke="#EE6A1F" stroke-width="2.6" stroke-linecap="round"/></g></svg></a>
     </div>
   </div>
@@ -649,7 +649,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
     <span id="footTxt"></span>
     <p class="book" id="footBook"></p>
     <p class="disclaimer" role="note" id="footDisc"></p>
-    <div class="ver-row"><button class="ver" type="button" aria-label="버전 2.6.1">v2.6.1</button></div>
+    <div class="ver-row"><button class="ver" type="button" aria-label="버전 2.7.0">v2.7.0</button></div>
   </div>
 </footer>
 
@@ -662,7 +662,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
 <div id="dlgRoot"></div>
 
 <script src="egg.js"></script>
-<script src="tutor.js?v=2.6.1"></script>
+<script src="tutor.js?v=2.7.0"></script>
 <script>
 /* ================= I18N ================= */
 let LANG="ko";
@@ -975,7 +975,7 @@ evFree:"Free sailing started (seed {0})",evResume:"Resumed saved scenario",loadi
 
 /* ---- v1.5 ---- */
 Object.assign(I18N.ko,{
-sb_ownc:"자선으로",sb_safe:"안전 수심선",safeTip:"안전 수심선 설정 (얕은·안전·깊은 등심선, 안전 수심)",sfTitle:"안전 수심선 설정",sfShip:"자선 흘수 {0} m · UKC 기준 흘수의 {1}%",sfRec:"흘수 기준 추천값 넣기",sfRecNote:"얕은 = 흘수 {0} m → {1} m · 안전 = 흘수 + UKC {2} m → {3} m · 깊은 = 흘수 × 2 {4} m → {5} m (해도에 없는 값은 다음 깊은 등심선)",sfRecDone:"흘수 기준 추천값을 넣었습니다.",sfApplied:"적용 중인 안전 등심선: {0} m",sfZones:"수심 색 구분",z_sh:"얕은 물 · Shallow water",z_nn:"항해 불가 수역 · Non-navigable water",z_nv:"항해 가능 수역 · Navigable water",z_dw:"깊은 물 · Deep water",sfNone:"없음 (얕은 등심선 = 안전 등심선)",sfNote:"깊은 등심선 = 흘수 × 2는 통상적인 기준이에요. 회사 SMS 규정이 있으면 그 값을 따르세요. 경보를 줄이려고 값을 흘수보다 낮추면 안 돼요.",owncTip:"자선을 화면 중앙으로",upTip_NU:"N UP · 진북 위",upTip_HU:"H UP · 선수 방향 위",upTip_CU:"C UP · 침로(COG) 위",
+sb_ownc:"자선으로",sb_safe:"안전 수심선",safeTip:"안전 수심선 설정 (얕은·안전·깊은 등심선, 안전 수심)",sfTitle:"안전 수심선 설정",sfShip:"자선 흘수 {0} m · UKC 기준 흘수의 {1}%",sfDraft:"현재 흘수 · Draught (m)",sfDraftS:"적하·밸러스트로 흘수가 바뀌면 여기서 고쳐요 (2~22 m)",sfUkcNow:"UKC 기준: 흘수의 {0}% (자선 정보에서 변경)",sfRec:"흘수 기준 추천값 넣기",sfRecNote:"얕은 = 흘수 {0} m → {1} m · 안전 = 흘수 + UKC {2} m → {3} m · 깊은 = 흘수 × 2 {4} m → {5} m (해도에 없는 값은 다음 깊은 등심선)",sfRecDone:"흘수 기준 추천값을 넣었습니다.",sfApplied:"적용 중인 안전 등심선: {0} m",sfZones:"수심 색 구분",z_sh:"얕은 물 · Shallow water",z_nn:"항해 불가 수역 · Non-navigable water",z_nv:"항해 가능 수역 · Navigable water",z_dw:"깊은 물 · Deep water",sfNone:"없음 (얕은 등심선 = 안전 등심선)",sfNote:"깊은 등심선 = 흘수 × 2는 통상적인 기준이에요. 회사 SMS 규정이 있으면 그 값을 따르세요. 경보를 줄이려고 값을 흘수보다 낮추면 안 돼요.",owncTip:"자선을 화면 중앙으로",upTip_NU:"N UP · 진북 위",upTip_HU:"H UP · 선수 방향 위",upTip_CU:"C UP · 침로(COG) 위",
 ia_llroute:"위경도<br>입력",llTitle:"위경도로 항로 만들기",dragTip:"끌어서 순서 바꾸기",rtCount:"저장 항로 {0} / {1}",rtGen:"시나리오",rtLL:"위경도",rtGo:"시작",rtMax:"항로는 최대 {0}개까지 저장됩니다. 항로 관리에서 하나를 지운 뒤 다시 시도하세요.",
 llNote:"도°분.분′ 형식(커서 표시와 같음). 60분 = 1도. N/S·E/W 버튼을 누르면 반구가 바뀝니다.",llCursor:"+ 커서 위치",llOwn:"+ 자선 위치",rtLLEdit:"위경도로 항로 편집",llSaveGo:"저장 후 이 항로로 시작",llBad:"빨간 행의 위경도를 확인하세요 (도는 정수, 분은 0~59.999).",
 scFreeP:"정해진 목표 없이 자유롭게 항해합니다. 저장된 항로를 골라 그 항로에서 시작할 수도 있습니다.",scRoute:"항로",scNoRoute:"없음",scNoLib:"저장된 항로 없음 (항로계획 → 위경도 입력)",scStartPos:"시작 위치",scTraffic:"교통량",scLevel:"난이도",
@@ -986,7 +986,7 @@ gTitle:"목표 도달",gP:"GOAL WPT 0.3 NM 안에 들어왔습니다. 시나리�
 evGoal:"목표 WPT 도달",evLevel:"난이도 {0}"
 });
 Object.assign(I18N.en,{
-sb_ownc:"OWN SHIP",sb_safe:"Safety contour",safeTip:"Safety contour settings (shallow, safety, deep contours, safety depth)",sfTitle:"Safety contour settings",sfShip:"Own ship draught {0} m · UKC policy {1}% of draught",sfRec:"Fill from draught",sfRecNote:"Shallow = draught {0} m → {1} m · Safety = draught + UKC {2} m → {3} m · Deep = 2 × draught {4} m → {5} m (values not in the chart use the next deeper contour)",sfRecDone:"Recommended values from the draught applied.",sfApplied:"Safety contour in use: {0} m",sfZones:"Depth shades",z_sh:"Shallow water",z_nn:"Non-navigable water",z_nv:"Navigable water",z_dw:"Deep water",sfNone:"None (shallow contour = safety contour)",sfNote:"Deep contour = 2 × draught is a common convention. Follow your company SMS if it sets other values. Never lower the values below the draught to silence alarms.",owncTip:"Centre own ship",upTip_NU:"N UP · true north up",upTip_HU:"H UP · heading up",upTip_CU:"C UP · course (COG) up",
+sb_ownc:"OWN SHIP",sb_safe:"Safety contour",safeTip:"Safety contour settings (shallow, safety, deep contours, safety depth)",sfTitle:"Safety contour settings",sfShip:"Own ship draught {0} m · UKC policy {1}% of draught",sfDraft:"Current draught (m)",sfDraftS:"Update it when loading or ballasting changes the draught (2–22 m)",sfUkcNow:"UKC policy: {0}% of draught (change in Own ship info)",sfRec:"Fill from draught",sfRecNote:"Shallow = draught {0} m → {1} m · Safety = draught + UKC {2} m → {3} m · Deep = 2 × draught {4} m → {5} m (values not in the chart use the next deeper contour)",sfRecDone:"Recommended values from the draught applied.",sfApplied:"Safety contour in use: {0} m",sfZones:"Depth shades",z_sh:"Shallow water",z_nn:"Non-navigable water",z_nv:"Navigable water",z_dw:"Deep water",sfNone:"None (shallow contour = safety contour)",sfNote:"Deep contour = 2 × draught is a common convention. Follow your company SMS if it sets other values. Never lower the values below the draught to silence alarms.",owncTip:"Centre own ship",upTip_NU:"N UP · true north up",upTip_HU:"H UP · heading up",upTip_CU:"C UP · course (COG) up",
 ia_llroute:"Lat/Lon<br>Entry",llTitle:"New route by lat/lon",dragTip:"Drag to reorder",rtCount:"Saved routes {0} / {1}",rtGen:"scenario",rtLL:"Lat/Lon",rtGo:"Start",rtMax:"Up to {0} routes can be saved. Delete one in Manage Data and try again.",
 llNote:"deg°min.min′ format, same as the cursor readout. 60 min = 1°. Tap N/S or E/W to switch hemisphere.",llCursor:"+ Cursor",llOwn:"+ Own ship",rtLLEdit:"Edit route by lat/lon",llSaveGo:"Save and start on this route",llBad:"Check the red rows (whole degrees, minutes 0–59.999).",
 scFreeP:"Sail freely with no set goal. You can pick a saved route to start on it.",scRoute:"Route",scNoRoute:"None",scNoLib:"No saved routes (PLAN → Lat/Lon entry)",scStartPos:"Start",scTraffic:"Traffic",scLevel:"Difficulty",
@@ -2948,8 +2948,9 @@ function dlgUCSelect(){const cur=S.ucActive||[];
     d.querySelector("#usOk").onclick=()=>{S.ucActive=ucReadChecks(d,"ucsel");logEv("evUcSel",[S.ucActive.length]);chartDirty=true;lookAheadSafe();close()}}})}
 
 /* ================= UI ================= */
-const VERSION="2.6.1";
+const VERSION="2.7.0";
 const PATCH_NOTES=[
+{v:"2.7.0",d:"2026-11-26",ko:["안전 수심선 설정 창에서 현재 흘수를 바로 입력: 추천값·UKC 계산·좌초 판정이 모두 이 흘수를 따름"],en:["Enter the current draught directly in the Safety contour window; recommendations, UKC and grounding all follow it"]},
 {v:"2.6.1",d:"2026-11-26",ko:["항로 보고서의 UKC 계산이 고정 흘수(11 m) 대신 설정에서 정한 현재 흘수를 쓰도록 수정"],en:["Route report UKC now uses the current draught set in Settings instead of the fixed 11 m"]},
 {v:"2.6.0",d:"2026-11-26",ko:["화면 아래 '안전 수심선' 버튼 추가(NAVI·CHARTS·PLAN 모든 모드): 얕은·안전·깊은 등심선과 안전 수심을 한 창에서 설정, 흘수 기준 추천값 넣기","해도 수심 색 구분 강화: 얕은 물 초록 · 항해 불가 진한 파랑 · 항해 가능 연한 파랑 · 깊은 물 흰색","용어를 얕은 등심선(Shallow contour) · 깊은 등심선(Deep contour)으로 바꾸고 영문 명칭 함께 표기","과정 2에 안전 등심선 교육 9단계 추가: 얕은 = 흘수, 깊은 = 흘수 × 2, 안전 = 흘수 + UKC, 다음 깊은 등심선 적용, 항로는 안전 등심선 얕은 쪽에 들어가면 안 됨"],en:["New Safety contour button in the status bar (all modes): set shallow, safety and deep contours and safety depth in one place, with values filled from the draught","Clearer depth shades: shallow water green, non-navigable dark blue, navigable light blue, deep water white","Korean labels renamed to shallow/deep contour, shown with the English names","Course 2 adds 9 safety-contour steps (Korean)"]},
 {v:"2.5.0",d:"2026-11-25",ko:["교육 과정을 시작하면 경보음을 꺼 둠(좌하단 단추로 켜고 끄기, 경보 단계에서는 자동으로 켜짐)","과정 1에 경보 창 교육 5단계 추가: 경보 상자, 우선순위(알람·경고·주의), 경보 목록에서 확인(ACK), 경보 기록, 경보음 설정"],en:["Alarm sound is muted when a training course starts (toggle at bottom-left; turns on automatically in the alert steps)","Course 1 adds 5 alert-window steps: alert box, priorities, ACK in the alert list, alert log, buzzer setting"]},
@@ -3704,6 +3705,7 @@ function dlgHelp(tab="menu"){
 /* ---------- 안전 수심선 (Safety contour) ---------- */
 const CONTOURS=[2,5,10,20,30,50,100,200];
 function ownDraft(){return (S.own&&S.own.draft)||SHIP.draft}
+function setOwnDraft(v){v=Math.round(clamp(+v||ownDraft(),2,22)*10)/10;if(S.own)S.own.draft=v;else SHIP.draft=v;chartDirty=true;return v}
 function ceilContour(v){for(const c of CONTOURS)if(c>=v-1e-9)return c;return CONTOURS[CONTOURS.length-1]}
 function safetyRec(){const d=ownDraft(),u=S.set.ukcPct??10,need=d*(1+u/100);
   return{d,u,need,sh:ceilContour(d),sc:ceilContour(need),dp:ceilContour(d*2),sd:[2,5,8,10,12,15,20,25,30].find(v=>v>=need-1e-9)??30}}
@@ -3712,8 +3714,9 @@ function dlgSafety(){
   const zones=()=>{const P=PAL[S.set.palette]||PAL.day,sc=safetyLevel(S.set.safetyContour),sh=shallowLevel(S.set.shallowContour,sc),dp=deepLevel(S.set.deepContour,sc),four=S.set.shades===4;
     const row=(c,n,r)=>`<div><i style="background:${c}"></i><b>${t(n)}</b><span class="mono">${r}</span></div>`;
     return row(P.depsh,"z_sh",`0 – ${sh} m`)+row(P.depms,"z_nn",sh<sc?`${sh} – ${sc} m`:t("sfNone"))+(four?row(P.depmd,"z_nv",`${sc} – ${dp} m`)+row(P.depdw,"z_dw",`> ${dp} m`):row(P.depdw,"z_nv",`> ${sc} m`))};
-  const body=()=>{const r=safetyRec();return `<p class="note" style="margin:0 0 8px">${t("sfShip",[r.d.toFixed(1),r.u])}</p>
-    <div class="form">
+  const body=()=>{const r=safetyRec();return `<div class="form">
+      <label>${t("sfDraft")}<small>${t("sfDraftS")}</small></label><input type="number" id="sfDraft" inputmode="decimal" min="2" max="22" step="0.1" value="${r.d.toFixed(1)}">
+      <label></label><small style="color:var(--muted)">${t("sfUkcNow",[r.u])}</small>
       <label>${t("shallowC")}<small>${t("shallowCS")}</small></label>${sel("shallowContour",[2,5,10,20,30])}
       <label>${t("safetyC")}<small>${t("safetyCS")}</small></label>${sel("safetyContour",[2,5,10,20,30,50])}
       <label>${t("deepC")}<small>${t("deepCS")}</small></label>${sel("deepContour",[10,20,30,50,100,200])}
@@ -3727,7 +3730,7 @@ function dlgSafety(){
     <p class="note" style="margin:10px 0 0">${t("sfNote")}</p>`};
   openDlg(t("sfTitle"),`<div id="sfBody">${body()}</div>`,{sub:"Safety contour · Depth settings",onMount:(d)=>{
     const redraw=()=>{d.querySelector("#sfBody").innerHTML=body()};
-    d.addEventListener("change",e=>{const s=e.target.closest("select[data-k]");if(s){setSetting(s.dataset.k,+s.value);redraw();renderNavPage()}});
+    d.addEventListener("change",e=>{if(e.target.id==="sfDraft"){setOwnDraft(e.target.value);redraw();return}const s=e.target.closest("select[data-k]");if(s){setSetting(s.dataset.k,+s.value);redraw();renderNavPage()}});
     d.addEventListener("click",e=>{const b=e.target.closest("[data-sh]");if(b){setSetting("shades",+b.dataset.sh);redraw();return}
       if(e.target.closest("#sfRec")){const r=safetyRec();setSetting("shallowContour",r.sh);setSetting("safetyContour",r.sc);setSetting("deepContour",r.dp);setSetting("safetyDepth",r.sd);redraw();renderNavPage();toast(t("sfRecDone"))}});
   }});
