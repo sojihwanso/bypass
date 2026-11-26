@@ -363,7 +363,7 @@ initKeys(keyHandlers);
 const RESUME = 'radar-resume';
 function snapshot() { const o = W.own; return { def: { ...W.def, t: W.t, own: { lat: o.lat, lon: o.lon, hdg: o.hdg, tele: o.tele, state: { stw: o.stw, sog: o.sog, cog: o.cog, rudder: o.rudder, rudderOrder: o.rudderOrder, r: o.r, rot: o.rot, auto: { ...o.auto } } }, targets: W.targets.map((g) => ({ ...g })), weather: W.weather }, radar: radar.state }; }
 function saveNow() { if (!W) return; try { localStorage.setItem(RESUME, JSON.stringify(snapshot())); } catch (e) {} }
-function resume() { try { const s = JSON.parse(localStorage.getItem(RESUME) || 'null'); if (!s || !s.def) return false; startWorld(s.def); setRadar(s.radar === 'tx' ? 'tx' : 'stby'); return true; } catch (e) { return false; } }
+function resume() { try { const s = JSON.parse(localStorage.getItem(RESUME) || 'null'); if (!s || !s.def) return false; startWorld(s.def); setRadar('stby'); return true; } catch (e) { return false; } }
 setInterval(() => { if (W && !paused) saveNow(); }, 15000);
 addEventListener('pagehide', saveNow);
 

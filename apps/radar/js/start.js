@@ -62,7 +62,7 @@ function runScenario(scn, o = {}) {
   const R = window.Radar, en = lang() === 'en';
   lastResult = null; current = scn; R.setPaused(false);
   R.startWorld({ name: o.free ? (en ? 'Free navigation' : '자유 항해') : `${scn.id} · ${tl(scn)}`, own: scn.own, targets: scn.targets, weather: scn.weather, aids: scn.aids, marks: scn.marks || [], needsCoast: !!scn.needsCoast });
-  R.setRadar(o.free || o.keepTx ? 'tx' : 'stby');
+  R.setRadar('stby'); /* 어떻게 시작하든 STBY(송신 → 예열 5초) */
   if (scn.message) R.ais().addMessage({ ...scn.message, t: 0 });
   if (o.free) { R.setLog(null); R.setScenarioTick(null); return; }
   const log = createLog(scn); curLog = log; let lastS = -1;
