@@ -293,6 +293,7 @@ const PRESET_ORDER = ['NEAR', 'FAR', 'ROUGH SEA', 'SHIP', 'HARBOR', 'COAST', 'CU
 const TRAIL_ORDER = [0, 30, 180, 360, 900];
 Object.assign(actions, {
   tx: toggleTx,
+  band: () => { S.ctrl.band = S.ctrl.band === 'X' ? 'S' : 'X'; ppi.clear(); prevScan = new Array(N_BRG); prevRaw = null; saveSettings(); },
   mode: () => { const o = S.disp.motion === 'TM' ? ['CU', 'NU'] : ['HU', 'CU', 'NU']; S.disp.orient = o[(o.indexOf(S.disp.orient) + 1) % 3]; V.crs = W ? W.own.hdg : 0; tmOff = { x: 0, y: 0 }; ppi.clear(); saveSettings(); },
   motion: () => { S.disp.motion = S.disp.motion === 'RM' ? 'TM' : 'RM'; tmOff = { x: 0, y: 0 }; if (S.disp.motion === 'TM' && S.disp.orient === 'HU') S.disp.orient = 'NU'; saveSettings(); },
   off: () => { offCenter = offCenter ? null : { x: 0, y: 0.5 }; },

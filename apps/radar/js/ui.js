@@ -77,7 +77,7 @@ export function initUI(root, actions) {
     <div class="tl">
       <div class="row2"><div class="bx" id="bxRange" data-wheel="range" style="position:static"><span class="lb">RANGE</span><span class="big" id="vRange">-</span><span class="lb" id="vRing"></span><span class="pm"><button type="button" data-act="rangeUp" aria-label="범위 늘리기">+</button><button type="button" data-act="rangeDn" aria-label="범위 줄이기">−</button></span></div>
       <div class="bx" id="bxRef" style="position:static"><span class="lb">REF POINT</span><button type="button" data-act="refpt" id="vRef">CCRP</button></div></div>
-      <div class="bx" id="bxMode" style="position:static"><button type="button" data-act="mode" id="vOrient">HU</button><button type="button" data-act="motion" id="vMotion">RM</button><span class="lb" id="vBand">X-BAND</span><button type="button" data-act="pulse" id="vPulse">M1</button></div>
+      <div class="bx" id="bxMode" style="position:static"><button type="button" data-act="mode" id="vOrient">HU</button><button type="button" data-act="motion" id="vMotion">RM</button><button type="button" data-act="band" id="vBand">X-BAND</button><button type="button" data-act="pulse" id="vPulse">M1</button></div>
       <div class="bx" id="bxPict" style="position:static;display:flex;gap:6px;align-items:center"><span class="lb">PICTURE</span><button type="button" data-act="preset" id="vPict">-</button><button type="button" data-act="off" id="vOff">OFF CENTER</button></div>
       <div class="bx" id="bxTx" style="position:static"><span class="dot"></span><span id="vTx">STBY</span></div>
     </div>
@@ -265,7 +265,7 @@ export function initUI(root, actions) {
     $('#vRange').textContent = d.rangeNM < 1 ? d.rangeNM.toString().replace(/^0/, '') : d.rangeNM;
     $('#vRing').textContent = '/' + d.ringInt + ' NM';
     $('#vOrient').textContent = ABBR[d.orient][0]; $('#vOrient').title = ABBR[d.orient][1];
-    $('#vMotion').textContent = ABBR[d.motion][0]; $('#vMotion').title = ABBR[d.motion][1]; $('#vBand').textContent = S.ctrl.band + '-BAND'; $('#vPulse').textContent = S.ctrl.pulse;
+    $('#vMotion').textContent = ABBR[d.motion][0]; $('#vMotion').title = ABBR[d.motion][1]; $('#vBand').textContent = S.ctrl.band + '-BAND'; $('#vBand').title = lang() === 'en' ? (S.ctrl.band === 'X' ? 'X-band (3 cm): fine resolution, SART responds · click for S-band' : 'S-band (10 cm): less rain/sea clutter, wider beam, no SART · click for X-band') : (S.ctrl.band === 'X' ? 'X 밴드(3 cm): 분해능 좋음, SART 응답 · 누르면 S 밴드' : 'S 밴드(10 cm): 비·해면 반사에 강함, 빔이 넓음, SART 없음 · 누르면 X 밴드'); $('#vPulse').textContent = S.ctrl.pulse;
     const tx = $('#bxTx'); tx.classList.toggle('on', d.tx === 'tx'); tx.classList.toggle('warm', d.tx === 'warm');
     $('#vTx').textContent = d.tx === 'tx' ? 'TX' : d.tx === 'warm' ? `${t('warm')} ${Math.ceil(d.warmLeft)}s` : 'STBY';
     const hint = $('#stbyHint'); hint.hidden = d.tx === 'tx';
