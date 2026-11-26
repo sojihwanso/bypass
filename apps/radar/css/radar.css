@@ -351,3 +351,6 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--rule);border
 @media (max-width:1366px){.hb [data-t]{display:none}}
 /* 왼쪽 아래 커뮤니티 단추(bp-home) 자리를 비움 */
 [data-qb="in"] .qbar{bottom:60px}
+
+/* 모드 상자 한 줄 유지 */
+#bxMode{display:flex;flex-wrap:nowrap;gap:4px;align-items:center;white-space:nowrap}
