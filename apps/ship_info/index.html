@@ -266,6 +266,10 @@ select,.fgroup input[type="search"]{font:inherit;font-size:13.5px;padding:6px 10
 .ctag.p{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
 .ctag.c{border-style:solid}
 .ctag.e{border-style:dashed;color:var(--muted)}
+/* 새 자료: 통계(선원통계연보), 등록(KOSWEC). 보도·환산·추정과 섞이지 않게 바탕만 옅게 */
+.ctag.s,.ctag.r{border-style:solid;color:var(--ink);background:color-mix(in srgb,var(--ink) 9%,transparent)}
+.ctag.r{border-style:double;border-width:3px;padding:0 4px;line-height:1.1}
+.load-fail{color:var(--muted);font-size:14px}
 .fleet{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 .fleet small{display:block;font-family:var(--font-body);font-size:12px;color:var(--muted);white-space:normal;max-width:17em}
 .basis{display:inline-block;margin-left:6px;font-family:var(--font-body);font-size:11px;color:var(--muted);border:1px solid var(--rule);border-radius:var(--r-tag);padding:0 5px;vertical-align:1px}
@@ -536,6 +540,8 @@ footer .readme-h{display:block;margin-bottom:10px}
   <div class="wrap mast-top">
     <a class="logo" href="#home"><b>선사록</b><span>선사, 선종, 해운 뉴스 한눈에 확인</span></a>
     <nav class="navlinks" aria-label="바로가기" id="navlinks">
+      <a href="#wage">임금</a>
+      <a href="#dir">등록 업체</a>
       <a href="#news">해운 소식</a>
       <a href="#board">정보 제보</a>
     </nav>
@@ -675,6 +681,13 @@ footer .readme-h{display:block;margin-bottom:10px}
 
   <!-- 선사 상세 -->
   <div class="view" id="v-co" hidden></div>
+
+  <!-- 임금 (선원통계연보) -->
+  <div class="view" id="v-wage" hidden></div>
+
+  <!-- KOSWEC 등록 업체 목록·상세 -->
+  <div class="view" id="v-dir" hidden></div>
+  <div class="view" id="v-firm" hidden></div>
 
   <!-- 제보 게시판 -->
   <div class="view" id="v-board" hidden>
@@ -1109,6 +1122,49 @@ CO.forEach(c => { c.job = JOB[c.n] || null; c.site = SITE[c.n] || null; });
 const CO_BY = Object.fromEntries(CO.map(c => [c.n, c]));
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- 새 자료: 임금 통계(wage.json), KOSWEC 등록 업체(koswec.json) ---------- */
+const DATA_CACHE = {};
+function loadData(name){
+  if (!DATA_CACHE[name]) DATA_CACHE[name] = fetch('data/'+name+'.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .catch(e => { delete DATA_CACHE[name]; throw e; });
+  return DATA_CACHE[name];
+}
+function dataBox(el, name, render){
+  el.innerHTML = '<p class="load-fail" aria-live="polite">불러오는 중</p>';
+  loadData(name).then(d => { if (el.isConnected) render(d); }, () => {
+    el.innerHTML = '<p class="load-fail">자료를 불러오지 못했습니다. <button type="button" class="linkbtn" data-retry>다시 시도</button></p>';
+    el.querySelector('[data-retry]').addEventListener('click', () => dataBox(el, name, render));
+  });
+}
+/* 앱 선종 → 통계 선종(stat), KOSWEC 선종(kos). 괄호 안 이름은 label */
+const SHARED_NOTE = {
+  crude:"석유제품선/케미컬선과 함께 '유조'로 집계됩니다.",
+  product:"'유조'는 원유운반선과 함께 집계됩니다.",
+  bulk:"시멘트선/연안선과 함께 '잡화'로 집계됩니다.",
+  cement:"'잡화'는 벌크선, '기타'는 중량물선/특수선과 함께 집계됩니다.",
+  heavy:"시멘트선/연안선과 함께 '기타'로 집계됩니다."
+};
+const TYPE_MAP = {
+  lng:{label:'LNG', stat:['LNG'], kos:['LNG']},
+  lpg:{label:'LPG', stat:['LPG'], kos:['LPG']},
+  crude:{label:'유조', stat:['유조'], kos:['유조']},
+  container:{label:'컨테이너', stat:['컨테이너'], kos:['컨테이너']},
+  pctc:{label:'자동차', stat:['자동차'], kos:['자동차']},
+  bulk:{label:'잡화', stat:['잡화'], kos:['잡화']},
+  product:{label:'유조·케미컬', stat:['유조','케미컬'], kos:['유조','케미컬']},
+  cement:{label:'잡화·기타', stat:['잡화','기타'], kos:['잡화','기타'], biz:['coastal']},
+  heavy:{label:'기타', stat:['기타'], kos:['기타']}
+};
+Object.entries(TYPE_MAP).forEach(([id, m]) => { if (!m.biz) m.biz = ['ocean','fmerchant','coastal']; if (SHARED_NOTE[id]) m.shared = SHARED_NOTE[id]; });
+const STAT_TO_KOS = {'급유':'급유선','냉동':'냉동냉장'};
+const typeLabel = id => TYPE_BY_ID[id].name+' ('+TYPE_MAP[id].label+')';
+const man = k => k == null ? '-' : Math.round(k/10).toLocaleString('ko-KR');
+const BIZ_KEYS = ['ocean','coastal','deepsea','nearsea','fmerchant','ffish'];
+const KOS_BIZ = {ocean:'외항상선', coastal:'내항상선', deepsea:'원양어선', nearsea:'연근해어선', fmerchant:'해외취업상선', ffish:'해외취업어선'};
+function renderWage(qs){ const el = $('#v-wage'); dataBox(el, 'wage', () => { el.innerHTML = '<h1>임금</h1>'; }); }
+function renderDir(qs){ const el = $('#v-dir'); dataBox(el, 'koswec', () => { el.innerHTML = '<h1>등록 업체</h1>'; }); }
+function renderFirm(id){ const el = $('#v-firm'); dataBox(el, 'koswec', () => { el.innerHTML = '<h1>등록 업체</h1>'; }); return id; }
 const LIMIT = 5;
 const state = {kind:'all', fleet:'all', foreign:true, q:'', routes:new Set(), cadet:false, reserve:false, newsCat:'all', newsRange:'all', newsFrom:'', newsTo:'', newsQ:'', cmpTab:'co', sort:'rank'};
 const cmp = {co:[], ty:[]};
@@ -1707,7 +1763,7 @@ function route(){
   const qs = qpos < 0 ? '' : hash.slice(qpos + 1);
   const changed = hash !== lastHash;
   lastHash = hash;
-  const ids = ['home','news','type','co','board','compare'];
+  const ids = ['home','news','type','co','board','compare','wage','dir','firm'];
   ids.forEach(id => $('#v-'+id).hidden = true);
   $('#hero').hidden = true;
   sxClose();
@@ -1735,6 +1791,13 @@ function route(){
     $('#v-compare').hidden = false; renderCompare(); title = '비교 | 선사록';
   } else if (h === 'board'){
     $('#v-board').hidden = false; title = '정보 제보 | 선사록';
+  } else if (h === 'wage'){
+    $('#v-wage').hidden = false; renderWage(qs); title = '임금 | 선사록';
+  } else if (h === 'dir'){
+    $('#v-dir').hidden = false; renderDir(qs); title = '등록 업체 | 선사록';
+  } else if (h.startsWith('firm-')){
+    let id = ''; try{ id = decodeURIComponent(h.slice(5)); }catch(e){}
+    $('#v-firm').hidden = false; renderFirm(id); title = '등록 업체 | 선사록';
   } else {
     $('#v-home').hidden = false; $('#hero').hidden = false; renderHome();
   }
