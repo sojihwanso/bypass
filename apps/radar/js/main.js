@@ -1,15 +1,17 @@
 /* 레이더 시뮬레이터 진입점 (작업 6: PPI 연결용 임시 루프 — 작업 13에서 전체 루프로 확장) */
-import { S, loadSettings } from './state.js?v=1.0.0';
-import { createPPI } from './ppi.js?v=1.0.0';
-import { buildScene, updateScene, rawLine, processLine, N_BRG } from './echo.js?v=1.0.0';
-import { createShip, createTarget, stepShip, stepTarget } from './sim.js?v=1.0.0';
-import { makeProj } from './geo.js?v=1.0.0';
+import { S, loadSettings } from './state.js';
+import { createPPI } from './ppi.js';
+import { buildScene, updateScene, rawLine, processLine, N_BRG } from './echo.js';
+import { createShip, createTarget, stepShip, stepTarget } from './sim.js';
+import { makeProj } from './geo.js';
+import { initUI } from './ui.js';
+import { RING_INT } from './echo.js';
 
 const TEST = new URLSearchParams(location.search).has('test');
 loadSettings();
 const app = document.getElementById('app');
-app.innerHTML = '<div class="ppi-wrap"><canvas id="cvEcho"></canvas><canvas id="cvOver"></canvas></div>';
-const ppi = createPPI(document.getElementById('cvEcho'), document.getElementById('cvOver'));
+const ui = initUI(app, { rangeUp: () => (V.rangeNM = 12), rangeDn: () => (V.rangeNM = 3) });
+const ppi = createPPI(ui.echoCanvas, ui.overCanvas);
 ppi.resize(); addEventListener('resize', () => ppi.resize());
 
 const own = createShip({ lat: 34.6, lon: 125.0, hdg: 30 }); own.antH = 25;
@@ -39,6 +41,7 @@ function tick(dt) {
   }
   ant = (ant + n) & (N_BRG - 1);
   ppi.render(V, bufR);
+  if (frames % 6 === 0) ui.refresh({ rangeNM: V.rangeNM, ringInt: RING_INT[V.rangeNM] || 1, orient: V.orient, motion: V.motion, tx: 'tx', speed: 1, own: { hdg: own.hdg, stw: own.stw, sog: own.sog, cog: own.cog, rot: own.rot, lat: own.lat, lon: own.lon }, ebl: [{ on: false }, { on: false }], vrm: [{ on: false }, { on: false }], tgt: [], cursor: null });
 }
 requestAnimationFrame(frame);
 if (TEST) window.RadarTest = { ready: true, S, ppi, view: () => V, setView: (o) => Object.assign(V, o), setRange: (r) => { V.rangeNM = r; }, frames: () => frames, tick };
