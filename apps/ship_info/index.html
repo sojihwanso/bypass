@@ -288,6 +288,14 @@ select,.fgroup input[type="search"]{font:inherit;font-size:13.5px;padding:6px 10
 .wt.sub td:first-child{color:var(--muted)}
 .wt.sub tr.tot td{font-weight:600;color:var(--ink)}
 .wage-foot{margin-top:12px;font-size:13px}
+.wt .th-btn{all:unset;cursor:pointer;color:inherit}
+.wt .th-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wt th[aria-sort] .th-btn{color:var(--ink);font-weight:600}
+.wt th[aria-sort="descending"] .th-btn::after{content:" ↓"}
+.wt tr.sumall td{font-weight:600;border-top:1px solid var(--ink);border-bottom:0}
+.wt td a{color:var(--ink)}
+#wage-sum{min-width:0}
+.seg-scroll{overflow-x:auto;max-width:100%;padding-bottom:2px}
 .wage-foot p{margin:0 0 6px}
 .wage-foot a{color:var(--ink)}
 .fleet{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -1236,7 +1244,46 @@ function renderTypeWage(id){
     bindWageToggle(el);
   });
 }
-function renderWage(qs){ const el = $('#v-wage'); dataBox(el, 'wage', () => { el.innerHTML = '<h1>임금</h1>'; }); }
+/* 통계 선종 → 그 선종을 쓰는 앱 선종 이름 */
+function wageName(b, s){
+  const apps = Object.keys(TYPE_MAP).filter(id => TYPE_MAP[id].biz.includes(b) && TYPE_MAP[id].stat.includes(s));
+  return apps.length ? apps.map(id => TYPE_BY_ID[id].name).join('·')+' ('+s+')' : s;
+}
+const WAGE_SORTS = [...WAGE_COLS, 'vessels'];
+function renderWage(qs){
+  const el = $('#v-wage');
+  const q = new URLSearchParams(qs || '');
+  const biz = BIZ_KEYS.includes(q.get('biz')) ? q.get('biz') : 'ocean';
+  const sort = WAGE_SORTS.includes(q.get('sort')) ? q.get('sort') : 'total';
+  dataBox(el, 'wage', w => {
+    const B = w.biz[biz];
+    const val = t => sort === 'vessels' ? t.vessels : t.rows[ridx(w, sort)][1];
+    const items = Object.entries(B.types).map(([s, t]) => ({s, t, v: val(t)}))
+      .sort((a, b) => (b.v ?? -1) - (a.v ?? -1) || a.s.localeCompare(b.s, 'ko'));
+    const sum = '<table class="wt" id="wage-sum"><thead><tr><th>업종</th><th>척수</th><th>승선원(명)</th><th>전체 평균</th></tr></thead><tbody>'+
+      BIZ_KEYS.map(k => { const x = w.biz[k]; return '<tr><td>'+(k === biz ? '<b>'+esc(x.name)+'</b>' : '<a href="#wage?biz='+k+'">'+esc(x.name)+'</a>')+'</td><td>'+fmtN(x.vessels)+'</td><td>'+fmtN(x.rows[0][0])+'</td><td>'+man(x.rows[0][1])+'</td></tr>'; }).join('')+
+      '</tbody><tfoot><tr class="sumall"><td>전체</td><td>'+fmtN(w.overall.vessels)+'</td><td>'+fmtN(w.overall.rows[0][0])+'</td><td>'+man(w.overall.rows[0][1])+'</td></tr></tfoot></table>';
+    const th = k => { const on = k === sort; const label = k === 'vessels' ? '척수' : WAGE_COL_NAME[k];
+      return '<th'+(on ? ' aria-sort="descending"' : '')+'><button type="button" class="th-btn" data-wsort="'+k+'">'+label+'</button></th>'; };
+    const main = '<table class="wt" id="wage-main"><thead><tr><th>선종 (통계 이름)</th>'+WAGE_COLS.map(th).join('')+th('vessels')+'</tr></thead><tbody>'+
+      items.map(({s, t}, i) => t.note
+        ? '<tr class="wrow"><td>'+esc(wageName(biz, s))+'<span class="note">'+esc(t.note)+'</span></td>'+WAGE_COLS.map(() => '<td>-</td>').join('')+'<td>'+fmtN(t.vessels)+'</td></tr>'
+        : wageLine(w, wageName(biz, s), t, 'w-'+biz+'-'+i)).join('')+'</tbody></table>';
+    el.innerHTML =
+      '<div class="crumb"><a href="#home">처음</a> &rsaquo; 임금</div>'+
+      '<div class="co-head"><div><h1>선원 월평균 임금</h1><div class="tags"><span class="ctag s">통계</span></div></div></div>'+
+      '<section class="sheet blk"><h2>업종별 총괄</h2><div class="in"><div class="table-scroll">'+sum+'</div>'+
+        '<p class="note" style="margin-top:8px">전체 평균은 그 업종 승선원 전체의 평균, 단위 만 원.'+(w.biz.fmerchant ? ' 해외취업 표는 한국인 선원만 집계한 것입니다.' : '')+'</p></div></section>'+
+      '<section class="sheet blk" style="margin-top:16px"><h2>선종별 · 직책별</h2><div class="in">'+
+        '<div class="seg-scroll"><div class="seg" role="group" aria-label="업종">'+BIZ_KEYS.map(k => '<button type="button" data-wbiz="'+k+'" aria-pressed="'+(k === biz)+'">'+esc(w.biz[k].name)+'</button>').join('')+'</div></div>'+
+        '<p class="note" style="margin:10px 0">'+esc(B.name)+' '+fmtN(B.vessels)+'척 기준. 단위 만 원, 열 머리를 누르면 그 열이 큰 순으로, 줄을 누르면 직책별 원값(천 원)이 펼쳐집니다. 승선원이나 척수가 10 미만이면 표본 적음으로 표시합니다.</p>'+
+        '<div class="table-scroll">'+main+'</div>'+
+        '<div class="wage-foot"><p class="note">'+esc('2026년 한국선원통계연보 임금현황('+w.source.pages+'), 원본 단위 천 원. 월평균 임금은 업종별 총승선원의 평균값이며 회사별 급여가 아닙니다.')+'</p></div></div></section>';
+    bindWageToggle(el);
+    el.querySelectorAll('[data-wbiz]').forEach(b => b.addEventListener('click', () => { location.hash = 'wage?biz='+b.dataset.wbiz+(sort !== 'total' ? '&sort='+sort : ''); }));
+    el.querySelectorAll('[data-wsort]').forEach(b => b.addEventListener('click', () => { location.hash = 'wage?biz='+biz+'&sort='+b.dataset.wsort; }));
+  });
+}
 function renderDir(qs){ const el = $('#v-dir'); dataBox(el, 'koswec', () => { el.innerHTML = '<h1>등록 업체</h1>'; }); }
 function renderFirm(id){ const el = $('#v-firm'); dataBox(el, 'koswec', () => { el.innerHTML = '<h1>등록 업체</h1>'; }); return id; }
 const LIMIT = 5;
