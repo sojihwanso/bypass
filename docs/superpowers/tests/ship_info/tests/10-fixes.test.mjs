@@ -56,8 +56,11 @@ export default [
    assert(r[0].endsWith('hero-day.webp') && !r[1], 'srcs '+r);
  })},
  {name:'mobile-card-other-types', fn: () => withPage({...M, hash:'#type-bulk'}, async p => {
-   const n = await p.$$eval('#reg-body tr.row td:nth-child(9) .other a', es => es.filter(e => e.getClientRects().length).length);
-   assert(n > 0, 'other types hidden');
+   /* v3.4.0부터 휴대폰 카드는 요약만, 다른 선종은 '자세히'를 눌러 펼침 */
+   const tr = await p.$('#reg-body tr.row:has(td:nth-child(9) .other a)');
+   await (await tr.$('.row-more')).click();
+   const n = await tr.$$eval('td:nth-child(9) .other a', es => es.filter(e => e.getClientRects().length).length);
+   assert(n > 0, 'other types hidden after expand');
  })},
  {name:'board-copy-text', fn: () => withPage({hash:'#board'}, async p => {
    const t = await p.$eval('#v-board .page-lead, #v-board p.lines', e => e.textContent);

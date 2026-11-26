@@ -597,7 +597,26 @@ footer .readme-h{display:block;margin-bottom:10px}
   .filters:not(.open){display:none}
   .reg tr.row td:nth-child(9) .other{display:flex;flex-wrap:wrap;gap:4px}
   .reg tr.row td:nth-child(9) .none{display:none}
+  /* 휴대폰 카드: 회사·구분·규모·실습만, 나머지는 '자세히' */
+  .reg tr.row:not(.open) td:nth-child(6),.reg tr.row:not(.open) td:nth-child(7),.reg tr.row:not(.open) td:nth-child(9){display:none}
+  .reg tr.row:not(.open) td:nth-child(5) small.note,.reg tr.row:not(.open) .jrot{display:none!important}
+  .reg tr.row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;position:relative;padding:12px 12px 12px 52px}
+  .reg tr.row td.pick{position:absolute;left:4px;top:8px}
+  .reg tr.row td.rk{flex:0 0 auto;width:auto;font-size:12px}
+  .reg tr.row td:nth-child(3){flex:1 1 0;min-width:0;display:flex;align-items:center;gap:8px}
+  .reg tr.row td:nth-child(4),.reg tr.row td:nth-child(5),.reg tr.row td:nth-child(8){flex:0 0 auto;padding:0}
+  .reg tr.row td:nth-child(5){flex-basis:auto}
+  .reg tr.row td:nth-child(3) + td{margin-left:0}
+  .reg tr.row td:nth-child(4){order:1}.reg tr.row td:nth-child(5){order:2}.reg tr.row td:nth-child(8){order:3}
+  .reg tr.row td:nth-child(6),.reg tr.row td:nth-child(7),.reg tr.row td:nth-child(9){order:4;flex:1 1 100%}
+  .reg tr.row::after{content:"";flex-basis:100%;order:0}
+  .reg .jobs{display:flex;flex-wrap:wrap;gap:4px}
+  .reg tr.row .row-more{display:inline-flex;align-items:center;margin-left:auto;min-height:32px;padding:0 10px;font:inherit;font-size:12.5px;color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:var(--r-in);cursor:pointer;flex:none}
+  .f-chips:not(:empty){display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+  .f-chips .chip{min-height:36px}
 }
+.reg .row-more{display:none}
+.f-chips{display:none}
 @media (max-width: 820px){ .hero img{display:block} }
 
 </style>
@@ -720,7 +739,14 @@ footer .readme-h{display:block;margin-bottom:10px}
     <nav class="type-switch" id="type-switch" aria-label="다른 선종 보기"></nav>
     <div class="type-head" id="type-head"></div>
     <button type="button" class="f-toggle" id="f-toggle" aria-expanded="false" aria-controls="filters">필터</button>
+    <div class="f-chips" id="f-chips" aria-live="polite"></div>
     <div class="filters" id="filters" role="group" aria-label="필터">
+      <div class="fgroup"><span>실습, 병역 (회사 공개 자료 기준)</span>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <label class="check"><input type="checkbox" id="f-cadet"> 2027 실습생 선발</label>
+          <label class="check"><input type="checkbox" id="f-reserve"> 승선근무예비역 가능</label>
+        </div>
+      </div>
       <div class="fgroup"><span>회사 구분</span>
         <div class="seg" id="f-kind">
           <button type="button" data-v="all" aria-pressed="true">전체</button>
@@ -740,12 +766,6 @@ footer .readme-h{display:block;margin-bottom:10px}
       </div>
       <div class="fgroup"><span>국적</span>
         <label class="check"><input type="checkbox" id="f-foreign" checked> 외국계 한국지사 포함</label>
-      </div>
-      <div class="fgroup"><span>실습, 병역 (회사 공개 자료 기준)</span>
-        <div style="display:flex;gap:16px;flex-wrap:wrap">
-          <label class="check"><input type="checkbox" id="f-cadet"> 2027 실습생 선발</label>
-          <label class="check"><input type="checkbox" id="f-reserve"> 승선근무예비역 가능</label>
-        </div>
       </div>
       <div class="fgroup"><label for="f-q"><span class="note">이 선종 안에서 검색</span></label>
         <input type="search" id="f-q" placeholder="회사 이름" autocomplete="off">
@@ -1635,7 +1655,7 @@ function renderRegOnly(u){
   fillCoNews(u.n);
 }
 const LIMIT = 5;
-const state = {more:0, kind:'all', fleet:'all', foreign:true, q:'', routes:new Set(), cadet:false, reserve:false, newsCat:'all', newsRange:'all', newsFrom:'', newsTo:'', newsQ:'', cmpTab:'co', sort:'rank'};
+const state = {more:0, kind:'all', fleet:'all', foreign:true, q:'', routes:new Set(), cadet:false, reserve:false, newsCat:'all', newsRange:'all', newsFrom:'', newsTo:'', newsQ:'', cmpTab:'co', sort:'job'};
 const cmp = {co:[], ty:[]};
 const CMP_KEY = 'sasarok-cmp-v1';
 function loadCmp(){
@@ -2044,7 +2064,7 @@ function filterQuery(){
   if (state.reserve) q.push('reserve=1');
   if (state.q) q.push('q='+encodeURIComponent(state.q));
   if (state.routes.size) q.push('r='+[...state.routes].map(encodeURIComponent).join(','));
-  if (state.sort !== 'rank') q.push('sort='+state.sort);
+  if (state.sort !== 'job') q.push('sort='+state.sort);   /* 기본은 실습생 선발 우선 */
   if (state.more === 1) q.push('more=1');
   return q.join('&');
 }
@@ -2107,6 +2127,7 @@ function renderTable(typeId){
   const nOn = FILTERS.filter(f => f.on(state)).length;
   $('#f-active').textContent = nOn ? '· 걸린 조건 '+nOn+'개' : '';
   $('#f-toggle').textContent = nOn ? '필터 · '+nOn+'개 적용' : '필터';
+  $('#f-chips').innerHTML = FILTERS.filter(f => f.on(state)).map(f => '<button type="button" class="chip" data-foff="'+f.k+'" aria-label="'+esc(f.label)+' 조건 풀기" aria-pressed="true">'+esc(f.label)+' <span aria-hidden="true">×</span></button>').join('');
   document.querySelectorAll('.reg th[data-col]').forEach(th => {
     const on = th.dataset.col === state.sort;
     if (on) th.setAttribute('aria-sort', SORT_DIR[state.sort]); else th.removeAttribute('aria-sort');
@@ -2114,7 +2135,7 @@ function renderTable(typeId){
   if (typeId === currentType && currentView() === 'type') syncHash();
   $('#th-cap').textContent = typeId === 'container' ? '선복량 (TEU)' : (typeId === 'heavy' ? '운영 척수' : '재화중량 (dwt)');
   $('#r-count').textContent = full.length+'곳 중 '+list.length+'곳 표시';
-  $('#sort-note').innerHTML = '<span class="lines"><span>'+(typeId === 'container' ? '정렬은 총 선복량(TEU)이 큰 순서입니다.' : (typeId === 'heavy' ? '중량물선과 특수선은 규모를 한 가지 수치로 비교하기 어려워 운영 척수 순서로 놓았습니다.' : '정렬은 재화중량(dwt)이 큰 순서로, 큰 배를 많이 가진 회사가 위에 옵니다.'))+'</span>' +
+  $('#sort-note').innerHTML = '<span class="lines">'+(state.sort === 'job' ? '<span>2027 실습생 선발 회사를 먼저, 그다음 승선근무예비역 가능 회사를 보여 줍니다. 순위 열 머리를 누르면 규모 순으로 바뀝니다.</span>' : '')+'<span>'+(typeId === 'container' ? '정렬은 총 선복량(TEU)이 큰 순서입니다.' : (typeId === 'heavy' ? '중량물선과 특수선은 규모를 한 가지 수치로 비교하기 어려워 운영 척수 순서로 놓았습니다.' : '정렬은 재화중량(dwt)이 큰 순서로, 큰 배를 많이 가진 회사가 위에 옵니다.'))+'</span>' +
     '<span>값을 찾지 못한 회사는 아래쪽에 선단 척수 순서로 둡니다.</span><span>선단 숫자는 기준 시점과 집계 방식이 회사마다 달라 대략적인 규모로 봐 주시기 바랍니다.</span><span>회사 이름이나 줄을 누르면 자세한 화면으로 이동합니다.</span></span>';
   if (!list.length){
     $('#reg-body').innerHTML = '<tr class="empty-row"><td colspan="9">'+esc(emptyHint(full))+'</td></tr>';
@@ -2130,7 +2151,7 @@ function renderTable(typeId){
     return '<tr class="row" tabindex="0" data-co="'+esc(c.n)+'">'+
       '<td class="pick"><label class="pick-hit"><input type="checkbox" id="'+cid+'" data-pickco="'+esc(c.n)+'"'+(picked?' checked':'')+'><span class="sr">'+esc(c.n)+' 비교에 담기</span></label></td>'+
       '<td class="rk">'+rank.get(c.n)+'</td>'+
-      '<td><span class="cname"><a href="'+coHref(c.n)+'">'+esc(c.n)+'</a>'+(c.sub?'<span class="sub">'+esc(c.sub)+'</span>':'')+'</span></td>'+
+      '<td><span class="cname"><a href="'+coHref(c.n)+'">'+esc(c.n)+'</a>'+(c.sub?'<span class="sub">'+esc(c.sub)+'</span>':'')+'</span><button type="button" class="row-more" aria-expanded="false" aria-label="'+esc(c.n)+' 자세히 보기">자세히</button></td>'+
       '<td>'+kindTag(c)+'</td>'+
       '<td>'+capCell+'</td>'+
       '<td>'+fleetHtml(c)+'</td>'+
@@ -2333,11 +2354,11 @@ function setupBoard(){
 
 /* ---------- 라우팅 ---------- */
 function resetFilters(){
-  Object.assign(state, {kind:'all', fleet:'all', foreign:true, q:'', cadet:false, reserve:false, sort:'rank', more:0});
+  Object.assign(state, {kind:'all', fleet:'all', foreign:true, q:'', cadet:false, reserve:false, sort:'job', more:0});
   state.routes = new Set();
 }
 /* 선종을 옮길 때: 선종과 상관없는 조건(회사 구분, 국적, 실습생 선발, 예비역)은 두고 나머지만 비움 */
-function resetTypeOnly(){ state.more = 0; state.q = ''; state.fleet = 'all'; state.routes = new Set(); state.sort = 'rank'; }
+function resetTypeOnly(){ state.more = 0; state.q = ''; state.fleet = 'all'; state.routes = new Set(); state.sort = 'job'; }
 function setReadme(open){ $('#readme').hidden = !open; const b = $('#readme-toggle'); b.setAttribute('aria-expanded', String(open)); b.textContent = open ? '접기' : '펼치기'; }
 function route(){
   const hash = location.hash || '#home';
@@ -2408,6 +2429,10 @@ document.addEventListener('click', e => {
   if (gb){ const ul = gb.nextElementSibling; const open = gb.getAttribute('aria-expanded') !== 'true'; gb.setAttribute('aria-expanded', String(open)); if (ul) ul.hidden = !open; return; }
   const nq = t.closest('a[data-news-q]');
   if (nq){ e.preventDefault(); state.newsQ = nq.dataset.newsQ; state.newsCat = 'all'; state.newsRange = 'all'; location.hash = 'news'; return; }
+  const rm = t.closest('#reg-body .row-more');
+  if (rm){ const tr = rm.closest('tr.row'); const open = !tr.classList.contains('open'); tr.classList.toggle('open', open); rm.setAttribute('aria-expanded', String(open)); rm.textContent = open ? '접기' : '자세히'; return; }
+  const fo = t.closest('#f-chips button[data-foff]');
+  if (fo){ const f = FILTERS.find(x => x.k === fo.dataset.foff); if (f){ f.off(state); syncFilterUI(); renderTable(currentType); } return; }
   const sm = t.closest('button[data-ships-more]');
   if (sm){
     const open = sm.getAttribute('aria-expanded') !== 'true';
