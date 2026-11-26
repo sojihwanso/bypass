@@ -270,6 +270,26 @@ select,.fgroup input[type="search"]{font:inherit;font-size:13.5px;padding:6px 10
 .ctag.s,.ctag.r{border-style:solid;color:var(--ink);background:color-mix(in srgb,var(--ink) 9%,transparent)}
 .ctag.r{border-style:double;border-width:3px;padding:0 4px;line-height:1.1}
 .load-fail{color:var(--muted);font-size:14px}
+/* 임금 표 */
+#type-wage{margin-top:16px}
+.wt{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
+.wt th{font-weight:500;font-size:12.5px;color:var(--muted);text-align:right;padding:8px 10px;border-bottom:1px solid var(--rule);white-space:nowrap}
+.wt td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.wt th:first-child,.wt td:first-child{text-align:left}
+.wt tr:last-child td{border-bottom:0}
+.wt .wbtn{all:unset;cursor:pointer;color:var(--ink);font-weight:600;display:inline-flex;gap:6px;align-items:baseline;min-height:28px}
+.wt .wbtn::before{content:"+";font-family:var(--font-mono);color:var(--muted);width:10px}
+.wt .wbtn[aria-expanded="true"]::before{content:"\2212"}
+.wt .wbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wt td .note{margin-left:8px;font-weight:400}
+.wt tr.wdet>td{padding:4px 10px 14px;background:var(--paper);text-align:left}
+.wt.sub{min-width:0;font-size:13px}
+.wt.sub th,.wt.sub td{padding:5px 8px}
+.wt.sub td:first-child{color:var(--muted)}
+.wt.sub tr.tot td{font-weight:600;color:var(--ink)}
+.wage-foot{margin-top:12px;font-size:13px}
+.wage-foot p{margin:0 0 6px}
+.wage-foot a{color:var(--ink)}
 .fleet{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 .fleet small{display:block;font-family:var(--font-body);font-size:12px;color:var(--muted);white-space:normal;max-width:17em}
 .basis{display:inline-block;margin-left:6px;font-family:var(--font-body);font-size:11px;color:var(--muted);border:1px solid var(--rule);border-radius:var(--r-tag);padding:0 5px;vertical-align:1px}
@@ -675,6 +695,7 @@ footer .readme-h{display:block;margin-bottom:10px}
       </table>
     </div>
     <p class="note foot-note" id="sort-note"></p>
+    <section class="sheet blk" id="type-wage"></section>
     <div class="pc" id="type-pc"></div>
     <div class="refs" id="type-refs"></div>
   </div>
@@ -1162,6 +1183,59 @@ const typeLabel = id => TYPE_BY_ID[id].name+' ('+TYPE_MAP[id].label+')';
 const man = k => k == null ? '-' : Math.round(k/10).toLocaleString('ko-KR');
 const BIZ_KEYS = ['ocean','coastal','deepsea','nearsea','fmerchant','ffish'];
 const KOS_BIZ = {ocean:'외항상선', coastal:'내항상선', deepsea:'원양어선', nearsea:'연근해어선', fmerchant:'해외취업상선', ffish:'해외취업어선'};
+const WAGE_COLS = ['total','master','co','o3','ce','e1','e3'];
+const WAGE_COL_NAME = {total:'전체 평균', master:'선장', co:'1항사', o3:'3항사', ce:'기관장', e1:'1기사', e3:'3기사'};
+const smallSample = (vessels, n) => vessels < 10 || n < 10;
+let WAGE_RIDX = null;
+const ridx = (w, k) => (WAGE_RIDX || (WAGE_RIDX = Object.fromEntries(w.ranks.map((r, i) => [r[0], i]))))[k];
+const fmtN = v => v == null ? '-' : v.toLocaleString('ko-KR');
+/* 21직책 원값 표(천 원) */
+function wageRowsHtml(rows, ranks){
+  return '<table class="wt sub"><thead><tr><th>직책</th><th>승선원(명)</th><th>계</th><th>기본임금</th><th>시간외수당</th><th>상여금</th><th>기타</th></tr></thead><tbody>'+
+    rows.map((r, i) => '<tr'+(/total|off|rat/.test(ranks[i][0]) ? ' class="tot"' : '')+'><td>'+esc(ranks[i][1])+'</td>'+r.map(v => '<td>'+fmtN(v)+'</td>').join('')+'</tr>').join('')+
+    '</tbody></table><p class="note" style="margin:6px 0 0">단위 천 원. 원본 표 그대로</p>';
+}
+/* 임금 한 줄 + 펼침 줄. label: 업종 칸 글자 */
+function wageLine(w, label, t, key){
+  const n = t.rows[0][0];
+  const cells = WAGE_COLS.map(k => '<td>'+man(t.rows[ridx(w,k)][1])+'</td>').join('');
+  return '<tr class="wrow"><td><button type="button" class="wbtn" aria-expanded="false" aria-controls="wd-'+key+'">'+esc(label)+'</button>'+
+    (smallSample(t.vessels, n || 0) ? '<span class="note">표본 적음</span>' : '')+'</td>'+cells+'<td>'+fmtN(t.vessels)+'</td></tr>'+
+    '<tr class="wdet" id="wd-'+key+'" hidden><td colspan="'+(WAGE_COLS.length+2)+'">'+wageRowsHtml(t.rows, w.ranks)+'</td></tr>';
+}
+function wageHead(first){
+  return '<thead><tr><th>'+esc(first)+'</th>'+WAGE_COLS.map(k => '<th>'+WAGE_COL_NAME[k]+'</th>').join('')+'<th>척수</th></tr></thead>';
+}
+function bindWageToggle(root){
+  root.querySelectorAll('.wbtn').forEach(b => b.addEventListener('click', () => {
+    const open = b.getAttribute('aria-expanded') !== 'true';
+    b.setAttribute('aria-expanded', String(open));
+    document.getElementById(b.getAttribute('aria-controls')).hidden = !open;
+  }));
+}
+const kosOf = stat => STAT_TO_KOS[stat] || stat;
+function renderTypeWage(id){
+  const el = $('#type-wage');
+  const m = TYPE_MAP[id];
+  if (!m){ el.hidden = true; return; }
+  el.hidden = false;
+  dataBox(el, 'wage', w => {
+    if (currentType !== id) return;
+    const lines = [];
+    m.biz.forEach(b => m.stat.forEach(s => {
+      const t = w.biz[b].types[s];
+      if (t && t.rows[0][0] > 0) lines.push(wageLine(w, w.biz[b].name+' · '+s, t, 't-'+b+'-'+BIZ_KEYS.indexOf(b)+'-'+m.stat.indexOf(s)));
+    }));
+    const dirHref = '#dir?type='+m.kos.map(kosOf).join(',')+(id === 'cement' ? '&biz='+KOS_BIZ.coastal : '');
+    el.innerHTML = '<h2>월평균 임금 · '+esc(typeLabel(id))+' <span class="ctag s">통계</span></h2><div class="in">'+
+      '<p class="note">업종별 평균입니다. 단위 만 원, 줄을 누르면 직책별 원값(천 원)이 펼쳐집니다.</p>'+
+      '<div class="table-scroll"><table class="wt">'+wageHead('업종 · 통계 선종')+'<tbody>'+lines.join('')+'</tbody></table></div>'+
+      '<div class="wage-foot">'+(m.shared ? '<p>'+esc(m.shared)+'</p>' : '')+
+      '<p class="note">2026년 한국선원통계연보 임금현황. 월평균 임금은 업종별 총승선원의 평균값이며 회사별 급여가 아닙니다.</p>'+
+      '<p><a href="#wage?biz=ocean">임금 화면에서 다른 선종과 비교</a> · <a href="'+esc(dirHref)+'">이 선종 배를 등록한 업체 보기</a></p></div></div>';
+    bindWageToggle(el);
+  });
+}
 function renderWage(qs){ const el = $('#v-wage'); dataBox(el, 'wage', () => { el.innerHTML = '<h1>임금</h1>'; }); }
 function renderDir(qs){ const el = $('#v-dir'); dataBox(el, 'koswec', () => { el.innerHTML = '<h1>등록 업체</h1>'; }); }
 function renderFirm(id){ const el = $('#v-firm'); dataBox(el, 'koswec', () => { el.innerHTML = '<h1>등록 업체</h1>'; }); return id; }
@@ -1778,7 +1852,7 @@ function route(){
     currentType = next;
     $('#v-type').hidden = false;
     const t = TYPE_BY_ID[next];
-    renderTypeSwitch(next); renderTypeHead(t); renderRoutes(); syncFilterUI(); renderTable(next);
+    renderTypeSwitch(next); renderTypeHead(t); renderRoutes(); syncFilterUI(); renderTable(next); renderTypeWage(next);
     title = t.name+' | 선사록';
   } else if (h.startsWith('co-')){
     try{ const f = sessionStorage.getItem('sasarok-from-table'); let n0 = ''; try{ n0 = decodeURIComponent(h.slice(3)); }catch(e){} if (f && f !== n0) sessionStorage.removeItem('sasarok-from-table'); }catch(e){}
