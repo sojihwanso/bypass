@@ -10,7 +10,7 @@ export const CATEGORIES = [
   { no: '07', id: 'ext', title: '외력', lede: '바람, 수류, 천수, 안벽, 선박 간 상호작용, 파랑' },
   { no: '08', id: 'practice', title: '조선 실무', lede: '침로 유지, 변침, 충돌 회피, 접이안, 긴급조선' },
   { no: '09', id: 'moor', title: '계류와 묘박', lede: '계류 설비, 앵커와 양묘기, 파주력과 주묘' },
-  { no: '10', id: 'data', title: '자료실', lede: '대상선 조종 특성, 공식 모음, 용어 찾기' }
+  { no: '10', id: 'data', title: '자료실', lede: '대상선 조종 특성, 공식 모음, 용어 찾기, 기말 5번 풀이·답안 예시' }
 ];
 
 const U = (cat, no, id, title, lede, forms, sources, extra = {}) => ({ cat, no, id, title, lede, forms, sources, stage: 2, ...extra });
@@ -56,7 +56,9 @@ export const UNITS = [
   U('moor', '9-3', 'anchor', '파주력과 주묘', '주묘의 징후, 확인 방법, 정상 선회와의 구별', ['3D', '애니메이션', '표'], ['S14 7~11쪽', '교 V3 묘박 215~222쪽', '운 Ⅴ-2 닻 당직'], { stage: 1, exam: '기말 4' }),
   U('data', '10-1', 'shipdata', '대상선 조종 특성', '6,000TEU 컨테이너선 자료', ['표'], ['교 V4'], { ready: true }),
   U('data', '10-2', 'formulas', '공식 모음', '단원에 나온 식을 한곳에', ['표'], ['각 단원'], { ready: true }),
-  U('data', '10-3', 'glossary', '용어 찾기', '우리말·영문 용어와 해당 단원', ['표'], ['각 단원'], { ready: true })
+  U('data', '10-3', 'glossary', '용어 찾기', '우리말·영문 용어와 해당 단원', ['표'], ['각 단원'], { ready: true }),
+  U('data', '10-4', 'alter-examples', '변침 풀이 예제', '대상선 값으로 조타 개시점과 정침 계획 계산', ['표', '도식'], ['교 V3 Ch2 168~169쪽', '교 V4'], { ready: true, exam: '기말 5' }),
+  U('data', '10-5', 'alter-answers', '기말 5번 답안 예시', '변침 조타 계획 답안 세 가지', ['글', '도식'], ['S12 6~7쪽', '교 V3 Ch2 168~169쪽'], { ready: true, exam: '기말 5' })
 ];
 export const unitById = id => UNITS.find(u => u.id === id);
 export const STAGE1 = UNITS.filter(u => u.stage === 1);
