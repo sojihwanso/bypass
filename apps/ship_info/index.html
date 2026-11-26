@@ -296,6 +296,41 @@ select,.fgroup input[type="search"]{font:inherit;font-size:13.5px;padding:6px 10
 .wt td a{color:var(--ink)}
 #wage-sum{min-width:0}
 .seg-scroll{overflow-x:auto;max-width:100%;padding-bottom:2px}
+/* 등록 업체 */
+.dir-src{max-width:72ch;margin:4px 0 0}
+.dir-search{margin-top:18px;max-width:360px}
+.dir-filters{padding-top:14px}
+.dir-filters .dir-types{flex-basis:100%}
+.dir-filters .chip small{font-weight:400;color:var(--muted)}
+.dir-filters .chip[aria-pressed="true"] small{color:#16181d}
+.dir-list{list-style:none;margin:0;padding:0;background:var(--sheet);border:1px solid var(--rule);border-radius:var(--r-card)}
+.dir-list li{display:grid;grid-template-columns:minmax(0,1.6fr) 7.5em 4em minmax(0,1.4fr) 9.5em;gap:4px 16px;align-items:baseline;padding:12px 18px;border-bottom:1px solid var(--rule);font-size:14px}
+.dir-list li:last-child{border-bottom:0}
+.dir-list .fn{font-weight:600;color:var(--ink);text-decoration:none}
+.dir-list .fn:hover{text-decoration:underline}
+.dir-list .fapp{margin-left:10px;font-size:12px;color:var(--ink)}
+.dir-list .fhit{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.dir-list .fb,.dir-list .ft{color:var(--muted);font-size:13px}
+.dir-list .fs{text-align:right}
+.dir-list .fp{color:var(--muted);font-size:13px;text-align:right}
+#dir-count{margin:0 0 8px}
+#dir-foot{margin-top:14px}
+#dir-foot .more{min-height:40px;cursor:pointer}
+#firm-ships td:first-child{color:var(--muted)}
+#firm-ships td,#firm-ships th{text-align:left}
+#firm-ships td:nth-child(3),#firm-ships th:nth-child(3){text-align:right}
+@media (max-width:640px){
+  .dir-list li{grid-template-columns:1fr auto;padding:12px 14px}
+  .dir-list .fl{grid-column:1/-1}
+  .dir-list .fs{grid-row:2;grid-column:2}
+  .dir-list .fb{grid-row:2;grid-column:1}
+  .dir-list .ft{grid-column:1/-1}
+  .dir-list .fp{grid-column:1/-1;text-align:left}
+  .dir-filters .fgroup{flex:1 1 100%}
+  .dir-search{max-width:none;margin-bottom:10px}
+  .dir-search input{width:100%;box-sizing:border-box}
+  .dir-filters .fgroup input,.dir-filters .fgroup select{width:100%;box-sizing:border-box}
+}
 .wage-foot p{margin:0 0 6px}
 .wage-foot a{color:var(--ink)}
 .fleet{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -1284,8 +1319,144 @@ function renderWage(qs){
     el.querySelectorAll('[data-wsort]').forEach(b => b.addEventListener('click', () => { location.hash = 'wage?biz='+biz+'&sort='+b.dataset.wsort; }));
   });
 }
-function renderDir(qs){ const el = $('#v-dir'); dataBox(el, 'koswec', () => { el.innerHTML = '<h1>등록 업체</h1>'; }); }
-function renderFirm(id){ const el = $('#v-firm'); dataBox(el, 'koswec', () => { el.innerHTML = '<h1>등록 업체</h1>'; }); return id; }
+/* ---------- KOSWEC 등록 업체 ---------- */
+const firmHref = id => '#firm-'+encodeURIComponent(id);
+const REGION = {'전남광주통합특별시':'전남·광주','강원특별자치도':'강원','강원도':'강원','전북특별자치도':'전북','전라북도':'전북','전라남도':'전남',
+  '경상남도':'경남','경상북도':'경북','충청남도':'충남','충청북도':'충북','제주특별자치도':'제주','세종특별자치시':'세종','경기도':'경기'};
+function regionOf(addr){
+  if (!addr) return '기타';
+  const w = addr.split(' ')[0];
+  return REGION[w] || w.replace(/(특별자치시|특별자치도|특별시|광역시|도)$/, '') || '기타';
+}
+function firmTopTypes(f, k = 3){
+  const c = {};
+  f.ships.forEach(s => { c[s[3]] = (c[s[3]] || 0) + 1; });
+  return Object.entries(c).sort((a, b) => b[1] - a[1] || a[0] - b[0]).slice(0, k).map(([ti, n]) => [Number(ti), n]);
+}
+const KOS_SRC = '한국선원복지고용센터(koswec.or.kr) 정보마당 업체조회, 2026년 11월 26일 수집. 등록 선박은 센터에 선원 고용을 신고한 배이며 회사가 운항하는 전체 선대와 다를 수 있습니다.';
+const KOS_RULE = '선박 3척 이상인 회사만 실었습니다. 개인선주·연근해어선 지역 묶음은 회사가 아니어서 뺐습니다. 어선만 운용하는 회사도 뺐습니다.';
+function renderDir(qs){
+  const el = $('#v-dir');
+  dataBox(el, 'koswec', k => {
+    const F = k.firms, T = k.typeNames, BN = k.bizNames;
+    const bizUsed = BN.filter((b, i) => F.some(f => f.b === i));
+    const regions = [...new Set(F.map(f => regionOf(f.addr)))].sort((a, b) => (a === '기타') - (b === '기타') || F.filter(f => regionOf(f.addr) === b).length - F.filter(f => regionOf(f.addr) === a).length);
+    const typeCount = T.map((_, i) => F.filter(f => f.ships.some(s => s[3] === i)).length);
+    const q0 = new URLSearchParams(qs || '');
+    const st = {
+      q: (q0.get('q') || '').slice(0, 60),
+      biz: bizUsed.includes(q0.get('biz')) ? q0.get('biz') : '',
+      types: new Set((q0.get('type') || '').split(',').filter(x => T.includes(x))),
+      r: regions.includes(q0.get('r')) ? q0.get('r') : '',
+      sort: q0.get('sort') === 'name' ? 'name' : 'ships', shown: 50
+    };
+    const total = F.reduce((a, f) => a + f.ships.length, 0);
+    el.innerHTML =
+      '<div class="crumb"><a href="#home">처음</a> &rsaquo; 등록 업체</div>'+
+      '<div class="co-head"><div><h1>KOSWEC 등록 업체 '+F.length.toLocaleString('ko-KR')+'곳 · 선박 '+total.toLocaleString('ko-KR')+'척</h1><div class="tags"><span class="ctag r">등록</span></div></div></div>'+
+      '<p class="note dir-src">'+esc(KOS_SRC)+' '+esc(KOS_RULE)+'</p>'+
+      '<div class="fgroup dir-search"><label for="dir-q"><span class="note">회사 이름, 선박 이름</span></label><input type="search" id="dir-q" autocomplete="off" placeholder="예: 에이치엠엠, 프리즘"></div>'+
+      '<button type="button" class="f-toggle" id="dir-ftoggle" aria-expanded="false" aria-controls="dir-filters">업종 · 지역 · 선종 필터</button>'+
+      '<div class="filters dir-filters" id="dir-filters">'+
+        '<div class="fgroup"><label for="dir-biz"><span class="note">업종 (업체 기준)</span></label><select id="dir-biz"><option value="">전체</option>'+bizUsed.map(b => '<option>'+esc(b)+'</option>').join('')+'</select></div>'+
+        '<div class="fgroup"><label for="dir-r"><span class="note">지역 (주소 기준)</span></label><select id="dir-r"><option value="">전체</option>'+regions.map(r => '<option>'+esc(r)+'</option>').join('')+'</select></div>'+
+        '<div class="fgroup"><label for="dir-sort"><span class="note">정렬</span></label><select id="dir-sort"><option value="ships">선박 많은 순</option><option value="name">이름 순</option></select></div>'+
+        '<div class="fgroup dir-types"><span>선종 (하나라도 있으면 표시)</span><div class="chips" id="dir-types">'+
+          T.map((n, i) => '<button type="button" class="chip" data-dtype="'+esc(n)+'" aria-pressed="false">'+esc(n)+'<small>'+typeCount[i]+'</small></button>').join('')+'</div></div>'+
+      '</div>'+
+      '<p class="note" id="dir-count" aria-live="polite"></p><ul class="dir-list" id="dir-list"></ul><div id="dir-foot"></div>';
+    const qi = $('#dir-q'), bs = $('#dir-biz'), rs = $('#dir-r'), ss = $('#dir-sort');
+    const sync = () => {
+      qi.value = st.q; bs.value = st.biz; rs.value = st.r; ss.value = st.sort;
+      el.querySelectorAll('[data-dtype]').forEach(b => b.setAttribute('aria-pressed', String(st.types.has(b.dataset.dtype))));
+    };
+    const toHash = () => {
+      const u = new URLSearchParams();
+      if (st.q.trim()) u.set('q', st.q.trim());
+      if (st.biz) u.set('biz', st.biz);
+      if (st.types.size) u.set('type', [...st.types].join(','));
+      if (st.r) u.set('r', st.r);
+      if (st.sort !== 'ships') u.set('sort', st.sort);
+      const h = '#dir' + (u.toString() ? '?' + u.toString().replace(/%2C/g, ',') : '');
+      if (location.hash !== h){ history.replaceState(null, '', h); lastHash = location.hash; }
+    };
+    const draw = () => {
+      const qq = st.q.trim().toLowerCase().replace(/\s+/g, ' ');
+      const bi = st.biz ? BN.indexOf(st.biz) : -1;
+      const ti = new Set([...st.types].map(n => T.indexOf(n)));
+      let list = F.map(f => {
+        if (bi >= 0 && f.b !== bi) return null;
+        if (st.r && regionOf(f.addr) !== st.r) return null;
+        if (ti.size && !f.ships.some(s => ti.has(s[3]))) return null;
+        let hit = null;
+        if (qq){
+          if (!f.n.toLowerCase().includes(qq)){
+            hit = f.ships.filter(s => s[0].toLowerCase().includes(qq)).map(s => s[0]);
+            if (!hit.length) return null;
+          }
+        }
+        return {f, hit};
+      }).filter(Boolean);
+      if (st.sort === 'name') list.sort((a, b) => a.f.n.localeCompare(b.f.n, 'ko'));
+      $('#dir-count').textContent = list.length.toLocaleString('ko-KR')+'곳 · 선박 '+list.reduce((a, x) => a + x.f.ships.length, 0).toLocaleString('ko-KR')+'척';
+      if (!list.length){
+        $('#dir-list').innerHTML = '';
+        $('#dir-foot').innerHTML = '<p class="cmp-empty" id="dir-empty">조건에 맞는 업체가 없습니다. 필터를 줄여 보시기 바랍니다. <button type="button" class="linkbtn">필터 초기화</button></p>';
+        $('#dir-empty button').addEventListener('click', () => { st.q = ''; st.biz = ''; st.types.clear(); st.r = ''; st.shown = 50; sync(); toHash(); draw(); });
+        return;
+      }
+      $('#dir-list').innerHTML = list.slice(0, st.shown).map(({f, hit}) =>
+        '<li class="firm" data-ships="'+f.ships.length+'">'+
+          '<div class="fl"><a class="fn" href="'+firmHref(f.id)+'">'+esc(f.n)+'</a>'+(f.app ? '<a class="fapp" href="'+coHref(f.app)+'">선사록에 있음</a>' : '')+
+            (hit ? '<span class="fhit">선박: '+esc(hit.slice(0, 3).join(', '))+(hit.length > 3 ? ' 외 '+(hit.length - 3)+'척' : '')+'</span>' : '')+'</div>'+
+          '<span class="fb">'+esc(BN[f.b])+'</span>'+
+          '<span class="fs mono">'+f.ships.length+'척</span>'+
+          '<span class="ft">'+firmTopTypes(f).map(([i, n]) => esc(T[i])+' '+n).join(', ')+'</span>'+
+          '<span class="fp mono">'+esc(f.tel || '')+'</span></li>').join('');
+      const rest = list.length - st.shown;
+      $('#dir-foot').innerHTML = rest > 0 ? '<button type="button" class="more" id="dir-more">'+Math.min(50, rest)+'곳 더 보기 ('+rest+'곳 남음)</button>' : '';
+      if (rest > 0) $('#dir-more').addEventListener('click', () => { st.shown += 50; draw(); });
+    };
+    let tm;
+    qi.addEventListener('input', () => { clearTimeout(tm); tm = setTimeout(() => { st.q = qi.value.slice(0, 60); st.shown = 50; toHash(); draw(); }, 150); });
+    bs.addEventListener('change', () => { st.biz = bs.value; st.shown = 50; toHash(); draw(); });
+    rs.addEventListener('change', () => { st.r = rs.value; st.shown = 50; toHash(); draw(); });
+    ss.addEventListener('change', () => { st.sort = ss.value; st.shown = 50; toHash(); draw(); });
+    el.querySelectorAll('[data-dtype]').forEach(b => b.addEventListener('click', () => {
+      const n = b.dataset.dtype; st.types.has(n) ? st.types.delete(n) : st.types.add(n); st.shown = 50; sync(); toHash(); draw();
+    }));
+    $('#dir-ftoggle').addEventListener('click', e => { const open = $('#dir-filters').classList.toggle('open'); e.currentTarget.setAttribute('aria-expanded', String(open)); });
+    sync(); draw();
+  });
+}
+function renderFirm(id){
+  const el = $('#v-firm');
+  dataBox(el, 'koswec', k => {
+    const f = k.firms.find(x => x.id === id);
+    if (!f){
+      el.innerHTML = '<div class="crumb"><a href="#home">처음</a> &rsaquo; <a href="#dir">등록 업체</a></div><p class="cmp-empty">찾는 업체가 없습니다. <a href="#dir">등록 업체 목록</a>에서 다시 찾아보시기 바랍니다.</p>';
+      return;
+    }
+    document.title = f.n+' | 선사록';
+    const T = k.typeNames, BN = k.bizNames;
+    const byType = firmTopTypes(f, 99);
+    el.innerHTML =
+      '<div class="crumb"><a href="#home">처음</a> &rsaquo; <a href="#dir">등록 업체</a> &rsaquo; '+esc(f.n)+'</div>'+
+      '<div class="co-head"><div><h1>'+esc(f.n)+'</h1><div class="tags"><span class="ctag r">등록</span></div></div>'+
+        (f.app ? '<div class="acts"><a class="btn ghost" href="'+coHref(f.app)+'">선사록 선사 정보 보기</a></div>' : '')+'</div>'+
+      '<section class="sheet blk"><h2>기본 정보</h2><div class="in"><dl class="kv">'+
+        '<dt>업종</dt><dd>'+esc(BN[f.b])+'</dd>'+
+        (f.tel ? '<dt>전화</dt><dd class="mono">'+esc(f.tel)+'</dd>' : '')+
+        (f.fax ? '<dt>팩스</dt><dd class="mono">'+esc(f.fax)+'</dd>' : '')+
+        (f.addr ? '<dt>주소</dt><dd>'+esc(f.addr)+'</dd>' : '')+
+        '<dt>등록 선박</dt><dd>'+f.ships.length+'척 ('+byType.map(([i, n]) => esc(T[i])+' '+n).join(', ')+')</dd>'+
+      '</dl></div></section>'+
+      '<section class="sheet blk" style="margin-top:16px"><h2>등록 선박 '+f.ships.length+'척</h2><div class="in"><div class="table-scroll"><table class="wt" id="firm-ships">'+
+        '<thead><tr><th>#</th><th>선박명</th><th>총톤수</th><th>업종</th><th>선종</th><th>선박 국적</th><th>선주 국적</th></tr></thead><tbody>'+
+        f.ships.map((s, i) => '<tr><td class="mono">'+(i + 1)+'</td><td>'+esc(s[0])+'</td><td>'+(s[1] == null ? '-' : s[1].toLocaleString('ko-KR')+'톤')+'</td><td>'+esc(BN[s[2]])+'</td><td>'+esc(T[s[3]])+'</td><td>'+esc(s[4])+'</td><td>'+esc(s[5])+'</td></tr>').join('')+
+      '</tbody></table></div><p class="note" style="margin-top:10px">'+esc(KOS_SRC)+'</p></div></section>';
+  });
+}
 const LIMIT = 5;
 const state = {kind:'all', fleet:'all', foreign:true, q:'', routes:new Set(), cadet:false, reserve:false, newsCat:'all', newsRange:'all', newsFrom:'', newsTo:'', newsQ:'', cmpTab:'co', sort:'rank'};
 const cmp = {co:[], ty:[]};
