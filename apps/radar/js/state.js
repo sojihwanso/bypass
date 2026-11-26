@@ -1,4 +1,6 @@
 /* 전역 상태 S · 설정 저장/불러오기 · 이벤트 버스 */
+import { MENU } from './menu.js';
+import { RANGES } from './echo.js';
 export const DEFAULTS = {
   ctrl: {
     tx: false, band: 'X', pulse: 'M1', tune: { auto: true, val: 50 }, gain: 65,
@@ -43,12 +45,30 @@ function merge(dst, def, src) {
   }
 }
 function reset() { const f = clone(DEFAULTS); for (const k of Object.keys(f)) S[k] = f[k]; }
-export function loadSettings(storage = globalThis.localStorage) {
-  reset();
-  try { const raw = storage && storage.getItem(KEY); if (raw) merge(S, DEFAULTS, JSON.parse(raw)); } catch (e) { reset(); }
+/* 사이트 데이터가 막힌 브라우저는 localStorage를 읽기만 해도 예외가 남 → try 안에서 꺼냄 */
+const store = (s) => (s !== undefined ? s : globalThis.localStorage);
+const getP = (o, p) => p.split('.').reduce((a, k) => (a == null ? undefined : a[k]), o);
+const setP = (o, p, v) => { const ks = p.split('.'), l = ks.pop(); ks.reduce((a, k) => a[k], o)[l] = v; };
+/* 형식은 맞아도 값이 범위 밖이면 기본값·범위로 */
+function validate() {
+  for (const it of MENU.flatMap((m) => m.items)) {
+    if (!it.path) continue; const v = getP(S, it.path);
+    if (it.type === 'enum' && !it.opts.some((o) => o.v === v)) setP(S, it.path, getP(DEFAULTS, it.path));
+    if (it.type === 'num' && (typeof v !== 'number' || !isFinite(v))) setP(S, it.path, getP(DEFAULTS, it.path));
+    else if (it.type === 'num') setP(S, it.path, Math.min(it.max, Math.max(it.min, v)));
+  }
+  if (!RANGES.includes(S.disp.rangeNM)) S.disp.rangeNM = DEFAULTS.disp.rangeNM;
+  if (!['HU', 'CU', 'NU'].includes(S.disp.orient)) S.disp.orient = DEFAULTS.disp.orient;
+  if (!['RM', 'TM'].includes(S.disp.motion)) S.disp.motion = DEFAULTS.disp.motion;
+  for (const k of ['gain']) S.ctrl[k] = Math.min(100, Math.max(0, S.ctrl[k]));
+  for (const k of ['sea', 'rain', 'tune']) S.ctrl[k].val = Math.min(100, Math.max(0, S.ctrl[k].val));
 }
-export function saveSettings(storage = globalThis.localStorage) {
-  try { const o = {}; for (const k of Object.keys(DEFAULTS)) o[k] = S[k]; storage && storage.setItem(KEY, JSON.stringify(o)); } catch (e) { /* 저장 불가 브라우저 */ }
+export function loadSettings(storage) {
+  reset();
+  try { const st = store(storage), raw = st && st.getItem(KEY); if (raw) merge(S, DEFAULTS, JSON.parse(raw)); validate(); } catch (e) { reset(); }
+}
+export function saveSettings(storage) {
+  try { const st = store(storage), o = {}; for (const k of Object.keys(DEFAULTS)) o[k] = S[k]; st && st.setItem(KEY, JSON.stringify(o)); } catch (e) { /* 저장 불가 브라우저 */ }
 }
 export function resetSettings() { reset(); }
 const bus = {};

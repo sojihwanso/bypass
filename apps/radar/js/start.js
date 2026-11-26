@@ -8,7 +8,17 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 const mmss = (s) => `${String((s / 60) | 0).padStart(2, '0')}:${String((s % 60) | 0).padStart(2, '0')}`;
 let ui = null, lastResult = null, current = null;
 
-export function initStart(uiRef) { ui = uiRef; window.RadarStart = openStart; return { openStart, startScenario, lastResult: () => lastResult }; }
+/* 안내·결과는 각자 대화상자(같은 창을 다시 쓰면 늦게 오는 close 이벤트가 정지를 풀어 버림) */
+let curLog = null;
+function ownDlg(id, title, body, foot) {
+  let d = document.getElementById(id);
+  if (!d) { d = document.createElement('dialog'); d.id = id; document.getElementById('app').append(d); }
+  d.innerHTML = `<div class="dlg-h"><span></span><button class="btn" type="button" data-x="1"></button></div><div class="dlg-b"></div><div class="dlg-f"></div>`;
+  d.querySelector('.dlg-h span').textContent = title; d.querySelector('[data-x]').textContent = lang() === 'en' ? 'Close' : '닫기';
+  d.querySelector('.dlg-b').innerHTML = body; d.querySelector('.dlg-f').innerHTML = foot;
+  if (!d.open) d.showModal(); return d;
+}
+export function initStart(uiRef) { ui = uiRef; window.RadarStart = openStart; return { openStart, startScenario, lastResult: () => lastResult, finishNow: () => curLog && !lastResult && finish(evaluate(curLog.result())) }; }
 
 export async function openStart(o = {}) {
   const R = window.Radar, en = lang() === 'en';
@@ -55,7 +65,7 @@ function runScenario(scn, o = {}) {
   R.setRadar(o.free || o.keepTx ? 'tx' : 'stby');
   if (scn.message) R.ais().addMessage({ ...scn.message, t: 0 });
   if (o.free) { R.setLog(null); R.setScenarioTick(null); return; }
-  const log = createLog(scn); let lastS = -1;
+  const log = createLog(scn); curLog = log; let lastS = -1;
   R.setLog((w) => { if (w.t - lastS >= 1) { lastS = w.t; log.sample(w); } });
   R.setScenarioTick((w) => {
     if (lastResult) return; const r = log.result();
@@ -65,8 +75,8 @@ function runScenario(scn, o = {}) {
   });
   if (!o.skipBrief) {
     R.setPaused(true);
-    const d = ui.dialog(`${scn.id} · ${tl(scn)}`, `<p class="rule-chip">COLREG ${scn.rule}</p><p>${esc(tl(scn.brief))}</p><p class="small">${en ? 'Pass: every ship passes at 0.3 NM or more, no collision, no grounding.' : '합격: 모든 상대선과 0.3 NM 이상 떨어져 지나가고, 충돌·좌초가 없으면 돼요.'}</p>`, `<button class="btn pri" type="button" data-go="1">${en ? 'Start' : '시작'}</button>`);
-    d.onclick = (e) => { if (e.target.closest('[data-go]')) { d.close(); R.setPaused(false); } };
+    const d = ownDlg('briefDlg', `${scn.id} · ${tl(scn)}`, `<p class="rule-chip">COLREG ${scn.rule}</p><p>${esc(tl(scn.brief))}</p><p class="small">${en ? 'Pass: every ship passes at 0.3 NM or more, no collision, no grounding.' : '합격: 모든 상대선과 0.3 NM 이상 떨어져 지나가고, 충돌·좌초가 없으면 돼요.'}</p>`, `<button class="btn pri" type="button" data-go="1">${en ? 'Start' : '시작'}</button>`);
+    d.onclick = (e) => { if (e.target.closest('[data-go]') || e.target.closest('[data-x]')) d.close(); };
     d.onclose = () => R.setPaused(false);
   }
 }
@@ -80,7 +90,8 @@ function finish(r) {
     <dt>${en ? 'First action' : '첫 조치'}</dt><dd>${fa ? `${mmss(fa.t)} · TCPA ${fa.tcpa != null ? fa.tcpa.toFixed(1) + ' min' : '-'} · ${fa.rng != null ? fa.rng.toFixed(2) + ' NM' : ''} · ${fa.dHdg >= 0 ? (en ? 'stbd ' : '우현 ') : en ? 'port ' : '좌현 '}${Math.abs(fa.dHdg).toFixed(0)}°${fa.dSpd < -0.5 ? ` · ${fa.dSpd.toFixed(1)} kn` : ''}` : en ? 'none' : '없음'}</dd>
     <dt>${en ? 'Collision / grounding' : '충돌 / 좌초'}</dt><dd>${r.collision ? (en ? 'collision' : '충돌') : '-'} / ${r.grounding ? (en ? 'grounded' : '좌초') : '-'}</dd></dl>
     <ul class="notes">${r.notes.map((n) => `<li>${esc(tl(n))}</li>`).join('')}</ul></div>`;
-  const d = ui.dialog(en ? 'Result' : '결과', html, `<button class="btn" type="button" data-r="again">${en ? 'Try again' : '다시 하기'}</button><button class="btn" type="button" data-r="menu">${en ? 'Scenarios' : '시나리오 목록'}</button><button class="btn pri" type="button" data-r="cont">${en ? 'Keep sailing' : '계속 항해'}</button>`);
-  d.onclose = () => R.setPaused(false);
-  d.onclick = (e) => { const b = e.target.closest('[data-r]'); if (!b) return; d.close(); R.setPaused(false); if (b.dataset.r === 'again') runScenario(current); if (b.dataset.r === 'menu') openStart(); };
+  const d = ownDlg('resDlg', en ? 'Result' : '결과', html, `<button class="btn" type="button" data-r="again">${en ? 'Try again' : '다시 하기'}</button><button class="btn" type="button" data-r="menu">${en ? 'Scenarios' : '시나리오 목록'}</button><button class="btn pri" type="button" data-r="cont">${en ? 'Keep sailing' : '계속 항해'}</button>`);
+  let next = null;
+  d.onclose = () => { if (next === 'again') runScenario(current); else if (next === 'menu') openStart(); else R.setPaused(false); next = null; };
+  d.onclick = (e) => { if (e.target.closest('[data-x]')) { d.close(); return; } const b = e.target.closest('[data-r]'); if (!b) return; next = b.dataset.r === 'cont' ? null : b.dataset.r; d.close(); };
 }

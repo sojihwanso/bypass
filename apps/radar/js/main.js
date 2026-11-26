@@ -52,12 +52,12 @@ export function startWorld(def) {
   W = { def, name: def.name || '', own, targets: def.targets.map((g) => (g.want ? { ...g, legs: [...(g.legs || [])], want: { ...g.want } } : createTarget(g))), weather: { sea: 0, windFrom: 0, windMs: 0, rain: [], ducting: false, interference: false, current: { set: 0, drift: 0 }, ...(def.weather || {}) }, aids: def.aids || [], marks: def.marks || [], t: def.t || 0, land: { rings: [], ok: false, heightM: 100 }, needsCoast: !!def.needsCoast };
   P = makeProj(def.own.lat, def.own.lon);
   tracker = createTracker({ max: 100 }); ais = createAIS(); alerts = createAlerts(() => W.t); tools = createTools(); route = createRoute(); trails.reset(V.rangeNM, S.disp.trails.mode);
-  selected = []; tmOff = { x: 0, y: 0 }; ruler = null; prevScan = new Array(N_BRG); prevRaw = null; ppi.clear();
+  selected = []; tmOff = { x: 0, y: 0 }; ruler = null; rulerA = null; uiMode = null; azZones = []; piOn = false; speed = 1; offCenter = null; prevScan = new Array(N_BRG); prevRaw = null; ppi.clear();
   scene = buildScene({ own: ownScene(), targets: W.targets, weather: W.weather, aids: W.aids, band: S.ctrl.band, pulse: S.ctrl.pulse, seed: (Math.random() * 1e6) | 0 });
   trialSet = { course: own.hdg, speed: own.stw };
   const bb = { lat0: def.own.lat - 0.6, lat1: def.own.lat + 0.6, lon0: def.own.lon - 0.75, lon1: def.own.lon + 0.75 };
   const myW = W;
-  loadLand(bb).then((L) => { if (W !== myW) return; W.land = { rings: L.rings, ok: L.ok, heightM: 100 }; coastKey = ''; scene = buildScene({ own: ownScene(), targets: W.targets, land: W.land, weather: W.weather, aids: W.aids, band: S.ctrl.band, pulse: S.ctrl.pulse, seed: scene.seed }); if (!L.ok) alerts.raise('coastfail', 'C', lang() === 'en' ? 'Coastline data unavailable' : '해안선 데이터 없음'); });
+  loadLand(bb).then((L) => { if (W !== myW) return; W.land = { rings: L.rings, ok: L.ok, tried: true, heightM: 100 }; if (L.ok) alerts.resolve('coastfail'); coastKey = ''; scene = buildScene({ own: ownScene(), targets: W.targets, land: W.land, weather: W.weather, aids: W.aids, band: S.ctrl.band, pulse: S.ctrl.pulse, seed: scene.seed }); if (!L.ok) alerts.raise('coastfail', 'C', lang() === 'en' ? 'Coastline data unavailable' : '해안선 데이터 없음'); });
   return W;
 }
 const ownScene = () => ({ lat: W.own.lat, lon: W.own.lon, hdg: W.own.hdg, antH: W.own.antH });
@@ -97,7 +97,8 @@ function tick(dt) {
   scene.band = S.ctrl.band; scene.pulse = S.ctrl.pulse;
   updateScene(scene, ownScene(), W.targets, W.t);
   // 안테나 스윕(실시간 2.5 s/회전)
-  const offM = Math.hypot(V.offset.x, V.offset.y), bufR = V.rangeNM * (1 + offM);
+  // 버퍼 거리는 오프셋 크기와 상관없이 고정(매 프레임 바뀌면 PPI가 매번 지워짐) — 오프셋 최대 0.75 R
+  const bufR = V.rangeNM * (V.motion === 'TM' || offCenter ? 1.75 : 1);
   const nl = Math.round((dt / 2.5) * N_BRG), oxy = ownXY(), trailOn = S.disp.trails.time > 0, tl = S.disp.trails.level;
   for (let k = 0; k < nl; k++) {
     const bi = (ant + k) & (N_BRG - 1), raw = rawLine(scene, bi, 512, bufR);
@@ -105,7 +106,7 @@ function tick(dt) {
     prevRaw = raw; prevScan[bi] = lv.pre || lv; ppi.writeLine(bi, lv);
     if (trailOn && S.ctrl.tx) { const b = (bi / N_BRG) * 360 * D, sb = Math.sin(b), cb = Math.cos(b), dr = bufR / 512, rel = S.disp.trails.mode === 'REL';
       for (let i = S.disp.trails.suppressOS ? 40 : 2; i < 512; i += 2) if (lv[i] >= tl + 1) { const r = (i + 0.5) * dr; rel ? trails.mark(r * sb, r * cb, W.t) : trails.mark(oxy.x + r * sb, oxy.y + r * cb, W.t); } }
-    if (bi === N_BRG - 1) onScan();
+    if (bi === N_BRG - 1 && run > 0) onScan();
   }
   ant = (ant + nl) & (N_BRG - 1);
   ppi.setPersistence(S.disp.persistence);
@@ -143,7 +144,7 @@ function onScan() {
   });
   if (S.alert.anchorOn && tools.anchor) { const a = { x: P.x(tools.anchor.lon), y: P.y(tools.anchor.lat) }; if (anchorWatch(a, S.alert.anchorR, ownXY())) alerts.raise('anchor', 'A', 'ANCHOR WATCH'); else alerts.resolve('anchor'); } else alerts.resolve('anchor');
   if (S.alert.watch > 0 && (performance.now() - lastUser) / 60000 > S.alert.watch) alerts.raise('watch', 'W', en ? 'WATCH ALERT: confirm watch' : '당직 경보: 확인해 주세요');
-  if (W.needsCoast && !W.land.ok) alerts.raise('coastfail', 'C', en ? 'Coastline data unavailable' : '해안선 데이터 없음');
+  if (W.needsCoast && W.land.tried && !W.land.ok) alerts.raise('coastfail', 'C', en ? 'Coastline data unavailable' : '해안선 데이터 없음');
 }
 
 /* ---------- 위층 모델 ---------- */
@@ -263,7 +264,7 @@ Object.assign(actions, {
   ebl1: () => { tools.ebl[0].on = !tools.ebl[0].on; if (tools.ebl[0].on && W) tools.ebl[0].brg = Math.round(W.own.hdg); }, ebl2: () => { tools.ebl[1].on = !tools.ebl[1].on; },
   vrm1: () => { tools.vrm[0].on = !tools.vrm[0].on; }, vrm2: () => { tools.vrm[1].on = !tools.vrm[1].on; },
   eblRef: () => { S.disp.eblRef = S.disp.eblRef === 'REL' ? 'TRUE' : 'REL'; saveSettings(); },
-  ack: () => { const a = alerts.top(); if (a) alerts.ack(a.id); for (const g of tracker.targets()) if (g.state === 'lost' && !alerts.has('lost:' + g.id)) tracker.cancel(g.id); tracker.removeLost && cleanupLost(); },
+  ack: () => { const a = alerts.list().find((x) => !x.acked && x.pri !== 'C'); if (!a) return; /* 아직 확인 안 한 것 중 가장 급한 것 */ alerts.ack(a.id); if (a.id.startsWith('lost:')) { const id = a.id.slice(5); tracker.cancel(id); selected = selected.filter((x) => x !== id); alerts.resolve(a.id); } },
   silence: () => alerts.silence(),
   alertList: () => { const rows = alerts.list().map((a) => `<tr><td>${a.pri}</td><td>${a.text}</td><td>${a.active ? (lang() === 'en' ? 'active' : '발생') : lang() === 'en' ? 'rectified' : '해소'}</td><td>${a.acked ? 'ACK' : '-'}</td></tr>`).join(''); ui.dialog(t('alert'), `<table class="tbl">${rows || `<tr><td>${t('noAlert')}</td></tr>`}</table>`, `<button class="btn" type="button" data-act="ackAll">${lang() === 'en' ? 'ACK all' : '모두 확인'}</button>`); },
   ackAll: () => { alerts.ackAll(); actions.alertList(); },
@@ -278,7 +279,6 @@ Object.assign(actions, {
   cursor: (id, pos) => cursorAct(id, pos),
   menuAction: (id) => menuAction(id),
 });
-function cleanupLost() { for (const g of [...tracker.targets()]) if (g.state === 'lost' && !alerts.list().some((a) => a.id === 'lost:' + g.id)) tracker.cancel(g.id); }
 function cursorAct(id, pos) {
   if (!W) return; const w = screenToWorld(pos), near = nearestTarget(pos);
   if (id === 'acq') return acquireAt(pos);
@@ -360,7 +360,7 @@ setInterval(() => { if (W && !paused) saveNow(); }, 15000);
 addEventListener('pagehide', saveNow);
 
 /* ---------- 외부 모듈(시나리오·도움말)이 쓸 창구 ---------- */
-window.Radar = { startWorld, freeDef, setRadar, get world() { return W; }, setLog(fn) { logFn = fn; }, setScenarioTick(fn) { onScenarioTick = fn; }, alerts: () => alerts, ais: () => ais, tracker: () => tracker, route: () => route, tools: () => tools, saveNow, resume, hasResume: () => !!localStorage.getItem(RESUME), setPaused: (p) => { paused = p; }, pointInLand };
+window.Radar = { startWorld, freeDef, setRadar, get world() { return W; }, setLog(fn) { logFn = fn; }, setScenarioTick(fn) { onScenarioTick = fn; }, alerts: () => alerts, ais: () => ais, tracker: () => tracker, route: () => route, tools: () => tools, saveNow, resume, hasResume: () => { try { return !!localStorage.getItem(RESUME); } catch (e) { return false; } }, setPaused: (p) => { paused = p; }, pointInLand };
 
 /* 빠른 진행(테스트·검증): 그리지 않고 물리·기록만 */
 function tickSim(sec) { if (!W) return; const n = Math.ceil(sec / 0.25); for (let i = 0; i < n; i++) { if (paused) return; const h = sec / n; W.t += h; stepShip(W.own, h, W.weather.current); for (const g of W.targets) stepTarget(g, h, W.t); if (onScenarioTick) onScenarioTick(W, h); if (logFn) logFn(W); } }
@@ -378,7 +378,7 @@ if (TEST) {
     radar: { set: setRadar, toggle: toggleTx, get state() { return radar.state; } }, world: () => W, tracker: { targets: () => tracker.targets() },
     newWorld: (o) => startWorld(freeDef(o)), tgtScreen: (id) => { const g = W.targets.find((x) => x.id === id), r = relOf(P.x(g.lon), P.y(g.lat)), p = ppi.toScreen(r.brg, r.rng); return { sx: p.x, sy: p.y }; },
     cursorAct, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,
-    startScenario: (id, o) => starter.startScenario(id, o), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), tickSim, sim: { setAuto, setRudderOrder, setTelegraph }, menuItems: () => MENU.flatMap((m) => m.items.map((i) => (lang() === 'en' ? i.en : i.ko))),
+    startScenario: (id, o) => starter.startScenario(id, o), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), finishNow: () => starter.finishNow(), forceState: (o) => { if (o.az) { azZones = o.az; tracker.setZones(o.az); } if (o.speed) speed = o.speed; if (o.pi !== undefined) piOn = o.pi; }, uiState: () => ({ az: azZones.length > 0, speed, pi: piOn, off: !!offCenter }), tickSim, sim: { setAuto, setRudderOrder, setTelegraph }, menuItems: () => MENU.flatMap((m) => m.items.map((i) => (lang() === 'en' ? i.en : i.ko))),
   };
   setRadar('tx');
 }

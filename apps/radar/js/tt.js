@@ -7,7 +7,7 @@ const GATE = 0.3, GATE0 = 0.5, ACQ_SEC = 60, WIN = 150, MAN_KN = 3;
 const courseOf = (vx, vy) => wrap360(Math.atan2(vx, vy) / D2R);
 
 export function createTracker({ max = 100 } = {}) {
-  let list = [], seq = 0, zones = [], cand = [], lim = { cpa: 2, tcpa: 12, on: true }, pastInt = 60;
+  let list = [], seq = 0, zones = [], cand = [], lim = { cpa: 2, tcpa: 12, on: true }, pastInt = 60, lastUpd = -Infinity;
   const live = () => list.filter((g) => g.state !== 'lost');
   function make(x, y, t, auto) {
     if (live().length >= max) return null;
@@ -15,6 +15,8 @@ export function createTracker({ max = 100 } = {}) {
     list.push(g); return g.id;
   }
   function update(dets, own, t) {
+    if (t <= lastUpd) return; // 일시정지 중 같은 시각의 스캔은 무시(dt=0이면 필터 속도가 튐)
+    lastUpd = t;
     const abs = dets.map((d) => ({ x: own.x + d.x, y: own.y + d.y, rel: d, used: false }));
     for (const g of list) {
       if (g.state === 'lost') continue;

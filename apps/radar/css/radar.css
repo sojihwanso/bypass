@@ -213,6 +213,7 @@ dialog::backdrop{background:rgba(5,10,14,.55)}
 
 /* 시작·결과 화면 */
 #startDlg{width:min(920px,94vw)}
+#briefDlg,#resDlg{width:min(640px,94vw)}
 .start .lead{margin:0 0 12px;color:var(--muted)}
 .scards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
 .scard{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto 1fr;gap:2px 10px;text-align:left;border:1px solid var(--rule);background:var(--paper);border-radius:8px;padding:10px 12px;transition:border-color .15s,background .15s}
