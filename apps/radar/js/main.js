@@ -16,6 +16,7 @@ import { initKeys, KEYMAP } from './keys.js';
 import { drawOverlay } from './overlay.js';
 import { t, lang } from './i18n.js';
 import { initStart } from './start.js';
+import { initHelp } from './help.js';
 
 const TEST = new URLSearchParams(location.search).has('test');
 loadSettings();
@@ -368,6 +369,7 @@ function tickSim(sec) { if (!W) return; const n = Math.ceil(sec / 0.25); for (le
 startWorld(freeDef({ targets: [{ brg: 40, rng: 4, hdg: 230, kn: 11 }, { brg: 300, rng: 5, hdg: 100, kn: 8 }] }));
 setRange(S.disp.rangeNM);
 const starter = initStart(ui);
+initHelp();
 requestAnimationFrame(frame);
 if (!TEST) starter.openStart();
 if (TEST) {
@@ -376,7 +378,7 @@ if (TEST) {
     radar: { set: setRadar, toggle: toggleTx, get state() { return radar.state; } }, world: () => W, tracker: { targets: () => tracker.targets() },
     newWorld: (o) => startWorld(freeDef(o)), tgtScreen: (id) => { const g = W.targets.find((x) => x.id === id), r = relOf(P.x(g.lon), P.y(g.lat)), p = ppi.toScreen(r.brg, r.rng); return { sx: p.x, sy: p.y }; },
     cursorAct, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,
-    startScenario: (id, o) => starter.startScenario(id, o), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), tickSim, sim: { setAuto, setRudderOrder, setTelegraph },
+    startScenario: (id, o) => starter.startScenario(id, o), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), tickSim, sim: { setAuto, setRudderOrder, setTelegraph }, menuItems: () => MENU.flatMap((m) => m.items.map((i) => (lang() === 'en' ? i.en : i.ko))),
   };
   setRadar('tx');
 }
