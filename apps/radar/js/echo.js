@@ -20,7 +20,9 @@ export const sartDots = (r) => Array.from({ length: 12 }, (_, i) => r + 0.08 + i
 const MORSE = { A: '.-', B: '-...', C: '-.-.', D: '-..', G: '--.', K: '-.-', M: '--', N: '-.', O: '---', Q: '--.-', T: '-', X: '-..-', Y: '-.--', Z: '--..' };
 export function raconCode(letter) { const out = []; let r = 0; for (const c of MORSE[letter] || '-') { const len = c === '-' ? 0.24 : 0.08; out.push([r, r + len]); r += len + 0.08; } return out; }
 
-const C_DB = 38; // 레이더 방정식 상수: 100 m² 물표가 6 NM에서 약 27 dB
+const C_DB = 44; // 레이더 방정식 상수(교육용으로 물표를 6 dB 강하게): 100 m² 물표가 6 NM에서 약 33 dB
+const SEA_K = -7; // 해면 반사 세기 보정(교육용으로 약하게)
+const THR0 = 44; // 수신 문턱 = THR0 − 0.4·GAIN (잡음이 GAIN을 높여도 늦게 올라오게)
 const LAND_CELL = 0.03, LAND_HALF = 40; // 육지 격자(NM)
 const defaultRcs = (L) => 0.05 * L * L;
 
@@ -54,7 +56,7 @@ function buildLandGrid(rings, proj, ox, oy) {
   return g;
 }
 const landAt = (g, x, y) => { const c = Math.floor((x - g.x0) / g.cell), r = Math.floor((y - g.y0) / g.cell); return c >= 0 && r >= 0 && c < g.n && r < g.n ? g.data[r * g.n + c] : 0; };
-const landDb = (R) => 60 - 30 * Math.log10(R + 0.5);
+const landDb = (R) => 64 - 30 * Math.log10(R + 0.5);
 
 /* ---- 장면 ---- */
 export function buildScene({ own, targets = [], land = { rings: [], heightM: 100 }, weather = {}, aids = [], band = 'X', pulse = 'M1', seed = 1 }) {
@@ -128,7 +130,7 @@ export function rawLine(sc, brgIdx, nBins, maxRng) {
   const land = sc.grid && sc.grid.any ? landLine(sc, cb, brgIdx, nBins, maxRng, 0) : null;
   // 해면 클러터
   if (W.sea > 0) {
-    const ext = 0.6 + 0.7 * W.sea, k = 4.2 * W.sea + (sc.band === 'S' ? -8 : 0) + 3 * Math.cos((brg - W.windFrom) * D2R) + mast;
+    const ext = 0.6 + 0.7 * W.sea, k = 4.2 * W.sea + SEA_K + (sc.band === 'S' ? -8 : 0) + 3 * Math.cos((brg - W.windFrom) * D2R) + mast;
     for (let i = 0; i < nBins; i++) {
       if (R[i] > ext + 1) break;
       if (land && land[i] !== 0) continue;
@@ -206,7 +208,7 @@ export function processLine(raw, c, ctx) {
   const rain = c.rain || { auto: false, val: 0 }, rv = rain.auto || ace ? Math.max(rain.val, 60) : rain.val;
   if (rv > 0) { const m = movingMean(v, 12); for (let i = 0; i < n; i++) if (m[i] > 2) v[i] -= (rv / 100) * (m[i] - 2); }
   // 문턱 → 단계
-  const thr = 40 - 0.4 * c.gain + tl + (ace ? 3 : 0);
+  const thr = THR0 - 0.4 * c.gain + tl + (ace ? 3 : 0);
   for (let i = 0; i < n; i++) { const d = v[i] - tl - thr; if (d > 0) lv[i] = Math.min(15, 1 + Math.floor(d / 3)); }
   if (c.wiper) for (let i = 0; i < n; i++) if (lv[i] <= c.wiper) lv[i] = 0;
   if (c.noiseRej || ace) for (let i = 1; i < n - 1; i++) if (lv[i] && !lv[i - 1] && !lv[i + 1] && lv[i] < 4) lv[i] = 0;
@@ -226,11 +228,11 @@ export function detect(sc, c, rnd = Math.random) {
   if (!c.tx || c.gain <= 0) return [];
   const g = () => Math.sqrt(-2 * Math.log(Math.max(1e-12, rnd()))) * Math.cos(2 * Math.PI * rnd());
   const band = BANDS[sc.band] || BANDS.X, pulseUs = PULSES[sc.pulse] || 0.3, pg = 10 * Math.log10(pulseUs / 0.3);
-  const tl = c.tune && !c.tune.auto ? 6 * ((c.tune.val - 50) / 40) ** 2 : 0, thr = 40 - 0.4 * c.gain + tl;
+  const tl = c.tune && !c.tune.auto ? 6 * ((c.tune.val - 50) / 40) ** 2 : 0, thr = THR0 - 0.4 * c.gain + tl;
   const out = [];
   for (const t of sc.tg) {
     if (!t.visible) continue;
-    const db = t.db0 + pg, sea = sc.weather.sea > 0 && t.R < 0.6 + 0.7 * sc.weather.sea + 1 ? 4.2 * sc.weather.sea - 30 * Math.log10(Math.max(t.R, 0.05)) : -99;
+    const db = t.db0 + pg, sea = sc.weather.sea > 0 && t.R < 0.6 + 0.7 * sc.weather.sea + 1 ? 4.2 * sc.weather.sea + SEA_K + (sc.band === 'S' ? -8 : 0) - 30 * Math.log10(Math.max(t.R, 0.05)) : -99;
     const Rs = 0.5 + 0.4 * (c.stcRange ?? 5), stc = c.sea && !c.sea.auto && c.sea.val > 0 ? (c.sea.val / 100) * 45 * Math.max(0, 1 - t.R / Rs) ** ((c.stcCurve ?? 3) / 3) : 0;
     if (db - stc <= thr || db <= sea + 3) continue;
     if (sc.grid && sc.grid.any) { const sb = Math.sin(t.brg * D2R), cb = Math.cos(t.brg * D2R); let hid = false; for (let r = 0.05; r < t.R; r += 0.03) if (landAt(sc.grid, sc.ox + r * sb, sc.oy + r * cb)) { hid = true; break; } if (hid) continue; }
