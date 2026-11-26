@@ -236,7 +236,7 @@ export function initUI(root, actions) {
     const r = wrap.getBoundingClientRect(), h = r.height, wIn = r.width + (qIn ? 0 : QB_W), full = h / 2 - LBL;
     const RIn = Math.min(full, (wIn - QIN_R - 170) / 2 - LBL), wantIn = r.width > 0 && h >= 560 && RIn >= 0.85 * full;
     if (wantIn !== qIn) { qIn = wantIn; document.documentElement.dataset.qb = qIn ? 'in' : 'out'; if (qIn) wrap.append(qbar); else main.prepend(qbar); }
-    wrap.classList.toggle('compact', qIn && h < 760);
+    wrap.classList.toggle('compact', qIn && h < 900);
     /* 방위 눈금 글자가 모서리 상자에 가리지 않게: 상자와 원 사이 28px 이상이 되도록 원을 줄임 */
     const wr = wrap.getBoundingClientRect(), boxes = [...wrap.querySelectorAll('.tl > *, .tr > *, #bxEbl, #bxVrm, #bxPi, #bxTgtTools')].filter((e) => e.offsetWidth > 0).map((e) => { const q = e.getBoundingClientRect(); return [q.left - wr.left, q.top - wr.top, q.right - wr.left, q.bottom - wr.top]; });
     const roomFor = (cx, cy) => Math.min(...boxes.map(([l, t, rr, bb]) => Math.hypot(Math.max(l, Math.min(cx, rr)) - cx, Math.max(t, Math.min(cy, bb)) - cy))) - 28;
@@ -257,7 +257,13 @@ export function initUI(root, actions) {
       else rp.append($('#pnTgt'), $('#pnTT'));
     }
     if (mode === 'rside') wrap.style.setProperty('--sidew', colW + 'px');
+    fitSide();
     return mode;
+  }
+  /* 오른쪽 칸 폭을 실제 원 크기(최종 shift·rmax)에서 다시 계산: 칸이 방위 눈금 글자를 덮지 않게 */
+  function fitSide() {
+    if (mode !== 'rside') return; const r = wrap.getBoundingClientRect(), R = Math.min(Math.min(r.width, r.height) / 2 - LBL, rmax), cx = r.width / 2 - shift;
+    wrap.style.setProperty('--sidew', Math.max(120, Math.min(300, r.width - 12 - (cx + R + LBL) - 10)) + 'px');
   }
   relayout();
 
