@@ -43,8 +43,13 @@ img { max-width: 100%; display: block; }
 .on-hero .corner .mver, .on-hero .corner .theme { color: var(--on-navy); border-color: rgba(255,255,255,.28); background: rgba(8, 19, 28, .35); }
 
 .toc-btn { position: fixed; left: calc(max(12px, env(safe-area-inset-left)) + 52px); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 40; height: 48px; padding: 0 18px 0 14px; border-radius: 999px; border: 0; background: var(--navy); color: var(--on-navy); display: inline-flex; align-items: center; gap: 10px; font-weight: 650; cursor: pointer; box-shadow: var(--shadow); }
-/* 왼쪽 아래 bypass 커뮤니티 바로가기(.bp-home, 40px) 자리를 비우고, 펼쳐지는 안내 글자가 목차 단추를 덮지 않게 한다 */
-.bp-home span { animation: none; }
+/* 왼쪽 아래 bypass 커뮤니티 바로가기(.bp-home, 40px) 자리를 비우고, 펼쳐지는 안내 글자가 목차 단추를 덮지 않게 한다.
+   바로가기 블록의 <style>이 </body> 앞(이 파일보다 뒤)에 있으므로 body를 붙여 우선순위를 높인다. */
+body .bp-home { bottom: calc(max(16px, env(safe-area-inset-bottom)) + 4px); } /* 목차 단추(48px)와 가운데 줄 맞춤 */
+body .bp-home span { animation: none; }
+.toc-btn { transition: transform .25s; }
+body:has(.bp-home:hover) .toc-btn, body:has(.bp-home:focus-visible) .toc-btn { transform: translateX(52px); }
+@media (prefers-reduced-motion: reduce) { .toc-btn { transition: none; } }
 :root[data-theme="dark"] .toc-btn { background: #E6EEF2; color: #08131C; }
 .toc-btn svg { width: 20px; height: 20px; }
 .toc-btn .cnt { font-size: var(--s-13); font-weight: 500; opacity: .8; font-variant-numeric: tabular-nums; }
