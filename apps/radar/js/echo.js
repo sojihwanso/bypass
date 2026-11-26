@@ -210,10 +210,12 @@ export function processLine(raw, c, ctx) {
   for (let i = 0; i < n; i++) { const d = v[i] - tl - thr; if (d > 0) lv[i] = Math.min(15, 1 + Math.floor(d / 3)); }
   if (c.wiper) for (let i = 0; i < n; i++) if (lv[i] <= c.wiper) lv[i] = 0;
   if (c.noiseRej || ace) for (let i = 1; i < n - 1; i++) if (lv[i] && !lv[i - 1] && !lv[i + 1] && lv[i] < 4) lv[i] = 0;
-  // EAV: 앞 스캔과 상관
+  // EAV: 앞 스캔(평균 전 값)과 상관 — 평균 결과를 다시 넘기면 0이 굳어 버림
+  const pre = lv.slice(); 
   if (c.eav && ctx.prevScan) for (let i = 0; i < n; i++) { const p = ctx.prevScan[i]; lv[i] = c.eav === 1 ? (lv[i] + p) >> 1 : c.eav === 2 ? Math.min(lv[i], p) : Math.min(lv[i], p) && Math.max(lv[i], p); }
   // ES: 거리 방향 확대
   if (c.es) { const k = c.es; for (let i = n - 1; i >= 0; i--) for (let j = 1; j <= k && i - j >= 0; j++) if (lv[i - j] > lv[i]) lv[i] = lv[i - j]; }
+  lv.pre = pre;
   return lv;
 }
 function movingMean(v, w) { const n = v.length, m = new Float32Array(n); let s = 0; for (let i = 0; i < Math.min(n, w); i++) s += v[i]; for (let i = 0; i < n; i++) { const a = i - w - 1, b = i + w; if (b < n) s += v[b]; if (a >= 0) s -= v[a]; const lo = Math.max(0, i - w), hi = Math.min(n - 1, i + w); m[i] = s / (hi - lo + 1); } return m; }

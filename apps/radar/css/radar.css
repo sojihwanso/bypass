@@ -15,6 +15,7 @@
 [data-theme="night"]{--paper:#05090C;--surface:#0A1015;--ink:#9FB0BC;--muted:#66788A;--rule:#18232B;--soft:#0E161C;--navy:#07141F;--navy-ink:#9FB0BC;--accent:#4E86B3;--accent-bg:#0E1C28;--ok:#4E9C67;--ok-bg:#0F1F15;--bad:#D26A60;--bad-bg:#2A100E;--warn:#BF8F3E;--warn-bg:#24190A;
   --c-bg:#03080B;--c-panel:rgba(6,12,17,.9);--c-line:#15222C;--c-ink:#8C9DAA;--c-dim:#56687A;--c-hi:#4F8FB3;--c-echo:#B57A1C;--c-ok:#3E8F5E;--c-bad:#B9544B;--c-warn:#A8822F;color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{margin:0;height:100%;background:var(--paper);color:var(--ink);font:14px/1.45 var(--f-body);-webkit-font-smoothing:antialiased;overflow:hidden}
 ::selection{background:var(--accent);color:var(--navy-ink)}
 button,select,input{font:inherit;color:inherit}
@@ -64,7 +65,7 @@ button{cursor:pointer}
 .bx button:hover{border-color:var(--c-hi);color:var(--c-hi)}
 .bx button.on{background:color-mix(in srgb,var(--c-hi) 18%,transparent);border-color:var(--c-hi);color:var(--c-hi)}
 .tl{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
-.tr{top:12px;right:12px;width:208px}
+.tr{position:absolute;top:12px;right:12px;width:208px;display:flex;flex-direction:column;gap:6px}
 .bl{bottom:12px;left:12px;width:196px}
 .br{bottom:12px;right:12px;width:196px}
 .tc{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px;align-items:stretch}
@@ -83,11 +84,11 @@ button{cursor:pointer}
 #bxTx .dot{width:8px;height:8px;border-radius:50%;background:var(--c-dim)}
 #bxTx.on .dot{background:var(--c-ok)}
 #bxTx.warm .dot{background:var(--c-warn)}
-#bxCursor{min-width:150px;padding:5px 10px;font-family:var(--f-mono);font-size:11.5px;line-height:1.35}
+#bxCursor{padding:5px 10px;font-family:var(--f-mono);font-size:11.5px;line-height:1.35}
 .eb{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px 8px}
 .eb .vv{font-size:15px;text-align:right;cursor:ns-resize}
 .eb .tg{min-width:44px}
-.ver-foot{position:absolute;left:50%;bottom:4px;transform:translateX(-50%);font-family:var(--f-mono);font-size:10.5px;color:var(--c-dim);background:none;border:0;letter-spacing:.06em;z-index:3}
+.ver-foot{position:absolute;left:50%;bottom:2px;transform:translateX(-50%);font-family:var(--f-mono);font-size:10.5px;color:var(--c-dim);background:none;border:0;letter-spacing:.06em;z-index:3}
 
 /* 오른쪽 정보창 */
 .rp{background:var(--surface);border-left:1px solid var(--rule);overflow-y:auto;display:flex;flex-direction:column;scrollbar-width:thin}
@@ -206,3 +207,6 @@ dialog::backdrop{background:rgba(5,10,14,.55)}
 .sethd b{min-width:58px;text-align:center}
 .conn-tab{position:fixed;right:calc(var(--rpw) + 14px);bottom:16px;z-index:35;border:1px solid var(--rule);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 14px;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;box-shadow:0 6px 16px rgba(0,0,0,.25)}
 .conn-tab[hidden]{display:none}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl td,.tbl th{border-bottom:1px solid var(--rule);padding:5px 6px;text-align:left}
+.dlg-b .kv{max-width:360px}

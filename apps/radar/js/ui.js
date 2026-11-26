@@ -52,15 +52,15 @@ export function initUI(root, actions) {
     <div class="tl">
       <div class="bx" id="bxRange" data-wheel="range" style="position:static"><span class="lb">RANGE</span><span class="big" id="vRange">-</span><span class="lb" id="vRing"></span><span class="pm"><button type="button" data-act="rangeUp" aria-label="범위 늘리기">+</button><button type="button" data-act="rangeDn" aria-label="범위 줄이기">−</button></span></div>
       <div class="bx" id="bxMode" style="position:static"><button type="button" data-act="mode" id="vOrient">HU</button><button type="button" data-act="motion" id="vMotion">RM</button><span class="lb" id="vBand">X-BAND</span><button type="button" data-act="pulse" id="vPulse">M1</button></div>
+      <div class="bx" id="bxTx" style="position:static"><span class="dot"></span><span id="vTx">STBY</span></div>
     </div>
-    <div class="tc"><div class="bx" id="bxTx" style="position:static"><span class="dot"></span><span id="vTx">STBY</span></div><div class="bx" id="bxCursor" style="position:static"></div></div>
-    <div class="bx tr" id="bxEcho">
+    <div class="tr"><div class="bx" id="bxEcho" style="position:static">
       <div class="ctl" id="bxGain" data-wheel="gain"><span class="lb">GAIN</span><span class="bar"><i></i></span><span class="md"></span></div>
       <div class="ctl" id="bxSea" data-wheel="sea" data-act="seaAuto"><span class="lb">SEA</span><span class="bar"><i></i></span><span class="md"></span></div>
       <div class="ctl" id="bxRain" data-wheel="rain" data-act="rainAuto"><span class="lb">RAIN</span><span class="bar"><i></i></span><span class="md"></span></div>
       <div class="ctl" id="bxTune" data-wheel="tune" data-act="tuneAuto"><span class="lb">TUNE</span><span class="bar"><i></i></span><span class="md"></span></div>
       <div class="lb" id="vPreset" style="margin-top:4px"></div>
-    </div>
+    </div><div class="bx" id="bxCursor" style="position:static"></div></div>
     <div class="bx bl" id="bxEbl"><div class="eb">
       <button type="button" class="tg" data-act="ebl1">EBL1</button><span class="vv" id="vEbl1" data-wheel="ebl1">-</span><button type="button" data-act="eblRef" id="vEblRef">T</button>
       <button type="button" class="tg" data-act="ebl2">EBL2</button><span class="vv" id="vEbl2" data-wheel="ebl2">-</span><span></span></div></div>
