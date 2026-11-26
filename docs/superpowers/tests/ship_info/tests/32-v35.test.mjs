@@ -62,6 +62,6 @@ export default [
  }},
  {name:'v35-version', fn: () => withPage({}, async p => {
    const t = await p.$eval('#ver-top', e => e.textContent.trim());
-   assert(t === 'v. 3.8.0', t);
+   assert(t === 'v. 3.8.1', t);
  })}
 ];

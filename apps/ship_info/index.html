@@ -169,7 +169,7 @@ main.wrap{padding:30px 24px 72px}
 .trow .pk{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);white-space:nowrap}
 .trow .pk input{width:16px;height:16px;accent-color:var(--accent)}
 .bypass{position:relative;container-type:inline-size;background:var(--sheet);color:var(--ink);border:1px solid var(--rule);padding:18px 20px;border-radius:var(--r-card)}
-.bp-mark{position:absolute;top:22px;right:26px;width:clamp(120px,28cqw,196px);height:auto;rotate:-7deg;pointer-events:none}
+.bp-mark{position:absolute;top:22px;right:26px;width:clamp(120px,28cqw,196px);height:auto;pointer-events:none}
 @container (max-width: 420px){.bp-mark{width:58px;top:16px;right:16px}}
 .bypass .bp-tag{font-size:12px;color:var(--muted)}
 .bypass h2{font-size:20px;letter-spacing:.04em;margin:4px 0 2px;font-weight:700}
@@ -721,7 +721,7 @@ footer .readme-h{display:block;margin-bottom:10px}
         <span id="m-count"></span>
         <a class="cmp-top" href="#compare" id="cmp-top">비교 <small id="cmp-n"></small></a>
         <button type="button" class="theme-btn" id="theme-btn" aria-pressed="false">다크모드</button>
-        <button type="button" class="mver" id="ver-top" title="버전" aria-label="버전 정보">v. 3.8.0</button>
+        <button type="button" class="mver" id="ver-top" title="버전" aria-label="버전 정보">v. 3.8.1</button>
         <a class="home-logo" href="https://teambypass.vercel.app/" target="_top" title="Team Bypass 메인 페이지" aria-label="Team Bypass 메인 페이지"><img src="/assets/favicon.svg" alt="" width="30" height="30"></a>
       </div>
     </div>
@@ -1033,7 +1033,7 @@ footer .readme-h{display:block;margin-bottom:10px}
       <li><span class="lines"><span>이 사이트는 개인이 만든 자료 모음이며 회사나 학교와 관계가 없습니다.</span><span>틀린 내용은 정보 제보 게시판으로 알려 주시기 바랍니다.</span></span></li>
     </ul>
     </div>
-    <p class="foot-ver"><button type="button" class="ver" id="ver-foot" title="버전" aria-label="버전 정보">v. 3.8.0 · TEAM BYPASS</button></p>
+    <p class="foot-ver"><button type="button" class="ver" id="ver-foot" title="버전" aria-label="버전 정보">v. 3.8.1 · TEAM BYPASS</button></p>
   </div>
 </footer>
 
@@ -2712,8 +2712,11 @@ $('#nf-from').addEventListener('change', e => { const w = newsWindow(); state.ne
 $('#nf-to').addEventListener('change', e => { const w = newsWindow(); state.newsFrom = w.from; state.newsTo = e.target.value; state.newsRange = 'custom'; renderNews(); });
 
 /* ---------- 버전, 패치노트, 이스터에그 ---------- */
-const VERSION = '3.8.0';   // 첫째 자리 큰 기능·개편, 둘째 자리 작은 기능, 셋째 자리 버그·오타 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '3.8.1';   // 첫째 자리 큰 기능·개편, 둘째 자리 작은 기능, 셋째 자리 버그·오타 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  {v:'3.8.1', d:'2026-11-27', i:[
+    '홈 BYPASS 소개의 마름모 로고를 기울이지 않고 똑바로 세웠습니다.'
+  ]},
   {v:'3.8.0', d:'2026-11-27', i:[
     '선종 표는 다시 규모 순이 기본입니다. 표 바로 위에서 \'규모 순\'과 \'실습생 선발 우선\'을 고를 수 있고, 지금 어떤 순서인지 그 옆에 적었습니다. 실습 우선일 때 순위 열은 \'규모 순위\'로 바뀝니다.',
     '표 머리(규모, 구분, 선단, 실습·병역) 설명을 표 위 \'표 머리 설명\'에서 펼쳐 볼 수 있습니다. 홈 선종 목록에 \'등록만\'의 뜻을 적었습니다.',
