@@ -16,9 +16,9 @@ export default [
  {name:'dir-type-link-filter', fn: () => withPage({hash:'#dir?type=LNG'}, async p => {
    await ready(p);
    const rows = await rowsOf(p);
-   assert(rows.length > 0 && rows.length <= 26, 'rows '+rows.length);
+   assert(rows.length > 0 && rows.length <= 30, 'rows '+rows.length);
    const ok = await p.evaluate(async names => { await uniReady(); const li = UNI_K.typeNames.indexOf('LNG');
-     return names.every(n => UNI_BY[n].firm && UNI_BY[n].firm.ships.some(s => s[3] === li)); }, rows.map(r => r.n));
+     return names.every(n => UNI_BY[n].firm ? UNI_BY[n].firm.ships.some(s => s[3] === li) : UNI_BY[n].types.includes('lng')); }, rows.map(r => r.n));
    assert(ok, 'firm without LNG');
  })},
  {name:'dir-cement-link', fn: () => withPage({hash:'#dir?type=잡화,기타&biz=내항상선'}, async p => {

@@ -1217,7 +1217,9 @@ function loadData(name){
 function dataBox(el, name, render){
   if (name === 'uni' ? UNI_K : DATA_READY[name]){ render(name === 'uni' ? UNI_K : DATA_READY[name]); return; }
   el.innerHTML = '<p class="load-fail" aria-live="polite">불러오는 중</p>';
+  const route0 = (location.hash || '#home').split('?')[0];
   (name === 'uni' ? uniReady().then(() => UNI_K) : loadData(name)).then(d => { if (el.isConnected) render(d); }, () => {
+    if ((location.hash || '#home').split('?')[0] !== route0) return;   /* 그 사이 다른 화면으로 옮겼으면 덮어쓰지 않음 */
     el.innerHTML = '<p class="load-fail">자료를 불러오지 못했습니다. <button type="button" class="linkbtn" data-retry>다시 시도</button></p>';
     el.querySelector('[data-retry]').addEventListener('click', () => dataBox(el, name, render));
   });
@@ -1397,7 +1399,9 @@ function renderDir(qs){
     const regOf = u => u.firm ? regionOf(u.firm.addr) : null;
     const regCount = {}; UNI.forEach(u => { const r = regOf(u); if (r) regCount[r] = (regCount[r] || 0) + 1; });
     const regions = Object.keys(regCount).sort((a, b) => (a === '기타') - (b === '기타') || regCount[b] - regCount[a]);
-    const typeCount = T.map((_, i) => UNI.filter(u => u.firm && u.firm.ships.some(s => s[3] === i)).length);
+    /* 등록 자료가 없는 선사는 앱 선종을 KOSWEC 선종 이름에 대 본다 */
+    const appHasKos = (u, kos) => u.types.some(id => TYPE_MAP[id].kos.includes(kos));
+    const typeCount = T.map((n, i) => UNI.filter(u => u.firm ? u.firm.ships.some(s => s[3] === i) : appHasKos(u, n)).length);
     const q0 = new URLSearchParams(qs || '');
     const st = {
       q: (q0.get('q') || '').slice(0, 60),
@@ -1448,7 +1452,7 @@ function renderDir(qs){
         if (st.co && !u.co) return null;
         if (bi >= 0 && !(f && f.b === bi)) return null;
         if (st.r && regOf(u) !== st.r) return null;
-        if (ti.size && !(f && f.ships.some(s => ti.has(s[3])))) return null;
+        if (ti.size && !(f ? f.ships.some(s => ti.has(s[3])) : [...st.types].some(n => appHasKos(u, n)))) return null;
         let hit = null;
         if (qq){
           const names = (u.n+' '+(u.co && u.co.sub || '')+' '+(f ? f.n : '')).toLowerCase();
@@ -1503,7 +1507,7 @@ const KOS_TO_STAT = Object.fromEntries(Object.entries(STAT_TO_KOS).map(([a, b]) 
 const BIZKEY_OF = Object.fromEntries(Object.entries(KOS_BIZ).map(([key, name]) => [name, key]));
 function curCoName(){
   if (currentView() !== 'co') return null;
-  try{ return decodeURIComponent((location.hash || '').slice(4).split('?')[0]); }catch(e){ return null; }
+  try{ return decodeURIComponent((location.hash || '').slice(4).split('?')[0]); }catch(e){ return ''; }
 }
 function coShipsHtml(f, k){
   const T = k.typeNames, BN = k.bizNames;
@@ -1596,7 +1600,7 @@ function renderRegOnly(u){
   fillCoWage(u.n, u);
 }
 const LIMIT = 5;
-const state = {more:false, kind:'all', fleet:'all', foreign:true, q:'', routes:new Set(), cadet:false, reserve:false, newsCat:'all', newsRange:'all', newsFrom:'', newsTo:'', newsQ:'', cmpTab:'co', sort:'rank'};
+const state = {more:0, kind:'all', fleet:'all', foreign:true, q:'', routes:new Set(), cadet:false, reserve:false, newsCat:'all', newsRange:'all', newsFrom:'', newsTo:'', newsQ:'', cmpTab:'co', sort:'rank'};
 const cmp = {co:[], ty:[]};
 const CMP_KEY = 'sasarok-cmp-v1';
 function loadCmp(){
@@ -1948,7 +1952,7 @@ function filterQuery(){
   if (state.q) q.push('q='+encodeURIComponent(state.q));
   if (state.routes.size) q.push('r='+[...state.routes].map(encodeURIComponent).join(','));
   if (state.sort !== 'rank') q.push('sort='+state.sort);
-  if (state.more) q.push('more=1');
+  if (state.more === 1) q.push('more=1');
   return q.join('&');
 }
 function applyQuery(qs){
@@ -1962,7 +1966,7 @@ function applyQuery(qs){
   state.q = p.get('q') || '';
   state.routes = new Set((p.get('r') || '').split(',').filter(r => ROUTES.includes(r)));
   if (SORTS.hasOwnProperty(p.get('sort'))) state.sort = p.get('sort');
-  state.more = p.get('more') === '1';
+  state.more = p.get('more') === '1' ? 1 : 0;
 }
 function typeHash(){ const q = filterQuery(); return '#type-'+currentType+(q ? '?'+q : ''); }
 function syncHash(){
@@ -1984,7 +1988,8 @@ function renderRegGroup(typeId, topCount){
   }
   const q = state.q.trim().toLowerCase();
   const list = q ? all.filter(u => u.n.toLowerCase().includes(q)) : all;
-  const open = state.more || (!!q && list.length > 0);
+  /* more: 1 펼침, -1 직접 접음, 0 자동(검색에 걸리면 펼침) */
+  const open = state.more === 1 || (state.more !== -1 && !!q && list.length > 0);
   el.innerHTML =
     '<div class="rg-head"><button type="button" class="rg-btn" aria-expanded="'+open+'" aria-controls="reg-list">등록 선박만 있는 회사 '+all.length+'곳</button>'+
       (q ? '<span class="note">검색어에 맞는 회사 '+list.length+'곳</span>' : '')+'</div>'+
@@ -1994,7 +1999,7 @@ function renderRegGroup(typeId, topCount){
         return '<tr data-n="'+n+'"><td><a href="'+coHref(u.n)+'">'+esc(u.n)+'</a></td><td>'+esc(UNI_K.bizNames[u.firm.b])+'</td><td>'+n+'척</td><td>'+u.ships+'척</td><td class="mono">'+esc(u.firm.tel || '')+'</td></tr>'; }).join('')+
       '</tbody></table></div>' : '');
   el.querySelector('.rg-btn').addEventListener('click', () => {
-    state.more = el.querySelector('.rg-btn').getAttribute('aria-expanded') !== 'true';
+    state.more = el.querySelector('.rg-btn').getAttribute('aria-expanded') !== 'true' ? 1 : -1;
     syncHash(); renderRegGroup(typeId, topCount);
     const b = el.querySelector('.rg-btn'); if (b) b.focus();
   });
@@ -2233,11 +2238,11 @@ function setupBoard(){
 
 /* ---------- 라우팅 ---------- */
 function resetFilters(){
-  Object.assign(state, {kind:'all', fleet:'all', foreign:true, q:'', cadet:false, reserve:false, sort:'rank', more:false});
+  Object.assign(state, {kind:'all', fleet:'all', foreign:true, q:'', cadet:false, reserve:false, sort:'rank', more:0});
   state.routes = new Set();
 }
 /* 선종을 옮길 때: 선종과 상관없는 조건(회사 구분, 국적, 실습생 선발, 예비역)은 두고 나머지만 비움 */
-function resetTypeOnly(){ state.more = false; state.q = ''; state.fleet = 'all'; state.routes = new Set(); state.sort = 'rank'; }
+function resetTypeOnly(){ state.more = 0; state.q = ''; state.fleet = 'all'; state.routes = new Set(); state.sort = 'rank'; }
 function setReadme(open){ $('#readme').hidden = !open; const b = $('#readme-toggle'); b.setAttribute('aria-expanded', String(open)); b.textContent = open ? '접기' : '펼치기'; }
 function route(){
   const hash = location.hash || '#home';
@@ -2277,13 +2282,14 @@ function route(){
   } else if (h === 'wage'){
     $('#v-wage').hidden = false; renderWage(qs); title = '임금 | 선사록';
   } else if (h === 'dir'){
-    $('#v-dir').hidden = false; renderDir(qs); title = '등록 업체 | 선사록';
+    $('#v-dir').hidden = false; renderDir(qs); title = '선사 목록 | 선사록';
   } else if (h.startsWith('firm-')){
     /* v2 주소: 같은 회사 화면으로 넘긴다 */
     let id = ''; try{ id = decodeURIComponent(h.slice(5)); }catch(e){}
     const box = $('#v-co'); box.hidden = false;
     dataBox(box, 'uni', () => {
-      if (!location.hash.startsWith('#firm-')) return;
+      let cur = null; try{ cur = decodeURIComponent((location.hash || '').slice(6).split('?')[0]); }catch(e){}
+      if (!location.hash.startsWith('#firm-') || cur !== id) return;
       const u = UNI.find(x => x.firm && x.firm.id === id);
       if (!u){ box.innerHTML = '<div class="crumb"><a href="#home">처음</a></div><p class="cmp-empty">찾는 선사가 없습니다. 검색창이나 <a href="#dir">선사 목록</a>에서 다시 찾아보시기 바랍니다.</p>'; return; }
       history.replaceState(null, '', coHref(u.n)); lastHash = location.hash;
