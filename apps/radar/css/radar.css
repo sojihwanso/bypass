@@ -290,3 +290,18 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--rule);border
 .hb:hover{opacity:1;border-color:rgba(255,255,255,.5)}
 .hb.on{background:var(--navy-ink);color:var(--navy);opacity:1}
 @media (max-width:1300px){.hb span[data-t]{display:none}.brand span{display:none}}
+
+/* 송신 대기 안내(PPI 가운데) */
+.stby-hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;max-width:min(80%,420px);background:var(--c-panel);border:1px solid var(--c-hi);color:var(--c-ink);border-radius:var(--r);padding:10px 14px;font-size:13px;line-height:1.45;text-align:center}
+.stby-hint:hover{border-color:var(--c-ok)}
+.stby-hint[hidden]{display:none}
+
+/* 단추 막대를 PPI 안쪽 왼쪽으로 넣었을 때 */
+[data-qb="in"] .main{grid-template-columns:1fr var(--rpw)}
+[data-qb="in"] .qbar{display:grid;grid-template-columns:1fr 1fr;gap:3px;width:144px;padding:0;margin-top:2px;background:none;border:0;overflow:visible}
+[data-qb="in"] .qbar .qsep{grid-column:1/-1;margin:2px 0;background:var(--c-line)}
+[data-qb="in"] .qb{background:var(--c-panel);border-color:var(--c-line);color:var(--c-dim);padding:4px 2px}
+[data-qb="in"] .qb .qv{color:var(--c-ink)}
+[data-qb="in"] .qb:hover{border-color:var(--c-hi);color:var(--c-hi)}
+[data-qb="in"] .qb.on{background:rgba(127,211,255,.14);border-color:var(--c-hi);color:var(--c-hi)}
+[data-qb="in"] .qb.on .qv{color:var(--c-hi)}

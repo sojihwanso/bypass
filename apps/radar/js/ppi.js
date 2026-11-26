@@ -11,7 +11,7 @@ export function createPPI(canvas, overlay) {
   const buf = new Uint8Array(N_BRG * NB), written = new Float64Array(N_BRG);
   const st = { canvas, overlay, stats: { clears: 0, renders: 0, litPixels: 0 }, persistence: 2 };
   let W = 0, H = 0, dpr = 1, img = null, px = null, lutA = null, lutB = null, lutKey = '', pal = null, palKey = '';
-  let geom = { cx: 0, cy: 0, R: 0, ox: 0, oy: 0 }, lastRange = null, bufRange = 1, view = null, shift = 0;
+  let geom = { cx: 0, cy: 0, R: 0, ox: 0, oy: 0 }, lastRange = null, bufRange = 1, view = null, shift = 0, rmax = Infinity;
 
   function resize() {
     /* 영상 층은 CSS 해상도(최대 배율 1)로 그려 픽셀 수를 줄이고, 글자·선 위층(overlay)만 기기 배율로 선명하게 */
@@ -27,7 +27,7 @@ export function createPPI(canvas, overlay) {
 
   function upBrg(v) { return v.orient === 'NU' ? 0 : v.orient === 'CU' ? (v.crs ?? v.hdg) : v.hdg; }
   function layout(v) {
-    const R = Math.max(10, Math.floor(Math.min(W, H) / 2) - Math.round(36 * dpr)), cx = Math.floor(W / 2 - shift * dpr), cy = Math.floor(H / 2);
+    const R = Math.max(10, Math.min(Math.floor(Math.min(W, H) / 2) - Math.round(36 * dpr), Math.floor(rmax * dpr))), cx = Math.floor(W / 2 - shift * dpr), cy = Math.floor(H / 2);
     const off = v.offset || { x: 0, y: 0 };
     geom = { cx, cy, R, ox: cx + off.x * R, oy: cy + off.y * R };
   }
@@ -85,5 +85,5 @@ export function createPPI(canvas, overlay) {
     return { brg: wrap360(Math.atan2(ex, -ey) / D2R + upBrg(view)), rng: Math.hypot(ex, ey) * k };
   }
   function inside(x, y) { return Math.hypot(x * dpr - geom.cx, y * dpr - geom.cy) <= geom.R; }
-  return Object.assign(st, { resize, clear, writeLine, render, toScreen, fromScreen, inside, setPersistence: (s) => (st.persistence = s), setShift: (px) => { if (px !== shift) { shift = px; lutKey = ''; } }, geom: () => ({ ...geom, dpr }), upBrg: () => upBrg(view) });
+  return Object.assign(st, { resize, clear, writeLine, render, toScreen, fromScreen, inside, setPersistence: (s) => (st.persistence = s), setShift: (px, rm = Infinity) => { if (px !== shift || rm !== rmax) { shift = px; rmax = rm; lutKey = ''; } }, geom: () => ({ ...geom, dpr }), upBrg: () => upBrg(view) });
 }

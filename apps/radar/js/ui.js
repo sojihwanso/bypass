@@ -65,6 +65,7 @@ export function initUI(root, actions) {
   <nav class="qbar" id="qbar" aria-label="빠른 조작">${QB.map(([k, l]) => (k === 'sep' ? '<div class="qsep"></div>' : `<button type="button" class="qb" data-act="${k}" id="qb_${k}">${ICON[k]}<span data-t="${l}"></span><span class="qv" id="qv_${k}"></span></button>`)).join('')}</nav>
   <section class="ppi-wrap" id="ppiWrap">
     <canvas id="cvEcho"></canvas><canvas id="cvOver" aria-label="레이더 화면"></canvas>
+    <button type="button" class="stby-hint" id="stbyHint" data-act="tx"></button>
     <div class="tl">
       <div class="row2"><div class="bx" id="bxRange" data-wheel="range" style="position:static"><span class="lb">RANGE</span><span class="big" id="vRange">-</span><span class="lb" id="vRing"></span><span class="pm"><button type="button" data-act="rangeUp" aria-label="범위 늘리기">+</button><button type="button" data-act="rangeDn" aria-label="범위 줄이기">−</button></span></div>
       <div class="bx" id="bxRef" style="position:static"><span class="lb">REF POINT</span><button type="button" data-act="refpt" id="vRef">CCRP</button></div></div>
@@ -219,11 +220,23 @@ export function initUI(root, actions) {
   rp.insertBefore($('#connSlot'), $('#pnAlert'));
   let mode = null;
   let shift = 0;
+  const qbar = $('#qbar'), tl = wrap.querySelector('.tl'), QB_W = 72, QIN_R = 164, LBL = 36;
+  let qIn = false, rmax = Infinity;
   function relayout() {
-    /* 오른쪽 칸 폭 = 150~300px, 칸과 방위 눈금 사이 46px. 모자라면 원을 왼쪽으로 옮김(왼쪽 여백 40px 이상일 때만) */
-    const r = wrap.getBoundingClientRect(), dia = Math.min(r.width, r.height) - 72, gutter = (r.width - dia) / 2;
-    const colW = Math.min(300, Math.max(150, gutter - 46)); shift = Math.max(0, colW + 46 - gutter);
-    const next = r.width > 0 && gutter - shift >= 40 ? 'rside' : 'bar'; if (next === 'bar') shift = 0;
+    /* 단추 막대: 화면 높이가 넉넉하면(800px 이상) PPI 왼쪽 안(왼쪽 위 상자 아래)으로 넣고, 원은 막대와 오른쪽 칸 사이에 둠(최대 15%까지 줄임).
+       아니면 왼쪽 막대. 오른쪽 칸 폭 = 150~300px, 칸과 방위 눈금 사이 46px. 모자라면 원을 왼쪽으로 옮김 */
+    const r = wrap.getBoundingClientRect(), h = r.height, wIn = r.width + (qIn ? 0 : QB_W), full = h / 2 - LBL;
+    const RIn = Math.min(full, (wIn - QIN_R - 170) / 2 - LBL), wantIn = r.width > 0 && h >= 800 && RIn >= 0.85 * full;
+    if (wantIn !== qIn) { qIn = wantIn; document.documentElement.dataset.qb = qIn ? 'in' : 'out'; if (qIn) tl.append(qbar); else main.prepend(qbar); }
+    let colW, next;
+    if (qIn) {
+      const cx = Math.min(Math.max(wIn / 2, QIN_R + LBL + RIn), wIn - 170 - LBL - RIn);
+      colW = Math.min(300, wIn - 12 - (cx + RIn + LBL) - 8); shift = wIn / 2 - cx; rmax = RIn; next = 'rside';
+    } else {
+      const w = r.width, dia = Math.min(w, h) - 72, g = (w - dia) / 2; rmax = Infinity;
+      colW = Math.min(300, Math.max(150, g - 46)); shift = Math.max(0, colW + 46 - g);
+      next = r.width > 0 && g - shift >= 40 ? 'rside' : 'bar'; if (next === 'bar') shift = 0;
+    }
     if (next !== mode) {
       mode = next; document.documentElement.dataset.layout = mode;
       if (mode === 'rside') $('#sideR').append($('#pnTgt'), $('#pnTT'));
@@ -246,6 +259,8 @@ export function initUI(root, actions) {
     $('#vMotion').textContent = d.motion; $('#vBand').textContent = S.ctrl.band + '-BAND'; $('#vPulse').textContent = S.ctrl.pulse;
     const tx = $('#bxTx'); tx.classList.toggle('on', d.tx === 'tx'); tx.classList.toggle('warm', d.tx === 'warm');
     $('#vTx').textContent = d.tx === 'tx' ? 'TX' : d.tx === 'warm' ? `${t('warm')} ${Math.ceil(d.warmLeft)}s` : 'STBY';
+    const hint = $('#stbyHint'); hint.hidden = d.tx === 'tx';
+    hint.textContent = d.tx === 'warm' ? (lang() === 'en' ? `Warming up… ${Math.ceil(d.warmLeft)} s` : `예열 중… ${Math.ceil(d.warmLeft)}초 뒤 영상이 나와요`) : (lang() === 'en' ? 'STBY — click here or the TX button to transmit' : 'STBY(대기) — 여기나 왼쪽 [송신] 단추를 누르면 5초 예열 뒤 영상이 나와요');
     setCtl('#bxGain', S.ctrl.gain, false); setCtl('#bxSea', S.ctrl.sea.val, S.ctrl.sea.auto, S.ctrl.sea.auto ? 'AUTO' : null);
     setCtl('#bxRain', S.ctrl.rain.val, S.ctrl.rain.auto, S.ctrl.rain.auto ? 'AUTO' : null); setCtl('#bxTune', S.ctrl.tune.auto ? 50 : S.ctrl.tune.val, S.ctrl.tune.auto, S.ctrl.tune.auto ? 'AUTO' : null);
     $('#vPreset').textContent = `${S.ctrl.preset} · IR ${S.ctrl.ir} · ES ${S.ctrl.es} · EAV ${S.ctrl.eav}${S.ctrl.ace ? ' · ACE' : ''}`;
@@ -282,5 +297,5 @@ export function initUI(root, actions) {
     const chip = $('#scnChip'); chip.hidden = !d.scnName; chip.textContent = d.scnName || '';
   }
   function dialog(title, html, foot = '') { $('#genT').textContent = title; $('#genB').innerHTML = html; $('#genF').innerHTML = foot; const g = $('#genDlg'); if (!g.open) g.showModal(); return g; }
-  return { refresh, applyLang, applyTheme, renderMenu, dialog, relayout, layoutMode: () => mode, shift: () => shift, closeAll() { menuEl.hidden = true; cm.hidden = true; }, echoCanvas: $('#cvEcho'), overCanvas: $('#cvOver') };
+  return { refresh, applyLang, applyTheme, renderMenu, dialog, relayout, layoutMode: () => mode, qbInside: () => qIn, shift: () => shift, rmax: () => rmax, closeAll() { menuEl.hidden = true; cm.hidden = true; }, echoCanvas: $('#cvEcho'), overCanvas: $('#cvOver') };
 }

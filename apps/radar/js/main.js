@@ -40,7 +40,7 @@ const rnd = Math.random;
 const actions = {};
 const ui = initUI(app, actions);
 const ppi = createPPI(ui.echoCanvas, ui.overCanvas);
-const fit = () => { ui.relayout(); ppi.setShift(ui.shift()); ppi.resize(); coastKey = ''; };
+const fit = () => { ui.relayout(); ppi.setShift(ui.shift(), ui.rmax()); ppi.resize(); coastKey = ''; };
 fit(); addEventListener('resize', fit);
 document.documentElement.dataset.theme = S.disp.palette;
 
@@ -382,11 +382,11 @@ requestAnimationFrame(frame);
 if (!TEST) starter.openStart();
 if (TEST) {
   window.RadarTest = {
-    ready: true, S, ppi, view: () => V, setView: (o) => Object.assign(V, o), setRange: (r) => { S.disp.rangeNM = r; V.rangeNM = r; }, frames: () => frames, tick, frameAt, own, paused: () => paused || hiddenPause, setPaused: (p) => { paused = p; }, KEYMAP, keyHandlers,
+    ready: true, S, ppi, scene: () => scene, view: () => V, setView: (o) => Object.assign(V, o), setRange: (r) => { S.disp.rangeNM = r; V.rangeNM = r; }, frames: () => frames, tick, frameAt, own, paused: () => paused || hiddenPause, setPaused: (p) => { paused = p; }, KEYMAP, keyHandlers,
     radar: { set: setRadar, toggle: toggleTx, get state() { return radar.state; }, get warmLeft() { return radar.warmLeft; } }, world: () => W, tracker: { targets: () => tracker.targets() },
     newWorld: (o) => startWorld(freeDef(o)), tgtScreen: (id) => { const g = W.targets.find((x) => x.id === id), r = relOf(P.x(g.lon), P.y(g.lat)), p = ppi.toScreen(r.brg, r.rng); return { sx: p.x, sy: p.y }; },
     cursorAct, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,
-    startScenario: (id, o) => starter.startScenario(id, o), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), finishNow: () => starter.finishNow(), shouldBeep, antenna: () => ant, relayout: () => { fit(); }, layoutMode: () => ui.layoutMode(), forceState: (o) => { if (o.az) { azZones = o.az; tracker.setZones(o.az); } if (o.speed) speed = o.speed; if (o.pi !== undefined) piOn = o.pi; }, uiState: () => ({ az: azZones.length > 0, speed, pi: piOn, off: !!offCenter }), tickSim, sim: { setAuto, setRudderOrder, setTelegraph }, menuItems: () => MENU.flatMap((m) => m.items.map((i) => (lang() === 'en' ? i.en : i.ko))),
+    startScenario: (id, o) => starter.startScenario(id, o), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), finishNow: () => starter.finishNow(), shouldBeep, antenna: () => ant, relayout: () => { fit(); }, layoutMode: () => ui.layoutMode(), qbInside: () => ui.qbInside(), forceState: (o) => { if (o.az) { azZones = o.az; tracker.setZones(o.az); } if (o.speed) speed = o.speed; if (o.pi !== undefined) piOn = o.pi; }, uiState: () => ({ az: azZones.length > 0, speed, pi: piOn, off: !!offCenter }), tickSim, sim: { setAuto, setRudderOrder, setTelegraph }, menuItems: () => MENU.flatMap((m) => m.items.map((i) => (lang() === 'en' ? i.en : i.ko))),
   };
   setRadar('tx');
 }
