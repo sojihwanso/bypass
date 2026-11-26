@@ -37,8 +37,8 @@ export function initHelp() {
   let dlg = null;
   function open(tab = 'screen') {
     const en = lang() === 'en';
-    if (!dlg) { dlg = document.createElement('dialog'); dlg.id = 'helpDlg'; document.getElementById('app').append(dlg); dlg.addEventListener('click', (e) => { const b = e.target.closest('[data-htab]'); if (b) render(b.dataset.htab); if (e.target.closest('[data-hclose]')) dlg.close(); }); }
-    dlg.innerHTML = `<div class="dlg-h"><span>${en ? 'Help' : '도움말'}</span><button class="btn" type="button" data-hclose="1">${en ? 'Close' : '닫기'}</button></div><div class="htabs">${TABS.map(([k, ko, e]) => `<button type="button" data-htab="${k}">${en ? e : ko}</button>`).join('')}</div><div class="dlg-b hbody"></div>`;
+    if (!dlg) { dlg = document.createElement('dialog'); dlg.id = 'helpDlg'; document.getElementById('app').append(dlg); dlg.addEventListener('click', (e) => { const b = e.target.closest('[data-htab]'); if (b) render(b.dataset.htab); if (e.target.closest('[data-hclose]')) dlg.close(); if (e.target.closest('[data-act="eduStart"]')) { dlg.close(); window.Tutor && window.Tutor.menu(); } }); }
+    dlg.innerHTML = `<div class="dlg-h"><span>${en ? 'Help' : '도움말'}</span><span style="display:flex;gap:6px"><button class="btn pri" type="button" data-act="eduStart">${en ? 'Training course' : '교육 과정 시작'}</button><button class="btn" type="button" data-hclose="1">${en ? 'Close' : '닫기'}</button></span></div><div class="htabs">${TABS.map(([k, ko, e]) => `<button type="button" data-htab="${k}">${en ? e : ko}</button>`).join('')}</div><div class="dlg-b hbody"></div>`;
     render(tab); if (!dlg.open) dlg.showModal();
   }
   function render(tab) {

@@ -354,3 +354,8 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--rule);border
 
 /* 모드 상자 한 줄 유지 */
 #bxMode{display:flex;flex-wrap:nowrap;gap:4px;align-items:center;white-space:nowrap}
+
+/* 시작 화면 교육 과정 카드 */
+.edu-card{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin:0 0 12px;padding:10px 14px;border:2px solid #241008;border-radius:12px;background:#FFF1E6;color:#241008;cursor:pointer;font:inherit}
+.edu-card:hover{background:#FFE3CC}
+.edu-card b{display:block;font-size:15px}.edu-card small{display:block;font-size:12.5px;color:#7A4532;margin-top:2px}

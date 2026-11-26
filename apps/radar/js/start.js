@@ -29,6 +29,7 @@ export async function openStart(o = {}) {
   const card = (s) => `<button type="button" class="scard" data-scn="${s.id}"><span class="sid">${s.id}</span><b>${esc(tl(s))}</b><span class="rule">COLREG ${s.rule}</span><span class="sb">${esc(tl(s.brief))}</span><span class="why" hidden></span></button>`;
   const html = `<div class="start">
     <p class="lead">${en ? 'Pick a collision-avoidance scenario. The radar starts in STANDBY: switch it on and wait for the warm-up.' : '충돌 회피 시나리오를 고르세요. 레이더는 대기(STBY)로 시작해요. 송신을 켜고 예열을 기다리세요.'}</p>
+    <button type="button" class="edu-card" data-start="edu"><img src="../ecdis/edu/dodo_explain.webp" alt="" width="56" height="56"><span><b>${en ? 'Training course with Dodo (Korean)' : '도도와 함께하는 교육 과정'}</b><small>${en ? 'Five short courses, step by step.' : '처음이라면 여기부터! 레이더 켜기부터 충돌 회피까지 5과정 50단계를 하나씩 따라 해요.'}</small></span></button>
     <div class="lvl" role="group" aria-label="${en ? 'Difficulty' : '난이도'}"><b>${en ? 'Difficulty (surrounding traffic)' : '난이도(주변 교통량)'}</b>${LEVELS.map((l) => `<button type="button" class="btn${S.sim.level === l ? ' on' : ''}" data-level="${l}">${LVL[l][en ? 1 : 0]}</button>`).join('')}<span class="small">${en ? 'Harder = more ships, and more of them without AIS.' : '어려울수록 배가 많고, AIS 없는 배도 많아져요.'}</span></div>
     <div class="scards">${SCENARIOS.map(card).join('')}</div>
     <div class="free"><b>${en ? 'Free navigation' : '자유 항해'}</b>
@@ -50,6 +51,7 @@ export async function openStart(o = {}) {
     starting = true;
     const c = e.target.closest('[data-scn]'); if (c && !c.disabled) { dlg.close(); startScenario(c.dataset.scn); return; }
     const b = e.target.closest('[data-start]'); if (!b) { starting = false; return; }
+    if (b.dataset.start === 'edu') { dlg.close(); R.setPaused(false); window.Tutor && window.Tutor.menu(); return; }
     if (b.dataset.start === 'resume') { dlg.close(); current = null; R.setLog(null); R.setScenarioTick(null); R.resume(); return; }
     const scn = freeSetup({ lat: 33.5, lon: 124.6, nTargets: +dlg.querySelector('#fN').value, sea: 2, rain: false, seed: +dlg.querySelector('#fSeed').value || 1 });
     dlg.close(); runScenario(scn, { free: true, skipBrief: true });

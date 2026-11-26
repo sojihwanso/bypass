@@ -268,7 +268,7 @@ function cursorInfo(c) {
 
 /* ---------- 경보음 ---------- */
 let actx = null;
-const shouldBeep = () => !(paused || hiddenPause) && S.alert.volume !== 'OFF' && alerts.sounding();
+const shouldBeep = () => !(paused || hiddenPause) && !window.EDU_MUTE && S.alert.volume !== 'OFF' && alerts.sounding();
 function beep() {
   if (TEST || !shouldBeep()) return;
   try { actx ||= new AudioContext(); const os = actx.createOscillator(), gn = actx.createGain(); os.frequency.value = 1050; gn.gain.value = { LOW: 0.04, MID: 0.09, HIGH: 0.18 }[S.alert.volume] || 0.09; os.connect(gn).connect(actx.destination); os.start(); os.stop(actx.currentTime + 0.18); } catch (e) {}
