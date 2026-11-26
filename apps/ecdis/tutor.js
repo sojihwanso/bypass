@@ -401,7 +401,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
       quiz: [["10 m", false], ["20 m", true], ["50 m", false]],
       good: "맞아요! 8.5 × 2 = 17 m라서, 해도 등심선으로는 20 m예요.", bad: "흘수 × 2 = 17 m예요. 17 m 이상인 첫 등심선을 골라 보세요." },
     { id: "SC6", mood: "caution", target: () => q(".dlg #sfRec") || q("#bSafe"), cursor: true, before: plan, title: "직접 설정해 봐요 — '안전 수심선' 버튼",
-      body: "'안전 수심선' 버튼을 누르면 우리 배의 현재 흘수를 입력하고 UKC 기준을 확인한 뒤, 얕은 등심선 · 안전 등심선 · 깊은 등심선 · 안전 수심을 한 창에서 정할 수 있어요. '흘수 기준 추천값 넣기'를 누르면 계산한 값이 한 번에 들어가요.",
+      body: "'안전 수심선' 버튼을 누르면 우리 배의 현재 흘수를 입력하고 UKC 기준을 확인한 뒤, 얕은 등심선 · 안전 등심선 · 깊은 등심선 · 안전 수심을 한 창에서 정할 수 있어요. '흘수 기준 추천값 넣기'를 누르면 계산한 값이 한 번에 들어가요. 흘수나 UKC 기준을 바꾸면 세 등심선이 기준대로 자동으로 다시 맞춰져요.",
       say: "이 버튼은 NAVI · CHARTS · PLAN 어느 모드에서나 화면 아래에 있어요!",
       task: "'안전 수심선'을 눌러 얕은 등심선은 흘수 이상, 안전 등심선은 흘수 + UKC 이상, 깊은 등심선은 흘수 × 2 이상으로 맞춰 보세요.",
       check: () => { if (!Tutor.clicked('[data-act="safety"]')) return false; const d = ownDraft(), u = S.set.ukcPct ?? 10, sc = safetyLevel(S.set.safetyContour);

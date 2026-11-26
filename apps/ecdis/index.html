@@ -611,7 +611,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
     <div class="htools">
       <div class="seg2" role="group" aria-label="Language"><button type="button" data-act="lang" data-v="ko">한</button><button type="button" data-act="lang" data-v="en">EN</button></div>
       <button class="hbtn" type="button" data-act="fs" id="fsBtn" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
-      <button class="ver" type="button" aria-label="버전 2.7.0">v2.7.0</button>
+      <button class="ver" type="button" aria-label="버전 2.8.0">v2.8.0</button>
       <a class="tb-home" href="https://teambypass.vercel.app/" aria-label="Team Bypass 메인 페이지로 이동" title="Team Bypass"><svg viewBox="0 0 132 132" width="30" height="30" aria-hidden="true"><path d="M66 4L128 66L66 128L4 66Z" fill="#1C211E" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/><path d="M66 12L120 66L66 120L12 66Z" fill="#EE6A1F"/><path d="M66 18L114 66L66 114L18 66Z" fill="#1C211E"/><path d="M66 25L107 66L66 107L25 66Z" fill="#EE6A1F"/><g transform="translate(36 34) scale(0.6)" fill="#1C211E"><ellipse cx="44" cy="60" rx="27" ry="23"/><path d="M51 45C55 37 58 31 61 25L72 30C68 36 66 44 64 53Z"/><circle cx="66" cy="26" r="10"/><path d="M72 20C83 19 93 24 95 32C96 38 91 41 88 37C86 34 82 33 74 33Z"/><path d="M19 52C10 47 7 40 11 34C14 43 20 46 23 46Z"/><path d="M37 80L35 92L27 95L41 95L42 81Z"/><path d="M51 80L51 92L44 95L58 95L56 81Z"/><circle cx="68" cy="23.5" r="2" fill="#EE6A1F"/><path d="M32 55C40 50 51 54 54 64" fill="none" stroke="#EE6A1F" stroke-width="2.6" stroke-linecap="round"/></g></svg></a>
     </div>
   </div>
@@ -649,7 +649,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
     <span id="footTxt"></span>
     <p class="book" id="footBook"></p>
     <p class="disclaimer" role="note" id="footDisc"></p>
-    <div class="ver-row"><button class="ver" type="button" aria-label="버전 2.7.0">v2.7.0</button></div>
+    <div class="ver-row"><button class="ver" type="button" aria-label="버전 2.8.0">v2.8.0</button></div>
   </div>
 </footer>
 
@@ -662,7 +662,7 @@ body.plan-only #rpScroll [data-box="sens"],body.plan-only #rpScroll [data-box="h
 <div id="dlgRoot"></div>
 
 <script src="egg.js"></script>
-<script src="tutor.js?v=2.7.0"></script>
+<script src="tutor.js?v=2.8.0"></script>
 <script>
 /* ================= I18N ================= */
 let LANG="ko";
@@ -2948,8 +2948,9 @@ function dlgUCSelect(){const cur=S.ucActive||[];
     d.querySelector("#usOk").onclick=()=>{S.ucActive=ucReadChecks(d,"ucsel");logEv("evUcSel",[S.ucActive.length]);chartDirty=true;lookAheadSafe();close()}}})}
 
 /* ================= UI ================= */
-const VERSION="2.7.0";
+const VERSION="2.8.0";
 const PATCH_NOTES=[
+{v:"2.8.0",d:"2026-11-26",ko:["흘수나 UKC 기준을 바꾸면, 그리고 시나리오를 시작할 때 얕은·안전·깊은 등심선과 안전 수심을 기준대로 자동으로 맞춤(얕은 = 흘수, 안전 = 흘수 + UKC, 깊은 = 흘수 × 2)","자선 정보 제원표의 흘수를 현재 흘수로 표시"],en:["Shallow, safety and deep contours and safety depth now follow the draught and UKC policy automatically (also at scenario start)","Own ship data shows the current draught"]},
 {v:"2.7.0",d:"2026-11-26",ko:["안전 수심선 설정 창에서 현재 흘수를 바로 입력: 추천값·UKC 계산·좌초 판정이 모두 이 흘수를 따름"],en:["Enter the current draught directly in the Safety contour window; recommendations, UKC and grounding all follow it"]},
 {v:"2.6.1",d:"2026-11-26",ko:["항로 보고서의 UKC 계산이 고정 흘수(11 m) 대신 설정에서 정한 현재 흘수를 쓰도록 수정"],en:["Route report UKC now uses the current draught set in Settings instead of the fixed 11 m"]},
 {v:"2.6.0",d:"2026-11-26",ko:["화면 아래 '안전 수심선' 버튼 추가(NAVI·CHARTS·PLAN 모든 모드): 얕은·안전·깊은 등심선과 안전 수심을 한 창에서 설정, 흘수 기준 추천값 넣기","해도 수심 색 구분 강화: 얕은 물 초록 · 항해 불가 진한 파랑 · 항해 가능 연한 파랑 · 깊은 물 흰색","용어를 얕은 등심선(Shallow contour) · 깊은 등심선(Deep contour)으로 바꾸고 영문 명칭 함께 표기","과정 2에 안전 등심선 교육 9단계 추가: 얕은 = 흘수, 깊은 = 흘수 × 2, 안전 = 흘수 + UKC, 다음 깊은 등심선 적용, 항로는 안전 등심선 얕은 쪽에 들어가면 안 됨"],en:["New Safety contour button in the status bar (all modes): set shallow, safety and deep contours and safety depth in one place, with values filled from the draught","Clearer depth shades: shallow water green, non-navigable dark blue, navigable light blue, deep water white","Korean labels renamed to shallow/deep contour, shown with the English names","Course 2 adds 9 safety-contour steps (Korean)"]},
@@ -3705,7 +3706,9 @@ function dlgHelp(tab="menu"){
 /* ---------- 안전 수심선 (Safety contour) ---------- */
 const CONTOURS=[2,5,10,20,30,50,100,200];
 function ownDraft(){return (S.own&&S.own.draft)||SHIP.draft}
-function setOwnDraft(v){v=Math.round(clamp(+v||ownDraft(),2,22)*10)/10;if(S.own)S.own.draft=v;else SHIP.draft=v;chartDirty=true;return v}
+function setOwnDraft(v){v=Math.round(clamp(+v||ownDraft(),2,22)*10)/10;if(S.own)S.own.draft=v;else SHIP.draft=v;chartDirty=true;syncContours();return v}
+/* 흘수·UKC 기준이 바뀌면 얕은 = 흘수, 안전 = 흘수 + UKC, 깊은 = 흘수 × 2(각각 다음 깊은 등심선), 안전 수심 = 흘수 + UKC로 맞춤 */
+function syncContours(){const r=safetyRec();setSetting("shallowContour",r.sh);setSetting("safetyContour",r.sc);setSetting("deepContour",r.dp);setSetting("safetyDepth",r.sd);if(S.own&&$("#pgBody"))renderNavPage()}
 function ceilContour(v){for(const c of CONTOURS)if(c>=v-1e-9)return c;return CONTOURS[CONTOURS.length-1]}
 function safetyRec(){const d=ownDraft(),u=S.set.ukcPct??10,need=d*(1+u/100);
   return{d,u,need,sh:ceilContour(d),sc:ceilContour(need),dp:ceilContour(d*2),sd:[2,5,8,10,12,15,20,25,30].find(v=>v>=need-1e-9)??30}}
@@ -3732,7 +3735,7 @@ function dlgSafety(){
     const redraw=()=>{d.querySelector("#sfBody").innerHTML=body()};
     d.addEventListener("change",e=>{if(e.target.id==="sfDraft"){setOwnDraft(e.target.value);redraw();return}const s=e.target.closest("select[data-k]");if(s){setSetting(s.dataset.k,+s.value);redraw();renderNavPage()}});
     d.addEventListener("click",e=>{const b=e.target.closest("[data-sh]");if(b){setSetting("shades",+b.dataset.sh);redraw();return}
-      if(e.target.closest("#sfRec")){const r=safetyRec();setSetting("shallowContour",r.sh);setSetting("safetyContour",r.sc);setSetting("deepContour",r.dp);setSetting("safetyDepth",r.sd);redraw();renderNavPage();toast(t("sfRecDone"))}});
+      if(e.target.closest("#sfRec")){syncContours();redraw();toast(t("sfRecDone"))}});
   }});
 }
 function dlgSettings(tab){
@@ -3786,8 +3789,8 @@ function dlgSettings(tab){
         const sb=e.target.closest(".seg button[data-k]");if(sb){let v=sb.dataset.v;v=v==="true"?true:v==="false"?false:isNaN(+v)?v:+v;setSetting(sb.dataset.k,v);sb.parentNode.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===sb));if(sb.dataset.k==="palette")buildIA();if(sb.dataset.k==="dbase")buildSB();renderNavPage()}
         const lb=e.target.closest("[data-lang]");if(lb){LANG=lb.dataset.lang;try{localStorage.setItem("ecdis-sim-lang",LANG)}catch(er){}applyLang();close();dlgSettings(tab)}
       });
-      d.addEventListener("change",e=>{const s=e.target.closest("select[data-k]");if(s){setSetting(s.dataset.k,+s.value);renderNavPage()}const i=e.target.closest("[data-own]");if(i){S.own.draft=clamp(+i.value,2,22)}});
-      d.querySelector("#setDef").onclick=()=>{const keep={palette:S.set.palette};S.set=Object.assign({},DEF_SET,keep);saveSet();chartDirty=true;buildSB();buildIA();renderNavPage();close();dlgSettings(tab);toast(t("defDone"))};
+      d.addEventListener("change",e=>{const s=e.target.closest("select[data-k]");if(s){setSetting(s.dataset.k,+s.value);renderNavPage()}const i=e.target.closest("[data-own]");if(i){i.value=setOwnDraft(i.value)}});
+      d.querySelector("#setDef").onclick=()=>{const keep={palette:S.set.palette};S.set=Object.assign({},DEF_SET,keep);saveSet();syncContours();chartDirty=true;buildSB();buildIA();renderNavPage();close();dlgSettings(tab);toast(t("defDone"))};
     }});
 }
 function dlgAlerts(){
@@ -3854,10 +3857,10 @@ function dlgPick(x,y,legendOnly){
   }
   openDlg(legendOnly?t("chartLegend"):t("pick"),`<div class="pick">${out.map(o=>`<div class="it"><b>${esc(o.n)}</b><code>${o.c}</code><dl>${o.a.map(a=>`<dt>${esc(a[0])}</dt><dd>${esc(a[1])}</dd>`).join("")}</dl></div>`).join("")}</div>`,{sub:fmtLat(wy)+" "+fmtLon(wx)});
 }
-function dlgOwn(){const o=S.own;openDlg(t("ownData"),`<table class="tbl">${[[t("shipType"),t("container")],[t("loadCond"),t("fullLoad")],["LOA",SHIP.loa.toFixed(2)+" m"],["LBP",SHIP.lbp.toFixed(2)+" m"],[t("breadth"),SHIP.B.toFixed(2)+" m"],[t("depthMld"),SHIP.D.toFixed(2)+" m"],[t("draft"),SHIP.draft.toFixed(2)+" m"],["CCRP",t("ccrpV",[SHIP.ccrpAft])],["MMSI",o.mmsi],["Call sign",o.cs],[t("current"),fmtB(S.cur.set)+" / "+S.cur.drift.toFixed(1)+" kn"],["ODO",o.odo.toFixed(2)+" NM"]].map(r=>`<tr><td>${r[0]}</td><td class="m">${esc(r[1])}</td></tr>`).join("")}</table>
+function dlgOwn(){const o=S.own;openDlg(t("ownData"),`<table class="tbl">${[[t("shipType"),t("container")],[t("loadCond"),t("fullLoad")],["LOA",SHIP.loa.toFixed(2)+" m"],["LBP",SHIP.lbp.toFixed(2)+" m"],[t("breadth"),SHIP.B.toFixed(2)+" m"],[t("depthMld"),SHIP.D.toFixed(2)+" m"],[t("draft"),ownDraft().toFixed(2)+" m"],["CCRP",t("ccrpV",[SHIP.ccrpAft])],["MMSI",o.mmsi],["Call sign",o.cs],[t("current"),fmtB(S.cur.set)+" / "+S.cur.drift.toFixed(1)+" kn"],["ODO",o.odo.toFixed(2)+" NM"]].map(r=>`<tr><td>${r[0]}</td><td class="m">${esc(r[1])}</td></tr>`).join("")}</table>
   <div class="form own-ukc"><label>${t("airDraft")} (m)</label><input type="number" id="ownAir" min="5" max="80" step=".1" value="${S.set.airDraft??45}"><label>${t("ukcPct")} (%)</label><input type="number" id="ownUkc" min="5" max="30" step="1" value="${S.set.ukcPct??10}"></div><p class="note ukc-note">${t("ukcNote")}</p>
   <h4 style="margin:14px 0 6px;font-size:13.5px">${t("speedTable")}</h4><table class="tbl"><tr><th>${t("order")}</th><th>RPM</th><th>kn</th></tr>${ORDERS.filter(q=>q.rpm>0).map(q=>`<tr><td>${t("ordL_"+q.k)}</td><td class="m">${q.rpm}</td><td class="m">${rpmSpeed(q.rpm).toFixed(1)}</td></tr>`).join("")}</table>
-  <p class="note">${t("ownNote")}</p>`,{sub:"Own ship data",onMount:d=>{const on=(id,k,lo,hi)=>{const i=d.querySelector(id);i.onchange=()=>{const v=parseFloat(i.value);if(isFinite(v)){S.set[k]=clamp(v,lo,hi);i.value=S.set[k];saveSet()}}};on("#ownAir","airDraft",5,80);on("#ownUkc","ukcPct",5,30)}})}
+  <p class="note">${t("ownNote")}</p>`,{sub:"Own ship data",onMount:d=>{const on=(id,k,lo,hi)=>{const i=d.querySelector(id);i.onchange=()=>{const v=parseFloat(i.value);if(isFinite(v)){S.set[k]=clamp(v,lo,hi);i.value=S.set[k];saveSet();if(k==="ukcPct")syncContours()}}};on("#ownAir","airDraft",5,80);on("#ownUkc","ukcPct",5,30)}})}
 function dlgGoto(){
   const c=S.cursor.valid?S.cursor:{x:S.own.x,y:S.own.y};
   openDlg(t("gotoT"),`<div class="form"><label>LAT (°)</label><input type="number" id="gLat" step="0.0001" value="${toLat(c.y).toFixed(4)}"><label>LON (°)</label><input type="number" id="gLon" step="0.0001" value="${nearLon(toLon(c.x),0).toFixed(4)}"></div><p style="font-size:12.5px;color:var(--muted)">${t("gotoNote")}</p>`,{foot:`<button class="btn" data-x>${t("cancel")}</button><button class="btn pri" id="gGo">Go To</button>`,onMount:(d,close)=>{d.querySelector("#gGo").onclick=()=>{const[x,y]=fromLL(+d.querySelector("#gLat").value,+d.querySelector("#gLon").value);if(isFinite(x)&&isFinite(y)){S.view.free=true;S.view.cx=x;S.view.cy=y;close()}}}});
@@ -4151,7 +4154,7 @@ function loop(ts){
 }
 function dlgBlocking(){return false}
 let looping=false;
-function afterScenario(msg){
+function afterScenario(msg){syncContours();
   S.paused=false;S.standby=false;$("#standby").hidden=true;S.sel=null;$("#fade")&&$("#fade").remove();S.ucEdit=null;
   document.body.classList.toggle("plan-only",!!S.planOnly);
   if(S.planOnly){closeCtl();S.view.free=true;S.mode="PLAN";setMode("PLAN")}
