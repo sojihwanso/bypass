@@ -12,4 +12,10 @@ export default [
    const r = await p.evaluate(() => { const on = getComputedStyle(document.querySelector('.jb.on')), off = getComputedStyle(document.querySelector('.jb:not(.on)')); return [on.fontWeight, off.fontWeight, on.backgroundColor, off.backgroundColor]; });
    assert(Number(r[0]) >= 600 && Number(r[1]) < 600 && r[2] !== r[3], JSON.stringify(r));
  })},
+ {name:'theme-button-fixed-width', fn: () => withPage({}, async p => {
+   const w1 = await p.$eval('#theme-btn', b => b.getBoundingClientRect().width);
+   await p.click('#theme-btn'); await p.waitForTimeout(150);
+   const w2 = await p.$eval('#theme-btn', b => b.getBoundingClientRect().width);
+   assert(Math.abs(w1 - w2) < 1, w1+' vs '+w2);
+ })},
 ];

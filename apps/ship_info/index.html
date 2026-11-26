@@ -543,6 +543,7 @@ footer li::before{content:"-";color:var(--muted)}
 .lines > span{display:block}
 .intro p{max-width:none}
 .theme-btn{font:inherit;font-size:13px;font-weight:600;color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:var(--r-in);padding:5px 11px;cursor:pointer;white-space:nowrap}
+.theme-btn{min-width:6.6em;text-align:center}   /* '다크모드'↔'라이트모드' 바뀌어도 폭 고정 */
 .theme-btn:hover{border-color:var(--accent-bg);color:var(--accent)}
 .type-head .sub{margin:6px 0 0;color:var(--muted);font-size:14px}
 .nf{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:flex-end;margin:0 0 14px}
@@ -663,7 +664,7 @@ footer .readme-h{display:block;margin-bottom:10px}
         <span id="m-count"></span>
         <a class="cmp-top" href="#compare" id="cmp-top">비교 <small id="cmp-n"></small></a>
         <button type="button" class="theme-btn" id="theme-btn" aria-pressed="false">다크모드</button>
-        <button type="button" class="mver" id="ver-top" title="버전" aria-label="버전 정보">v. 3.3.0</button>
+        <button type="button" class="mver" id="ver-top" title="버전" aria-label="버전 정보">v. 3.4.0</button>
         <a class="home-logo" href="https://teambypass.vercel.app/" target="_top" title="Team Bypass 메인 페이지" aria-label="Team Bypass 메인 페이지"><img src="/assets/favicon.svg" alt="" width="30" height="30"></a>
       </div>
     </div>
@@ -952,7 +953,7 @@ footer .readme-h{display:block;margin-bottom:10px}
       <li><span class="lines"><span>이 사이트는 개인이 만든 자료 모음이며 회사나 학교와 관계가 없습니다.</span><span>틀린 내용은 정보 제보 게시판으로 알려 주시기 바랍니다.</span></span></li>
     </ul>
     </div>
-    <p class="foot-ver"><button type="button" class="ver" id="ver-foot" title="버전" aria-label="버전 정보">v. 3.3.0 · TEAM BYPASS</button></p>
+    <p class="foot-ver"><button type="button" class="ver" id="ver-foot" title="버전" aria-label="버전 정보">v. 3.4.0 · TEAM BYPASS</button></p>
   </div>
 </footer>
 
@@ -2599,8 +2600,16 @@ $('#nf-from').addEventListener('change', e => { const w = newsWindow(); state.ne
 $('#nf-to').addEventListener('change', e => { const w = newsWindow(); state.newsFrom = w.from; state.newsTo = e.target.value; state.newsRange = 'custom'; renderNews(); });
 
 /* ---------- 버전, 패치노트, 이스터에그 ---------- */
-const VERSION = '3.3.0';   // 첫째 자리 큰 기능·개편, 둘째 자리 작은 기능, 셋째 자리 버그·오타 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '3.4.0';   // 첫째 자리 큰 기능·개편, 둘째 자리 작은 기능, 셋째 자리 버그·오타 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  {v:'3.4.0', d:'2026-11-27', i:[
+    '선종 표는 2027 실습생 선발 회사를 먼저 보여 주고, 실습·병역 필터를 맨 앞으로 옮겼습니다. 규모 순은 순위 열 머리를 누르면 됩니다.',
+    '휴대폰에서 선종 표를 회사·구분·규모·실습만 담은 짧은 카드로 바꾸고, 나머지는 \'자세히\'로 펼치게 했습니다. 걸린 필터는 칩으로 보이고 눌러서 풀 수 있습니다.',
+    '선종 표 아래 등록 선박만 있는 회사는 20곳씩 보여 줍니다. 회사 화면 오른쪽 칸은 스크롤해도 따라옵니다.',
+    '검색 결과가 없으면 그렇다고 알리고 선사 목록으로 안내합니다. 홈 해운 소식 칸에 마지막 갱신과 실패 여부를 보여 줍니다.',
+    '등록 자료만 있는 회사는 제목 아래에 선사 자료가 없다는 점과 비교할 수 없는 이유를 적었습니다. 임금 표에는 같은 급 항해사·기관사가 원본에서도 같은 값이라는 주석을 달았습니다.',
+    '빈 비교 화면에 선종 바로가기를, 임금 화면 각 줄에 그 선종 표로 가는 링크를 넣었습니다. 본문 바로가기와 실습 배지 구분 등 접근성도 손봤습니다.'
+  ]},
   {v:'3.3.0', d:'2026-11-26', i:[
     '같은 사건을 여러 매체가 쓴 기사는 하나로 묶고, \'같은 소식 n건 더\'를 누르면 다른 매체 기사를 볼 수 있습니다.',
     '지난번 해운 소식을 본 뒤 새로 들어온 소식에 \'새\' 표시를 붙이고, 홈 해운 소식 칸에 새 소식 수를 보여 줍니다.'
