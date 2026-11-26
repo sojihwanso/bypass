@@ -27,16 +27,32 @@ export const ICON = {
   scn: P('<path d="M5 21V4h12l-2.5 4L17 12H5"/>'),
   help: P('<circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.4c-.7.3-1 .9-1 1.6v.4"/><circle cx="12" cy="17" r=".6"/>'),
   fs: P('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'),
+  tune: P('<path d="M3 15c2-6 4-6 6 0s4 6 6 0 4-6 6 0"/><path d="M12 3v4"/>'),
+  pulse: P('<path d="M3 17h4V7h4v10h10"/>'),
+  ir: P('<path d="M4 12h2M8 12h2M12 12h2M16 12h2M20 12h1"/><path d="M5 6l14 12"/>'),
+  es: P('<path d="M4 12h16"/><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/>'),
+  eav: P('<path d="M4 16c3-8 5-8 8 0s5 8 8 0" opacity=".45"/><path d="M4 12h16"/>'),
+  ace: P('<path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/>'),
+  hl: P('<path d="M12 3v18" stroke-dasharray="3 3"/><path d="M4 4l16 16"/>'),
+  map: P('<path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/>'),
+  cureset: P('<path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v4h4"/><path d="M12 8v4l3 2"/>'),
+  ownais: P('<path d="M12 3l6 16-6-4-6 4z"/>'),
+  aismsg: P('<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M3 7l9 6 9-6"/>'),
   mute: P('<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l4 6M21 9l-4 6"/>'),
   panel: P('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/>'),
 };
-const QB = [['tx', 'q_tx'], ['mode', 'q_mode'], ['motion', 'q_motion'], ['off', 'q_off'], ['sep'], ['preset', 'q_preset'], ['trail', 'q_trail'], ['pi', 'q_pi'], ['az', 'q_az'], ['sep'], ['pause', 'q_pause'], ['speed', 'q_speed'], ['scn', 'q_scn'], ['sep'], ['pal', 'q_pal'], ['conn', 'q_conn'], ['shot', 'q_shot'], ['menu', 'q_menu']];
+/* 왼쪽 막대: 매뉴얼 1.4.1의 순서(위: 송신·튜닝·펄스·IR·ES·EAV·ACE / 아래: HL·MAP·CU/TM 리셋·자선 AIS·AIS 메시지·밝기).
+   실제와 똑같지 않게 두 쌍만 한 칸씩 바꿈: 펄스↔튜닝, MAP↔HL. 그 아래는 시뮬레이터 전용 묶음 */
+const QB = [['tx', 'q_tx'], ['tune', 'q_tune'], ['pulse', 'q_pulse'], ['ir', 'q_ir'], ['es', 'q_es'], ['eav', 'q_eav'], ['ace', 'q_ace'], ['sep'], ['hl', 'q_hl'], ['map', 'q_map'], ['cureset', 'q_cureset'], ['ownais', 'q_ownais'], ['aismsg', 'q_aismsg'], ['pal', 'q_pal']];
+/* 실제 레이더에 없는 시뮬레이터 전용 단추는 헤더에 */
+const HB = [['scn', 'q_scn'], ['pause', 'q_pause'], ['speed', 'q_speed'], ['conn', 'q_conn'], ['shot', 'q_shot']];
 
 export function initUI(root, actions) {
   root.innerHTML = `
 <header class="top">
   <div class="brand"><b data-t="brand"></b><span data-t="sub"></span></div>
   <span class="scn-chip" id="scnChip" hidden></span>
+  <div class="simbar" role="group" aria-label="시뮬레이터">${HB.map(([k, l]) => `<button type="button" class="hb" data-act="${k}" id="hb_${k}">${ICON[k]}<span data-t="${l}"></span><span class="qv" id="hv_${k}"></span></button>`).join('')}</div>
   <div class="htools">
     <button class="hbtn rp-toggle" type="button" data-act="rp" aria-label="정보창">${ICON.panel}</button>
     <div class="seg2" role="group" aria-label="Language"><button type="button" data-act="lang" data-v="ko">한</button><button type="button" data-act="lang" data-v="en">EN</button></div>
@@ -50,17 +66,22 @@ export function initUI(root, actions) {
   <section class="ppi-wrap" id="ppiWrap">
     <canvas id="cvEcho"></canvas><canvas id="cvOver" aria-label="레이더 화면"></canvas>
     <div class="tl">
-      <div class="bx" id="bxRange" data-wheel="range" style="position:static"><span class="lb">RANGE</span><span class="big" id="vRange">-</span><span class="lb" id="vRing"></span><span class="pm"><button type="button" data-act="rangeUp" aria-label="범위 늘리기">+</button><button type="button" data-act="rangeDn" aria-label="범위 줄이기">−</button></span></div>
+      <div class="row2"><div class="bx" id="bxRange" data-wheel="range" style="position:static"><span class="lb">RANGE</span><span class="big" id="vRange">-</span><span class="lb" id="vRing"></span><span class="pm"><button type="button" data-act="rangeUp" aria-label="범위 늘리기">+</button><button type="button" data-act="rangeDn" aria-label="범위 줄이기">−</button></span></div>
+      <div class="bx" id="bxRef" style="position:static"><span class="lb">REF POINT</span><button type="button" data-act="refpt" id="vRef">CCRP</button></div></div>
       <div class="bx" id="bxMode" style="position:static"><button type="button" data-act="mode" id="vOrient">HU</button><button type="button" data-act="motion" id="vMotion">RM</button><span class="lb" id="vBand">X-BAND</span><button type="button" data-act="pulse" id="vPulse">M1</button></div>
+      <div class="bx" id="bxPict" style="position:static;display:flex;gap:6px;align-items:center"><span class="lb">PICTURE</span><button type="button" data-act="preset" id="vPict">-</button><button type="button" data-act="off" id="vOff">OFF CENTER</button></div>
       <div class="bx" id="bxTx" style="position:static"><span class="dot"></span><span id="vTx">STBY</span></div>
     </div>
-    <div class="tr"><div class="bx" id="bxEcho" style="position:static">
+    <div class="bx" id="bxInd" style="top:12px;left:50%;transform:translateX(-50%)" hidden></div>
+    <div class="tr"><div class="bx" id="bxWatch" style="position:static" hidden><span class="lb">WATCH</span> <span class="vv" id="vWatch"></span></div><div class="bx" id="bxEcho" style="position:static">
       <div class="ctl" id="bxGain" data-wheel="gain"><span class="lb">GAIN</span><span class="bar"><i></i></span><span class="md"></span></div>
       <div class="ctl" id="bxSea" data-wheel="sea" data-act="seaAuto"><span class="lb">SEA</span><span class="bar"><i></i></span><span class="md"></span></div>
       <div class="ctl" id="bxRain" data-wheel="rain" data-act="rainAuto"><span class="lb">RAIN</span><span class="bar"><i></i></span><span class="md"></span></div>
       <div class="ctl" id="bxTune" data-wheel="tune" data-act="tuneAuto"><span class="lb">TUNE</span><span class="bar"><i></i></span><span class="md"></span></div>
       <div class="lb" id="vPreset" style="margin-top:4px"></div>
-    </div><div class="bx" id="bxCursor" style="position:static"></div></div>
+    </div><div class="bx" id="bxCursor" style="position:static"></div><div class="bx" id="bxMenu" style="position:static;display:flex;gap:6px;justify-content:flex-end"><button type="button" data-act="menu" data-t="q_menu"></button></div></div>
+    <div class="bx" id="bxPi" style="left:12px;bottom:92px;display:flex;gap:6px;align-items:center"><button type="button" data-act="pi" id="vPi">PI</button><span class="lb" id="vPiV"></span></div>
+    <div class="bx" id="bxTgtTools" style="right:12px;bottom:92px;display:flex;gap:6px;align-items:center"><button type="button" data-act="trial" id="vTrial">TRIAL</button><button type="button" data-act="az" id="vAz">ACQ ZONE</button></div>
     <div class="bx bl" id="bxEbl"><div class="eb">
       <button type="button" class="tg" data-act="ebl1">EBL1</button><span class="vv" id="vEbl1" data-wheel="ebl1">-</span><button type="button" data-act="eblRef" id="vEblRef">T</button>
       <button type="button" class="tg" data-act="ebl2">EBL2</button><span class="vv" id="vEbl2" data-wheel="ebl2">-</span><span></span></div></div>
@@ -74,10 +95,10 @@ export function initUI(root, actions) {
     <div class="sec" id="pnOwn"><h3><span data-t="own"></span><span class="num" id="vClock"></span></h3>
       <dl class="kv"><dt>HDG</dt><dd class="big" id="vHdg">-</dd><dt>STW</dt><dd id="vStw">-</dd><dt>SOG</dt><dd id="vSog">-</dd><dt>COG</dt><dd id="vCog">-</dd><dt>ROT</dt><dd id="vRot">-</dd><dt data-t="posn"></dt><dd id="vPos">-</dd><dt data-t="elapsed"></dt><dd id="vEl">-</dd></dl></div>
     <button class="help-btn" type="button" id="btnHelp" data-act="help">${ICON.help}<span data-t="help"></span></button>
-    <div id="connSlot"></div>
     <div class="sec" id="pnTgt"><h3><span data-t="tgt"></span></h3><div class="tslots" id="tSlots"></div></div>
-    <div class="sec" id="pnTT"><h3><span data-t="ttais"></span><span class="num" id="vCounts"></span></h3><dl class="kv" id="vTT"></dl></div>
+    <div class="sec" id="pnTT"><h3><span data-t="ttais"></span><span class="num" id="vCounts"></span></h3><dl class="kv" id="vTT"></dl><div class="ttbtns"><button class="btn" type="button" data-act="vecMode" id="vVec">VECTOR</button><button class="btn" type="button" data-act="trail" id="vTrail">TRAIL</button></div></div>
     <div class="sec" id="pnAlert"><h3><span data-t="alert"></span><span class="num" id="vAlN"></span></h3><div id="aBox"></div></div>
+    <div id="connSlot"></div>
   </aside>
 </div>
 <div class="mpanel" id="menuPanel" hidden><header><span data-t="menuTitle"></span><button class="btn" type="button" data-act="menuClose" data-t="close"></button></header><div class="mtabs" id="mTabs"></div><div class="mlist" id="mList"></div></div>
@@ -135,6 +156,10 @@ export function initUI(root, actions) {
     seaAuto: () => { S.ctrl.sea.auto = !S.ctrl.sea.auto; emit('settings', 'ctrl.sea'); },
     rainAuto: () => { S.ctrl.rain.auto = !S.ctrl.rain.auto; emit('settings', 'ctrl.rain'); },
     tuneAuto: () => { S.ctrl.tune.auto = !S.ctrl.tune.auto; emit('settings', 'ctrl.tune'); },
+    tune: () => { S.ctrl.tune.auto = !S.ctrl.tune.auto; emit('settings', 'ctrl.tune'); },
+    ir: () => { S.ctrl.ir = (S.ctrl.ir + 1) % 4; emit('settings', 'ctrl.ir'); }, es: () => { S.ctrl.es = (S.ctrl.es + 1) % 4; emit('settings', 'ctrl.es'); },
+    eav: () => { S.ctrl.eav = (S.ctrl.eav + 1) % 4; emit('settings', 'ctrl.eav'); }, ace: () => { S.ctrl.ace = !S.ctrl.ace; emit('settings', 'ctrl.ace'); },
+    map: () => { S.disp.map.on = !S.disp.map.on; emit('settings', 'disp.map'); }, hl: () => {},
   };
   root.addEventListener('click', (e) => {
     const el = e.target.closest('[data-act]'); if (!el || el.closest('#menuPanel [data-tab]')) return;
@@ -159,6 +184,10 @@ export function initUI(root, actions) {
   root.addEventListener('pointermove', (e) => { if (!drag) return; const dy = drag.y - e.clientY; if (Math.abs(dy) > 12) { drag.el.dispatchEvent(new WheelEvent('wheel', { deltaY: -dy, bubbles: true, cancelable: true })); drag.y = e.clientY; } });
   addEventListener('pointerup', () => { drag = null; });
 
+  /* HL OFF: 누르고 있는 동안 선수선 숨김 */
+  const hlb = $('#qb_hl');
+  hlb.addEventListener('pointerdown', () => actions.hlHold && actions.hlHold(true));
+  for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) hlb.addEventListener(ev, () => actions.hlHold && actions.hlHold(false));
   /* ---- 커서 메뉴(오른쪽 클릭 / 길게 누르기) ---- */
   const cm = $('#cmenu'), over = $('#cvOver');
   const CM = [['acq', 'cm_acq'], ['cancel', 'cm_cancel'], ['data', 'cm_data'], ['act', 'cm_act'], ['ref', 'cm_ref'], ['-'], ['ebl', 'cm_ebl'], ['vrm', 'cm_vrm'], ['offEbl', 'cm_offEbl'], ['ruler', 'cm_ruler'], ['-'], ['off', 'cm_off'], ['center', 'cm_center'], ['drop', 'cm_drop'], ['anchor', 'cm_anchor']];
@@ -185,19 +214,22 @@ export function initUI(root, actions) {
 
   applyLang(); applyTheme();
 
-  /* 배치: PPI 원 양옆 공간이 넉넉하면 기능 버튼(왼쪽)·경보·물표·TT(오른쪽)를 그 안으로, 좁으면 원래 자리로 */
-  const SIDE_MIN = 200, main = root.querySelector('.main'), rp = $('#rp'), wrap = $('#ppiWrap');
+  /* 배치: 물표 정보·TT·AIS 설정은 PPI 원 오른쪽 빈 공간(넉넉하면), 아니면 오른쪽 패널. 패널 순서: 자선 → 도움말 → Conning → 경보 */
+  const SIDE_MIN = 140, main = root.querySelector('.main'), rp = $('#rp'), wrap = $('#ppiWrap');
+  rp.insertBefore($('#connSlot'), $('#pnAlert'));
   let mode = null;
+  let shift = 0;
   function relayout() {
-    const vw = innerWidth, vh = innerHeight - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hdr')) || 50);
-    const rpw = vw > 1000 ? 300 : 0, avail = vw - rpw, dia = Math.min(avail, vh) - 72, gutter = (avail - dia) / 2;
-    const next = gutter >= SIDE_MIN ? 'side' : 'bar';
+    /* 오른쪽 칸 폭 = 150~300px, 칸과 방위 눈금 사이 46px. 모자라면 원을 왼쪽으로 옮김(왼쪽 여백 40px 이상일 때만) */
+    const r = wrap.getBoundingClientRect(), dia = Math.min(r.width, r.height) - 72, gutter = (r.width - dia) / 2;
+    const colW = Math.min(300, Math.max(150, gutter - 46)); shift = Math.max(0, colW + 46 - gutter);
+    const next = r.width > 0 && gutter - shift >= 40 ? 'rside' : 'bar'; if (next === 'bar') shift = 0;
     if (next !== mode) {
       mode = next; document.documentElement.dataset.layout = mode;
-      if (mode === 'side') { $('#sideL').append($('#qbar')); $('#sideR').append($('#pnAlert'), $('#pnTgt'), $('#pnTT')); }
-      else { main.prepend($('#qbar')); rp.insertBefore($('#pnAlert'), $('#connSlot')); rp.append($('#pnTgt'), $('#pnTT')); } // 좁은 화면: 경보는 Conning보다 위(늘 보이게)
+      if (mode === 'rside') $('#sideR').append($('#pnTgt'), $('#pnTT'));
+      else rp.append($('#pnTgt'), $('#pnTT'));
     }
-    if (mode === 'side') { const w = Math.max(170, Math.min(300, gutter - 40)); wrap.style.setProperty('--sidew', w + 'px'); }
+    if (mode === 'rside') wrap.style.setProperty('--sidew', colW + 'px');
     return mode;
   }
   relayout();
@@ -223,11 +255,17 @@ export function initUI(root, actions) {
     $('#vVrm1').textContent = vr(0); $('#vVrm2').textContent = vr(1); $('#vTtg1').textContent = d.vrm[0].ttg != null ? f1(d.vrm[0].ttg, 1) + "'" : ''; $('#vTtg2').textContent = d.vrm[1].ttg != null ? f1(d.vrm[1].ttg, 1) + "'" : '';
     root.querySelectorAll('[data-act="ebl1"],[data-act="ebl2"],[data-act="vrm1"],[data-act="vrm2"]').forEach((b) => { const k = b.dataset.act, i = +k.slice(-1) - 1; b.classList.toggle('on', (k.startsWith('ebl') ? d.ebl : d.vrm)[i].on); });
     // 빠른 막대 상태
-    $('#qv_mode').textContent = d.orient; $('#qv_motion').textContent = d.motion; $('#qv_speed').textContent = '×' + d.speed; $('#qv_pal').textContent = t('pal_' + S.disp.palette);
-    $('#qv_tx').textContent = d.tx === 'tx' ? 'TX' : d.tx === 'warm' ? '…' : 'STBY'; $('#qv_preset').textContent = S.ctrl.preset.replace('CUSTOM', 'C');
-    $('#qv_trail').textContent = S.disp.trails.time ? (S.disp.trails.mode === 'TRUE' ? 'T ' : 'R ') + Math.round(S.disp.trails.time / 60) + "'" : 'OFF';
-    $('#qb_tx').classList.toggle('on', d.tx !== 'stby'); $('#qb_off').classList.toggle('on', !!d.offCenter); $('#qb_pi').classList.toggle('on', !!d.piOn); $('#qb_az').classList.toggle('on', !!d.azOn);
-    $('#qb_pause').classList.toggle('on', !!d.paused); $('#qb_conn').classList.toggle('on', !!d.connOn); $('#qb_trail').classList.toggle('on', S.disp.trails.time > 0);
+    const qv = (k, v, on) => { $('#qv_' + k).textContent = v; if (on !== undefined) $('#qb_' + k).classList.toggle('on', !!on); };
+    qv('tx', d.tx === 'tx' ? 'TX' : d.tx === 'warm' ? 'WARM' : 'STBY', d.tx !== 'stby'); qv('tune', S.ctrl.tune.auto ? 'AUTO' : 'MAN', S.ctrl.tune.auto); qv('pulse', S.ctrl.pulse);
+    qv('ir', S.ctrl.ir ? String(S.ctrl.ir) : 'OFF', S.ctrl.ir > 0); qv('es', S.ctrl.es ? String(S.ctrl.es) : 'OFF', S.ctrl.es > 0); qv('eav', S.ctrl.eav ? String(S.ctrl.eav) : 'OFF', S.ctrl.eav > 0); qv('ace', S.ctrl.ace ? 'ON' : 'OFF', S.ctrl.ace);
+    qv('hl', 'OFF'); qv('map', S.disp.map.on ? 'ON' : 'OFF', S.disp.map.on); qv('cureset', d.orient === 'CU' || d.motion === 'TM' ? 'RESET' : '-'); qv('ownais', ''); qv('aismsg', d.msgN ? String(d.msgN) : '');
+    qv('pal', t('pal_' + S.disp.palette));
+    $('#hv_speed').textContent = '×' + d.speed; $('#hb_pause').classList.toggle('on', !!d.paused); $('#hb_conn').classList.toggle('on', !!d.connOn); $('#hb_speed').classList.toggle('on', d.speed > 1);
+    $('#vPict').textContent = S.ctrl.preset; $('#vOff').classList.toggle('on', !!d.offCenter); $('#vRef').textContent = d.ref || 'CCRP';
+    $('#vPi').classList.toggle('on', !!d.piOn); $('#vPiV').textContent = d.piOn ? d.piText || '' : ''; $('#vAz').classList.toggle('on', !!d.azOn); $('#vTrial').classList.toggle('on', S.tt.trialMode !== 'OFF');
+    $('#vVec').textContent = 'VECTOR ' + S.tt.vector; $('#vTrail').textContent = 'TRAIL ' + (S.disp.trails.time ? (S.disp.trails.mode === 'TRUE' ? 'T ' : 'R ') + Math.round(S.disp.trails.time / 60) + "'" : 'OFF');
+    const ind = [S.ctrl.sart ? 'SART' : '', d.paused ? (lang() === 'en' ? 'PAUSED' : '일시정지') : '', d.speed > 1 ? 'SIM ×' + d.speed : ''].filter(Boolean); $('#bxInd').hidden = !ind.length; $('#bxInd').textContent = ind.join('  ·  ');
+    $('#bxWatch').hidden = !S.alert.watch; if (S.alert.watch) $('#vWatch').textContent = d.watchLeft || '';
     // 자선
     const o = d.own; if (o) {
       $('#vHdg').textContent = deg(o.hdg); $('#vStw').textContent = f1(o.stw) + ' kn'; $('#vSog').textContent = f1(o.sog) + ' kn'; $('#vCog').textContent = deg(o.cog);
@@ -235,7 +273,7 @@ export function initUI(root, actions) {
     }
     $('#vClock').textContent = d.clock || ''; $('#vEl').textContent = d.elapsed || '-';
     // 물표 2칸
-    $('#tSlots').innerHTML = [0, 1].map((i) => { const g = d.tgt && d.tgt[i]; if (!g) return `<div class="tslot"><span class="empty">${i === 0 ? esc(t('noTgt')) : ''}</span></div>`;
+    $('#tSlots').innerHTML = [0, 1].map((i) => { const g = d.tgt && d.tgt[i]; if (!g) return `<div class="tslot${i ? ' blank' : ''}"><span class="empty">${i === 0 ? esc(t('noTgt')) : ''}</span></div>`;
       return `<div class="tslot${g.danger ? ' danger' : ''}"><div class="nm">${esc(g.label)}</div><dl class="kv"><dt>BRG</dt><dd>${deg(g.brg)}</dd><dt>RNG</dt><dd>${f1(g.rng, 2)}</dd><dt>COG</dt><dd>${deg(g.cog)}</dd><dt>SOG</dt><dd>${f1(g.sog)}</dd><dt>CPA</dt><dd>${f1(g.cpa, 2)}</dd><dt>TCPA</dt><dd>${g.tcpa == null ? '-' : g.tcpa < 0 ? '--' : f1(g.tcpa, 1)}</dd><dt>BCR</dt><dd>${g.bcr == null ? '-' : f1(g.bcr, 2)}</dd><dt>BCT</dt><dd>${g.bct == null ? '-' : f1(g.bct, 1)}</dd></dl></div>`; }).join('');
     $('#vCounts').textContent = `TT ${d.ttN ?? 0} · AIS ${d.aisN ?? 0}`;
     $('#vTT').innerHTML = `<dt>${esc(t('vector'))}</dt><dd>${S.tt.vector} ${S.tt.vecMin} min</dd><dt>${esc(t('cpaLim'))}</dt><dd>${S.tt.cpaOn ? `${S.tt.cpa.toFixed(1)} NM / ${S.tt.tcpa} min` : 'OFF'}</dd><dt>${esc(t('past'))}</dt><dd>${S.tt.pastPts} × ${S.tt.pastInt}s</dd><dt>${esc(t('aisFilt'))}</dt><dd>${S.ais.maxRngOn ? S.ais.maxRng + ' NM' : '-'} ${S.ais.minSpdOn ? '≥' + S.ais.minSpd + ' kn' : ''}</dd>`;
@@ -244,5 +282,5 @@ export function initUI(root, actions) {
     const chip = $('#scnChip'); chip.hidden = !d.scnName; chip.textContent = d.scnName || '';
   }
   function dialog(title, html, foot = '') { $('#genT').textContent = title; $('#genB').innerHTML = html; $('#genF').innerHTML = foot; const g = $('#genDlg'); if (!g.open) g.showModal(); return g; }
-  return { refresh, applyLang, applyTheme, renderMenu, dialog, relayout, layoutMode: () => mode, closeAll() { menuEl.hidden = true; cm.hidden = true; }, echoCanvas: $('#cvEcho'), overCanvas: $('#cvOver') };
+  return { refresh, applyLang, applyTheme, renderMenu, dialog, relayout, layoutMode: () => mode, shift: () => shift, closeAll() { menuEl.hidden = true; cm.hidden = true; }, echoCanvas: $('#cvEcho'), overCanvas: $('#cvOver') };
 }

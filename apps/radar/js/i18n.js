@@ -4,6 +4,7 @@ const D = {
   ko: {
     brand: '레이더 시뮬레이터', sub: 'RADAR SIMULATOR · TRAINING', help: '도움말', menu: '메뉴', close: '닫기', ok: '확인', cancel: '취소',
     q_tx: '송신', q_mode: '방위 모드', q_motion: '운동 모드', q_off: '중심 이동', q_preset: '맞춤 영상', q_trail: '항적', q_pi: 'PI선', q_az: '포착 구역',
+    q_tune: '튜닝', q_pulse: '펄스', q_ir: '간섭 제거', q_es: '영상 확대', q_eav: '영상 평균', q_ace: '자동 클러터', q_hl: '선수선 숨김', q_map: '레이더 맵', q_cureset: 'CU/TM 리셋', q_ownais: '자선 AIS', q_aismsg: 'AIS 메시지',
     q_pause: '일시정지', q_speed: '배속', q_pal: '화면', q_menu: '메뉴', q_conn: 'Conning', q_shot: '캡처', q_scn: '시나리오',
     own: '자선', tgt: '물표 정보', ttais: 'TT · AIS', alert: '경보', noTgt: '물표를 눌러 고르세요', noAlert: '경보 없음',
     posn: '위치', time: '시각', elapsed: '경과', ack: '확인', silence: '소리 끄기', list: '목록', count: '개',
@@ -17,7 +18,8 @@ const D = {
   en: {
     brand: 'Radar Simulator', sub: 'RADAR SIMULATOR · TRAINING', help: 'Help', menu: 'Menu', close: 'Close', ok: 'OK', cancel: 'Cancel',
     q_tx: 'Power', q_mode: 'Mode', q_motion: 'Motion', q_off: 'Off-center', q_preset: 'Echo preset', q_trail: 'Trails', q_pi: 'PI lines', q_az: 'Acq zone',
-    q_pause: 'Pause', q_speed: 'Speed', q_pal: 'Display', q_menu: 'Menu', q_conn: 'Conning', q_shot: 'Capture', q_scn: 'Scenario',
+    q_tune: 'Tune', q_pulse: 'Pulse', q_ir: 'Int. reject', q_es: 'Echo stretch', q_eav: 'Echo avg', q_ace: 'ACE', q_hl: 'HL off', q_map: 'Radar map', q_cureset: 'CU/TM reset', q_ownais: 'Own AIS', q_aismsg: 'AIS msg',
+    q_pause: 'Pause', q_speed: 'Speed', q_pal: 'Brilliance', q_menu: 'Menu', q_conn: 'Conning', q_shot: 'Capture', q_scn: 'Scenario',
     own: 'Own ship', tgt: 'Target data', ttais: 'TT · AIS', alert: 'Alerts', noTgt: 'Click a target to select it', noAlert: 'No alerts',
     posn: 'POSN', time: 'Time', elapsed: 'Elapsed', ack: 'ACK', silence: 'Silence', list: 'List', count: '',
     cursor: 'Cursor', stby: 'STBY', warm: 'Warm-up', tx: 'TX', paused: 'Paused',

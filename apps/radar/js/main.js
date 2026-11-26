@@ -40,7 +40,7 @@ const rnd = Math.random;
 const actions = {};
 const ui = initUI(app, actions);
 const ppi = createPPI(ui.echoCanvas, ui.overCanvas);
-const fit = () => { ui.relayout(); ppi.resize(); coastKey = ''; };
+const fit = () => { ui.relayout(); ppi.setShift(ui.shift()); ppi.resize(); coastKey = ''; };
 fit(); addEventListener('resize', fit);
 document.documentElement.dataset.theme = S.disp.palette;
 
@@ -189,7 +189,7 @@ function latLonGrid() {
   for (let lo = lo0; lo <= W.own.lon + dLat * 1.3; lo += step) { const l = []; for (let la = W.own.lat - dLat; la <= W.own.lat + dLat; la += dLat / 20) l.push(relOf(P.x(lo), P.y(la))); lines.push(l); }
   return lines;
 }
-let azZones = [];
+let azZones = [], refPt = 'CCRP';
 
 /* ---------- UI 갱신 ---------- */
 const pad = (n) => String(n).padStart(2, '0');
@@ -212,7 +212,7 @@ function refreshUI() {
     cursor: cur, ebl: tools.ebl.map((e, i) => ({ on: e.on, brg: S.disp.eblRef === 'REL' ? wrap360(tools.eblTrue(i, o.hdg) - o.hdg) : tools.eblTrue(i, o.hdg) })),
     vrm: tools.vrm.map((v) => ({ on: v.on, rng: toUnit(v.rng, S.disp.vrmUnit), ttg: S.disp.vrmTTG && v.on ? vrmTTG(v.rng, o.sog) : null })),
     tgt: [slot(selected[0]), slot(selected[1])], ttN: tracker.targets().filter((g) => g.state !== 'lost').length, aisN: ais.list().filter((a) => a.status !== 'lost').length,
-    alertTop: top ? { ...top, time: `${pad(((top.tSim % 86400) / 3600) | 0)}:${pad(((top.tSim % 3600) / 60) | 0)}:${pad((top.tSim % 60) | 0)}` } : null, alertN: alerts.list().length, scnName: W.name,
+    alertTop: top ? { ...top, time: `${pad(((top.tSim % 86400) / 3600) | 0)}:${pad(((top.tSim % 3600) / 60) | 0)}:${pad((top.tSim % 60) | 0)}` } : null, alertN: alerts.list().length, scnName: W.name, msgN: ais.messages().length, ref: refPt, piText: `${tools.pi.brg.toFixed(0).padStart(3, '0')}° · ${tools.pi.interval} NM`, watchLeft: S.alert.watch ? (() => { const s = Math.max(0, S.alert.watch * 60 - (performance.now() - lastUser) / 1000); return `${pad((s / 60) | 0)}:${pad((s % 60) | 0)}`; })() : '',
   });
   conn && conn.refresh();
   const tb = document.getElementById('bxTrial'); if (tb) { tb.hidden = S.tt.trialMode === 'OFF'; tb.querySelector('#trC').textContent = trialSet.course.toFixed(0).padStart(3, '0') + '°'; tb.querySelector('#trS').textContent = trialSet.speed.toFixed(1) + ' kn'; tb.querySelector('#trD').textContent = S.tt.trialDelay + ' min'; }
@@ -268,6 +268,12 @@ Object.assign(actions, {
   eblRef: () => { S.disp.eblRef = S.disp.eblRef === 'REL' ? 'TRUE' : 'REL'; saveSettings(); },
   ack: () => { const a = alerts.list().find((x) => !x.acked && x.pri !== 'C'); if (!a) return; /* 아직 확인 안 한 것 중 가장 급한 것 */ alerts.ack(a.id); if (a.id.startsWith('lost:')) { const id = a.id.slice(5); tracker.cancel(id); selected = selected.filter((x) => x !== id); alerts.resolve(a.id); } },
   silence: () => alerts.silence(),
+  hlHold: (down) => { V.hlHidden = down; },
+  cureset: () => { if (S.disp.orient === 'CU') V.crs = W.own.hdg; if (S.disp.motion === 'TM') { const v = velXY(W.own.cog, 1); tmOff = { x: -0.5 * v.vx, y: 0.5 * v.vy }; } ppi.clear(); },
+  ownais: () => menuAction('ownData'), aismsg: () => menuAction('aisMsgs'),
+  refpt: () => { refPt = refPt === 'CCRP' ? 'ANT' : 'CCRP'; },
+  trial: () => { S.tt.trialMode = S.tt.trialMode === 'OFF' ? 'STATIC' : 'OFF'; if (S.tt.trialMode !== 'OFF' && W) trialSet = { course: W.own.hdg, speed: W.own.stw }; saveSettings(); },
+  vecMode: () => { S.tt.vector = S.tt.vector === 'TRUE' ? 'REL' : 'TRUE'; saveSettings(); },
   alertList: () => { const rows = alerts.list().map((a) => `<tr><td>${a.pri}</td><td>${a.text}</td><td>${a.active ? (lang() === 'en' ? 'active' : '발생') : lang() === 'en' ? 'rectified' : '해소'}</td><td>${a.acked ? 'ACK' : '-'}</td></tr>`).join(''); ui.dialog(t('alert'), `<table class="tbl">${rows || `<tr><td>${t('noAlert')}</td></tr>`}</table>`, `<button class="btn" type="button" data-act="ackAll">${lang() === 'en' ? 'ACK all' : '모두 확인'}</button>`); },
   ackAll: () => { alerts.ackAll(); actions.alertList(); },
   help: () => { if (window.RadarHelp) window.RadarHelp(); },
