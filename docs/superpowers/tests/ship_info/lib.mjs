@@ -13,6 +13,8 @@ export async function withPage(opts, fn){
   await ctx.addInitScript(t => { try{ localStorage.setItem('sasarok-theme-v1', t); }catch(e){} }, theme);
   if (opts.init) await ctx.addInitScript(opts.init.fn, opts.init.arg);
   const page = await ctx.newPage();
+  /* 실제 해운 소식 서버는 부르지 않음(테스트가 서버 상태에 흔들리지 않게). 소식 테스트는 page.route로 가짜 응답을 덧씌움 */
+  await page.route('**/functions/v1/ship-news*', r => r.fulfill({status:404, contentType:'application/json', body:'{}'}));
   const errors = [];
   page.on('pageerror', e => errors.push(String(e)));
   await page.goto(BASE + (opts.hash || '#home'));

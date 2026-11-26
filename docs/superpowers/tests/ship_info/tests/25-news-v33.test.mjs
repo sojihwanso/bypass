@@ -14,7 +14,8 @@ async function boot(p, hash, items, seed){
     localStorage.setItem('sasarok-news-visit-v1', s ? String(s) : '');
     location.hash = h; location.reload();
   }, [hash, seed || 0]);
-  await p.waitForTimeout(1200);
+  await p.waitForFunction(() => typeof NEWS_ALL !== 'undefined' && NEWS_ALL.some(n => n.u && n.u.startsWith('https://ex.com/')), null, {timeout:8000});
+  await p.waitForTimeout(200);
 }
 export default [
  {name:'news-group-same-story', fn: () => withPage({}, async p => {
