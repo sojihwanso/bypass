@@ -51,8 +51,17 @@ export default [
      assert(r.pos === 'fixed' && r.l === 12 && r.bot === 12 && r.lbl.includes('BYPASS'), JSON.stringify(r));
    });
  }},
+ {name:'v37-bp-mark-no-overlap', fn: async () => {
+   for (const w of [1440, 1000, 390]) await withPage({width:w, height:900}, async p => {
+     const r = await p.evaluate(() => { const card = document.querySelector('#v-home .bypass'), m = card.querySelector('.bp-mark').getBoundingClientRect();
+       const hit = [...card.querySelectorAll('p span, h2, .bp-tag, li, a')].filter(e => { const b = e.getBoundingClientRect(); const rg = document.createRange(); rg.selectNodeContents(e); const t = rg.getBoundingClientRect();
+         return t.right > m.left + 4 && t.left < m.right - 4 && t.bottom > m.top + 4 && t.top < m.bottom - 4; }).map(e => e.textContent.slice(0, 20));
+       return {w: m.width, hit}; });
+     assert(r.w > 40 && r.hit.length === 0, w+' '+JSON.stringify(r));
+   });
+ }},
  {name:'v35-version', fn: () => withPage({}, async p => {
    const t = await p.$eval('#ver-top', e => e.textContent.trim());
-   assert(t === 'v. 3.6.0', t);
+   assert(t === 'v. 3.7.0', t);
  })}
 ];

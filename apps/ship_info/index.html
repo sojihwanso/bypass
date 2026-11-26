@@ -108,10 +108,10 @@ main.wrap{padding:30px 24px 72px}
 .hero-stage{--w:max(100cqw,calc(100cqh * var(--ar)));--h:calc(var(--w) / var(--ar));position:absolute;width:var(--w);height:var(--h);left:calc((100cqw - var(--w)) * var(--ox));top:calc((100cqh - var(--h)) * var(--oy))}
 .hero-stage img{position:absolute;display:block}
 .hero-bg{inset:0;width:100%;height:100%}
-.hero-stage .ship{height:auto;opacity:0;transition:opacity .6s ease}
-.hero-art.go .ship{opacity:1;animation:ship-in 2.4s cubic-bezier(.2,.7,.25,1) var(--d) both,ship-bob var(--b) ease-in-out calc(var(--d) + 2.4s) infinite alternate}
-@keyframes ship-in{from{translate:-1.4% 0}to{translate:0 0}}
-@keyframes ship-bob{from{transform:translateY(0) rotate(0deg)}to{transform:translateY(1.5px) rotate(.3deg)}}
+.hero-stage .ship{height:auto;opacity:0;transition:opacity .6s ease;transform-origin:50% 90%}
+.hero-art.go .ship{opacity:1;animation:ship-in 3.2s cubic-bezier(.2,.7,.25,1) var(--d) both,ship-bob var(--b) ease-in-out var(--d) infinite}
+@keyframes ship-in{from{translate:-7% 0}to{translate:0 0}}
+@keyframes ship-bob{0%,100%{transform:translate(0,0) rotate(0deg)}30%{transform:translate(3px,4px) rotate(.7deg)}65%{transform:translate(-2px,-1px) rotate(-.5deg)}}
 @media (prefers-reduced-motion: reduce){.hero-art .ship{opacity:1;animation:none!important}}
 .hero .hero-night{display:none}
 :root[data-theme="dark"] .hero{background:#0b1626}
@@ -168,7 +168,9 @@ main.wrap{padding:30px 24px 72px}
 .trow .tc small{display:block;font-size:12px;color:var(--muted)}
 .trow .pk{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);white-space:nowrap}
 .trow .pk input{width:16px;height:16px;accent-color:var(--accent)}
-.bypass{background:var(--sheet);color:var(--ink);border:1px solid var(--rule);padding:18px 20px;border-radius:var(--r-card)}
+.bypass{position:relative;container-type:inline-size;background:var(--sheet);color:var(--ink);border:1px solid var(--rule);padding:18px 20px;border-radius:var(--r-card)}
+.bp-mark{position:absolute;top:22px;right:26px;width:clamp(120px,28cqw,196px);height:auto;rotate:-7deg;pointer-events:none}
+@container (max-width: 420px){.bp-mark{width:58px;top:16px;right:16px}}
 .bypass .bp-tag{font-size:12px;color:var(--muted)}
 .bypass h2{font-size:20px;letter-spacing:.04em;margin:4px 0 2px;font-weight:700}
 .bypass p{margin:8px 0 0;font-size:14px;line-height:1.7;color:var(--muted)}
@@ -673,7 +675,7 @@ footer .readme-h{display:block;margin-bottom:10px}
         <span id="m-count"></span>
         <a class="cmp-top" href="#compare" id="cmp-top">비교 <small id="cmp-n"></small></a>
         <button type="button" class="theme-btn" id="theme-btn" aria-pressed="false">다크모드</button>
-        <button type="button" class="mver" id="ver-top" title="버전" aria-label="버전 정보">v. 3.6.0</button>
+        <button type="button" class="mver" id="ver-top" title="버전" aria-label="버전 정보">v. 3.7.0</button>
         <a class="home-logo" href="https://teambypass.vercel.app/" target="_top" title="Team Bypass 메인 페이지" aria-label="Team Bypass 메인 페이지"><img src="/assets/favicon.svg" alt="" width="30" height="30"></a>
       </div>
     </div>
@@ -692,17 +694,17 @@ footer .readme-h{display:block;margin-bottom:10px}
 <section class="hero" id="hero" aria-labelledby="hero-h">
   <div class="hero-art hero-day" style="--ar:2.2410" aria-hidden="true"><div class="hero-stage">
     <img class="hero-bg" data-src="assets/hero-day-bg.webp" alt="" width="1376" height="614">
-    <img class="ship" data-src="assets/hero-day-ship1.webp" alt="" width="334" height="67" style="left:71.37%;top:63.19%;width:24.27%;--d:0s;--b:7.2s">
-    <img class="ship" data-src="assets/hero-day-ship2.webp" alt="" width="465" height="98" style="left:32.56%;top:64.50%;width:33.79%;--d:0.35s;--b:8.4s">
-    <img class="ship" data-src="assets/hero-day-ship3.webp" alt="" width="345" height="87" style="left:71.08%;top:75.57%;width:25.07%;--d:0.15s;--b:6.6s">
-    <img class="ship" data-src="assets/hero-day-ship4.webp" alt="" width="408" height="76" style="left:36.63%;top:85.67%;width:29.65%;--d:0.5s;--b:9s">
+    <img class="ship" data-src="assets/hero-day-ship1.webp" alt="" width="334" height="67" style="left:71.37%;top:63.19%;width:24.27%;--d:0s;--b:4.6s">
+    <img class="ship" data-src="assets/hero-day-ship2.webp" alt="" width="465" height="98" style="left:32.56%;top:64.50%;width:33.79%;--d:0.35s;--b:5.4s">
+    <img class="ship" data-src="assets/hero-day-ship3.webp" alt="" width="345" height="87" style="left:71.08%;top:75.57%;width:25.07%;--d:0.15s;--b:4.2s">
+    <img class="ship" data-src="assets/hero-day-ship4.webp" alt="" width="408" height="76" style="left:36.63%;top:85.67%;width:29.65%;--d:0.5s;--b:5.8s">
   </div></div>
   <div class="hero-art hero-night" style="--ar:2.2407" aria-hidden="true"><div class="hero-stage">
     <img class="hero-bg" data-src="assets/hero-night-bg.webp" alt="" width="1024" height="457">
-    <img class="ship" data-src="assets/hero-night-ship1.webp" alt="" width="253" height="57" style="left:71.09%;top:62.14%;width:24.71%;--d:0s;--b:7.2s">
-    <img class="ship" data-src="assets/hero-night-ship2.webp" alt="" width="348" height="74" style="left:32.42%;top:64.77%;width:33.98%;--d:0.35s;--b:8.4s">
-    <img class="ship" data-src="assets/hero-night-ship3.webp" alt="" width="259" height="68" style="left:71.00%;top:75.27%;width:25.29%;--d:0.15s;--b:6.6s">
-    <img class="ship" data-src="assets/hero-night-ship4.webp" alt="" width="311" height="62" style="left:36.13%;top:84.90%;width:30.37%;--d:0.5s;--b:9s">
+    <img class="ship" data-src="assets/hero-night-ship1.webp" alt="" width="253" height="57" style="left:71.09%;top:62.14%;width:24.71%;--d:0s;--b:4.6s">
+    <img class="ship" data-src="assets/hero-night-ship2.webp" alt="" width="348" height="74" style="left:32.42%;top:64.77%;width:33.98%;--d:0.35s;--b:5.4s">
+    <img class="ship" data-src="assets/hero-night-ship3.webp" alt="" width="259" height="68" style="left:71.00%;top:75.27%;width:25.29%;--d:0.15s;--b:4.2s">
+    <img class="ship" data-src="assets/hero-night-ship4.webp" alt="" width="311" height="62" style="left:36.13%;top:84.90%;width:30.37%;--d:0.5s;--b:5.8s">
   </div></div>
   <div class="wrap hero-in">
     <h1 id="hero-h">배 종류부터 정하면<br>지원할 회사가 좁혀집니다</h1>
@@ -724,6 +726,7 @@ footer .readme-h{display:block;margin-bottom:10px}
         <p class="types-more"><a href="#wage">선종별 월평균 임금</a><span aria-hidden="true"> · </span><a href="#dir">선사 목록 385곳</a></p>
       </section>
       <section class="bypass" aria-labelledby="bp-h">
+        <svg class="bp-mark" viewBox="1 1 130 130" aria-hidden="true" focusable="false"><path d="M66 4 L128 66 L66 128 L4 66 Z" fill="#EE6A1F" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/><path d="M66 15 L117 66 L66 117 L15 66 Z" fill="none" stroke="#1C211E" stroke-width="5" stroke-linejoin="round"/><g transform="translate(34 32) scale(0.64)" fill="#1C211E"><ellipse cx="44" cy="60" rx="27" ry="23"/><path d="M51 45 C55 37 58 31 61 25 L72 30 C68 36 66 44 64 53 Z"/><circle cx="66" cy="26" r="10"/><path d="M72 20 C83 19 93 24 95 32 C96 38 91 41 88 37 C86 34 82 33 74 33 Z"/><path d="M19 52 C10 47 7 40 11 34 C14 43 20 46 23 46 Z"/><path d="M37 80 L35 92 L27 95 L41 95 L42 81 Z"/><path d="M51 80 L51 92 L44 95 L58 95 L56 81 Z"/></g></svg>
         <div class="bp-tag">목포해양대 바이브 코딩 크루</div>
         <h2 id="bp-h">BYPASS</h2>
         <p class="lines"><span>시간표 맞추기 귀찮아서 수강플래너를,</span><span>배고파서 학식 알리미를,</span><span>시험이 걱정돼서 ECDIS 시뮬레이터를 만든 사람들이에요.</span></p>
@@ -976,7 +979,7 @@ footer .readme-h{display:block;margin-bottom:10px}
       <li><span class="lines"><span>이 사이트는 개인이 만든 자료 모음이며 회사나 학교와 관계가 없습니다.</span><span>틀린 내용은 정보 제보 게시판으로 알려 주시기 바랍니다.</span></span></li>
     </ul>
     </div>
-    <p class="foot-ver"><button type="button" class="ver" id="ver-foot" title="버전" aria-label="버전 정보">v. 3.6.0 · TEAM BYPASS</button></p>
+    <p class="foot-ver"><button type="button" class="ver" id="ver-foot" title="버전" aria-label="버전 정보">v. 3.7.0 · TEAM BYPASS</button></p>
   </div>
 </footer>
 
@@ -2627,8 +2630,12 @@ $('#nf-from').addEventListener('change', e => { const w = newsWindow(); state.ne
 $('#nf-to').addEventListener('change', e => { const w = newsWindow(); state.newsFrom = w.from; state.newsTo = e.target.value; state.newsRange = 'custom'; renderNews(); });
 
 /* ---------- 버전, 패치노트, 이스터에그 ---------- */
-const VERSION = '3.6.0';   // 첫째 자리 큰 기능·개편, 둘째 자리 작은 기능, 셋째 자리 버그·오타 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '3.7.0';   // 첫째 자리 큰 기능·개편, 둘째 자리 작은 기능, 셋째 자리 버그·오타 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  {v:'3.7.0', d:'2026-11-27', i:[
+    '홈 BYPASS 소개 칸 오른쪽에 BYPASS 마름모 표지판 로고를 크게 넣었습니다. 휴대폰에서는 작게 오른쪽 위에 둡니다.',
+    '홈 첫 그림의 배가 더 멀리서 밀려 들어오고, 그 뒤 물결에 맞춰 위아래·앞뒤로 눈에 띄게 흔들립니다.'
+  ]},
   {v:'3.6.0', d:'2026-11-27', i:[
     '다른 BYPASS 앱처럼 화면 왼쪽 아래에 BYPASS 커뮤니티 바로가기 단추를 달았습니다.',
     '이제 쓰지 않는 옛 홈 첫 그림 두 장을 지웠습니다.'
