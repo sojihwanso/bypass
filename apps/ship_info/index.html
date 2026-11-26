@@ -1201,6 +1201,7 @@ function loadData(name){
   return DATA_CACHE[name];
 }
 function dataBox(el, name, render){
+  if (DATA_READY[name]){ render(DATA_READY[name]); return; }
   el.innerHTML = '<p class="load-fail" aria-live="polite">불러오는 중</p>';
   loadData(name).then(d => { if (el.isConnected) render(d); }, () => {
     el.innerHTML = '<p class="load-fail">자료를 불러오지 못했습니다. <button type="button" class="linkbtn" data-retry>다시 시도</button></p>';
@@ -1281,7 +1282,7 @@ function renderTypeWage(id){
       '<div class="table-scroll"><table class="wt">'+wageHead('업종 · 통계 선종')+'<tbody>'+lines.join('')+'</tbody></table></div>'+
       '<div class="wage-foot">'+(m.shared ? '<p>'+esc(m.shared)+'</p>' : '')+
       '<p class="note">2026년 한국선원통계연보 임금현황. 월평균 임금은 업종별 총승선원의 평균값이며 회사별 급여가 아닙니다.</p>'+
-      '<p><a href="#wage?biz=ocean">임금 화면에서 다른 선종과 비교</a> · <a href="'+esc(dirHref)+'">이 선종 배를 등록한 업체 보기</a></p></div></div>';
+      '<p><a href="#wage?biz='+m.biz[0]+'">임금 화면에서 다른 선종과 비교</a> · <a href="'+esc(dirHref)+'">이 선종 배를 등록한 업체 보기</a></p></div></div>';
     bindWageToggle(el);
   });
 }
@@ -1291,7 +1292,7 @@ function wageName(b, s){
   return apps.length ? apps.map(id => TYPE_BY_ID[id].name).join('·')+' ('+s+')' : s;
 }
 const WAGE_SORTS = [...WAGE_COLS, 'vessels'];
-function renderWage(qs){
+function renderWage(qs, focusSel){
   const el = $('#v-wage');
   const q = new URLSearchParams(qs || '');
   const biz = BIZ_KEYS.includes(q.get('biz')) ? q.get('biz') : 'ocean';
@@ -1321,8 +1322,11 @@ function renderWage(qs){
         '<div class="table-scroll">'+main+'</div>'+
         '<div class="wage-foot"><p class="note">'+esc('2026년 한국선원통계연보 임금현황('+w.source.pages+'), 원본 단위 천 원. 월평균 임금은 업종별 총승선원의 평균값이며 회사별 급여가 아닙니다.')+'</p></div></div></section>';
     bindWageToggle(el);
-    el.querySelectorAll('[data-wbiz]').forEach(b => b.addEventListener('click', () => { location.hash = 'wage?biz='+b.dataset.wbiz+(sort !== 'total' ? '&sort='+sort : ''); }));
-    el.querySelectorAll('[data-wsort]').forEach(b => b.addEventListener('click', () => { location.hash = 'wage?biz='+biz+'&sort='+b.dataset.wsort; }));
+    /* 같은 화면 안에서 바꿀 때는 주소만 바꾸고 다시 그림 (맨 위로 튀지 않게, 포커스 유지) */
+    const go = (q, sel) => { history.replaceState(null, '', '#wage?'+q); lastHash = location.hash; renderWage(q, sel); };
+    el.querySelectorAll('[data-wbiz]').forEach(b => b.addEventListener('click', () => go('biz='+b.dataset.wbiz+(sort !== 'total' ? '&sort='+sort : ''), '[data-wbiz="'+b.dataset.wbiz+'"]')));
+    el.querySelectorAll('[data-wsort]').forEach(b => b.addEventListener('click', () => go('biz='+biz+'&sort='+b.dataset.wsort, '[data-wsort="'+b.dataset.wsort+'"]')));
+    if (focusSel){ const f = el.querySelector(focusSel); if (f) f.focus({preventScroll:true}); }
   });
 }
 /* ---------- KOSWEC 등록 업체 ---------- */

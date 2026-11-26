@@ -23,6 +23,7 @@ export default [
    assert(rows.length > 0 && rows.every(r => r[0].startsWith('내항선')), JSON.stringify(rows));
    const href = await p.$eval('#type-wage a[href^="#dir"]', a => a.getAttribute('href'));
    assert(href.includes('biz='), href);
+   assert(await p.$('#type-wage a[href="#wage?biz=coastal"]'), 'wage link should open coastal');
  })},
  {name:'type-wage-dash-not-zero', fn: () => withPage({hash:'#type-lng'}, async p => {
    await ready(p);

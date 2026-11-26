@@ -44,6 +44,24 @@ export default [
    const n2 = (await rowsOf(p)).map(r => r[0].replace('표본 적음', '').trim());
    assert(n2.includes('벌크선·시멘트선/연안선 (잡화)'), JSON.stringify(n2));
  })},
+ {name:'wage-sort-keeps-place', fn: () => withPage({hash:'#wage', width:390, height:844}, async p => {
+   await ready(p);
+   await p.$eval('#wage-main', e => e.scrollIntoView());
+   await p.waitForTimeout(100);
+   const y0 = await p.evaluate(() => scrollY);
+   const h0 = await p.evaluate(() => history.length);
+   await p.focus('#wage-main [data-wsort="master"]');
+   await p.keyboard.press('Enter');
+   await p.waitForTimeout(400);
+   const r = await p.evaluate(() => ({y: scrollY, f: document.activeElement && document.activeElement.dataset.wsort, h: history.length, hash: location.hash}));
+   assert(r.hash.includes('sort=master'), r.hash);
+   assert(Math.abs(r.y - y0) < 60, 'jumped '+y0+' -> '+r.y);
+   assert(r.f === 'master', 'focus lost');
+   assert(r.h === h0, 'history grew');
+   await p.click('#v-wage .seg button:text-is("내항선")');
+   await p.waitForTimeout(400);
+   assert(await p.evaluate(() => scrollY) > 100, 'biz switch jumped to top');
+ })},
  {name:'wage-summary-six', fn: () => withPage({hash:'#wage'}, async p => {
    await ready(p);
    const n = await p.$$eval('#wage-sum tbody tr', trs => trs.length);
