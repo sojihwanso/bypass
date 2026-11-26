@@ -67,12 +67,14 @@ export function initUI(root, actions) {
     <div class="bx br" id="bxVrm"><div class="eb">
       <button type="button" class="tg" data-act="vrm1">VRM1</button><span class="vv" id="vVrm1" data-wheel="vrm1">-</span><span class="lb" id="vTtg1"></span>
       <button type="button" class="tg" data-act="vrm2">VRM2</button><span class="vv" id="vVrm2" data-wheel="vrm2">-</span><span class="lb" id="vTtg2"></span></div></div>
+    <div class="side side-l" id="sideL"></div><div class="side side-r" id="sideR"></div>
     <button class="ver-foot" type="button" id="verFoot" aria-label="버전 ${VERSION}">v${VERSION}</button>
   </section>
   <aside class="rp" id="rp">
     <div class="sec" id="pnOwn"><h3><span data-t="own"></span><span class="num" id="vClock"></span></h3>
       <dl class="kv"><dt>HDG</dt><dd class="big" id="vHdg">-</dd><dt>STW</dt><dd id="vStw">-</dd><dt>SOG</dt><dd id="vSog">-</dd><dt>COG</dt><dd id="vCog">-</dd><dt>ROT</dt><dd id="vRot">-</dd><dt data-t="posn"></dt><dd id="vPos">-</dd><dt data-t="elapsed"></dt><dd id="vEl">-</dd></dl></div>
     <button class="help-btn" type="button" id="btnHelp" data-act="help">${ICON.help}<span data-t="help"></span></button>
+    <div id="connSlot"></div>
     <div class="sec" id="pnTgt"><h3><span data-t="tgt"></span></h3><div class="tslots" id="tSlots"></div></div>
     <div class="sec" id="pnTT"><h3><span data-t="ttais"></span><span class="num" id="vCounts"></span></h3><dl class="kv" id="vTT"></dl></div>
     <div class="sec" id="pnAlert"><h3><span data-t="alert"></span><span class="num" id="vAlN"></span></h3><div id="aBox"></div></div>
@@ -183,6 +185,23 @@ export function initUI(root, actions) {
 
   applyLang(); applyTheme();
 
+  /* 배치: PPI 원 양옆 공간이 넉넉하면 기능 버튼(왼쪽)·경보·물표·TT(오른쪽)를 그 안으로, 좁으면 원래 자리로 */
+  const SIDE_MIN = 200, main = root.querySelector('.main'), rp = $('#rp'), wrap = $('#ppiWrap');
+  let mode = null;
+  function relayout() {
+    const vw = innerWidth, vh = innerHeight - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hdr')) || 50);
+    const rpw = vw > 1000 ? 300 : 0, avail = vw - rpw, dia = Math.min(avail, vh) - 72, gutter = (avail - dia) / 2;
+    const next = gutter >= SIDE_MIN ? 'side' : 'bar';
+    if (next !== mode) {
+      mode = next; document.documentElement.dataset.layout = mode;
+      if (mode === 'side') { $('#sideL').append($('#qbar')); $('#sideR').append($('#pnAlert'), $('#pnTgt'), $('#pnTT')); }
+      else { main.prepend($('#qbar')); rp.insertBefore($('#pnAlert'), $('#connSlot')); rp.append($('#pnTgt'), $('#pnTT')); } // 좁은 화면: 경보는 Conning보다 위(늘 보이게)
+    }
+    if (mode === 'side') { const w = Math.max(170, Math.min(300, gutter - 40)); wrap.style.setProperty('--sidew', w + 'px'); }
+    return mode;
+  }
+  relayout();
+
   /* ---- 값 갱신 ---- */
   const f1 = (v, d = 1) => (v == null || !isFinite(v) ? '-' : v.toFixed(d));
   const deg = (v) => { if (v == null || !isFinite(v)) return '-'; let x = Math.round((((v % 360) + 360) % 360) * 10) / 10; if (x >= 360) x = 0; return x.toFixed(1).padStart(5, '0') + '°'; };
@@ -225,5 +244,5 @@ export function initUI(root, actions) {
     const chip = $('#scnChip'); chip.hidden = !d.scnName; chip.textContent = d.scnName || '';
   }
   function dialog(title, html, foot = '') { $('#genT').textContent = title; $('#genB').innerHTML = html; $('#genF').innerHTML = foot; const g = $('#genDlg'); if (!g.open) g.showModal(); return g; }
-  return { refresh, applyLang, applyTheme, renderMenu, dialog, closeAll() { menuEl.hidden = true; cm.hidden = true; }, echoCanvas: $('#cvEcho'), overCanvas: $('#cvOver') };
+  return { refresh, applyLang, applyTheme, renderMenu, dialog, relayout, layoutMode: () => mode, closeAll() { menuEl.hidden = true; cm.hidden = true; }, echoCanvas: $('#cvEcho'), overCanvas: $('#cvOver') };
 }

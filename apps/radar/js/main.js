@@ -39,7 +39,7 @@ const rnd = Math.random;
 const actions = {};
 const ui = initUI(app, actions);
 const ppi = createPPI(ui.echoCanvas, ui.overCanvas);
-const fit = () => { ppi.resize(); };
+const fit = () => { ui.relayout(); ppi.resize(); coastKey = ''; };
 fit(); addEventListener('resize', fit);
 document.documentElement.dataset.theme = S.disp.palette;
 
@@ -333,7 +333,7 @@ document.addEventListener('visibilitychange', () => setHidden(document.hidden));
   document.getElementById('ppiWrap').append(tb); }
 
 /* ---------- Conning·키보드 ---------- */
-const conn = initConning(document.getElementById('app'), own, { wind: () => (W ? { dir: W.weather.windFrom, ms: W.weather.windMs } : null) });
+const conn = initConning(document.getElementById('connSlot'), own, { wind: () => (W ? { dir: W.weather.windFrom, ms: W.weather.windMs } : null) });
 const keyHandlers = {
   steerL: () => own() && (own().auto.on ? setAuto(own(), true, own().auto.setHdg - 1) : setRudderOrder(own(), own().rudderOrder - 5)),
   steerR: () => own() && (own().auto.on ? setAuto(own(), true, own().auto.setHdg + 1) : setRudderOrder(own(), own().rudderOrder + 5)),
@@ -378,7 +378,7 @@ if (TEST) {
     radar: { set: setRadar, toggle: toggleTx, get state() { return radar.state; } }, world: () => W, tracker: { targets: () => tracker.targets() },
     newWorld: (o) => startWorld(freeDef(o)), tgtScreen: (id) => { const g = W.targets.find((x) => x.id === id), r = relOf(P.x(g.lon), P.y(g.lat)), p = ppi.toScreen(r.brg, r.rng); return { sx: p.x, sy: p.y }; },
     cursorAct, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,
-    startScenario: (id, o) => starter.startScenario(id, o), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), finishNow: () => starter.finishNow(), forceState: (o) => { if (o.az) { azZones = o.az; tracker.setZones(o.az); } if (o.speed) speed = o.speed; if (o.pi !== undefined) piOn = o.pi; }, uiState: () => ({ az: azZones.length > 0, speed, pi: piOn, off: !!offCenter }), tickSim, sim: { setAuto, setRudderOrder, setTelegraph }, menuItems: () => MENU.flatMap((m) => m.items.map((i) => (lang() === 'en' ? i.en : i.ko))),
+    startScenario: (id, o) => starter.startScenario(id, o), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), finishNow: () => starter.finishNow(), relayout: () => { fit(); }, layoutMode: () => ui.layoutMode(), forceState: (o) => { if (o.az) { azZones = o.az; tracker.setZones(o.az); } if (o.speed) speed = o.speed; if (o.pi !== undefined) piOn = o.pi; }, uiState: () => ({ az: azZones.length > 0, speed, pi: piOn, off: !!offCenter }), tickSim, sim: { setAuto, setRudderOrder, setTelegraph }, menuItems: () => MENU.flatMap((m) => m.items.map((i) => (lang() === 'en' ? i.en : i.ko))),
   };
   setRadar('tx');
 }

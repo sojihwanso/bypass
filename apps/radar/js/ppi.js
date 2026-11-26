@@ -27,7 +27,7 @@ export function createPPI(canvas, overlay) {
 
   function upBrg(v) { return v.orient === 'NU' ? 0 : v.orient === 'CU' ? (v.crs ?? v.hdg) : v.hdg; }
   function layout(v) {
-    const R = Math.floor(Math.min(W, H) / 2) - Math.round(36 * dpr), cx = Math.floor(W / 2), cy = Math.floor(H / 2);
+    const R = Math.max(10, Math.floor(Math.min(W, H) / 2) - Math.round(36 * dpr)), cx = Math.floor(W / 2), cy = Math.floor(H / 2);
     const off = v.offset || { x: 0, y: 0 };
     geom = { cx, cy, R, ox: cx + off.x * R, oy: cy + off.y * R };
   }
