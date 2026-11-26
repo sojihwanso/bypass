@@ -408,7 +408,7 @@ ${narrow() ? `<div class="tu-rot"><b>📱 가로 화면을 권장해요</b>휴�
         return shallowLevel(S.set.shallowContour, sc) >= ceilContour(d) - 1e-9 && sc >= ceilContour(d * (1 + u / 100)) - 1e-9 && deepLevel(S.set.deepContour, sc) >= ceilContour(d * 2) - 1e-9; },
       good: "해도 색이 바뀐 것 보이세요? 초록은 배가 닿는 곳, 진한 파랑은 들어가면 안 되는 곳이에요.", bad: "흘수보다 얕게 잡으면 위험한 곳도 '안전'으로 보여요. 창에 나온 계산을 다시 볼까요?" },
     { id: "SC7", mood: "explain", target: "#cvChart", before: plan, title: "해도 색으로 구분해요",
-      body: "4색 표시에서는 수심을 네 구역으로 칠해요.<br><span style=\"color:#5fae6e\">■</span> <b>얕은 물 (Shallow water)</b> · 0 ~ 얕은 등심선: 초록<br><span style=\"color:#4f8fd6\">■</span> <b>항해 불가 수역 (Non-navigable water)</b> · 얕은 ~ 안전 등심선: 진한 파랑<br><span style=\"color:#b6d8f2\">■</span> <b>항해 가능 수역 (Navigable water)</b> · 안전 ~ 깊은 등심선: 연한 파랑<br><b>□ 깊은 물 (Deep water)</b> · 깊은 등심선보다 깊음: 흰색<br>2색(Two colour)으로 바꾸면 안전 등심선을 기준으로 얕은 쪽과 깊은 쪽 두 가지로 크게 나뉘어요. 얕은 등심선과 안전 등심선이 같은 등심선이 되면 진한 파랑 띠 없이 바로 초록이에요.",
+      body: "4색 표시에서는 수심을 네 구역으로 칠해요.<br><span style=\"color:#5fae6e\">■</span> <b>얕은 물 (Shallow water)</b> · 0 ~ 얕은 등심선: 초록<br><span style=\"color:#4f8fd6\">■</span> <b>항해 불가 수역 (Non-navigable water)</b> · 얕은 ~ 안전 등심선: 진한 파랑<br><span style=\"color:#b6d8f2\">■</span> <b>항해 가능 수역 (Navigable water)</b> · 안전 ~ 깊은 등심선: 연한 파랑<br><b>□ 깊은 물 (Deep water)</b> · 깊은 등심선보다 깊음: 흰색<br>2색(Two colour)으로 바꾸면 안전 등심선을 기준으로 얕은 쪽(진한 파랑)과 깊은 쪽(흰색)으로 크게 나뉘고, 얕은 물은 2색에서도 초록으로 남아요. 얕은 등심선과 안전 등심선이 같은 등심선이 되면 진한 파랑 띠 없이 바로 초록이에요.",
       say: "초록·진한 파랑 = 위험, 연한 파랑·흰색 = 갈 수 있음! 색만 봐도 바로 알 수 있어야 해요.",
       note: "근거: 교재 21.4 그림 21-8(Deep / Navigable / Non-Navigable / Shallow), IMO MSC.232(82) 5.9" },
     { id: "SC8", mood: "caution", title: "항로는 얕은 쪽으로 들어가면 안 돼요",

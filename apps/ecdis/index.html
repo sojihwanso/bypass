@@ -2950,7 +2950,7 @@ function dlgUCSelect(){const cur=S.ucActive||[];
 /* ================= UI ================= */
 const VERSION="2.6.0";
 const PATCH_NOTES=[
-{v:"2.6.0",d:"2026-11-26",ko:["화면 아래 '안전 수심선' 버튼 추가(NAVI·CHARTS·PLAN 모든 모드): 얕은·안전·깊은 등심선과 안전 수심을 한 창에서 설정, 흘수 기준 추천값 넣기","해도 수심 색 구분 강화: 얕은 물 초록 · 항해 불가 진한 파랑 · 항해 가능 연한 파랑 · 깊은 물 흰색","용어를 얕은 등심선(Shallow contour) · 깊은 등심선(Deep contour)으로 바꾸고 영문 명칭 함께 표기","과정 2에 안전 등심선 교육 9단계 추가: 얕은 = 흘수, 깊은 = 흘수 × 2, 안전 = 흘수 + UKC, 다음 깊은 등심선 적용, 항로는 안전 등심선 얕은 쪽에 들어가면 안 됨"],en:["New Safety contour button in the status bar (all modes): set shallow, safety and deep contours and safety depth in one place, with values filled from the draught","Clearer depth shades: shallow water green, non-navigable dark blue, navigable light blue, deep water white","Course 2 adds 9 safety-contour steps (Korean)"]},
+{v:"2.6.0",d:"2026-11-26",ko:["화면 아래 '안전 수심선' 버튼 추가(NAVI·CHARTS·PLAN 모든 모드): 얕은·안전·깊은 등심선과 안전 수심을 한 창에서 설정, 흘수 기준 추천값 넣기","해도 수심 색 구분 강화: 얕은 물 초록 · 항해 불가 진한 파랑 · 항해 가능 연한 파랑 · 깊은 물 흰색","용어를 얕은 등심선(Shallow contour) · 깊은 등심선(Deep contour)으로 바꾸고 영문 명칭 함께 표기","과정 2에 안전 등심선 교육 9단계 추가: 얕은 = 흘수, 깊은 = 흘수 × 2, 안전 = 흘수 + UKC, 다음 깊은 등심선 적용, 항로는 안전 등심선 얕은 쪽에 들어가면 안 됨"],en:["New Safety contour button in the status bar (all modes): set shallow, safety and deep contours and safety depth in one place, with values filled from the draught","Clearer depth shades: shallow water green, non-navigable dark blue, navigable light blue, deep water white","Korean labels renamed to shallow/deep contour, shown with the English names","Course 2 adds 9 safety-contour steps (Korean)"]},
 {v:"2.5.0",d:"2026-11-25",ko:["교육 과정을 시작하면 경보음을 꺼 둠(좌하단 단추로 켜고 끄기, 경보 단계에서는 자동으로 켜짐)","과정 1에 경보 창 교육 5단계 추가: 경보 상자, 우선순위(알람·경고·주의), 경보 목록에서 확인(ACK), 경보 기록, 경보음 설정"],en:["Alarm sound is muted when a training course starts (toggle at bottom-left; turns on automatically in the alert steps)","Course 1 adds 5 alert-window steps: alert box, priorities, ACK in the alert list, alert log, buzzer setting"]},
 {v:"2.4.4",d:"2026-11-25",ko:["브라우저 탭 아이콘을 bypass 로고로"],en:["Browser tab icon is now the bypass logo"]},
 {v:"2.4.3",d:"2026-11-25",ko:["교육 소개정 단계에서 같은 셀을 다시 업데이트해도 정답 처리","화면 버튼 이름 '컨닝'을 'Conning'으로 통일","교육 문구 오타·표현 다듬기, 타각 단계 시연 영상을 S20(S10 두 번)으로 다시 제작"],en:["Small-correction step counts re-updating the same cell","Conning label unified","Training text fixes; rudder demo clip remade for S20"]},
@@ -3018,7 +3018,7 @@ function buildSB(){
   <button class="sbb lvb" data-act="lvl" id="bLvl" title="${esc(t("lvlTip"))}"></button>
   <button class="sbb lockb" data-act="lock" id="bLock" title="${esc(t("lockTip"))}"></button>
   <button class="sbb dd" data-act="dbase" id="bBase">${t("db_"+S.set.dbase)}</button>
-  <button class="sbb sfb" data-act="safety" id="bSafe" title="${esc(t("safeTip"))}"></button>
+  <button class="sbb sfb" data-act="safety" id="bSafe" title="${esc(t("safeTip"))}">${t("sb_safe")} <b id="bSafeV"></b></button>
   <span class="sb-sp"></span>
   <button class="sbb ic" data-act="help" aria-label="Help">${IC.help}</button>
   <button class="sbb upb on" data-act="upcyc" id="bUp" title="${esc(t("upCycTip"))}" aria-label="Orientation">N UP</button>
@@ -3032,7 +3032,7 @@ function buildSB(){
   only.addEventListener("pointerdown",on);["pointerup","pointerleave","pointercancel"].forEach(ev=>only.addEventListener(ev,off));
 }
 
-function updSBState(){const sf=$("#bSafe");if(sf)sf.innerHTML=`${t("sb_safe")} <b>${safetyLevel(S.set.safetyContour)}m</b>`;
+function updSBState(){const sf=$("#bSafeV");if(sf)sf.textContent=safetyLevel(S.set.safetyContour)+"m";
   const l=$("#bLvl");if(l){const v=(S.traffic&&S.traffic.lvl)||getLevel();l.innerHTML=`${t("sb_lvl")}<b>${t("lv_"+v)}</b>`;l.dataset.v=v}
   const k=$("#bLock");if(k){const on=!!S.set.lock;k.classList.toggle("on",on);k.innerHTML=(on?IC.lock:IC.unlock)+`<span>${t(on?"sb_locked":"sb_lock")}</span>`}}
 function isLocked(){if(S.set&&S.set.lock){toast(t("lockedMsg"));return true}return false}
@@ -3135,7 +3135,7 @@ function renderNavPage(){
   else if(p==="rings")h=`<div class="fr"><label>${t("rings")}</label>${sw("rings",st.rings)}</div><div class="fr"><label>${t("ringInt")}</label>${sel("ringInt",[0.25,0.5,1,2,3,5],st.ringInt)}</div><div class="fr"><label>${t("ringN")}</label>${sel("ringN",[2,3,4,5,6,8,10],st.ringN)}</div>`;
   else if(p==="pred")h=`<div class="fr"><label>${t("predictor")}</label>${sw("predictor",st.predictor)}</div><div class="fr"><label>${t("predTime")}</label>${sel("predTime",[1,2,3,5],st.predTime)}</div><p class="muted" style="font-size:11px;margin:4px 0 0;color:var(--muted)">${t("predNote")}</p>`;
   else if(p==="past")h=`<div class="fr"><label>${t("pastTrack")}</label>${sw("pastTrack",st.pastTrack)}</div><div class="fr"><label>${t("pastLen")}</label>${sel("pastLen",[10,30,60,120,240],st.pastLen)}</div><div class="osrow" style="margin-top:3px"><button class="mini" data-act="clrtrack">${t("clrTrack")}</button></div>`;
-  else if(p==="look")h=`<div class="fr"><label>${t("showLook")}</label>${sw("showLook",st.showLook)}</div><div class="fr"><label>${t("lookTime")}</label>${sel("lookTime",[1,2,3,6,10,15,20],st.lookTime)}</div><div class="fr"><label>${t("lookWidth")}</label>${sel("lookWidth",[0.05,0.1,0.15,0.2,0.3,0.5],st.lookWidth)}</div><div class="fr"><label>${t("safetyC")}</label>${sel("safetyContour",[2,5,10,20,30],st.safetyContour)}</div>`;
+  else if(p==="look")h=`<div class="fr"><label>${t("showLook")}</label>${sw("showLook",st.showLook)}</div><div class="fr"><label>${t("lookTime")}</label>${sel("lookTime",[1,2,3,6,10,15,20],st.lookTime)}</div><div class="fr"><label>${t("lookWidth")}</label>${sel("lookWidth",[0.05,0.1,0.15,0.2,0.3,0.5],st.lookWidth)}</div><div class="fr"><label>${t("safetyC")}</label>${sel("safetyContour",[2,5,10,20,30,50],st.safetyContour)}</div>`;
   $("#pgBody").innerHTML=h;
 }
 function updateHelmStatic(){
@@ -3705,7 +3705,7 @@ const CONTOURS=[2,5,10,20,30,50,100,200];
 function ownDraft(){return (S.own&&S.own.draft)||SHIP.draft}
 function ceilContour(v){for(const c of CONTOURS)if(c>=v-1e-9)return c;return CONTOURS[CONTOURS.length-1]}
 function safetyRec(){const d=ownDraft(),u=S.set.ukcPct??10,need=d*(1+u/100);
-  return{d,u,need,sh:ceilContour(d),sc:ceilContour(need),dp:ceilContour(d*2),sd:[2,5,8,10,12,15,20,25].find(v=>v>=need-1e-9)??25}}
+  return{d,u,need,sh:ceilContour(d),sc:ceilContour(need),dp:ceilContour(d*2),sd:[2,5,8,10,12,15,20,25,30].find(v=>v>=need-1e-9)??30}}
 function dlgSafety(){
   const sel=(k,opts)=>`<select data-k="${k}">${opts.map(v=>`<option${+v===+S.set[k]?" selected":""}>${v}</option>`).join("")}</select>`;
   const zones=()=>{const P=PAL[S.set.palette]||PAL.day,sc=safetyLevel(S.set.safetyContour),sh=shallowLevel(S.set.shallowContour,sc),dp=deepLevel(S.set.deepContour,sc),four=S.set.shades===4;
@@ -3716,7 +3716,7 @@ function dlgSafety(){
       <label>${t("shallowC")}<small>${t("shallowCS")}</small></label>${sel("shallowContour",[2,5,10,20,30])}
       <label>${t("safetyC")}<small>${t("safetyCS")}</small></label>${sel("safetyContour",[2,5,10,20,30,50])}
       <label>${t("deepC")}<small>${t("deepCS")}</small></label>${sel("deepContour",[10,20,30,50,100,200])}
-      <label>${t("safetyD")}<small>${t("safetyDS")}</small></label>${sel("safetyDepth",[2,5,8,10,12,15,20,25])}
+      <label>${t("safetyD")}<small>${t("safetyDS")}</small></label>${sel("safetyDepth",[2,5,8,10,12,15,20,25,30])}
       <label>${t("shades")}</label><span class="seg">${[[4,t("shade4")],[2,t("shade2")]].map(([v,l])=>`<button type="button" data-sh="${v}" class="${S.set.shades===v?"on":""}">${l}</button>`).join("")}</span>
     </div>
     <p style="margin:10px 0 4px"><button class="btn" id="sfRec">${t("sfRec")}</button></p>
@@ -3726,9 +3726,9 @@ function dlgSafety(){
     <p class="note" style="margin:10px 0 0">${t("sfNote")}</p>`};
   openDlg(t("sfTitle"),`<div id="sfBody">${body()}</div>`,{sub:"Safety contour · Depth settings",onMount:(d)=>{
     const redraw=()=>{d.querySelector("#sfBody").innerHTML=body()};
-    d.addEventListener("change",e=>{const s=e.target.closest("select[data-k]");if(s){setSetting(s.dataset.k,+s.value);redraw()}});
+    d.addEventListener("change",e=>{const s=e.target.closest("select[data-k]");if(s){setSetting(s.dataset.k,+s.value);redraw();renderNavPage()}});
     d.addEventListener("click",e=>{const b=e.target.closest("[data-sh]");if(b){setSetting("shades",+b.dataset.sh);redraw();return}
-      if(e.target.closest("#sfRec")){const r=safetyRec();setSetting("shallowContour",r.sh);setSetting("safetyContour",r.sc);setSetting("deepContour",r.dp);setSetting("safetyDepth",r.sd);redraw();toast(t("sfRecDone"))}});
+      if(e.target.closest("#sfRec")){const r=safetyRec();setSetting("shallowContour",r.sh);setSetting("safetyContour",r.sc);setSetting("deepContour",r.dp);setSetting("safetyDepth",r.sd);redraw();renderNavPage();toast(t("sfRecDone"))}});
   }});
 }
 function dlgSettings(tab){
@@ -3755,7 +3755,7 @@ function dlgSettings(tab){
       <label>${t("shallowC")}<small>${t("shallowCS")}</small></label>${sel("shallowContour",[2,5,10,20,30])}
       <label>${t("safetyC")}<small>${t("safetyCS")}</small></label>${sel("safetyContour",[2,5,10,20,30,50])}
       <label>${t("deepC")}<small>${t("deepCS")}</small></label>${sel("deepContour",[10,20,30,50,100,200])}
-      <label>${t("safetyD")}<small>${t("safetyDS")}</small></label>${sel("safetyDepth",[2,5,8,10,12,15,20,25])}
+      <label>${t("safetyD")}<small>${t("safetyDS")}</small></label>${sel("safetyDepth",[2,5,8,10,12,15,20,25,30])}
       <label>${t("shades")}</label>${seg("shades",[[4,t("shade4")],[2,t("shade2")]])}
       <h5>${t("dispCat")}</h5>
       <label>Display base</label>${seg("dbase",[["BASE","BASE"],["STD","STD"],["ALL","ALL"]])}
