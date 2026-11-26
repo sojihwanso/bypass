@@ -144,6 +144,7 @@ main.wrap{padding:30px 24px 72px}
 .news a.t{color:var(--ink);text-decoration:none;font-weight:600;line-height:1.5}
 .news a.t:hover{text-decoration:underline;text-decoration-color:var(--mark);text-decoration-thickness:3px}
 .news p{margin:2px 0 0;font-size:13.5px;color:var(--muted)}
+.meta .auto{font-size:11px;border:1px dashed var(--rule);border-radius:var(--r-tag);padding:0 5px}
 .news .meta{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin-top:3px;font-size:12px;color:var(--muted)}
 .cat{display:inline-block;font-size:11.5px;line-height:1.5;padding:0 7px;border:1px solid var(--rule);border-radius:var(--r-tag);color:var(--muted);white-space:nowrap}
 .types{overflow:hidden}
@@ -611,7 +612,7 @@ footer .readme-h{display:block;margin-bottom:10px}
         <span id="m-count"></span>
         <a class="cmp-top" href="#compare" id="cmp-top">비교 <small id="cmp-n"></small></a>
         <button type="button" class="theme-btn" id="theme-btn" aria-pressed="false">다크모드</button>
-        <button type="button" class="mver" id="ver-top" title="버전" aria-label="버전 정보">v. 3.0.1</button>
+        <button type="button" class="mver" id="ver-top" title="버전" aria-label="버전 정보">v. 3.1.0</button>
         <a class="home-logo" href="https://teambypass.vercel.app/" target="_top" title="Team Bypass 메인 페이지" aria-label="Team Bypass 메인 페이지"><img src="/assets/favicon.svg" alt="" width="30" height="30"></a>
       </div>
     </div>
@@ -898,7 +899,7 @@ footer .readme-h{display:block;margin-bottom:10px}
       <li><span class="lines"><span>이 사이트는 개인이 만든 자료 모음이며 회사나 학교와 관계가 없습니다.</span><span>틀린 내용은 정보 제보 게시판으로 알려 주시기 바랍니다.</span></span></li>
     </ul>
     </div>
-    <p class="foot-ver"><button type="button" class="ver" id="ver-foot" title="버전" aria-label="버전 정보">v. 3.0.1 · TEAM BYPASS</button></p>
+    <p class="foot-ver"><button type="button" class="ver" id="ver-foot" title="버전" aria-label="버전 정보">v. 3.1.0 · TEAM BYPASS</button></p>
   </div>
 </footer>
 
@@ -1146,7 +1147,7 @@ const JOB = {
 
 /* ---------- 소식 ----------
  c: 분류. 날짜는 보도일이거나 지표 기준일 */
-const NEWS_CATS = ['사고','선대와 발주','운임과 원자재','실적과 시황','정책과 제도','선원과 채용','기업 소식'];
+const NEWS_CATS = ['사고','선대와 발주','운임과 원자재','실적과 시황','정책과 제도','선원과 채용','조선','항만','해외 해운사','기업 소식'];
 const NEWS = [
  {d:'2026-11-24', c:'선대와 발주', t:'한화 필리 조선소, 10년 만에 MR 탱커 강재 절단', s:'글로벌이코노믹', u:'https://www.g-enews.com/article/Global-Biz/2026/11/2026112322505947382bd56fbc3c_1', p:'한화해운이 4만9500DWT급 MR 탱커 4척을 확정 발주했고 6척은 옵션이다. LNG선 2척까지 더해 총 12척 규모다.'},
  {d:'2026-11-09', c:'선대와 발주', t:'HD한국조선해양, 아프리카 선사에서 LNG선 2척 6,629억 원 수주', s:'Baird Maritime', u:'https://www.bairdmaritime.com/shipping/tankers/hd-korea-shipbuilding-lng-order', p:'올해 누적 수주는 195척, 216억9000만 달러로 연간 목표의 93.1%다.'},
@@ -1195,9 +1196,10 @@ const NEWS = [
  응답 형식: [{d:'YYYY-MM-DD', c:'분류', t:'제목', s:'출처', u:'원문 주소', p:'요약'}]
  또는 {items:[...]} 형태. 받은 소식은 기본 목록과 합쳐 원문 주소 기준으로 중복을 없앤다. */
 const NEWS_FEED = {
-  url: '',                 /* 예: 'https://teambypass.vercel.app/api/news' */
-  refreshMinutes: 30,      /* 화면을 켜 둔 동안 다시 받아 오는 간격 */
-  cacheKey: 'sasarok-news-cache-v1'
+  url: 'https://itzdjdgjqcpmxdfssfel.supabase.co/functions/v1/ship-news',   /* Supabase Edge Function (supabase/functions/ship-news) */
+  refreshMinutes: 360,     /* 6시간 안에 받은 적이 있으면 다시 묻지 않음 (서버는 하루 한 번 새로 모음) */
+  cacheKey: 'sasarok-news-cache-v2',   /* {at: 받은 시각(ms), updated: 서버 갱신 시각, items: [...]} — 덮어쓰지 않고 쌓음 */
+  keepDays: 90, keepMax: 500
 };
 
 /* ---------- 연결 ---------- */
@@ -1650,7 +1652,7 @@ function normDate(d){
   const m = String(d||'').trim().match(/^(\d{4})[-.\/](\d{1,2})[-.\/](\d{1,2})/);
   return m ? m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0') : null;
 }
-function mergeNews(items){
+function mergeNews(items, auto){
   const map = new Map(NEWS_ALL.map(n => [n.u, n]));
   let added = 0;
   (items || []).forEach(x => {
@@ -1660,25 +1662,40 @@ function mergeNews(items){
     const c = String(x.c || x.category || '기업 소식').trim();
     if (!NEWS_CATS.includes(c)) NEWS_CATS.push(c);
     if (!map.has(u)) added++;
-    map.set(u, {d, c, t, u, s:String(x.s || x.source || '').trim(), p:String(x.p || x.summary || '').trim()});
+    const prev = map.get(u);
+    map.set(u, {d, c, t, u, s:String(x.s || x.source || '').trim(), p:String(x.p || x.summary || '').trim(), auto: prev ? !!prev.auto && !!auto : !!auto});
   });
   NEWS_ALL = [...map.values()].sort((a,b) => b.d.localeCompare(a.d) || a.t.localeCompare(b.t,'ko'));
   return added;
 }
 mergeNews(NEWS);
-try{ const cached = JSON.parse(localStorage.getItem(NEWS_FEED.cacheKey) || 'null'); if (Array.isArray(cached)) mergeNews(cached); }catch(e){}
+function readNewsCache(){
+  try{ const c = JSON.parse(localStorage.getItem(NEWS_FEED.cacheKey) || 'null'); if (c && Array.isArray(c.items)) return c; }catch(e){}
+  return null;
+}
+{ const c = readNewsCache(); if (c) mergeNews(c.items, true); }
+function feedTimeText(iso){ const d = new Date(iso); return Number.isFinite(d.getTime()) ? (d.getMonth()+1)+'월 '+d.getDate()+'일 '+d.getHours()+'시' : ''; }
 function rerenderNews(){ const v = currentView(); if (v === 'home') renderHome(); else if (v === 'news') renderNews(); }
 async function fetchFeed(){
-  if (!NEWS_FEED.url){ feedStatus = '지금은 사이트에 들어 있는 소식만 보여 줍니다. 소식 서버가 연결되면 새 소식을 자동으로 받아 옵니다.'; return; }
+  if (!NEWS_FEED.url){ feedStatus = '지금은 사이트에 들어 있는 소식만 보여 줍니다.'; return; }
+  const cache = readNewsCache();
+  const okText = up => '하루 한 번 자동으로 새 소식을 받습니다.'+(feedTimeText(up) ? ' 마지막 갱신 '+feedTimeText(up)+'.' : '');
+  if (cache && Date.now() - (cache.at || 0) < NEWS_FEED.refreshMinutes * 60000){ feedStatus = okText(cache.updated); return; }
   try{
-    const r = await fetch(NEWS_FEED.url, {cache:'no-store'});
+    const since = cache && /^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(cache.updated || '') ? '?since='+encodeURIComponent(cache.updated) : '';
+    const r = await fetch(NEWS_FEED.url + since, {cache:'no-store'});
+    if (r.status === 404){ feedStatus = '새 소식 자동 수집을 준비하고 있습니다. 지금은 사이트에 들어 있는 소식만 보여 줍니다.'; return; }
     if (!r.ok) throw new Error(String(r.status));
     const j = await r.json();
-    const arr = Array.isArray(j) ? j : (j.items || []);
-    const added = mergeNews(arr);
-    try{ localStorage.setItem(NEWS_FEED.cacheKey, JSON.stringify(arr.slice(0,300))); }catch(e){}
-    const now = new Date();
-    feedStatus = '소식 서버에서 '+now.getHours()+'시 '+String(now.getMinutes()).padStart(2,'0')+'분에 받아 왔습니다.'+(added ? ' 새 소식 '+added+'건이 추가됐습니다.' : '');
+    const arr = (Array.isArray(j) ? j : (j && Array.isArray(j.items) ? j.items : [])).filter(x => x && typeof x === 'object' && /^https?:\/\//.test(String(x.u || '')) && normDate(x.d));
+    mergeNews(arr, true);
+    /* 캐시는 쌓는다: 예전 것 + 새것, 주소 기준 하나, 90일·500건 */
+    const cut = new Date(Date.now() - NEWS_FEED.keepDays * 86400000).toISOString().slice(0, 10);
+    const byU = new Map(((cache && cache.items) || []).concat(arr).map(x => [x.u, {d:normDate(x.d), c:x.c, t:x.t, s:x.s, u:x.u, p:x.p}]));
+    const items = [...byU.values()].filter(x => x.d && x.d >= cut).sort((a, b) => b.d.localeCompare(a.d)).slice(0, NEWS_FEED.keepMax);
+    const updated = j && typeof j.updated === 'string' ? j.updated : (cache && cache.updated) || '';
+    try{ localStorage.setItem(NEWS_FEED.cacheKey, JSON.stringify({at: Date.now(), updated, items})); }catch(e){}
+    feedStatus = okText(updated);
   }catch(e){
     feedStatus = '소식 서버에 연결하지 못해 저장된 소식을 보여 줍니다.';
   }
@@ -1838,7 +1855,7 @@ function renderFav(){
 }
 function renderNewsItem(n, full){
   const dd = full ? n.d.replace(/-/g,'.') : n.d.slice(5).replace('-','.');
-  return '<li><span class="d">'+dd+'</span><div><a class="t" href="'+esc(n.u)+'" target="_blank" rel="noopener">'+esc(n.t)+'</a>'+(n.p?'<p>'+esc(n.p)+'</p>':'')+'<div class="meta"><span class="cat">'+esc(n.c)+'</span><span>'+esc(n.s)+'</span></div></div></li>';
+  return '<li><span class="d">'+dd+'</span><div><a class="t" href="'+esc(n.u)+'" target="_blank" rel="noopener">'+esc(n.t)+'</a>'+(n.p?'<p>'+esc(n.p)+'</p>':'')+'<div class="meta"><span class="cat">'+esc(n.c)+'</span><span>'+esc(n.s)+'</span>'+(n.auto ? '<span class="auto">자동 수집</span>' : '')+'</div></div></li>';
 }
 function newsFade(el){ el.classList.toggle('at-end', el.scrollTop + el.clientHeight >= el.scrollHeight - 4); }
 function renderHome(){
@@ -2441,8 +2458,13 @@ $('#nf-from').addEventListener('change', e => { const w = newsWindow(); state.ne
 $('#nf-to').addEventListener('change', e => { const w = newsWindow(); state.newsFrom = w.from; state.newsTo = e.target.value; state.newsRange = 'custom'; renderNews(); });
 
 /* ---------- 버전, 패치노트, 이스터에그 ---------- */
-const VERSION = '3.0.1';   // 첫째 자리 큰 기능·개편, 둘째 자리 작은 기능, 셋째 자리 버그·오타 (올릴 때 PATCH_NOTES 맨 앞에 추가)
+const VERSION = '3.1.0';   // 첫째 자리 큰 기능·개편, 둘째 자리 작은 기능, 셋째 자리 버그·오타 (올릴 때 PATCH_NOTES 맨 앞에 추가)
 const PATCH_NOTES = [
+  {v:'3.1.0', d:'2026-11-26', i:[
+    '해운 소식을 하루 한 번 자동으로 받습니다. 해운 전문지 4곳과 구글 뉴스 검색에서 해운·조선·항만·해외 해운사·선원 소식을 모읍니다.',
+    '분류에 조선, 항만, 해외 해운사를 더했고, 자동으로 모은 소식에는 \'자동 수집\' 표시가 붙습니다.',
+    '한 번 받은 소식은 이 기기에 90일까지 남아 기간을 넓혀 볼 수 있습니다.'
+  ]},
   {v:'3.0.1', d:'2026-11-26', i:[
     '홈 선종 목록과 맨 위 회사 수에 등록 선박만 있는 회사도 함께 셉니다(선사 385곳).',
     '별(즐겨찾기)을 눌러도 펼쳐 둔 임금 줄과 등록 선박 목록이 접히지 않습니다.',
