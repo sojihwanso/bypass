@@ -89,3 +89,28 @@ test('search-cap-per-query', () => {
   const many = '<rss>' + Array.from({length: 30}, (_, i) => `<item><title>부산항 선박 소식 ${i}번째 기사 제목</title><link>https://news.google.com/rss/articles/A${i}</link><pubDate>Wed, 26 Nov 2026 0${i % 10}:00:00 GMT</pubDate><source url="x">매체${i}</source></item>`).join('') + '</rss>';
   assert.equal(pickItems(parseRss(many, 'x'), true, 10).length, 10);
 });
+test('bad-dates-and-chars', () => {
+  const bad = PRESS.replace('2026-11-26 19:53:15', '2026-13-45 10:00:00');
+  assert.equal(parseRss(bad, 'x').length, 0, 'invalid month/day kept');
+  const nul = PRESS.replace('HMM, 컨테이너선', 'HMM&#0;, 컨테이너선&#xD800;').replace('<b>운임</b>', '운임 &#99999999;');
+  const [a] = parseRss(nul, 'x');
+  assert.ok(a && !/[\u0000-\u001f\ud800-\udfff]/.test(a.t), JSON.stringify(a && a.t));
+});
+test('future-date-dropped', () => {
+  const fut = PRESS.replace('2026-11-26 19:53:15', '2099-01-01 10:00:00');
+  assert.equal(parseRss(fut, 'x', Date.parse('2026-11-26T12:00:00Z')).length, 0);
+});
+test('dedupe-prefix-and-press-via-google', () => {
+  const mk = (t, s, u) => ({ t, s, u, d: '2026-11-26', p: '', c: '기업 소식', k: titleKey(t) });
+  const a = mk('HMM, 최원혁 대표이사 재선임', '해양한국', 'https://a/1');
+  const b = mk('HMM, 최원혁 대표이사 재선임..2028년 3월까지 임기 연장', '동아일보', 'https://news.google.com/x');
+  assert.equal(dedupe([a, b]).length, 1);
+  const c = mk('완전히 다른 제목의 해운 기사 하나', '한국해운신문', 'https://news.google.com/y');
+  assert.equal(pickItems([c], true).length, 0, 'google item from a press we already read');
+});
+test('classify-false-accidents', () => {
+  assert.notEqual(classify('해진공, 부산·인천해사고에 장학금 전달', ''), '사고');
+  assert.notEqual(classify('인천해경, 해양사고 예방 업무협약', ''), '사고');
+  assert.notEqual(classify('폭발적 성장 HMM 실적', ''), '사고');
+  assert.equal(classify('여수 앞바다 화물선 충돌', ''), '사고');
+});

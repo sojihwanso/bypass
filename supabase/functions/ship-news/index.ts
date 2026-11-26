@@ -8,7 +8,8 @@
 //
 // 필요한 비밀 값: 없음. SUPABASE_URL · SUPABASE_SERVICE_ROLE_KEY 는 Supabase 가 자동으로 넣어 줍니다.
 //
-// 부르는 법: GET → { updated: 'ISO 시각', items: [{d, c, t, s, u, p}] }  (최근 30일, 최신순, 최대 200건)
+// 부르는 법: GET → { updated: 'ISO 시각', items: [{d, c, t, s, u, p}] }
+//   ?since=<ISO 시각> 이 있으면 그 뒤에 새로 들어온 소식만(최대 300건), 없으면 최신 150건.
 
 export type Raw = { t: string; u: string; d: string; s: string; p: string };
 export type Item = Raw & { c: string; k: string };
@@ -17,7 +18,8 @@ const ALLOWED_ORIGINS = ['https://teambypass.vercel.app', 'https://bypass-three.
 const PREVIEW_ORIGIN = /^https:\/\/bypass-git-[a-z0-9-]+-oojoo1\.vercel\.app$/;
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 const REFRESH_MS = 24 * 3600 * 1000;
-const KEEP_DAYS = 45, SEND_DAYS = 30, SEND_MAX = 200, TIMEOUT_MS = 8000;
+const KEEP_DAYS = 45, TIMEOUT_MS = 8000;
+const PRESS_NAMES = ['쉬핑뉴스넷', '해양한국', '한국해운신문', '카고뉴스'];
 
 const g = (q: string) => 'https://news.google.com/rss/search?q=' + encodeURIComponent(q + ' when:3d') + '&hl=ko&gl=KR&ceid=KR:ko';
 export const SOURCES: { name: string; url: string; search: boolean; filter?: boolean }[] = [
@@ -35,12 +37,16 @@ export const SOURCES: { name: string; url: string; search: boolean; filter?: boo
 const ENT: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', middot: '·', hellip: '…', lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”' };
 function decode(s: string): string {
   return s.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (m, e) => {
-    if (e[0] === '#') { const n = e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10); return Number.isFinite(n) ? String.fromCodePoint(n) : m; }
+    if (e[0] === '#') { const n = e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10); return Number.isFinite(n) && n > 0 && n <= 0x10ffff ? String.fromCodePoint(n) : ''; }
     return ENT[e.toLowerCase()] ?? m;
   });
 }
 const stripTags = (s: string) => s.replace(/<[^>]*>/g, ' ');
-const clean = (s: string) => decode(stripTags(decode(s))).replace(/\s+/g, ' ').trim();
+/* 제어 문자·짝 없는 서로게이트는 Postgres가 거부하므로 지움 */
+const clean = (s: string) => decode(stripTags(decode(s)))
+  .replace(/[\u0000-\u001f\u007f]/g, ' ')
+  .replace(/[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/g, '')
+  .replace(/\s+/g, ' ').trim();
 function tag(block: string, name: string): string {
   const m = block.match(new RegExp('<' + name + '(?:\\s[^>]*)?>([\\s\\S]*?)</' + name + '>', 'i'));
   if (!m) return '';
@@ -53,14 +59,19 @@ function tag(block: string, name: string): string {
 function kstDate(raw: string): string {
   const s = raw.trim();
   const local = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T]\d{2}:\d{2}(?::\d{2})?)?$/); // 국내 전문지: 이미 한국 시간
-  if (local) return local[1] + '-' + local[2] + '-' + local[3];
+  if (local){
+    const mo = +local[2], da = +local[3];
+    if (mo < 1 || mo > 12 || da < 1 || da > 31) return '';
+    return local[1] + '-' + local[2] + '-' + local[3];
+  }
   const t = Date.parse(s);
   if (!Number.isFinite(t)) return '';
   return new Date(t + 9 * 3600 * 1000).toISOString().slice(0, 10);
 }
 
-export function parseRss(xml: string, fallbackSource: string): Raw[] {
+export function parseRss(xml: string, fallbackSource: string, nowMs = Date.now()): Raw[] {
   const out: Raw[] = [];
+  const maxDay = new Date(nowMs + (9 + 24) * 3600 * 1000).toISOString().slice(0, 10);   // 한국 시간 내일까지만
   for (const m of xml.matchAll(/<item\b[\s\S]*?<\/item>/gi)) {
     const b = m[0];
     let t = clean(tag(b, 'title'));
@@ -72,7 +83,7 @@ export function parseRss(xml: string, fallbackSource: string): Raw[] {
     if (src && p.endsWith(src)) p = p.slice(0, -src.length).trim();
     if (p === t || t.startsWith(p) || p.length < 10) p = '';
     if (p.length > 120) p = p.slice(0, 119).trimEnd() + '…';
-    if (!t || !/^https?:\/\//.test(u) || !d) continue;
+    if (!t || !/^https?:\/\//.test(u) || !d || d > maxDay) continue;
     out.push({ t: t.slice(0, 200), u, d, s: src.slice(0, 40), p });
   }
   return out;
@@ -103,7 +114,8 @@ const RULES: [string, RegExp][] = [
 ];
 export function classify(t: string, p: string): string {
   const s = t + ' ' + p;
-  for (const [c, re] of RULES) if (re.test(s)) return c;
+  const noFalseAccident = s.replace(/해사고|사고 ?예방|폭발적/g, '');   // 해사고(학교), 사고 예방 협약, 폭발적 성장
+  for (const [c, re] of RULES) if (re.test(c === '사고' ? noFalseAccident : s)) return c;
   return '기업 소식';
 }
 export function titleKey(t: string): string {
@@ -112,14 +124,17 @@ export function titleKey(t: string): string {
 /** filter: 해운 낱말로 거름(검색 결과·카고뉴스). cap: 최신순 최대 개수(검색어마다 10) */
 export function pickItems(raws: Raw[], filter: boolean, cap = Infinity): Item[] {
   return raws.filter(r => !filter || isMaritime(r.t))
+    .filter(r => !(PRESS_NAMES.includes(r.s) && /news\.google\.com/.test(r.u)))   // 이미 직접 받는 전문지 기사가 구글로 다시 들어온 것
     .sort((a, b) => b.d.localeCompare(a.d)).slice(0, cap)
     .map(r => ({ ...r, c: classify(r.t, r.p), k: titleKey(r.t) }));
 }
+/** 주소가 같거나, 제목 키가 같거나, 짧은 키(12자 이상)가 긴 키의 앞부분이면 같은 기사 */
 export function dedupe(items: Item[]): Item[] {
-  const seenU = new Set<string>(), seenK = new Set<string>(), out: Item[] = [];
+  const seenU = new Set<string>(), keys: string[] = [], out: Item[] = [];
+  const same = (a: string, b: string) => a === b || (Math.min(a.length, b.length) >= 12 && (a.startsWith(b) || b.startsWith(a)));
   for (const it of items) {
-    if (seenU.has(it.u) || (it.k && seenK.has(it.k))) continue;
-    seenU.add(it.u); if (it.k) seenK.add(it.k); out.push(it);
+    if (seenU.has(it.u) || (it.k && keys.some(k => same(k, it.k)))) continue;
+    seenU.add(it.u); if (it.k) keys.push(it.k); out.push(it);
   }
   return out;
 }
@@ -157,6 +172,7 @@ export async function collect(http: typeof fetch): Promise<{ items: Item[]; fail
   const lists = await Promise.all(SOURCES.map(async (s) => {
     try {
       const raws = parseRss(await getText(http, s.url), s.search ? '구글 뉴스' : s.name);
+      if (!raws.length) failed.push(s.name + '(0건)');   // 동의 화면 같은 HTML이 200으로 온 경우
       return pickItems(raws, s.search || !!s.filter, s.search ? 10 : Infinity);
     } catch { failed.push(s.name); return [] as Item[]; }
   }));
@@ -182,29 +198,38 @@ export async function handle(req: Request, deps?: Partial<Deps>): Promise<Respon
     // 1) 24시간 지났으면 새로 모음 (먼저 last_fetch를 바꿔 동시에 여러 번 모으지 않게)
     let last = 0, lastOk = '';
     const mr = await rest('ship_news_meta?select=last_fetch,last_ok&id=eq.1');
-    if (mr.ok) { const row = (await mr.json() as { last_fetch?: string; last_ok?: string }[])[0]; last = row?.last_fetch ? Date.parse(row.last_fetch) : 0; lastOk = row?.last_ok ?? ''; }
+    if (!mr.ok) throw new Error('meta ' + mr.status);   // 표가 없거나 키가 틀림: 모으지 않고 502 (요청마다 다시 모으지 않게)
+    const row = (await mr.json() as { last_fetch?: string; last_ok?: string }[])[0];
+    last = row?.last_fetch ? Date.parse(row.last_fetch) : 0;
+    lastOk = row?.last_ok && Number.isFinite(Date.parse(row.last_ok)) ? new Date(row.last_ok).toISOString() : '';
     if (!last || now() - last >= REFRESH_MS) {
       const startedAt = new Date(now()).toISOString();
       await putMeta({ last_fetch: startedAt });
       const { items, failed } = await collect(http);
+      const errors = failed.length ? ['받지 못한 곳: ' + failed.join(', ')] : [];
       if (items.length) {
-        await rest('ship_news?on_conflict=u', {
+        const up = await rest('ship_news?on_conflict=u', {
           method: 'POST', headers: { Prefer: 'resolution=ignore-duplicates,return=minimal' },
           body: JSON.stringify(items.map(({ d, c, t, s, u, p, k }) => ({ d, c, t, s, u, p, k, fetched_at: startedAt }))),
         });
+        if (!up.ok) errors.push('저장 실패 ' + up.status + ' ' + (await up.text()).slice(0, 200));
       }
       const cut = new Date(now() - KEEP_DAYS * 86400e3).toISOString().slice(0, 10);
       await rest('ship_news?d=lt.' + cut, { method: 'DELETE', headers: { Prefer: 'return=minimal' } });
-      lastOk = startedAt;
-      await putMeta({ last_ok: startedAt, last_error: failed.length ? '받지 못한 곳: ' + failed.join(', ') : null });
+      const saved = !errors.some(e => e.startsWith('저장 실패'));
+      if (saved) lastOk = startedAt;
+      // 저장에 실패하면 한 시간 뒤 다시 모으도록 last_fetch를 앞당김
+      await putMeta(saved ? { last_ok: startedAt, last_error: errors.length ? errors.join(' / ') : null }
+                          : { last_fetch: new Date(now() - REFRESH_MS + 3600e3).toISOString(), last_error: errors.join(' / ') });
     }
 
     // 2) 돌려줄 소식: since 뒤에 새로 들어온 것(최대 300) 또는 최신 150
     const sinceRaw = new URL(req.url).searchParams.get('since') ?? '';
-    const since = /^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(sinceRaw) && Number.isFinite(Date.parse(sinceRaw)) ? sinceRaw : '';
+    const since = /^\d{4}-\d{2}-\d{2}T[\d:.]+(Z|[+-]\d{2}:\d{2})$/.test(sinceRaw) && Number.isFinite(Date.parse(sinceRaw)) ? new Date(sinceRaw).toISOString() : '';
     const q = 'ship_news?select=d,c,t,s,u,p&order=fetched_at.desc,d.desc' + (since ? '&fetched_at=gt.' + encodeURIComponent(since) + '&limit=300' : '&limit=150');
     const sr = await rest(q);
-    const rows = sr.ok ? await sr.json() as Raw[] & { c: string }[] : [];
+    if (!sr.ok) throw new Error('select ' + sr.status);
+    const rows = await sr.json() as (Raw & { c: string })[];
     const items = rows.map((r: any) => ({ d: r.d, c: r.c, t: r.t, s: r.s, u: r.u, p: r.p || '' }));
     return reply(req, 200, { updated: lastOk || new Date(now()).toISOString(), items }, { 'Cache-Control': 'public, max-age=600' });
   } catch (e) {

@@ -4,16 +4,16 @@ import { handle, SOURCES } from '../../../../../supabase/functions/ship-news/ind
 
 const ENV = { SUPABASE_URL: 'https://db.test', SUPABASE_SERVICE_ROLE_KEY: 'k' };
 const RSS = (n, i = 1) => `<rss><item><title>부산항 선박 소식 ${n} ${i}</title><link>https://ex.com/${n}/${i}</link><pubDate>2026-11-26 10:00:00</pubDate></item></rss>`;
-function fakeDb({ lastFetch, failSource } = {}) {
+function fakeDb({ lastFetch, failSource, lastOk, failUpsert, failMeta, emptySource } = {}) {
   const calls = { src: [], upsert: null, del: 0, meta: [], select: [] };
   const http = async (url, init = {}) => {
     const u = String(url), m = (init.method || 'GET').toUpperCase();
     if (u.startsWith('https://db.test/rest/v1/ship_news_meta')) {
-      if (m === 'GET') return new Response(JSON.stringify(lastFetch ? [{ last_fetch: lastFetch }] : []), { status: 200 });
+      if (m === 'GET') return failMeta ? new Response('{"message":"relation does not exist"}', { status: 404 }) : new Response(JSON.stringify(lastFetch ? [{ last_fetch: lastFetch, last_ok: lastOk || null }] : []), { status: 200 });
       calls.meta.push(JSON.parse(init.body)); return new Response('', { status: 201 });
     }
     if (u.startsWith('https://db.test/rest/v1/ship_news')) {
-      if (m === 'POST') { calls.upsert = JSON.parse(init.body); return new Response('', { status: 201 }); }
+      if (m === 'POST') { calls.upsert = JSON.parse(init.body); return new Response(failUpsert ? '{"message":"bad"}' : '', { status: failUpsert ? 400 : 201 }); }
       if (m === 'DELETE') { calls.del++; return new Response(null, { status: 204 }); }
       calls.select.push(u);
       return new Response(JSON.stringify([{ d: '2026-11-26', c: '항만', t: '부산항 소식', s: '쉬핑뉴스넷', u: 'https://ex.com/a', p: '', k: 'x', fetched_at: '2026-11-26T01:00:00Z' }]), { status: 200 });
@@ -21,6 +21,7 @@ function fakeDb({ lastFetch, failSource } = {}) {
     calls.src.push(u);
     const src = SOURCES.find(s => s.url === u);
     if (failSource && src && src.name === failSource) return new Response('no', { status: 500 });
+    if (emptySource && src && src.name === emptySource) return new Response('<html>consent</html>', { status: 200 });
     return new Response(RSS(src ? src.name : 'x'), { status: 200 });
   };
   return { http, calls };
@@ -69,4 +70,30 @@ test('response-shape', async () => {
   const { http } = fakeDb({ lastFetch: new Date(NOW - 3600e3).toISOString() });
   const j = await (await handle(req(), { env: k => ENV[k], http, now: () => NOW })).json();
   assert.deepEqual(Object.keys(j.items[0]).sort(), ['c', 'd', 'p', 's', 't', 'u']);
+});
+
+test('updated-normalized-for-since', async () => {
+  const { http } = fakeDb({ lastFetch: new Date(NOW - 3600e3).toISOString(), lastOk: '2026-11-26T03:00:00.482+00:00' });
+  const j = await (await handle(req(), { env: k => ENV[k], http, now: () => NOW })).json();
+  assert.equal(j.updated, '2026-11-26T03:00:00.482Z');
+  const { http: h2, calls } = fakeDb({ lastFetch: new Date(NOW - 3600e3).toISOString() });
+  await handle(req('?since=' + encodeURIComponent('2026-11-26T03:00:00.482+00:00')), { env: k => ENV[k], http: h2, now: () => NOW });
+  assert.ok(calls.select[0].includes('fetched_at=gt.'), calls.select[0]);
+});
+test('upsert-failure-not-ok', async () => {
+  const { http, calls } = fakeDb({ failUpsert: true });
+  await handle(req(), { env: k => ENV[k], http, now: () => NOW });
+  assert.ok(!calls.meta.some(m => m.last_ok), 'last_ok written despite failed save');
+  assert.ok(calls.meta.some(m => String(m.last_error || '').includes('저장')), JSON.stringify(calls.meta));
+});
+test('meta-missing-no-collect', async () => {
+  const { http, calls } = fakeDb({ failMeta: true });
+  const r = await handle(req(), { env: k => ENV[k], http, now: () => NOW });
+  assert.equal(r.status, 502);
+  assert.equal(calls.src.length, 0, 'collected without a table');
+});
+test('zero-items-source-recorded', async () => {
+  const { http, calls } = fakeDb({ emptySource: '해양한국' });
+  await handle(req(), { env: k => ENV[k], http, now: () => NOW });
+  assert.ok(calls.meta.some(m => String(m.last_error || '').includes('해양한국')), JSON.stringify(calls.meta));
 });

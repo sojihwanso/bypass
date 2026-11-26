@@ -50,4 +50,9 @@ export default [
    await open(p, '#news', r => r.fulfill({status:404, body:''}));
    assert((await p.$eval('#feed-state', e => e.textContent)).includes('준비하고 있습니다'), '404 text');
  })},
+ {name:'feed-since-offset-format', fn: () => withPage({init:{fn: () => { try{ if (!sessionStorage.getItem('s2')){ sessionStorage.setItem('s2','1'); localStorage.setItem('sasarok-news-cache-v2', JSON.stringify({at: 1, updated:'2026-11-25T03:00:00.482+00:00', items:[]})); } }catch(e){} }}}, async p => {
+   let url = '';
+   await open(p, '#news', r => { url = r.request().url(); return r.fulfill({status:200, contentType:'application/json', body: body([])}); });
+   assert(url.includes('since='), 'since missing: '+url);
+ })},
 ];
