@@ -9,12 +9,12 @@ export default [
  })},
  {name:'hero-theme-swap', fn: async () => {
    await withPage({theme:'light'}, async p => {
-     assert(await vis(p,'img.hero-day'), 'day hidden in light');
-     assert(!(await vis(p,'img.hero-night')), 'night visible in light');
+     assert(await vis(p,'.hero-art.hero-day'), 'day hidden in light');
+     assert(!(await vis(p,'.hero-art.hero-night')), 'night visible in light');
    });
    await withPage({theme:'dark'}, async p => {
-     assert(await vis(p,'img.hero-night'), 'night hidden in dark');
-     assert(!(await vis(p,'img.hero-day')), 'day visible in dark');
+     assert(await vis(p,'.hero-art.hero-night'), 'night hidden in dark');
+     assert(!(await vis(p,'.hero-art.hero-day')), 'day visible in dark');
      const col = await p.$eval('.hero h1', el => getComputedStyle(el).color);
      const r = contrast(col, 'rgb(11,22,38)'); assert(r >= 4.5, 'dark h1 contrast '+r.toFixed(2));
    });

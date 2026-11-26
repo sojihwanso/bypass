@@ -52,8 +52,8 @@ export default [
    assert(await p.$eval('.hero-day', e => getComputedStyle(e).display) === 'block', 'inline');
  })},
  {name:'only-theme-image-loads', fn: () => withPage({}, async p => {
-   const r = await p.evaluate(() => [document.querySelector('.hero-day').currentSrc, document.querySelector('.hero-night').getAttribute('src')]);
-   assert(r[0].endsWith('hero-day.webp') && !r[1], 'srcs '+r);
+   const r = await p.evaluate(() => [document.querySelector('.hero-day .hero-bg').currentSrc, document.querySelector('.hero-night .hero-bg').getAttribute('src')]);
+   assert(r[0].endsWith('hero-day-bg.webp') && !r[1], 'srcs '+r);
  })},
  {name:'mobile-card-other-types', fn: () => withPage({...M, hash:'#type-bulk'}, async p => {
    /* v3.4.0부터 휴대폰 카드는 요약만, 다른 선종은 '자세히'를 눌러 펼침 */
