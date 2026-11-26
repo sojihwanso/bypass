@@ -166,7 +166,7 @@ function onScan() {
   tracker.setLimits(S.tt.cpa, S.tt.tcpa, S.tt.cpaOn); tracker.setPastInterval(S.tt.pastInt);
   const dets = S.ctrl.tx ? detect(scene, S.ctrl, rnd) : [];
   tracker.update(dets, own, W.t);
-  ais.setLimits(S.tt.cpa, S.tt.tcpa, S.tt.cpaOn);
+  ais.setLimits(S.tt.cpa, S.tt.tcpa, S.tt.cpaOn, { on: S.ais.cpaAutoOn, rng: S.ais.cpaAutoRng });
   ais.update(W.targets, { lat: o.lat, lon: o.lon, sog: o.sog, cog: o.cog }, W.t);
   ais.associate(tracker.targets(), { rng: 0.1, spd: 2, crs: 15 }, (la, lo) => ({ x: P.x(lo), y: P.y(la) }));
   // 경보

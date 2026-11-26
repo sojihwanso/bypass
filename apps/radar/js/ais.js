@@ -36,7 +36,9 @@ export function createAIS() {
       a.x = P.x(a.lon) + v.vx * dt; a.y = P.y(a.lat) + v.vy * dt;
       const c = cpaTcpa({ x: 0, y: 0 }, ov, { x: a.x, y: a.y }, v); a.cpa = c.cpa; a.tcpa = c.tcpa;
       const br = brgRng(0, 0, a.x, a.y); a.brg = br.brg; a.rng = br.rng;
-      const danger = lim.on && a.cpa < lim.cpa && a.tcpa >= 0 && a.tcpa <= lim.tcpa;
+      /* 위험 판정은 활성 물표만(IEC 62388). 휴면 물표는 'CPA 자동 활성'이 켜져 있고 정한 거리 안일 때만 자동 활성 */
+      const danger = lim.on && a.cpa < lim.cpa && a.tcpa >= 0 && a.tcpa <= lim.tcpa, canAuto = lim.auto && lim.auto.on && a.rng <= lim.auto.rng;
+      if (a.status === 'sleep' && !(danger && canAuto)) continue;
       if (danger) a.status = 'danger'; else if (a.status === 'danger') a.status = 'active';
     }
   }
@@ -46,7 +48,7 @@ export function createAIS() {
     return out.filter((a) => a.status === 'danger' || (!(f.maxRngOn && a.rng > f.maxRng) && !(f.minSpdOn && a.sog < f.minSpd) && !(f.exceptB && a.cls === 'B')));
   }
   return {
-    update, list, setLimits(cpa, tcpa, on = true) { lim = { cpa, tcpa, on }; },
+    update, list, setLimits(cpa, tcpa, on = true, auto = null) { lim = { cpa, tcpa, on, auto }; },
     activate(id) { const a = map.get(id); if (a && a.status === 'sleep') a.status = 'active'; },
     sleep(id) { const a = map.get(id); if (a && a.status === 'active') a.status = 'sleep'; },
     sleepAll() { for (const a of map.values()) if (a.status === 'active') a.status = 'sleep'; },
