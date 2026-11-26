@@ -2,7 +2,7 @@ import { withPage, assert } from '../lib.mjs';
 export default [
  {name:'version-2', fn: () => withPage({}, async p => {
    const r = await p.evaluate(() => [document.querySelector('#ver-top').textContent, document.querySelector('#ver-foot').textContent, VERSION, PATCH_NOTES[0].v]);
-   assert(r[0].includes('2.0.0') && r[1].includes('2.0.0') && r[2] === '2.0.0' && r[3] === '2.0.0', JSON.stringify(r));
+   assert(r[2].startsWith('2.') && r[0].includes(r[2]) && r[1].includes(r[2]) && r[3] === r[2], JSON.stringify(r));
  })},
  {name:'readme-sources', fn: () => withPage({}, async p => {
    const t = await p.$eval('#readme', e => e.textContent);

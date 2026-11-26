@@ -1,5 +1,5 @@
 """선사록 데이터 점검: python3 -I check_data.py <apps/ship_info/data 폴더>"""
-import json, os, sys
+import json, os, re, sys
 
 d = sys.argv[1]
 w = json.load(open(os.path.join(d, 'wage.json'), encoding='utf-8'))
@@ -56,6 +56,7 @@ assert '대표' not in json.dumps(F, ensure_ascii=False)
 for f in F:
     for v in (f['tel'], f['fax']):
         assert v is None or not v.startswith('01'), (f['n'], v)
+        assert v is None or re.fullmatch(r'0\d{1,3}-\d{3,4}-\d{4}|1\d{3}-\d{4}', v), ('전화 형식', f['n'], v)
     for s in f['ships']:
         assert len(s) == 6 and s[4] and s[5], (f['n'], s)
         assert s[1] is None or isinstance(s[1], (int, float))

@@ -85,6 +85,16 @@ def split_tail(tail, types, countries):
     raise SystemExit('선박 꼬리를 나눌 수 없음: ' + tail)
 
 
+def phone(v):
+    """원본 표기 정리: 앞뒤 '-' 제거, 하이픈 없는 8자리 대표번호(15xx·16xx·18xx)는 XXXX-XXXX"""
+    if v is None:
+        return None
+    v = v.strip('-')
+    if re.fullmatch(r'1[568]\d{6}', v):
+        v = v[:4] + '-' + v[4:]
+    return v
+
+
 def info_fields(info):
     tel = fax = addr = None
     parts = [x.strip() for x in info.split(' · ')]
@@ -100,6 +110,7 @@ def info_fields(info):
             rest.append(x)
     if rest:
         addr = clean(' · '.join(rest))
+    tel, fax = phone(tel), phone(fax)
     mob = re.compile(r'^01[016789]')
     tel = None if tel and mob.match(tel) else tel
     fax = None if fax and mob.match(fax) else fax
