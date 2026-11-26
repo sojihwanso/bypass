@@ -273,6 +273,15 @@ select,.fgroup input[type="search"]{font:inherit;font-size:13.5px;padding:6px 10
 .ctag.r{border-style:double;border-width:3px;padding:0 4px;line-height:1.1}
 .load-fail{color:var(--muted);font-size:14px}
 #co-wage,#co-reg{margin-top:0}
+.reg-group{margin-top:18px;padding:14px 18px;background:var(--sheet);border:1px solid var(--rule);border-radius:var(--r-card)}
+.reg-group .rg-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px}
+.reg-group .rg-btn{font:inherit;font-weight:600;font-size:14.5px;color:var(--ink);background:none;border:1px solid var(--ink);border-radius:var(--r-in);padding:7px 14px;min-height:40px;cursor:pointer}
+.reg-group .rg-btn::before{content:"+ ";font-family:var(--font-mono);color:var(--muted)}
+.reg-group .rg-btn[aria-expanded="true"]::before{content:"\2212  "}
+.reg-group .rg-desc{margin:8px 0 0}
+.reg-group .rg-desc .ctag{margin-left:4px}
+#reg-list{margin-top:12px}
+#reg-list .wt th:nth-child(2),#reg-list .wt td:nth-child(2),#reg-list .wt th:last-child,#reg-list .wt td:last-child{text-align:left}
 .ships-more{margin-top:10px;min-height:36px;cursor:pointer}
 dl.kv.kv-side{grid-template-columns:3em 1fr;font-size:14px}
 /* 임금 표 */
@@ -743,6 +752,7 @@ footer .readme-h{display:block;margin-bottom:10px}
         <tbody id="reg-body"></tbody>
       </table>
     </div>
+    <section class="reg-group" id="reg-group" hidden></section>
     <p class="note foot-note" id="sort-note"></p>
     <section class="sheet blk" id="type-wage"></section>
     <div class="pc" id="type-pc"></div>
@@ -1571,7 +1581,7 @@ function renderRegOnly(u){
   fillCoWage(u.n, u);
 }
 const LIMIT = 5;
-const state = {kind:'all', fleet:'all', foreign:true, q:'', routes:new Set(), cadet:false, reserve:false, newsCat:'all', newsRange:'all', newsFrom:'', newsTo:'', newsQ:'', cmpTab:'co', sort:'rank'};
+const state = {more:false, kind:'all', fleet:'all', foreign:true, q:'', routes:new Set(), cadet:false, reserve:false, newsCat:'all', newsRange:'all', newsFrom:'', newsTo:'', newsQ:'', cmpTab:'co', sort:'rank'};
 const cmp = {co:[], ty:[]};
 const CMP_KEY = 'sasarok-cmp-v1';
 function loadCmp(){
@@ -1856,7 +1866,7 @@ function renderNews(){
 function renderTypeHead(t){
   const l = companiesOf(t.id), o = l.filter(c => c.kind === 'owner').length;
   $('#type-head').innerHTML = sym(t.id,'big') +
-    '<div><h1>'+esc(t.name)+'</h1><p class="sub">선사 '+l.length+'곳 (선주사 '+o+', 관리선사 '+(l.length-o)+')</p></div>'+
+    '<div><h1>'+esc(t.name)+'</h1><p class="sub">선사 '+l.length+'곳 (선주사 '+o+', 관리선사 '+(l.length-o)+')'+(UNI_K && regOnlyFor(t.id).length ? ' · 등록만 '+regOnlyFor(t.id).length+'곳' : '')+'</p></div>'+
     '<div class="acts">'+starBtn('types', t.id, t.name)+'<label class="check"><input type="checkbox" data-pickty="'+t.id+'"'+(cmp.ty.includes(t.id)?' checked':'')+'> 비교에 담기</label></div>';
   $('#type-pc').innerHTML =
     pcSection('pros', '장점으로 꼽히는 것', '장점', t.pros) + pcSection('cons', '단점으로 꼽히는 것', '단점', t.cons);
@@ -1923,6 +1933,7 @@ function filterQuery(){
   if (state.q) q.push('q='+encodeURIComponent(state.q));
   if (state.routes.size) q.push('r='+[...state.routes].map(encodeURIComponent).join(','));
   if (state.sort !== 'rank') q.push('sort='+state.sort);
+  if (state.more) q.push('more=1');
   return q.join('&');
 }
 function applyQuery(qs){
@@ -1936,6 +1947,7 @@ function applyQuery(qs){
   state.q = p.get('q') || '';
   state.routes = new Set((p.get('r') || '').split(',').filter(r => ROUTES.includes(r)));
   if (SORTS.hasOwnProperty(p.get('sort'))) state.sort = p.get('sort');
+  state.more = p.get('more') === '1';
 }
 function typeHash(){ const q = filterQuery(); return '#type-'+currentType+(q ? '?'+q : ''); }
 function syncHash(){
@@ -1943,12 +1955,42 @@ function syncHash(){
   if (location.hash !== h){ history.replaceState(null, '', h); lastHash = h; }
   try{ sessionStorage.setItem('sasarok-last-type', h); }catch(e){}
 }
+/* ---------- 선종 표 아래: 등록 선박만 있는 회사 (기본 접힘) ---------- */
+const REG_BLOCK_FILTERS = ['kind','fleet','routes','cadet','reserve'];
+function renderRegGroup(typeId, topCount){
+  const el = $('#reg-group');
+  if (!UNI_K){ el.hidden = true; uniReady().then(() => { if (currentType === typeId && currentView() === 'type'){ renderRegGroup(typeId, topCount); renderTypeHead(TYPE_BY_ID[typeId]); } }, () => {}); return; }
+  const all = regOnlyFor(typeId);
+  if (!all.length){ el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
+  if (FILTERS.some(f => REG_BLOCK_FILTERS.includes(f.k) && f.on(state))){
+    el.innerHTML = '<p class="note">등록 선박만 있는 회사 '+all.length+'곳은 숨겼습니다. 회사 구분·선단 규모·항로·실습·예비역 필터는 선사 자료가 있는 회사에만 적용됩니다.</p>';
+    return;
+  }
+  const q = state.q.trim().toLowerCase();
+  const list = q ? all.filter(u => u.n.toLowerCase().includes(q)) : all;
+  const open = state.more || (!!q && list.length > 0);
+  el.innerHTML =
+    '<div class="rg-head"><button type="button" class="rg-btn" aria-expanded="'+open+'" aria-controls="reg-list">등록 선박만 있는 회사 '+all.length+'곳</button>'+
+      (q ? '<span class="note">검색어에 맞는 회사 '+list.length+'곳</span>' : '')+'</div>'+
+    '<p class="note rg-desc">선사 자료 없이 한국선원복지고용센터 등록 선박만 있는 회사입니다. 이 선종 등록 척수가 많은 순입니다. <span class="ctag r">등록</span></p>'+
+    (open && list.length ? '<div class="table-scroll" id="reg-list"><table class="wt"><thead><tr><th>회사</th><th>업종</th><th>이 선종</th><th>전체 등록</th><th>전화</th></tr></thead><tbody>'+
+      list.map(u => { const n = typeShipCount(u, typeId);
+        return '<tr data-n="'+n+'"><td><a href="'+coHref(u.n)+'">'+esc(u.n)+'</a></td><td>'+esc(UNI_K.bizNames[u.firm.b])+'</td><td>'+n+'척</td><td>'+u.ships+'척</td><td class="mono">'+esc(u.firm.tel || '')+'</td></tr>'; }).join('')+
+      '</tbody></table></div>' : '');
+  el.querySelector('.rg-btn').addEventListener('click', () => {
+    state.more = el.querySelector('.rg-btn').getAttribute('aria-expanded') !== 'true';
+    syncHash(); renderRegGroup(typeId, topCount);
+    const b = el.querySelector('.rg-btn'); if (b) b.focus();
+  });
+}
 function renderTable(typeId){
   const full = sortedFor(typeId);
   const rank = new Map(full.map((c,i) => [c.n, i+1]));
   const list = filterList(full, state);
   if (SORTS[state.sort]) list.sort((a,b) => SORTS[state.sort](a,b) || rank.get(a.n) - rank.get(b.n));
   shownList = list;
+  renderRegGroup(typeId, list.length);
   const nOn = FILTERS.filter(f => f.on(state)).length;
   $('#f-active').textContent = nOn ? '· 걸린 조건 '+nOn+'개' : '';
   $('#f-toggle').textContent = nOn ? '필터 · '+nOn+'개 적용' : '필터';
@@ -2176,11 +2218,11 @@ function setupBoard(){
 
 /* ---------- 라우팅 ---------- */
 function resetFilters(){
-  Object.assign(state, {kind:'all', fleet:'all', foreign:true, q:'', cadet:false, reserve:false, sort:'rank'});
+  Object.assign(state, {kind:'all', fleet:'all', foreign:true, q:'', cadet:false, reserve:false, sort:'rank', more:false});
   state.routes = new Set();
 }
 /* 선종을 옮길 때: 선종과 상관없는 조건(회사 구분, 국적, 실습생 선발, 예비역)은 두고 나머지만 비움 */
-function resetTypeOnly(){ state.q = ''; state.fleet = 'all'; state.routes = new Set(); state.sort = 'rank'; }
+function resetTypeOnly(){ state.more = false; state.q = ''; state.fleet = 'all'; state.routes = new Set(); state.sort = 'rank'; }
 function setReadme(open){ $('#readme').hidden = !open; const b = $('#readme-toggle'); b.setAttribute('aria-expanded', String(open)); b.textContent = open ? '접기' : '펼치기'; }
 function route(){
   const hash = location.hash || '#home';
