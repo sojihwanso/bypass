@@ -375,7 +375,10 @@ dl.kv.kv-side{grid-template-columns:3em 1fr;font-size:14px}
 .none{color:var(--muted);font-size:12.5px}
 .jobs{display:grid;gap:4px;justify-items:start}
 .jb{font-size:12px;padding:0 7px;border:1px solid var(--rule);border-radius:var(--r-tag);color:var(--muted);white-space:nowrap}
-.jb.on{border-color:var(--plus);color:var(--plus)}
+.jb.on{border-color:var(--plus);color:var(--plus);font-weight:600;background:color-mix(in srgb,var(--plus) 10%,transparent)}
+.skip{position:absolute;left:12px;top:-60px;z-index:50;padding:10px 14px;background:var(--ink);color:var(--sheet);border-radius:var(--r-in);font-weight:600;text-decoration:none}
+.skip:focus{top:12px}
+main:focus{outline:none}
 .jrot{font-size:12px}
 .empty-row td{padding:30px 14px;text-align:center;color:var(--muted)}
 .foot-note{margin-top:14px;max-width:96ch}
@@ -642,6 +645,7 @@ footer .readme-h{display:block;margin-bottom:10px}
 </style>
 </head>
 <body>
+<a class="skip" href="#main" data-skip>본문으로 건너뛰기</a>
 <div id="cmp-live" class="sr" aria-live="polite"></div>
 <header class="mast">
   <div class="topstrip">
@@ -685,7 +689,7 @@ footer .readme-h{display:block;margin-bottom:10px}
   </div>
 </section>
 
-<main class="wrap">
+<main class="wrap" id="main" tabindex="-1">
 
   <!-- 홈 -->
   <div class="view" id="v-home">
@@ -2464,6 +2468,7 @@ document.addEventListener('click', e => {
   if (gb){ const ul = gb.nextElementSibling; const open = gb.getAttribute('aria-expanded') !== 'true'; gb.setAttribute('aria-expanded', String(open)); if (ul) ul.hidden = !open; return; }
   const nq = t.closest('a[data-news-q]');
   if (nq){ e.preventDefault(); state.newsQ = nq.dataset.newsQ; state.newsCat = 'all'; state.newsRange = 'all'; location.hash = 'news'; return; }
+  if (t.closest('a[data-skip]')){ e.preventDefault(); const m = $('#main'); m.focus(); m.scrollIntoView(); return; }   /* 해시 경로를 바꾸지 않고 본문으로 */
   const rm = t.closest('#reg-body .row-more');
   if (rm){ const tr = rm.closest('tr.row'); const open = !tr.classList.contains('open'); tr.classList.toggle('open', open); rm.setAttribute('aria-expanded', String(open)); rm.textContent = open ? '접기' : '자세히'; return; }
   const fo = t.closest('#f-chips button[data-foff]');
