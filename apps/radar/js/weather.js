@@ -85,9 +85,12 @@ export function windDrift(windFrom, windMs, hdg) {
 }
 export const speedLoss = (sea) => (sea >= 8 ? 3 : sea >= 7 ? 2.2 : sea >= 6 ? 1.5 : sea >= 5 ? 0.8 : 0);
 
-export function weatherLabel(w, lang) {
+export const currentLabel = (w, lang) => (w.current && w.current.drift >= 0.05 ? `${lang === 'en' ? 'Cur' : '조류'} ${String(Math.round(w.current.set)).padStart(3, '0')}°/${w.current.drift.toFixed(1)}kn` : '');
+/* short = 헤더용(풍력 계급 뺌, 조류 짧게). 전체는 단추 풍선 도움말에 */
+export function weatherLabel(w, lang, short = false) {
   const en = lang === 'en', k = (KIND[w.kind] || KIND.clear)[en ? 1 : 0];
   const st = SEA_STATE[Math.max(0, Math.min(8, Math.round(w.sea || 0)))];
   const c = w.current && w.current.drift >= 0.05 ? ` · ${en ? 'Current' : '조류'} ${String(Math.round(w.current.set)).padStart(3, '0')}° ${w.current.drift.toFixed(1)} kn` : '';
+  if (short) return `${k} · ${en ? 'Sea' : '해상'} ${w.sea}` + (w.fog ? ` · ${en ? 'Vis' : '시정'} ${w.visNM}` : '');
   return `${k} · ${en ? 'Sea' : '해상'} ${w.sea} (${en ? 'Bft' : '풍력'} ${st.bft})` + (w.fog ? ` · ${en ? 'Vis' : '시정'} ${w.visNM} NM` : '') + c;
 }

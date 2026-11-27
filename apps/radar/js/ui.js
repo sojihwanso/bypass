@@ -113,7 +113,7 @@ export function initUI(root, actions) {
 <div class="cmenu" id="cmenu" hidden role="menu"></div>
 <dialog id="eggDlg"><div class="dlg-h"><span data-t="egg"></span><button class="btn" type="button" data-act="eggClose" data-t="close"></button></div><div class="dlg-b" id="eggBody"></div><div class="dlg-f"><button class="btn pri" type="button" data-act="patch" data-t="patch"></button></div></dialog>
 <dialog id="genDlg"><div class="dlg-h"><span id="genT"></span><button class="btn" type="button" data-act="genClose" data-t="close"></button></div><div class="dlg-b" id="genB"></div><div class="dlg-f" id="genF"></div></dialog>
-<div class="rotate"><div><b data-t="rotate" style="font-size:18px"></b><p data-t="rotateSub"></p></div></div>`;
+<div class="rotate" role="dialog" aria-modal="true" aria-labelledby="rotT"><div><svg class="rot-ic" viewBox="0 0 48 48" aria-hidden="true"><rect x="15" y="6" width="18" height="30" rx="3"/><path d="M8 30a16 16 0 0 0 14 12M40 18A16 16 0 0 0 26 6"/><path d="M22 42l-2-4 4-1M26 6l2 4-4 1"/></svg><b id="rotT" data-t="rotate"></b><p data-t="rotateSub"></p><button type="button" class="btn rot-ok" data-act="rotateOk" data-t="rotateOk"></button></div></div>`;
 
   let menuTab = MENU[0].id;
   const applyLang = () => {
@@ -154,6 +154,7 @@ export function initUI(root, actions) {
 
   /* ---- 클릭 위임 ---- */
   const internal = {
+    rotateOk: () => { document.documentElement.dataset.portraitOk = '1'; try { sessionStorage.setItem('radar-portrait-ok', '1'); } catch (e) {} },
     menu: () => { menuEl.hidden = !menuEl.hidden; if (!menuEl.hidden) renderMenu(); },
     menuClose: () => { menuEl.hidden = true; },
     lang: (el) => { S.ui.lang = el.dataset.v; saveSettings(); applyLang(); emit('settings', 'ui.lang'); },
@@ -235,6 +236,7 @@ export function initUI(root, actions) {
   $('#verTop').addEventListener('click', eggTap); /* 이 앱은 하단 버전 표시 없음(사용자 결정) */
 
   applyLang(); applyTheme();
+  try { if (sessionStorage.getItem('radar-portrait-ok')) document.documentElement.dataset.portraitOk = '1'; } catch (e) {}
 
   /* 배치: Conning은 PPI 원 오른쪽 빈 공간(넉넉하면, 작은 판), 물표 정보·TT·AIS 설정은 오른쪽 패널. 좁으면 모두 오른쪽 패널(자선 → Conning → 경보 → 물표) */
   const SIDE_MIN = 140, main = root.querySelector('.main'), rp = $('#rp'), wrap = $('#ppiWrap');
@@ -312,7 +314,7 @@ export function initUI(root, actions) {
     qv('ir', S.ctrl.ir ? String(S.ctrl.ir) : 'OFF', S.ctrl.ir > 0); qv('es', S.ctrl.es ? String(S.ctrl.es) : 'OFF', S.ctrl.es > 0); qv('eav', S.ctrl.eav ? String(S.ctrl.eav) : 'OFF', S.ctrl.eav > 0); qv('ace', S.ctrl.ace ? 'ON' : 'OFF', S.ctrl.ace);
     qv('hl', 'OFF'); qv('map', S.disp.map.on ? 'ON' : 'OFF', S.disp.map.on); qv('cureset', d.orient === 'CU' || d.motion === 'TM' ? 'RESET' : '-'); qv('ownais', ''); qv('aismsg', d.msgN ? String(d.msgN) : '');
     qv('pal', t('pal_' + S.disp.palette)); if (d.mark) qv('mark', d.mark.sym, d.mark.on); $('#qb_pal').title = lang() === 'en' ? 'Day/dusk/night · long-press or right-click: colour set' : '주간·박명·야간 · 길게 누르거나 오른쪽 클릭: 색 조합'; $('#qb_mark').title = lang() === 'en' ? 'Mark: press, then click the PPI · long-press or right-click: shape' : '마크: 누른 뒤 PPI를 누르면 놓임 · 길게 누르거나 오른쪽 클릭: 모양 고르기';
-    if (d.wx) { $('#hv_wx').textContent = d.wx.on ? d.wx.label : (lang() === 'en' ? 'OFF' : '꺼짐'); $('#hb_wx').classList.toggle('on', d.wx.on); $('#hb_wx').title = lang() === 'en' ? 'Weather changes on/off' : '날씨 변화 켜기/끄기'; }
+    if (d.wx) { setHTML('#hv_wx', d.wx.on ? esc(d.wx.label) + (d.wx.cur ? `<span class="wxc">${esc(d.wx.cur)}</span>` : '') : esc(lang() === 'en' ? 'OFF' : '꺼짐')); $('#hb_wx').classList.toggle('on', d.wx.on); $('#hb_wx').title = (d.wx.on && d.wx.full ? d.wx.full + '\n' : '') + (lang() === 'en' ? 'Click: weather changes on/off (new random weather each time)' : '누르면 날씨 변화 켜기/끄기(켤 때마다 새 날씨)'); }
     $('#hv_speed').textContent = '×' + d.speed; $('#hb_pause').classList.toggle('on', !!d.paused); $('#hb_conn').classList.toggle('on', !!d.connOn); $('#hb_speed').classList.toggle('on', d.speed > 1);
     $('#vPict').textContent = S.ctrl.preset; $('#vOff').classList.toggle('on', !!d.offCenter); $('#vRef').textContent = d.ref || 'CCRP';
     $('#vPi').classList.toggle('on', !!d.piOn); if (d.pi) { $('#vPiB').textContent = d.pi.brg; $('#vPiI').textContent = d.pi.int; $('#vPiB').classList.toggle('off', !d.piOn); $('#vPiI').classList.toggle('off', !d.piOn); $('#vPiB').title = lang() === 'en' ? 'PI bearing · wheel / drag / arrow keys' : 'PI 방위 · 휠·끌기·화살표'; $('#vPiI').title = lang() === 'en' ? 'Spacing between PI lines · wheel / drag / arrow keys' : 'PI 선 사이 간격 · 휠·끌기·화살표'; } $('#vAz').classList.toggle('on', !!d.azOn); $('#vTrial').classList.toggle('on', S.tt.trialMode !== 'OFF');

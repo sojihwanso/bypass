@@ -19,7 +19,7 @@ import { t, lang } from './i18n.js';
 import { initStart } from './start.js';
 import { initHelp } from './help.js';
 import { COL, piColor } from './overlay.js';
-import { createWeatherRun, stepWeather, windDrift, speedLoss, weatherLabel, WX_CAP, rollWeather } from './weather.js';
+import { createWeatherRun, stepWeather, windDrift, speedLoss, weatherLabel, currentLabel, WX_CAP, rollWeather } from './weather.js';
 import { refillTraffic, steerTraffic, trafficRing } from './traffic.js';
 import { routeClear } from './place.js';
 
@@ -296,7 +296,7 @@ function refreshUI() {
   const cur = cursor && cursorInfo(cursor);
   ui.refresh({
     mark: { on: uiMode === 'mark' || uiMode === 'mark2', sym: MARK_BY_ID[MARKS[markShape]].sym }, markHint: uiMode === 'mark2' ? (lang() === 'en' ? 'MARK: click the end point' : '마크: 끝점을 누르세요') : uiMode === 'mark' && isLineMark(MARKS[markShape]) ? (lang() === 'en' ? 'MARK: click the start point' : '마크: 시작점을 누르세요') : '',
-    wx: { on: S.sim.weatherOn || !!W.weather.fixed, label: weatherLabel(W.weather, lang()) },
+    wx: { on: S.sim.weatherOn || !!W.weather.fixed, label: weatherLabel(W.weather, lang(), true), cur: currentLabel(W.weather, lang()), full: weatherLabel(W.weather, lang()) },
     rangeNM: V.rangeNM, ringInt: RING_INT[V.rangeNM], orient: V.orient, motion: V.motion, tx: radar.state, warmLeft: radar.warmLeft, speed, paused: paused || hiddenPause, offCenter: !!offCenter, piOn, pm: { on: !!pmSave, graph: S.ctrl.pmMode !== 'OFF', loss: +S.ctrl.pmLoss || 0 }, wheelRange: !!S.disp.wheelRange, azOn: azZones.length > 0, connOn: conn && conn.shown,
     own: { hdg: sn.hdg, stw: sn.stw, sog: sn.sog, cog: sn.cog, rot: o.rot, lat: sn.lat, lon: sn.lon }, clock: `${pad(d.getHours())}:${pad(d.getMinutes())}`, elapsed: `${pad((el / 3600) | 0)}:${pad(((el % 3600) / 60) | 0)}:${pad((el % 60) | 0)}`,
     cursor: cur, ebl: tools.ebl.map((e, i) => ({ on: e.on, brg: S.disp.eblRef === 'REL' ? wrap360(tools.eblTrue(i, o.hdg) - o.hdg) : tools.eblTrue(i, o.hdg) })),

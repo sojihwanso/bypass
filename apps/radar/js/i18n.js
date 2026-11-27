@@ -13,7 +13,7 @@ const D = {
     cm_acq: 'TT 포착', cm_cancel: 'TT 해제', cm_data: '물표 데이터', cm_ebl: 'EBL1을 여기로', cm_vrm: 'VRM1을 여기로', cm_off: '여기를 중심으로',
     cm_offEbl: 'EBL1 원점을 여기로', cm_drop: 'Drop mark', cm_anchor: '닻 위치로', cm_ruler: '두 점 거리 재기', cm_act: 'AIS 활성/휴면', cm_ref: '기준 물표로', cm_center: '중심 복귀',
     pal_day: '주간', pal_dusk: '박명', pal_night: '야간', egg: '이스터에그', patch: '패치노트', eggMsg: '선교 당직, 오늘도 수고 많았어요. 레이더는 눈을 대신할 뿐, 견시를 대신하지는 않아요.',
-    rotate: '가로 화면으로 돌려 주세요', rotateSub: '레이더 화면은 가로로 써야 넓게 보여요.', menuTitle: '메뉴', foot: '교육용 레이더 시뮬레이터 · 실제 항해에 쓰지 마세요',
+    rotate: '가로 화면을 권장해요', rotateSub: '휴대폰·태블릿을 가로로 돌리면 레이더 원과 단추가 넓게 보여요. 이 시뮬레이터는 가로 화면에 맞춰 만들었어요.', rotateOk: '세로로 계속하기', menuTitle: '메뉴', foot: '교육용 레이더 시뮬레이터 · 실제 항해에 쓰지 마세요',
   },
   en: {
     brand: 'Radar Simulator', sub: 'COLLISION AVOIDANCE TRAINING', help: 'Help', menu: 'Menu', close: 'Close', ok: 'OK', cancel: 'Cancel',
@@ -27,7 +27,7 @@ const D = {
     cm_acq: 'Acquire TT', cm_cancel: 'Cancel TT', cm_data: 'Target data', cm_ebl: 'EBL1 here', cm_vrm: 'VRM1 here', cm_off: 'Off-center here',
     cm_offEbl: 'EBL1 origin here', cm_drop: 'Drop mark', cm_anchor: 'Anchor position', cm_ruler: 'Range between points', cm_act: 'AIS activate/sleep', cm_ref: 'Set reference target', cm_center: 'Re-center',
     pal_day: 'Day', pal_dusk: 'Dusk', pal_night: 'Night', egg: 'Easter egg', patch: 'Patch notes', eggMsg: 'Thanks for standing your watch. Radar extends your eyes, it never replaces a proper lookout.',
-    rotate: 'Please rotate to landscape', rotateSub: 'The radar display needs a wide screen.', menuTitle: 'Menu', foot: 'Training radar simulator · not for navigation',
+    rotate: 'Landscape recommended', rotateSub: 'Turn your phone or tablet sideways for a larger radar picture and buttons. This simulator is laid out for landscape.', rotateOk: 'Continue in portrait', menuTitle: 'Menu', foot: 'Training radar simulator · not for navigation',
   },
 };
 export const lang = () => (S.ui.lang === 'en' ? 'en' : 'ko');
