@@ -127,7 +127,7 @@ function trafficTick(run) {
 }
 function freeDef(o = {}) {
   const lat = o.lat ?? 34.35, lon = o.lon ?? 125.6, Pq = makeProj(lat, lon), at = (b, r) => ({ lat: Pq.lat(r * Math.cos(b * D)), lon: Pq.lon(r * Math.sin(b * D)) });
-  return { name: o.name || '', own: { lat, lon, hdg: o.hdg ?? 0, tele: o.tele }, targets: (o.targets || []).map((x, i) => ({ id: x.id || 't' + i, ...at(x.brg, x.rng), hdg: x.hdg, kn: x.kn, L: x.L ?? 120, rcs: x.rcs ?? null, h: x.h ?? null, ais: x.ais ?? true, name: x.name || 'SHIP ' + (i + 1), mmsi: x.mmsi, legs: x.legs || [] })), weather: o.weather || { sea: 2 }, aids: o.aids || [] };
+  return { name: o.name || '', own: { lat, lon, hdg: o.hdg ?? 0, tele: o.tele }, targets: (o.targets || []).map((x, i) => ({ id: x.id || 't' + i, ...at(x.brg, x.rng), hdg: x.hdg, kn: x.kn, L: x.L ?? 120, rcs: x.rcs ?? null, h: x.h ?? null, ais: x.ais ?? true, name: x.name || 'SHIP ' + (i + 1), mmsi: x.mmsi, cls: x.cls || 'A', legs: x.legs || [] })), weather: o.weather || { sea: 2 }, aids: o.aids || [] };
 }
 const D = Math.PI / 180;
 
@@ -227,8 +227,8 @@ function overlayModel() {
   const tts = tracker.targets().filter((g) => !g.assoc || g.state !== 'track').map((g) => { const r = relOf(g.x, g.y);
     const pastS = g.past.slice(-S.tt.pastPts).map((q) => { const rr = relOf(q.x, q.y); return ppi.toScreen(rr.brg, rr.rng); });
     const tr = trialMap && trialMap.get(g.id);
-    return { ...g, brg: r.brg, rng: r.rng, relVec: relV(g.course, g.speed), pastS, selected: selected.includes(g.id), trialDanger: tr && tr.cpa < S.tt.cpa && tr.tcpa >= 0 }; });
-  const aisL = S.ais.disp ? ais.list({ maxRngOn: S.ais.maxRngOn, maxRng: S.ais.maxRng, minSpdOn: S.ais.minSpdOn, minSpd: S.ais.minSpd, exceptB: S.ais.exceptB }).filter((a) => a.x !== undefined).map((a) => ({ ...a, relVec: relV(a.cog, a.sog), selected: selected.includes('A:' + a.id) })) : [];
+    return { ...g, brg: r.brg, rng: r.rng, relVec: relV(g.course, g.speed), pastS, selected: selected.includes(g.id), letter: selected.includes(g.id) ? letter(g.id) : '', trialDanger: tr && tr.cpa < S.tt.cpa && tr.tcpa >= 0 }; });
+  const aisL = S.ais.disp ? ais.list({ maxRngOn: S.ais.maxRngOn, maxRng: S.ais.maxRng, minSpdOn: S.ais.minSpdOn, minSpd: S.ais.minSpd, exceptB: S.ais.exceptB }).filter((a) => a.x !== undefined).map((a) => ({ ...a, relVec: relV(a.cog, a.sog), selected: selected.includes('A:' + a.id), letter: selected.includes('A:' + a.id) ? letter('A:' + a.id) : '' })) : [];
   const toBR = (lat, lon) => relOf(P.x(lon), P.y(lat));
   // 해안선(레이더 맵): 범위가 바뀌거나 자선이 움직이면 다시 투영
   let coast = null;
@@ -272,9 +272,11 @@ function refreshUI() {
   const slot = (id) => {
     if (!id) return null;
     if (id.startsWith('A:')) { const a = ais.list().find((x) => 'A:' + x.id === id); if (!a || a.x === undefined) return null; const r = { brg: a.brg, rng: a.rng }, bb = bcrBct({ x: 0, y: 0, ...ov }, { x: a.x, y: a.y, ...velXY(a.cog, a.sog) });
-      return { label: `AIS ${a.name}`, brg: r.brg, rng: r.rng, cog: a.cog, sog: a.sog, cpa: a.cpa, tcpa: a.tcpa, bcr: bb.bcr, bct: bb.bct, danger: a.status === 'danger' }; }
+      const ago = W.t - a.lastRep, lat = a.lat, lon = a.lon; // 마지막으로 받은 보고 위치
+      return { id, kind: 'ais', letter: letter(id), open: expanded.has(id), label: a.name, brg: r.brg, rng: r.rng, cog: a.cog, sog: a.sog, cpa: a.cpa, tcpa: a.tcpa, bcr: bb.bcr, bct: bb.bct, danger: a.status === 'danger', a: { ...a, ago, lat, lon, tt: a.assoc ? (tracker.targets().find((x) => x.id === a.assoc) || {}).no : null } }; }
     const g = tracker.targets().find((x) => x.id === id); if (!g) return null; const r = relOf(g.x, g.y), tr = g.state === 'track';
-    return { label: `TT ${g.no}${g.assoc ? ' · AIS' : ''}${g.state === 'acq' ? ' (ACQ)' : g.state === 'lost' ? ' (LOST)' : ''}`, brg: r.brg, rng: r.rng, cog: tr ? g.course : null, sog: tr ? g.speed : null, cpa: tr ? g.cpa : null, tcpa: tr ? g.tcpa : null, bcr: tr ? g.bcr : null, bct: tr ? g.bct : null, danger: g.danger };
+    const aa = g.assoc ? ais.list().find((x) => x.id === g.assoc) : null;
+    return { id, kind: 'tt', letter: letter(id), open: expanded.has(id), label: `TT ${g.no}${g.state === 'acq' ? ' (ACQ)' : g.state === 'lost' ? ' (LOST)' : ''}`, tt: { no: g.no, state: g.state, lat: P.lat(g.y), lon: P.lon(g.x), age: g.t0 != null ? W.t - g.t0 : null, assoc: aa ? aa.name : null }, brg: r.brg, rng: r.rng, cog: tr ? g.course : null, sog: tr ? g.speed : null, cpa: tr ? g.cpa : null, tcpa: tr ? g.tcpa : null, bcr: tr ? g.bcr : null, bct: tr ? g.bct : null, danger: g.danger };
   };
   const top = alerts.top(), el = W.t, d = new Date();
   const cur = cursor && cursorInfo(cursor);
@@ -285,7 +287,7 @@ function refreshUI() {
     own: { hdg: sn.hdg, stw: sn.stw, sog: sn.sog, cog: sn.cog, rot: o.rot, lat: sn.lat, lon: sn.lon }, clock: `${pad(d.getHours())}:${pad(d.getMinutes())}`, elapsed: `${pad((el / 3600) | 0)}:${pad(((el % 3600) / 60) | 0)}:${pad((el % 60) | 0)}`,
     cursor: cur, ebl: tools.ebl.map((e, i) => ({ on: e.on, brg: S.disp.eblRef === 'REL' ? wrap360(tools.eblTrue(i, o.hdg) - o.hdg) : tools.eblTrue(i, o.hdg) })),
     vrm: tools.vrm.map((v) => ({ on: v.on, rng: toUnit(v.rng, S.disp.vrmUnit), ttg: S.disp.vrmTTG && v.on ? vrmTTG(v.rng, o.sog) : null })),
-    tgt: [slot(selected[0]), slot(selected[1])], ttN: tracker.targets().filter((g) => g.state !== 'lost').length, aisN: ais.list().filter((a) => a.status !== 'lost').length,
+    tgt: (syncLetters(), [...selected].sort((p, q) => (letterOf.get(p) || 'Z').localeCompare(letterOf.get(q) || 'Z')).map(slot).filter(Boolean)), ttN: tracker.targets().filter((g) => g.state !== 'lost').length, aisN: ais.list().filter((a) => a.status !== 'lost').length,
     alertTop: top ? { ...top, time: `${pad(((top.tSim % 86400) / 3600) | 0)}:${pad(((top.tSim % 3600) / 60) | 0)}:${pad((top.tSim % 60) | 0)}` } : null, alertN: alerts.list().length, scnName: W.name, msgN: ais.messages().length, ref: refPt, pi: { brg: `${tools.pi.brg.toFixed(1).padStart(5, '0')}°`, int: `${tools.pi.interval.toFixed(2)} NM` }, watchLeft: S.alert.watch ? (() => { const s = Math.max(0, S.alert.watch * 60 - (performance.now() - lastUser) / 1000); return `${pad((s / 60) | 0)}:${pad((s % 60) | 0)}`; })() : '',
   });
   conn && conn.refresh();
@@ -334,7 +336,14 @@ function nearestTarget(pos, px = 16) {
   for (const a of ais.list()) if (a.x !== undefined) { const p = s(a.brg, a.rng), d = Math.hypot(p.x - q.x, p.y - q.y); if (d < bd) { bd = d; best = { kind: 'ais', id: a.id }; } }
   return best;
 }
-function select(id) { selected = [id, ...selected.filter((x) => x !== id)].slice(0, 2); }
+/* 고른 물표(최대 4): A·B·C·D 글자를 붙여 PPI와 정보창에서 같은 글자로 구분. 넘치면 가장 먼저 고른 것을 뺌 */
+const SEL_MAX = 4, LETTERS = 'ABCD', letterOf = new Map(), expanded = new Set();
+function select(id) {
+  if (!selected.includes(id)) { selected = [...selected, id]; if (selected.length > SEL_MAX) selected = selected.slice(-SEL_MAX); }
+  syncLetters();
+}
+function syncLetters() { for (const k of [...letterOf.keys()]) if (!selected.includes(k)) { letterOf.delete(k); expanded.delete(k); } for (const k of selected) if (!letterOf.has(k)) { const used = new Set(letterOf.values()); letterOf.set(k, [...LETTERS].find((c) => !used.has(c))); } }
+const letter = (id) => { syncLetters(); return letterOf.get(id) || ''; };
 /* 누른 곳 둘레(반지름 6 px)에 레이더 영상이 있는지 */
 function echoNear(pos) { for (let dy = -6; dy <= 6; dy += 2) for (let dx = -6; dx <= 6; dx += 2) { if (dx * dx + dy * dy > 36) continue; const p = ppi.fromScreen(pos.x + dx, pos.y + dy); if (p.rng > 0.05 && ppi.levelAt(p.brg, p.rng) > 0) return true; } return false; }
 function acquireAt(pos) {
@@ -378,6 +387,7 @@ Object.assign(actions, {
   refpt: () => { refPt = refPt === 'CCRP' ? 'ANT' : 'CCRP'; },
   trial: () => { S.tt.trialMode = S.tt.trialMode === 'OFF' ? 'STATIC' : 'OFF'; if (S.tt.trialMode !== 'OFF' && W) trialSet = { course: W.own.hdg, speed: W.own.stw }; saveSettings(); },
   vecMode: () => { S.tt.vector = S.tt.vector === 'TRUE' ? 'REL' : 'TRUE'; saveSettings(); },
+  slotToggle: (id) => { const was = expanded.has(id); expanded.clear(); if (!was) expanded.add(id); refreshUI(); } /* 전체 정보 창은 한 번에 하나 */, slotClose: (id) => { selected = selected.filter((x) => x !== id); syncLetters(); refreshUI(); },
   vecUp: () => vecStep(1), vecDn: () => vecStep(-1),
   alertList: () => { const rows = alerts.list().map((a) => `<tr><td>${a.pri}</td><td>${a.text}</td><td>${a.active ? (lang() === 'en' ? 'active' : '발생') : lang() === 'en' ? 'rectified' : '해소'}</td><td>${a.acked ? 'ACK' : '-'}</td></tr>`).join(''); ui.dialog(t('alert'), `<table class="tbl">${rows || `<tr><td>${t('noAlert')}</td></tr>`}</table>`, `<button class="btn" type="button" data-act="ackAll">${lang() === 'en' ? 'ACK all' : '모두 확인'}</button>`); },
   ackAll: () => { alerts.ackAll(); actions.alertList(); },

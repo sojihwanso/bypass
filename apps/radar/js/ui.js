@@ -175,6 +175,9 @@ export function initUI(root, actions) {
     const a = el.dataset.act;
     if (internal[a]) internal[a](el, e); else if (actions[a]) actions[a](el, e);
   });
+  /* 물표 정보 칸: 누르는 순간(pointerdown) 처리 — 1초마다 다시 그려져도 눌림이 사라지지 않게 */
+  root.addEventListener('pointerdown', (e) => { if (e.target.closest('#tDetail')) { const cx = e.target.closest('[data-slot-x]'); if (cx) { e.preventDefault(); actions.slotToggle && actions.slotToggle(cx.dataset.slotX); } return; } /* 전체 정보 창: ×는 창만 닫기 */ const x = e.target.closest('[data-slot-x]'); if (x) { e.preventDefault(); actions.slotClose && actions.slotClose(x.dataset.slotX); return; } const sl = e.target.closest('[data-slot]'); if (sl && e.button === 0) actions.slotToggle && actions.slotToggle(sl.dataset.slot); });
+  root.addEventListener('keydown', (e) => { const sl = e.target.closest && e.target.closest('[data-slot]'); if (sl && (e.key === 'Enter' || e.key === ' ') && e.target === sl) { e.preventDefault(); e.stopPropagation(); const id = sl.dataset.slot; actions.slotToggle && actions.slotToggle(id); const n = document.querySelector(`[data-slot="${CSS.escape(id)}"]`); n && n.focus(); } });
   /* ---- 휠: 상자 위에서 값 조정 ---- */
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   root.addEventListener('wheel', (e) => {
@@ -325,13 +328,38 @@ export function initUI(root, actions) {
     }
     $('#vClock').textContent = d.clock || ''; $('#vEl').textContent = d.elapsed || '-';
     // 물표 2칸
-    setHTML('#tSlots', [0, 1].map((i) => { const g = d.tgt && d.tgt[i]; if (!g) return `<div class="tslot${i ? ' blank' : ''}"><span class="empty">${i === 0 ? esc(t('noTgt')) : ''}</span></div>`;
-      return `<div class="tslot${g.danger ? ' danger' : ''}"><div class="nm">${esc(g.label)}</div><dl class="kv"><dt>BRG</dt><dd>${deg(g.brg)}</dd><dt>RNG</dt><dd>${f1(g.rng, 2)}</dd><dt>COG</dt><dd>${deg(g.cog)}</dd><dt>SOG</dt><dd>${f1(g.sog)}</dd><dt>CPA</dt><dd>${f1(g.cpa, 2)}</dd><dt>TCPA</dt><dd>${g.tcpa == null ? '-' : g.tcpa < 0 ? '--' : f1(g.tcpa, 1)}</dd><dt>BCR</dt><dd>${g.bcr == null ? '-' : f1(g.bcr, 2)}</dd><dt>BCT</dt><dd>${g.bct == null ? '-' : f1(g.bct, 1)}</dd></dl></div>`; }).join(''));
+    setHTML('#tSlots', d.tgt && d.tgt.length ? d.tgt.map((g) => slotHTML({ ...g, open: false, sel: g.open }, ll)).join('') : `<div class="tslot"><span class="empty">${esc(t('noTgt'))}</span></div>`);
+    { const og = (d.tgt || []).find((g) => g.open); let card = $('#tDetail');
+      if (!og) { if (card) card.remove(); }
+      else { if (!card) { card = document.createElement('div'); card.id = 'tDetail'; card.className = 'tdetail'; card.setAttribute('role', 'dialog'); root.append(card); }
+        setHTML('#tDetail', slotHTML(og, ll)); const sl = $('#tSlots').getBoundingClientRect(), w = card.offsetWidth || 320, h = card.offsetHeight;
+        let x = sl.left - w - 10; if (x < 8) x = Math.min(innerWidth - w - 8, sl.right + 10); const y = Math.max(8, Math.min(sl.top, innerHeight - h - 8)); card.style.left = x + 'px'; card.style.top = y + 'px'; } }
     $('#vCounts').textContent = `TT ${d.ttN ?? 0} · AIS ${d.aisN ?? 0}`;
     setHTML('#vTT', `<dt>${esc(t('vector'))}</dt><dd>${S.tt.vector} ${S.tt.vecMin} min</dd><dt>${esc(t('cpaLim'))}</dt><dd>${S.tt.cpaOn ? `${S.tt.cpa.toFixed(1)} NM / ${S.tt.tcpa} min` : 'OFF'}</dd><dt>${esc(t('past'))}</dt><dd>${S.tt.pastPts} × ${S.tt.pastInt}s</dd><dt>${esc(t('aisFilt'))}</dt><dd>${S.ais.maxRngOn ? S.ais.maxRng + ' NM' : '-'} ${S.ais.minSpdOn ? '≥' + S.ais.minSpd + ' kn' : ''}</dd>`);
     const a = d.alertTop; $('#vAlN').textContent = d.alertN ? d.alertN : '';
     setHTML('#aBox', a ? `<div class="abox ${a.pri}${a.acked ? '' : ' unack'}"><span class="ic">${a.pri === 'A' ? '!' : a.pri}</span><span class="tx"><b>${esc(a.text)}</b><span>${a.active ? '' : (lang() === 'en' ? 'rectified · ' : '해소됨 · ')}${esc(a.time || '')}</span></span><span style="display:flex;gap:4px">${a.pri !== 'C' && !a.acked ? `<button class="btn" type="button" data-act="ack">${esc(t('ack'))}</button>` : ''}<button class="btn ib" type="button" data-act="silence" title="${esc(t('silence'))}" aria-label="${esc(t('silence'))}">${ICON.mute}</button><button class="btn" type="button" data-act="alertList">${esc(t('list'))}</button></span></div>` : `<span class="empty">${esc(t('noAlert'))}</span>`);
     const chip = $('#scnChip'); chip.hidden = !d.scnName; chip.textContent = d.scnName || ''; chip.title = lang() === 'en' ? 'Show the briefing again' : '브리핑 다시 보기';
+  }
+  /* 물표 정보 칸: 평소엔 필수(BRG·RNG·COG·SOG·CPA·TCPA), 누르면 전체(AIS: ITU-R M.1371 정적·동적·항해 정보 + 계산값) */
+  function slotHTML(g, ll) {
+    const en = lang() === 'en', row = (k, v) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`, tc = (v) => (v == null ? '-' : v < 0 ? '--' : f1(v, 1) + ' min');
+    const ess = row('BRG', deg(g.brg)) + row('RNG', f1(g.rng, 2) + ' NM') + row('COG', deg(g.cog)) + row('SOG', f1(g.sog) + ' kn') + row('CPA', g.cpa == null ? '-' : f1(g.cpa, 2) + ' NM') + row('TCPA', tc(g.tcpa));
+    const head = `<div class="nm"><b class="tlet">${esc(g.letter)}</b><span>${g.kind === 'ais' ? 'AIS ' : ''}${esc(g.label)}</span><span class="tg">${g.open ? '' : g.sel ? '◂' : '▸'}</span><button type="button" class="x" data-slot-x="${esc(g.id)}" aria-label="${en ? 'Deselect' : '선택 해제'}">×</button></div>`;
+    let more = '';
+    if (g.open) {
+      const sec = (title, body) => `<h5>${esc(title)}</h5><dl class="kv">${body}</dl>`, calc = row('BCR', g.bcr == null ? '-' : f1(g.bcr, 2) + ' NM') + row('BCT', tc(g.bct));
+      if (g.kind === 'ais') { const a = g.a, nv = { underway: 'UNDER WAY USING ENGINE', anchored: 'AT ANCHOR', moored: 'MOORED', fishing: 'ENGAGED IN FISHING', nuc: 'NOT UNDER COMMAND', ram: 'RESTRICTED MANOEUVRABILITY', cbd: 'CONSTRAINED BY DRAUGHT', aground: 'AGROUND' }[a.navStatus] || String(a.navStatus || '-').toUpperCase(), na = '-';
+        more = sec(en ? 'Calculated (radar)' : '계산 정보(레이더)', calc + row(en ? 'Status' : '상태', { sleep: en ? 'Sleeping' : '휴면', active: en ? 'Activated' : '활성', danger: en ? 'Dangerous' : '위험', lost: en ? 'Lost' : '분실' }[a.status] || a.status) + row(en ? 'TT link' : 'TT 연관', a.tt ? 'TT ' + a.tt : '-'))
+          + sec(en ? 'Dynamic' : '동적 정보', row(en ? 'Position' : '위치', `${ll(a.lat, true)} ${ll(a.lon, false)}`) + row('HDG', deg(a.hdg)) + row('ROT', f1(a.rot) + ' °/min') + row(en ? 'Nav status' : '항해 상태', nv) + row(en ? 'Pos accuracy' : '위치 정확도', a.posAcc === 'HIGH' ? (en ? 'High (<10 m)' : '높음(10 m 이내)') : (en ? 'Low (>10 m)' : '낮음(10 m 넘음)')) + row('RAIM', a.raim) + row(en ? 'Last report' : '마지막 수신', f1(a.ago, 0) + (en ? ' s ago' : '초 전')))
+          + sec(en ? 'Static' : '정적 정보', row('MMSI', String(a.mmsi)) + row('IMO', a.imo ? String(a.imo) : na) + row(en ? 'Call sign' : '호출 부호', a.call) + row(en ? 'Name' : '선명', a.name) + row(en ? 'Ship type' : '선종', a.shipType) + row(en ? 'Size' : '크기', `${a.L} × ${a.B} m`) + row(en ? 'GNSS ant. A/B/C/D' : '안테나 위치 A/B/C/D', `${a.refA}/${a.refB}/${a.refC}/${a.refD} m`) + row('EPFS', a.epfs) + row(en ? 'Class' : '등급', 'Class ' + a.cls))
+          + sec(en ? 'Voyage related' : '항해 정보', row(en ? 'Draught' : '흘수', a.draught != null ? f1(a.draught) + ' m' : na) + row(en ? 'Destination' : '목적지', a.dest || na) + row('ETA', a.eta || na) + row(en ? 'Cargo' : '화물(위험물)', a.cargo || na))
+          + (a.cls === 'B' ? `<p class="note">${en ? 'Class B sends no IMO number, draught, destination or ETA.' : 'Class B는 IMO 번호·흘수·목적지·ETA를 보내지 않아요.'}</p>` : '');
+      } else { const q = g.tt;
+        more = sec(en ? 'Tracking (ARPA)' : '추적 정보(ARPA)', calc + row(en ? 'State' : '상태', { acq: en ? 'Acquiring' : '포착 중', track: en ? 'Tracking' : '추적 중', lost: en ? 'Lost' : '분실' }[q.state] || q.state) + row(en ? 'Position' : '위치', `${ll(q.lat, true)} ${ll(q.lon, false)}`) + row(en ? 'Tracked for' : '추적 시간', q.age == null ? '-' : f1(q.age / 60, 1) + ' min') + row(en ? 'AIS link' : 'AIS 연관', q.assoc || '-'))
+          + `<p class="note">${en ? 'Radar tracking only measures position and motion. Name, size and voyage data come from AIS.' : 'TT는 위치·움직임만 재요. 선명·크기·항해 정보는 AIS로만 알 수 있어요.'}</p>`;
+      }
+    }
+    return `<div class="tslot${g.danger ? ' danger' : ''}${g.open ? ' open' : ''}${g.sel ? ' sel' : ''}" data-slot="${esc(g.id)}" tabindex="0" role="button" aria-expanded="${!!g.open}" title="${en ? 'Click: all data' : '누르면 전체 정보'}">${head}<dl class="kv">${ess}</dl>${more}</div>`;
   }
   /* 내용이 같으면 다시 그리지 않음(단추를 누르는 사이 요소가 바뀌어 클릭이 사라지지 않게) */
   function setHTML(sel, html) { const el = $(sel); if (el && el._h !== html) { el._h = html; el.innerHTML = html; } }

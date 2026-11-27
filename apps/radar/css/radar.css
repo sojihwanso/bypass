@@ -392,3 +392,26 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--rule);border
 .ttbtns .vect{display:inline-flex;align-items:center;gap:2px}
 .ttbtns .vect .btn{padding:2px 7px;min-width:0}
 .ttbtns .vect .vv{font-family:var(--f-mono);font-size:12px;min-width:44px;text-align:center;cursor:ns-resize}
+/* 물표 정보 칸: A·B·C·D 글자, 평소 필수 6개(2열), 누르면 전체 */
+.tslots{grid-template-columns:minmax(0,1fr)!important;max-height:min(62vh,640px);overflow:auto}
+.tslot{cursor:pointer;position:relative;min-width:0}
+.tslot:hover{border-color:var(--accent)}
+.tslot .nm{display:flex;align-items:center;gap:6px}
+.tslot .nm span:first-of-type{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.tslot .tlet{display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:3px;background:var(--accent);color:var(--surface);font-family:var(--f-mono);font-size:11px}
+.tslot .tg{color:var(--muted);font-size:10px}
+.tslot .x{border:0;background:none;color:var(--muted);font-size:15px;line-height:1;padding:0 2px;cursor:pointer}
+.tslot .x:hover{color:var(--bad)}
+.tslot>dl.kv:first-of-type{grid-template-columns:auto 1fr auto 1fr;column-gap:8px}
+.tslot h5{margin:8px 0 2px;font-size:11px;color:var(--muted);font-weight:600;border-top:1px solid var(--rule);padding-top:5px}
+.tslot .note{margin:6px 0 0;font-size:11px;color:var(--muted)}
+[data-layout="rside"] .side .tslot .tlet{background:var(--c-hi);color:var(--c-bg)}
+[data-layout="rside"] .side .tslot h5{border-color:var(--c-line);color:var(--c-dim)}
+/* 전체 정보 창(물표 칸을 누르면 칸 옆에 뜸) */
+.tdetail{position:fixed;z-index:55;width:320px;max-height:calc(100dvh - 16px);overflow:auto;background:var(--surface);color:var(--ink);border:1px solid var(--rule);border-radius:var(--r);box-shadow:0 4px 18px rgba(0,0,0,.25)}
+.tdetail .tslot{border:0;cursor:default}
+.tdetail .tslot>dl.kv:first-of-type{grid-template-columns:auto 1fr auto 1fr}
+.tslot.sel{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+[data-layout="rside"] .side .tslot>dl.kv:first-of-type{grid-template-columns:auto 1fr}
+[data-layout="rside"] .side .tslot .nm{display:flex}
+@media (min-width:1700px){[data-layout="rside"] .side .tslot>dl.kv:first-of-type{grid-template-columns:auto 1fr auto 1fr}}

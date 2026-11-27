@@ -11,6 +11,25 @@ export function reportInterval(kn, rot = 0, cls = 'A', nav = 'underway') {
   return turning ? 3.3 : 10;
 }
 
+/* 정적·항해 정보(ITU-R M.1371 메시지 5, Class B는 18·24): 시나리오에 없으면 MMSI로 정해지는 그럴듯한 값.
+   Class B는 IMO 번호·흘수·목적지·ETA를 보내지 않음 */
+const DESTS = ['BUSAN', 'ULSAN', 'GWANGYANG', 'INCHEON', 'MOKPO', 'YEOSU', 'PYEONGTAEK', 'SHANGHAI', 'QINGDAO', 'TOKYO', 'KOBE', 'KAOHSIUNG'];
+export const NAV_TEXT = { underway: 'UNDER WAY USING ENGINE', anchored: 'AT ANCHOR', moored: 'MOORED', nuc: 'NOT UNDER COMMAND', ram: 'RESTRICTED MANOEUVRABILITY', cbd: 'CONSTRAINED BY DRAUGHT', aground: 'AGROUND', fishing: 'ENGAGED IN FISHING', sailing: 'UNDER WAY SAILING' };
+export function aisStatic(g, a) {
+  const m = a.mmsi >>> 0, h = (k) => (Math.imul(m ^ Math.imul(k, 2654435761), 2246822519) >>> 0) / 4294967296, L = g.L ?? 100, B = g.B ?? Math.max(3, Math.round(L / 6.5)), clsB = a.cls === 'B';
+  const type = g.shipType || (L < 25 ? 'FISHING' : L < 60 ? 'PASSENGER' : h(1) < 0.45 ? 'CARGO' : h(1) < 0.75 ? 'TANKER' : 'CONTAINER');
+  const refA = Math.round(L * (0.75 + 0.1 * h(2))), refC = Math.round(B / 2);
+  const eta = new Date(Date.UTC(2026, 10, 27) + (6 + Math.floor(h(3) * 60)) * 3600e3);
+  const pad = (n) => String(n).padStart(2, '0'), letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  return {
+    imo: clsB ? null : g.imo ?? 9100000 + Math.floor(h(4) * 899999), call: g.call ?? 'D' + letters[Math.floor(h(5) * 26)] + letters[Math.floor(h(6) * 26)] + Math.floor(h(7) * 90 + 10),
+    shipType: type, L, B, refA, refB: L - refA, refC, refD: B - refC, epfs: 'GPS', posAcc: h(8) < 0.7 ? 'HIGH' : 'LOW', raim: h(9) < 0.5 ? 'IN USE' : 'NOT IN USE',
+    draught: clsB ? null : g.draught ?? Math.round((L / 22 + 1 + h(10) * 3) * 10) / 10, dest: clsB ? '' : g.dest || DESTS[Math.floor(h(11) * DESTS.length)],
+    eta: clsB ? '' : `${pad(eta.getUTCMonth() + 1)}-${pad(eta.getUTCDate())} ${pad(eta.getUTCHours())}:${pad(Math.floor(h(12) * 6) * 10)} UTC`,
+    cargo: clsB ? '' : type === 'TANKER' ? (h(13) < 0.5 ? 'HAZ CAT X (Y)' : 'HAZ CAT A') : '-',
+  };
+}
+
 export function createAIS() {
   const map = new Map(); let lim = { cpa: 2, tcpa: 12, on: true }, msgs = [], P = null;
   function update(targets, own, t) {
@@ -20,7 +39,7 @@ export function createAIS() {
       if (!g.ais) continue;
       const x = P.x(g.lon), y = P.y(g.lat); if (Math.hypot(x, y) > AIS_RANGE_NM) continue;
       let a = map.get(g.id);
-      if (!a) { a = { id: g.id, mmsi: g.mmsi ?? 440000000 + map.size + 1, name: g.name || g.id, cls: g.cls || 'A', status: 'sleep', reports: 0, lastRep: -1e9, past: [], navStatus: g.nav || 'underway', dest: g.dest || '', assoc: null }; map.set(g.id, a); }
+      if (!a) { a = { id: g.id, mmsi: g.mmsi ?? 440000000 + map.size + 1, name: g.name || g.id, cls: g.cls || 'A', status: 'sleep', reports: 0, lastRep: -1e9, past: [], navStatus: g.nav || 'underway', assoc: null }; Object.assign(a, aisStatic(g, a)); map.set(g.id, a); }
       if (t - a.lastRep >= reportInterval(g.sog ?? g.kn, g.rot || 0, a.cls, a.navStatus) - 1e-9) {
         a.lat = g.lat; a.lon = g.lon; a.cog = g.cog ?? g.hdg; a.sog = g.sog ?? g.kn; a.hdg = g.hdg; a.rot = g.rot || 0; a.lastRep = t; a.reports++;
         if (!a.past.length || t - a.past[a.past.length - 1].t >= 60) { a.past.push({ lat: g.lat, lon: g.lon, t }); if (a.past.length > 10) a.past.shift(); }

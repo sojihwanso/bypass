@@ -91,6 +91,7 @@ function drawTT(g, p, t, V, k, up, col, M) {
     for (const q of t.pastS || []) { g.beginPath(); g.arc(q.x, q.y, 1.6, 0, 7); g.fill(); }
   }
   g.lineWidth = 1; g.font = '10px "IBM Plex Mono", monospace'; g.fillText(String(t.no), p.x + 9, p.y + 12);
+  if (t.letter) { g.font = 'bold 12px "IBM Plex Mono", monospace'; g.fillStyle = col; g.fillText(t.letter, p.x - 22, p.y - 12); g.font = '10px "IBM Plex Mono", monospace'; }
   if (t.selected) { g.strokeStyle = col; g.beginPath(); for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) { g.moveTo(p.x + sx * 13, p.y + sy * 7); g.lineTo(p.x + sx * 13, p.y + sy * 13); g.lineTo(p.x + sx * 7, p.y + sy * 13); } g.stroke(); }
 }
 function drawAis(g, p, a, V, k, up, col, M) {
@@ -101,5 +102,6 @@ function drawAis(g, p, a, V, k, up, col, M) {
   g.restore();
   if (a.status !== 'sleep' && a.status !== 'lost') { const vc = M.vecRel ? a.relVec : { course: a.cog, speed: a.sog }; g.setLineDash([5, 3]); vec(g, p, vc.course, vc.speed, M.vecMin, k, up); g.setLineDash([]); }
   if (a.selected) { g.beginPath(); g.rect(p.x - 14, p.y - 14, 28, 28); g.stroke(); }
+  if (a.letter) { g.font = 'bold 12px "IBM Plex Mono", monospace'; g.fillText(a.letter, p.x - 24, p.y - 12); g.font = '10px "IBM Plex Mono", monospace'; }
   g.lineWidth = 1;
 }
