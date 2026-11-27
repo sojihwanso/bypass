@@ -58,9 +58,11 @@ export function freeSetup({ lat = 33.5, lon = 124.6, nTargets = 4, sea = 2, rain
 }
 
 /* 기록: 1초마다 표본 */
-export function createLog(scn) {
-  const min = {}, isBg = (g) => String(g.id).startsWith('bg'); let bgMin = null, collisionBg = null, collision = false, grounding = false, first = null, own0 = null, t0Act = null, after = null;
+export function createLog(scn, init = null) {
+  const isBg = (g) => String(g.id).startsWith('bg'), I = init || {}, min = { ...(I.min || {}) };
+  let bgMin = I.bgMin ?? null, collisionBg = I.collisionBg ?? null, collision = !!I.collision, grounding = !!I.grounding, first = I.first ?? null, own0 = I.own0 ?? null, t0Act = I.t0Act ?? null;
   return {
+    dump() { return JSON.parse(JSON.stringify({ min, bgMin, collisionBg, collision, grounding, first, own0, t0Act })); }, // 이어 하기 저장용
     sample(w) {
       const o = w.own, P = makeProj(o.lat, o.lon), ov = velXY(o.cog ?? o.hdg, o.sog ?? o.stw);
       if (!own0) own0 = { hdg: o.hdg, tele: o.tele };

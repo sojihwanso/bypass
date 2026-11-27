@@ -22,7 +22,7 @@ function ownDlg(id, title, body, foot) {
   d.querySelector('.dlg-b').innerHTML = body; d.querySelector('.dlg-f').innerHTML = foot;
   if (!d.open) d.showModal(); return d;
 }
-export function initStart(uiRef) { ui = uiRef; window.RadarStart = openStart; return { openStart, startScenario, lastResult: () => lastResult, finishNow: () => curLog && !lastResult && finish(evaluate(curLog.result())) }; }
+export function initStart(uiRef) { ui = uiRef; window.RadarStart = openStart; return { openStart, startScenario, resumeVoyage, lastResult: () => lastResult, finishNow: () => curLog && !lastResult && finish(evaluate(curLog.result())) }; }
 
 export async function openStart(o = {}) {
   const R = window.Radar, en = lang() === 'en';
@@ -52,7 +52,7 @@ export async function openStart(o = {}) {
     const c = e.target.closest('[data-scn]'); if (c && !c.disabled) { dlg.close(); startScenario(c.dataset.scn); return; }
     const b = e.target.closest('[data-start]'); if (!b) { starting = false; return; }
     if (b.dataset.start === 'edu') { dlg.close(); R.setPaused(false); window.Tutor && window.Tutor.menu(); return; }
-    if (b.dataset.start === 'resume') { dlg.close(); current = null; R.setLog(null); R.setScenarioTick(null); R.resume(); return; }
+    if (b.dataset.start === 'resume') { dlg.close(); resumeVoyage(); return; }
     const scn = freeSetup({ lat: 33.5, lon: 124.6, nTargets: +dlg.querySelector('#fN').value, sea: 2, rain: false, seed: +dlg.querySelector('#fSeed').value || 1 });
     dlg.close(); runScenario(scn, { free: true, skipBrief: true });
   };
@@ -90,19 +90,12 @@ async function runScenario(scn, o = {}) {
   lastResult = null; current = scn;
   const pr = await prepare(scn, o), def = pr.def; R.setPaused(false);
   const where = pr.region ? ` · ${tl(pr.region)}` : '';
-  R.startWorld({ name: (o.free ? (en ? 'Free navigation' : '자유 항해') : `${scn.id} · ${tl(scn)}`) + where, own: def.own, targets: def.targets, weather: pr.weather, aids: def.aids, marks: def.marks || [], needsCoast: !!scn.needsCoast, traffic: { level: pr.level } });
+  R.startWorld({ name: (o.free ? (en ? 'Free navigation' : '자유 항해') : `${scn.id} · ${tl(scn)}`) + where, own: def.own, targets: def.targets, weather: pr.weather, aids: def.aids, marks: def.marks || [], needsCoast: !!scn.needsCoast, traffic: { level: pr.level }, save: true, scnId: o.free ? null : scn.id });
   R.setWeatherRun(createWeatherRun({ rnd: pr.rnd, enabled: S.sim.weatherOn }));
   R.setRadar('stby'); /* 어떻게 시작하든 STBY(송신 → 예열 5초) */
   if (scn.message) R.ais().addMessage({ ...scn.message, t: 0 });
   if (o.free) { R.setLog(null); R.setScenarioTick(null); return; }
-  const log = createLog(def); curLog = log; let lastS = -1;
-  R.setLog((w) => { if (w.t - lastS >= 1) { lastS = w.t; log.sample(w); } });
-  R.setScenarioTick((w) => {
-    if (lastResult) return; const r = log.result();
-    const P = makeProj(w.own.lat, w.own.lon), ov = velXY(w.own.cog, w.own.sog);
-    const clear = w.t > 300 && w.targets.filter((g) => !String(g.id).startsWith('bg')).every((g) => { const x = P.x(g.lon), y = P.y(g.lat); return Math.hypot(x, y) > 2 && cpaTcpa({ x: 0, y: 0 }, ov, { x, y }, velXY(g.cog, g.sog)).tcpa < 0; });
-    if (r.collision || r.grounding || clear || w.t >= scn.durationMin * 60) finish(evaluate(r));
-  });
+  attachEval(def);
   if (!o.skipBrief) {
     R.setPaused(true);
     const d = ownDlg('briefDlg', `${scn.id} · ${tl(scn)}`, `<p class="rule-chip">COLREG ${scn.rule}</p><p>${esc(tl(scn.brief))}</p><p class="small">${en ? 'Pass: every scenario ship passes at 0.3 NM or more, no collision, no grounding. Surrounding traffic keeps clear of you on its own and is not graded for distance.' : '합격: 시나리오 상대선과 모두 0.3 NM 이상 떨어져 지나가고, 충돌·좌초가 없으면 돼요. 주변 배(난이도)는 자선을 알아서 피하고, 거리는 합격 판정에 넣지 않아요.'}</p>`, `<button class="btn pri" type="button" data-go="1">${en ? 'Start' : '시작'}</button>`);
@@ -111,8 +104,27 @@ async function runScenario(scn, o = {}) {
   }
 }
 
+/* 기록·평가를 붙임(새로 시작할 때, 이어 하기로 돌아올 때 init = 저장된 기록) */
+function attachEval(def, init = null) {
+  const R = window.Radar, log = createLog(def, init); curLog = log; let lastS = -1;
+  R.setLog((w) => { if (w.t - lastS >= 1) { lastS = w.t; log.sample(w); } }, () => log.dump());
+  R.setScenarioTick((w) => {
+    if (lastResult) return; const r = log.result();
+    const P = makeProj(w.own.lat, w.own.lon), ov = velXY(w.own.cog, w.own.sog);
+    const clear = w.t > 300 && w.targets.filter((g) => !String(g.id).startsWith('bg')).every((g) => { const x = P.x(g.lon), y = P.y(g.lat); return Math.hypot(x, y) > 2 && cpaTcpa({ x: 0, y: 0 }, ov, { x, y }, velXY(g.cog, g.sog)).tcpa < 0; });
+    if (r.collision || r.grounding || clear || w.t >= def.durationMin * 60) finish(evaluate(r));
+  });
+}
+/* 이전 항해 이어 하기: 시나리오 도중이었으면 평가를 이어서 붙임 */
+export function resumeVoyage() {
+  const R = window.Radar; lastResult = null; curLog = null; current = null;
+  const s = R.resume(); if (!s) return false;
+  const scn = s.scn && SCENARIOS.find((x) => x.id === s.scn);
+  if (scn) { current = scn; attachEval({ ...scn, ...R.world.def, rule: scn.rule, durationMin: scn.durationMin, own: scn.own }, s.log); }
+  return true;
+}
 function finish(r) {
-  const R = window.Radar, en = lang() === 'en'; lastResult = r; R.setScenarioTick(null); R.setLog(null); R.setPaused(true);
+  const R = window.Radar, en = lang() === 'en'; lastResult = r; R.setScenarioTick(null); R.setLog(null); R.setPaused(true); if (R.world) R.world.def.scnId = null; // 끝난 시나리오는 이어 하기에서 다시 평가하지 않음
   const g = r.minRange && R.world.targets.find((x) => x.id === r.minRange.id), nm = g ? (g.name || (en ? 'fishing boat' : '어선')) : '-';
   const fa = r.firstAction;
   const html = `<div class="result ${r.pass ? 'ok' : 'ng'}"><b class="verdict">${r.pass ? (en ? 'PASS' : '합격') : en ? 'NOT PASSED' : '불합격'}</b>

@@ -283,7 +283,7 @@ export function initUI(root, actions) {
     setCtl('#bxGain', S.ctrl.gain, false); setCtl('#bxSea', S.ctrl.sea.val, S.ctrl.sea.auto, S.ctrl.sea.auto ? 'AUTO' : null);
     setCtl('#bxRain', S.ctrl.rain.val, S.ctrl.rain.auto, S.ctrl.rain.auto ? 'AUTO' : null); setCtl('#bxTune', S.ctrl.tune.auto ? 50 : S.ctrl.tune.val, S.ctrl.tune.auto, S.ctrl.tune.auto ? 'AUTO' : null);
     $('#vPreset').textContent = `${S.ctrl.preset} · IR ${S.ctrl.ir} · ES ${S.ctrl.es} · EAV ${S.ctrl.eav}${S.ctrl.ace ? ' · ACE' : ''}`;
-    const c = d.cursor; $('#bxCursor').innerHTML = c ? `${deg(c.brg)} ${c.rel ? 'R' : 'T'}  ${f1(c.rng, 3)} NM<br>${ll(c.lat, true)}<br>${ll(c.lon, false)}${c.ttg != null ? `<br>TTG ${f1(c.ttg, 1)} min` : ''}` : `<span class="lb">${esc(t('cursor'))}</span>`;
+    const c = d.cursor; setHTML('#bxCursor', c ? `${deg(c.brg)} ${c.rel ? 'R' : 'T'}  ${f1(c.rng, 3)} NM<br>${ll(c.lat, true)}<br>${ll(c.lon, false)}${c.ttg != null ? `<br>TTG ${f1(c.ttg, 1)} min` : ''}` : `<span class="lb">${esc(t('cursor'))}</span>`);
     const eb = (i) => (d.ebl[i].on ? deg(d.ebl[i].brg) : 'OFF'), vr = (i) => (d.vrm[i].on ? f1(d.vrm[i].rng, 3) + ' ' + S.disp.vrmUnit : 'OFF');
     $('#vEbl1').textContent = eb(0); $('#vEbl2').textContent = eb(1); $('#vEblRef').textContent = S.disp.eblRef === 'REL' ? 'R' : 'T';
     $('#vVrm1').textContent = vr(0); $('#vVrm2').textContent = vr(1); $('#vTtg1').textContent = d.vrm[0].ttg != null ? f1(d.vrm[0].ttg, 1) + "'" : ''; $('#vTtg2').textContent = d.vrm[1].ttg != null ? f1(d.vrm[1].ttg, 1) + "'" : '';
@@ -304,18 +304,20 @@ export function initUI(root, actions) {
     // 자선
     const o = d.own; if (o) {
       $('#vHdg').textContent = deg(o.hdg); $('#vStw').textContent = f1(o.stw) + ' kn'; $('#vSog').textContent = f1(o.sog) + ' kn'; $('#vCog').textContent = deg(o.cog);
-      $('#vRot').textContent = f1(o.rot) + ' °/min'; $('#vPos').innerHTML = `${ll(o.lat, true)}<br>${ll(o.lon, false)}`;
+      $('#vRot').textContent = f1(o.rot) + ' °/min'; setHTML('#vPos', `${ll(o.lat, true)}<br>${ll(o.lon, false)}`);
     }
     $('#vClock').textContent = d.clock || ''; $('#vEl').textContent = d.elapsed || '-';
     // 물표 2칸
-    $('#tSlots').innerHTML = [0, 1].map((i) => { const g = d.tgt && d.tgt[i]; if (!g) return `<div class="tslot${i ? ' blank' : ''}"><span class="empty">${i === 0 ? esc(t('noTgt')) : ''}</span></div>`;
-      return `<div class="tslot${g.danger ? ' danger' : ''}"><div class="nm">${esc(g.label)}</div><dl class="kv"><dt>BRG</dt><dd>${deg(g.brg)}</dd><dt>RNG</dt><dd>${f1(g.rng, 2)}</dd><dt>COG</dt><dd>${deg(g.cog)}</dd><dt>SOG</dt><dd>${f1(g.sog)}</dd><dt>CPA</dt><dd>${f1(g.cpa, 2)}</dd><dt>TCPA</dt><dd>${g.tcpa == null ? '-' : g.tcpa < 0 ? '--' : f1(g.tcpa, 1)}</dd><dt>BCR</dt><dd>${g.bcr == null ? '-' : f1(g.bcr, 2)}</dd><dt>BCT</dt><dd>${g.bct == null ? '-' : f1(g.bct, 1)}</dd></dl></div>`; }).join('');
+    setHTML('#tSlots', [0, 1].map((i) => { const g = d.tgt && d.tgt[i]; if (!g) return `<div class="tslot${i ? ' blank' : ''}"><span class="empty">${i === 0 ? esc(t('noTgt')) : ''}</span></div>`;
+      return `<div class="tslot${g.danger ? ' danger' : ''}"><div class="nm">${esc(g.label)}</div><dl class="kv"><dt>BRG</dt><dd>${deg(g.brg)}</dd><dt>RNG</dt><dd>${f1(g.rng, 2)}</dd><dt>COG</dt><dd>${deg(g.cog)}</dd><dt>SOG</dt><dd>${f1(g.sog)}</dd><dt>CPA</dt><dd>${f1(g.cpa, 2)}</dd><dt>TCPA</dt><dd>${g.tcpa == null ? '-' : g.tcpa < 0 ? '--' : f1(g.tcpa, 1)}</dd><dt>BCR</dt><dd>${g.bcr == null ? '-' : f1(g.bcr, 2)}</dd><dt>BCT</dt><dd>${g.bct == null ? '-' : f1(g.bct, 1)}</dd></dl></div>`; }).join(''));
     $('#vCounts').textContent = `TT ${d.ttN ?? 0} · AIS ${d.aisN ?? 0}`;
-    $('#vTT').innerHTML = `<dt>${esc(t('vector'))}</dt><dd>${S.tt.vector} ${S.tt.vecMin} min</dd><dt>${esc(t('cpaLim'))}</dt><dd>${S.tt.cpaOn ? `${S.tt.cpa.toFixed(1)} NM / ${S.tt.tcpa} min` : 'OFF'}</dd><dt>${esc(t('past'))}</dt><dd>${S.tt.pastPts} × ${S.tt.pastInt}s</dd><dt>${esc(t('aisFilt'))}</dt><dd>${S.ais.maxRngOn ? S.ais.maxRng + ' NM' : '-'} ${S.ais.minSpdOn ? '≥' + S.ais.minSpd + ' kn' : ''}</dd>`;
+    setHTML('#vTT', `<dt>${esc(t('vector'))}</dt><dd>${S.tt.vector} ${S.tt.vecMin} min</dd><dt>${esc(t('cpaLim'))}</dt><dd>${S.tt.cpaOn ? `${S.tt.cpa.toFixed(1)} NM / ${S.tt.tcpa} min` : 'OFF'}</dd><dt>${esc(t('past'))}</dt><dd>${S.tt.pastPts} × ${S.tt.pastInt}s</dd><dt>${esc(t('aisFilt'))}</dt><dd>${S.ais.maxRngOn ? S.ais.maxRng + ' NM' : '-'} ${S.ais.minSpdOn ? '≥' + S.ais.minSpd + ' kn' : ''}</dd>`);
     const a = d.alertTop; $('#vAlN').textContent = d.alertN ? d.alertN : '';
-    $('#aBox').innerHTML = a ? `<div class="abox ${a.pri}${a.acked ? '' : ' unack'}"><span class="ic">${a.pri === 'A' ? '!' : a.pri}</span><span class="tx"><b>${esc(a.text)}</b><span>${a.active ? '' : (lang() === 'en' ? 'rectified · ' : '해소됨 · ')}${esc(a.time || '')}</span></span><span style="display:flex;gap:4px">${a.pri !== 'C' && !a.acked ? `<button class="btn" type="button" data-act="ack">${esc(t('ack'))}</button>` : ''}<button class="btn ib" type="button" data-act="silence" title="${esc(t('silence'))}" aria-label="${esc(t('silence'))}">${ICON.mute}</button><button class="btn" type="button" data-act="alertList">${esc(t('list'))}</button></span></div>` : `<span class="empty">${esc(t('noAlert'))}</span>`;
+    setHTML('#aBox', a ? `<div class="abox ${a.pri}${a.acked ? '' : ' unack'}"><span class="ic">${a.pri === 'A' ? '!' : a.pri}</span><span class="tx"><b>${esc(a.text)}</b><span>${a.active ? '' : (lang() === 'en' ? 'rectified · ' : '해소됨 · ')}${esc(a.time || '')}</span></span><span style="display:flex;gap:4px">${a.pri !== 'C' && !a.acked ? `<button class="btn" type="button" data-act="ack">${esc(t('ack'))}</button>` : ''}<button class="btn ib" type="button" data-act="silence" title="${esc(t('silence'))}" aria-label="${esc(t('silence'))}">${ICON.mute}</button><button class="btn" type="button" data-act="alertList">${esc(t('list'))}</button></span></div>` : `<span class="empty">${esc(t('noAlert'))}</span>`);
     const chip = $('#scnChip'); chip.hidden = !d.scnName; chip.textContent = d.scnName || '';
   }
+  /* 내용이 같으면 다시 그리지 않음(단추를 누르는 사이 요소가 바뀌어 클릭이 사라지지 않게) */
+  function setHTML(sel, html) { const el = $(sel); if (el && el._h !== html) { el._h = html; el.innerHTML = html; } }
   function dialog(title, html, foot = '') { $('#genT').textContent = title; $('#genB').innerHTML = html; $('#genF').innerHTML = foot; const g = $('#genDlg'); if (!g.open) g.showModal(); return g; }
   /* 배속 고르기: 헤더 배속 단추 아래 작은 목록 */
   function speedPop(list, cur) {

@@ -36,7 +36,7 @@ const radar = { state: 'stby', warmLeft: 0 };
 const V = { rangeNM: S.disp.rangeNM, orient: S.disp.orient, motion: S.disp.motion, hdg: 0, crs: 0, offset: { x: 0, y: 0 }, palette: S.disp.palette, videoColor: S.disp.videoColor, rings: S.disp.rings, hlHidden: false };
 let antAcc = 0, paused = false, hiddenPause = false, speed = 1, ant = 0, last = performance.now(), frames = 0, prevRaw = null, prevScan = new Array(N_BRG);
 let offCenter = null, tmOff = { x: 0, y: 0 }, cursor = null, selected = [], uiMode = null, rulerA = null, ruler = null, piOn = false, lastUser = performance.now(), trialSet = { course: 0, speed: 14 };
-let logFn = null, onScenarioTick = null, coastScreen = null, coastKey = '';
+let logFn = null, logDump = null, onScenarioTick = null, coastScreen = null, coastKey = '';
 const rnd = Math.random;
 const SPEEDS = [1, 2, 4, 8, 16, 32], MARKS = ['tri', 'circle', 'square', 'cross', 'anchor'], MARK_SYM = { tri: '▲', circle: '○', square: '□', cross: '✕', anchor: '⚓' };
 let lastClick = null, eduKey = '';
@@ -102,7 +102,7 @@ function openTgtList() {
 function weatherTick(run) {
   if (!wxRun) return;
   const ev = stepWeather(wxRun, W.weather, run, W.own);
-  if (ev.length || W.weather.rain.length) syncSceneWeather();
+  syncSceneWeather(); // 해상 단계 변화·마지막 비구름이 사라질 때도 영상에 반영(알림이 없을 때도)
   for (const e of ev) { const id = 'wx:' + (++wxN); alerts.raise(id, 'C', lang() === 'en' ? e.en : e.ko); wxPend.push({ id, t: W.t + 60 }); }
   wxPend = wxPend.filter((p) => { if (W.t < p.t) return true; alerts.resolve(p.id); return false; });
 }
@@ -311,7 +311,7 @@ const TRAIL_ORDER = [0, 30, 180, 360, 900];
 Object.assign(actions, {
   tx: toggleTx,
   band: () => { S.ctrl.band = S.ctrl.band === 'X' ? 'S' : 'X'; ppi.clear(); prevScan = new Array(N_BRG); prevRaw = null; saveSettings(); },
-  mode: () => { const o = S.disp.motion === 'TM' ? ['CU', 'NU'] : ['HU', 'CU', 'NU']; S.disp.orient = o[(o.indexOf(S.disp.orient) + 1) % 3]; V.crs = W ? W.own.hdg : 0; tmOff = { x: 0, y: 0 }; ppi.clear(); saveSettings(); },
+  mode: () => { const o = S.disp.motion === 'TM' ? ['CU', 'NU'] : ['HU', 'CU', 'NU']; S.disp.orient = o[(o.indexOf(S.disp.orient) + 1) % o.length]; V.crs = W ? W.own.hdg : 0; tmOff = { x: 0, y: 0 }; ppi.clear(); saveSettings(); },
   motion: () => { S.disp.motion = S.disp.motion === 'RM' ? 'TM' : 'RM'; tmOff = { x: 0, y: 0 }; if (S.disp.motion === 'TM' && S.disp.orient === 'HU') S.disp.orient = 'NU'; saveSettings(); },
   off: () => { offCenter = offCenter ? null : { x: 0, y: 0.5 }; },
   preset: () => { const i = PRESET_ORDER.indexOf(S.ctrl.preset); applyPreset(S, PRESET_ORDER[(i + 1) % PRESET_ORDER.length]); saveSettings(); },
@@ -371,8 +371,9 @@ function cursorAct(id, pos) {
 function menuAction(id) {
   const en = lang() === 'en';
   if (id === 'save') { saveSettings(); try { localStorage.setItem('radar-presets', JSON.stringify(savedPresets())); } catch (e) {} ui.dialog(en ? 'Settings' : '설정', `<p>${en ? 'Saved.' : '저장했습니다.'}</p>`); }
-  if (id === 'load') { loadSettings(); ui.applyLang(); ui.applyTheme(); ui.renderMenu(); }
-  if (id === 'reset') { resetSettings(); saveSettings(); ui.applyLang(); ui.applyTheme(); ui.renderMenu(); }
+  if (id === 'load' || id === 'reset') { // 송신 상태는 설정이 아니라 지금 레이더 상태를 따름(불러오기·초기화로 영상이 꺼지지 않게)
+    if (id === 'load') loadSettings(); else { resetSettings(); saveSettings(); }
+    S.ctrl.tx = radar.state === 'tx'; setRange(S.disp.rangeNM); ui.applyLang(); ui.applyTheme(); ui.renderMenu(); }
   if (id === 'ttCancelAll') { tracker.cancelAll(); selected = selected.filter((x) => x.startsWith('A:')); for (const a of alerts.list()) if (/^(cpa|lost):/.test(a.id)) { alerts.resolve(a.id); alerts.ack(a.id); } }
   if (id === 'sleepAll') ais.sleepAll();
   if (id === 'acqZone') { ui.closeAll(); uiMode = 'az1'; }
@@ -432,14 +433,15 @@ initKeys(keyHandlers);
 
 /* ---------- 자동 저장(15 s)·이어 하기 ---------- */
 const RESUME = 'radar-resume';
-function snapshot() { const o = W.own; return { def: { ...W.def, t: W.t, own: { lat: o.lat, lon: o.lon, hdg: o.hdg, tele: o.tele, state: { stw: o.stw, sog: o.sog, cog: o.cog, rudder: o.rudder, rudderOrder: o.rudderOrder, r: o.r, rot: o.rot, auto: { ...o.auto } } }, targets: W.targets.map((g) => ({ ...g })), weather: W.weather }, radar: radar.state }; }
-function saveNow() { if (!W) return; try { localStorage.setItem(RESUME, JSON.stringify(snapshot())); } catch (e) {} }
-function resume() { try { const s = JSON.parse(localStorage.getItem(RESUME) || 'null'); if (!s || !s.def) return false; startWorld(s.def); setRadar('stby'); wxRun = createWeatherRun({ rnd: Math.random, enabled: S.sim.weatherOn }); wxPend = []; return true; } catch (e) { return false; } }
+/* 저장은 시나리오·자유 항해로 시작한 항해(def.save)만. 시작 화면 뒤 배경·교육 과정은 이전 항해 저장을 덮지 않음 */
+function snapshot() { const o = W.own; return { scn: W.def.scnId || null, log: logDump ? logDump() : null, def: { ...W.def, t: W.t, own: { lat: o.lat, lon: o.lon, hdg: o.hdg, tele: o.tele, state: { stw: o.stw, sog: o.sog, cog: o.cog, rudder: o.rudder, rudderOrder: o.rudderOrder, r: o.r, rot: o.rot, auto: { ...o.auto } } }, targets: W.targets.map((g) => ({ ...g })), weather: W.weather }, radar: radar.state }; }
+function saveNow() { if (!W || !W.def.save) return; try { localStorage.setItem(RESUME, JSON.stringify(snapshot())); } catch (e) {} }
+function resume() { try { const s = JSON.parse(localStorage.getItem(RESUME) || 'null'); if (!s || !s.def) return null; logFn = null; logDump = null; onScenarioTick = null; startWorld(s.def); setRadar('stby'); wxRun = createWeatherRun({ rnd: Math.random, enabled: S.sim.weatherOn }); wxPend = []; return s; } catch (e) { return null; } }
 setInterval(() => { if (W && !paused) saveNow(); }, 15000);
 addEventListener('pagehide', saveNow);
 
 /* ---------- 외부 모듈(시나리오·도움말)이 쓸 창구 ---------- */
-window.Radar = { startWorld, freeDef, setRadar, get world() { return W; }, setLog(fn) { logFn = fn; }, setScenarioTick(fn) { onScenarioTick = fn; }, alerts: () => alerts, ais: () => ais, tracker: () => tracker, route: () => route, tools: () => tools, saveNow, resume, hasResume: () => { try { return !!localStorage.getItem(RESUME); } catch (e) { return false; } }, setPaused: (p) => { paused = p; }, pointInLand, setWeatherRun: (r) => { wxRun = r; wxPend = []; } };
+window.Radar = { startWorld, freeDef, setRadar, get world() { return W; }, setLog(fn, dump = null) { logFn = fn; logDump = fn ? dump : null; }, setScenarioTick(fn) { onScenarioTick = fn; }, alerts: () => alerts, ais: () => ais, tracker: () => tracker, route: () => route, tools: () => tools, saveNow, resume, hasResume: () => { try { return !!localStorage.getItem(RESUME); } catch (e) { return false; } }, setPaused: (p) => { paused = p; }, pointInLand, setWeatherRun: (r) => { wxRun = r; wxPend = []; } };
 
 /* 빠른 진행(테스트·검증): 그리지 않고 물리·기록만 */
 function tickSim(sec) { if (!W) return; const n = Math.ceil(sec / 0.25); for (let i = 0; i < n; i++) { if (paused) return; const h = sec / n; W.t += h; stepShip(W.own, h, shipEnv()); weatherTick(h); trafficTick(h); for (const g of W.targets) stepTarget(g, h, W.t); if (onScenarioTick) onScenarioTick(W, h); if (logFn) logFn(W); } }
@@ -460,7 +462,7 @@ function eduSetup(o = {}, key = '') {
   });
   const wx = { kind: 'clear', sea: 1, windFrom: 0, windMs: 3, ...(o.weather || {}) }; wx.rain = (wx.rain || []).map((c) => (c.brg !== undefined ? { ...c, ...at(c.brg, c.rng) } : c));
   startWorld(freeDef({ lat, lon, hdg, targets: tg, weather: wx, aids: (o.aids || []).map((a) => ({ ...a, ...at(a.brg, a.rng) })) }));
-  W.weather.fixed = true; W.def.traffic = null; logFn = null; onScenarioTick = null; wxRun = null; paused = false; speed = 1;
+  W.weather.fixed = true; W.def.traffic = null; logFn = null; logDump = null; onScenarioTick = null; wxRun = null; paused = false; speed = 1;
   Object.assign(S.ctrl, { gain: 65, sea: { auto: false, val: 30 }, rain: { auto: false, val: 0 }, tune: { auto: true, val: 50 }, band: 'X', ir: 2, es: 0, eav: 0, ace: false, secondRej: false }, o.ctrl || {});
   if (o.tt) Object.assign(S.tt, o.tt);
   setRange(o.range || 6); setRadar(o.tx === false ? 'stby' : 'tx'); eduKey = key;
@@ -484,8 +486,8 @@ if (TEST) {
     ready: true, S, ppi, emit, pauseParts: () => ({ paused, hiddenPause }), weatherRun: () => wxRun, scene: () => scene, colors: () => COL, piColor, selected: () => selected, menuPaths: () => MENU.flatMap((x) => x.items.map((i) => i.path)), menuOpts: (p) => (MENU.flatMap((x) => x.items).find((i) => i.path === p) || { opts: [] }).opts, setSpeed, speed: () => speed, proj: makeProj, view: () => V, setView: (o) => Object.assign(V, o), setRange: (r) => { S.disp.rangeNM = r; V.rangeNM = r; }, frames: () => frames, tick, frameAt, own, paused: () => paused || hiddenPause, setPaused: (p) => { paused = p; }, KEYMAP, keyHandlers,
     radar: { set: setRadar, toggle: toggleTx, get state() { return radar.state; }, get warmLeft() { return radar.warmLeft; } }, world: () => W, tracker: { targets: () => tracker.targets() },
     newWorld: (o) => startWorld(freeDef(o)), tgtScreen: (id) => { const g = W.targets.find((x) => x.id === id), r = relOf(P.x(g.lon), P.y(g.lat)), p = ppi.toScreen(r.brg, r.rng); return { sx: p.x, sy: p.y }; },
-    cursorAct, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,
-    startScenario: (id, o) => starter.startScenario(id, o), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), finishNow: () => starter.finishNow(), shouldBeep, antenna: () => ant, relayout: () => { fit(); }, layoutMode: () => ui.layoutMode(), qbInside: () => ui.qbInside(), forceState: (o) => { if (o.az) { azZones = o.az; tracker.setZones(o.az); } if (o.speed) speed = o.speed; if (o.pi !== undefined) piOn = o.pi; }, uiState: () => ({ az: azZones.length > 0, speed, pi: piOn, off: !!offCenter }), tickSim, sim: { setAuto, setRudderOrder, setTelegraph }, menuItems: () => MENU.flatMap((m) => m.items.map((i) => (lang() === 'en' ? i.en : i.ko))),
+    cursorAct, menuAction, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,
+    startScenario: (id, o) => starter.startScenario(id, o), resumeVoyage: () => starter.resumeVoyage(), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), finishNow: () => starter.finishNow(), shouldBeep, antenna: () => ant, relayout: () => { fit(); }, layoutMode: () => ui.layoutMode(), qbInside: () => ui.qbInside(), forceState: (o) => { if (o.az) { azZones = o.az; tracker.setZones(o.az); } if (o.speed) speed = o.speed; if (o.pi !== undefined) piOn = o.pi; }, uiState: () => ({ az: azZones.length > 0, speed, pi: piOn, off: !!offCenter }), tickSim, sim: { setAuto, setRudderOrder, setTelegraph }, menuItems: () => MENU.flatMap((m) => m.items.map((i) => (lang() === 'en' ? i.en : i.ko))),
   };
   setRadar('tx');
 }
