@@ -329,7 +329,7 @@ export function initUI(root, actions) {
     }
     $('#vClock').textContent = d.clock || ''; $('#vEl').textContent = d.elapsed || '-';
     // 물표 2칸
-    setHTML('#tSlots', d.tgt && d.tgt.length ? d.tgt.map((g) => slotHTML({ ...g, open: false, sel: g.open }, ll)).join('') : `<div class="tslot"><span class="empty">${esc(t('noTgt'))}</span></div>`);
+    setHTML('#tSlots', d.tgt && d.tgt.length ? d.tgt.map((g) => slotHTML({ ...g, open: false, sel: g.open }, ll)).join('') : `<p class="empty tgt-empty">${esc(t('noTgt'))}</p>`); // 고른 물표가 없을 땐 상자 없이 안내 글만
     { const og = (d.tgt || []).find((g) => g.open); let card = $('#tDetail');
       if (!og) { if (card) card.remove(); }
       else { if (!card) { card = document.createElement('div'); card.id = 'tDetail'; card.className = 'tdetail'; card.setAttribute('role', 'dialog'); root.append(card); }
