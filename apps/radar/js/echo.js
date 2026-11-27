@@ -235,6 +235,18 @@ export function detect(sc, c, rnd = Math.random) {
     const db = t.db0 + pg, sea = sc.weather.sea > 0 && t.R < 0.6 + 0.7 * sc.weather.sea + 1 ? 4.2 * sc.weather.sea + SEA_K + (sc.band === 'S' ? -8 : 0) - 30 * Math.log10(Math.max(t.R, 0.05)) : -99;
     const Rs = 0.5 + 0.4 * (c.stcRange ?? 5), stc = c.sea && !c.sea.auto && c.sea.val > 0 ? (c.sea.val / 100) * 45 * Math.max(0, 1 - t.R / Rs) ** ((c.stcCurve ?? 3) / 3) : 0;
     if (db - stc <= thr || db <= sea + 3) continue;
+    /* 비(화면 영상과 같은 식): 물표까지 경로 감쇠, 물표 자리 비 반사. FTC는 넓은 반사를 (rv/100)·(평균−2)만큼 빼므로 비와 물표가 같이 내려감.
+       FTC 뒤에도 비가 문턱을 넘고 물표가 비보다 10 dB 이상 세지 않으면 비에 묻혀 못 잡음 */
+    if (sc.rainp.length) {
+      const sb = Math.sin(t.brg * D2R), cb = Math.cos(t.brg * D2R), inR = (x, y) => { let r = 0; for (const q of sc.rainp) if ((x - q.x) ** 2 + (y - q.y) ** 2 < q.rNM * q.rNM) r += q.rate; return r; };
+      let att = 0; for (let r = 0.025; r < t.R; r += 0.05) { const k = inR(r * sb, r * cb); if (k) att += (sc.band === 'S' ? 0.002 : 0.02) * k * 0.05 * 2; }
+      const rate = inR(t.R * sb, t.R * cb), rv = c.rain && (c.rain.auto || c.ace) ? Math.max(c.rain.val, 60) : (c.rain ? c.rain.val : 0);
+      if (rate > 0) {
+        const rdb = 14 + 10 * Math.log10(rate) - 20 * Math.log10(t.R + 0.5) + (sc.band === 'S' ? -20 : 0), k = (rv / 100) * Math.max(0, rdb - 2);
+        if (db - att - k - stc <= thr) continue;
+        if (rdb - k - stc > thr && db - att - rdb < 10) continue;
+      } else if (db - att - stc <= thr) continue;
+    }
     if (sc.grid && sc.grid.any) { const sb = Math.sin(t.brg * D2R), cb = Math.cos(t.brg * D2R); let hid = false; for (let r = 0.05; r < t.R; r += 0.03) if (landAt(sc.grid, sc.ox + r * sb, sc.oy + r * cb)) { hid = true; break; } if (hid) continue; }
     const R = t.R + g() * (rangeResM(pulseUs) / 2 / NM_M), b = (t.brg + g() * (band.beamDeg / 6)) * D2R;
     out.push({ x: R * Math.sin(b), y: R * Math.cos(b), strength: db - thr });

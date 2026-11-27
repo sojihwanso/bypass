@@ -16,17 +16,19 @@ function rainBand(r, own, windFrom, dist0, dist1) {
   return out;
 }
 
-/* 시작 날씨. base(시나리오 고정)가 있으면 그것을 씀 */
-export function rollWeather(rnd, base, own) {
+/* 난이도별 날씨 상한(처음 하는 학생에게 강풍·안개까지 한꺼번에 주지 않게). 시나리오 고정 날씨(S5)는 그대로 */
+export const WX_CAP = { none: { sea: 3, fog: false }, easy: { sea: 3, fog: false }, medium: { sea: 5, fog: true }, hard: { sea: 6, fog: true } };
+/* 시작 날씨. base(시나리오 고정)가 있으면 그것을 씀. cap = WX_CAP[난이도] */
+export function rollWeather(rnd, base, own, cap = WX_CAP.hard) {
   if (base) return { kind: base.kind || ((base.rain || []).length ? 'showers' : 'clear'), fog: !!base.fog, visNM: base.visNM ?? (base.fog ? 0.5 : 10), ducting: false, interference: false, ...base, rain: (base.rain || []).map((c) => ({ ...c })), fixed: true };
   const u = rnd(), kind = u < 0.4 ? 'clear' : u < 0.6 ? 'wind' : u < 0.85 ? 'showers' : 'duct';
   const windFrom = Math.round(rnd() * 360);
   const sea = kind === 'wind' ? 5 + Math.floor(rnd() * 2) : kind === 'showers' ? 2 + Math.floor(rnd() * 3) : 1 + Math.floor(rnd() * 2);
-  const fog = (kind === 'clear' || kind === 'showers') && rnd() < 0.3;
-  return { kind, fog, visNM: fog ? Math.round(rr(rnd, 0.5, 2) * 10) / 10 : 10, sea, windFrom, windMs: windOfSea(sea), rain: kind === 'showers' ? rainBand(rnd, own, windFrom, 2, 8) : [], ducting: kind === 'duct', interference: false };
+  const fog = (kind === 'clear' || kind === 'showers') && rnd() < 0.3 && cap.fog, s2 = Math.min(sea, cap.sea), k2 = kind === 'wind' && s2 < 5 ? 'clear' : kind;
+  return { kind: k2, fog, visNM: fog ? Math.round(rr(rnd, 0.5, 2) * 10) / 10 : 10, sea: s2, windFrom, windMs: windOfSea(s2), rain: kind === 'showers' ? rainBand(rnd, own, windFrom, 2, 8) : [], ducting: kind === 'duct', interference: false };
 }
 
-export function createWeatherRun({ rnd, enabled = true }) { return { rnd, enabled, next: rr(rnd, 600, 1500), seaTarget: null, seaT: 0 }; }
+export function createWeatherRun({ rnd, enabled = true, cap = WX_CAP.hard }) { return { rnd, enabled, cap, next: rr(rnd, 600, 1500), seaTarget: null, seaT: 0 }; }
 
 /* w(=W.weather)를 제자리에서 바꿈. 알림 목록을 돌려줌 */
 export function stepWeather(run, w, dt, own) {
@@ -52,7 +54,7 @@ export function stepWeather(run, w, dt, own) {
       w.rain = w.rain.concat(band); w.kind = 'showers';
       ev.push({ kind: 'rain', ko: `강우 구역 접근 · 방위 ${String(b).padStart(3, '0')}°`, en: `Rain area approaching · ${String(b).padStart(3, '0')}°` });
     } else {
-      const up = w.sea <= 2 || (w.sea < 6 && r() < 0.5), t = Math.max(0, Math.min(6, w.sea + (up ? 1 : -1) * (1 + Math.floor(r() * 2))));
+      const mx = (run.cap || WX_CAP.hard).sea, up = w.sea <= 2 || (w.sea < mx && r() < 0.5), t = Math.max(0, Math.min(mx, w.sea + (up ? 1 : -1) * (1 + Math.floor(r() * 2))));
       run.seaTarget = t; run.seaT = 0; w.windFrom = Math.round(wrap360(w.windFrom + rr(r, -30, 30)));
       ev.push(up ? { kind: 'wind', ko: `바람이 강해짐 · 해상 ${t}까지`, en: `Wind increasing · sea ${t}` } : { kind: 'wind', ko: `바람이 약해짐 · 해상 ${t}까지`, en: `Wind easing · sea ${t}` });
     }

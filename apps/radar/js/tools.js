@@ -47,17 +47,29 @@ export function createTools() {
 
 /* 에코 항적 래스터: REL이면 자선 기준 NM 좌표, TRUE면 지리 기준 NM 좌표(원점 고정) */
 export function createTrails(N = 512) {
-  const ts = new Float32Array(N * N).fill(-1e9);
+  /* 칸마다 마지막 영상 시각. 기록된 칸 번호는 list에 따로 모아 forEach가 512×512 전체를 훑지 않게(오래된 칸은 그때 목록에서 뺌) */
+  let ts = new Float32Array(N * N).fill(-1e9), inL = new Uint8Array(N * N), list = new Int32Array(1024), n = 0;
   let cell = 6 / (N / 2), mode = 'REL', ox = 0, oy = 0;
+  const wipe = () => { ts.fill(-1e9); inL.fill(0); n = 0; };
+  const push = (i) => { if (inL[i]) return; inL[i] = 1; if (n === list.length) { const b = new Int32Array(list.length * 2); b.set(list); list = b; } list[n++] = i; };
   return {
-    get mode() { return mode; }, get cell() { return cell; }, origin: () => ({ x: ox, y: oy }),
-    reset(rangeNM, m = mode, origin = { x: 0, y: 0 }) { cell = rangeNM / (N / 2); mode = m; ox = origin.x; oy = origin.y; ts.fill(-1e9); },
-    mark(x, y, t) { const c = Math.floor((x - ox) / cell + N / 2), r = Math.floor((y - oy) / cell + N / 2); if (c >= 0 && r >= 0 && c < N && r < N) ts[r * N + c] = t; },
-    /* fn(x, y, 나이비율 0..1) — 나이비율 1 이상(오래됨)은 건너뜀 */
-    forEach(now, trailSec, fn) {
-      for (let i = 0; i < N * N; i++) { const a = (now - ts[i]) / trailSec; if (a < 0 || a >= 1) continue; const r = (i / N) | 0, c = i - r * N; fn(ox + (c + 0.5 - N / 2) * cell, oy + (r + 0.5 - N / 2) * cell, Math.max(a, 1e-6)); }
+    get mode() { return mode; }, get cell() { return cell; }, origin: () => ({ x: ox, y: oy }), size: () => n,
+    reset(rangeNM, m = mode, origin = { x: 0, y: 0 }) { cell = rangeNM / (N / 2); mode = m; ox = origin.x; oy = origin.y; wipe(); },
+    mark(x, y, t) { const c = Math.floor((x - ox) / cell + N / 2), r = Math.floor((y - oy) / cell + N / 2); if (c >= 0 && r >= 0 && c < N && r < N) { const i = r * N + c; ts[i] = t; push(i); } },
+    /* TRUE: 격자 가운데를 (x,y) 쪽으로 정수 칸만큼 옮김(지난 항적은 같은 바다 위치에 남음) */
+    recenter(x, y) {
+      const dc = Math.round((x - ox) / cell), dr = Math.round((y - oy) / cell); if (!dc && !dr) return;
+      const t2 = new Float32Array(N * N).fill(-1e9), keep = []; inL.fill(0);
+      for (let k = 0; k < n; k++) { const i = list[k], r = ((i / N) | 0) - dr, c = i - ((i / N) | 0) * N - dc; if (r >= 0 && c >= 0 && r < N && c < N) { const j = r * N + c; t2[j] = ts[i]; keep.push(j); } }
+      ts = t2; n = 0; for (const j of keep) push(j); ox += dc * cell; oy += dr * cell;
     },
-    clear() { ts.fill(-1e9); },
+    /* fn(x, y, 나이비율 0..1) — 나이비율 1 이상(오래됨)은 건너뛰고 목록에서 뺌 */
+    forEach(now, trailSec, fn) {
+      let w = 0;
+      for (let k = 0; k < n; k++) { const i = list[k], a = (now - ts[i]) / trailSec; if (a >= 1) { inL[i] = 0; continue; } list[w++] = i; if (a < 0) continue; const r = (i / N) | 0, c = i - r * N; fn(ox + (c + 0.5 - N / 2) * cell, oy + (r + 0.5 - N / 2) * cell, Math.max(a, 1e-6)); }
+      n = w;
+    },
+    clear() { wipe(); },
   };
 }
 

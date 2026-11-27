@@ -23,7 +23,7 @@ export function createPPI(canvas, overlay) {
     W = Math.max(1, Math.round(r.width * dpr)); H = Math.max(1, Math.round(r.height * dpr));
     canvas.width = W; canvas.height = H;
     if (overlay) { overlay.width = Math.round(r.width * od); overlay.height = Math.round(r.height * od); }
-    img = g.createImageData(W, H); px = new Uint32Array(img.data.buffer); lutKey = '';
+    img = g.createImageData(W, H); px = new Uint32Array(img.data.buffer); lutKey = ''; maskKey = '';
   }
   function clear() { buf.fill(0); written.fill(0); st.stats.clears++; }
   function writeLine(bi, levels) { const o = bi * NB, n = Math.min(NB, levels.length); for (let i = 0; i < n; i++) buf[o + i] = levels[i]; for (let i = n; i < NB; i++) buf[o + i] = 0; written[bi] = performance.now(); }
@@ -34,16 +34,29 @@ export function createPPI(canvas, overlay) {
     const off = v.offset || { x: 0, y: 0 };
     geom = { cx, cy, R, ox: cx + off.x * R, oy: cy + off.y * R };
   }
+  /* 화면 변환표: 자선 기준 상대 좌표(±h px)마다 방위칸·거리칸. 자선 위치(TM 이동·중심 이동)는 읽는 자리만 옮기므로 다시 만들지 않음.
+     원 안 픽셀 목록(inX·inY·inP)은 원 크기·위치가 바뀔 때만 */
+  let relS = 0, relH = 0, inX = null, inY = null, inP = null, maskKey = '';
   function buildLut(v) {
-    const key = [W, H, geom.ox | 0, geom.oy | 0, geom.R, v.rangeNM, bufRange].join(',');
-    if (key === lutKey) return; lutKey = key;
-    lutA = new Int16Array(W * H).fill(-1); lutB = new Int16Array(W * H);
-    const R2 = geom.R * geom.R, k = (v.rangeNM / bufRange) * NB / geom.R;
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      const dx = x - geom.cx, dy = y - geom.cy; if (dx * dx + dy * dy > R2) continue;
-      const ex = x - geom.ox, ey = y - geom.oy, d = Math.hypot(ex, ey) * k; if (d >= NB) continue;
-      const a = Math.atan2(ex, -ey) / D2R; // 화면 위 = 0°, 시계 방향
-      lutA[y * W + x] = Math.round((wrap360(a) / 360) * N_BRG) & (N_BRG - 1); lutB[y * W + x] = d | 0;
+    const big = Math.hypot((v.offset || {}).x || 0, (v.offset || {}).y || 0) > 0 || v.motion === 'TM';
+    const key = [geom.R, v.rangeNM, bufRange, big].join(',');
+    if (key !== lutKey) {
+      lutKey = key; st.stats.lutBuilds = (st.stats.lutBuilds || 0) + 1;
+      relH = Math.ceil(geom.R * (big ? 1.76 : 1)) + 1; relS = 2 * relH + 1;
+      lutA = new Int16Array(relS * relS).fill(-1); lutB = new Int16Array(relS * relS);
+      const k = (v.rangeNM / bufRange) * NB / geom.R;
+      for (let ey = -relH; ey <= relH; ey++) for (let ex = -relH; ex <= relH; ex++) {
+        const d = Math.hypot(ex, ey) * k; if (d >= NB) continue;
+        const i = (ey + relH) * relS + ex + relH, a = Math.atan2(ex, -ey) / D2R; // 화면 위 = 0°, 시계 방향
+        lutA[i] = Math.round((wrap360(a) / 360) * N_BRG) & (N_BRG - 1); lutB[i] = d | 0;
+      }
+    }
+    const mk = [W, H, geom.cx, geom.cy, geom.R].join(',');
+    if (mk !== maskKey) {
+      maskKey = mk; const R2 = geom.R * geom.R, xs = [], ys = [];
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const dx = x - geom.cx, dy = y - geom.cy; if (dx * dx + dy * dy <= R2) { xs.push(x); ys.push(y); } }
+      inX = Int16Array.from(xs); inY = Int16Array.from(ys); inP = new Int32Array(xs.length); for (let q = 0; q < xs.length; q++) inP[q] = ys[q] * W + xs[q];
+      px.fill(0); // 원 밖은 늘 투명
     }
   }
   function palette(v) {
@@ -69,10 +82,11 @@ export function createPPI(canvas, overlay) {
     const age = new Uint8Array(N_BRG); for (let i = 0; i < N_BRG; i++) { const a = (now - written[i]) / per; age[i] = a < 0.5 ? 0 : a < 1 ? 1 : a < 1.6 ? 2 : 3; }
     const bg = bgPx;
     let lit = 0;
-    for (let p = 0, n = W * H; p < n; p++) {
-      const a = lutA[p];
+    const ox = Math.round(geom.ox), oy = Math.round(geom.oy), base = relH - oy, baseX = relH - ox;
+    for (let q = 0, n = inP.length; q < n; q++) {
+      const p = inP[q], i = (inY[q] + base) * relS + inX[q] + baseX, a = lutA[i];
       if (a < 0) { px[p] = 0; continue; }
-      const bi = (a + rot) & (N_BRG - 1), l = buf[bi * NB + lutB[p]];
+      const bi = (a + rot) & (N_BRG - 1), l = buf[bi * NB + lutB[i]];
       if (l) { px[p] = pal[age[bi] * 16 + l]; lit++; } else px[p] = bg;
     }
     g.putImageData(img, 0, 0);

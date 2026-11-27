@@ -58,7 +58,7 @@ export function initUI(root, actions) {
   root.innerHTML = `
 <header class="top">
   <div class="brand"><b data-t="brand"></b><span data-t="sub"></span></div>
-  <span class="scn-chip" id="scnChip" hidden></span>
+  <button type="button" class="scn-chip" id="scnChip" data-act="brief" hidden></button>
   <div class="simbar" role="group" aria-label="시뮬레이터">${HB.map(([k, l]) => `<button type="button" class="hb" data-act="${k}" id="hb_${k}">${ICON[k]}<span data-t="${l}"></span><span class="qv" id="hv_${k}"></span></button>`).join('')}</div>
   <div class="htools">
     <button class="hbtn rp-toggle" type="button" data-act="rp" aria-label="정보창">${ICON.panel}</button>
@@ -327,7 +327,7 @@ export function initUI(root, actions) {
     setHTML('#vTT', `<dt>${esc(t('vector'))}</dt><dd>${S.tt.vector} ${S.tt.vecMin} min</dd><dt>${esc(t('cpaLim'))}</dt><dd>${S.tt.cpaOn ? `${S.tt.cpa.toFixed(1)} NM / ${S.tt.tcpa} min` : 'OFF'}</dd><dt>${esc(t('past'))}</dt><dd>${S.tt.pastPts} × ${S.tt.pastInt}s</dd><dt>${esc(t('aisFilt'))}</dt><dd>${S.ais.maxRngOn ? S.ais.maxRng + ' NM' : '-'} ${S.ais.minSpdOn ? '≥' + S.ais.minSpd + ' kn' : ''}</dd>`);
     const a = d.alertTop; $('#vAlN').textContent = d.alertN ? d.alertN : '';
     setHTML('#aBox', a ? `<div class="abox ${a.pri}${a.acked ? '' : ' unack'}"><span class="ic">${a.pri === 'A' ? '!' : a.pri}</span><span class="tx"><b>${esc(a.text)}</b><span>${a.active ? '' : (lang() === 'en' ? 'rectified · ' : '해소됨 · ')}${esc(a.time || '')}</span></span><span style="display:flex;gap:4px">${a.pri !== 'C' && !a.acked ? `<button class="btn" type="button" data-act="ack">${esc(t('ack'))}</button>` : ''}<button class="btn ib" type="button" data-act="silence" title="${esc(t('silence'))}" aria-label="${esc(t('silence'))}">${ICON.mute}</button><button class="btn" type="button" data-act="alertList">${esc(t('list'))}</button></span></div>` : `<span class="empty">${esc(t('noAlert'))}</span>`);
-    const chip = $('#scnChip'); chip.hidden = !d.scnName; chip.textContent = d.scnName || '';
+    const chip = $('#scnChip'); chip.hidden = !d.scnName; chip.textContent = d.scnName || ''; chip.title = lang() === 'en' ? 'Show the briefing again' : '브리핑 다시 보기';
   }
   /* 내용이 같으면 다시 그리지 않음(단추를 누르는 사이 요소가 바뀌어 클릭이 사라지지 않게) */
   function setHTML(sel, html) { const el = $(sel); if (el && el._h !== html) { el._h = html; el.innerHTML = html; } }

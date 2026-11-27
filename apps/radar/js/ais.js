@@ -30,7 +30,9 @@ export function createAIS() {
     for (const a of map.values()) {
       if (a.lastRep < -1e8) continue;
       const iv = reportInterval(a.sog, a.rot, a.cls, a.navStatus);
-      if (t - a.lastRep > Math.max(20, 3.5 * iv)) { a.status = 'lost'; continue; }
+      if (t - a.lastRep > Math.max(20, 3.5 * iv)) { // 분실: 마지막 보고 위치에 머물고(자선 기준 좌표만 다시 계산), 5분 지나면 지움
+        if (t - a.lastRep > Math.max(20, 3.5 * iv) + 300) { map.delete(a.id); continue; }
+        a.status = 'lost'; a.x = P.x(a.lon); a.y = P.y(a.lat); const bl = brgRng(0, 0, a.x, a.y); a.brg = bl.brg; a.rng = bl.rng; a.cpa = null; a.tcpa = null; continue; }
       // 마지막 보고에서 추측 항법으로 현재 위치
       const dt = (t - a.lastRep) / 3600, v = velXY(a.cog, a.sog);
       a.x = P.x(a.lon) + v.vx * dt; a.y = P.y(a.lat) + v.vy * dt;
