@@ -102,7 +102,7 @@ export function initUI(root, actions) {
   </section>
   <aside class="rp" id="rp">
     <div class="sec" id="pnOwn"><h3><span data-t="own"></span><span class="num" id="vClock"></span></h3>
-      <dl class="kv"><dt>HDG</dt><dd class="big" id="vHdg">-</dd><dt>STW</dt><dd id="vStw">-</dd><dt>SOG</dt><dd id="vSog">-</dd><dt>COG</dt><dd id="vCog">-</dd><dt>ROT</dt><dd id="vRot">-</dd><dt data-t="posn"></dt><dd id="vPos">-</dd><dt data-t="elapsed"></dt><dd id="vEl">-</dd></dl></div>
+      <dl class="kv"><dt>HDG</dt><dd class="big" id="vHdg">-</dd><dt>STW</dt><dd id="vStw">-</dd><dt>SOG</dt><dd id="vSog">-</dd><dt>COG</dt><dd id="vCog">-</dd><dt>ROT</dt><dd id="vRot">-</dd><dt data-t="posn"></dt><dd id="vPos">-</dd><dt id="vWptL" data-t="nextWpt" hidden></dt><dd id="vWpt" hidden></dd><dt data-t="elapsed"></dt><dd id="vEl">-</dd></dl></div>
     <div class="sec" id="pnTgt"><h3><span data-t="tgt"></span></h3><div class="tslots" id="tSlots"></div></div>
     <div class="sec" id="pnTT"><h3><span data-t="ttais"></span><span class="num" id="vCounts"></span></h3><dl class="kv" id="vTT"></dl><div class="ttbtns"><button class="btn" type="button" data-act="tgtList" id="vTgtList" data-t="tgtList"></button><button class="btn" type="button" data-act="vecMode" id="vVec">VECTOR</button><span class="vect" role="group" aria-label="VECTOR TIME"><button class="btn" type="button" data-act="vecDn" aria-label="벡터 짧게">−</button><span class="vv" id="vVecT" data-wheel="vecT" aria-label="VECTOR TIME">-</span><button class="btn" type="button" data-act="vecUp" aria-label="벡터 길게">+</button></span><button class="btn" type="button" data-act="trail" id="vTrail">TRAIL</button></div></div>
     <div class="sec" id="pnAlert"><h3><span data-t="alert"></span><span class="num" id="vAlN"></span></h3><div id="aBox"></div></div>
@@ -347,7 +347,7 @@ export function initUI(root, actions) {
       $('#vHdg').textContent = deg(o.hdg); $('#vStw').textContent = f1(o.stw) + ' kn'; $('#vSog').textContent = f1(o.sog) + ' kn'; $('#vCog').textContent = deg(o.cog);
       $('#vRot').textContent = f1(o.rot) + ' °/min'; setHTML('#vPos', `${ll(o.lat, true)}<br>${ll(o.lon, false)}`);
     }
-    $('#vClock').textContent = d.clock || ''; $('#vEl').textContent = d.elapsed || '-';
+    $('#vClock').textContent = d.clock || ''; $('#vEl').textContent = d.elapsed || '-'; { const r = $('#vWpt'), w = d.wpt; r.hidden = !w; $('#vWptL').hidden = !w; if (w) r.textContent = `WP${w.no}/${w.n} · ${deg(w.brg)} · ${f1(w.rng, 2)} NM`; }
     // 물표 2칸
     const ae = document.activeElement, fsel = ae && ae.closest && ae.closest('#tSlots') ? (ae.dataset.slotTg ? `[data-slot-tg="${CSS.escape(ae.dataset.slotTg)}"]` : ae.dataset.slotX ? `[data-slot-x="${CSS.escape(ae.dataset.slotX)}"]` : null) : null;
     setHTML('#tSlots', d.tgt && d.tgt.length ? d.tgt.map((g) => slotHTML({ ...g, open: false, sel: g.open }, ll)).join('') : `<p class="empty tgt-empty">${esc(t('noTgt'))}</p>`); // 고른 물표가 없을 땐 상자 없이 안내 글만

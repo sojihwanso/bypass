@@ -1,7 +1,7 @@
 /* 시작 화면(시나리오 5개·자유 항해·이어 하기) · 시나리오 안내 · 결과 화면 */
 import { SCENARIOS, freeSetup, createLog, evaluate } from './scenarios.js';
 import { loadLand, pointInLand } from './coast.js';
-import { REGIONS, pickStart, routeClear } from './place.js';
+import { REGIONS, pickStart, routeClear, makeRoute } from './place.js';
 import { makeTraffic, LEVELS } from './traffic.js';
 import { rollWeather, rollCurrent, createWeatherRun, WX_CAP } from './weather.js';
 import { S, saveSettings } from './state.js';
@@ -88,7 +88,9 @@ async function prepare(scn, o) {
   const wxOn = S.sim.weatherOn || scn.fixedWeather;
   const lvl = o.level ?? S.sim.level, weather = wxOn ? rollWeather(rnd, scn.fixedWeather ? def.weather : null, def.own, WX_CAP[lvl] || WX_CAP.hard) : { kind: 'clear', fog: false, visNM: 10, sea: 1, windFrom: Math.round(rnd() * 360), windMs: 3, rain: [], ducting: false, interference: false };
   weather.current = def.weather && def.weather.current ? { ...def.weather.current } : cur;
-  return { def: { ...def, targets: [...def.targets, ...bg] }, weather, region, rnd, level: o.level ?? S.sim.level };
+  // 변침점 3~5개: 첫 구간은 시나리오 시간 동안 가는 거리 + 2 NM 이상(조우가 첫 구간에서 일어나게)
+  const kn0 = def.own.kn ?? 14, route = makeRoute({ lat: def.own.lat, lon: def.own.lon, hdg: def.own.hdg, rnd, rings: L2.ok ? L2.rings : null, firstNM: (kn0 * (scn.durationMin || 30)) / 60 + 2 });
+  return { def: { ...def, targets: [...def.targets, ...bg] }, weather, region, rnd, level: o.level ?? S.sim.level, route };
 }
 
 async function runScenario(scn, o = {}) {
@@ -96,7 +98,7 @@ async function runScenario(scn, o = {}) {
   lastResult = null; current = scn;
   const pr = await prepare(scn, o), def = pr.def; R.setPaused(false);
   const where = pr.region ? ` · ${tl(pr.region)}` : '';
-  R.startWorld({ name: (o.free ? (en ? 'Free navigation' : '자유 항해') : `${scn.id} · ${tl(scn)}`) + where, own: def.own, targets: def.targets, weather: pr.weather, aids: def.aids, marks: def.marks || [], needsCoast: !!scn.needsCoast, traffic: { level: pr.level }, save: true, scnId: o.free ? null : scn.id });
+  R.startWorld({ name: (o.free ? (en ? 'Free navigation' : '자유 항해') : `${scn.id} · ${tl(scn)}`) + where, own: def.own, targets: def.targets, weather: pr.weather, aids: def.aids, marks: def.marks || [], needsCoast: !!scn.needsCoast, traffic: { level: pr.level }, route: pr.route, save: true, scnId: o.free ? null : scn.id });
   R.setWeatherRun(createWeatherRun({ rnd: pr.rnd, enabled: S.sim.weatherOn, cap: WX_CAP[pr.level] || WX_CAP.hard }));
   R.setRadar('stby'); /* 어떻게 시작하든 STBY(송신 → 예열 5초) */
   S.ctrl.gain = 0; if (S.ctrl.ace) S.ctrl.ace = false; /* GAIN 0에서 시작: 송신 뒤 GAIN을 올리며 영상이 살아나는 것을 직접 보게 */

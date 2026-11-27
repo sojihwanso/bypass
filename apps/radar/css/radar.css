@@ -469,3 +469,8 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--rule);border
 #bxTgtTools{width:196px;justify-content:flex-end}
 .tslot .tg{border:0;background:none;color:var(--muted);cursor:pointer;padding:0 3px;font-size:11px;line-height:1}
 .tslot .tg:focus-visible,.tslot .x:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+/* 머리줄이 화면보다 넓어지지 않게: 시나리오 이름은 줄어들고(말줄임), 이름이 있을 땐 1700px 아래에서 단추 글자를 숨김 */
+.top{min-width:0;overflow:hidden}
+.scn-chip{flex:0 1 auto;min-width:60px;max-width:22vw}
+.simbar,.htools{flex:none}
+@media (max-width:1700px){.top:has(.scn-chip:not([hidden])) .hb [data-t]{display:none}}

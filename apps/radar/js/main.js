@@ -63,7 +63,7 @@ export function startWorld(def) {
   W = { def, name: def.name || '', own, targets: def.targets.map((g) => (g.want ? { ...g, legs: [...(g.legs || [])], want: { ...g.want } } : createTarget(g))), weather: { sea: 0, windFrom: 0, windMs: 0, rain: [], ducting: false, interference: false, current: { set: 0, drift: 0 }, ...(def.weather || {}) }, aids: def.aids || [], marks: def.marks || [], t: def.t || 0, land: { rings: [], ok: false, heightM: 100 }, needsCoast: !!def.needsCoast };
   P = makeProj(def.own.lat, def.own.lon);
   if (pmSave) pmOff(); // 새 세계(시나리오·교육·이어 하기)는 PM을 끄고 원래 설정으로, OFF CENTER는 아래에서 새로 비움
-  tracker = createTracker({ max: 100 }); ais = createAIS(); alerts = createAlerts(realNow, () => W.t); tools = createTools(); route = createRoute(); trails.reset(V.rangeNM, S.disp.trails.mode);
+  tracker = createTracker({ max: 100 }); ais = createAIS(); alerts = createAlerts(realNow, () => W.t); tools = createTools(); route = createRoute(); if (def.route && def.route.length) { route.add(def.own.lat, def.own.lon); for (const w of def.route) route.add(w.lat, w.lon); route.next = 1; route.start = true; } trails.reset(V.rangeNM, S.disp.trails.mode);
   W.userMarks = (def.userMarks || []).map((m) => ({ ...m })); trafAcc = 0; steerAcc = 0; selected = []; tmOff = { x: 0, y: 0 }; ruler = null; rulerA = null; uiMode = null; azZones = []; piOn = false; speed = 1; offCenter = null; prevScan = new Array(N_BRG); prevRaw = null; ppi.clear();
   scene = buildScene({ own: ownScene(), targets: W.targets, weather: W.weather, aids: W.aids, band: S.ctrl.band, pulse: S.ctrl.pulse, seed: (Math.random() * 1e6) | 0 });
   trialSet = { course: own.hdg, speed: own.stw };
@@ -264,7 +264,7 @@ function overlayModel() {
     own: { L: o.spec.L, B: o.spec.B, scaled: S.disp.osMark === 'SCALED', vec: { course: o.cog, speed: o.sog }, vecMin: S.tt.vecMin }, stern: S.disp.stern,
     trails: S.disp.trails.time > 0 ? { cell: trails.cell, multi: S.disp.trails.grad === 'MULTI', cells: (fn) => trails.forEach(W.t, S.disp.trails.time, (x, y, a) => (trails.mode === 'REL' ? fn(x, y, a) : fn(x - oxy.x, y - oxy.y, a))) } : null,
     coast, marks: S.disp.map.on && S.disp.map.marks ? W.marks.map((m) => ({ ...m, ...toBR(m.lat, m.lon) })) : null,
-    route: S.disp.route ? route.wpts.map((w) => toBR(w.lat, w.lon)) : null,
+    route: S.disp.route ? route.wpts.map((w) => toBR(w.lat, w.lon)) : null, routeStart: !!route.start, routeNext: route.wpts.length ? (route.start ? route.next : route.next + 1) : 0,
     zones: [...tools.zones.filter(Boolean).map((z) => ({ ...z, kind: 'ta' })), ...(azZones.map((z) => ({ ...z, kind: 'az' })))],
     pi: piOn ? { n: S.disp.piMax, brg: tools.pi.brg, interval: tools.pi.interval, mode: S.disp.piMode } : null,
     ebl: tools.ebl.map((e) => ({ on: e.on, brgTrue: tools.eblTrue(tools.ebl.indexOf(e), o.hdg), origin: e.origin ? toBR(e.origin.lat, e.origin.lon) : null })),
@@ -302,6 +302,7 @@ function refreshUI() {
   ui.refresh({
     mark: { on: uiMode === 'mark' || uiMode === 'mark2', sym: MARK_BY_ID[MARKS[markShape]].sym }, markHint: uiMode === 'mark2' ? (lang() === 'en' ? 'MARK: click the end point' : '마크: 끝점을 누르세요') : uiMode === 'mark' && isLineMark(MARKS[markShape]) ? (lang() === 'en' ? 'MARK: click the start point' : '마크: 시작점을 누르세요') : '',
     wx: { on: S.sim.weatherOn || !!W.weather.fixed, label: weatherLabel(W.weather, lang(), true), cur: currentLabel(W.weather, lang()), full: weatherLabel(W.weather, lang()) },
+    wpt: (() => { if (!route.wpts.length) return null; const li = route.legInfo(W.own.lat, W.own.lon); return li ? { no: route.start ? li.index : li.index + 1, n: route.wpts.length - (route.start ? 1 : 0), brg: li.brg, rng: li.rng } : null; })(),
     rangeNM: V.rangeNM, ringInt: RING_INT[V.rangeNM], orient: V.orient, motion: V.motion, tx: radar.state, warmLeft: radar.warmLeft, speed, paused: paused || hiddenPause, offCenter: !!offCenter, piOn, pm: { on: !!pmSave, graph: S.ctrl.pmMode !== 'OFF', loss: +S.ctrl.pmLoss || 0 }, wheelRange: !!S.disp.wheelRange, azOn: azZones.length > 0, connOn: conn && conn.shown,
     own: { hdg: sn.hdg, stw: sn.stw, sog: sn.sog, cog: sn.cog, rot: o.rot, lat: sn.lat, lon: sn.lon }, clock: `${pad(d.getHours())}:${pad(d.getMinutes())}`, elapsed: `${pad((el / 3600) | 0)}:${pad(((el % 3600) / 60) | 0)}:${pad((el % 60) | 0)}`,
     cursor: cur, ebl: tools.ebl.map((e, i) => ({ on: e.on, brg: S.disp.eblRef === 'REL' ? wrap360(tools.eblTrue(i, o.hdg) - o.hdg) : tools.eblTrue(i, o.hdg) })),
