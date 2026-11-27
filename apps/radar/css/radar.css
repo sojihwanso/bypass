@@ -365,3 +365,17 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--rule);border
 .edu-card{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin:0 0 12px;padding:10px 14px;border:2px solid #241008;border-radius:12px;background:#FFF1E6;color:#241008;cursor:pointer;font:inherit}
 .edu-card:hover{background:#FFE3CC}
 .edu-card b{display:block;font-size:15px}.edu-card small{display:block;font-size:12.5px;color:#7A4532;margin-top:2px}
+/* 고르기 창(색 조합·마크 모양) */
+.pick-pop{flex-wrap:wrap;max-width:240px}
+.pick-pop button{display:inline-flex;align-items:center;gap:5px;font-size:14px}
+.pick-pop .sw{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:3px;font-size:11px;border:1px solid var(--rule)}
+#bxPi .vv{cursor:ns-resize;padding:0 2px}
+#bxPi .vv.off{opacity:.45}
+/* RANGE 휠 토글·PM 시험 */
+#bxRange .whl{margin-left:6px;padding:2px 6px;font-size:11px}
+.pm-ind{color:#e0b000;font-weight:700}
+#bxPm{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+#bxPm .pmg{display:flex;flex-direction:column;gap:2px;min-width:150px}
+#bxPm .pmrow{display:flex;align-items:center;gap:6px}
+#bxPm .pmbar{flex:1;height:6px;min-width:70px;background:var(--soft);border-radius:2px;overflow:hidden}
+#bxPm .pmbar i{display:block;height:100%;background:#2e9d5b}

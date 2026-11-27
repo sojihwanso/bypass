@@ -117,6 +117,12 @@ function landLine(sc, cb, bi, nBins, maxRng, offset) {
   return L;
 }
 
+/* PM 호: n개를 8.0~19.8 NM에 고르게, 손실 loss dB(0~10)만큼 각 폭이 줄고 바깥 호부터 사라짐 */
+export function pmArcs(n = 5, loss = 0) {
+  const out = [], f = Math.max(0, 1 - loss / 10);
+  for (let k = 0; k < n; k++) { const r = n === 1 ? 8 : 8 + (11.8 * k) / (n - 1), half = 30 * f * (1 - (0.6 * k) / n) - (loss >= 10 ? 1 : 0); if (half > 0.5 && k < Math.ceil(n * f)) out.push({ r, half }); }
+  return out;
+}
 export function rawLine(sc, brgIdx, nBins, maxRng) {
   const cb = bins(sc, nBins, maxRng), out = new Float32Array(nBins), brg = (brgIdx / N_BRG) * 360;
   const band = BANDS[sc.band] || BANDS.X, half = band.beamDeg / 2, pulseUs = PULSES[sc.pulse] || 0.3, pulseNM = rangeResM(pulseUs) / NM_M, pg = 10 * Math.log10(pulseUs / 0.3);
@@ -150,13 +156,17 @@ export function rawLine(sc, brgIdx, nBins, maxRng) {
       att[i] = acc;
     }
   }
-  if (land) for (let i = 0; i < nBins; i++) if (land[i] > 0) { const v = land[i] + pg + mast; if (v > out[i]) out[i] = v; }
+  if (land) for (let i = 0; i < nBins; i++) if (land[i] > 0) { const v = land[i] + pg + mast - (sc.loss || 0); if (v > out[i]) out[i] = v; }
   // 물표
   const put = (r0, r1, db) => { let a = Math.max(0, Math.floor(r0 / dr)), b = Math.min(nBins - 1, Math.floor(r1 / dr)); for (let i = a; i <= b; i++) { if (land && land[i] !== 0) continue; const v = db - (att ? att[i] : 0); if (v > out[i]) out[i] = v; } };
+  /* 물표 본체: 빔 가장자리(u→1)로 갈수록 거리 폭이 줄고 세기도 약해져 둥근 타원으로 보임(실제 영상처럼 각진 부채꼴이 아님) */
+  const putOval = (r0, len, db, u) => { const hl = len / 2 + dr * 0.5, mid = r0 + len / 2, h = hl * Math.sqrt(Math.max(0, 1 - u * u)), a = Math.max(0, Math.floor((mid - h) / dr)), b = Math.min(nBins - 1, Math.floor((mid + h) / dr));
+    for (let i = a; i <= b; i++) { if (land && land[i] !== 0) continue; const v0 = (R[i] - mid) / hl, w = u * u + v0 * v0; if (w > 1) continue; const v = db - 8 * w - (att ? att[i] : 0); if (v > out[i]) out[i] = v; } };
+  const loss = sc.loss || 0;
   for (const t of sc.tg) {
     if (!t.visible || t.R > maxRng + 2) continue;
-    const off = Math.abs(angDiff(brg, t.brg)), eff = Math.max(0, off - t.angHalf), db = t.db0 + pg + mast + 2 * (hash(t.R * 1000 | 0, sc.scan) - 0.5);
-    if (eff <= half * 1.8) put(t.R, t.R + pulseNM + t.depth, db - 3 * (eff / half) ** 2);
+    const off = Math.abs(angDiff(brg, t.brg)), eff = Math.max(0, off - t.angHalf), db = t.db0 + pg + mast - loss + (sc.boost && sc.boost.has(t.id) ? 8 : 0) + 2 * (hash(t.R * 1000 | 0, sc.scan) - 0.5);
+    if (eff <= half * 1.8) putOval(t.R, pulseNM + t.depth, db - 3 * (eff / half) ** 2, eff / (half * 1.8));
     else if (db > 50 && t.R < 3 && off < 12) put(t.R, t.R + pulseNM, db - 28); // 사이드로브 호
     if (eff <= half) {
       const relT = wrap360(t.brg - (sc.own.hdg || 0)), beam = Math.abs(Math.sin(relT * D2R));
@@ -164,6 +174,8 @@ export function rawLine(sc, brgIdx, nBins, maxRng) {
     }
     if (db > 45 && t.R < 2 && Math.abs(angDiff(brg, wrap360((sc.own.hdg || 0) + 180))) <= half) put(t.R, t.R + pulseNM, db - 18); // 마스트 간접 반사
   }
+  // 성능 감시(PM, 매뉴얼 1.49): 안테나 쪽 PM 장치가 만드는 호. 정상이면 8.0~19.8 NM 사이, 손실이 클수록 짧아지고 바깥 호부터 사라짐, 10 dB 손실이면 없음
+  if (sc.pm && sc.pm.on) for (const a of pmArcs(sc.pm.arcs, sc.pm.loss)) { const off = Math.abs(angDiff(rel, sc.pm.relBrg)); if (off <= a.half) put(a.r, a.r + 0.12, 32 - 4 * (off / a.half) ** 2); }
   // SART(X 밴드만), RACON
   for (const a of sc.aidp) {
     const off = Math.abs(angDiff(brg, a.brg));

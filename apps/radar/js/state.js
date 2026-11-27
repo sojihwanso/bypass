@@ -6,10 +6,10 @@ export const DEFAULTS = {
     tx: false, band: 'X', pulse: 'M1', tune: { auto: true, val: 50 }, gain: 65,
     sea: { auto: false, val: 30 }, rain: { auto: false, val: 0 },
     ir: 2, es: 0, eav: 0, ace: false, noiseRej: false, secondRej: false,
-    stcCurve: 3, stcRange: 5, wiper: 0, sart: false, preset: 'CUSTOM1',
+    stcCurve: 3, stcRange: 5, wiper: 0, sart: false, preset: 'CUSTOM1', pmMode: 'OFF', pmArcs: 5, pmLoss: 0,
   },
   disp: {
-    rangeNM: 6, orient: 'HU', motion: 'RM', rings: true, palette: 'day', videoColor: 'amber', colorSet: 'C1', iala: 'A',
+    rangeNM: 6, wheelRange: false, orient: 'HU', motion: 'RM', rings: true, palette: 'day', videoColor: 'amber', colorSet: 'C1', iala: 'A',
     trails: { mode: 'REL', time: 180, grad: 'MULTI', level: 2, os: false, suppressOS: false },
     stern: false, osMark: 'SCALED', grid: false,
     map: { on: true, coast: true, marks: true }, route: true,

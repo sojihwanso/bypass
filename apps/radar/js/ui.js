@@ -75,11 +75,12 @@ export function initUI(root, actions) {
     <canvas id="cvEcho"></canvas><canvas id="cvOver" aria-label="레이더 화면"></canvas>
     <button type="button" class="stby-hint" id="stbyHint" data-act="tx"></button>
     <div class="tl">
-      <div class="row2"><div class="bx" id="bxRange" data-wheel="range" style="position:static"><span class="lb">RANGE</span><span class="big" id="vRange">-</span><span class="lb" id="vRing"></span><span class="pm"><button type="button" data-act="rangeUp" aria-label="범위 늘리기">+</button><button type="button" data-act="rangeDn" aria-label="범위 줄이기">−</button></span></div>
+      <div class="row2"><div class="bx" id="bxRange" data-wheel="range" style="position:static"><span class="lb">RANGE</span><span class="big" id="vRange">-</span><span class="lb" id="vRing"></span><span class="pm"><button type="button" data-act="rangeUp" aria-label="범위 늘리기">+</button><button type="button" data-act="rangeDn" aria-label="범위 줄이기">−</button></span><button type="button" class="whl" data-act="wheelRange" id="vWhl">휠</button></div>
       <div class="bx" id="bxRef" style="position:static"><span class="lb">REF POINT</span><button type="button" data-act="refpt" id="vRef">CCRP</button></div></div>
       <div class="bx" id="bxMode" style="position:static"><button type="button" data-act="mode" id="vOrient">HU</button><button type="button" data-act="motion" id="vMotion">RM</button><button type="button" data-act="band" id="vBand">X-BAND</button><button type="button" data-act="pulse" id="vPulse">M1</button></div>
       <div class="bx" id="bxPict" style="position:static;display:flex;gap:6px;align-items:center"><span class="lb">PICTURE</span><button type="button" data-act="preset" id="vPict">-</button><button type="button" data-act="off" id="vOff">OFF CENTER</button></div>
       <div class="bx" id="bxTx" style="position:static"><span class="dot"></span><span id="vTx">STBY</span></div>
+      <div class="bx" id="bxPm" style="position:static"><button type="button" data-act="pm" id="vPm">PM TEST</button><div class="pmg" id="vPmG" hidden></div></div>
     </div>
     <div class="bx" id="bxInd" style="top:12px;left:50%;transform:translateX(-50%)" hidden></div>
     <div class="tr"><div class="bx" id="bxWatch" style="position:static" hidden><span class="lb">WATCH</span> <span class="vv" id="vWatch"></span></div><div class="bx" id="bxEcho" style="position:static">
@@ -89,7 +90,7 @@ export function initUI(root, actions) {
       <div class="ctl" id="bxTune" data-wheel="tune" data-act="tuneAuto"><span class="lb">TUNE</span><span class="bar"><i></i></span><span class="md"></span></div>
       <div class="lb" id="vPreset" style="margin-top:4px"></div>
     </div><div class="bx" id="bxCursor" style="position:static"></div><div class="bx" id="bxMenu" style="position:static;display:flex;gap:6px;justify-content:flex-end"><button type="button" data-act="menu" data-t="q_menu"></button></div></div>
-    <div class="bx" id="bxPi" style="left:12px;bottom:92px;display:flex;gap:6px;align-items:center"><button type="button" data-act="pi" id="vPi">PI</button><span class="lb" id="vPiV"></span></div>
+    <div class="bx" id="bxPi" style="left:12px;bottom:92px;display:flex;gap:6px;align-items:center"><button type="button" data-act="pi" id="vPi">PI</button><span class="vv" id="vPiB" data-wheel="piB" aria-label="PI BRG">-</span><span class="vv" id="vPiI" data-wheel="piI" aria-label="PI INTERVAL">-</span></div>
     <div class="bx" id="bxTgtTools" style="right:12px;bottom:92px;display:flex;gap:6px;align-items:center"><button type="button" data-act="trial" id="vTrial">TRIAL</button><button type="button" data-act="az" id="vAz">ACQ ZONE</button></div>
     <div class="bx bl" id="bxEbl"><div class="eb">
       <button type="button" class="tg" data-act="ebl1">EBL1</button><span class="vv" id="vEbl1" data-wheel="ebl1">-</span><button type="button" data-act="eblRef" id="vEblRef">T</button>
@@ -306,13 +307,16 @@ export function initUI(root, actions) {
     qv('tx', d.tx === 'tx' ? 'TX' : d.tx === 'warm' ? 'WARM' : 'STBY', d.tx !== 'stby'); qv('tune', S.ctrl.tune.auto ? 'AUTO' : 'MAN', S.ctrl.tune.auto); qv('pulse', S.ctrl.pulse);
     qv('ir', S.ctrl.ir ? String(S.ctrl.ir) : 'OFF', S.ctrl.ir > 0); qv('es', S.ctrl.es ? String(S.ctrl.es) : 'OFF', S.ctrl.es > 0); qv('eav', S.ctrl.eav ? String(S.ctrl.eav) : 'OFF', S.ctrl.eav > 0); qv('ace', S.ctrl.ace ? 'ON' : 'OFF', S.ctrl.ace);
     qv('hl', 'OFF'); qv('map', S.disp.map.on ? 'ON' : 'OFF', S.disp.map.on); qv('cureset', d.orient === 'CU' || d.motion === 'TM' ? 'RESET' : '-'); qv('ownais', ''); qv('aismsg', d.msgN ? String(d.msgN) : '');
-    qv('pal', t('pal_' + S.disp.palette)); if (d.mark) qv('mark', d.mark.sym, d.mark.on); $('#qb_pal').title = lang() === 'en' ? 'Brilliance · long-press: colour set' : '밝기 · 길게 누르면 색 조합';
+    qv('pal', t('pal_' + S.disp.palette)); if (d.mark) qv('mark', d.mark.sym, d.mark.on); $('#qb_pal').title = lang() === 'en' ? 'Day/dusk/night · long-press or right-click: colour set' : '주간·박명·야간 · 길게 누르거나 오른쪽 클릭: 색 조합'; $('#qb_mark').title = lang() === 'en' ? 'Mark: press, then click the PPI · long-press or right-click: shape' : '마크: 누른 뒤 PPI를 누르면 놓임 · 길게 누르거나 오른쪽 클릭: 모양 고르기';
     if (d.wx) { $('#hv_wx').textContent = d.wx.on ? d.wx.label : (lang() === 'en' ? 'OFF' : '꺼짐'); $('#hb_wx').classList.toggle('on', d.wx.on); $('#hb_wx').title = lang() === 'en' ? 'Weather changes on/off' : '날씨 변화 켜기/끄기'; }
     $('#hv_speed').textContent = '×' + d.speed; $('#hb_pause').classList.toggle('on', !!d.paused); $('#hb_conn').classList.toggle('on', !!d.connOn); $('#hb_speed').classList.toggle('on', d.speed > 1);
     $('#vPict').textContent = S.ctrl.preset; $('#vOff').classList.toggle('on', !!d.offCenter); $('#vRef').textContent = d.ref || 'CCRP';
-    $('#vPi').classList.toggle('on', !!d.piOn); $('#vPiV').textContent = d.piOn ? d.piText || '' : ''; $('#vAz').classList.toggle('on', !!d.azOn); $('#vTrial').classList.toggle('on', S.tt.trialMode !== 'OFF');
+    $('#vPi').classList.toggle('on', !!d.piOn); if (d.pi) { $('#vPiB').textContent = d.pi.brg; $('#vPiI').textContent = d.pi.int; $('#vPiB').classList.toggle('off', !d.piOn); $('#vPiI').classList.toggle('off', !d.piOn); $('#vPiB').title = lang() === 'en' ? 'PI bearing · wheel / drag / arrow keys' : 'PI 방위 · 휠·끌기·화살표'; $('#vPiI').title = lang() === 'en' ? 'Spacing between PI lines · wheel / drag / arrow keys' : 'PI 선 사이 간격 · 휠·끌기·화살표'; } $('#vAz').classList.toggle('on', !!d.azOn); $('#vTrial').classList.toggle('on', S.tt.trialMode !== 'OFF');
     $('#vVec').textContent = 'VECTOR ' + S.tt.vector; $('#vTrail').textContent = 'TRAIL ' + (S.disp.trails.time ? (S.disp.trails.mode === 'TRUE' ? 'T ' : 'R ') + Math.round(S.disp.trails.time / 60) + "'" : 'OFF');
-    const ind = [S.ctrl.sart ? 'SART' : '', d.paused ? (lang() === 'en' ? 'PAUSED' : '일시정지') : '', d.speed > 1 ? 'SIM ×' + d.speed : ''].filter(Boolean); $('#bxInd').hidden = !ind.length; $('#bxInd').textContent = ind.join('  ·  ');
+    const ind = [S.ctrl.sart ? 'SART' : '', d.paused ? (lang() === 'en' ? 'PAUSED' : '일시정지') : '', d.speed > 1 ? 'SIM ×' + d.speed : ''].filter(Boolean); const pmI = d.pm && d.pm.on; $('#bxInd').hidden = !ind.length && !pmI; setHTML('#bxInd', (pmI ? '<b class="pm-ind">PM</b>' + (ind.length ? '  ·  ' : '') : '') + esc(ind.join('  ·  ')));
+    if (d.pm) { const en = lang() === 'en'; $('#vPm').classList.toggle('on', d.pm.on); $('#vPm').title = en ? 'Performance monitor test (manual 1.49) · TX only · range 24 NM' : '성능 감시 시험(매뉴얼 1.49) · 송신 중에만 · 거리 24 NM으로 바뀜'; const g = $('#vPmG'); g.hidden = !d.pm.graph && !d.pm.on;
+      if (!g.hidden) { const lv = Math.max(0, 10 - d.pm.loss), bar = (nm) => `<span class="pmrow"><span class="lb">${nm}</span><span class="pmbar"><i style="width:${lv * 10}%"></i></span><span class="lb">${d.pm.loss ? '−' + d.pm.loss : '0'} dB</span></span>`; setHTML('#vPmG', bar('TX') + bar('RX') + `<span class="lb">${d.pm.loss >= 10 ? (en ? 'No arc: 10 dB loss — call a technician' : '호 없음: 10 dB 손실 — 정비 필요') : d.pm.loss ? (en ? 'Arcs shorter: performance loss' : '호가 짧아짐: 성능 저하') : (en ? 'Normal: arcs 8.0–19.8 NM' : '정상: 호 8.0~19.8 NM')}</span>`); } }
+    { const w = $('#vWhl'); w.classList.toggle('on', !!d.wheelRange); w.setAttribute('aria-pressed', String(!!d.wheelRange)); w.title = lang() === 'en' ? 'Convenience (not on real radars): mouse wheel over the PPI changes the range' : '편의 기능(실제 장비에는 없음): 켜면 PPI 위 마우스 휠로 거리 범위 조절'; w.textContent = lang() === 'en' ? 'WHEEL' : '휠'; }
     $('#bxWatch').hidden = !S.alert.watch; if (S.alert.watch) $('#vWatch').textContent = d.watchLeft || '';
     // 자선
     const o = d.own; if (o) {
@@ -340,5 +344,16 @@ export function initUI(root, actions) {
     const r = $('#hb_speed').getBoundingClientRect(); pop.style.left = r.left + 'px'; pop.style.top = r.bottom + 4 + 'px'; root.append(pop);
     setTimeout(() => addEventListener('pointerdown', function off(e) { if (!e.target.closest('#spdPop,#hb_speed')) { pop.remove(); removeEventListener('pointerdown', off); } }), 0);
   }
-  return { wheelable, refresh, speedPop, applyLang, applyTheme, renderMenu, dialog, relayout, layoutMode: () => mode, qbInside: () => qIn, ABBR, shift: () => shift, rmax: () => rmax, closeAll() { menuEl.hidden = true; cm.hidden = true; }, echoCanvas: $('#cvEcho'), overCanvas: $('#cvOver') };
+  /* 고르기 창: 단추를 길게 누르거나 오른쪽 클릭하면 단추 옆에 뜸. items: [{html, act, val, on, title}] */
+  function pickPop(anchor, items) {
+    let pop = $('#pickPop'); if (pop) pop.remove(); if (!items) return;
+    pop = document.createElement('div'); pop.id = 'pickPop'; pop.className = 'spd-pop pick-pop'; pop.setAttribute('role', 'menu');
+    pop.innerHTML = items.map((i) => `<button type="button" role="menuitemradio" aria-checked="${!!i.on}" class="${i.on ? 'on' : ''}" data-act="${i.act}" data-val="${esc(String(i.val))}" title="${esc(i.title || '')}">${i.html}</button>`).join('');
+    root.append(pop); const r = anchor.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight;
+    let x = r.right + 6, y = r.top; if (x + pw > innerWidth - 4) x = Math.max(4, r.left - pw - 6); if (y + ph > innerHeight - 4) y = Math.max(4, innerHeight - ph - 4);
+    pop.style.left = x + 'px'; pop.style.top = y + 'px'; const first = pop.querySelector('.on') || pop.querySelector('button'); if (first) first.focus();
+    setTimeout(() => addEventListener('pointerdown', function off(e) { if (!e.target.closest('#pickPop')) { pop.remove(); removeEventListener('pointerdown', off); } }), 0);
+    pop.addEventListener('keydown', (e) => { if (e.key === 'Escape') { pop.remove(); anchor.focus(); } });
+  }
+  return { wheelable, refresh, speedPop, pickPop, applyLang, applyTheme, renderMenu, dialog, relayout, layoutMode: () => mode, qbInside: () => qIn, ABBR, shift: () => shift, rmax: () => rmax, closeAll() { menuEl.hidden = true; cm.hidden = true; }, echoCanvas: $('#cvEcho'), overCanvas: $('#cvOver') };
 }

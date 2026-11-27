@@ -1,6 +1,6 @@
 /* 레이더 시뮬레이터 진입점: 세계(자선·타선·날씨) → 선박 운동 → 안테나 스윕 → 영상 → TT·AIS·경보 → PPI·위층·UI */
 import { S, loadSettings, saveSettings, resetSettings, on, emit } from './state.js';
-import { createPPI } from './ppi.js';
+import { createPPI, COLOR_SETS } from './ppi.js';
 import { buildScene, updateScene, rawLine, processLine, detect, N_BRG, RANGES, RING_INT, PULSE_BY_RANGE } from './echo.js';
 import { createShip, createTarget, stepShip, stepTarget, sensors, setRudderOrder, setTelegraph, setAuto, TELEGRAPH } from './sim.js';
 import { makeProj, brgRng, velXY, cpaTcpa, bcrBct, wrap360 } from './geo.js';
@@ -22,7 +22,7 @@ import { createWeatherRun, stepWeather, windDrift, speedLoss, weatherLabel, WX_C
 import { refillTraffic, steerTraffic, trafficRing } from './traffic.js';
 
 const TEST = new URLSearchParams(location.search).has('test');
-loadSettings();
+loadSettings(); S.ctrl.pmMode = 'OFF'; // PM은 켤 때마다 새로(저장된 ON으로 시작하지 않음)
 try { loadSavedPresets(JSON.parse(localStorage.getItem('radar-presets') || 'null')); } catch (e) {}
 const app = document.getElementById('app');
 const WARM_SEC = 5; // 실제 마그네트론 예열은 약 90 s — 시뮬레이터는 5 s로 줄임(도움말에 적음)
@@ -130,7 +130,7 @@ function freeDef(o = {}) {
 const D = Math.PI / 180;
 
 /* ---------- 레이더 송신 ---------- */
-function setRadar(s) { radar.state = s; radar.warmLeft = s === 'warm' ? WARM_SEC : 0; S.ctrl.tx = s === 'tx'; if (s !== 'tx') ppi.clear(); }
+function setRadar(s) { if (s !== 'tx' && pmSave) pmOff(); radar.state = s; radar.warmLeft = s === 'warm' ? WARM_SEC : 0; S.ctrl.tx = s === 'tx'; if (s !== 'tx') ppi.clear(); }
 function toggleTx() { setRadar(radar.state === 'stby' ? 'warm' : 'stby'); }
 
 /* ---------- 프레임 ---------- */
@@ -156,7 +156,10 @@ function tick(dt) {
     if (Math.hypot(tmOff.x, tmOff.y) > 0.7) { const m = Math.hypot(sx, sy) || 1; tmOff = { x: -0.5 * sx / m, y: 0.5 * sy / m }; }
     V.offset = { ...tmOff };
   } else V.offset = offCenter ? { ...offCenter } : { x: 0, y: 0 };
-  scene.band = S.ctrl.band; scene.pulse = S.ctrl.pulse;
+  scene.band = S.ctrl.band; scene.pulse = S.ctrl.pulse; scene.loss = +S.ctrl.pmLoss || 0;
+  if (pmSave) pmLock(); scene.pm = pmSave ? { on: true, arcs: +S.ctrl.pmArcs || 5, relBrg: PM_REL, loss: scene.loss } : null;
+  // 포착(플로팅)한 물표는 영상을 더 선명하게: TT 위치에서 0.2 NM 안의 배
+  scene.boost = new Set(); for (const g of tracker.targets()) { if (g.state === 'lost') continue; let best = null, bd = 0.2; for (const s of W.targets) { const d = Math.hypot(P.x(s.lon) - g.x, P.y(s.lat) - g.y); if (d < bd) { bd = d; best = s; } } if (best) scene.boost.add(best.id); }
   updateScene(scene, ownScene(), W.targets, W.t);
   // 안테나 스윕(실시간 2.5 s/회전)
   // 버퍼 거리는 오프셋 크기와 상관없이 고정(매 프레임 바뀌면 PPI가 매번 지워짐) — 오프셋 최대 0.75 R
@@ -276,12 +279,12 @@ function refreshUI() {
   ui.refresh({
     mark: { on: uiMode === 'mark', sym: MARK_SYM[MARKS[markShape]] },
     wx: { on: S.sim.weatherOn || !!W.weather.fixed, label: weatherLabel(W.weather, lang()) },
-    rangeNM: V.rangeNM, ringInt: RING_INT[V.rangeNM], orient: V.orient, motion: V.motion, tx: radar.state, warmLeft: radar.warmLeft, speed, paused: paused || hiddenPause, offCenter: !!offCenter, piOn, azOn: azZones.length > 0, connOn: conn && conn.shown,
+    rangeNM: V.rangeNM, ringInt: RING_INT[V.rangeNM], orient: V.orient, motion: V.motion, tx: radar.state, warmLeft: radar.warmLeft, speed, paused: paused || hiddenPause, offCenter: !!offCenter, piOn, pm: { on: !!pmSave, graph: S.ctrl.pmMode !== 'OFF', loss: +S.ctrl.pmLoss || 0 }, wheelRange: !!S.disp.wheelRange, azOn: azZones.length > 0, connOn: conn && conn.shown,
     own: { hdg: sn.hdg, stw: sn.stw, sog: sn.sog, cog: sn.cog, rot: o.rot, lat: sn.lat, lon: sn.lon }, clock: `${pad(d.getHours())}:${pad(d.getMinutes())}`, elapsed: `${pad((el / 3600) | 0)}:${pad(((el % 3600) / 60) | 0)}:${pad((el % 60) | 0)}`,
     cursor: cur, ebl: tools.ebl.map((e, i) => ({ on: e.on, brg: S.disp.eblRef === 'REL' ? wrap360(tools.eblTrue(i, o.hdg) - o.hdg) : tools.eblTrue(i, o.hdg) })),
     vrm: tools.vrm.map((v) => ({ on: v.on, rng: toUnit(v.rng, S.disp.vrmUnit), ttg: S.disp.vrmTTG && v.on ? vrmTTG(v.rng, o.sog) : null })),
     tgt: [slot(selected[0]), slot(selected[1])], ttN: tracker.targets().filter((g) => g.state !== 'lost').length, aisN: ais.list().filter((a) => a.status !== 'lost').length,
-    alertTop: top ? { ...top, time: `${pad(((top.tSim % 86400) / 3600) | 0)}:${pad(((top.tSim % 3600) / 60) | 0)}:${pad((top.tSim % 60) | 0)}` } : null, alertN: alerts.list().length, scnName: W.name, msgN: ais.messages().length, ref: refPt, piText: `${tools.pi.brg.toFixed(0).padStart(3, '0')}° · ${tools.pi.interval} NM`, watchLeft: S.alert.watch ? (() => { const s = Math.max(0, S.alert.watch * 60 - (performance.now() - lastUser) / 1000); return `${pad((s / 60) | 0)}:${pad((s % 60) | 0)}`; })() : '',
+    alertTop: top ? { ...top, time: `${pad(((top.tSim % 86400) / 3600) | 0)}:${pad(((top.tSim % 3600) / 60) | 0)}:${pad((top.tSim % 60) | 0)}` } : null, alertN: alerts.list().length, scnName: W.name, msgN: ais.messages().length, ref: refPt, pi: { brg: `${tools.pi.brg.toFixed(1).padStart(5, '0')}°`, int: `${tools.pi.interval.toFixed(2)} NM` }, watchLeft: S.alert.watch ? (() => { const s = Math.max(0, S.alert.watch * 60 - (performance.now() - lastUser) / 1000); return `${pad((s / 60) | 0)}:${pad((s % 60) | 0)}`; })() : '',
   });
   conn && conn.refresh();
   const tb = document.getElementById('bxTrial'); if (tb) { tb.hidden = S.tt.trialMode === 'OFF'; tb.querySelector('#trC').textContent = trialSet.course.toFixed(0).padStart(3, '0') + '°'; tb.querySelector('#trS').textContent = trialSet.speed.toFixed(1) + ' kn'; tb.querySelector('#trD').textContent = S.tt.trialDelay + ' min'; }
@@ -301,7 +304,23 @@ function beep() {
 
 /* ---------- 조작 ---------- */
 const own = () => W && W.own;
-function rangeStep(d) { const i = RANGES.indexOf(S.disp.rangeNM); setRange(RANGES[Math.max(0, Math.min(RANGES.length - 1, i + d))]); }
+/* ---------- 성능 감시(PM, 매뉴얼 1.49) ---------- */
+const PM_REL = 135; // PM 장치가 있는 상대 방위(가정)
+var pmSave = null; // 켜기 전 설정(끄면 되돌림). null이면 PM 꺼짐
+const PM_FIX = { sea: { auto: false, val: 0 }, rain: { auto: false, val: 0 }, tune: { auto: true }, ace: false, es: 0, eav: 0, ir: 2, noiseRej: false, secondRej: false, wiper: 0, pulse: 'L' };
+function pmLock() { const c = S.ctrl; c.sea = { ...PM_FIX.sea }; c.rain = { ...PM_FIX.rain }; c.tune.auto = true; for (const k of ['ace', 'es', 'eav', 'ir', 'noiseRej', 'secondRej', 'wiper', 'pulse']) c[k] = PM_FIX[k]; }
+function pmOn() {
+  if (pmSave) return true;
+  if (radar.state !== 'tx') { S.ctrl.pmMode = 'OFF'; ui.dialog('PM', `<p>${lang() === 'en' ? 'Set the radar to TX first. The performance monitor works only while transmitting.' : '먼저 송신(TX)으로 바꾸세요. 성능 감시는 송신 중에만 켜져요.'}</p>`); return false; }
+  const c = S.ctrl; pmSave = { ctrl: JSON.parse(JSON.stringify({ gain: c.gain, sea: c.sea, rain: c.rain, tune: c.tune, ace: c.ace, es: c.es, eav: c.eav, ir: c.ir, noiseRej: c.noiseRej, secondRej: c.secondRej, wiper: c.wiper, pulse: c.pulse })), range: S.disp.rangeNM, offCenter, motion: S.disp.motion };
+  c.gain = 70; pmLock(); offCenter = null; if (S.disp.motion === 'TM' && S.disp.orient === 'NU') S.disp.motion = 'RM'; setRange(24); c.pulse = 'L'; c.pmMode = 'ON'; ppi.clear(); return true;
+}
+function pmOff() {
+  if (!pmSave) { if (S.ctrl.pmMode === 'ON') S.ctrl.pmMode = 'OFF'; return; }
+  const sv = pmSave; pmSave = null; Object.assign(S.ctrl, sv.ctrl); S.ctrl.pmMode = 'OFF'; offCenter = sv.offCenter; S.disp.motion = sv.motion; setRange(sv.range); if (!PULSE_BY_RANGE[sv.range].includes(sv.ctrl.pulse)) S.ctrl.pulse = DEFAULT_PULSE[sv.range]; else S.ctrl.pulse = sv.ctrl.pulse; ppi.clear(); saveSettings();
+}
+/* 손으로 거리를 바꾸면 PM 꺼짐(매뉴얼 *4) */
+function rangeStep(d) { if (pmSave) { pmOff(); return; } const i = RANGES.indexOf(S.disp.rangeNM); setRange(RANGES[Math.max(0, Math.min(RANGES.length - 1, i + d))]); }
 function setRange(r) { S.disp.rangeNM = r; if (!PULSE_BY_RANGE[r].includes(S.ctrl.pulse)) S.ctrl.pulse = DEFAULT_PULSE[r]; trails.reset(r, S.disp.trails.mode, trails.mode === 'TRUE' ? trails.origin() : undefined); tmOff = { x: 0, y: 0 }; coastKey = ''; saveSettings(); }
 function screenToWorld(pos) { const p = ppi.fromScreen(pos.sx ?? pos.x, pos.sy ?? pos.y), oxy = ownXY(); const x = oxy.x + p.rng * Math.sin(p.brg * D), y = oxy.y + p.rng * Math.cos(p.brg * D); return { ...p, x, y, lat: P.lat(y), lon: P.lon(x) }; }
 function nearestTarget(pos, px = 16) {
@@ -311,6 +330,8 @@ function nearestTarget(pos, px = 16) {
   return best;
 }
 function select(id) { selected = [id, ...selected.filter((x) => x !== id)].slice(0, 2); }
+/* 누른 곳 둘레(반지름 6 px)에 레이더 영상이 있는지 */
+function echoNear(pos) { for (let dy = -6; dy <= 6; dy += 2) for (let dx = -6; dx <= 6; dx += 2) { if (dx * dx + dy * dy > 36) continue; const p = ppi.fromScreen(pos.x + dx, pos.y + dy); if (p.rng > 0.05 && ppi.levelAt(p.brg, p.rng) > 0) return true; } return false; }
 function acquireAt(pos) {
   const w = screenToWorld(pos), id = tracker.acquire(w.x, w.y, W.t);
   if (!id) alerts.raise('ttfull', 'W', 'TT FULL'); else select(id);
@@ -326,6 +347,8 @@ Object.assign(actions, {
   off: () => { offCenter = offCenter ? null : { x: 0, y: 0.5 }; },
   preset: () => { const i = PRESET_ORDER.indexOf(S.ctrl.preset); applyPreset(S, PRESET_ORDER[(i + 1) % PRESET_ORDER.length]); saveSettings(); },
   trail: () => { const i = TRAIL_ORDER.indexOf(S.disp.trails.time); S.disp.trails.time = TRAIL_ORDER[(i + 1) % TRAIL_ORDER.length]; trails.reset(V.rangeNM, S.disp.trails.mode, S.disp.trails.mode === 'TRUE' ? ownXY() : undefined); saveSettings(); },
+  colorSet: (el) => { S.disp.colorSet = el.dataset.val; saveSettings(); ui.pickPop(null); },
+  markPick: (el) => { markShape = Math.max(0, MARKS.indexOf(el.dataset.val)); uiMode = 'mark'; ui.pickPop(null); },
   pi: () => { piOn = !piOn; if (piOn) tools.pi.brg = Math.round(W.own.hdg); },
   az: () => { if (azZones.length) { azZones = []; tracker.setZones([]); } else uiMode = 'az1'; },
   mark: () => { if (uiMode === 'mark') markShape = (markShape + 1) % MARKS.length; uiMode = 'mark'; },
@@ -336,6 +359,8 @@ Object.assign(actions, {
   conn: () => conn.toggle(),
   shot: () => { const c = document.createElement('canvas'), a = ui.echoCanvas, b = ui.overCanvas; c.width = b.width; c.height = b.height; const g = c.getContext('2d'); g.fillStyle = '#0A131A'; g.fillRect(0, 0, c.width, c.height); g.drawImage(a, 0, 0, c.width, c.height); g.drawImage(b, 0, 0); const l = document.createElement('a'); l.download = `radar-${Date.now()}.png`; l.href = c.toDataURL('image/png'); l.click(); },
   rangeUp: () => rangeStep(1), rangeDn: () => rangeStep(-1),
+  pm: () => { if (pmSave) pmOff(); else pmOn(); saveSettings(); }, pmGraph: () => { S.ctrl.pmMode = pmSave ? 'ON' : S.ctrl.pmMode === 'GRAPH' ? 'OFF' : 'GRAPH'; saveSettings(); },
+  wheelRange: () => { S.disp.wheelRange = !S.disp.wheelRange; saveSettings(); },
   pulse: () => { const L = PULSE_BY_RANGE[S.disp.rangeNM], i = L.indexOf(S.ctrl.pulse); S.ctrl.pulse = L[(i + 1) % L.length]; },
   ebl1: () => { tools.ebl[0].on = !tools.ebl[0].on; if (tools.ebl[0].on && W) tools.ebl[0].brg = Math.round(W.own.hdg); }, ebl2: () => { tools.ebl[1].on = !tools.ebl[1].on; },
   vrm1: () => { tools.vrm[0].on = !tools.vrm[0].on; }, vrm2: () => { tools.vrm[1].on = !tools.vrm[1].on; },
@@ -352,10 +377,12 @@ Object.assign(actions, {
   ackAll: () => { alerts.ackAll(); actions.alertList(); },
   help: () => { if (window.RadarHelp) window.RadarHelp(); },
   scn: () => { if (window.RadarStart) window.RadarStart(); }, brief: () => { if (window.RadarBrief) window.RadarBrief(); },
-  wheel: (k, d) => {
+  wheel: (k, d, ev) => {
     if (k === 'range') return rangeStep(-d);
     if (k.startsWith('ebl')) { const e = tools.ebl[+k.slice(-1) - 1]; e.on = true; e.brg = wrap360(e.brg + d * (S.disp.eblRef === 'REL' ? 1 : 1) * 0.5); }
     if (k.startsWith('vrm')) { const v = tools.vrm[+k.slice(-1) - 1]; v.on = true; v.rng = Math.max(0, v.rng + d * Math.max(0.005, V.rangeNM / 200)); }
+    if (k === 'piB') { piOn = true; tools.pi.brg = wrap360(Math.round((tools.pi.brg + d * (ev && ev.shiftKey ? 5 : 0.5)) * 10) / 10); }
+    if (k === 'piI') { piOn = true; const st = ev && ev.shiftKey ? 0.5 : V.rangeNM <= 3 ? 0.01 : 0.05; tools.pi.interval = Math.round(Math.max(0.01, Math.min(V.rangeNM, tools.pi.interval + d * st)) * 100) / 100; }
     if (k === 'trC') trialSet.course = wrap360(trialSet.course + d); if (k === 'trS') trialSet.speed = Math.max(0, Math.min(25, trialSet.speed + d * 0.5)); if (k === 'trD') S.tt.trialDelay = Math.max(0, Math.min(30, S.tt.trialDelay + d * 0.5));
   },
   cursor: (id, pos) => cursorAct(id, pos),
@@ -382,7 +409,7 @@ function menuAction(id) {
   const en = lang() === 'en';
   if (id === 'save') { saveSettings(); try { localStorage.setItem('radar-presets', JSON.stringify(savedPresets())); } catch (e) {} ui.dialog(en ? 'Settings' : '설정', `<p>${en ? 'Saved.' : '저장했습니다.'}</p>`); }
   if (id === 'load' || id === 'reset') { // 송신 상태는 설정이 아니라 지금 레이더 상태를 따름(불러오기·초기화로 영상이 꺼지지 않게)
-    if (id === 'load') loadSettings(); else { resetSettings(); saveSettings(); }
+    pmSave = null; if (id === 'load') loadSettings(); else { resetSettings(); saveSettings(); } S.ctrl.pmMode = 'OFF';
     S.ctrl.tx = radar.state === 'tx'; setRange(S.disp.rangeNM); ui.applyLang(); ui.applyTheme(); ui.renderMenu(); }
   if (id === 'ttCancelAll') { tracker.cancelAll(); selected = selected.filter((x) => x.startsWith('A:')); for (const a of alerts.list()) if (/^(cpa|lost):/.test(a.id)) { alerts.resolve(a.id); alerts.ack(a.id); } }
   if (id === 'sleepAll') ais.sleepAll();
@@ -392,13 +419,21 @@ function menuAction(id) {
 }
 /* PPI 마우스: 커서·선택·구역·줄자 */
 /* 밝기 단추 길게 누르기 → 색 조합 순환 */
-{ const b = document.getElementById('qb_pal'), SETS = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6']; let tmr = null, long = false;
-  b.addEventListener('pointerdown', () => { long = false; clearTimeout(tmr); tmr = setTimeout(() => { long = true; S.disp.colorSet = SETS[(SETS.indexOf(S.disp.colorSet) + 1) % SETS.length]; saveSettings(); }, 600); });
-  for (const ev of ['pointerup', 'pointerleave']) b.addEventListener(ev, () => clearTimeout(tmr));
-  b.addEventListener('click', (e) => { if (long) { e.stopImmediatePropagation(); long = false; } }, true); }
+/* 밝기·마크 단추: 짧게 = 원래 동작, 길게(0.5초) 또는 오른쪽 클릭 = 옆에 고르기 창(색 조합 6가지 / 마크 모양 5가지) */
+const colorPick = (b) => ui.pickPop(b, Object.keys(COLOR_SETS).map((k) => { const c = COLOR_SETS[k]; return { act: 'colorSet', val: k, on: (S.disp.colorSet || 'C1') === k, title: k, html: `<span class="sw" style="background:rgb(${c.bg});color:rgb(${c.echo})">●</span>${k.slice(1)}` }; }));
+const markPick = (b) => ui.pickPop(b, MARKS.map((m, i) => ({ act: 'markPick', val: m, on: i === markShape, title: m, html: MARK_SYM[m] })));
+function holdPick(id, fn) { const b = document.getElementById(id); if (!b) return; let tmr = null, long = false, p0 = null;
+  b.addEventListener('pointerdown', (e) => { long = false; p0 = { x: e.clientX, y: e.clientY }; clearTimeout(tmr); tmr = setTimeout(() => { long = true; fn(b); }, 500); });
+  b.addEventListener('pointermove', (e) => { if (p0 && Math.hypot(e.clientX - p0.x, e.clientY - p0.y) > 10) clearTimeout(tmr); });
+  for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) b.addEventListener(ev, () => clearTimeout(tmr));
+  b.addEventListener('contextmenu', (e) => { e.preventDefault(); clearTimeout(tmr); long = true; fn(b); });
+  b.addEventListener('click', (e) => { if (long) { e.stopImmediatePropagation(); e.preventDefault(); long = false; } }, true); }
+holdPick('qb_pal', colorPick); holdPick('qb_mark', markPick);
 const ov = ui.overCanvas;
 ov.addEventListener('pointermove', (e) => { const r = ov.getBoundingClientRect(); cursor = { x: e.clientX - r.left, y: e.clientY - r.top }; if (uiMode === 'ruler' && rulerA) { const b = screenToWorld(cursor), d = brgRng(rulerA.x, rulerA.y, b.x, b.y); ruler = { a: relOf(rulerA.x, rulerA.y), b: relOf(b.x, b.y), label: `${d.brg.toFixed(1)}° ${d.rng.toFixed(3)} NM` }; } });
 ov.addEventListener('pointerleave', () => { cursor = null; });
+/* 편의 기능(실제 장비에는 없음): RANGE 옆 '휠' 단추를 켜면 PPI 위 마우스 휠로 거리 범위 조절. 트랙패드처럼 잘게 오는 휠은 모아서 한 단계씩 */
+{ let acc = 0, lastEv = 0, lastStep = 0; ov.addEventListener('wheel', (e) => { if (!S.disp.wheelRange || !W) return; e.preventDefault(); const now = performance.now(); if (now - lastEv > 300) acc = 0; lastEv = now; acc += e.deltaMode ? e.deltaY * 40 : e.deltaY; if (Math.abs(acc) >= 50 && now - lastStep > 150) { rangeStep(acc > 0 ? 1 : -1); acc = 0; lastStep = now; } }, { passive: false }); }
 ov.addEventListener('click', (e) => {
   if (!W) return; const r = ov.getBoundingClientRect(), pos = { x: e.clientX - r.left, y: e.clientY - r.top }, w = screenToWorld(pos); lastClick = { brg: w.brg, rng: w.rng };
   if (uiMode === 'az1') { azStart = w; uiMode = 'az2'; return; }
@@ -408,10 +443,10 @@ ov.addEventListener('click', (e) => {
   if (uiMode === 'ta1' || uiMode === 'ta2') return;
   const near = nearestTarget(pos);
   if (near) { if (near.kind === 'ais') { const a = ais.list().find((x) => x.id === near.id); if (a.status === 'sleep') ais.activate(near.id); select('A:' + near.id); } else select(near.id); }
-  else if (S.tt.select.startsWith('MANUAL') && e.detail === 2) acquireAt(pos);
+  else if (S.tt.select.startsWith('MANUAL') && echoNear(pos)) acquireAt(pos); // 영상 위를 한 번 누르면 포착(빈 바다를 눌러 헛 물표가 생기지 않게 영상이 있을 때만)
 });
 let azStart = null;
-on('settings', (path) => { V.palette = S.disp.palette; if (path === 'sim.weatherOn') applyWeatherOn(); if (path === 'ui.lang') fit(); saveSettings(); });
+on('settings', (path) => { if (path === 'ctrl.pmMode') { if (S.ctrl.pmMode === 'ON') pmOn(); else if (pmSave) { const m = S.ctrl.pmMode; pmOff(); S.ctrl.pmMode = m; } } V.palette = S.disp.palette; if (path === 'sim.weatherOn') applyWeatherOn(); if (path === 'ui.lang') fit(); saveSettings(); });
 addEventListener('pointerdown', () => { lastUser = performance.now(); alerts.resolve('watch'); }, true);
 addEventListener('keydown', () => { lastUser = performance.now(); alerts.resolve('watch'); }, true);
 function setHidden(h) { hiddenPause = h; last = performance.now(); }
