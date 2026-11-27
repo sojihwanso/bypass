@@ -60,15 +60,18 @@ export function stepShip(s, dt, env = { set: 0, drift: 0 }) {
 export function createTarget({ id, lat, lon, hdg, kn, L = 150, rcs = null, hAnt = 20, h = null, ais = true, legs = [], behavior = 'scripted', name = '', mmsi = null, cls = 'A' }) {
   return { id, lat, lon, hdg: wrap360(hdg), kn, L, rcs, hAnt, h: h ?? Math.max(3, L / 10), ais, legs: [...legs].sort((a, b) => a.t - b.t), behavior, name, mmsi, cls, want: { hdg: wrap360(hdg), kn }, sog: kn, cog: wrap360(hdg), rot: 0 };
 }
-export function stepTarget(g, dt, tNow) {
+/* cur = 조류 {set, drift}: 모든 배가 같이 밀리므로(자선도) 상대 운동은 그대로, 대지 침로·속력(COG·SOG)만 바뀜 */
+export function stepTarget(g, dt, tNow, cur = null) {
   dt = Math.min(dt, 1);
   for (const lg of g.legs) if (tNow >= lg.t) { g.want.hdg = wrap360(lg.hdg); g.want.kn = lg.kn; }
   const e = angDiff(g.want.hdg, g.hdg), maxTurn = 0.5 * dt; // 30°/min
   const turn = clamp(e, -maxTurn, maxTurn);
   g.hdg = wrap360(g.hdg + turn); g.rot = (turn / dt) * 60;
   g.kn += clamp(g.want.kn - g.kn, -0.05 * dt, 0.05 * dt);
-  g.sog = g.kn; g.cog = g.hdg;
-  move(g, g.kn * Math.sin(g.hdg * D2R), g.kn * Math.cos(g.hdg * D2R), dt);
+  let vx = g.kn * Math.sin(g.hdg * D2R), vy = g.kn * Math.cos(g.hdg * D2R);
+  if (cur && cur.drift > 0) { vx += cur.drift * Math.sin(cur.set * D2R); vy += cur.drift * Math.cos(cur.set * D2R); }
+  g.sog = Math.hypot(vx, vy); g.cog = cur && cur.drift > 0 ? wrap360(Math.atan2(vx, vy) / D2R) : g.hdg;
+  move(g, vx, vy, dt);
 }
 
 /* 센서: 자이로 오차(°), LOG 오차(%), GPS 잡음(m, rnd 0..1 두 개로 정규분포 근사) */

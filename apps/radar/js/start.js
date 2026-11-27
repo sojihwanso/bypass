@@ -3,7 +3,7 @@ import { SCENARIOS, freeSetup, createLog, evaluate } from './scenarios.js';
 import { loadLand, pointInLand } from './coast.js';
 import { REGIONS, pickStart, routeClear } from './place.js';
 import { makeTraffic, LEVELS } from './traffic.js';
-import { rollWeather, createWeatherRun, WX_CAP } from './weather.js';
+import { rollWeather, rollCurrent, createWeatherRun, WX_CAP } from './weather.js';
 import { S, saveSettings } from './state.js';
 import { makeProj, velXY, cpaTcpa } from './geo.js';
 import { t, tl, lang } from './i18n.js';
@@ -73,20 +73,21 @@ const around = (lat, lon) => ({ lat0: lat - 0.6, lat1: lat + 0.6, lon0: lon - 0.
 async function prepare(scn, o) {
   const rnd = seeded((o.seed ?? Math.random() * 4294967295) >>> 0 || 1);
   let def = scn, region = null;
+  const wxOn0 = S.sim.weatherOn || scn.fixedWeather, cur = scn.weather && scn.weather.current ? { ...scn.weather.current } : wxOn0 ? rollCurrent(rnd) : { set: 0, drift: 0 }; // 조류를 먼저 정해 항로 확인에 넣음
   if (o.place !== false && !scn.needsCoast) {
     const first = o.region ? REGIONS.find((r) => r.id === o.region) : REGIONS[Math.floor(rnd() * REGIONS.length)];
     // 고른 해역에서 육지로 가지 않는 침로를 못 찾으면 다른 해역도 차례로 시도
     for (const cand of o.region ? [first] : [first, ...REGIONS.filter((r) => r !== first)]) {
       const L = await loadLand(around((cand.box.lat0 + cand.box.lat1) / 2, (cand.box.lon0 + cand.box.lon1) / 2), o.fetchText);
-      if (L.ok) { const p = pickStart({ def: scn, region: cand, rings: L.rings, rnd }); if (p.ok) { def = p.def; region = cand; break; } }
+      if (L.ok) { const p = pickStart({ def: scn, region: cand, rings: L.rings, rnd, cur }); if (p.ok) { def = p.def; region = cand; break; } }
     }
   }
   const L2 = await loadLand(around(def.own.lat, def.own.lon), o.fetchText), P = makeProj(def.own.lat, def.own.lon);
   const onLand = (lat, lon) => L2.ok && pointInLand(L2.rings, lat, lon);
-  const bg = makeTraffic({ level: o.level ?? S.sim.level, own: { ...def.own, kn: def.own.kn ?? 14 }, rnd }).filter((g) => !L2.ok || routeClear(L2.rings, g.lat, g.lon, g.hdg, g.kn, 60, 0.3)); // 주변 배도 1시간 동안 육지로 가지 않는 배만
+  const bg = makeTraffic({ level: o.level ?? S.sim.level, own: { ...def.own, kn: def.own.kn ?? 14 }, rnd }).filter((g) => !L2.ok || routeClear(L2.rings, g.lat, g.lon, g.hdg, g.kn, 60, 0.3, cur)); // 주변 배도 1시간 동안 육지로 가지 않는 배만
   const wxOn = S.sim.weatherOn || scn.fixedWeather;
   const lvl = o.level ?? S.sim.level, weather = wxOn ? rollWeather(rnd, scn.fixedWeather ? def.weather : null, def.own, WX_CAP[lvl] || WX_CAP.hard) : { kind: 'clear', fog: false, visNM: 10, sea: 1, windFrom: Math.round(rnd() * 360), windMs: 3, rain: [], ducting: false, interference: false };
-  if (def.weather && def.weather.current) weather.current = { ...def.weather.current };
+  weather.current = def.weather && def.weather.current ? { ...def.weather.current } : cur;
   return { def: { ...def, targets: [...def.targets, ...bg] }, weather, region, rnd, level: o.level ?? S.sim.level };
 }
 

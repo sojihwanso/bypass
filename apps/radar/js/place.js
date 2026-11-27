@@ -33,13 +33,15 @@ function clear(rings, P, x, y, r) {
   if (r > 0) for (let k = 0; k < 8; k++) if (pointInLand(rings, P.lat(y + r * Math.cos(k * 45 * D)), P.lon(x + r * Math.sin(k * 45 * D)))) return false;
   return true;
 }
-function trackClear(rings, P, x0, y0, hdg, kn, min, buf) {
-  const len = kn * min / 60, sb = Math.sin(hdg * D), cb = Math.cos(hdg * D);
+/* cur(조류)가 있으면 대지 항적(선수 방향 속력 + 조류)으로 확인 */
+function trackClear(rings, P, x0, y0, hdg, kn, min, buf, cur = null) {
+  let vx = kn * Math.sin(hdg * D), vy = kn * Math.cos(hdg * D); if (cur && cur.drift > 0) { vx += cur.drift * Math.sin(cur.set * D); vy += cur.drift * Math.cos(cur.set * D); }
+  const sp = Math.hypot(vx, vy) || 1e-9, len = sp * min / 60, sb = vx / sp, cb = vy / sp;
   for (let d = 0; d <= len + 1e-9; d += 0.5) if (!clear(rings, P, x0 + d * sb, y0 + d * cb, buf)) return false;
   return true;
 }
 /* 위경도 (lat,lon)에서 hdg로 kn 속력 min분 가는 길(둘레 buf NM 포함)이 바다로만 가는지 */
-export function routeClear(rings, lat, lon, hdg, kn, min, buf = 0) { const P = makeProj(lat, lon); return trackClear(rings, P, 0, 0, hdg, kn, min, buf); }
+export function routeClear(rings, lat, lon, hdg, kn, min, buf = 0, cur = null) { const P = makeProj(lat, lon); return trackClear(rings, P, 0, 0, hdg, kn, min, buf, cur); }
 function landWithin(rings, lat, lon, nm) {
   const P = makeProj(lat, lon);
   for (const r of rings) for (let i = 0; i < r.length; i += 2) if (Math.hypot(P.x(r[i]), P.y(r[i + 1])) < nm) return true;
@@ -47,13 +49,13 @@ function landWithin(rings, lat, lon, nm) {
 }
 
 /* 자선은 시나리오 시간 내내(최소 30분, 자유 항해 60분) 1 NM 여유로 육지에 닿지 않는 침로, 상대선도 같은 시간 0.3 NM 여유 */
-export function pickStart({ def, region, rings, rnd, tries = 80 }) {
+export function pickStart({ def, region, rings, rnd, tries = 80, cur = null }) {
   const b = region.box, min = Math.max(def.durationMin || 30, 30);
   for (let i = 0; i < tries; i++) {
     const lat = b.lat0 + rnd() * (b.lat1 - b.lat0), lon = b.lon0 + rnd() * (b.lon1 - b.lon0), dHdg = Math.floor(rnd() * 360);
     const d = rotatePlace(def, { lat, lon, dHdg }), P = makeProj(lat, lon);
-    if (!trackClear(rings, P, 0, 0, d.own.hdg, d.own.kn ?? 14, min, 1)) continue;
-    if (!d.targets.every((g) => trackClear(rings, P, P.x(g.lon), P.y(g.lat), g.hdg, g.kn, min, 0.3))) continue;
+    if (!trackClear(rings, P, 0, 0, d.own.hdg, d.own.kn ?? 14, min, 1, cur)) continue;
+    if (!d.targets.every((g) => trackClear(rings, P, P.x(g.lon), P.y(g.lat), g.hdg, g.kn, min, 0.3, cur))) continue;
     if (region.nearLand && !landWithin(rings, lat, lon, 12)) continue;
     return { def: d, ok: true, dHdg };
   }

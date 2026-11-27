@@ -21,6 +21,8 @@ const MORSE = { A: '.-', B: '-...', C: '-.-.', D: '-..', G: '--.', K: '-.-', M: 
 export function raconCode(letter) { const out = []; let r = 0; for (const c of MORSE[letter] || '-') { const len = c === '-' ? 0.24 : 0.08; out.push([r, r + len]); r += len + 0.08; } return out; }
 
 const C_DB = 44; // 레이더 방정식 상수(교육용으로 물표를 6 dB 강하게): 100 m² 물표가 6 NM에서 약 33 dB
+/* 해상 6 넘게는 해면 반사가 덜 늘어남(해상 8에서 범위 약 5.4 NM) */
+const seaEff = (s) => (s <= 6 ? s : 6 + (s - 6) * 0.6);
 const SEA_K = -1.5; // 해면 반사 세기 보정(원래 0, 교육용 −7에서 사용자 요청으로 −1.5)
 const THR0 = 42; // 수신 문턱 = THR0 − 0.4·GAIN (원래 40과 교육용 44의 중간: 잡음이 조금 더 일찍 보임)
 const LAND_CELL = 0.03, LAND_HALF = 40; // 육지 격자(NM)
@@ -136,7 +138,7 @@ export function rawLine(sc, brgIdx, nBins, maxRng) {
   const land = sc.grid && sc.grid.any ? landLine(sc, cb, brgIdx, nBins, maxRng, 0) : null;
   // 해면 클러터
   if (W.sea > 0) {
-    const ext = 0.6 + 0.7 * W.sea, k = 4.2 * W.sea + SEA_K + (sc.band === 'S' ? -8 : 0) + 3 * Math.cos((brg - W.windFrom) * D2R) + mast;
+    const se = seaEff(W.sea), ext = 0.6 + 0.7 * se, k = 4.2 * se + SEA_K + (sc.band === 'S' ? -8 : 0) + 3 * Math.cos((brg - W.windFrom) * D2R) + mast;
     for (let i = 0; i < nBins; i++) {
       if (R[i] > ext + 1) break;
       if (land && land[i] !== 0) continue;
@@ -244,7 +246,7 @@ export function detect(sc, c, rnd = Math.random) {
   const out = [];
   for (const t of sc.tg) {
     if (!t.visible) continue;
-    const db = t.db0 + pg, sea = sc.weather.sea > 0 && t.R < 0.6 + 0.7 * sc.weather.sea + 1 ? 4.2 * sc.weather.sea + SEA_K + (sc.band === 'S' ? -8 : 0) - 30 * Math.log10(Math.max(t.R, 0.05)) : -99;
+    const db = t.db0 + pg, sea = sc.weather.sea > 0 && t.R < 0.6 + 0.7 * seaEff(sc.weather.sea) + 1 ? 4.2 * seaEff(sc.weather.sea) + SEA_K + (sc.band === 'S' ? -8 : 0) - 30 * Math.log10(Math.max(t.R, 0.05)) : -99;
     const Rs = 0.5 + 0.4 * (c.stcRange ?? 5), stc = c.sea && !c.sea.auto && c.sea.val > 0 ? (c.sea.val / 100) * 45 * Math.max(0, 1 - t.R / Rs) ** ((c.stcCurve ?? 3) / 3) : 0;
     if (db - stc <= thr || db <= sea + 3) continue;
     /* 비(화면 영상과 같은 식): 물표까지 경로 감쇠, 물표 자리 비 반사. FTC는 넓은 반사를 (rv/100)·(평균−2)만큼 빼므로 비와 물표가 같이 내려감.
