@@ -1,5 +1,5 @@
 /* 레이더 시뮬레이터 진입점: 세계(자선·타선·날씨) → 선박 운동 → 안테나 스윕 → 영상 → TT·AIS·경보 → PPI·위층·UI */
-import { S, loadSettings, saveSettings, resetSettings, on, emit } from './state.js';
+import { S, loadSettings, saveSettings, resetSettings, on, emit, setSaveFilter } from './state.js';
 import { createPPI, COLOR_SETS } from './ppi.js';
 import { MARK_TYPES, MARK_BY_ID, isLineMark, markIcon, markDist } from './marks.js';
 import { buildScene, updateScene, rawLine, processLine, detect, N_BRG, RANGES, RING_INT, PULSE_BY_RANGE } from './echo.js';
@@ -19,7 +19,7 @@ import { t, lang } from './i18n.js';
 import { initStart } from './start.js';
 import { initHelp } from './help.js';
 import { COL, piColor } from './overlay.js';
-import { createWeatherRun, stepWeather, windDrift, speedLoss, weatherLabel, currentLabel, WX_CAP, rollWeather } from './weather.js';
+import { createWeatherRun, stepWeather, windDrift, speedLoss, weatherLabel, currentLabel, WX_CAP, rollWeather, rollCurrent } from './weather.js';
 import { refillTraffic, steerTraffic, trafficRing } from './traffic.js';
 import { routeClear } from './place.js';
 
@@ -41,7 +41,7 @@ let offCenter = null, tmOff = { x: 0, y: 0 }, cursor = null, selected = [], uiMo
 let logFn = null, logDump = null, onScenarioTick = null, coastScreen = null, coastKey = '', coastWorld = { land: null, rings: [] };
 const rnd = Math.random;
 const SPEEDS = [1, 2, 4, 8, 16, 32], MARKS = MARK_TYPES.map((t) => t.id);
-let markA = null, markPrev = null; // 선 마크: 첫 점·지금 커서
+let markA = null, markPrev = null, saveT = null; // 선 마크: 첫 점·지금 커서
 let lastClick = null, eduKey = '';
 let markShape = 0, tgtSort = 'rng', tgtTimer = null;
 let wxRun = null, wxPend = [], wxN = 0, trafAcc = 0, steerAcc = 0;
@@ -62,8 +62,9 @@ export function startWorld(def) {
   if (def.own.state) Object.assign(own, def.own.state, { spec: own.spec, auto: { ...def.own.state.auto } });
   W = { def, name: def.name || '', own, targets: def.targets.map((g) => (g.want ? { ...g, legs: [...(g.legs || [])], want: { ...g.want } } : createTarget(g))), weather: { sea: 0, windFrom: 0, windMs: 0, rain: [], ducting: false, interference: false, current: { set: 0, drift: 0 }, ...(def.weather || {}) }, aids: def.aids || [], marks: def.marks || [], t: def.t || 0, land: { rings: [], ok: false, heightM: 100 }, needsCoast: !!def.needsCoast };
   P = makeProj(def.own.lat, def.own.lon);
+  if (pmSave) pmOff(); // 새 세계(시나리오·교육·이어 하기)는 PM을 끄고 원래 설정으로, OFF CENTER는 아래에서 새로 비움
   tracker = createTracker({ max: 100 }); ais = createAIS(); alerts = createAlerts(realNow, () => W.t); tools = createTools(); route = createRoute(); trails.reset(V.rangeNM, S.disp.trails.mode);
-  W.userMarks = []; trafAcc = 0; steerAcc = 0; selected = []; tmOff = { x: 0, y: 0 }; ruler = null; rulerA = null; uiMode = null; azZones = []; piOn = false; speed = 1; offCenter = null; prevScan = new Array(N_BRG); prevRaw = null; ppi.clear();
+  W.userMarks = (def.userMarks || []).map((m) => ({ ...m })); trafAcc = 0; steerAcc = 0; selected = []; tmOff = { x: 0, y: 0 }; ruler = null; rulerA = null; uiMode = null; azZones = []; piOn = false; speed = 1; offCenter = null; prevScan = new Array(N_BRG); prevRaw = null; ppi.clear();
   scene = buildScene({ own: ownScene(), targets: W.targets, weather: W.weather, aids: W.aids, band: S.ctrl.band, pulse: S.ctrl.pulse, seed: (Math.random() * 1e6) | 0 });
   trialSet = { course: own.hdg, speed: own.stw };
   const bb = { lat0: def.own.lat - 0.6, lat1: def.own.lat + 0.6, lon0: def.own.lon - 0.75, lon1: def.own.lon + 0.75 };
@@ -85,8 +86,11 @@ function shipEnv() {
 /* 날씨 변화 켬/끔(헤더·메뉴 공통): 끄면 시나리오 고정 날씨가 아닌 한 바로 잔잔하게 */
 /* 날씨 켜기: 켤 때마다 새 날씨를 무작위로(난이도 상한 안에서, 그냥 맑음만 나오지 않게 다시 뽑음). 끄면 잔잔한 맑음 */
 function rerollWeather() {
-  if (!W || W.weather.fixed) return; const cap = WX_CAP[S.sim.level] || WX_CAP.hard, own = { lat: W.own.lat, lon: W.own.lon, hdg: W.own.hdg }; let w = null;
+  if (!W || W.weather.fixed) return; const lvl = (W.def.traffic && W.def.traffic.level) || S.sim.level, cap = WX_CAP[lvl] || WX_CAP.hard, own = { lat: W.own.lat, lon: W.own.lon, hdg: W.own.hdg }; let w = null;
   for (let i = 0; i < 8; i++) { w = rollWeather(Math.random, null, own, cap); if (!(w.kind === 'clear' && !w.fog) && w.kind !== W.weather.kind) break; }
+  /* 새 조류로 시나리오 상대선(주변 배 bg는 스스로 피함)이 30분 안에 육지로 밀리면 다른 조류를, 끝내 없으면 조류 0 */
+  if (W.land.ok) { const ok = (c) => W.targets.every((g) => String(g.id).startsWith('bg') || routeClear(W.land.rings, g.lat, g.lon, g.hdg, g.kn ?? 0, 30, 0.2, c));
+    if (!ok(w.current)) { let c = null; for (let i = 0; i < 12 && !c; i++) { const t = rollCurrent(Math.random); if (ok(t)) c = t; } w.current = c || { set: 0, drift: 0 }; } }
   Object.assign(W.weather, w); syncSceneWeather(); wxRun = createWeatherRun({ rnd: Math.random, enabled: true, cap });
 }
 function applyWeatherOn() { saveSettings(); if (S.sim.weatherOn) rerollWeather(); if (wxRun) wxRun.enabled = S.sim.weatherOn; if (!S.sim.weatherOn && W && !W.weather.fixed) { Object.assign(W.weather, { kind: 'clear', fog: false, sea: 1, windMs: 3, rain: [], ducting: false, current: { set: 0, drift: 0 } }); syncSceneWeather(); } }
@@ -175,7 +179,8 @@ function tick(dt) {
   scene.band = S.ctrl.band; scene.pulse = S.ctrl.pulse; scene.loss = +S.ctrl.pmLoss || 0;
   if (pmSave) pmLock(); scene.pm = pmSave ? { on: true, arcs: +S.ctrl.pmArcs || 5, relBrg: PM_REL, loss: scene.loss } : null;
   // 포착(플로팅)한 물표는 영상을 더 선명하게: TT 위치에서 0.2 NM 안의 배
-  scene.boost = new Set(); for (const g of tracker.targets()) { if (g.state === 'lost') continue; let best = null, bd = 0.2; for (const s of W.targets) { const d = Math.hypot(P.x(s.lon) - g.x, P.y(s.lat) - g.y); if (d < bd) { bd = d; best = s; } } if (best) scene.boost.add(best.id); }
+  if (!scene.boost || Math.abs(W.t - (scene.boostAt ?? -99)) > 0.5) { scene.boostAt = W.t; // 포착 물표 찾기는 0.5초(시뮬 시간)마다
+    scene.boost = new Set(); for (const g of tracker.targets()) { if (g.state === 'lost') continue; let best = null, bd = 0.2; for (const s of W.targets) { const d = Math.hypot(P.x(s.lon) - g.x, P.y(s.lat) - g.y); if (d < bd) { bd = d; best = s; } } if (best) scene.boost.add(best.id); } }
   updateScene(scene, ownScene(), W.targets, W.t);
   // 안테나 스윕(실시간 2.5 s/회전)
   // 버퍼 거리는 오프셋 크기와 상관없이 고정(매 프레임 바뀌면 PPI가 매번 지워짐) — 오프셋 최대 0.75 R
@@ -327,6 +332,8 @@ const PM_REL = 135; // PM 장치가 있는 상대 방위(가정)
 var pmSave = null; // 켜기 전 설정(끄면 되돌림). null이면 PM 꺼짐
 const PM_FIX = { sea: { auto: false, val: 0 }, rain: { auto: false, val: 0 }, tune: { auto: true }, ace: false, es: 0, eav: 0, ir: 2, noiseRej: false, secondRej: false, wiper: 0, pulse: 'L' };
 function pmLock() { const c = S.ctrl; c.sea = { ...PM_FIX.sea }; c.rain = { ...PM_FIX.rain }; c.tune.auto = true; for (const k of ['ace', 'es', 'eav', 'ir', 'noiseRej', 'secondRej', 'wiper', 'pulse']) c[k] = PM_FIX[k]; }
+/* PM 중에 설정이 저장되면 PM 값 대신 켜기 전 값을 저장(창을 닫아도 원래 설정이 남게) */
+setSaveFilter((o) => { if (!pmSave) return o; Object.assign(o.ctrl, JSON.parse(JSON.stringify(pmSave.ctrl)), { pmMode: 'OFF' }); o.disp.rangeNM = pmSave.range; o.disp.motion = pmSave.motion; return o; });
 function pmOn() {
   if (pmSave) return true;
   if (radar.state !== 'tx') { S.ctrl.pmMode = 'OFF'; ui.dialog('PM', `<p>${lang() === 'en' ? 'Set the radar to TX first. The performance monitor works only while transmitting.' : '먼저 송신(TX)으로 바꾸세요. 성능 감시는 송신 중에만 켜져요.'}</p>`); return false; }
@@ -344,10 +351,12 @@ function vecStep(d) { const i = VEC_STEPS.indexOf(S.tt.vecMin), j = i < 0 ? VEC_
 function rangeStep(d) { if (pmSave) { pmOff(); return; } const i = RANGES.indexOf(S.disp.rangeNM); setRange(RANGES[Math.max(0, Math.min(RANGES.length - 1, i + d))]); }
 function setRange(r) { S.disp.rangeNM = r; if (!PULSE_BY_RANGE[r].includes(S.ctrl.pulse)) S.ctrl.pulse = DEFAULT_PULSE[r]; trails.reset(r, S.disp.trails.mode, trails.mode === 'TRUE' ? trails.origin() : undefined); tmOff = { x: 0, y: 0 }; coastKey = ''; saveSettings(); }
 function screenToWorld(pos) { const p = ppi.fromScreen(pos.sx ?? pos.x, pos.sy ?? pos.y), oxy = ownXY(); const x = oxy.x + p.rng * Math.sin(p.brg * D), y = oxy.y + p.rng * Math.cos(p.brg * D); return { ...p, x, y, lat: P.lat(y), lon: P.lon(x) }; }
+/* 화면에 그려지는 AIS만(표시 끔·거리·속력·Class B 필터 반영) — 숨은 AIS가 클릭을 가로채지 않게 */
+function visibleAis() { return S.ais.disp ? ais.list({ maxRngOn: S.ais.maxRngOn, maxRng: S.ais.maxRng, minSpdOn: S.ais.minSpdOn, minSpd: S.ais.minSpd, exceptB: S.ais.exceptB }).filter((a) => a.x !== undefined) : []; }
 function nearestTarget(pos, px = 16) {
   let best = null, bd = px; const s = (b, r) => ppi.toScreen(b, r), q = { x: pos.sx ?? pos.x, y: pos.sy ?? pos.y };
   for (const g of tracker.targets()) { const r = relOf(g.x, g.y), p = s(r.brg, r.rng), d = Math.hypot(p.x - q.x, p.y - q.y); if (d < bd) { bd = d; best = { kind: 'tt', id: g.id }; } }
-  for (const a of ais.list()) if (a.x !== undefined) { const p = s(a.brg, a.rng), d = Math.hypot(p.x - q.x, p.y - q.y); if (d < bd) { bd = d; best = { kind: 'ais', id: a.id }; } }
+  for (const a of visibleAis()) { const p = s(a.brg, a.rng), d = Math.hypot(p.x - q.x, p.y - q.y); if (d < bd) { bd = d; best = { kind: 'ais', id: a.id }; } }
   return best;
 }
 /* 고른 물표(최대 4): A·B·C·D 글자를 붙여 PPI와 정보창에서 같은 글자로 구분. 넘치면 가장 먼저 고른 것을 뺌 */
@@ -432,7 +441,7 @@ function cursorAct(id, pos) {
   if (id === 'ruler') { rulerA = w; uiMode = 'ruler'; return; }
   if (id === 'off') { const G = ppi.geom(), R = G.R / G.dpr, cx = G.cx / G.dpr, cy = G.cy / G.dpr, ox = ((pos.sx ?? pos.x) - cx) / R, oy = ((pos.sy ?? pos.y) - cy) / R, m = Math.hypot(ox, oy); offCenter = m > 0.75 ? { x: (ox / m) * 0.75, y: (oy / m) * 0.75 } : { x: ox, y: oy }; return; }
   if (id === 'center') { offCenter = null; tools.ebl[0].origin = null; tools.vrm[0].origin = null; return; }
-  if (id === 'markDel') { let bi = -1, bd = 20; const scr = (la, lo) => { const q = relOf(P.x(lo), P.y(la)); return ppi.toScreen(q.brg, q.rng); }; W.userMarks.forEach((k, i) => { const d = markDist(k.shape, scr(k.lat, k.lon), k.lat2 != null ? scr(k.lat2, k.lon2) : null, pos); if (d < bd) { bd = d; bi = i; } }); if (bi >= 0) W.userMarks.splice(bi, 1); return; }
+  if (id === 'markDel') { const q = { x: pos.sx ?? pos.x, y: pos.sy ?? pos.y }; let bi = -1, bd = 20; const scr = (la, lo) => { const q = relOf(P.x(lo), P.y(la)); return ppi.toScreen(q.brg, q.rng); }; W.userMarks.forEach((k, i) => { const d = markDist(k.shape, scr(k.lat, k.lon), k.lat2 != null ? scr(k.lat2, k.lon2) : null, q); if (d < bd) { bd = d; bi = i; } }); if (bi >= 0) W.userMarks.splice(bi, 1); return; }
   if (id === 'drop') { tools.drops.push({ lat: w.lat, lon: w.lon }); if (tools.drops.length > 20) tools.drops.shift(); return; }
   if (id === 'anchor') { tools.anchor = { lat: W.own.lat, lon: W.own.lon }; S.alert.anchorOn = true; return; }
 }
@@ -478,7 +487,7 @@ ov.addEventListener('click', (e) => {
   else if (S.tt.select.startsWith('MANUAL') && echoNear(pos)) acquireAt(pos); // 영상 위를 한 번 누르면 포착(빈 바다를 눌러 헛 물표가 생기지 않게 영상이 있을 때만)
 });
 let azStart = null;
-on('settings', (path) => { if (path === 'ctrl.pmMode') { if (S.ctrl.pmMode === 'ON') pmOn(); else if (pmSave) { const m = S.ctrl.pmMode; pmOff(); S.ctrl.pmMode = m; } } V.palette = S.disp.palette; if (path === 'sim.weatherOn') applyWeatherOn(); if (path === 'ui.lang') fit(); saveSettings(); });
+on('settings', (path) => { if (path === 'ctrl.pmMode') { if (S.ctrl.pmMode === 'ON') pmOn(); else if (pmSave) { const m = S.ctrl.pmMode; pmOff(); S.ctrl.pmMode = m; } } V.palette = S.disp.palette; if (path === 'sim.weatherOn') applyWeatherOn(); if (path === 'ui.lang') fit(); clearTimeout(saveT); saveT = setTimeout(saveSettings, 400); }); // 휠을 굴릴 때마다 저장하지 않게 모아서
 addEventListener('pointerdown', () => { lastUser = performance.now(); alerts.resolve('watch'); }, true);
 addEventListener('keydown', () => { lastUser = performance.now(); alerts.resolve('watch'); }, true);
 function setHidden(h) { hiddenPause = h; last = performance.now(); }
@@ -511,7 +520,7 @@ initKeys(keyHandlers);
 /* ---------- 자동 저장(15 s)·이어 하기 ---------- */
 const RESUME = 'radar-resume';
 /* 저장은 시나리오·자유 항해로 시작한 항해(def.save)만. 시작 화면 뒤 배경·교육 과정은 이전 항해 저장을 덮지 않음 */
-function snapshot() { const o = W.own; return { scn: W.def.scnId || null, log: logDump ? logDump() : null, def: { ...W.def, t: W.t, own: { lat: o.lat, lon: o.lon, hdg: o.hdg, tele: o.tele, state: { stw: o.stw, sog: o.sog, cog: o.cog, rudder: o.rudder, rudderOrder: o.rudderOrder, r: o.r, rot: o.rot, auto: { ...o.auto } } }, targets: W.targets.map((g) => ({ ...g })), weather: W.weather }, radar: radar.state }; }
+function snapshot() { const o = W.own; return { scn: W.def.scnId || null, log: logDump ? logDump() : null, def: { ...W.def, t: W.t, own: { lat: o.lat, lon: o.lon, hdg: o.hdg, tele: o.tele, state: { stw: o.stw, sog: o.sog, cog: o.cog, rudder: o.rudder, rudderOrder: o.rudderOrder, r: o.r, rot: o.rot, auto: { ...o.auto } } }, targets: W.targets.map((g) => ({ ...g })), weather: W.weather, userMarks: W.userMarks }, radar: radar.state }; }
 function saveNow() { if (!W || !W.def.save) return; try { localStorage.setItem(RESUME, JSON.stringify(snapshot())); } catch (e) {} }
 function resume() { try { const s = JSON.parse(localStorage.getItem(RESUME) || 'null'); if (!s || !s.def) return null; logFn = null; logDump = null; onScenarioTick = null; startWorld(s.def); setRadar('stby'); wxRun = createWeatherRun({ rnd: Math.random, enabled: S.sim.weatherOn, cap: WX_CAP[(s.def.traffic && s.def.traffic.level) || 'hard'] || WX_CAP.hard }); wxPend = []; return s; } catch (e) { return null; } }
 setInterval(() => { if (W && !paused) saveNow(); }, 15000);
@@ -566,7 +575,7 @@ if (TEST) {
     radar: { set: setRadar, toggle: toggleTx, get state() { return radar.state; }, get warmLeft() { return radar.warmLeft; } }, world: () => W, tracker: { targets: () => tracker.targets() },
     newWorld: (o) => { if (S.ctrl.gain < 20) S.ctrl.gain = 65; startWorld(freeDef(o)); }, /* 점검용 세계는 영상이 보이게(시작 화면의 GAIN 0과 별개) */ tgtScreen: (id) => { const g = W.targets.find((x) => x.id === id), r = relOf(P.x(g.lon), P.y(g.lat)), p = ppi.toScreen(r.brg, r.rng); return { sx: p.x, sy: p.y }; },
     coastDebug: () => { if (!coastScreen || !W.land.rings.length) return null; let maxErr = 0, n = 0; const r = W.land.rings[0], step = Math.max(2, Math.floor(r.length / 2 / 400) * 2); coastScreen[0].forEach((p, j) => { const i = j * step, q = relOf(P.x(r[i]), P.y(r[i + 1])), t = ppi.toScreen(q.brg, q.rng); maxErr = Math.max(maxErr, Math.hypot(t.x - p.x, t.y - p.y)); n++; }); return { n, maxErr }; },
-    cursorAct, menuAction, trails: () => trails, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,
+    onLand: (lat, lon) => !!(W && W.land.ok && pointInLand(W.land.rings, lat, lon)), cursorAct, menuAction, trails: () => trails, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,
     startScenario: (id, o) => starter.startScenario(id, o), resumeVoyage: () => starter.resumeVoyage(), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), finishNow: () => starter.finishNow(), shouldBeep, antenna: () => ant, relayout: () => { fit(); }, layoutMode: () => ui.layoutMode(), qbInside: () => ui.qbInside(), forceState: (o) => { if (o.az) { azZones = o.az; tracker.setZones(o.az); } if (o.speed) speed = o.speed; if (o.pi !== undefined) piOn = o.pi; }, uiState: () => ({ az: azZones.length > 0, speed, pi: piOn, off: !!offCenter }), tickSim, sim: { setAuto, setRudderOrder, setTelegraph }, menuItems: () => MENU.flatMap((m) => m.items.map((i) => (lang() === 'en' ? i.en : i.ko))),
   };
   setRadar('tx');

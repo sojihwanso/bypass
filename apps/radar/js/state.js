@@ -69,8 +69,11 @@ export function loadSettings(storage) {
   reset();
   try { const st = store(storage), raw = st && st.getItem(KEY); if (raw) merge(S, DEFAULTS, JSON.parse(raw)); validate(); } catch (e) { reset(); }
 }
+/* 저장 직전 고치기(예: PM 시험 중에는 PM이 바꾼 값 대신 원래 설정을 저장) */
+let saveFilter = null;
+export const setSaveFilter = (f) => { saveFilter = f; };
 export function saveSettings(storage) {
-  try { const st = store(storage), o = {}; for (const k of Object.keys(DEFAULTS)) o[k] = S[k]; st && st.setItem(KEY, JSON.stringify(o)); } catch (e) { /* 저장 불가 브라우저 */ }
+  try { const st = store(storage); let o = {}; for (const k of Object.keys(DEFAULTS)) o[k] = S[k]; if (saveFilter) o = saveFilter(JSON.parse(JSON.stringify(o))); st && st.setItem(KEY, JSON.stringify(o)); } catch (e) { /* 저장 불가 브라우저 */ }
 }
 export function resetSettings() { reset(); }
 const bus = {};

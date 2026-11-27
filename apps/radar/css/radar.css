@@ -467,3 +467,5 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--rule);border
 [data-layout="rside"] .tr{width:var(--sidew)}
 #bxPi{width:196px}
 #bxTgtTools{width:196px;justify-content:flex-end}
+.tslot .tg{border:0;background:none;color:var(--muted);cursor:pointer;padding:0 3px;font-size:11px;line-height:1}
+.tslot .tg:focus-visible,.tslot .x:focus-visible{outline:2px solid var(--accent);outline-offset:1px}

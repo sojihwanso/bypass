@@ -176,9 +176,27 @@ export function initUI(root, actions) {
     const a = el.dataset.act;
     if (internal[a]) internal[a](el, e); else if (actions[a]) actions[a](el, e);
   });
-  /* 물표 정보 칸: 누르는 순간(pointerdown) 처리 — 1초마다 다시 그려져도 눌림이 사라지지 않게 */
-  root.addEventListener('pointerdown', (e) => { if (e.target.closest('#tDetail')) { const cx = e.target.closest('[data-slot-x]'); if (cx) { e.preventDefault(); actions.slotToggle && actions.slotToggle(cx.dataset.slotX); } return; } /* 전체 정보 창: ×는 창만 닫기 */ const x = e.target.closest('[data-slot-x]'); if (x) { e.preventDefault(); actions.slotClose && actions.slotClose(x.dataset.slotX); return; } const sl = e.target.closest('[data-slot]'); if (sl && e.button === 0) actions.slotToggle && actions.slotToggle(sl.dataset.slot); });
-  root.addEventListener('keydown', (e) => { const sl = e.target.closest && e.target.closest('[data-slot]'); if (sl && (e.key === 'Enter' || e.key === ' ') && e.target === sl) { e.preventDefault(); e.stopPropagation(); const id = sl.dataset.slot; actions.slotToggle && actions.slotToggle(id); const n = document.querySelector(`[data-slot="${CSS.escape(id)}"]`); n && n.focus(); } });
+  /* 물표 정보 칸: 마우스는 누르는 순간(1초에 여러 번 다시 그려져도 눌림이 사라지지 않게), 터치는 손가락을 떼는 순간(10px 넘게 움직이면 스크롤로 보고 무시) */
+  let slotTouch = null;
+  root.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('#tDetail')) { const cx = e.target.closest('[data-slot-x]'); if (cx) { e.preventDefault(); actions.slotToggle && actions.slotToggle(cx.dataset.slotX); } return; } /* 전체 정보 창: ×는 창만 닫기 */
+    const x = e.target.closest('[data-slot-x]'); if (x) { e.preventDefault(); actions.slotClose && actions.slotClose(x.dataset.slotX); return; }
+    const sl = e.target.closest('[data-slot]'); if (!sl || e.button !== 0) return;
+    if (e.pointerType === 'mouse' || !e.pointerType) actions.slotToggle && actions.slotToggle(sl.dataset.slot); else slotTouch = { id: sl.dataset.slot, pid: e.pointerId, x: e.clientX, y: e.clientY };
+  });
+  root.addEventListener('pointermove', (e) => { if (slotTouch && e.pointerId === slotTouch.pid && Math.hypot(e.clientX - slotTouch.x, e.clientY - slotTouch.y) > 10) slotTouch = null; });
+  root.addEventListener('pointerup', (e) => { if (slotTouch && e.pointerId === slotTouch.pid) { const id = slotTouch.id; slotTouch = null; actions.slotToggle && actions.slotToggle(id); } });
+  root.addEventListener('pointercancel', () => { slotTouch = null; });
+  /* 키보드: 칸의 ▸ 단추 Enter/Space = 전체 정보, × = 선택 해제, 전체 정보 창에서 Esc = 닫기 */
+  root.addEventListener('keydown', (e) => {
+    const card = e.target.closest && e.target.closest('#tDetail');
+    if (card && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); const id = card.dataset.id; actions.slotToggle && actions.slotToggle(id); const b = document.querySelector(`[data-slot-tg="${CSS.escape(id)}"]`); b && b.focus(); return; }
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const tg = e.target.closest && e.target.closest('[data-slot-tg]'), x = e.target.closest && e.target.closest('[data-slot-x]');
+    if (x && !x.closest('#tDetail')) { e.preventDefault(); e.stopPropagation(); actions.slotClose && actions.slotClose(x.dataset.slotX); const f = document.querySelector('#tSlots [data-slot-tg]'); if (f) f.focus(); return; }
+    if (x) { e.preventDefault(); e.stopPropagation(); actions.slotToggle && actions.slotToggle(x.dataset.slotX); return; }
+    if (tg) { e.preventDefault(); e.stopPropagation(); actions.slotToggle && actions.slotToggle(tg.dataset.slotTg); const c = $('#tDetail'); if (c) c.focus(); }
+  });
   /* ---- 휠: 상자 위에서 값 조정 ---- */
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   root.addEventListener('wheel', (e) => {
@@ -331,10 +349,13 @@ export function initUI(root, actions) {
     }
     $('#vClock').textContent = d.clock || ''; $('#vEl').textContent = d.elapsed || '-';
     // 물표 2칸
+    const ae = document.activeElement, fsel = ae && ae.closest && ae.closest('#tSlots') ? (ae.dataset.slotTg ? `[data-slot-tg="${CSS.escape(ae.dataset.slotTg)}"]` : ae.dataset.slotX ? `[data-slot-x="${CSS.escape(ae.dataset.slotX)}"]` : null) : null;
     setHTML('#tSlots', d.tgt && d.tgt.length ? d.tgt.map((g) => slotHTML({ ...g, open: false, sel: g.open }, ll)).join('') : `<p class="empty tgt-empty">${esc(t('noTgt'))}</p>`); // 고른 물표가 없을 땐 상자 없이 안내 글만
-    { const og = (d.tgt || []).find((g) => g.open); let card = $('#tDetail');
-      if (!og) { if (card) card.remove(); }
-      else { if (!card) { card = document.createElement('div'); card.id = 'tDetail'; card.className = 'tdetail'; card.setAttribute('role', 'dialog'); root.append(card); }
+    if (fsel && document.activeElement !== document.querySelector(fsel)) { const f = document.querySelector(fsel); if (f) f.focus({ preventScroll: true }); } // 다시 그려도 키보드 초점 유지
+    { const og = (d.tgt || []).find((g) => g.open); let card = $('#tDetail'); const slr = $('#tSlots').getBoundingClientRect(), slVis = slr.width > 0 && (innerWidth > 1000 || $('#rp').classList.contains('open')); // 좁은 화면에서 정보창(서랍)을 닫으면 카드도 숨김
+      if (!og || !slVis) { if (card) card.remove(); }
+      else { if (!card) { card = document.createElement('div'); card.id = 'tDetail'; card.className = 'tdetail'; card.setAttribute('role', 'dialog'); card.tabIndex = -1; root.append(card); }
+        card.dataset.id = og.id; card.setAttribute('aria-label', `${og.letter} ${og.label} · ${lang() === 'en' ? 'all data (Esc to close)' : '전체 정보(Esc로 닫기)'}`);
         setHTML('#tDetail', slotHTML(og, ll)); const sl = $('#tSlots').getBoundingClientRect(), w = card.offsetWidth || 320, h = card.offsetHeight;
         let x = sl.left - w - 10; if (x < 8) x = Math.min(innerWidth - w - 8, sl.right + 10); const y = Math.max(8, Math.min(sl.top, innerHeight - h - 8)); card.style.left = x + 'px'; card.style.top = y + 'px'; } }
     $('#vCounts').textContent = `TT ${d.ttN ?? 0} · AIS ${d.aisN ?? 0}`;
@@ -347,7 +368,7 @@ export function initUI(root, actions) {
   function slotHTML(g, ll) {
     const en = lang() === 'en', row = (k, v) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`, tc = (v) => (v == null ? '-' : v < 0 ? '--' : f1(v, 1) + ' min');
     const ess = row('BRG', deg(g.brg)) + row('RNG', f1(g.rng, 2) + ' NM') + row('COG', deg(g.cog)) + row('SOG', f1(g.sog) + ' kn') + row('CPA', g.cpa == null ? '-' : f1(g.cpa, 2) + ' NM') + row('TCPA', tc(g.tcpa));
-    const head = `<div class="nm"><b class="tlet">${esc(g.letter)}</b><span>${g.kind === 'ais' ? 'AIS ' : ''}${esc(g.label)}</span><span class="tg">${g.open ? '' : g.sel ? '◂' : '▸'}</span><button type="button" class="x" data-slot-x="${esc(g.id)}" aria-label="${en ? 'Deselect' : '선택 해제'}">×</button></div>`;
+    const head = `<div class="nm"><b class="tlet">${esc(g.letter)}</b><span>${g.kind === 'ais' ? 'AIS ' : ''}${esc(g.label)}</span>${g.open ? '' : `<button type="button" class="tg" data-slot-tg="${esc(g.id)}" aria-expanded="${!!g.sel}" aria-label="${en ? 'All data' : '전체 정보'} ${esc(g.letter)}">${g.sel ? '◂' : '▸'}</button>`}<button type="button" class="x" data-slot-x="${esc(g.id)}" aria-label="${en ? 'Deselect' : '선택 해제'}">×</button></div>`;
     let more = '';
     if (g.open) {
       const sec = (title, body) => `<h5>${esc(title)}</h5><dl class="kv">${body}</dl>`, calc = row('BCR', g.bcr == null ? '-' : f1(g.bcr, 2) + ' NM') + row('BCT', tc(g.bct));
@@ -362,7 +383,7 @@ export function initUI(root, actions) {
           + `<p class="note">${en ? 'Radar tracking only measures position and motion. Name, size and voyage data come from AIS.' : 'TT는 위치·움직임만 재요. 선명·크기·항해 정보는 AIS로만 알 수 있어요.'}</p>`;
       }
     }
-    return `<div class="tslot${g.danger ? ' danger' : ''}${g.open ? ' open' : ''}${g.sel ? ' sel' : ''}" data-slot="${esc(g.id)}" tabindex="0" role="button" aria-expanded="${!!g.open}" title="${en ? 'Click: all data' : '누르면 전체 정보'}">${head}<dl class="kv">${ess}</dl>${more}</div>`;
+    return `<div class="tslot${g.danger ? ' danger' : ''}${g.open ? ' open' : ''}${g.sel ? ' sel' : ''}" ${g.open ? '' : `data-slot="${esc(g.id)}"`} role="group" aria-label="${esc(g.letter)} ${esc(g.label)}" title="${g.open ? '' : en ? 'Click: all data' : '누르면 전체 정보'}">${head}<dl class="kv">${ess}</dl>${more}</div>`;
   }
   /* 내용이 같으면 다시 그리지 않음(단추를 누르는 사이 요소가 바뀌어 클릭이 사라지지 않게) */
   function setHTML(sel, html) { const el = $(sel); if (el && el._h !== html) { el._h = html; el.innerHTML = html; } }
