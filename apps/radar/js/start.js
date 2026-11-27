@@ -105,7 +105,7 @@ async function runScenario(scn, o = {}) {
   });
   if (!o.skipBrief) {
     R.setPaused(true);
-    const d = ownDlg('briefDlg', `${scn.id} · ${tl(scn)}`, `<p class="rule-chip">COLREG ${scn.rule}</p><p>${esc(tl(scn.brief))}</p><p class="small">${en ? 'Pass: every ship passes at 0.3 NM or more, no collision, no grounding.' : '합격: 모든 상대선과 0.3 NM 이상 떨어져 지나가고, 충돌·좌초가 없으면 돼요.'}</p>`, `<button class="btn pri" type="button" data-go="1">${en ? 'Start' : '시작'}</button>`);
+    const d = ownDlg('briefDlg', `${scn.id} · ${tl(scn)}`, `<p class="rule-chip">COLREG ${scn.rule}</p><p>${esc(tl(scn.brief))}</p><p class="small">${en ? 'Pass: every scenario ship passes at 0.3 NM or more, no collision, no grounding. Surrounding traffic keeps clear of you on its own and is not graded for distance.' : '합격: 시나리오 상대선과 모두 0.3 NM 이상 떨어져 지나가고, 충돌·좌초가 없으면 돼요. 주변 배(난이도)는 자선을 알아서 피하고, 거리는 합격 판정에 넣지 않아요.'}</p>`, `<button class="btn pri" type="button" data-go="1">${en ? 'Start' : '시작'}</button>`);
     d.onclick = (e) => { if (e.target.closest('[data-go]') || e.target.closest('[data-x]')) d.close(); };
     d.onclose = () => R.setPaused(false);
   }
@@ -117,6 +117,7 @@ function finish(r) {
   const fa = r.firstAction;
   const html = `<div class="result ${r.pass ? 'ok' : 'ng'}"><b class="verdict">${r.pass ? (en ? 'PASS' : '합격') : en ? 'NOT PASSED' : '불합격'}</b>
     <dl class="kv"><dt>${en ? 'Closest approach' : '가장 가까이 지난 거리'}</dt><dd>${r.minRange ? r.minRange.nm.toFixed(2) + ' NM' : '-'} · ${esc(nm)} · ${r.minRange ? mmss(r.minRange.t) : ''}</dd>
+    ${r.bgMin ? `<dt>${en ? 'Closest surrounding ship (not graded)' : '주변 배와 가장 가까이(참고)'}</dt><dd>${r.bgMin.nm.toFixed(2)} NM · ${esc(r.bgMin.name || (en ? 'no AIS' : 'AIS 없는 배'))} · ${mmss(r.bgMin.t)}</dd>` : ''}
     <dt>${en ? 'First action' : '첫 조치'}</dt><dd>${fa ? `${mmss(fa.t)} · TCPA ${fa.tcpa != null ? fa.tcpa.toFixed(1) + ' min' : '-'} · ${fa.rng != null ? fa.rng.toFixed(2) + ' NM' : ''} · ${fa.dHdg >= 0 ? (en ? 'stbd ' : '우현 ') : en ? 'port ' : '좌현 '}${Math.abs(fa.dHdg).toFixed(0)}°${fa.dSpd < -0.5 ? ` · ${fa.dSpd.toFixed(1)} kn` : ''}` : en ? 'none' : '없음'}</dd>
     <dt>${en ? 'Collision / grounding' : '충돌 / 좌초'}</dt><dd>${r.collision ? (en ? 'collision' : '충돌') : '-'} / ${r.grounding ? (en ? 'grounded' : '좌초') : '-'}</dd></dl>
     <ul class="notes">${r.notes.map((n) => `<li>${esc(tl(n))}</li>`).join('')}</ul></div>`;

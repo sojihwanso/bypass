@@ -1,8 +1,9 @@
 /* 충돌 회피 시나리오 5개 + 자유 항해, 기록·평가(순수 계산)
-   합격 = 모든 상대선과의 실제 최소 거리 ≥ 0.3 NM, 충돌·좌초 없음. TCPA·조치 시점은 기록만(사용자 결정).
+   합격 = 시나리오 상대선과의 실제 최소 거리 ≥ 0.3 NM, 충돌·좌초 없음. 주변 배(bg*, 난이도 교통량)는 거리 판정에서 빼고 참고로만 알림(충돌은 포함). TCPA·조치 시점은 기록만(사용자 결정).
    상대선 위치는 '자선이 그대로 가면 tc분 뒤 부딪히는 점'에서 거꾸로 계산한다. */
 import { makeProj, velXY, cpaTcpa, brgRng, angDiff, wrap360 } from './geo.js';
 import { createShip, createTarget, stepShip, stepTarget, TELEGRAPH } from './sim.js';
+import { steerTraffic } from './traffic.js';
 import { pointInLand } from './coast.js';
 
 export const PASS_NM = 0.3;
@@ -58,7 +59,7 @@ export function freeSetup({ lat = 33.5, lon = 124.6, nTargets = 4, sea = 2, rain
 
 /* 기록: 1초마다 표본 */
 export function createLog(scn) {
-  const min = {}; let collision = false, grounding = false, first = null, own0 = null, t0Act = null, after = null;
+  const min = {}, isBg = (g) => String(g.id).startsWith('bg'); let bgMin = null, collisionBg = null, collision = false, grounding = false, first = null, own0 = null, t0Act = null, after = null;
   return {
     sample(w) {
       const o = w.own, P = makeProj(o.lat, o.lon), ov = velXY(o.cog ?? o.hdg, o.sog ?? o.stw);
@@ -66,8 +67,9 @@ export function createLog(scn) {
       let near = null;
       for (const g of w.targets) {
         const x = P.x(g.lon), y = P.y(g.lat), d = Math.hypot(x, y);
+        if (d * 1852 < ((o.spec?.L ?? 190) + (g.L ?? 100)) / 2) { collision = true; if (isBg(g)) collisionBg = g.name || g.id; }
+        if (isBg(g)) { if (!bgMin || d < bgMin.nm) bgMin = { id: g.id, name: g.name || '', nm: d, t: w.t }; continue; }
         if (!min[g.id] || d < min[g.id].nm) min[g.id] = { id: g.id, nm: d, t: w.t };
-        if (d * 1852 < ((o.spec?.L ?? 190) + (g.L ?? 100)) / 2) collision = true;
         const c = cpaTcpa({ x: 0, y: 0 }, ov, { x, y }, velXY(g.cog ?? g.hdg, g.sog ?? g.kn));
         if (c.tcpa >= 0 && (!near || c.cpa < near.cpa)) near = { id: g.id, cpa: c.cpa, tcpa: c.tcpa, rng: d };
       }
@@ -75,7 +77,7 @@ export function createLog(scn) {
       if (!first && (Math.abs(angDiff(o.hdg, own0.hdg)) > 5 || o.tele !== own0.tele)) { first = { t: w.t, tcpa: near ? near.tcpa : null, rng: near ? near.rng : null, dHdg: 0, dSpd: 0 }; t0Act = { hdg: o.hdg, stw: o.stw, t: w.t, hdg0: own0.hdg, stw0: o.stw }; }
       if (first && w.t - t0Act.t <= 300) { const dh = angDiff(o.hdg, t0Act.hdg0); if (Math.abs(dh) > Math.abs(first.dHdg)) first.dHdg = dh; first.dSpd = o.stw - (scnKn(scn) ?? o.stw); }
     },
-    result() { const m = Object.values(min).sort((a, b) => a.nm - b.nm)[0] || null; return { minRange: m, collision, grounding, firstAction: first, scn }; },
+    result() { const m = Object.values(min).sort((a, b) => a.nm - b.nm)[0] || null; return { minRange: m, bgMin, collisionBg, collision, grounding, firstAction: first, scn }; },
   };
 }
 const scnKn = (scn) => (scn && scn.own ? TELEGRAPH[scn.own.tele]?.kn : null);
@@ -85,6 +87,8 @@ export function evaluate(r) {
   const pass = !!r.minRange && r.minRange.nm >= PASS_NM && !r.collision && !r.grounding;
   const s = r.scn || {}, notes = [];
   const fa = r.firstAction;
+  if (r.collision && r.collisionBg) notes.push({ ko: '주변 배와 충돌했어요. 주변 배는 자선을 피하려고 하지만, 가까이 오는 배는 모두 레이더로 지켜봐야 해요.', en: 'Collision with a surrounding ship. They try to keep clear, but every approaching ship still needs watching.' });
+  else if (r.bgMin && r.bgMin.nm < PASS_NM) notes.push({ ko: `참고: 주변 배와 ${r.bgMin.nm.toFixed(2)} NM까지 가까워졌어요. 합격 판정에는 넣지 않지만, 실제 바다라면 너무 가까운 거리예요.`, en: `Note: a surrounding ship came within ${r.bgMin.nm.toFixed(2)} NM. Not graded, but far too close at sea.` });
   if (r.collision) notes.push({ ko: '충돌했어요. 상대선의 방위가 거의 변하지 않으면(같은 방위·거리 감소) 충돌 위험이 있어요(제7조).', en: 'Collision. A steady bearing with decreasing range means risk of collision (Rule 7).' });
   if (r.grounding) notes.push({ ko: '좌초했어요. 피항할 때도 주변 수심과 육지를 같이 봐야 해요.', en: 'Grounded. Check the surrounding land and depths when manoeuvring.' });
   if (s.rule === '14') notes.push({ ko: '제14조: 마주치는 상태에서는 두 배 모두 우현으로 변침해 서로 좌현을 마주 보고 지나가요.', en: 'Rule 14: in a head-on situation each vessel alters to starboard so they pass port to port.' });
@@ -99,7 +103,7 @@ export function evaluate(r) {
 }
 
 /* 시뮬레이션(테스트·검증용): actions = [{t, fn(own)}] 또는 [{when(world,{t:{rng}}), fn(own)}] 한 번씩 */
-export function simulate(scn, actions = [], { rings = [], dt = 1 } = {}) {
+export function simulate(scn, actions = [], { rings = [], dt = 1, traffic = false } = {}) {
   const own = createShip({ lat: scn.own.lat, lon: scn.own.lon, hdg: scn.own.hdg, tele: scn.own.tele });
   const targets = scn.targets.map((g) => createTarget(g)), w = { t: 0, own, targets, land: { rings } }, log = createLog(scn), done = new Set();
   for (let t = 0; t <= scn.durationMin * 60; t += dt) {
@@ -107,6 +111,7 @@ export function simulate(scn, actions = [], { rings = [], dt = 1 } = {}) {
     let near = null; for (const g of targets) { const d = Math.hypot(P.x(g.lon), P.y(g.lat)); if (!near || d < near.rng) near = { rng: d, id: g.id }; }
     actions.forEach((a, i) => { if (done.has(i)) return; if ((a.t !== undefined && t >= a.t) || (a.when && a.when(w, { t: near }))) { a.fn(own); done.add(i); } });
     log.sample(w);
+    if (traffic && t % 10 === 0) steerTraffic(own, targets);
     for (let k = 0; k < dt / 0.25; k++) { stepShip(own, 0.25); for (const g of targets) stepTarget(g, 0.25, t + k * 0.25); }
   }
   return evaluate(log.result());

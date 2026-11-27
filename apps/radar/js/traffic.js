@@ -1,4 +1,4 @@
-/* 난이도 = 주변 교통량(ECDIS 시뮬레이터와 같은 뜻). 배경 배는 피하지 않고 직진.
+/* 난이도 = 주변 교통량(ECDIS 시뮬레이터와 같은 뜻). 배경 배는 직진하다가 자선과 위험해지면 우현으로 피함(steerTraffic).
    N척은 30분 안에 자선 2 NM 안으로 들어오게(측방 0.3~1.9 NM), 나머지는 멀리 지나감(2.5~6 NM) */
 import { makeProj, velXY } from './geo.js';
 
@@ -42,12 +42,35 @@ function oneShip(own, rnd, level, close, tc, id) {
 export function makeTraffic({ level, own, rnd, minutes = 30 }) {
   if (!CLOSE[level]) return [];
   const [c0, c1] = CLOSE[level], nClose = c0 + Math.floor(rnd() * (c1 - c0 + 1)), out = [];
+  const P = makeProj(own.lat, own.lon);
   for (let i = 0; i < nClose + FAR[level]; i++) {
     const close = i < nClose, ais = rnd() >= NOAIS[level];
-    const kn = ais ? Math.round(8 + rnd() * 10) : Math.round(3 + rnd() * 7), hdg = Math.round(rnd() * 360);
-    const side = (rnd() < 0.5 ? -1 : 1) * (close ? 0.3 + rnd() * 1.6 : 2.5 + rnd() * 3.5), tc = 3 + rnd() * (minutes - 4);
-    out.push({ id: 'bg' + i, name: ais ? 'VESSEL ' + (100 + i) : '', mmsi: ais ? 441000000 + i : null, ...meet(own, tc, hdg, kn, side), hdg, kn,
-      L: ais ? Math.round(60 + rnd() * 160) : Math.round(10 + rnd() * 20), rcs: ais ? null : Math.round(3 + rnd() * 5), h: ais ? null : 3, ais, legs: [] });
+    let g = null;
+    for (let k = 0; k < 10 && (!g || Math.hypot(P.x(g.lon), P.y(g.lat)) < 2.5); k++) { // 처음부터 자선 코앞(2.5 NM 안)에서 시작하지 않게
+      const kn = ais ? Math.round(8 + rnd() * 10) : Math.round(3 + rnd() * 7), hdg = Math.round(rnd() * 360);
+      const side = (rnd() < 0.5 ? -1 : 1) * (close ? 0.3 + rnd() * 1.6 : 2.5 + rnd() * 3.5), tc = 8 + rnd() * (minutes - 9);
+      g = { id: 'bg' + i, name: ais ? 'VESSEL ' + (100 + i) : '', mmsi: ais ? 441000000 + i : null, ...meet(own, tc, hdg, kn, side), hdg, kn,
+        L: ais ? Math.round(60 + rnd() * 160) : Math.round(10 + rnd() * 20), rcs: ais ? null : Math.round(3 + rnd() * 5), h: ais ? null : 3, ais, legs: [] };
+    }
+    out.push(g);
   }
   return out;
+}
+
+/* 주변 배(bg*)의 회피: 자선과 CPA < 1.0 NM(15분 안, 8 NM 안)이면 우현으로 돌려 CPA ≥ 1.2 NM 되는 가장 작은 각을 고름.
+   원래 침로(base)로 계속 다시 계산하므로, 지나가고 나면(CPA 충분·멀어짐) 저절로 원래 침로로 돌아감. 10초마다 부름 */
+export function steerTraffic(own, targets) {
+  const P = makeProj(own.lat, own.lon), ov = velXY(own.cog ?? own.hdg, own.sog ?? own.stw);
+  const cpaAt = (x, y, hdg, kn) => { const v = velXY(hdg, kn), rx = v.vx - ov.vx, ry = v.vy - ov.vy, s2 = rx * rx + ry * ry; const t = s2 < 1e-9 ? 0 : -(x * rx + y * ry) / s2; return { cpa: Math.hypot(x + rx * Math.max(0, t), y + ry * Math.max(0, t)), tcpa: t * 60 }; };
+  for (const g of targets) {
+    if (!String(g.id).startsWith('bg') || !g.want) continue;
+    g.base ||= { hdg: g.want.hdg, kn: g.want.kn };
+    const x = P.x(g.lon), y = P.y(g.lat), d = Math.hypot(x, y), b = g.base;
+    const c0 = cpaAt(x, y, b.hdg, b.kn), risk = d < 8 && c0.tcpa > 0 && c0.tcpa < 15;
+    if (!risk || c0.cpa >= (g.avoiding ? 1.2 : 1.0)) { if (g.avoiding) { g.want.hdg = b.hdg; g.want.kn = b.kn; g.avoiding = false; } continue; }
+    let a = 20; while (a <= 90 && cpaAt(x, y, b.hdg + a, b.kn).cpa < 1.2) a += 10;
+    if (a > 90) { let best = -1; for (let q = -90; q <= 150; q += 10) for (const k of [b.kn, b.kn / 2]) { const c = cpaAt(x, y, b.hdg + q, k).cpa + (q > 0 ? 0.05 : 0); if (c > best) { best = c; a = q; g.want.kn = k; } } }
+    else g.want.kn = b.kn;
+    g.want.hdg = (b.hdg + a + 360) % 360; g.avoiding = true;
+  }
 }

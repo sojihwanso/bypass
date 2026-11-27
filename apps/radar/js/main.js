@@ -19,7 +19,7 @@ import { initStart } from './start.js';
 import { initHelp } from './help.js';
 import { COL, piColor } from './overlay.js';
 import { createWeatherRun, stepWeather, windDrift, speedLoss, weatherLabel } from './weather.js';
-import { refillTraffic } from './traffic.js';
+import { refillTraffic, steerTraffic } from './traffic.js';
 
 const TEST = new URLSearchParams(location.search).has('test');
 loadSettings();
@@ -41,7 +41,7 @@ const rnd = Math.random;
 const SPEEDS = [1, 2, 4, 8, 16, 32], MARKS = ['tri', 'circle', 'square', 'cross', 'anchor'], MARK_SYM = { tri: '▲', circle: '○', square: '□', cross: '✕', anchor: '⚓' };
 let lastClick = null, eduKey = '';
 let markShape = 0, tgtSort = 'rng', tgtTimer = null;
-let wxRun = null, wxPend = [], wxN = 0, trafAcc = 0;
+let wxRun = null, wxPend = [], wxN = 0, trafAcc = 0, steerAcc = 0;
 
 /* ---------- UI ---------- */
 const actions = {};
@@ -60,7 +60,7 @@ export function startWorld(def) {
   W = { def, name: def.name || '', own, targets: def.targets.map((g) => (g.want ? { ...g, legs: [...(g.legs || [])], want: { ...g.want } } : createTarget(g))), weather: { sea: 0, windFrom: 0, windMs: 0, rain: [], ducting: false, interference: false, current: { set: 0, drift: 0 }, ...(def.weather || {}) }, aids: def.aids || [], marks: def.marks || [], t: def.t || 0, land: { rings: [], ok: false, heightM: 100 }, needsCoast: !!def.needsCoast };
   P = makeProj(def.own.lat, def.own.lon);
   tracker = createTracker({ max: 100 }); ais = createAIS(); alerts = createAlerts(realNow, () => W.t); tools = createTools(); route = createRoute(); trails.reset(V.rangeNM, S.disp.trails.mode);
-  W.userMarks = []; trafAcc = 0; selected = []; tmOff = { x: 0, y: 0 }; ruler = null; rulerA = null; uiMode = null; azZones = []; piOn = false; speed = 1; offCenter = null; prevScan = new Array(N_BRG); prevRaw = null; ppi.clear();
+  W.userMarks = []; trafAcc = 0; steerAcc = 0; selected = []; tmOff = { x: 0, y: 0 }; ruler = null; rulerA = null; uiMode = null; azZones = []; piOn = false; speed = 1; offCenter = null; prevScan = new Array(N_BRG); prevRaw = null; ppi.clear();
   scene = buildScene({ own: ownScene(), targets: W.targets, weather: W.weather, aids: W.aids, band: S.ctrl.band, pulse: S.ctrl.pulse, seed: (Math.random() * 1e6) | 0 });
   trialSet = { course: own.hdg, speed: own.stw };
   const bb = { lat0: def.own.lat - 0.6, lat1: def.own.lat + 0.6, lon0: def.own.lon - 0.75, lon1: def.own.lon + 0.75 };
@@ -106,9 +106,10 @@ function weatherTick(run) {
   for (const e of ev) { const id = 'wx:' + (++wxN); alerts.raise(id, 'C', lang() === 'en' ? e.en : e.ko); wxPend.push({ id, t: W.t + 60 }); }
   wxPend = wxPend.filter((p) => { if (W.t < p.t) return true; alerts.resolve(p.id); return false; });
 }
-/* 난이도 교통량 유지: 1분마다 지나간 배는 20 NM 밖에서 지우고, 모자라면 화면 밖에서 새 배를 들여보냄(육지 경로 제외) */
+/* 난이도 교통량 유지: 10초마다 주변 배 회피, 1분마다 지나간 배는 20 NM 밖에서 지우고, 모자라면 화면 밖에서 새 배를 들여보냄(육지 경로 제외) */
 function trafficTick(run) {
   const lv = W.def.traffic && W.def.traffic.level; if (!lv || lv === 'none') return;
+  steerAcc += run; if (steerAcc >= 10) { steerAcc = 0; steerTraffic(W.own, W.targets); } // 주변 배는 10초마다 자선 회피 판단
   trafAcc += run; if (trafAcc < 60) return; trafAcc = 0;
   const o = W.own, Po = makeProj(o.lat, o.lon), own = { lat: o.lat, lon: o.lon, hdg: o.cog, kn: o.sog };
   W.targets = W.targets.filter((g) => { if (!String(g.id).startsWith('bg')) return true; const x = Po.x(g.lon), y = Po.y(g.lat), v = velXY(g.cog, g.sog), ov = velXY(o.cog, o.sog); return Math.hypot(x, y) < 20 || x * (v.vx - ov.vx) + y * (v.vy - ov.vy) < 0; });

@@ -14,7 +14,7 @@ const KO_SCREEN = `<h4>화면 세 구역</h4><ul>
 <li><b>헤더</b>: 시나리오, 일시정지, 배속(×1~×32, 키 [ ]), 날씨 표시(누르면 날씨 변화 켬/끔), Conning, 캡처, 도움말(? 아이콘).</li>
 <li><b>마크</b>: 마크 단추를 누르고 PPI를 누르면 그 자리(지리 고정)에 마크가 놓여요. 마크 단추를 다시 누르면 모양(▲ ○ □ ✕ ⚓)이 바뀌어요. 오른쪽 클릭 메뉴 '마크 지우기'로 지워요.</li>
 <li><b>물표 목록</b>: TT·AIS 상자의 '물표 목록' — 모든 TT·AIS의 방위·거리·침로·속력·CPA·TCPA, 거리·CPA·TCPA 순 정렬, 위험 물표는 빨강, 줄을 누르면 선택.</li>
-<li><b>난이도·날씨</b>: 시작 화면의 난이도는 주변 교통량(없음·쉬움·중간·어려움)이고, 어려울수록 AIS 없는 배(20·40·60%)가 많아요. 시작 해역·처음 침로는 무작위이고, 날씨도 무작위로 정해져 진행 중에 바뀌어요(비구름 접근, 바람·해상 변화, 바람에 밀림). PI 선은 IALA A(왼쪽 빨강·오른쪽 초록)이고 메뉴에서 B로 바꿀 수 있어요.</li>
+<li><b>난이도·날씨</b>: 시작 화면의 난이도는 주변 교통량(없음·쉬움·중간·어려움)이고, 어려울수록 AIS 없는 배(20·40·60%)가 많아요. 주변 배는 자선과 가까워질 것 같으면 스스로 우현으로 피하고, 합격 거리 판정에는 들어가지 않아요. 시작 해역·처음 침로는 무작위이고, 날씨도 무작위로 정해져 진행 중에 바뀌어요(비구름 접근, 바람·해상 변화, 바람에 밀림). PI 선은 IALA A(왼쪽 빨강·오른쪽 초록)이고 메뉴에서 B로 바꿀 수 있어요.</li>
 <li><b>가운데 레이더 화면(PPI)</b>: 자선이 중심(또는 중심 이동한 곳)에 있고, 바깥 원에 진방위 눈금이 있어요. 흰 선이 선수선, 자선에서 나온 선이 자선 벡터예요.
 <br>왼쪽 위: 거리 범위(휠·+/−로 바꾸기)와 거리환 간격, 방위·운동 모드, 밴드, 펄스 길이, 송신 상태.
 <br>오른쪽 위: <b>GAIN·SEA·RAIN·TUNE</b> 막대(마우스 휠로 조정, SEA·RAIN·TUNE 이름을 누르면 자동/수동 전환)와 커서 위치(방위·거리·위경도·도달 시간).
@@ -50,7 +50,7 @@ export function initHelp() {
     if (tab === 'keys') b.innerHTML = `<table class="tbl hkeys">${KEYMAP.map((k) => `<tr><td><kbd>${k.shift ? 'Shift + ' : ''}${k.key === ' ' ? 'Space' : esc(k.key)}</kbd></td><td>${esc(en ? k.en : k.ko)}</td></tr>`).join('')}</table>
       <h4>${en ? 'Mouse and touch' : '마우스·터치'}</h4><ul><li>${en ? 'Left click: select a target or button. Double-click on the PPI: acquire (manual TT).' : '왼쪽 클릭: 물표·단추 고르기. PPI 두 번 클릭: 수동 포착.'}</li><li>${en ? 'Right click (long press on touch): cursor menu — acquire, cancel, target data, EBL/VRM here, offset EBL, range between points, off-center, drop mark, anchor position.' : '오른쪽 클릭(터치는 길게 누르기): 커서 메뉴 — 포착·해제·물표 데이터·EBL/VRM을 여기로·오프셋 EBL·두 점 거리·중심 이동·Drop mark·닻 위치.'}</li><li>${en ? 'Mouse wheel over a box (GAIN, SEA, RAIN, TUNE, RANGE, EBL, VRM, TRIAL): change its value. On touch, drag up or down on the box.' : '상자 위에서 마우스 휠(GAIN·SEA·RAIN·TUNE·RANGE·EBL·VRM·TRIAL): 값 바꾸기. 터치는 상자 위에서 위아래로 끌기.'}</li><li>${en ? 'Conning window: drag the title bar to move, the minus button to hide. Keyboard steering still works while hidden.' : 'Conning 창: 제목줄을 끌어 옮기고, − 단추로 숨겨요. 숨겨도 키보드 조종은 돼요.'}</li></ul>`;
     if (tab === 'abbr') b.innerHTML = `<table class="tbl">${ABBR.map(([a, d]) => `<tr><th scope="row">${a}</th><td>${esc(d)}</td></tr>`).join('')}</table>`;
-    if (tab === 'scn') b.innerHTML = `<p>${en ? 'Pass: every ship passes at 0.3 NM or more, with no collision or grounding. Action timing (TCPA) is recorded but not graded.' : '합격: 모든 상대선과 0.3 NM 이상 떨어져 지나가고 충돌·좌초가 없으면 돼요. 조치 시점(TCPA)은 기록만 해요.'}</p>${SCENARIOS.map((s) => `<h4>${s.id} · ${esc(tl(s))} <small>COLREG ${s.rule}</small></h4><p>${esc(tl(s.brief))}</p>`).join('')}`;
+    if (tab === 'scn') b.innerHTML = `<p>${en ? 'Pass: every scenario ship passes at 0.3 NM or more, with no collision or grounding. Surrounding traffic (difficulty) keeps clear of you on its own; close passes with it are noted but not graded, a collision still fails. Action timing (TCPA) is recorded but not graded.' : '합격: 시나리오 상대선과 모두 0.3 NM 이상 떨어져 지나가고 충돌·좌초가 없으면 돼요. 난이도로 늘어난 주변 배는 자선을 알아서 피하고, 가까이 지난 거리는 참고로만 알려 줘요(충돌하면 불합격). 조치 시점(TCPA)은 기록만 해요.'}</p>${SCENARIOS.map((s) => `<h4>${s.id} · ${esc(tl(s))} <small>COLREG ${s.rule}</small></h4><p>${esc(tl(s.brief))}</p>`).join('')}`;
     if (tab === 'src') b.innerHTML = en ? EN_SRC : KO_SRC;
     b.scrollTop = 0;
   }
