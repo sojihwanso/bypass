@@ -21,8 +21,8 @@ const MORSE = { A: '.-', B: '-...', C: '-.-.', D: '-..', G: '--.', K: '-.-', M: 
 export function raconCode(letter) { const out = []; let r = 0; for (const c of MORSE[letter] || '-') { const len = c === '-' ? 0.24 : 0.08; out.push([r, r + len]); r += len + 0.08; } return out; }
 
 const C_DB = 44; // 레이더 방정식 상수(교육용으로 물표를 6 dB 강하게): 100 m² 물표가 6 NM에서 약 33 dB
-const SEA_K = -7; // 해면 반사 세기 보정(교육용으로 약하게)
-const THR0 = 44; // 수신 문턱 = THR0 − 0.4·GAIN (잡음이 GAIN을 높여도 늦게 올라오게)
+const SEA_K = -3.5; // 해면 반사 세기 보정(교육용으로 약하게 했다가 사용자 요청으로 원래(0)와 중간)
+const THR0 = 42; // 수신 문턱 = THR0 − 0.4·GAIN (원래 40과 교육용 44의 중간: 잡음이 조금 더 일찍 보임)
 const LAND_CELL = 0.03, LAND_HALF = 40; // 육지 격자(NM)
 const defaultRcs = (L) => 0.05 * L * L;
 
@@ -165,7 +165,7 @@ export function rawLine(sc, brgIdx, nBins, maxRng) {
   const loss = sc.loss || 0;
   for (const t of sc.tg) {
     if (!t.visible || t.R > maxRng + 2) continue;
-    const off = Math.abs(angDiff(brg, t.brg)), eff = Math.max(0, off - t.angHalf), db = t.db0 + pg + mast - loss + (sc.boost && sc.boost.has(t.id) ? 4 : 0) + 2 * (hash(t.R * 1000 | 0, sc.scan) - 0.5);
+    const off = Math.abs(angDiff(brg, t.brg)), eff = Math.max(0, off - t.angHalf), db = t.db0 + pg + mast - loss + (sc.boost && sc.boost.has(t.id) ? 8 : 0) + 2 * (hash(t.R * 1000 | 0, sc.scan) - 0.5);
     if (eff <= half * 1.8) putOval(t.R, pulseNM + t.depth, db - 3 * (eff / half) ** 2, eff / (half * 1.8));
     else if (db > 50 && t.R < 3 && off < 12) put(t.R, t.R + pulseNM, db - 28); // 사이드로브 호
     if (eff <= half) {
