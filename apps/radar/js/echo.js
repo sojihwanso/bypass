@@ -23,8 +23,8 @@ export function raconCode(letter) { const out = []; let r = 0; for (const c of M
 const C_DB = 44; // 레이더 방정식 상수(교육용으로 물표를 6 dB 강하게): 100 m² 물표가 6 NM에서 약 33 dB
 /* 해상 6 넘게는 해면 반사가 덜 늘어남(해상 8에서 범위 약 5.4 NM) */
 const seaEff = (s) => (s <= 6 ? s : 6 + (s - 6) * 0.6);
-const SEA_K = -1.5; // 해면 반사 세기 보정(원래 0, 교육용 −7에서 사용자 요청으로 −1.5)
-const THR0 = 42; // 수신 문턱 = THR0 − 0.4·GAIN (원래 40과 교육용 44의 중간: 잡음이 조금 더 일찍 보임)
+const SEA_K = 0; // 해면 반사 세기 보정(맨 처음 값으로 되돌림)
+const THR0 = 40; // 수신 문턱 = THR0 − 0.4·GAIN (맨 처음 값으로 되돌림)
 const LAND_CELL = 0.03, LAND_HALF = 40; // 육지 격자(NM)
 const defaultRcs = (L) => 0.05 * L * L;
 
