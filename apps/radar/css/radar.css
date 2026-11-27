@@ -478,3 +478,6 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--rule);border
 .cmenu{max-height:calc(100dvh - 16px);overflow-y:auto}
 .tdetail{z-index:35}
 .load-note{position:fixed;left:50%;top:calc(var(--hdr) + 14px);transform:translateX(-50%);z-index:120;background:var(--surface);color:var(--ink);border:1px solid var(--rule);border-radius:999px;padding:6px 16px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+/* 화면 오류 알림: 해역 준비 표시와 겹치지 않게 아래쪽 가운데, 닫기 단추 */
+.err-note{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:121;display:flex;align-items:center;gap:10px;background:var(--bad-bg);color:var(--ink);border:1px solid var(--bad);border-radius:8px;padding:8px 10px 8px 14px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.scn-chip:disabled{cursor:default;opacity:.85}

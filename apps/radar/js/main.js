@@ -92,7 +92,7 @@ function rerollWeather() {
   if (!W || W.weather.fixed) return; const lvl = (W.def.traffic && W.def.traffic.level) || S.sim.level, cap = WX_CAP[lvl] || WX_CAP.hard, own = { lat: W.own.lat, lon: W.own.lon, hdg: W.own.hdg }; let w = null;
   for (let i = 0; i < 8; i++) { w = rollWeather(Math.random, null, own, cap); if (!(w.kind === 'clear' && !w.fog) && w.kind !== W.weather.kind) break; }
   /* 새 조류로 시나리오 상대선(주변 배 bg는 스스로 피함)이 30분 안에 육지로 밀리면 다른 조류를, 끝내 없으면 조류 0 */
-  if (W.land.ok) { const o = W.own, ok = (c) => routeClear(W.land.rings, o.lat, o.lon, o.hdg, Math.max(0, o.stw), 30, 0.5, c) && W.targets.every((g) => String(g.id).startsWith('bg') || routeClear(W.land.rings, g.lat, g.lon, g.hdg, g.kn ?? 0, 30, 0.2, c)); // 자선도 30분 안에 육지로 밀리지 않게
+  if (W.land.ok) { const o = W.own, ownOk0 = o.stw <= 0.5 || !routeClear(W.land.rings, o.lat, o.lon, o.hdg, o.stw, 30, 0.5, { set: 0, drift: 0 }), ok = (c) => (ownOk0 || routeClear(W.land.rings, o.lat, o.lon, o.hdg, o.stw, 30, 0.5, c)) && W.targets.every((g) => String(g.id).startsWith('bg') || routeClear(W.land.rings, g.lat, g.lon, g.hdg, g.kn ?? 0, 30, 0.2, c)); // 자선도 30분 안에 육지로 밀리지 않게
     if (!ok(w.current)) { let c = null; for (let i = 0; i < 12 && !c; i++) { const t = rollCurrent(Math.random); if (ok(t)) c = t; } w.current = c || { set: 0, drift: 0 }; } }
   Object.assign(W.weather, w); syncSceneWeather(); wxRun = createWeatherRun({ rnd: Math.random, enabled: true, cap });
 }
@@ -113,7 +113,7 @@ function openTgtList() {
   const body = rows.map((x) => `<tr class="${x.danger ? 'danger' : ''}${selected.includes(x.id) ? ' sel' : ''}" data-act="tgtSel" data-id="${esc(x.id)}" tabindex="0" aria-selected="${selected.includes(x.id)}"><td>${esc(x.name)}</td><td>${f1(x.brg)}°</td><td>${f1(x.rng, 2)}</td><td>${x.crs === null ? '-' : f1(x.crs) + '°'}</td><td>${f1(x.spd)}</td><td>${f1(x.cpa, 2)}</td><td>${x.tcpa === null || x.tcpa === undefined ? '-' : f1(x.tcpa)}</td><td>${x.ais ? '●' : '—'}</td></tr>`).join('') || `<tr><td colspan="8">${en ? 'No targets' : '물표가 없어요'}</td></tr>`;
   /* 이미 열려 있으면 표 내용·정렬 표시만 바꿈(1초마다 통째로 다시 그리면 정렬 단추 초점이 사라짐) */
   const g = document.getElementById('genDlg'), tb = g && g.open && g.querySelector('.tgl tbody');
-  if (tb) { if (tb._h !== body) { tb._h = body; tb.innerHTML = body; } g.querySelectorAll('[data-sort]').forEach((b) => b.classList.toggle('on', b.dataset.sort === tgtSort)); return; }
+  if (tb) { if (tb._h !== body) { const ae = document.activeElement, fid = ae && ae.closest && ae.closest('.tgl tbody') && ae.dataset.id; tb._h = body; tb.innerHTML = body; if (fid) { const r = tb.querySelector(`tr[data-id="${CSS.escape(fid)}"]`); if (r) r.focus({ preventScroll: true }); } } /* 1초마다 다시 그려도 키보드로 고른 줄의 초점 유지 */ g.querySelectorAll('[data-sort]').forEach((b) => b.classList.toggle('on', b.dataset.sort === tgtSort)); return; }
   const d = ui.dialog(en ? 'Target list' : '물표 목록', `<div class="tgl-sort">${en ? 'Sort' : '정렬'} ${th('rng', '거리', 'Range')}${th('cpa', 'CPA', 'CPA')}${th('tcpa', 'TCPA', 'TCPA')}</div>
   <table class="tgl"><thead><tr><th>${en ? 'Target' : '물표'}</th><th>BRG</th><th>RNG</th><th>CRS</th><th>SPD</th><th>CPA</th><th>TCPA</th><th>AIS</th></tr></thead><tbody>${body}</tbody></table>`);
   clearInterval(tgtTimer); tgtTimer = setInterval(() => { if (!d.open || !d.querySelector('.tgl')) { clearInterval(tgtTimer); return; } openTgtList(); }, 1000);
@@ -157,7 +157,7 @@ function setRadar(s) { if (s !== 'tx' && pmSave) pmOff(); radar.state = s; radar
 function toggleTx() { setRadar(radar.state === 'stby' ? 'warm' : 'stby'); }
 
 /* ---------- 프레임 ---------- */
-function frame(now) { requestAnimationFrame(frame); try { frameAt(now); } catch (e) { if (!frame.err) { frame.err = true; console.error('[radar] frame error', e); const n = document.createElement('div'); n.className = 'load-note err-note'; n.setAttribute('role', 'alert'); n.textContent = lang() === 'en' ? 'A display error occurred. Please reload the page (your voyage is saved).' : '화면 오류가 났어요. 새로고침해 주세요(항해는 저장돼 있어요).'; document.getElementById('app').append(n); } } } // 한 번 오류가 나도 화면이 멈추지 않게 다음 프레임을 먼저 예약
+function frame(now) { requestAnimationFrame(frame); try { frameAt(now); } catch (e) { if (!frame.err) { frame.err = true; console.error('[radar] frame error', e); const en = lang() === 'en', saved = !!(W && W.def.save), n = document.createElement('div'); n.className = 'err-note'; n.setAttribute('role', 'alert'); n.innerHTML = `<span>${en ? 'A display error occurred. Please reload the page' + (saved ? ' (your voyage is saved).' : '.') : '화면 오류가 났어요. 새로고침해 주세요' + (saved ? '(항해는 저장돼 있어요).' : '.')}</span><button type="button" class="btn" aria-label="${en ? 'Close' : '닫기'}">×</button>`; n.querySelector('button').onclick = () => n.remove(); document.getElementById('app').append(n); } } } // 한 번 오류가 나도 화면이 멈추지 않게 다음 프레임을 먼저 예약
 function frameAt(now) { const dt = Math.min(0.25, Math.max(0, (now - last) / 1000)); last = now; tick(dt); }
 function tick(dt) {
   frames++;
@@ -311,7 +311,7 @@ function refreshUI() {
     cursor: cur, ebl: tools.ebl.map((e, i) => ({ on: e.on, brg: S.disp.eblRef === 'REL' ? wrap360(tools.eblTrue(i, o.hdg) - o.hdg) : tools.eblTrue(i, o.hdg) })),
     vrm: tools.vrm.map((v) => ({ on: v.on, rng: toUnit(v.rng, S.disp.vrmUnit), ttg: S.disp.vrmTTG && v.on ? vrmTTG(v.rng, o.sog) : null })),
     tgt: (syncLetters(), [...selected].sort((p, q) => (letterOf.get(p) || 'Z').localeCompare(letterOf.get(q) || 'Z')).map(slot).filter(Boolean)), ttN: tracker.targets().filter((g) => g.state !== 'lost').length, aisN: ais.list().filter((a) => a.status !== 'lost').length,
-    alertTop: top ? { ...top, time: `${pad(((top.tSim % 86400) / 3600) | 0)}:${pad(((top.tSim % 3600) / 60) | 0)}:${pad((top.tSim % 60) | 0)}` } : null, alertN: alerts.list().length, scnName: W.name, msgN: ais.messages().length, ref: refPt, pi: { brg: `${tools.pi.brg.toFixed(1).padStart(5, '0')}°`, int: `${tools.pi.interval.toFixed(2)} NM` }, watchLeft: S.alert.watch ? (() => { const s = Math.max(0, S.alert.watch * 60 - (performance.now() - lastUser) / 1000); return `${pad((s / 60) | 0)}:${pad((s % 60) | 0)}`; })() : '',
+    alertTop: top ? { ...top, time: `${pad(((top.tSim % 86400) / 3600) | 0)}:${pad(((top.tSim % 3600) / 60) | 0)}:${pad((top.tSim % 60) | 0)}` } : null, alertN: alerts.list().length, scnName: W.name, free: !W.def.scnId && !/^S\d/.test(W.name), msgN: ais.messages().length, ref: refPt, pi: { brg: `${tools.pi.brg.toFixed(1).padStart(5, '0')}°`, int: `${tools.pi.interval.toFixed(2)} NM` }, watchLeft: S.alert.watch ? (() => { const s = Math.max(0, S.alert.watch * 60 - (performance.now() - lastUser) / 1000); return `${pad((s / 60) | 0)}:${pad((s % 60) | 0)}`; })() : '',
   });
   conn && conn.refresh();
   const tb = document.getElementById('bxTrial'); if (tb) { tb.hidden = S.tt.trialMode === 'OFF'; tb.querySelector('#trC').textContent = trialSet.course.toFixed(0).padStart(3, '0') + '°'; tb.querySelector('#trS').textContent = trialSet.speed.toFixed(1) + ' kn'; tb.querySelector('#trD').textContent = S.tt.trialDelay + ' min'; }
@@ -503,6 +503,7 @@ document.addEventListener('visibilitychange', () => setHidden(document.hidden));
 
 /* ---------- Conning·키보드 ---------- */
 const conn = initConning(document.getElementById('connSlot'), own, { wind: () => (W ? { dir: W.weather.windFrom, ms: W.weather.windMs } : null) });
+ui.applyAria(); // Conning 창은 UI보다 늦게 만들어지므로 저장된 언어로 이름을 한 번 맞춤
 const keyHandlers = {
   steerL: () => own() && (own().auto.on ? setAuto(own(), true, own().auto.setHdg - 1) : setRudderOrder(own(), own().rudderOrder - 5)),
   steerR: () => own() && (own().auto.on ? setAuto(own(), true, own().auto.setHdg + 1) : setRudderOrder(own(), own().rudderOrder + 5)),

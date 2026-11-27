@@ -117,7 +117,7 @@ export function initUI(root, actions) {
 
   let menuTab = MENU[0].id;
   /* 화면 읽기용 이름(aria-label)도 언어에 맞춰: data-al-en이 있는 요소는 처음 한국어 값을 기억해 두고 바꿔 끼움 */
-  const applyAria = () => { const en = lang() === 'en'; for (const el of document.querySelectorAll('[data-al-en]')) { if (el.dataset.alKo === undefined) el.dataset.alKo = el.getAttribute('aria-label') || ''; el.setAttribute('aria-label', en ? el.dataset.alEn : el.dataset.alKo); } };
+  const applyAria = () => { const en = lang() === 'en'; for (const el of document.querySelectorAll('[data-al-en]')) { if (el.dataset.alKo === undefined) el.dataset.alKo = el.getAttribute('aria-label') || ''; el.setAttribute('aria-label', en ? el.dataset.alEn : el.dataset.alKo); if (el.hasAttribute('title')) el.title = en ? el.dataset.alEn : el.dataset.alKo; } }; // 풍선 도움말(title)도 같이
   const applyLang = () => {
     applyAria();
     document.documentElement.lang = lang();
@@ -367,7 +367,7 @@ export function initUI(root, actions) {
     setHTML('#vTT', `<dt>${esc(t('vector'))}</dt><dd>${S.tt.vector} ${S.tt.vecMin} min</dd><dt>${esc(t('cpaLim'))}</dt><dd>${S.tt.cpaOn ? `${S.tt.cpa.toFixed(1)} NM / ${S.tt.tcpa} min` : 'OFF'}</dd><dt>${esc(t('past'))}</dt><dd>${S.tt.pastPts} × ${S.tt.pastInt}s</dd><dt>${esc(t('aisFilt'))}</dt><dd>${S.ais.maxRngOn ? S.ais.maxRng + ' NM' : '-'} ${S.ais.minSpdOn ? '≥' + S.ais.minSpd + ' kn' : ''}</dd>`);
     const a = d.alertTop; $('#vAlN').textContent = d.alertN ? d.alertN : '';
     setHTML('#aBox', a ? `<div class="abox ${a.pri}${a.acked ? '' : ' unack'}"><span class="ic">${a.pri === 'A' ? '!' : a.pri}</span><span class="tx"><b>${esc(a.text)}</b><span>${a.active ? '' : (lang() === 'en' ? 'rectified · ' : '해소됨 · ')}${esc(a.time || '')}</span></span><span style="display:flex;gap:4px">${a.pri !== 'C' && !a.acked ? `<button class="btn" type="button" data-act="ack">${esc(t('ack'))}</button>` : ''}<button class="btn ib" type="button" data-act="silence" title="${esc(t('silence'))}" aria-label="${esc(t('silence'))}">${ICON.mute}</button><button class="btn" type="button" data-act="alertList">${esc(t('list'))}</button></span></div>` : `<span class="empty">${esc(t('noAlert'))}</span>`);
-    const chip = $('#scnChip'); chip.hidden = !d.scnName; chip.textContent = d.scnName || ''; chip.title = lang() === 'en' ? 'Show the briefing again' : '브리핑 다시 보기';
+    const chip = $('#scnChip'); chip.hidden = !d.scnName; chip.textContent = d.scnName || ''; chip.disabled = !!d.free; chip.title = d.free ? '' : lang() === 'en' ? 'Show the briefing again' : '브리핑 다시 보기'; // 자유 항해는 브리핑이 없어 누를 수 없게
   }
   /* 물표 정보 칸: 평소엔 필수(BRG·RNG·COG·SOG·CPA·TCPA), 누르면 전체(AIS: ITU-R M.1371 정적·동적·항해 정보 + 계산값) */
   function slotHTML(g, ll) {
@@ -412,5 +412,5 @@ export function initUI(root, actions) {
     setTimeout(() => addEventListener('pointerdown', function off(e) { if (!e.target.closest('#pickPop')) { pop.remove(); removeEventListener('pointerdown', off); } }), 0);
     pop.addEventListener('keydown', (e) => { if (e.key === 'Escape') { pop.remove(); anchor.focus(); } });
   }
-  return { wheelable, refresh, speedPop, pickPop, applyLang, applyTheme, renderMenu, dialog, relayout, layoutMode: () => mode, qbInside: () => qIn, ABBR, shift: () => shift, rmax: () => rmax, closeAll() { menuEl.hidden = true; cm.hidden = true; }, echoCanvas: $('#cvEcho'), overCanvas: $('#cvOver') };
+  return { wheelable, refresh, speedPop, pickPop, applyAria, applyLang, applyTheme, renderMenu, dialog, relayout, layoutMode: () => mode, qbInside: () => qIn, ABBR, shift: () => shift, rmax: () => rmax, closeAll() { menuEl.hidden = true; cm.hidden = true; }, echoCanvas: $('#cvEcho'), overCanvas: $('#cvOver') };
 }

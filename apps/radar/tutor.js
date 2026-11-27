@@ -240,7 +240,7 @@
     if (window.RadarEdu && window.RadarEdu.end) window.RadarEdu.end(); // 교육 중 바뀐 레이더 설정을 교육 전으로
     clearInterval(timer); timer = null; cur = null; active = false; applySnd(); document.querySelectorAll(".tu-glow").forEach((g) => g.classList.remove("tu-glow"));
     if (!root) return;
-    root.classList.remove("on"); cursor.classList.remove("show"); chip.classList.remove("show"); spot.classList.remove("show");
+    root.classList.remove("on"); cursor.classList.remove("show"); chip.classList.remove("show"); spot.classList.remove("show"); $(".tu-dim", root).classList.remove("show");
     if (pop) { pop.remove(); pop = null; }
   }
   function ensurePop() { if (pop) return; pop = document.createElement("div"); pop.className = "tu-pop"; pop.setAttribute("role", "dialog"); pop.setAttribute("aria-live", "polite"); pop.addEventListener("click", onClick); pop.addEventListener("pointerdown", onDown); root.appendChild(pop); }

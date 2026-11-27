@@ -3,8 +3,21 @@
    열 ci = floor((lon+180)/10), 타일 rj = floor((lat+90)/10), 좌표 = 타일 원점 + 정수/FULLQ (zigzag 차분). */
 export const FULLQ = 20000;
 const pad2 = (n) => String(n).padStart(2, '0');
-/* 해안선 받기: 8초 안에 안 오면 포기(네트워크가 멈춰도 '해역 준비 중'이 영영 남지 않게) */
-const defaultFetch = (ci) => { const ac = typeof AbortController !== 'undefined' ? new AbortController() : null, tm = ac ? setTimeout(() => ac.abort(), 8000) : null; return fetch('../ecdis/coast/c' + pad2(ci) + '.txt', ac ? { signal: ac.signal } : undefined).then((r) => (r.ok ? r.text() : Promise.reject(r.status))).finally(() => tm && clearTimeout(tm)); };
+/* 해안선 받기(파일 하나가 약 1~2 MB): 전체 시간이 아니라 '15초 동안 아무것도 안 오면' 포기 — 느린 망에서도 받는 중이면 끝까지 받고,
+   네트워크가 완전히 멈췄을 때만 '해역 준비 중'을 끝냄 */
+const IDLE_MS = 15000;
+function defaultFetch(ci) {
+  const ac = typeof AbortController !== 'undefined' ? new AbortController() : null; let tm = null;
+  const poke = () => { if (!ac) return; clearTimeout(tm); tm = setTimeout(() => ac.abort(), IDLE_MS); };
+  poke();
+  return fetch('../ecdis/coast/c' + pad2(ci) + '.txt', ac ? { signal: ac.signal } : undefined).then(async (r) => {
+    if (!r.ok) throw r.status;
+    if (!r.body || !r.body.getReader || typeof TextDecoder === 'undefined') { poke(); return await r.text(); }
+    const rd = r.body.getReader(), dec = new TextDecoder(); let out = '';
+    for (;;) { const { done, value } = await rd.read(); if (done) break; poke(); out += dec.decode(value, { stream: true }); }
+    return out + dec.decode();
+  }).finally(() => clearTimeout(tm));
+}
 
 function reader(u8, start) {
   let p = start;
@@ -40,11 +53,11 @@ export function ringsToLonLat(ci, rj, rings) {
 
 function bboxOf(r) { let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; for (let i = 0; i < r.length; i += 2) { if (r[i] < x0) x0 = r[i]; if (r[i] > x1) x1 = r[i]; if (r[i + 1] < y0) y0 = r[i + 1]; if (r[i + 1] > y1) y1 = r[i + 1]; } return { x0, x1, y0, y1 }; }
 
-/* 열 해독 결과 캐시: 불러오는 함수마다 따로(테스트·실패 대체 함수가 섞이지 않게). 실패는 저장하지 않음 */
+/* 열 해독 결과 캐시: 불러오는 함수마다 따로(테스트·실패 대체 함수가 섞이지 않게) */
 const CACHE = new WeakMap();
 function column(fetchText, ci) {
   let m = CACHE.get(fetchText); if (!m) CACHE.set(fetchText, (m = new Map()));
-  if (!m.has(ci)) m.set(ci, Promise.resolve(fetchText(ci)).then(decodeColumn).catch((e) => { m.delete(ci); throw e; }));
+  if (!m.has(ci)) { const p = Promise.resolve(fetchText(ci)).then(decodeColumn); m.set(ci, p); p.catch(() => { const t = setTimeout(() => { if (m.get(ci) === p) m.delete(ci); }, 60000); if (t && t.unref) t.unref(); }); } // 실패는 1분 동안 기억(해역 9곳을 돌며 같은 파일을 매번 처음부터 다시 받지 않게), 그 뒤 다시 시도
   return m.get(ci);
 }
 /* bbox 안 육지 고리만 모아 돌려줌. 불러오기 실패해도 reject하지 않음 */

@@ -60,13 +60,13 @@ export function freeSetup({ lat = 33.5, lon = 124.6, nTargets = 4, sea = 2, rain
 /* 기록: 1초마다 표본 */
 export function createLog(scn, init = null) {
   const isBg = (g) => String(g.id).startsWith('bg'), I = init || {}, min = { ...(I.min || {}) };
-  let port = I.port ?? 0, cum = I.cum ?? 0, prevH = I.prevH ?? null, stbdMax = I.stbdMax ?? 0, portBack = I.portBack ?? false, bgMin = I.bgMin ?? null, collisionBg = I.collisionBg ?? null, collision = !!I.collision, grounding = !!I.grounding, first = I.first ?? null, own0 = I.own0 ?? null, t0Act = I.t0Act ?? null;
+  let port = I.port ?? 0, cum = I.cum ?? 0, prevH = I.prevH ?? null, stbdMax = I.stbdMax ?? 0, portBack = I.portBack ?? false, crossT = I.crossT ?? null, bgMin = I.bgMin ?? null, collisionBg = I.collisionBg ?? null, collision = !!I.collision, grounding = !!I.grounding, first = I.first ?? null, own0 = I.own0 ?? null, t0Act = I.t0Act ?? null;
   return {
-    dump() { return JSON.parse(JSON.stringify({ port, cum, prevH, stbdMax, portBack, min, bgMin, collisionBg, collision, grounding, first, own0, t0Act })); }, // 이어 하기 저장용
+    dump() { return JSON.parse(JSON.stringify({ port, cum, prevH, stbdMax, portBack, crossT, min, bgMin, collisionBg, collision, grounding, first, own0, t0Act })); }, // 이어 하기 저장용
     sample(w) {
       const o = w.own, P = makeProj(o.lat, o.lon), ov = velXY(o.cog ?? o.hdg, o.sog ?? o.stw);
       if (!own0) own0 = { hdg: o.hdg, tele: o.tele };
-      let near = null;
+      let near = null, meeting = false;
       for (const g of w.targets) {
         const x = P.x(g.lon), y = P.y(g.lat), d = Math.hypot(x, y);
         if (d * 1852 < ((o.spec?.L ?? 190) + (g.L ?? 100)) / 2) { collision = true; if (isBg(g)) collisionBg = g.name || g.id; }
@@ -74,12 +74,14 @@ export function createLog(scn, init = null) {
         if (!min[g.id] || d < min[g.id].nm) min[g.id] = { id: g.id, nm: d, t: w.t, ahead: Math.abs(angDiff(wrap360(Math.atan2(-x, -y) * 180 / Math.PI), g.hdg ?? 0)) < 90 }; // ahead: 최근접 때 자선이 상대선 정횡 앞(선수 쪽)
         const c = cpaTcpa({ x: 0, y: 0 }, ov, { x, y }, velXY(g.cog ?? g.hdg, g.sog ?? g.kn));
         if (c.tcpa >= 0 && (!near || c.cpa < near.cpa)) near = { id: g.id, cpa: c.cpa, tcpa: c.tcpa, rng: d };
+        if (c.tcpa >= 0 && d < 8 && Math.abs(angDiff(g.hdg ?? 0, o.hdg)) > 45) meeting = true; // 마주치거나 횡단하며 다가오는 배(같은 방향으로 추월당하는 배는 빼서, 추월만 남았을 때 좌현 추월을 탓하지 않음)
       }
       if (w.land && w.land.rings && w.land.rings.length && pointInLand(w.land.rings, o.lat, o.lon)) grounding = true;
       if (!first && (Math.abs(angDiff(o.hdg, own0.hdg)) > 5 || o.tele !== own0.tele)) { first = { t: w.t, tcpa: near ? near.tcpa : null, rng: near ? near.rng : null, dHdg: 0, dSpd: 0 }; t0Act = { hdg: o.hdg, stw: o.stw, t: w.t, hdg0: own0.hdg, stw0: o.stw }; }
       // 처음 침로에서 돈 각을 표본마다 누적(우현 +, 좌현 −): ±180°로 접히지 않아 우현으로 한 바퀴 돌아도 좌현으로 보지 않음
-      if (prevH !== null) cum += angDiff(o.hdg, prevH); prevH = o.hdg; if (cum > stbdMax) stbdMax = cum;
-      if (near && near.rng < 8 && cum < port) { port = cum; portBack = stbdMax > 10; } // 상대선이 다가오는 동안 좌현으로 가장 많이 돈 각, 그 전에 우현으로 피했는지(되돌아오다 지나침)
+      const cum0 = cum; if (prevH !== null) cum += angDiff(o.hdg, prevH); prevH = o.hdg; if (cum > stbdMax) stbdMax = cum;
+      if (cum0 > 0 && cum <= 0 && stbdMax > 10) crossT = w.t; // 우현으로 피했다가 처음 침로를 지나 되돌아온 순간
+      if (meeting && cum < port) { port = cum; portBack = cum >= -30 && (portBack || (crossT !== null && w.t - crossT <= 300)); } // '지나침'은 되돌아온 지 5분 안(타를 풀어도 한동안 계속 돎), 30° 이내만(그 밖은 진짜 좌현 변침) // 상대선이 다가오는 동안 좌현으로 가장 많이 돈 각, 그 전에 우현으로 피했는지(되돌아오다 지나침)
       if (first && w.t - t0Act.t <= 300) { const dh = cum; if (Math.abs(dh) > Math.abs(first.dHdg)) first.dHdg = dh; first.dSpd = o.stw - (scnKn(scn) ?? o.stw); }
     },
     result() { const m = Object.values(min).sort((a, b) => a.nm - b.nm)[0] || null; return { minRange: m, byId: { ...min }, portMax: port, portBack, bgMin, collisionBg, collision, grounding, firstAction: first, scn }; },
@@ -107,7 +109,7 @@ export function evaluate(r) {
   if (s.rule === '15·16') notes.push({ ko: '제15·16조: 상대선을 우현에 둔 배가 피항선이에요. 가능하면 상대선 선수 쪽을 지나지 말고, 일찍 크게 피하세요.', en: 'Rules 15-16: the vessel with the other on her starboard side keeps out of the way, avoids crossing ahead, and acts early and substantially.' });
   if (s.rule === '17') { notes.push({ ko: '제17조: 유지선은 침로·속력을 지키되, 피항선이 적절히 피하지 않으면 혼자서 피할 수 있어요. 충돌을 피할 수 없을 만큼 가까워지면 반드시 최선의 협력 동작을 해야 해요.', en: 'Rule 17: the stand-on vessel keeps course and speed but may act alone when the give-way vessel fails to act, and must act when collision can no longer be avoided by the give-way vessel alone.' });
     if (toPort) W('규칙 주의(제17조(c)): 좌현 쪽 횡단선에 대해 좌현으로 변침하면 안 돼요.', 'Rule check (Rule 17(c)): do not alter to port for a vessel on your own port side.'); }
-  if (s.rule === '13' && toPort) W('규칙 주의(제13·14·15조): 추월 중이라도 마주 오는 배와 우현 쪽 횡단선이 있을 때 좌현으로 변침했어요. 그 배들에 대해서는 우현으로 피하세요.', 'Rule check (Rules 13-15): while overtaking you altered to port with a vessel meeting head-on and another crossing from starboard. Alter to starboard for them.');
+  if (s.rule === '13' && toPort) W('규칙 주의(제13~17조): 추월 중이라도 마주 오거나 횡단하며 다가오는 배가 있을 때 좌현으로 변침했어요. 다가오는 배에 대해서는 우현으로 피하고, 추월은 그 배들이 지나간 뒤에 하세요.', 'Rule check (Rules 13-17): while overtaking you altered to port with another vessel still approaching head-on or crossing. Alter to starboard for approaching vessels and overtake once they are clear.');
   if (s.rule === '13') notes.push({ ko: '제13조: 추월선은 추월이 끝날 때까지 피해야 해요. 다른 배와의 관계도 함께 보세요.', en: 'Rule 13: the overtaking vessel keeps out of the way until finally past and clear.' });
   if (s.rule === '19') { notes.push({ ko: '제19조: 제한 시계에서는 안전한 속력으로, 레이더로만 탐지한 정횡 앞쪽 배에 대해서는 좌현 변침을 피해요.', en: 'Rule 19: in restricted visibility proceed at a safe speed and avoid altering to port for a vessel detected by radar alone forward of the beam.' });
     if (toPort) W('규칙 주의(제19조(d)): 좌현으로 변침했어요. 정횡 앞쪽 배에 대해서는 피하라고 하는 동작이에요.', 'Rule check (Rule 19(d)): you altered to port, which the rule says to avoid for a vessel forward of the beam.'); }
