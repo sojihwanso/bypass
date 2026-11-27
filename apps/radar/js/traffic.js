@@ -16,17 +16,20 @@ function meet(own, tcMin, hdg, kn, side) {
 /* 시간이 지나도 난이도만큼: 12 NM 안에서 다가오거나 6 NM 안에 있는 배경 배 수를 이만큼 유지 */
 export const KEEP = { easy: 3, medium: 22, hard: 56 };
 const relOf = (own, g) => { const P = makeProj(own.lat, own.lon), x = P.x(g.lon), y = P.y(g.lat), ov = velXY(own.hdg, own.kn), tv = velXY(g.cog ?? g.hdg, g.sog ?? g.kn); return { d: Math.hypot(x, y), closing: x * (tv.vx - ov.vx) + y * (tv.vy - ov.vy) < 0 }; };
-export function activeCount(own, targets) { let n = 0; for (const g of targets) { if (!String(g.id).startsWith('bg')) continue; const r = relOf(own, g); if (r.d <= 6 || (r.d <= 12 && r.closing)) n++; } return n; }
-/* 모자란 만큼(한 번에 목표의 15%까지) 새 배를 화면 밖 6.5~12 NM에서 들여보냄. clear(g)=false면 육지 경로라 버림 */
-export function refillTraffic({ level, own, targets, rnd, seq = 0, clear = () => true }) {
+export function activeCount(own, targets, dMax = 12) { let n = 0; for (const g of targets) { if (!String(g.id).startsWith('bg')) continue; const r = relOf(own, g); if (r.d <= 6 || (r.d <= dMax && r.closing)) n++; } return n; }
+/* 새 배가 나오는 고리·지우는 거리: 지금 화면에 보이는 반경(vis NM)보다 바깥. 기본(6 NM 이하)은 6.5~12 NM, 20 NM 밖에서 지움 */
+export function trafficRing(vis = 6) { const dMin = Math.max(6.5, vis + 0.5); return { dMin, dMax: Math.max(12, vis + 6), dDrop: Math.max(20, vis + 3) }; }
+/* 모자란 만큼(한 번에 목표의 15%까지) 새 배를 화면 밖 고리(ring, 기본 6.5~12 NM)에서 들여보냄. clear(g)=false면 육지 경로라 버림 */
+export function refillTraffic({ level, own, targets, rnd, seq = 0, clear = () => true, ring = trafficRing() }) {
   if (!KEEP[level]) return [];
-  const want = Math.min(KEEP[level] - activeCount(own, targets), Math.ceil(KEEP[level] * 0.15)), out = [], P = makeProj(own.lat, own.lon);
+  const want = Math.min(KEEP[level] - activeCount(own, targets, ring.dMax), Math.ceil(KEEP[level] * 0.15)), out = [], P = makeProj(own.lat, own.lon), k = ring.dMin / 6.5; // 멀리서 나오면 만나는 시각도 그만큼 늦게
   const [c0, c1] = CLOSE[level], pClose = (c0 + c1) / 2 / ((c0 + c1) / 2 + FAR[level]);
   for (let i = 0; i < want; i++) {
-    for (let k = 0; k < 8; k++) {
-      const close = rnd() < pClose, g = oneShip(own, rnd, level, close, 12 + rnd() * 16, 'bg' + (seq + out.length));
+    const close = rnd() < pClose; // 배마다 한 번만 정함(재시도로 먼 배 쪽에 쏠리지 않게)
+    for (let t = 0; t < 8; t++) {
+      const g = oneShip(own, rnd, level, close, (12 + rnd() * 16) * k, 'bg' + (seq + out.length));
       const d = Math.hypot(P.x(g.lon), P.y(g.lat));
-      if (d >= 6.5 && d <= 12 && clear(g)) { out.push(g); break; }
+      if (d >= ring.dMin && d <= ring.dMax && clear(g)) { out.push(g); break; }
     }
   }
   return out;

@@ -71,7 +71,7 @@ export function createLog(scn, init = null) {
         const x = P.x(g.lon), y = P.y(g.lat), d = Math.hypot(x, y);
         if (d * 1852 < ((o.spec?.L ?? 190) + (g.L ?? 100)) / 2) { collision = true; if (isBg(g)) collisionBg = g.name || g.id; }
         if (isBg(g)) { if (!bgMin || d < bgMin.nm) bgMin = { id: g.id, name: g.name || '', nm: d, t: w.t }; continue; }
-        if (!min[g.id] || d < min[g.id].nm) min[g.id] = { id: g.id, nm: d, t: w.t };
+        if (!min[g.id] || d < min[g.id].nm) min[g.id] = { id: g.id, nm: d, t: w.t, ahead: Math.abs(angDiff(wrap360(Math.atan2(-x, -y) * 180 / Math.PI), g.hdg ?? 0)) < 90 }; // ahead: 최근접 때 자선이 상대선 정횡 앞(선수 쪽)
         const c = cpaTcpa({ x: 0, y: 0 }, ov, { x, y }, velXY(g.cog ?? g.hdg, g.sog ?? g.kn));
         if (c.tcpa >= 0 && (!near || c.cpa < near.cpa)) near = { id: g.id, cpa: c.cpa, tcpa: c.tcpa, rng: d };
       }
@@ -79,7 +79,7 @@ export function createLog(scn, init = null) {
       if (!first && (Math.abs(angDiff(o.hdg, own0.hdg)) > 5 || o.tele !== own0.tele)) { first = { t: w.t, tcpa: near ? near.tcpa : null, rng: near ? near.rng : null, dHdg: 0, dSpd: 0 }; t0Act = { hdg: o.hdg, stw: o.stw, t: w.t, hdg0: own0.hdg, stw0: o.stw }; }
       if (first && w.t - t0Act.t <= 300) { const dh = angDiff(o.hdg, t0Act.hdg0); if (Math.abs(dh) > Math.abs(first.dHdg)) first.dHdg = dh; first.dSpd = o.stw - (scnKn(scn) ?? o.stw); }
     },
-    result() { const m = Object.values(min).sort((a, b) => a.nm - b.nm)[0] || null; return { minRange: m, bgMin, collisionBg, collision, grounding, firstAction: first, scn }; },
+    result() { const m = Object.values(min).sort((a, b) => a.nm - b.nm)[0] || null; return { minRange: m, byId: { ...min }, bgMin, collisionBg, collision, grounding, firstAction: first, scn }; },
   };
 }
 const scnKn = (scn) => (scn && scn.own ? TELEGRAPH[scn.own.tele]?.kn : null);
@@ -93,15 +93,20 @@ export function evaluate(r) {
   else if (r.bgMin && r.bgMin.nm < PASS_NM) notes.push({ ko: `참고: 주변 배와 ${r.bgMin.nm.toFixed(2)} NM까지 가까워졌어요. 합격 판정에는 넣지 않지만, 실제 바다라면 너무 가까운 거리예요.`, en: `Note: a surrounding ship came within ${r.bgMin.nm.toFixed(2)} NM. Not graded, but far too close at sea.` });
   if (r.collision) notes.push({ ko: '충돌했어요. 상대선의 방위가 거의 변하지 않으면(같은 방위·거리 감소) 충돌 위험이 있어요(제7조).', en: 'Collision. A steady bearing with decreasing range means risk of collision (Rule 7).' });
   if (r.grounding) notes.push({ ko: '좌초했어요. 피항할 때도 주변 수심과 육지를 같이 봐야 해요.', en: 'Grounded. Check the surrounding land and depths when manoeuvring.' });
+  const W = (ko, en) => notes.push({ ko, en, warn: true }), main = s.targets && s.targets[0] && r.byId && r.byId[s.targets[0].id];
+  if (s.rule === '14' && fa && fa.dHdg < -5) W('규칙 주의(제14조): 마주치는 상태에서 좌현으로 변침했어요. 상대선도 우현으로 돌면 오히려 마주 보게 돼요. 우현으로 변침하세요.', 'Rule check (Rule 14): you altered to port in a head-on situation. If the other ship alters to starboard you close again. Alter to starboard.');
+  if (s.rule === '15·16' && main && main.ahead && main.nm < 2) W('규칙 주의(제15조): 상대선의 선수 쪽을 가로질러 지나갔어요. 피항선은 사정이 허락하면 상대선 선수 쪽을 지나지 말고, 우현으로 크게 돌아 선미 쪽으로 지나가세요.', 'Rule check (Rule 15): you crossed ahead of the other vessel. The give-way vessel should avoid crossing ahead; alter to starboard and pass astern.');
+  if (s.rule === '17' && fa && fa.tcpa != null && fa.tcpa > 10) W(`규칙 주의(제17조(a)): 유지선인데 TCPA ${fa.tcpa.toFixed(0)}분일 때 먼저 움직였어요. 피항선이 피할 시간이 충분할 때는 침로·속력을 지키고, 피항선이 적절히 피하지 않는 것이 분명해졌을 때 움직이세요.`, `Rule check (Rule 17(a)): as stand-on vessel you acted at TCPA ${fa.tcpa.toFixed(0)} min. Keep course and speed while the give-way vessel still has time; act only once it is apparent she is not taking appropriate action.`);
   if (s.rule === '14') notes.push({ ko: '제14조: 마주치는 상태에서는 두 배 모두 우현으로 변침해 서로 좌현을 마주 보고 지나가요.', en: 'Rule 14: in a head-on situation each vessel alters to starboard so they pass port to port.' });
   if (s.rule === '15·16') notes.push({ ko: '제15·16조: 상대선을 우현에 둔 배가 피항선이에요. 가능하면 상대선 선수 쪽을 지나지 말고, 일찍 크게 피하세요.', en: 'Rules 15-16: the vessel with the other on her starboard side keeps out of the way, avoids crossing ahead, and acts early and substantially.' });
   if (s.rule === '17') { notes.push({ ko: '제17조: 유지선은 침로·속력을 지키되, 피항선이 적절히 피하지 않으면 혼자서 피할 수 있어요. 충돌을 피할 수 없을 만큼 가까워지면 반드시 최선의 협력 동작을 해야 해요.', en: 'Rule 17: the stand-on vessel keeps course and speed but may act alone when the give-way vessel fails to act, and must act when collision can no longer be avoided by the give-way vessel alone.' });
-    if (fa && fa.dHdg < -5) notes.push({ ko: '제17조(c): 좌현 쪽 횡단선에 대해 좌현으로 변침하면 안 돼요.', en: 'Rule 17(c): do not alter to port for a vessel on your own port side.' }); }
+    if (fa && fa.dHdg < -5) W('규칙 주의(제17조(c)): 좌현 쪽 횡단선에 대해 좌현으로 변침하면 안 돼요.', 'Rule check (Rule 17(c)): do not alter to port for a vessel on your own port side.'); }
   if (s.rule === '13') notes.push({ ko: '제13조: 추월선은 추월이 끝날 때까지 피해야 해요. 다른 배와의 관계도 함께 보세요.', en: 'Rule 13: the overtaking vessel keeps out of the way until finally past and clear.' });
   if (s.rule === '19') { notes.push({ ko: '제19조: 제한 시계에서는 안전한 속력으로, 레이더로만 탐지한 정횡 앞쪽 배에 대해서는 좌현 변침을 피해요.', en: 'Rule 19: in restricted visibility proceed at a safe speed and avoid altering to port for a vessel detected by radar alone forward of the beam.' });
-    if (fa && fa.dHdg < -5) notes.push({ ko: '좌현으로 변침했어요. 제19조(d)에서 피하라고 하는 동작이에요.', en: 'You altered to port, which Rule 19(d) says to avoid.' }); }
+    if (fa && fa.dHdg < -5) W('규칙 주의(제19조(d)): 좌현으로 변침했어요. 정횡 앞쪽 배에 대해서는 피하라고 하는 동작이에요.', 'Rule check (Rule 19(d)): you altered to port, which the rule says to avoid for a vessel forward of the beam.'); }
   notes.push({ ko: '참고(제8조): 피항 동작은 충분히 일찍, 상대선이 레이더로 알아볼 만큼 크게 하세요. 이번 평가에서 조치 시점은 기록만 하고 합격 조건에는 넣지 않았어요.', en: 'Note (Rule 8): act early and make alterations large enough to be readily apparent on radar. Timing is recorded but not graded here.' });
-  return { ...r, pass, notes };
+  notes.sort((a, b) => (b.warn ? 1 : 0) - (a.warn ? 1 : 0)); // 규칙 지적을 맨 위로
+  return { ...r, pass, notes, warnN: notes.filter((n) => n.warn).length };
 }
 
 /* 시뮬레이션(테스트·검증용): actions = [{t, fn(own)}] 또는 [{when(world,{t:{rng}}), fn(own)}] 한 번씩 */

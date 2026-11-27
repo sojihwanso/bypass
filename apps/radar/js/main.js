@@ -19,7 +19,7 @@ import { initStart } from './start.js';
 import { initHelp } from './help.js';
 import { COL, piColor } from './overlay.js';
 import { createWeatherRun, stepWeather, windDrift, speedLoss, weatherLabel } from './weather.js';
-import { refillTraffic, steerTraffic } from './traffic.js';
+import { refillTraffic, steerTraffic, trafficRing } from './traffic.js';
 
 const TEST = new URLSearchParams(location.search).has('test');
 loadSettings();
@@ -106,17 +106,18 @@ function weatherTick(run) {
   for (const e of ev) { const id = 'wx:' + (++wxN); alerts.raise(id, 'C', lang() === 'en' ? e.en : e.ko); wxPend.push({ id, t: W.t + 60 }); }
   wxPend = wxPend.filter((p) => { if (W.t < p.t) return true; alerts.resolve(p.id); return false; });
 }
-/* 난이도 교통량 유지: 10초마다 주변 배 회피, 1분마다 지나간 배는 20 NM 밖에서 지우고, 모자라면 화면 밖에서 새 배를 들여보냄(육지 경로 제외) */
+/* 난이도 교통량 유지: 10초마다 주변 배 회피, 1분마다 지나간 배는 화면 밖(기본 20 NM)에서 지우고, 모자라면 화면 밖 고리에서 새 배를 들여보냄(육지 경로 제외) */
 function trafficTick(run) {
   const lv = W.def.traffic && W.def.traffic.level; if (!lv || lv === 'none') return;
   steerAcc += run; if (steerAcc >= 10) { steerAcc = 0; steerTraffic(W.own, W.targets); } // 주변 배는 10초마다 자선 회피 판단
   trafAcc += run; if (trafAcc < 60) return; trafAcc = 0;
   const o = W.own, Po = makeProj(o.lat, o.lon), own = { lat: o.lat, lon: o.lon, hdg: o.cog, kn: o.sog };
-  W.targets = W.targets.filter((g) => { if (!String(g.id).startsWith('bg')) return true; const x = Po.x(g.lon), y = Po.y(g.lat), v = velXY(g.cog, g.sog), ov = velXY(o.cog, o.sog); return Math.hypot(x, y) < 20 || x * (v.vx - ov.vx) + y * (v.vy - ov.vy) < 0; });
+  const ring = trafficRing(S.disp.rangeNM * (S.disp.motion === 'TM' || offCenter ? 1.75 : 1)); // 지금 화면에 보이는 반경 밖에서만 생기고 지워짐
+  W.targets = W.targets.filter((g) => { if (!String(g.id).startsWith('bg')) return true; const x = Po.x(g.lon), y = Po.y(g.lat), v = velXY(g.cog, g.sog), ov = velXY(o.cog, o.sog); return Math.hypot(x, y) < ring.dDrop || x * (v.vx - ov.vx) + y * (v.vy - ov.vy) < 0; });
   const onLand = (lat, lon) => W.land.ok && pointInLand(W.land.rings, lat, lon);
   const clear = (g) => [0, 0.25, 0.5].every((h) => { const v = velXY(g.hdg, g.kn), x = Po.x(g.lon) + v.vx * h, y = Po.y(g.lat) + v.vy * h; return !onLand(Po.lat(y), Po.lon(x)); });
   W.trafSeq = W.trafSeq || 1 + W.targets.reduce((m, g) => Math.max(m, /^bg\d+$/.test(g.id) ? +g.id.slice(2) : 0), 0);
-  const add = refillTraffic({ level: lv, own, targets: W.targets, rnd, seq: W.trafSeq, clear });
+  const add = refillTraffic({ level: lv, own, targets: W.targets, rnd, seq: W.trafSeq, clear, ring });
   W.trafSeq += add.length; for (const g of add) W.targets.push(createTarget(g));
 }
 function freeDef(o = {}) {
