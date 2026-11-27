@@ -19,7 +19,7 @@ import { t, lang } from './i18n.js';
 import { initStart } from './start.js';
 import { initHelp } from './help.js';
 import { COL, piColor } from './overlay.js';
-import { createWeatherRun, stepWeather, windDrift, speedLoss, weatherLabel, WX_CAP } from './weather.js';
+import { createWeatherRun, stepWeather, windDrift, speedLoss, weatherLabel, WX_CAP, rollWeather } from './weather.js';
 import { refillTraffic, steerTraffic, trafficRing } from './traffic.js';
 
 const TEST = new URLSearchParams(location.search).has('test');
@@ -82,7 +82,13 @@ function shipEnv() {
   return { set: wrap360(Math.atan2(vx, vy) / D2), drift: Math.hypot(vx, vy), loss: speedLoss(W.weather.sea || 0) };
 }
 /* 날씨 변화 켬/끔(헤더·메뉴 공통): 끄면 시나리오 고정 날씨가 아닌 한 바로 잔잔하게 */
-function applyWeatherOn() { saveSettings(); if (wxRun) wxRun.enabled = S.sim.weatherOn; if (!S.sim.weatherOn && W && !W.weather.fixed) { Object.assign(W.weather, { kind: 'clear', fog: false, sea: 1, windMs: 3, rain: [], ducting: false }); syncSceneWeather(); } }
+/* 날씨 켜기: 켤 때마다 새 날씨를 무작위로(난이도 상한 안에서, 그냥 맑음만 나오지 않게 다시 뽑음). 끄면 잔잔한 맑음 */
+function rerollWeather() {
+  if (!W || W.weather.fixed) return; const cap = WX_CAP[S.sim.level] || WX_CAP.hard, own = { lat: W.own.lat, lon: W.own.lon, hdg: W.own.hdg }; let w = null;
+  for (let i = 0; i < 8; i++) { w = rollWeather(Math.random, null, own, cap); if (!(w.kind === 'clear' && !w.fog) && w.kind !== W.weather.kind) break; }
+  Object.assign(W.weather, w); syncSceneWeather(); wxRun = createWeatherRun({ rnd: Math.random, enabled: true, cap });
+}
+function applyWeatherOn() { saveSettings(); if (S.sim.weatherOn) rerollWeather(); if (wxRun) wxRun.enabled = S.sim.weatherOn; if (!S.sim.weatherOn && W && !W.weather.fixed) { Object.assign(W.weather, { kind: 'clear', fog: false, sea: 1, windMs: 3, rain: [], ducting: false }); syncSceneWeather(); } }
 function syncSceneWeather() { if (scene) Object.assign(scene.weather, W.weather); }
 /* 물표 목록(TGT LIST): TT·AIS 전부, 정렬, 위험은 빨강, 줄 누르면 선택. 열려 있는 동안 1초마다 갱신 */
 function tgtRows() {
