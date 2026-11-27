@@ -24,7 +24,7 @@ function rainBand(r, own, windFrom, dist0, dist1) {
   const b = windFrom + rr(r, -40, 40), d = rr(r, dist0, dist1);
   for (let i = 0; i < n; i++) {
     const bb = (b + (i - n / 2) * 12) * D, dd = d + rr(r, -1, 1);
-    out.push({ lat: P.lat(dd * Math.cos(bb)), lon: P.lon(dd * Math.sin(bb)), rNM: rr(r, 0.8, 1.8), rate: Math.round(rr(r, 4, 10)) });
+    out.push({ lat: P.lat(dd * Math.cos(bb)), lon: P.lon(dd * Math.sin(bb)), rNM: rr(r, 0.8, 1.8), rate: Math.round(rr(r, 4, 10)), seed: Math.floor(r() * 1e6) });
   }
   return out;
 }

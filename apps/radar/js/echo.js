@@ -22,6 +22,27 @@ export function raconCode(letter) { const out = []; let r = 0; for (const c of M
 
 const C_DB = 44; // 레이더 방정식 상수(교육용으로 물표를 6 dB 강하게): 100 m² 물표가 6 NM에서 약 33 dB
 /* 해상 6 넘게는 해면 반사가 덜 늘어남(해상 8에서 범위 약 5.4 NM) */
+/* 부드러운 잡음(value noise, 0~1): 같은 자리는 같은 값이라 회전마다 모양이 이어지고, 좌표를 옮기면 천천히 흘러감 */
+const lat2 = (ix, iy, s) => { let h = Math.imul(ix, 374761393) + Math.imul(iy, 668265263) + Math.imul(s, 1442695041); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+export function vnoise(x, y, s = 0) { const ix = Math.floor(x), iy = Math.floor(y), fx = x - ix, fy = y - iy, u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy), a = lat2(ix, iy, s), b = lat2(ix + 1, iy, s), c = lat2(ix, iy + 1, s), d = lat2(ix + 1, iy + 1, s); return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v; }
+const fbm = (x, y, s) => 0.6 * vnoise(x, y, s) + 0.3 * vnoise(x * 2.1, y * 2.1, s + 7) + 0.1 * vnoise(x * 4.3, y * 4.3, s + 13); // 큰 덩어리 + 작은 얼룩
+/* 비구름 한 칸의 세기: 반지름이 방위마다 들쭉날쭉(가장자리 불규칙), 안쪽도 강약 얼룩. 무늬는 구름을 따라 움직이고 천천히 변함 */
+const cellSeed = (c) => c.seed ?? ((Math.round(c.rNM * 1000) * 31 + Math.round(c.rate * 7)) | 0);
+export function rainAt(cells, x, y, t = 0) {
+  let rate = 0;
+  for (const c of cells) {
+    const dx0 = x - c.x, dy0 = y - c.y; if (dx0 * dx0 + dy0 * dy0 > c.rNM * c.rNM * 4) continue;
+    const s = cellSeed(c), ang = (lat2(s, 1, 5) * Math.PI), ca = Math.cos(ang), sa = Math.sin(ang), stretch = 1.3 + 0.7 * lat2(s, 2, 5); // 구름마다 기울기·길쭉함이 다름
+    const u = (dx0 * ca - dy0 * sa) / stretch, v = (dx0 * sa + dy0 * ca) * Math.min(1.15, stretch * 0.8), d = Math.hypot(u, v); if (d > c.rNM * 1.7) continue;
+    const th = Math.atan2(u, v), drift = t / 900, n = fbm(Math.cos(th) * 2.4 + drift, Math.sin(th) * 2.4 - drift, s);
+    const edge = c.rNM * Math.max(0.35, 0.3 + 1.5 * (n - 0.2)); if (d >= edge) continue; // 가장자리가 크게 들쭉날쭉(볼록·오목)
+    const core = 1 - (d / edge) ** 1.5, p = fbm(u / c.rNM * 2.2 + drift * 0.5, v / c.rNM * 2.2, s + 3);
+    rate += c.rate * Math.max(0, 3 * core * (p * p * 2.2) - 0.05); // 안쪽 강약 얼룩(강한 비 덩어리와 약한 틈)
+  }
+  return rate;
+}
+/* 비 반사 세기: 보통 비(시간당 8 mm)가 X 밴드에서 10 NM 안팎까지 보이게(14였을 땐 3 NM 너머가 거의 안 보였음) */
+const RAIN_K = 24;
 const seaEff = (s) => (s <= 6 ? s : 6 + (s - 6) * 0.6);
 const SEA_K = 0; // 해면 반사 세기 보정(맨 처음 값으로 되돌림)
 const THR0 = 40; // 수신 문턱 = THR0 − 0.4·GAIN (맨 처음 값으로 되돌림)
@@ -138,11 +159,14 @@ export function rawLine(sc, brgIdx, nBins, maxRng) {
   const land = sc.grid && sc.grid.any ? landLine(sc, cb, brgIdx, nBins, maxRng, 0) : null;
   // 해면 클러터
   if (W.sea > 0) {
-    const se = seaEff(W.sea), ext = 0.6 + 0.7 * se, k = 4.2 * se + SEA_K + (sc.band === 'S' ? -8 : 0) + 3 * Math.cos((brg - W.windFrom) * D2R) + mast;
+    // 해면 반사: 방위마다 퍼지는 거리가 들쭉날쭉하고(바람 쪽이 더 멂), 파도 무리처럼 뭉친 얼룩(세계 좌표 잡음이라 바람 따라 천천히 흐름)
+    const se = seaEff(W.sea), th = brg * D2R, extA = 0.6 + 0.7 * se, ext = extA * (0.72 + 0.56 * fbm(Math.cos(th) * 2.2, Math.sin(th) * 2.2, 91 + (sc.seed & 255))), k = 4.2 * se + SEA_K + (sc.band === 'S' ? -8 : 0) + 3 * Math.cos((brg - W.windFrom) * D2R) + mast;
+    const sbr = Math.sin(th), cbr = Math.cos(th), wd = (W.windFrom || 0) * D2R, flow = sc.t / 3600 * 3, fx = sc.ox - Math.sin(wd) * flow, fy = sc.oy - Math.cos(wd) * flow;
     for (let i = 0; i < nBins; i++) {
       if (R[i] > ext + 1) break;
       if (land && land[i] !== 0) continue;
-      const v = k + cb.sea30[i] - (R[i] > ext ? (R[i] - ext) * 20 : 0) + NOISE_DB[(nr() * 4096) | 0];
+      const wx = fx + R[i] * sbr, wy = fy + R[i] * cbr, patch = fbm(wx * 3.2, wy * 3.2, 57);
+      const v = k + cb.sea30[i] - (R[i] > ext ? (R[i] - ext) * 20 : 0) + 14 * (patch - 0.5) + NOISE_DB[(nr() * 4096) | 0];
       if (v > out[i]) out[i] = v;
     }
   }
@@ -152,9 +176,9 @@ export function rawLine(sc, brgIdx, nBins, maxRng) {
     att = new Float32Array(nBins); const sb = Math.sin(brg * D2R), cbb = Math.cos(brg * D2R), bandK = sc.band === 'S' ? -20 : 0;
     let acc = 0;
     for (let i = 0; i < nBins; i++) {
-      const x = R[i] * sb, y = R[i] * cbb; let rate = 0;
-      for (const c of sc.rainp) if ((x - c.x) ** 2 + (y - c.y) ** 2 < c.rNM * c.rNM) rate += c.rate;
-      if (rate > 0) { acc += (sc.band === 'S' ? 0.002 : 0.02) * rate * dr * 2; const v = 14 + 10 * Math.log10(rate) - 20 * Math.log10(R[i] + 0.5) + bandK + NOISE_DB[(nr() * 4096) | 0] * 0.7; if (v > out[i]) out[i] = v; }
+      const x = R[i] * sb, y = R[i] * cbb;
+      const rate = rainAt(sc.rainp, x, y, sc.t);
+      if (rate > 0.05) { acc += (sc.band === 'S' ? 0.002 : 0.02) * rate * dr * 2; const v = RAIN_K + 10 * Math.log10(rate) - 20 * Math.log10(R[i] + 0.5) + bandK + NOISE_DB[(nr() * 4096) | 0] * 0.7; if (v > out[i]) out[i] = v; }
       att[i] = acc;
     }
   }
@@ -252,11 +276,11 @@ export function detect(sc, c, rnd = Math.random) {
     /* 비(화면 영상과 같은 식): 물표까지 경로 감쇠, 물표 자리 비 반사. FTC는 넓은 반사를 (rv/100)·(평균−2)만큼 빼므로 비와 물표가 같이 내려감.
        FTC 뒤에도 비가 문턱을 넘고 물표가 비보다 10 dB 이상 세지 않으면 비에 묻혀 못 잡음 */
     if (sc.rainp.length) {
-      const sb = Math.sin(t.brg * D2R), cb = Math.cos(t.brg * D2R), inR = (x, y) => { let r = 0; for (const q of sc.rainp) if ((x - q.x) ** 2 + (y - q.y) ** 2 < q.rNM * q.rNM) r += q.rate; return r; };
+      const sb = Math.sin(t.brg * D2R), cb = Math.cos(t.brg * D2R), inR = (x, y) => rainAt(sc.rainp, x, y, sc.t);
       let att = 0; for (let r = 0.025; r < t.R; r += 0.05) { const k = inR(r * sb, r * cb); if (k) att += (sc.band === 'S' ? 0.002 : 0.02) * k * 0.05 * 2; }
       const rate = inR(t.R * sb, t.R * cb), rv = c.rain && (c.rain.auto || c.ace) ? Math.max(c.rain.val, 60) : (c.rain ? c.rain.val : 0);
       if (rate > 0) {
-        const rdb = 14 + 10 * Math.log10(rate) - 20 * Math.log10(t.R + 0.5) + (sc.band === 'S' ? -20 : 0), k = (rv / 100) * Math.max(0, rdb - 2);
+        const rdb = RAIN_K + 10 * Math.log10(rate) - 20 * Math.log10(t.R + 0.5) + (sc.band === 'S' ? -20 : 0), k = (rv / 100) * Math.max(0, rdb - 2);
         if (db - att - k - stc <= thr) continue;
         if (rdb - k - stc > thr && db - att - rdb < 10) continue;
       } else if (db - att - stc <= thr) continue;
