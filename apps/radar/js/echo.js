@@ -165,7 +165,7 @@ export function rawLine(sc, brgIdx, nBins, maxRng) {
   const loss = sc.loss || 0;
   for (const t of sc.tg) {
     if (!t.visible || t.R > maxRng + 2) continue;
-    const off = Math.abs(angDiff(brg, t.brg)), eff = Math.max(0, off - t.angHalf), db = t.db0 + pg + mast - loss + (sc.boost && sc.boost.has(t.id) ? 8 : 0) + 2 * (hash(t.R * 1000 | 0, sc.scan) - 0.5);
+    const off = Math.abs(angDiff(brg, t.brg)), eff = Math.max(0, off - t.angHalf), db = t.db0 + pg + mast - loss + (sc.boost && sc.boost.has(t.id) ? 4 : 0) + 2 * (hash(t.R * 1000 | 0, sc.scan) - 0.5);
     if (eff <= half * 1.8) putOval(t.R, pulseNM + t.depth, db - 3 * (eff / half) ** 2, eff / (half * 1.8));
     else if (db > 50 && t.R < 3 && off < 12) put(t.R, t.R + pulseNM, db - 28); // 사이드로브 호
     if (eff <= half) {
