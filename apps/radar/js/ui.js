@@ -52,30 +52,30 @@ const qbBtn = ([k, l]) => `<button type="button" class="qb" data-act="${k}" id="
 /* 실제 레이더에 없는 시뮬레이터 전용 단추는 헤더에 */
 /* 약자는 풀어 쓰고, 전체 이름은 title로 */
 const ABBR = { HU: ['H.Up', 'Head Up'], NU: ['N.Up', 'North Up'], CU: ['C.Up', 'Course Up'], RM: ['R.Motion', 'Relative Motion'], TM: ['T.Motion', 'True Motion'] };
-const HB = [['scn', 'q_scn'], ['pause', 'q_pause'], ['speed', 'q_speed'], ['wx', 'q_wx'], ['conn', 'q_conn'], ['shot', 'q_shot']];
+const HB = [['scn', 'q_scn'], ['pause', 'q_pause'], ['speed', 'q_speed'], ['wx', 'q_wx'], ['shot', 'q_shot']] // Conning 단추는 뺌(Conning 창은 늘 보이고 − 단추로 접고 펼침);
 
 export function initUI(root, actions) {
   root.innerHTML = `
 <header class="top">
   <div class="brand"><b data-t="brand"></b><span data-t="sub"></span></div>
   <button type="button" class="scn-chip" id="scnChip" data-act="brief" hidden></button>
-  <div class="simbar" role="group" aria-label="시뮬레이터">${HB.map(([k, l]) => `<button type="button" class="hb" data-act="${k}" id="hb_${k}">${ICON[k]}<span data-t="${l}"></span><span class="qv" id="hv_${k}"></span></button>`).join('')}</div>
+  <div class="simbar" role="group" aria-label="시뮬레이터" data-al-en="Simulator">${HB.map(([k, l]) => `<button type="button" class="hb" data-act="${k}" id="hb_${k}">${ICON[k]}<span data-t="${l}"></span><span class="qv" id="hv_${k}"></span></button>`).join('')}</div>
   <div class="htools">
-    <button class="hbtn rp-toggle" type="button" data-act="rp" aria-label="정보창">${ICON.panel}</button>
-    <button class="hbtn" type="button" id="hdrHelp" data-act="help" aria-label="도움말" title="도움말">${ICON.help}</button>
+    <button class="hbtn rp-toggle" type="button" data-act="rp" aria-label="정보창" data-al-en="Info panel">${ICON.panel}</button>
+    <button class="hbtn" type="button" id="hdrHelp" data-act="help" aria-label="도움말" data-al-en="Help" title="도움말">${ICON.help}</button>
     <div class="seg2" role="group" aria-label="Language"><button type="button" data-act="lang" data-v="ko">한</button><button type="button" data-act="lang" data-v="en">EN</button></div>
-    <button class="hbtn" type="button" data-act="fs" aria-label="전체 화면">${ICON.fs}</button>
-    <button class="ver" type="button" id="verTop" aria-label="버전 ${VERSION}">v${VERSION}</button>
-    <a class="bp-logo" id="bpLogo" href="https://teambypass.vercel.app/" title="Team Bypass" aria-label="Team Bypass 메인으로">${BP_LOGO}</a>
+    <button class="hbtn" type="button" data-act="fs" aria-label="전체 화면" data-al-en="Full screen">${ICON.fs}</button>
+    <button class="ver" type="button" id="verTop" aria-label="버전 ${VERSION}" data-al-en="Version ${VERSION}">v${VERSION}</button>
+    <a class="bp-logo" id="bpLogo" href="https://teambypass.vercel.app/" title="Team Bypass" aria-label="Team Bypass 메인으로" data-al-en="Team Bypass home">${BP_LOGO}</a>
   </div>
 </header>
 <div class="main">
-  <nav class="qbar" id="qbar" aria-label="빠른 조작"><div class="qgrp" id="qbTop">${QB_TOP.map(qbBtn).join('')}</div><div class="qsep"></div><div class="qgrp" id="qbBot">${QB_BOT.map(qbBtn).join('')}</div></nav>
+  <nav class="qbar" id="qbar" aria-label="빠른 조작" data-al-en="Quick controls"><div class="qgrp" id="qbTop">${QB_TOP.map(qbBtn).join('')}</div><div class="qsep"></div><div class="qgrp" id="qbBot">${QB_BOT.map(qbBtn).join('')}</div></nav>
   <section class="ppi-wrap" id="ppiWrap">
-    <canvas id="cvEcho"></canvas><canvas id="cvOver" aria-label="레이더 화면"></canvas>
+    <canvas id="cvEcho"></canvas><canvas id="cvOver" aria-label="레이더 화면" data-al-en="Radar display"></canvas>
     <button type="button" class="stby-hint" id="stbyHint" data-act="tx"></button>
     <div class="tl">
-      <div class="row2"><div class="bx" id="bxRange" data-wheel="range" style="position:static"><span class="lb">RANGE</span><span class="big" id="vRange">-</span><span class="lb" id="vRing"></span><span class="pm"><button type="button" data-act="rangeUp" aria-label="범위 늘리기">+</button><button type="button" data-act="rangeDn" aria-label="범위 줄이기">−</button></span><button type="button" class="whl" data-act="wheelRange" id="vWhl">휠</button></div>
+      <div class="row2"><div class="bx" id="bxRange" data-wheel="range" style="position:static"><span class="lb">RANGE</span><span class="big" id="vRange">-</span><span class="lb" id="vRing"></span><span class="pm"><button type="button" data-act="rangeUp" aria-label="범위 늘리기" data-al-en="Increase range">+</button><button type="button" data-act="rangeDn" aria-label="범위 줄이기" data-al-en="Decrease range">−</button></span><button type="button" class="whl" data-act="wheelRange" id="vWhl">휠</button></div>
       <div class="bx" id="bxRef" style="position:static"><span class="lb">REF POINT</span><button type="button" data-act="refpt" id="vRef">CCRP</button></div></div>
       <div class="bx" id="bxMode" style="position:static"><button type="button" data-act="mode" id="vOrient">HU</button><button type="button" data-act="motion" id="vMotion">RM</button><button type="button" data-act="band" id="vBand">X-BAND</button><button type="button" data-act="pulse" id="vPulse">M1</button></div>
       <div class="bx" id="bxPict" style="position:static;display:flex;gap:6px;align-items:center"><span class="lb">PICTURE</span><button type="button" data-act="preset" id="vPict">-</button><button type="button" data-act="off" id="vOff">OFF CENTER</button></div>
@@ -104,7 +104,7 @@ export function initUI(root, actions) {
     <div class="sec" id="pnOwn"><h3><span data-t="own"></span><span class="num" id="vClock"></span></h3>
       <dl class="kv"><dt>HDG</dt><dd class="big" id="vHdg">-</dd><dt>STW</dt><dd id="vStw">-</dd><dt>SOG</dt><dd id="vSog">-</dd><dt>COG</dt><dd id="vCog">-</dd><dt>ROT</dt><dd id="vRot">-</dd><dt data-t="posn"></dt><dd id="vPos">-</dd><dt id="vWptL" data-t="nextWpt" hidden></dt><dd id="vWpt" hidden></dd><dt data-t="elapsed"></dt><dd id="vEl">-</dd></dl></div>
     <div class="sec" id="pnTgt"><h3><span data-t="tgt"></span></h3><div class="tslots" id="tSlots"></div></div>
-    <div class="sec" id="pnTT"><h3><span data-t="ttais"></span><span class="num" id="vCounts"></span></h3><dl class="kv" id="vTT"></dl><div class="ttbtns"><button class="btn" type="button" data-act="tgtList" id="vTgtList" data-t="tgtList"></button><button class="btn" type="button" data-act="vecMode" id="vVec">VECTOR</button><span class="vect" role="group" aria-label="VECTOR TIME"><button class="btn" type="button" data-act="vecDn" aria-label="벡터 짧게">−</button><span class="vv" id="vVecT" data-wheel="vecT" aria-label="VECTOR TIME">-</span><button class="btn" type="button" data-act="vecUp" aria-label="벡터 길게">+</button></span><button class="btn" type="button" data-act="trail" id="vTrail">TRAIL</button></div></div>
+    <div class="sec" id="pnTT"><h3><span data-t="ttais"></span><span class="num" id="vCounts"></span></h3><dl class="kv" id="vTT"></dl><div class="ttbtns"><button class="btn" type="button" data-act="tgtList" id="vTgtList" data-t="tgtList"></button><button class="btn" type="button" data-act="vecMode" id="vVec">VECTOR</button><span class="vect" role="group" aria-label="VECTOR TIME"><button class="btn" type="button" data-act="vecDn" aria-label="벡터 짧게" data-al-en="Shorter vector">−</button><span class="vv" id="vVecT" data-wheel="vecT" aria-label="VECTOR TIME">-</span><button class="btn" type="button" data-act="vecUp" aria-label="벡터 길게" data-al-en="Longer vector">+</button></span><button class="btn" type="button" data-act="trail" id="vTrail">TRAIL</button></div></div>
     <div class="sec" id="pnAlert"><h3><span data-t="alert"></span><span class="num" id="vAlN"></span></h3><div id="aBox"></div></div>
     <div id="connSlot"></div>
   </aside>
@@ -116,7 +116,10 @@ export function initUI(root, actions) {
 <div class="rotate" role="dialog" aria-modal="true" aria-labelledby="rotT"><div><svg class="rot-ic" viewBox="0 0 48 48" aria-hidden="true"><rect x="15" y="6" width="18" height="30" rx="3"/><path d="M8 30a16 16 0 0 0 14 12M40 18A16 16 0 0 0 26 6"/><path d="M22 42l-2-4 4-1M26 6l2 4-4 1"/></svg><b id="rotT" data-t="rotate"></b><p data-t="rotateSub"></p><button type="button" class="btn rot-ok" data-act="rotateOk" data-t="rotateOk"></button></div></div>`;
 
   let menuTab = MENU[0].id;
+  /* 화면 읽기용 이름(aria-label)도 언어에 맞춰: data-al-en이 있는 요소는 처음 한국어 값을 기억해 두고 바꿔 끼움 */
+  const applyAria = () => { const en = lang() === 'en'; for (const el of document.querySelectorAll('[data-al-en]')) { if (el.dataset.alKo === undefined) el.dataset.alKo = el.getAttribute('aria-label') || ''; el.setAttribute('aria-label', en ? el.dataset.alEn : el.dataset.alKo); } };
   const applyLang = () => {
+    applyAria();
     document.documentElement.lang = lang();
     for (const el of root.querySelectorAll('[data-t]')) el.textContent = t(el.dataset.t);
     for (const b of root.querySelectorAll('[data-act="lang"]')) b.classList.toggle('on', b.dataset.v === lang());
@@ -197,6 +200,8 @@ export function initUI(root, actions) {
     if (x) { e.preventDefault(); e.stopPropagation(); actions.slotToggle && actions.slotToggle(x.dataset.slotX); return; }
     if (tg) { e.preventDefault(); e.stopPropagation(); actions.slotToggle && actions.slotToggle(tg.dataset.slotTg); const c = $('#tDetail'); if (c) c.focus(); }
   });
+  /* 키보드: 단추가 아닌 data-act 요소(물표 목록 줄, SEA·RAIN·TUNE 상자의 AUTO 전환)도 Enter로 누름. 줄은 Space도 */
+  root.addEventListener('keydown', (e) => { if (e.defaultPrevented || (e.key !== 'Enter' && e.key !== ' ')) return; const el = e.target; if (!el || !el.dataset || !el.dataset.act || /^(BUTTON|INPUT|SELECT|TEXTAREA|A)$/.test(el.tagName)) return; if (e.key === ' ' && el.dataset.wheel) return; e.preventDefault(); e.stopPropagation(); el.click(); });
   /* ---- 휠: 상자 위에서 값 조정 ---- */
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   root.addEventListener('wheel', (e) => {
@@ -235,7 +240,7 @@ export function initUI(root, actions) {
     const r = over.getBoundingClientRect(); cmPos = { sx: x - r.left, sy: y - r.top };
     cm.innerHTML = CM.map(([k, l]) => (k === '-' ? '<hr>' : `<button type="button" role="menuitem" data-cm="${k}">${esc(t(l))}</button>`)).join('');
     cm.hidden = false; const w = cm.offsetWidth, h = cm.offsetHeight;
-    cm.style.left = Math.min(x, innerWidth - w - 8) + 'px'; cm.style.top = Math.min(y, innerHeight - h - 8) + 'px';
+    cm.style.left = Math.max(8, Math.min(x, innerWidth - w - 8)) + 'px'; cm.style.top = Math.max(8, Math.min(y, innerHeight - h - 8)) + 'px'; // 낮은 화면에서 위가 잘리지 않게(넘치면 메뉴 안에서 스크롤)
   }
   over.addEventListener('contextmenu', (e) => { e.preventDefault(); openCM(e.clientX, e.clientY); });
   let lp = null;
@@ -333,7 +338,7 @@ export function initUI(root, actions) {
     qv('hl', 'OFF'); qv('map', S.disp.map.on ? 'ON' : 'OFF', S.disp.map.on); qv('cureset', d.orient === 'CU' || d.motion === 'TM' ? 'RESET' : '-'); qv('ownais', ''); qv('aismsg', d.msgN ? String(d.msgN) : '');
     qv('pal', t('pal_' + S.disp.palette)); if (d.mark) qv('mark', d.mark.sym, d.mark.on); $('#qb_pal').title = lang() === 'en' ? 'Day/dusk/night · long-press or right-click: colour set' : '주간·박명·야간 · 길게 누르거나 오른쪽 클릭: 색 조합'; $('#qb_mark').title = lang() === 'en' ? 'Mark: press, then click the PPI · long-press or right-click: shape' : '마크: 누른 뒤 PPI를 누르면 놓임 · 길게 누르거나 오른쪽 클릭: 모양 고르기';
     if (d.wx) { setHTML('#hv_wx', d.wx.on ? esc(d.wx.label) + (d.wx.cur ? `<span class="wxc">${esc(d.wx.cur)}</span>` : '') : esc(lang() === 'en' ? 'OFF' : '꺼짐')); $('#hb_wx').classList.toggle('on', d.wx.on); $('#hb_wx').title = (d.wx.on && d.wx.full ? d.wx.full + '\n' : '') + (lang() === 'en' ? 'Click: weather changes on/off (new random weather each time)' : '누르면 날씨 변화 켜기/끄기(켤 때마다 새 날씨)'); }
-    $('#hv_speed').textContent = '×' + d.speed; $('#hb_pause').classList.toggle('on', !!d.paused); $('#hb_conn').classList.toggle('on', !!d.connOn); $('#hb_speed').classList.toggle('on', d.speed > 1);
+    $('#hv_speed').textContent = '×' + d.speed; $('#hb_pause').classList.toggle('on', !!d.paused); $('#hb_speed').classList.toggle('on', d.speed > 1);
     $('#vPict').textContent = S.ctrl.preset; $('#vOff').classList.toggle('on', !!d.offCenter); $('#vRef').textContent = d.ref || 'CCRP';
     $('#vPi').classList.toggle('on', !!d.piOn); if (d.pi) { $('#vPiB').textContent = d.pi.brg; $('#vPiI').textContent = d.pi.int; $('#vPiB').classList.toggle('off', !d.piOn); $('#vPiI').classList.toggle('off', !d.piOn); $('#vPiB').title = lang() === 'en' ? 'PI bearing · wheel / drag / arrow keys' : 'PI 방위 · 휠·끌기·화살표'; $('#vPiI').title = lang() === 'en' ? 'Spacing between PI lines · wheel / drag / arrow keys' : 'PI 선 사이 간격 · 휠·끌기·화살표'; } $('#vAz').classList.toggle('on', !!d.azOn); $('#vTrial').classList.toggle('on', S.tt.trialMode !== 'OFF');
     $('#vVec').textContent = 'VECTOR ' + S.tt.vector; $('#vVecT').textContent = S.tt.vecMin + ' min'; $('#vVecT').title = lang() === 'en' ? 'Vector time · −/+ buttons, wheel or arrow keys' : '벡터 시간 · −/+ 단추, 휠, 화살표'; $('#vTrail').textContent = 'TRAIL ' + (S.disp.trails.time ? (S.disp.trails.mode === 'TRUE' ? 'T ' : 'R ') + Math.round(S.disp.trails.time / 60) + "'" : 'OFF');

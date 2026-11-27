@@ -15,7 +15,7 @@ function meet(own, tcMin, hdg, kn, side) {
 
 /* 시간이 지나도 난이도만큼: 12 NM 안에서 다가오거나 6 NM 안에 있는 배경 배 수를 이만큼 유지 */
 export const KEEP = { easy: 3, medium: 22, hard: 56 };
-const relOf = (own, g) => { const P = makeProj(own.lat, own.lon), x = P.x(g.lon), y = P.y(g.lat), ov = velXY(own.hdg, own.kn), tv = velXY(g.cog ?? g.hdg, g.sog ?? g.kn); return { d: Math.hypot(x, y), closing: x * (tv.vx - ov.vx) + y * (tv.vy - ov.vy) < 0 }; };
+const relOf = (own, g) => { const P = makeProj(own.lat, own.lon), x = P.x(g.lon), y = P.y(g.lat), ov = velXY(own.hdg, own.kn), tv = velXY(g.hdg, g.kn); /* 물 기준(조류 빼고) */ return { d: Math.hypot(x, y), closing: x * (tv.vx - ov.vx) + y * (tv.vy - ov.vy) < 0 }; };
 export function activeCount(own, targets, dMax = 12) { let n = 0; for (const g of targets) { if (!String(g.id).startsWith('bg')) continue; const r = relOf(own, g); if (r.d <= 6 || (r.d <= dMax && r.closing)) n++; } return n; }
 /* 새 배가 나오는 고리·지우는 거리: 지금 화면에 보이는 반경(vis NM)보다 바깥. 기본(6 NM 이하)은 6.5~12 NM, 20 NM 밖에서 지움 */
 export function trafficRing(vis = 6) { const dMin = Math.max(6.5, vis + 0.5); return { dMin, dMax: Math.max(12, vis + 6), dDrop: Math.max(20, vis + 3) }; }
@@ -62,8 +62,9 @@ export function makeTraffic({ level, own, rnd, minutes = 30 }) {
 
 /* 주변 배(bg*)의 회피: 자선과 CPA < 1.0 NM(15분 안, 8 NM 안)이면 우현으로 돌려 CPA ≥ 1.2 NM 되는 가장 작은 각을 고름.
    원래 침로(base)로 계속 다시 계산하므로, 지나가고 나면(CPA 충분·멀어짐) 저절로 원래 침로로 돌아감. 10초마다 부름 */
+/* 물(대수) 기준으로 계산: 조류는 모든 배를 똑같이 밀어 상대 운동에 영향이 없으므로, 자선도 선수 방위·대수 속력(HDG·STW), 상대선도 HDG·속력으로 */
 export function steerTraffic(own, targets) {
-  const P = makeProj(own.lat, own.lon), ov = velXY(own.cog ?? own.hdg, own.sog ?? own.stw);
+  const P = makeProj(own.lat, own.lon), ov = velXY(own.hdg, own.stw ?? own.kn ?? own.sog);
   const cpaAt = (x, y, hdg, kn) => { const v = velXY(hdg, kn), rx = v.vx - ov.vx, ry = v.vy - ov.vy, s2 = rx * rx + ry * ry; const t = s2 < 1e-9 ? 0 : -(x * rx + y * ry) / s2; return { cpa: Math.hypot(x + rx * Math.max(0, t), y + ry * Math.max(0, t)), tcpa: t * 60 }; };
   for (const g of targets) {
     if (!String(g.id).startsWith('bg') || !g.want) continue;

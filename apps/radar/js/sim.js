@@ -38,7 +38,7 @@ export function stepShip(s, dt, env = { set: 0, drift: 0 }) {
   const sp = s.spec;
   if (s.auto.on) { // PD 오토파일럿: 침로 오차와 선회 각속도
     const e = angDiff(s.auto.setHdg, s.hdg);
-    s.rudderOrder = clamp(1.5 * e - 40 * s.r, -20, 20);
+    s.rudderOrder = s.stw < 0.5 ? 0 : clamp(1.5 * e - 40 * s.r, -20, 20); // 후진·정지 중에는 타가 반대로 듣거나 안 들으므로 타 중앙(발산 방지)
   }
   const dr = s.rudderOrder - s.rudder, step = sp.rudderRate * dt;
   s.rudder = Math.abs(dr) <= step ? s.rudderOrder : s.rudder + Math.sign(dr) * step;

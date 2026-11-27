@@ -246,7 +246,7 @@ export function detect(sc, c, rnd = Math.random) {
   const out = [];
   for (const t of sc.tg) {
     if (!t.visible) continue;
-    const db = t.db0 + pg, sea = sc.weather.sea > 0 && t.R < 0.6 + 0.7 * seaEff(sc.weather.sea) + 1 ? 4.2 * seaEff(sc.weather.sea) + SEA_K + (sc.band === 'S' ? -8 : 0) - 30 * Math.log10(Math.max(t.R, 0.05)) : -99;
+    const db = t.db0 + pg - (sc.loss || 0), sea = sc.weather.sea > 0 && t.R < 0.6 + 0.7 * seaEff(sc.weather.sea) + 1 ? 4.2 * seaEff(sc.weather.sea) + SEA_K + (sc.band === 'S' ? -8 : 0) - 30 * Math.log10(Math.max(t.R, 0.05)) : -99;
     const Rs = 0.5 + 0.4 * (c.stcRange ?? 5), stc = c.sea && !c.sea.auto && c.sea.val > 0 ? (c.sea.val / 100) * 45 * Math.max(0, 1 - t.R / Rs) ** ((c.stcCurve ?? 3) / 3) : 0;
     if (db - stc <= thr || db <= sea + 3) continue;
     /* 비(화면 영상과 같은 식): 물표까지 경로 감쇠, 물표 자리 비 반사. FTC는 넓은 반사를 (rv/100)·(평균−2)만큼 빼므로 비와 물표가 같이 내려감.

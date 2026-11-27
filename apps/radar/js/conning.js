@@ -11,7 +11,7 @@ const hd = (v) => { let x = Math.round((((v % 360) + 360) % 360) * 10) / 10; if 
 
 export function initConning(root, getShip, extra = {}) {
   const el = document.createElement('section'); el.id = 'conn'; el.className = 'conn'; el.setAttribute('aria-label', 'Conning');
-  el.innerHTML = `<div class="con-h"><b>CONNING</b><span class="lb" id="cnMode"></span><span style="margin-left:auto;display:flex;gap:4px"><button type="button" class="cbtn" data-act="connHide" aria-label="접기" title="접기"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 17h14"/></svg></button></span></div>
+  el.innerHTML = `<div class="con-h"><b>CONNING</b><span class="lb" id="cnMode"></span><span style="margin-left:auto;display:flex;gap:4px"><button type="button" class="cbtn" data-act="connHide" aria-label="접기" title="접기" data-al-en="Collapse"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 17h14"/></svg></button></span></div>
 <div class="con-b">
   <div class="cn-top"><div><span class="lb">HDG</span><b class="num big" id="cnHdg"></b></div><div><span class="lb">ROT °/min</span><b class="num" id="cnRot"></b><span class="rotbar"><i id="cnRotI"></i></span></div></div>
   <div class="cn-row"><span class="lb">RUDDER</span><span class="rud"><span class="rz"></span><i id="cnRudA"></i><i class="ord" id="cnRudO"></i></span><span class="num" id="cnRud"></span></div>
@@ -24,9 +24,9 @@ export function initConning(root, getShip, extra = {}) {
     </div>
   </div>
 </div>`;
-  const tab = document.createElement('button'); tab.id = 'connTab'; tab.type = 'button'; tab.className = 'conn-tab'; tab.textContent = 'CONNING'; tab.title = '펼치기'; tab.hidden = true;
+  const tab = document.createElement('button'); tab.id = 'connTab'; tab.type = 'button'; tab.className = 'conn-tab'; tab.textContent = 'CONNING'; tab.title = '펼치기'; tab.setAttribute('aria-label', 'CONNING 펼치기'); tab.dataset.alEn = 'Expand CONNING'; tab.hidden = true;
   root.append(el, tab);
-  const st = S.ui.conning;
+  const st = { get hidden() { return S.ui.conning.hidden; }, set hidden(v) { S.ui.conning.hidden = v; } }; // 설정 불러오기·초기화로 S.ui가 새 객체가 돼도 따라감
   /* 오른쪽 패널에 고정. 접으면 'CONNING' 줄만 남음(키보드 조종은 계속) */
   const show = (on) => { st.hidden = !on; el.hidden = !on; tab.hidden = on; if (on) refresh(); saveSettings(); };
   el.hidden = st.hidden; tab.hidden = !st.hidden;
@@ -53,5 +53,5 @@ export function initConning(root, getShip, extra = {}) {
     for (const b of el.querySelectorAll('[data-ap]')) b.classList.toggle('on', (b.dataset.ap === '1') === s.auto.on);
     el.querySelector('#cnSet').textContent = s.auto.on ? hd(s.auto.setHdg) : '---.-°'; el.querySelector('#cnMode').textContent = s.auto.on ? 'AUTO' : 'HAND';
   }
-  return { el, refresh, toggle() { show(el.hidden); }, get shown() { return !el.hidden; } };
+  return { el, refresh, sync() { el.hidden = st.hidden; tab.hidden = !st.hidden; if (!st.hidden) refresh(); }, toggle() { show(el.hidden); }, get shown() { return !el.hidden; } };
 }

@@ -54,7 +54,7 @@ export async function openStart(o = {}) {
     const c = e.target.closest('[data-scn]'); if (c && !c.disabled) { dlg.close(); startScenario(c.dataset.scn); return; }
     const b = e.target.closest('[data-start]'); if (!b) { starting = false; return; }
     if (b.dataset.start === 'edu') { dlg.close(); R.setPaused(false); window.Tutor && window.Tutor.menu(); return; }
-    if (b.dataset.start === 'resume') { dlg.close(); resumeVoyage(); return; }
+    if (b.dataset.start === 'resume') { dlg.close(); resumeVoyage(); R.setPaused(false); return; } // 시작 화면이 걸어 둔 일시정지를 풂(자동 저장도 다시 돎)
     const scn = freeSetup({ lat: 33.5, lon: 124.6, nTargets: +dlg.querySelector('#fN').value, sea: 2, rain: false, seed: +dlg.querySelector('#fSeed').value || 1 });
     dlg.close(); runScenario(scn, { free: true, skipBrief: true });
   };
@@ -93,10 +93,15 @@ async function prepare(scn, o) {
   return { def: { ...def, targets: [...def.targets, ...bg] }, weather, region, rnd, level: o.level ?? S.sim.level, route };
 }
 
+/* 해역(해안선)을 받는 동안: '해역 준비 중' 표시, 그 사이 다른 시작은 무시(시나리오 두 개가 함께 돌지 않게) */
+let preparing = false;
+function loadNote(on) { let n = document.getElementById('loadNote'); if (!on) { if (n) n.remove(); return; } if (!n) { n = document.createElement('div'); n.id = 'loadNote'; n.className = 'load-note'; n.setAttribute('role', 'status'); document.getElementById('app').append(n); } n.textContent = lang() === 'en' ? 'Preparing the sea area…' : '해역 준비 중…'; }
 async function runScenario(scn, o = {}) {
+  if (preparing) return; preparing = true; loadNote(true);
   const R = window.Radar, en = lang() === 'en';
+  let pr; try { pr = await prepare(scn, o); } finally { preparing = false; loadNote(false); }
   lastResult = null; current = scn;
-  const pr = await prepare(scn, o), def = pr.def; R.setPaused(false);
+  const def = pr.def; R.setPaused(false);
   const where = pr.region ? ` · ${tl(pr.region)}` : '';
   R.startWorld({ name: (o.free ? (en ? 'Free navigation' : '자유 항해') : `${scn.id} · ${tl(scn)}`) + where, own: def.own, targets: def.targets, weather: pr.weather, aids: def.aids, marks: def.marks || [], needsCoast: !!scn.needsCoast, traffic: { level: pr.level }, route: pr.route, save: true, scnId: o.free ? null : scn.id });
   R.setWeatherRun(createWeatherRun({ rnd: pr.rnd, enabled: S.sim.weatherOn, cap: WX_CAP[pr.level] || WX_CAP.hard }));

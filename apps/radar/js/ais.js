@@ -3,7 +3,7 @@ import { makeProj, cpaTcpa, velXY, angDiff, brgRng } from './geo.js';
 
 export const AIS_RANGE_NM = 25;
 export function reportInterval(kn, rot = 0, cls = 'A', nav = 'underway') {
-  if (cls === 'B') return 30;
+  if (cls === 'B') return kn < 2 ? 180 : kn <= 14 ? 30 : kn <= 23 ? 15 : 5; // Class B(SOTDMA): 2 kn 미만 3분
   if (nav === 'anchored' || nav === 'moored') return 180;
   const turning = Math.abs(rot) > 5; // °/min
   if (kn > 23) return 2;
@@ -43,7 +43,7 @@ export function createAIS() {
       if (t - a.lastRep >= reportInterval(g.sog ?? g.kn, g.rot || 0, a.cls, a.navStatus) - 1e-9) {
         a.lat = g.lat; a.lon = g.lon; a.cog = g.cog ?? g.hdg; a.sog = g.sog ?? g.kn; a.hdg = g.hdg; a.rot = g.rot || 0; a.lastRep = t; a.reports++;
         if (!a.past.length || t - a.past[a.past.length - 1].t >= 60) { a.past.push({ lat: g.lat, lon: g.lon, t }); if (a.past.length > 10) a.past.shift(); }
-        if (a.status === 'lost') a.status = 'sleep';
+        if (a.status === 'lost') a.status = a.before === 'sleep' || !a.before ? 'sleep' : 'active'; // 분실 전에 활성이었으면 다시 활성(경보 대상 유지)
       }
     }
     for (const a of map.values()) {
@@ -51,7 +51,7 @@ export function createAIS() {
       const iv = reportInterval(a.sog, a.rot, a.cls, a.navStatus);
       if (t - a.lastRep > Math.max(20, 3.5 * iv)) { // 분실: 마지막 보고 위치에 머물고(자선 기준 좌표만 다시 계산), 5분 지나면 지움
         if (t - a.lastRep > Math.max(20, 3.5 * iv) + 300) { map.delete(a.id); continue; }
-        a.status = 'lost'; a.x = P.x(a.lon); a.y = P.y(a.lat); const bl = brgRng(0, 0, a.x, a.y); a.brg = bl.brg; a.rng = bl.rng; a.cpa = null; a.tcpa = null; continue; }
+        if (a.status !== 'lost') a.before = a.status; a.status = 'lost'; a.x = P.x(a.lon); a.y = P.y(a.lat); const bl = brgRng(0, 0, a.x, a.y); a.brg = bl.brg; a.rng = bl.rng; a.cpa = null; a.tcpa = null; continue; }
       // 마지막 보고에서 추측 항법으로 현재 위치
       const dt = (t - a.lastRep) / 3600, v = velXY(a.cog, a.sog);
       a.x = P.x(a.lon) + v.vx * dt; a.y = P.y(a.lat) + v.vy * dt;

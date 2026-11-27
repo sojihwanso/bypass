@@ -32,7 +32,6 @@ export const MENU = [
     it('trailTime', 'disp.trails.time', 'enum', '항적 시간', 'TRAIL TIME', '항적을 남기는 시간입니다(초).', 'How long trails remain (seconds).', { opts: [E(0, 'OFF'), E(15, '15s'), E(30, '30s'), E(60, '1min'), E(180, '3min'), E(360, '6min'), E(900, '15min'), E(1800, '30min')] }),
     it('trailGrad', 'disp.trails.grad', 'enum', '항적 단계', 'TRAIL GRADATION', '한 가지 밝기(SINGLE) 또는 오래될수록 흐리게(MULTI).', 'Single brightness or fading with age.', { opts: enumOf(['SINGLE', 'MULTI']) }),
     it('trailLevel', 'disp.trails.level', 'enum', '항적 레벨', 'TRAIL LEVEL', '항적으로 남길 영상의 최소 세기입니다.', 'Minimum echo strength that leaves a trail.', { opts: enumOf([1, 2, 3, 4]) }),
-    it('osTrail', 'disp.trails.os', 'bool', '자선 항적', 'OS TRAIL', '자선의 지나온 길을 표시합니다.', 'Shows own ship trail.'),
     it('suppressOS', 'disp.trails.suppressOS', 'bool', '자선 주변 억제', 'SUPPRESS AROUND OS', '자선 주변 해면 반사가 항적으로 남지 않게 합니다.', 'Keeps sea clutter around own ship from leaving trails.'),
     it('stern', 'disp.stern', 'bool', '선미 마크', 'STERN MARK', '선수선 반대쪽에 선미 표시를 그립니다.', 'Draws the stern mark opposite the heading line.'),
     it('osMark', 'disp.osMark', 'enum', '자선 심볼', 'OWN SHIP MARK', '자선을 작은 기호(MINIMIZED) 또는 실제 크기(SCALED)로 그립니다.', 'Own ship as a small mark or to scale.', { opts: enumOf(['MINIMIZED', 'SCALED']) }),
@@ -61,11 +60,6 @@ export const MENU = [
     it('volume', 'alert.volume', 'enum', '경보음 크기', 'ALERT VOLUME', '경보음 크기입니다.', 'Alert sound volume.', { opts: enumOf(['OFF', 'LOW', 'MID', 'HIGH']) }),
     it('anchorOn', 'alert.anchorOn', 'bool', '닻 감시', 'ANCHOR WATCH', '투묘 위치에서 정한 거리 밖으로 벗어나면 경보를 울립니다.', 'Alerts when the ship drifts beyond the set distance from the anchor position.'),
     it('anchorR', 'alert.anchorR', 'num', '닻 감시 거리(NM)', 'ANCHOR WATCH RANGE', '닻 감시 반경입니다.', 'Anchor watch radius.', { min: 0.05, max: 9.99, step: 0.01 }),
-    it('ta1On', 'alert.ta1On', 'bool', '표적 경보 1', 'TARGET ALARM 1', '구역에 물표가 들어오거나(IN) 나가면(OUT) 경보를 울립니다.', 'Alerts when a target enters (IN) or leaves (OUT) the zone.'),
-    it('ta1Mode', 'alert.ta1Mode', 'enum', '표적 경보 1 방식', 'ALR1 MODE', 'IN 또는 OUT', 'IN or OUT', { opts: enumOf(['IN', 'OUT']) }),
-    it('ta2On', 'alert.ta2On', 'bool', '표적 경보 2', 'TARGET ALARM 2', '두 번째 표적 경보 구역입니다.', 'Second target alarm zone.'),
-    it('ta2Mode', 'alert.ta2Mode', 'enum', '표적 경보 2 방식', 'ALR2 MODE', 'IN 또는 OUT', 'IN or OUT', { opts: enumOf(['IN', 'OUT']) }),
-    it('taLevel', 'alert.taLevel', 'enum', '표적 경보 레벨', 'ALARM LEVEL', '경보를 일으킬 영상의 최소 세기입니다.', 'Minimum echo strength that triggers the alarm.', { opts: enumOf([1, 2, 3, 4]) }),
   ] },
   { id: 'ttais', ko: 'TT·AIS', en: 'TT·AIS', items: [
     it('vector', 'tt.vector', 'enum', '벡터 모드', 'VECTOR', '진(TRUE) 벡터는 실제 침로·속력, 상대(REL) 벡터는 자선 기준 움직임으로 충돌 위험을 바로 봅니다.', 'TRUE shows actual course and speed; REL shows motion relative to own ship for collision risk.', { opts: enumOf(['TRUE', 'REL']) }),
@@ -88,7 +82,6 @@ export const MENU = [
     it('aisMinSpd', 'ais.minSpd', 'num', 'AIS 최소 속력(kn)', 'AIS MIN SPEED VALUE', 'AIS 속력 필터 값입니다.', 'AIS speed filter.', { min: 0, max: 9.9, step: 0.1 }),
     it('aisExceptB', 'ais.exceptB', 'bool', 'Class B 제외', 'EXCEPT CLASS B', '소형선 Class B AIS를 숨깁니다.', 'Hides Class B (small craft) AIS.'),
     it('aisCpaAuto', 'ais.cpaAutoOn', 'bool', 'CPA 자동 활성', 'CPA AUTO ACTIVATE', '정한 거리 안 AIS 물표를 자동으로 활성화합니다.', 'Activates AIS targets within the set range automatically.'),
-    it('aisPopup', 'ais.popup', 'bool', 'AIS 팝업 정보', 'AIS POP UP INFO', '커서를 올리면 간단 정보를 띄웁니다.', 'Shows a pop-up when the cursor is on a target.'),
     act('acqZone', '포착 구역 설정', 'SET ACQ ZONE', 'PPI에서 두 점을 눌러 자동 포착 구역을 정합니다.', 'Click two points on the PPI to set an acquisition zone.'),
     act('ttCancelAll', 'TT 전체 해제', 'TT ALL CANCEL', '추적 중인 물표를 모두 해제합니다.', 'Cancels all tracked targets.'),
     act('sleepAll', 'AIS 모두 휴면', 'SLEEP ALL TARGETS', '활성 AIS 물표를 모두 휴면으로 돌립니다.', 'Puts all activated AIS targets to sleep.'),
@@ -138,4 +131,5 @@ export function applyPreset(S, id) {
 export function savePreset(S, id) { saved[id] = Object.fromEntries(KEYS.map((k) => [k, structuredClone(S.ctrl[k])])); }
 export function restorePreset(id, which = 'factory') { if (which === 'factory') delete saved[id]; }
 export const savedPresets = () => saved;
-export function loadSavedPresets(obj) { if (obj && typeof obj === 'object') for (const k of Object.keys(PRESETS)) if (obj[k]) saved[k] = obj[k]; }
+/* 저장된 맞춤 영상: 값이 빠졌거나 모양이 다르면 그 항목은 기본값으로(깨진 값 하나로 화면이 멈추지 않게) */
+export function loadSavedPresets(obj) { if (obj && typeof obj === 'object') for (const k of Object.keys(PRESETS)) { const p = obj[k]; if (!p || typeof p !== 'object') continue; const fixed = {}; for (const key of KEYS) { const d = PRESETS[k][key], v = p[key]; fixed[key] = v === undefined || v === null || typeof v !== typeof d || (typeof d === 'object' && (typeof v.val !== 'number' || !isFinite(v.val))) ? structuredClone(d) : v; } saved[k] = fixed; } }

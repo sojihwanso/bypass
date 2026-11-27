@@ -11,7 +11,7 @@ const KO_SCREEN = `<h4>화면 세 구역</h4><ul>
 <li><b>교육 과정</b>: 시작 화면 맨 위 카드나 도움말 창의 '교육 과정 시작'으로 도도와 함께 5과정 53단계를 따라 할 수 있어요. 언제든 ×로 끝내고 다음에 이어서 할 수 있어요.</li>
 <li><b>AIS 경보</b>: 휴면(작은 삼각형) AIS 물표는 CPA가 위험해도 경보를 울리지 않아요. 물표를 눌러 활성하거나 TT로 포착하면 CPA/TCPA 경보 대상이 돼요. 메뉴의 'CPA 자동 활성'을 켜면 정한 거리 안 위험 물표가 자동으로 활성돼요.</li>
 <li><b>X/S 밴드</b>: 왼쪽 위 모드 줄의 X-BAND 단추를 누르면 S 밴드로 바뀌어요. X(3 cm)는 분해능이 좋고 SART가 응답하고, S(10 cm)는 비·해면 반사에 강하지만 빔이 넓어요.</li>
-<li><b>헤더</b>: 시나리오, 일시정지, 배속(×1~×32, 키 [ ]), 날씨 표시(누르면 날씨 변화 켬/끔, 켤 때마다 새 날씨), Conning, 캡처, 도움말(? 아이콘).</li>
+<li><b>헤더</b>: 시나리오, 일시정지, 배속(×1~×32, 키 [ ]), 날씨 표시(누르면 날씨 변화 켬/끔, 켤 때마다 새 날씨), 캡처, 도움말(? 아이콘). Conning 창은 늘 보이고 창의 − 단추로 접고 펼쳐요(키보드 C도 돼요).</li>
 <li><b>배치</b>: 화면이 넓으면 작은 Conning 창이 레이더 원 오른쪽에, 물표 정보·TT·AIS 설정은 오른쪽 패널에 있어요. 시나리오·자유 항해는 GAIN 0에서 시작하니, 송신한 뒤 GAIN을 올리며 영상이 살아나는 것을 보세요. 시작 침로와 주변 배는 시나리오 시간(자유 항해 1시간) 동안 육지로 가지 않게 정해지고, 주변 배는 앞에 육지가 보이면 스스로 피해 가요. 시작 침로 앞 30 NM 안에는 육지가 없고, 시나리오·자유 항해마다 변침점 3~5개짜리 항로가 무작위로 생겨요(레이더 화면의 보라색 점선 WP1·WP2…, 자선 정보의 '다음 변침점'에 방위·거리). 첫 변침점은 시나리오 상황이 끝난 뒤에 나오고, 모든 구간은 육지에서 1 NM 넘게 떨어져 있어요.</li>
 <li><b>마크</b>: 마크 단추를 누르고 PPI를 누르면 그 자리(지리 고정)에 마크가 놓여요. 마크는 20가지예요. 마크 단추를 다시 누르면 차례로 바뀌고, 길게 누르거나 오른쪽 클릭하면 고르는 창이 떠요. 점 마크 12개(삼각형·원·사각형·X·십자·마름모·별·변침점 ◎·닻·침선·부표·깃발)는 한 번 눌러 놓고, 선 마크 8개(실선·파선·점선·일점쇄선·굵은 실선·화살표·이중선·원)는 시작점과 끝점을 차례로 눌러 그어요(Esc로 취소). 오른쪽 클릭 메뉴 '마크 지우기'로 지워요.</li>
 <li><b>PM TEST(성능 감시)</b>: 송신(TX) 중에 왼쪽 위 PM TEST 단추(또는 메뉴 → 영상 → 성능 감시)를 누르면 거리 24 NM·GAIN 70·SEA/RAIN 0·긴 펄스로 바뀌고, 상대 방위 135° 쪽에 호가 나타나요. 정상이면 가장 안쪽 호가 8.0~19.8 NM 사이에 있고, 호가 짧아지거나 사라지면 송수신 성능이 떨어진 거예요(호가 없으면 10 dB 손실). 다시 누르거나 거리를 바꾸면 꺼지고 설정이 원래대로 돌아와요. 연습하려면 메뉴의 'PM 연습: 성능 저하 가정'으로 손실을 넣어 보세요.</li>
@@ -43,7 +43,7 @@ export function initHelp() {
     const en = lang() === 'en';
     if (!dlg) { dlg = document.createElement('dialog'); dlg.id = 'helpDlg'; document.getElementById('app').append(dlg); dlg.addEventListener('click', (e) => { const b = e.target.closest('[data-htab]'); if (b) render(b.dataset.htab); if (e.target.closest('[data-hclose]')) dlg.close(); if (e.target.closest('[data-act="eduStart"]')) { dlg.close(); window.Tutor && window.Tutor.menu(); } }); }
     dlg.innerHTML = `<div class="dlg-h"><span>${en ? 'Help' : '도움말'}</span><span style="display:flex;gap:6px"><button class="btn pri" type="button" data-act="eduStart">${en ? 'Training course' : '교육 과정 시작'}</button><button class="btn" type="button" data-hclose="1">${en ? 'Close' : '닫기'}</button></span></div><div class="htabs">${TABS.map(([k, ko, e]) => `<button type="button" data-htab="${k}">${en ? e : ko}</button>`).join('')}</div><div class="dlg-b hbody"></div>`;
-    render(tab); if (!dlg.open) dlg.showModal();
+    render(tab); if (!dlg.open) { const R = window.Radar, was = !!(R && R.isPaused && R.isPaused()); if (R && R.setPaused) R.setPaused(true); dlg.onclose = () => { if (R && R.setPaused) R.setPaused(was); }; dlg.showModal(); } // 도움말을 읽는 동안 시뮬레이션 멈춤(브리핑 창과 같게)
   }
   function render(tab) {
     const en = lang() === 'en', b = dlg.querySelector('.hbody');

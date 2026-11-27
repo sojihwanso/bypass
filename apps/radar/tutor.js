@@ -237,6 +237,7 @@
 
   function start(course, step) { if (!STEPS[course] || !STEPS[course].length) return; mount(); active = true; sndOver = null; cur = { course, step: step || 0 }; show(cur.step); }
   function stop() {
+    if (window.RadarEdu && window.RadarEdu.end) window.RadarEdu.end(); // 교육 중 바뀐 레이더 설정을 교육 전으로
     clearInterval(timer); timer = null; cur = null; active = false; applySnd(); document.querySelectorAll(".tu-glow").forEach((g) => g.classList.remove("tu-glow"));
     if (!root) return;
     root.classList.remove("on"); cursor.classList.remove("show"); chip.classList.remove("show"); spot.classList.remove("show");

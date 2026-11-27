@@ -42,7 +42,7 @@ let logFn = null, logDump = null, onScenarioTick = null, coastScreen = null, coa
 const rnd = Math.random;
 const SPEEDS = [1, 2, 4, 8, 16, 32], MARKS = MARK_TYPES.map((t) => t.id);
 let markA = null, markPrev = null, saveT = null; // 선 마크: 첫 점·지금 커서
-let lastClick = null, eduKey = '';
+let lastClick = null, eduKey = '', eduSaved = null;
 let markShape = 0, tgtSort = 'rng', tgtTimer = null;
 let wxRun = null, wxPend = [], wxN = 0, trafAcc = 0, steerAcc = 0;
 
@@ -62,6 +62,7 @@ export function startWorld(def) {
   if (def.own.state) Object.assign(own, def.own.state, { spec: own.spec, auto: { ...def.own.state.auto } });
   W = { def, name: def.name || '', own, targets: def.targets.map((g) => (g.want ? { ...g, legs: [...(g.legs || [])], want: { ...g.want } } : createTarget(g))), weather: { sea: 0, windFrom: 0, windMs: 0, rain: [], ducting: false, interference: false, current: { set: 0, drift: 0 }, ...(def.weather || {}) }, aids: def.aids || [], marks: def.marks || [], t: def.t || 0, land: { rings: [], ok: false, heightM: 100 }, needsCoast: !!def.needsCoast };
   P = makeProj(def.own.lat, def.own.lon);
+  eduKey = ''; // 다른 세계가 시작되면 교육 단계는 자기 화면을 다시 만듦
   if (pmSave) pmOff(); // 새 세계(시나리오·교육·이어 하기)는 PM을 끄고 원래 설정으로, OFF CENTER는 아래에서 새로 비움
   tracker = createTracker({ max: 100 }); ais = createAIS(); alerts = createAlerts(realNow, () => W.t); tools = createTools(); route = createRoute(); if (def.route && def.route.length) { route.add(def.own.lat, def.own.lon); for (const w of def.route) route.add(w.lat, w.lon); route.next = 1; route.start = true; } trails.reset(V.rangeNM, S.disp.trails.mode);
   W.userMarks = (def.userMarks || []).map((m) => ({ ...m })); trafAcc = 0; steerAcc = 0; selected = []; tmOff = { x: 0, y: 0 }; ruler = null; rulerA = null; uiMode = null; azZones = []; piOn = false; speed = 1; offCenter = null; prevScan = new Array(N_BRG); prevRaw = null; ppi.clear();
@@ -107,7 +108,7 @@ function tgtRows() {
 function openTgtList() {
   if (!W) return; const en = lang() === 'en', { rows, f1 } = tgtRows(), esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const th = (k, ko, e) => `<button type="button" class="btn${tgtSort === k ? ' on' : ''}" data-act="tgtSort" data-sort="${k}">${en ? e : ko}</button>`;
-  const body = rows.map((x) => `<tr class="${x.danger ? 'danger' : ''}${selected.includes(x.id) ? ' sel' : ''}" data-act="tgtSel" data-id="${esc(x.id)}"><td>${esc(x.name)}</td><td>${f1(x.brg)}°</td><td>${f1(x.rng, 2)}</td><td>${x.crs === null ? '-' : f1(x.crs) + '°'}</td><td>${f1(x.spd)}</td><td>${f1(x.cpa, 2)}</td><td>${x.tcpa === null || x.tcpa === undefined ? '-' : f1(x.tcpa)}</td><td>${x.ais ? '●' : '—'}</td></tr>`).join('') || `<tr><td colspan="8">${en ? 'No targets' : '물표가 없어요'}</td></tr>`;
+  const body = rows.map((x) => `<tr class="${x.danger ? 'danger' : ''}${selected.includes(x.id) ? ' sel' : ''}" data-act="tgtSel" data-id="${esc(x.id)}" tabindex="0" aria-selected="${selected.includes(x.id)}"><td>${esc(x.name)}</td><td>${f1(x.brg)}°</td><td>${f1(x.rng, 2)}</td><td>${x.crs === null ? '-' : f1(x.crs) + '°'}</td><td>${f1(x.spd)}</td><td>${f1(x.cpa, 2)}</td><td>${x.tcpa === null || x.tcpa === undefined ? '-' : f1(x.tcpa)}</td><td>${x.ais ? '●' : '—'}</td></tr>`).join('') || `<tr><td colspan="8">${en ? 'No targets' : '물표가 없어요'}</td></tr>`;
   /* 이미 열려 있으면 표 내용·정렬 표시만 바꿈(1초마다 통째로 다시 그리면 정렬 단추 초점이 사라짐) */
   const g = document.getElementById('genDlg'), tb = g && g.open && g.querySelector('.tgl tbody');
   if (tb) { if (tb._h !== body) { tb._h = body; tb.innerHTML = body; } g.querySelectorAll('[data-sort]').forEach((b) => b.classList.toggle('on', b.dataset.sort === tgtSort)); return; }
@@ -134,7 +135,7 @@ function trafficTick(run) {
   const lv = W.def.traffic && W.def.traffic.level; if (!lv || lv === 'none') return;
   steerAcc += run; if (steerAcc >= 10) { steerAcc = 0; steerTraffic(W.own, W.targets); landSteer(); } // 주변 배는 10초마다 자선 회피·육지 피하기 판단
   trafAcc += run; if (trafAcc < 60) return; trafAcc = 0;
-  const o = W.own, Po = makeProj(o.lat, o.lon), own = { lat: o.lat, lon: o.lon, hdg: o.cog, kn: o.sog };
+  const o = W.own, Po = makeProj(o.lat, o.lon), own = { lat: o.lat, lon: o.lon, hdg: o.hdg, kn: o.stw }; // 물 기준(조류는 모든 배에 같아 상대 운동과 무관)
   const ring = trafficRing(S.disp.rangeNM * (S.disp.motion === 'TM' || offCenter ? 1.75 : 1)); // 지금 화면에 보이는 반경 밖에서만 생기고 지워짐
   W.targets = W.targets.filter((g) => { if (!String(g.id).startsWith('bg')) return true; const x = Po.x(g.lon), y = Po.y(g.lat), v = velXY(g.cog, g.sog), ov = velXY(o.cog, o.sog); return Math.hypot(x, y) < ring.dDrop || x * (v.vx - ov.vx) + y * (v.vy - ov.vy) < 0; });
   const onLand = (lat, lon) => W.land.ok && pointInLand(W.land.rings, lat, lon);
@@ -154,7 +155,7 @@ function setRadar(s) { if (s !== 'tx' && pmSave) pmOff(); radar.state = s; radar
 function toggleTx() { setRadar(radar.state === 'stby' ? 'warm' : 'stby'); }
 
 /* ---------- 프레임 ---------- */
-function frame(now) { frameAt(now); requestAnimationFrame(frame); }
+function frame(now) { requestAnimationFrame(frame); try { frameAt(now); } catch (e) { if (!frame.err) { frame.err = true; console.error('[radar] frame error', e); } } } // 한 번 오류가 나도 화면이 멈추지 않게 다음 프레임을 먼저 예약
 function frameAt(now) { const dt = Math.min(0.25, Math.max(0, (now - last) / 1000)); last = now; tick(dt); }
 function tick(dt) {
   frames++;
@@ -334,7 +335,7 @@ var pmSave = null; // 켜기 전 설정(끄면 되돌림). null이면 PM 꺼짐
 const PM_FIX = { sea: { auto: false, val: 0 }, rain: { auto: false, val: 0 }, tune: { auto: true }, ace: false, es: 0, eav: 0, ir: 2, noiseRej: false, secondRej: false, wiper: 0, pulse: 'L' };
 function pmLock() { const c = S.ctrl; c.sea = { ...PM_FIX.sea }; c.rain = { ...PM_FIX.rain }; c.tune.auto = true; for (const k of ['ace', 'es', 'eav', 'ir', 'noiseRej', 'secondRej', 'wiper', 'pulse']) c[k] = PM_FIX[k]; }
 /* PM 중에 설정이 저장되면 PM 값 대신 켜기 전 값을 저장(창을 닫아도 원래 설정이 남게) */
-setSaveFilter((o) => { if (!pmSave) return o; Object.assign(o.ctrl, JSON.parse(JSON.stringify(pmSave.ctrl)), { pmMode: 'OFF' }); o.disp.rangeNM = pmSave.range; o.disp.motion = pmSave.motion; return o; });
+setSaveFilter((o) => { if (eduSaved) { o.ctrl = JSON.parse(JSON.stringify(eduSaved.ctrl)); o.disp = JSON.parse(JSON.stringify(eduSaved.disp)); o.tt = JSON.parse(JSON.stringify(eduSaved.tt)); return o; } /* 교육 중에는 교육 전 설정을 저장 */ if (!pmSave) return o; Object.assign(o.ctrl, JSON.parse(JSON.stringify(pmSave.ctrl)), { pmMode: 'OFF' }); o.disp.rangeNM = pmSave.range; o.disp.motion = pmSave.motion; return o; });
 function pmOn() {
   if (pmSave) return true;
   if (radar.state !== 'tx') { S.ctrl.pmMode = 'OFF'; ui.dialog('PM', `<p>${lang() === 'en' ? 'Set the radar to TX first. The performance monitor works only while transmitting.' : '먼저 송신(TX)으로 바꾸세요. 성능 감시는 송신 중에만 켜져요.'}</p>`); return false; }
@@ -439,7 +440,7 @@ function cursorAct(id, pos) {
   if (id === 'ebl') { const e = tools.ebl[0]; e.on = true; e.origin = null; e.rel = false; e.brg = w.brg; return; }
   if (id === 'vrm') { const v = tools.vrm[0]; v.on = true; v.origin = null; v.rng = w.rng; return; }
   if (id === 'offEbl') { const e = tools.ebl[0], v = tools.vrm[0]; e.on = true; e.origin = { lat: w.lat, lon: w.lon }; v.origin = S.disp.eblStab ? { lat: w.lat, lon: w.lon } : null; return; }
-  if (id === 'ruler') { rulerA = w; uiMode = 'ruler'; return; }
+  if (id === 'ruler') { if (ruler && uiMode !== 'ruler') { ruler = null; rulerA = null; return; } /* 그려진 줄자가 있으면 같은 메뉴로 지움 */ rulerA = w; ruler = null; uiMode = 'ruler'; return; }
   if (id === 'off') { const G = ppi.geom(), R = G.R / G.dpr, cx = G.cx / G.dpr, cy = G.cy / G.dpr, ox = ((pos.sx ?? pos.x) - cx) / R, oy = ((pos.sy ?? pos.y) - cy) / R, m = Math.hypot(ox, oy); offCenter = m > 0.75 ? { x: (ox / m) * 0.75, y: (oy / m) * 0.75 } : { x: ox, y: oy }; return; }
   if (id === 'center') { offCenter = null; tools.ebl[0].origin = null; tools.vrm[0].origin = null; return; }
   if (id === 'markDel') { const q = { x: pos.sx ?? pos.x, y: pos.sy ?? pos.y }; let bi = -1, bd = 20; const scr = (la, lo) => { const q = relOf(P.x(lo), P.y(la)); return ppi.toScreen(q.brg, q.rng); }; W.userMarks.forEach((k, i) => { const d = markDist(k.shape, scr(k.lat, k.lon), k.lat2 != null ? scr(k.lat2, k.lon2) : null, q); if (d < bd) { bd = d; bi = i; } }); if (bi >= 0) W.userMarks.splice(bi, 1); return; }
@@ -450,7 +451,7 @@ function menuAction(id) {
   const en = lang() === 'en';
   if (id === 'save') { saveSettings(); try { localStorage.setItem('radar-presets', JSON.stringify(savedPresets())); } catch (e) {} ui.dialog(en ? 'Settings' : '설정', `<p>${en ? 'Saved.' : '저장했습니다.'}</p>`); }
   if (id === 'load' || id === 'reset') { // 송신 상태는 설정이 아니라 지금 레이더 상태를 따름(불러오기·초기화로 영상이 꺼지지 않게)
-    pmSave = null; if (id === 'load') loadSettings(); else { resetSettings(); saveSettings(); } S.ctrl.pmMode = 'OFF';
+    pmSave = null; if (id === 'load') loadSettings(); else { resetSettings(); saveSettings(); } S.ctrl.pmMode = 'OFF'; if (conn && conn.sync) conn.sync();
     S.ctrl.tx = radar.state === 'tx'; setRange(S.disp.rangeNM); ui.applyLang(); ui.applyTheme(); ui.renderMenu(); }
   if (id === 'ttCancelAll') { tracker.cancelAll(); selected = selected.filter((x) => x.startsWith('A:')); for (const a of alerts.list()) if (/^(cpa|lost):/.test(a.id)) { alerts.resolve(a.id); alerts.ack(a.id); } }
   if (id === 'sleepAll') ais.sleepAll();
@@ -481,8 +482,7 @@ ov.addEventListener('click', (e) => {
   if (uiMode === 'az2') { const a = azStart, z = { brg0: a.brg, brg1: w.brg, rng0: Math.min(a.rng, w.rng), rng1: Math.max(a.rng, w.rng) }; azZones = [...azZones, z].slice(-2); tracker.setZones(azZones); uiMode = null; return; }
   if (uiMode === 'mark') { const id = MARKS[markShape]; if (isLineMark(id)) { markA = w; markPrev = w; uiMode = 'mark2'; return; } if (W.userMarks.length < 100) W.userMarks.push({ lat: w.lat, lon: w.lon, shape: id }); uiMode = null; return; }
   if (uiMode === 'mark2') { if (W.userMarks.length < 100 && markA) W.userMarks.push({ lat: markA.lat, lon: markA.lon, lat2: w.lat, lon2: w.lon, shape: MARKS[markShape] }); markA = null; markPrev = null; uiMode = null; return; }
-  if (uiMode === 'ruler') { uiMode = null; return; }
-  if (uiMode === 'ta1' || uiMode === 'ta2') return;
+  if (uiMode === 'ruler') { if (rulerA) { const d = brgRng(rulerA.x, rulerA.y, w.x, w.y); ruler = { a: relOf(rulerA.x, rulerA.y), b: relOf(w.x, w.y), label: `${d.brg.toFixed(1)}° ${d.rng.toFixed(3)} NM` }; } uiMode = null; return; } // 터치처럼 움직임 없이 눌러도 두 번째 점으로
   const near = nearestTarget(pos);
   if (near) { if (near.kind === 'ais') { const a = ais.list().find((x) => x.id === near.id); if (a.status === 'sleep') ais.activate(near.id); select('A:' + near.id); } else select(near.id); }
   else if (S.tt.select.startsWith('MANUAL') && echoNear(pos)) acquireAt(pos); // 영상 위를 한 번 누르면 포착(빈 바다를 눌러 헛 물표가 생기지 않게 영상이 있을 때만)
@@ -542,6 +542,7 @@ requestAnimationFrame(frame);
 setTimeout(fit, 0); if (document.fonts) document.fonts.ready.then(fit); // 문구·글꼴이 채워진 뒤 단추줄 넘침·원 크기를 다시 계산
 /* 교육 과정 창구(edu-steps.js가 화면을 맞추고 판정을 읽음) */
 function eduSetup(o = {}, key = '') {
+  if (!eduSaved) eduSaved = JSON.parse(JSON.stringify({ ctrl: S.ctrl, disp: S.disp, tt: S.tt })); // 교육이 끝나면 되돌릴 사용자 설정
   if (key !== 'r1' && S.ctrl.gain < 20) S.ctrl.gain = 65; // 시나리오가 GAIN 0으로 남겨도 교육 화면(영상 조정 단계 뒤)은 보이게
   const lat = o.lat ?? 33.45, lon = o.lon ?? 124.55, hdg = o.hdg ?? 0, kn = 14, Pq = makeProj(lat, lon);
   const at = (b, r) => ({ lat: Pq.lat(r * Math.cos(b * D)), lon: Pq.lon(r * Math.sin(b * D)) });
@@ -558,6 +559,7 @@ function eduSetup(o = {}, key = '') {
 }
 const eduTgt = (id) => W && W.targets.find((g) => g.id === id);
 window.RadarEdu = {
+  end: () => { if (!eduSaved) return; const sv = eduSaved; eduSaved = null; eduKey = ''; if (pmSave) pmOff(); Object.assign(S.ctrl, sv.ctrl); Object.assign(S.disp, sv.disp); Object.assign(S.tt, sv.tt); setRange(S.disp.rangeNM); saveSettings(); },
   S, setup: eduSetup, ensure: (key, o) => { if (eduKey !== key || !W) eduSetup(o, key); }, key: () => eduKey, world: () => W, radar: () => radar.state,
   rel: (id) => { const g = eduTgt(id); return g ? relOf(P.x(g.lon), P.y(g.lat)) : null; },
   cursorRel: () => (cursor && W ? ppi.fromScreen(cursor.x, cursor.y) : null), lastClick: () => lastClick,
@@ -576,7 +578,7 @@ if (TEST) {
     radar: { set: setRadar, toggle: toggleTx, get state() { return radar.state; }, get warmLeft() { return radar.warmLeft; } }, world: () => W, tracker: { targets: () => tracker.targets() },
     newWorld: (o) => { if (S.ctrl.gain < 20) S.ctrl.gain = 65; startWorld(freeDef(o)); }, /* 점검용 세계는 영상이 보이게(시작 화면의 GAIN 0과 별개) */ tgtScreen: (id) => { const g = W.targets.find((x) => x.id === id), r = relOf(P.x(g.lon), P.y(g.lat)), p = ppi.toScreen(r.brg, r.rng); return { sx: p.x, sy: p.y }; },
     coastDebug: () => { if (!coastScreen || !W.land.rings.length) return null; let maxErr = 0, n = 0; const r = W.land.rings[0], step = Math.max(2, Math.floor(r.length / 2 / 400) * 2); coastScreen[0].forEach((p, j) => { const i = j * step, q = relOf(P.x(r[i]), P.y(r[i + 1])), t = ppi.toScreen(q.brg, q.rng); maxErr = Math.max(maxErr, Math.hypot(t.x - p.x, t.y - p.y)); n++; }); return { n, maxErr }; },
-    onLand: (lat, lon) => !!(W && W.land.ok && pointInLand(W.land.rings, lat, lon)), cursorAct, menuAction, trails: () => trails, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,
+    ruler: () => ruler, conn: () => conn, onLand: (lat, lon) => !!(W && W.land.ok && pointInLand(W.land.rings, lat, lon)), cursorAct, menuAction, trails: () => trails, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,
     startScenario: (id, o) => starter.startScenario(id, o), resumeVoyage: () => starter.resumeVoyage(), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), finishNow: () => starter.finishNow(), shouldBeep, antenna: () => ant, relayout: () => { fit(); }, layoutMode: () => ui.layoutMode(), qbInside: () => ui.qbInside(), forceState: (o) => { if (o.az) { azZones = o.az; tracker.setZones(o.az); } if (o.speed) speed = o.speed; if (o.pi !== undefined) piOn = o.pi; }, uiState: () => ({ az: azZones.length > 0, speed, pi: piOn, off: !!offCenter }), tickSim, sim: { setAuto, setRudderOrder, setTelegraph }, menuItems: () => MENU.flatMap((m) => m.items.map((i) => (lang() === 'en' ? i.en : i.ko))),
   };
   setRadar('tx');
