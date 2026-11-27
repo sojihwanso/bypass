@@ -47,7 +47,7 @@ let wxRun = null, wxPend = [], wxN = 0, trafAcc = 0, steerAcc = 0;
 const actions = {};
 const ui = initUI(app, actions);
 const ppi = createPPI(ui.echoCanvas, ui.overCanvas);
-const fit = () => { ui.relayout(); ppi.setShift(ui.shift(), ui.rmax()); ppi.resize(); coastKey = ''; };
+const fit = () => { ui.relayout(); ppi.setShift(ui.shift(), ui.rmax()); ppi.resize(); coastKey = ''; const G = ppi.measure(), wr = document.getElementById('ppiWrap').style; wr.setProperty('--ppiX', G.cx / G.dpr + 'px'); wr.setProperty('--ppiY', G.cy / G.dpr + 'px'); wr.setProperty('--ppiR', G.R / G.dpr + 'px'); }; // 원 중심·반지름(STBY 안내를 원 안에)
 fit(); addEventListener('resize', fit);
 document.documentElement.dataset.theme = S.disp.palette;
 
@@ -402,7 +402,7 @@ ov.addEventListener('click', (e) => {
   else if (S.tt.select.startsWith('MANUAL') && e.detail === 2) acquireAt(pos);
 });
 let azStart = null;
-on('settings', (path) => { V.palette = S.disp.palette; if (path === 'sim.weatherOn') applyWeatherOn(); saveSettings(); });
+on('settings', (path) => { V.palette = S.disp.palette; if (path === 'sim.weatherOn') applyWeatherOn(); if (path === 'ui.lang') fit(); saveSettings(); });
 addEventListener('pointerdown', () => { lastUser = performance.now(); alerts.resolve('watch'); }, true);
 addEventListener('keydown', () => { lastUser = performance.now(); alerts.resolve('watch'); }, true);
 function setHidden(h) { hiddenPause = h; last = performance.now(); }
@@ -411,7 +411,7 @@ document.addEventListener('visibilitychange', () => setHidden(document.hidden));
 /* Trial 상자 */
 { const tb = document.createElement('div'); tb.className = 'bx'; tb.id = 'bxTrial'; tb.hidden = true; tb.style.cssText = 'left:50%;bottom:44px;transform:translateX(-50%);display:flex;gap:12px;align-items:center';
   tb.innerHTML = '<span class="lb">TRIAL</span><span class="lb">CRS</span><span class="vv" id="trC" data-wheel="trC"></span><span class="lb">SPD</span><span class="vv" id="trS" data-wheel="trS"></span><span class="lb">DELAY</span><span class="vv" id="trD" data-wheel="trD"></span>';
-  document.getElementById('ppiWrap').append(tb); }
+  document.getElementById('ppiWrap').append(tb); tb.querySelectorAll('[data-wheel]').forEach(ui.wheelable); }
 
 /* ---------- Conning·키보드 ---------- */
 const conn = initConning(document.getElementById('connSlot'), own, { wind: () => (W ? { dir: W.weather.windFrom, ms: W.weather.windMs } : null) });
@@ -453,6 +453,7 @@ setRange(S.disp.rangeNM);
 const starter = initStart(ui);
 initHelp();
 requestAnimationFrame(frame);
+setTimeout(fit, 0); if (document.fonts) document.fonts.ready.then(fit); // 문구·글꼴이 채워진 뒤 단추줄 넘침·원 크기를 다시 계산
 /* 교육 과정 창구(edu-steps.js가 화면을 맞추고 판정을 읽음) */
 function eduSetup(o = {}, key = '') {
   const lat = o.lat ?? 33.45, lon = o.lon ?? 124.55, hdg = o.hdg ?? 0, kn = 14, Pq = makeProj(lat, lon);

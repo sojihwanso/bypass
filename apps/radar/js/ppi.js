@@ -89,5 +89,5 @@ export function createPPI(canvas, overlay) {
     return { brg: wrap360(Math.atan2(ex, -ey) / D2R + upBrg(view)), rng: Math.hypot(ex, ey) * k };
   }
   function inside(x, y) { return Math.hypot(x * dpr - geom.cx, y * dpr - geom.cy) <= geom.R; }
-  return Object.assign(st, { resize, clear, writeLine, render, toScreen, fromScreen, inside, setPersistence: (s) => (st.persistence = s), setShift: (px, rm = Infinity) => { if (px !== shift || rm !== rmax) { shift = px; rmax = rm; lutKey = ''; } }, geom: () => ({ ...geom, dpr }), levelAt: (brg, rng) => { const bi = Math.round((((brg % 360) + 360) % 360) / 360 * N_BRG) & (N_BRG - 1), i = Math.floor((rng / bufRange) * NB); return i >= 0 && i < NB ? buf[bi * NB + i] : 0; }, upBrg: () => upBrg(view) });
+  return Object.assign(st, { resize, clear, writeLine, render, toScreen, fromScreen, inside, setPersistence: (s) => (st.persistence = s), setShift: (px, rm = Infinity) => { if (px !== shift || rm !== rmax) { shift = px; rmax = rm; lutKey = ''; } }, geom: () => ({ ...geom, dpr }), measure: () => { layout({}); return { ...geom, dpr }; }, levelAt: (brg, rng) => { const bi = Math.round((((brg % 360) + 360) % 360) / 360 * N_BRG) & (N_BRG - 1), i = Math.floor((rng / bufRange) * NB); return i >= 0 && i < NB ? buf[bi * NB + i] : 0; }, upBrg: () => upBrg(view) });
 }

@@ -188,9 +188,17 @@ export function initUI(root, actions) {
   }, { passive: false });
   /* 터치: 상자 위 세로 끌기 = 휠 */
   let drag = null;
-  root.addEventListener('pointerdown', (e) => { const el = e.target.closest('[data-wheel]'); if (el && e.pointerType === 'touch') drag = { el, y: e.clientY }; });
-  root.addEventListener('pointermove', (e) => { if (!drag) return; const dy = drag.y - e.clientY; if (Math.abs(dy) > 12) { drag.el.dispatchEvent(new WheelEvent('wheel', { deltaY: -dy, bubbles: true, cancelable: true })); drag.y = e.clientY; } });
-  addEventListener('pointerup', () => { drag = null; });
+  root.addEventListener('pointerdown', (e) => { const el = e.target.closest('[data-wheel]'); if (el && e.pointerType === 'touch') drag = { el, y: e.clientY, id: e.pointerId }; });
+  root.addEventListener('pointermove', (e) => { if (!drag || e.pointerId !== drag.id) return; const dy = drag.y - e.clientY; if (Math.abs(dy) > 12) { drag.el.dispatchEvent(new WheelEvent('wheel', { deltaY: -dy, bubbles: true, cancelable: true })); drag.y = e.clientY; } });
+  for (const ev of ['pointerup', 'pointercancel']) addEventListener(ev, () => { drag = null; }); // 브라우저가 스크롤로 가져가도(pointercancel) 끌기 끝
+  /* 키보드: 값 상자(GAIN·EBL·VRM 등)에 초점을 두고 화살표·PageUp/Down으로 조정 */
+  const wheelable = (el) => { if (el.tabIndex < 0) { el.tabIndex = 0; el.setAttribute('role', 'spinbutton'); if (!el.getAttribute('aria-label')) el.setAttribute('aria-label', el.dataset.wheel.toUpperCase()); } };
+  root.querySelectorAll('[data-wheel]').forEach(wheelable);
+  root.addEventListener('keydown', (e) => {
+    const el = e.target.closest && e.target.closest('[data-wheel]'); if (!el || e.target !== el) return;
+    const d = { ArrowUp: 1, ArrowRight: 1, PageUp: 1, ArrowDown: -1, ArrowLeft: -1, PageDown: -1 }[e.key]; if (!d) return;
+    e.preventDefault(); e.stopPropagation(); el.dispatchEvent(new WheelEvent('wheel', { deltaY: -d, shiftKey: e.key.startsWith('Page'), bubbles: true, cancelable: true }));
+  });
 
   /* HL OFF: 누르고 있는 동안 선수선 숨김 */
   const hlb = $('#qb_hl');
@@ -208,8 +216,10 @@ export function initUI(root, actions) {
   }
   over.addEventListener('contextmenu', (e) => { e.preventDefault(); openCM(e.clientX, e.clientY); });
   let lp = null;
-  over.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') lp = setTimeout(() => openCM(e.clientX, e.clientY), 550); });
-  over.addEventListener('pointerup', () => clearTimeout(lp)); over.addEventListener('pointermove', () => clearTimeout(lp));
+  let lp0 = null; // 길게 누르기: 10 px 넘게 움직이거나 손을 떼면 취소(손가락 떨림으로는 취소되지 않게)
+  over.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') { lp0 = { x: e.clientX, y: e.clientY }; clearTimeout(lp); lp = setTimeout(() => openCM(lp0.x, lp0.y), 550); } });
+  for (const ev of ['pointerup', 'pointercancel']) over.addEventListener(ev, () => clearTimeout(lp));
+  over.addEventListener('pointermove', (e) => { if (lp0 && Math.hypot(e.clientX - lp0.x, e.clientY - lp0.y) > 10) clearTimeout(lp); });
   cm.addEventListener('click', (e) => { const b = e.target.closest('[data-cm]'); if (!b) return; cm.hidden = true; actions.cursor && actions.cursor(b.dataset.cm, cmPos); });
   document.addEventListener('pointerdown', (e) => { if (!cm.hidden && !e.target.closest('#cmenu')) cm.hidden = true; });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { cm.hidden = true; menuEl.hidden = true; } });
@@ -257,6 +267,9 @@ export function initUI(root, actions) {
     }
     if (mode === 'rside') wrap.style.setProperty('--sidew', colW + 'px');
     fitSide();
+    /* 왼쪽 막대가 넘치면: 먼저 아이콘을 숨긴 작은 단추, 그래도 넘치면 스크롤바를 보여 단추가 더 있음을 알림 */
+    qbar.classList.remove('compact-q', 'scrolls');
+    if (!qIn && qbar.scrollHeight > qbar.clientHeight + 1) { qbar.classList.add('compact-q'); if (qbar.scrollHeight > qbar.clientHeight + 1) qbar.classList.add('scrolls'); }
     return mode;
   }
   /* 오른쪽 칸 폭을 실제 원 크기(최종 shift·rmax)에서 다시 계산: 칸이 방위 눈금 글자를 덮지 않게 */
@@ -327,5 +340,5 @@ export function initUI(root, actions) {
     const r = $('#hb_speed').getBoundingClientRect(); pop.style.left = r.left + 'px'; pop.style.top = r.bottom + 4 + 'px'; root.append(pop);
     setTimeout(() => addEventListener('pointerdown', function off(e) { if (!e.target.closest('#spdPop,#hb_speed')) { pop.remove(); removeEventListener('pointerdown', off); } }), 0);
   }
-  return { refresh, speedPop, applyLang, applyTheme, renderMenu, dialog, relayout, layoutMode: () => mode, qbInside: () => qIn, ABBR, shift: () => shift, rmax: () => rmax, closeAll() { menuEl.hidden = true; cm.hidden = true; }, echoCanvas: $('#cvEcho'), overCanvas: $('#cvOver') };
+  return { wheelable, refresh, speedPop, applyLang, applyTheme, renderMenu, dialog, relayout, layoutMode: () => mode, qbInside: () => qIn, ABBR, shift: () => shift, rmax: () => rmax, closeAll() { menuEl.hidden = true; cm.hidden = true; }, echoCanvas: $('#cvEcho'), overCanvas: $('#cvOver') };
 }
