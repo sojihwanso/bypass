@@ -111,7 +111,7 @@ export function initUI(root, actions) {
 </div>
 <div class="mpanel" id="menuPanel" hidden><header><span data-t="menuTitle"></span><button class="btn" type="button" data-act="menuClose" data-t="close"></button></header><div class="mtabs" id="mTabs"></div><div class="mlist" id="mList"></div></div>
 <div class="cmenu" id="cmenu" hidden role="menu"></div>
-<dialog id="eggDlg"><div class="dlg-h"><span data-t="egg"></span><button class="btn" type="button" data-act="eggClose" data-t="close"></button></div><div class="dlg-b" id="eggBody"></div><div class="dlg-f"><button class="btn pri" type="button" data-act="patch" data-t="patch"></button></div></dialog>
+
 <dialog id="genDlg"><div class="dlg-h"><span id="genT"></span><button class="btn" type="button" data-act="genClose" data-t="close"></button></div><div class="dlg-b" id="genB"></div><div class="dlg-f" id="genF"></div></dialog>
 <div class="rotate" role="dialog" aria-modal="true" aria-labelledby="rotT"><div><svg class="rot-ic" viewBox="0 0 48 48" aria-hidden="true"><rect x="15" y="6" width="18" height="30" rx="3"/><path d="M8 30a16 16 0 0 0 14 12M40 18A16 16 0 0 0 26 6"/><path d="M22 42l-2-4 4-1M26 6l2 4-4 1"/></svg><b id="rotT" data-t="rotate"></b><p data-t="rotateSub"></p><button type="button" class="btn rot-ok" data-act="rotateOk" data-t="rotateOk"></button></div></div>`;
 
@@ -163,8 +163,8 @@ export function initUI(root, actions) {
     lang: (el) => { S.ui.lang = el.dataset.v; saveSettings(); applyLang(); emit('settings', 'ui.lang'); },
     fs: () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.().catch(() => {}); },
     rp: () => $('#rp').classList.toggle('open'),
-    eggClose: () => $('#eggDlg').close(), genClose: () => $('#genDlg').close(),
-    patch: () => { $('#eggBody').innerHTML = `<div class="pn">${PATCH_NOTES.map((p) => `<h4>v${p.v} · ${p.d}</h4><ul>${(p[lang()] || p.ko).map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`).join('')}</div>`; },
+    genClose: () => $('#genDlg').close(),
+    patch: () => dialog(t('patch'), `<div class="pn">${PATCH_NOTES.map((p) => `<h4>v${p.v} · ${p.d}</h4><ul>${(p[lang()] || p.ko).map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`).join('')}</div>`), // 패치노트는 따로 창으로(다른 앱과 같게)
     pal: () => { const o = ['day', 'dusk', 'night']; S.disp.palette = o[(o.indexOf(S.disp.palette) + 1) % 3]; applyTheme(); saveSettings(); emit('settings', 'disp.palette'); },
     seaAuto: () => { S.ctrl.sea.auto = !S.ctrl.sea.auto; emit('settings', 'ctrl.sea'); },
     rainAuto: () => { S.ctrl.rain.auto = !S.ctrl.rain.auto; emit('settings', 'ctrl.rain'); },
@@ -255,7 +255,15 @@ export function initUI(root, actions) {
   /* ---- 이스터에그: 버전 5번 ---- */
   let taps = 0, tapT = 0;
   const eggTap = () => { const n = performance.now(); taps = n - tapT < 1500 ? taps + 1 : 1; tapT = n; if (taps >= 5) { taps = 0; openEgg(); } };
-  function openEgg() { $('#eggBody').innerHTML = `${window.EGG_IMG ? `<img class="egg-img" src="${window.EGG_IMG}" alt="선교에서 바라본 석양">` : ''}<p>${esc(t('eggMsg'))}</p>`; $('#eggDlg').showModal(); }
+  /* 이스터에그(공통 구성): 그림 · Ver. · Made by Bypass · 패치노트 단추 · 아무 곳이나 누르면 닫힘 */
+  function openEgg() {
+    if (document.querySelector('.egg')) return;
+    const o = document.createElement('div'); o.className = 'egg'; o.setAttribute('role', 'dialog'); o.setAttribute('aria-modal', 'true'); o.setAttribute('aria-label', 'Made by Bypass');
+    o.innerHTML = `<div class="egg-card">${window.EGG_IMG ? `<img src="${window.EGG_IMG}" alt="${esc(t('eggAlt'))}">` : ''}<div class="egg-ver">Ver.${VERSION}</div><div class="egg-by">Made by Bypass</div><button type="button" class="btn egg-patch" data-egg="patch">${esc(t('patch'))}</button><small>${esc(t('eggClose'))}</small></div>`;
+    const close = () => { o.remove(); document.removeEventListener('keydown', k, true); }, k = (e) => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
+    o.addEventListener('click', (e) => { if (e.target.closest('[data-egg="patch"]')) { e.stopPropagation(); close(); internal.patch(); return; } close(); });
+    document.addEventListener('keydown', k, true); document.body.appendChild(o); o.querySelector('.egg-patch').focus();
+  }
   $('#verTop').addEventListener('click', eggTap); /* 이 앱은 하단 버전 표시 없음(사용자 결정) */
 
   applyLang(); applyTheme();
