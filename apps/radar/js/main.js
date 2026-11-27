@@ -1,6 +1,7 @@
 /* 레이더 시뮬레이터 진입점: 세계(자선·타선·날씨) → 선박 운동 → 안테나 스윕 → 영상 → TT·AIS·경보 → PPI·위층·UI */
 import { S, loadSettings, saveSettings, resetSettings, on, emit } from './state.js';
 import { createPPI, COLOR_SETS } from './ppi.js';
+import { MARK_TYPES, MARK_BY_ID, isLineMark, markIcon, markDist } from './marks.js';
 import { buildScene, updateScene, rawLine, processLine, detect, N_BRG, RANGES, RING_INT, PULSE_BY_RANGE } from './echo.js';
 import { createShip, createTarget, stepShip, stepTarget, sensors, setRudderOrder, setTelegraph, setAuto, TELEGRAPH } from './sim.js';
 import { makeProj, brgRng, velXY, cpaTcpa, bcrBct, wrap360 } from './geo.js';
@@ -38,7 +39,8 @@ let antAcc = 0, paused = false, hiddenPause = false, speed = 1, ant = 0, last = 
 let offCenter = null, tmOff = { x: 0, y: 0 }, cursor = null, selected = [], uiMode = null, rulerA = null, ruler = null, piOn = false, lastUser = performance.now(), trialSet = { course: 0, speed: 14 };
 let logFn = null, logDump = null, onScenarioTick = null, coastScreen = null, coastKey = '', coastWorld = { land: null, rings: [] };
 const rnd = Math.random;
-const SPEEDS = [1, 2, 4, 8, 16, 32], MARKS = ['tri', 'circle', 'square', 'cross', 'anchor'], MARK_SYM = { tri: '▲', circle: '○', square: '□', cross: '✕', anchor: '⚓' };
+const SPEEDS = [1, 2, 4, 8, 16, 32], MARKS = MARK_TYPES.map((t) => t.id);
+let markA = null, markPrev = null; // 선 마크: 첫 점·지금 커서
 let lastClick = null, eduKey = '';
 let markShape = 0, tgtSort = 'rng', tgtTimer = null;
 let wxRun = null, wxPend = [], wxN = 0, trafAcc = 0, steerAcc = 0;
@@ -248,7 +250,7 @@ function overlayModel() {
     pi: piOn ? { n: S.disp.piMax, brg: tools.pi.brg, interval: tools.pi.interval, mode: S.disp.piMode } : null,
     ebl: tools.ebl.map((e) => ({ on: e.on, brgTrue: tools.eblTrue(tools.ebl.indexOf(e), o.hdg), origin: e.origin ? toBR(e.origin.lat, e.origin.lon) : null })),
     vrm: tools.vrm.map((v) => ({ on: v.on, rng: v.rng, origin: v.origin ? toBR(v.origin.lat, v.origin.lon) : null })),
-    drops: tools.drops.map((d) => toBR(d.lat, d.lon)), userMarks: W.userMarks.map((k) => ({ ...k, ...toBR(k.lat, k.lon) })), iala: S.disp.iala, tts, ais: aisL, vecRel, vecMin: S.tt.vecMin, symColor: S.tt.symColor,
+    drops: tools.drops.map((d) => toBR(d.lat, d.lon)), userMarks: W.userMarks.map((k) => ({ ...k, ...toBR(k.lat, k.lon), b: k.lat2 != null ? toBR(k.lat2, k.lon2) : null })), markPrev: uiMode === 'mark2' && markA && markPrev ? { shape: MARKS[markShape], ...toBR(markA.lat, markA.lon), b: toBR(markPrev.lat, markPrev.lon) } : null, iala: S.disp.iala, tts, ais: aisL, vecRel, vecMin: S.tt.vecMin, symColor: S.tt.symColor,
     trial: S.tt.trialMode !== 'OFF' ? trialSet : null, cursor, ruler, grid,
   };
 }
@@ -277,7 +279,7 @@ function refreshUI() {
   const top = alerts.top(), el = W.t, d = new Date();
   const cur = cursor && cursorInfo(cursor);
   ui.refresh({
-    mark: { on: uiMode === 'mark', sym: MARK_SYM[MARKS[markShape]] },
+    mark: { on: uiMode === 'mark' || uiMode === 'mark2', sym: MARK_BY_ID[MARKS[markShape]].sym }, markHint: uiMode === 'mark2' ? (lang() === 'en' ? 'MARK: click the end point' : '마크: 끝점을 누르세요') : uiMode === 'mark' && isLineMark(MARKS[markShape]) ? (lang() === 'en' ? 'MARK: click the start point' : '마크: 시작점을 누르세요') : '',
     wx: { on: S.sim.weatherOn || !!W.weather.fixed, label: weatherLabel(W.weather, lang()) },
     rangeNM: V.rangeNM, ringInt: RING_INT[V.rangeNM], orient: V.orient, motion: V.motion, tx: radar.state, warmLeft: radar.warmLeft, speed, paused: paused || hiddenPause, offCenter: !!offCenter, piOn, pm: { on: !!pmSave, graph: S.ctrl.pmMode !== 'OFF', loss: +S.ctrl.pmLoss || 0 }, wheelRange: !!S.disp.wheelRange, azOn: azZones.length > 0, connOn: conn && conn.shown,
     own: { hdg: sn.hdg, stw: sn.stw, sog: sn.sog, cog: sn.cog, rot: o.rot, lat: sn.lat, lon: sn.lon }, clock: `${pad(d.getHours())}:${pad(d.getMinutes())}`, elapsed: `${pad((el / 3600) | 0)}:${pad(((el % 3600) / 60) | 0)}:${pad((el % 60) | 0)}`,
@@ -320,6 +322,9 @@ function pmOff() {
   const sv = pmSave; pmSave = null; Object.assign(S.ctrl, sv.ctrl); S.ctrl.pmMode = 'OFF'; offCenter = sv.offCenter; S.disp.motion = sv.motion; setRange(sv.range); if (!PULSE_BY_RANGE[sv.range].includes(sv.ctrl.pulse)) S.ctrl.pulse = DEFAULT_PULSE[sv.range]; else S.ctrl.pulse = sv.ctrl.pulse; ppi.clear(); saveSettings();
 }
 /* 손으로 거리를 바꾸면 PM 꺼짐(매뉴얼 *4) */
+/* 벡터 시간: 메뉴와 같은 단계(1·2·3·6·12·15·30분) */
+const VEC_STEPS = [1, 2, 3, 6, 12, 15, 30];
+function vecStep(d) { const i = VEC_STEPS.indexOf(S.tt.vecMin), j = i < 0 ? VEC_STEPS.findIndex((v) => v >= S.tt.vecMin) : i + d; S.tt.vecMin = VEC_STEPS[Math.max(0, Math.min(VEC_STEPS.length - 1, j < 0 ? VEC_STEPS.length - 1 : j))]; saveSettings(); }
 function rangeStep(d) { if (pmSave) { pmOff(); return; } const i = RANGES.indexOf(S.disp.rangeNM); setRange(RANGES[Math.max(0, Math.min(RANGES.length - 1, i + d))]); }
 function setRange(r) { S.disp.rangeNM = r; if (!PULSE_BY_RANGE[r].includes(S.ctrl.pulse)) S.ctrl.pulse = DEFAULT_PULSE[r]; trails.reset(r, S.disp.trails.mode, trails.mode === 'TRUE' ? trails.origin() : undefined); tmOff = { x: 0, y: 0 }; coastKey = ''; saveSettings(); }
 function screenToWorld(pos) { const p = ppi.fromScreen(pos.sx ?? pos.x, pos.sy ?? pos.y), oxy = ownXY(); const x = oxy.x + p.rng * Math.sin(p.brg * D), y = oxy.y + p.rng * Math.cos(p.brg * D); return { ...p, x, y, lat: P.lat(y), lon: P.lon(x) }; }
@@ -348,10 +353,10 @@ Object.assign(actions, {
   preset: () => { const i = PRESET_ORDER.indexOf(S.ctrl.preset); applyPreset(S, PRESET_ORDER[(i + 1) % PRESET_ORDER.length]); saveSettings(); },
   trail: () => { const i = TRAIL_ORDER.indexOf(S.disp.trails.time); S.disp.trails.time = TRAIL_ORDER[(i + 1) % TRAIL_ORDER.length]; trails.reset(V.rangeNM, S.disp.trails.mode, S.disp.trails.mode === 'TRUE' ? ownXY() : undefined); saveSettings(); },
   colorSet: (el) => { S.disp.colorSet = el.dataset.val; saveSettings(); ui.pickPop(null); },
-  markPick: (el) => { markShape = Math.max(0, MARKS.indexOf(el.dataset.val)); uiMode = 'mark'; ui.pickPop(null); },
+  markPick: (el) => { markShape = Math.max(0, MARKS.indexOf(el.dataset.val)); uiMode = 'mark'; markA = null; ui.pickPop(null); },
   pi: () => { piOn = !piOn; if (piOn) tools.pi.brg = Math.round(W.own.hdg); },
   az: () => { if (azZones.length) { azZones = []; tracker.setZones([]); } else uiMode = 'az1'; },
-  mark: () => { if (uiMode === 'mark') markShape = (markShape + 1) % MARKS.length; uiMode = 'mark'; },
+  mark: () => { if (uiMode === 'mark') markShape = (markShape + 1) % MARKS.length; uiMode = 'mark'; markA = null; },
   tgtList: () => openTgtList(), tgtSort: (el) => { tgtSort = el.dataset.sort; openTgtList(); }, tgtSel: (el) => { select(el.dataset.id); openTgtList(); },
   pause: () => { paused = !paused; }, speed: () => ui.speedPop(SPEEDS, speed), spd: (el) => { setSpeed(+el.dataset.spd); ui.speedPop(null); },
   faster: () => setSpeed(SPEEDS[Math.min(SPEEDS.length - 1, SPEEDS.indexOf(speed) + 1)]), slower: () => setSpeed(SPEEDS[Math.max(0, SPEEDS.indexOf(speed) - 1)]),
@@ -373,6 +378,7 @@ Object.assign(actions, {
   refpt: () => { refPt = refPt === 'CCRP' ? 'ANT' : 'CCRP'; },
   trial: () => { S.tt.trialMode = S.tt.trialMode === 'OFF' ? 'STATIC' : 'OFF'; if (S.tt.trialMode !== 'OFF' && W) trialSet = { course: W.own.hdg, speed: W.own.stw }; saveSettings(); },
   vecMode: () => { S.tt.vector = S.tt.vector === 'TRUE' ? 'REL' : 'TRUE'; saveSettings(); },
+  vecUp: () => vecStep(1), vecDn: () => vecStep(-1),
   alertList: () => { const rows = alerts.list().map((a) => `<tr><td>${a.pri}</td><td>${a.text}</td><td>${a.active ? (lang() === 'en' ? 'active' : '발생') : lang() === 'en' ? 'rectified' : '해소'}</td><td>${a.acked ? 'ACK' : '-'}</td></tr>`).join(''); ui.dialog(t('alert'), `<table class="tbl">${rows || `<tr><td>${t('noAlert')}</td></tr>`}</table>`, `<button class="btn" type="button" data-act="ackAll">${lang() === 'en' ? 'ACK all' : '모두 확인'}</button>`); },
   ackAll: () => { alerts.ackAll(); actions.alertList(); },
   help: () => { if (window.RadarHelp) window.RadarHelp(); },
@@ -381,6 +387,7 @@ Object.assign(actions, {
     if (k === 'range') return rangeStep(-d);
     if (k.startsWith('ebl')) { const e = tools.ebl[+k.slice(-1) - 1]; e.on = true; e.brg = wrap360(e.brg + d * (S.disp.eblRef === 'REL' ? 1 : 1) * 0.5); }
     if (k.startsWith('vrm')) { const v = tools.vrm[+k.slice(-1) - 1]; v.on = true; v.rng = Math.max(0, v.rng + d * Math.max(0.005, V.rangeNM / 200)); }
+    if (k === 'vecT') vecStep(d);
     if (k === 'piB') { piOn = true; tools.pi.brg = wrap360(Math.round((tools.pi.brg + d * (ev && ev.shiftKey ? 5 : 0.5)) * 10) / 10); }
     if (k === 'piI') { piOn = true; const st = ev && ev.shiftKey ? 0.5 : V.rangeNM <= 3 ? 0.01 : 0.05; tools.pi.interval = Math.round(Math.max(0.01, Math.min(V.rangeNM, tools.pi.interval + d * st)) * 100) / 100; }
     if (k === 'trC') trialSet.course = wrap360(trialSet.course + d); if (k === 'trS') trialSet.speed = Math.max(0, Math.min(25, trialSet.speed + d * 0.5)); if (k === 'trD') S.tt.trialDelay = Math.max(0, Math.min(30, S.tt.trialDelay + d * 0.5));
@@ -401,7 +408,7 @@ function cursorAct(id, pos) {
   if (id === 'ruler') { rulerA = w; uiMode = 'ruler'; return; }
   if (id === 'off') { const G = ppi.geom(), R = G.R / G.dpr, cx = G.cx / G.dpr, cy = G.cy / G.dpr, ox = ((pos.sx ?? pos.x) - cx) / R, oy = ((pos.sy ?? pos.y) - cy) / R, m = Math.hypot(ox, oy); offCenter = m > 0.75 ? { x: (ox / m) * 0.75, y: (oy / m) * 0.75 } : { x: ox, y: oy }; return; }
   if (id === 'center') { offCenter = null; tools.ebl[0].origin = null; tools.vrm[0].origin = null; return; }
-  if (id === 'markDel') { let bi = -1, bd = 20; W.userMarks.forEach((k, i) => { const q = relOf(P.x(k.lon), P.y(k.lat)), s = ppi.toScreen(q.brg, q.rng), d = Math.hypot(s.x - pos.x, s.y - pos.y); if (d < bd) { bd = d; bi = i; } }); if (bi >= 0) W.userMarks.splice(bi, 1); return; }
+  if (id === 'markDel') { let bi = -1, bd = 20; const scr = (la, lo) => { const q = relOf(P.x(lo), P.y(la)); return ppi.toScreen(q.brg, q.rng); }; W.userMarks.forEach((k, i) => { const d = markDist(k.shape, scr(k.lat, k.lon), k.lat2 != null ? scr(k.lat2, k.lon2) : null, pos); if (d < bd) { bd = d; bi = i; } }); if (bi >= 0) W.userMarks.splice(bi, 1); return; }
   if (id === 'drop') { tools.drops.push({ lat: w.lat, lon: w.lon }); if (tools.drops.length > 20) tools.drops.shift(); return; }
   if (id === 'anchor') { tools.anchor = { lat: W.own.lat, lon: W.own.lon }; S.alert.anchorOn = true; return; }
 }
@@ -421,16 +428,16 @@ function menuAction(id) {
 /* 밝기 단추 길게 누르기 → 색 조합 순환 */
 /* 밝기·마크 단추: 짧게 = 원래 동작, 길게(0.5초) 또는 오른쪽 클릭 = 옆에 고르기 창(색 조합 6가지 / 마크 모양 5가지) */
 const colorPick = (b) => ui.pickPop(b, Object.keys(COLOR_SETS).map((k) => { const c = COLOR_SETS[k]; return { act: 'colorSet', val: k, on: (S.disp.colorSet || 'C1') === k, title: k, html: `<span class="sw" style="background:rgb(${c.bg});color:rgb(${c.echo})">●</span>${k.slice(1)}` }; }));
-const markPick = (b) => ui.pickPop(b, MARKS.map((m, i) => ({ act: 'markPick', val: m, on: i === markShape, title: m, html: MARK_SYM[m] })));
+const markPick = (b) => { const en = lang() === 'en', col = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#12202A'; ui.pickPop(b, MARK_TYPES.map((t, i) => ({ act: 'markPick', val: t.id, on: i === markShape, title: en ? t.en : t.ko, html: `<img src="${markIcon(t.id, col)}" width="26" height="22" alt=""><span>${en ? t.en : t.ko}</span>` })), 'mark-pop'); };
 function holdPick(id, fn) { const b = document.getElementById(id); if (!b) return; let tmr = null, long = false, p0 = null;
   b.addEventListener('pointerdown', (e) => { long = false; p0 = { x: e.clientX, y: e.clientY }; clearTimeout(tmr); tmr = setTimeout(() => { long = true; fn(b); }, 500); });
   b.addEventListener('pointermove', (e) => { if (p0 && Math.hypot(e.clientX - p0.x, e.clientY - p0.y) > 10) clearTimeout(tmr); });
   for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) b.addEventListener(ev, () => clearTimeout(tmr));
-  b.addEventListener('contextmenu', (e) => { e.preventDefault(); clearTimeout(tmr); long = true; fn(b); });
+  b.addEventListener('contextmenu', (e) => { e.preventDefault(); clearTimeout(tmr); long = false; fn(b); });
   b.addEventListener('click', (e) => { if (long) { e.stopImmediatePropagation(); e.preventDefault(); long = false; } }, true); }
 holdPick('qb_pal', colorPick); holdPick('qb_mark', markPick);
 const ov = ui.overCanvas;
-ov.addEventListener('pointermove', (e) => { const r = ov.getBoundingClientRect(); cursor = { x: e.clientX - r.left, y: e.clientY - r.top }; if (uiMode === 'ruler' && rulerA) { const b = screenToWorld(cursor), d = brgRng(rulerA.x, rulerA.y, b.x, b.y); ruler = { a: relOf(rulerA.x, rulerA.y), b: relOf(b.x, b.y), label: `${d.brg.toFixed(1)}° ${d.rng.toFixed(3)} NM` }; } });
+ov.addEventListener('pointermove', (e) => { const r = ov.getBoundingClientRect(); cursor = { x: e.clientX - r.left, y: e.clientY - r.top }; if (uiMode === 'mark2') markPrev = screenToWorld(cursor); if (uiMode === 'ruler' && rulerA) { const b = screenToWorld(cursor), d = brgRng(rulerA.x, rulerA.y, b.x, b.y); ruler = { a: relOf(rulerA.x, rulerA.y), b: relOf(b.x, b.y), label: `${d.brg.toFixed(1)}° ${d.rng.toFixed(3)} NM` }; } });
 ov.addEventListener('pointerleave', () => { cursor = null; });
 /* 편의 기능(실제 장비에는 없음): RANGE 옆 '휠' 단추를 켜면 PPI 위 마우스 휠로 거리 범위 조절. 트랙패드처럼 잘게 오는 휠은 모아서 한 단계씩 */
 { let acc = 0, lastEv = 0, lastStep = 0; ov.addEventListener('wheel', (e) => { if (!S.disp.wheelRange || !W) return; e.preventDefault(); const now = performance.now(); if (now - lastEv > 300) acc = 0; lastEv = now; acc += e.deltaMode ? e.deltaY * 40 : e.deltaY; if (Math.abs(acc) >= 50 && now - lastStep > 150) { rangeStep(acc > 0 ? 1 : -1); acc = 0; lastStep = now; } }, { passive: false }); }
@@ -438,7 +445,8 @@ ov.addEventListener('click', (e) => {
   if (!W) return; const r = ov.getBoundingClientRect(), pos = { x: e.clientX - r.left, y: e.clientY - r.top }, w = screenToWorld(pos); lastClick = { brg: w.brg, rng: w.rng };
   if (uiMode === 'az1') { azStart = w; uiMode = 'az2'; return; }
   if (uiMode === 'az2') { const a = azStart, z = { brg0: a.brg, brg1: w.brg, rng0: Math.min(a.rng, w.rng), rng1: Math.max(a.rng, w.rng) }; azZones = [...azZones, z].slice(-2); tracker.setZones(azZones); uiMode = null; return; }
-  if (uiMode === 'mark') { if (W.userMarks.length < 50) W.userMarks.push({ lat: w.lat, lon: w.lon, shape: MARKS[markShape] }); uiMode = null; return; }
+  if (uiMode === 'mark') { const id = MARKS[markShape]; if (isLineMark(id)) { markA = w; markPrev = w; uiMode = 'mark2'; return; } if (W.userMarks.length < 100) W.userMarks.push({ lat: w.lat, lon: w.lon, shape: id }); uiMode = null; return; }
+  if (uiMode === 'mark2') { if (W.userMarks.length < 100 && markA) W.userMarks.push({ lat: markA.lat, lon: markA.lon, lat2: w.lat, lon2: w.lon, shape: MARKS[markShape] }); markA = null; markPrev = null; uiMode = null; return; }
   if (uiMode === 'ruler') { uiMode = null; return; }
   if (uiMode === 'ta1' || uiMode === 'ta2') return;
   const near = nearestTarget(pos);
@@ -472,7 +480,7 @@ const keyHandlers = {
   off: () => actions.off(), mode: () => actions.mode(), vecMode: () => { S.tt.vector = S.tt.vector === 'TRUE' ? 'REL' : 'TRUE'; saveSettings(); },
   hlHide: (down) => { V.hlHidden = down; }, conn: () => conn.toggle(),
   f1: () => applyPreset(S, S.ui.fkeys.F1), f2: () => applyPreset(S, S.ui.fkeys.F2), f3: () => applyPreset(S, S.ui.fkeys.F3), f4: () => applyPreset(S, S.ui.fkeys.F4),
-  esc: () => { ui.closeAll(); uiMode = null; ruler = null; },
+  esc: () => { ui.closeAll(); uiMode = null; ruler = null; markA = null; },
 };
 initKeys(keyHandlers);
 
@@ -524,7 +532,7 @@ window.RadarEdu = {
   tracker: () => tracker, ais: () => ais, alerts: () => alerts, tools: () => tools, speed: () => speed, piOn: () => piOn, selected: () => selected, trialSet: () => trialSet,
   marks: () => (W ? W.userMarks.length : 0), conn: () => ({ shown: conn && conn.shown, rudderOrder: W.own.rudderOrder, auto: { ...W.own.auto } }),
   startScenario: (id, o) => starter.startScenario(id, o), finishNow: () => starter.finishNow(), lastResult: () => starter.lastResult(), ctrl: (o) => Object.assign(S.ctrl, o),
-  setTx: () => { if (radar.state === 'stby') setRadar('tx'); }, pm: () => !!pmSave, pmOff: () => pmOff(), markShape: () => markShape, setSpeed: (n) => setSpeed(n), setRange: (r) => setRange(r),
+  setTx: () => { if (radar.state === 'stby') setRadar('tx'); }, pm: () => !!pmSave, pmOff: () => pmOff(), markShape: () => markShape, markReset: () => { markShape = 0; markA = null; }, setSpeed: (n) => setSpeed(n), setRange: (r) => setRange(r),
 };
 if (!TEST) starter.openStart();
 if (TEST) {

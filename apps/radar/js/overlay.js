@@ -3,6 +3,7 @@
 import { wrap360, D2R } from './geo.js';
 import { RING_INT } from './echo.js';
 import { piLines } from './tools.js';
+import { drawMark } from './marks.js';
 
 /* PI 선 색: IALA A = 왼쪽 빨강·오른쪽 초록, B = 반대. offset < 0 이 왼쪽 */
 export const piColor = (offset, iala) => (Math.abs(offset) < 1e-9 ? null : (offset < 0) === (iala !== 'B') ? '#E0443A' : '#34B35A');
@@ -50,13 +51,8 @@ export function drawOverlay(cv, ppi, V, M) {
   // 자선 Trial 벡터
   if (M.trial) { const e = { x: O.x + Math.sin((M.trial.course - up) * D2R) * M.trial.speed * (M.vecMin / 60) * k, y: O.y - Math.cos((M.trial.course - up) * D2R) * M.trial.speed * (M.vecMin / 60) * k }; g.strokeStyle = C.tool; g.lineWidth = 2; g.setLineDash([6, 3]); g.beginPath(); g.moveTo(O.x, O.y); g.lineTo(e.x, e.y); g.stroke(); g.setLineDash([]); g.lineWidth = 1; g.fillStyle = C.tool; g.fillText('TRIAL', e.x + 6, e.y); }
   // Drop mark
-  for (const m of M.userMarks || []) { const s = sc(m.brg, m.rng); g.strokeStyle = C.tool; g.lineWidth = 1.5; g.beginPath();
-    if (m.shape === 'tri') { g.moveTo(s.x, s.y - 7); g.lineTo(s.x + 6, s.y + 5); g.lineTo(s.x - 6, s.y + 5); g.closePath(); }
-    else if (m.shape === 'circle') g.arc(s.x, s.y, 6, 0, Math.PI * 2);
-    else if (m.shape === 'square') g.rect(s.x - 5.5, s.y - 5.5, 11, 11);
-    else if (m.shape === 'cross') { g.moveTo(s.x - 6, s.y - 6); g.lineTo(s.x + 6, s.y + 6); g.moveTo(s.x + 6, s.y - 6); g.lineTo(s.x - 6, s.y + 6); }
-    else { g.arc(s.x, s.y + 1, 5, 0.15 * Math.PI, 0.85 * Math.PI); g.moveTo(s.x, s.y - 7); g.lineTo(s.x, s.y + 6); g.moveTo(s.x - 4, s.y - 3); g.lineTo(s.x + 4, s.y - 3); }
-    g.stroke(); g.lineWidth = 1; }
+  for (const m of M.userMarks || []) drawMark(g, m.shape, sc(m.brg, m.rng), m.b ? sc(m.b.brg, m.b.rng) : null, C.tool);
+  if (M.markPrev) { g.globalAlpha = 0.6; drawMark(g, M.markPrev.shape, sc(M.markPrev.brg, M.markPrev.rng), sc(M.markPrev.b.brg, M.markPrev.b.rng), C.tool); g.globalAlpha = 1; }
   for (const d of M.drops || []) { const s = sc(d.brg, d.rng); g.strokeStyle = C.tool; g.beginPath(); g.moveTo(s.x - 6, s.y); g.lineTo(s.x + 6, s.y); g.moveTo(s.x, s.y - 6); g.lineTo(s.x, s.y + 6); g.stroke(); }
   // AIS
   const symC = SYM[M.symColor] || C.tt;

@@ -380,3 +380,15 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--rule);border
 #bxPm .pmrow{display:flex;align-items:center;gap:6px}
 #bxPm .pmbar{flex:1;height:6px;min-width:70px;background:var(--soft);border-radius:2px;overflow:hidden}
 #bxPm .pmbar i{display:block;height:100%;background:#2e9d5b}
+/* PM TEST: 단추만(바깥 상자 없음), 그래프는 켤 때만 작은 판으로 */
+#bxPm{background:none;border:0;padding:0}
+#bxPm>button{background:var(--c-panel)}
+#bxPm .pmg{background:var(--c-panel);border:1px solid var(--c-line);border-radius:var(--r);padding:6px 8px}
+/* 마크 고르기 창: 4줄 격자, 그림 + 이름 */
+.pick-pop.mark-pop{display:grid;grid-template-columns:repeat(4,auto);max-width:none;gap:2px}
+.pick-pop.mark-pop button{flex-direction:column;gap:1px;font-size:11px;padding:4px 6px;min-width:64px}
+.pick-pop.mark-pop img{display:block}
+/* TT·AIS 벡터 시간 */
+.ttbtns .vect{display:inline-flex;align-items:center;gap:2px}
+.ttbtns .vect .btn{padding:2px 7px;min-width:0}
+.ttbtns .vect .vv{font-family:var(--f-mono);font-size:12px;min-width:44px;text-align:center;cursor:ns-resize}
