@@ -524,7 +524,7 @@ window.RadarEdu = {
   tracker: () => tracker, ais: () => ais, alerts: () => alerts, tools: () => tools, speed: () => speed, piOn: () => piOn, selected: () => selected, trialSet: () => trialSet,
   marks: () => (W ? W.userMarks.length : 0), conn: () => ({ shown: conn && conn.shown, rudderOrder: W.own.rudderOrder, auto: { ...W.own.auto } }),
   startScenario: (id, o) => starter.startScenario(id, o), finishNow: () => starter.finishNow(), lastResult: () => starter.lastResult(), ctrl: (o) => Object.assign(S.ctrl, o),
-  setTx: () => { if (radar.state === 'stby') setRadar('tx'); }, setSpeed: (n) => setSpeed(n), setRange: (r) => setRange(r),
+  setTx: () => { if (radar.state === 'stby') setRadar('tx'); }, pm: () => !!pmSave, pmOff: () => pmOff(), markShape: () => markShape, setSpeed: (n) => setSpeed(n), setRange: (r) => setRange(r),
 };
 if (!TEST) starter.openStart();
 if (TEST) {

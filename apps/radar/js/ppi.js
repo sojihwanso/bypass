@@ -62,7 +62,7 @@ export function createPPI(canvas, overlay) {
   function palette(v) {
     const set = COLOR_SETS[v.colorSet] || COLOR_SETS.C1, key = (v.colorSet || 'C1') + (v.palette || 'day');
     if (key === palKey) return; palKey = key;
-    const c = set.echo, night = v.palette === 'night' ? 0.55 : v.palette === 'dusk' ? 0.8 : 1;
+    const c = set.echo, night = v.palette === 'night' ? 0.8 : v.palette === 'dusk' ? 0.92 : 1;
     bgPx = (255 << 24) | (Math.round(set.bg[2] * night) << 16) | (Math.round(set.bg[1] * night) << 8) | Math.round(set.bg[0] * night);
     pal = new Uint32Array(16 * 4);
     for (let a = 0; a < 4; a++) for (let l = 0; l < 16; l++) {

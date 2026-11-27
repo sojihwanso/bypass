@@ -4,16 +4,17 @@
   --navy:#173B57;--navy-ink:#FFFFFF;--accent:#1F5E8C;--accent-bg:#E8F0F7;
   --ok:#1E7A3C;--ok-bg:#E3F4E8;--bad:#B3261E;--bad-bg:#FBE7E5;--warn:#8A5A00;--warn-bg:#FBF0D9;
   /* PPI 둘레(콘솔): 모든 테마에서 어둡게 */
-  --c-bg:#0A131A;--c-panel:rgba(14,26,35,.86);--c-line:#26394A;--c-ink:#D6E2EA;--c-dim:#8597A5;--c-hi:#7FD3FF;--c-echo:#FFB028;--c-ok:#5BD68A;--c-bad:#FF6B5E;--c-warn:#FFC24A;
+  --c-bg:#A9B2B9;--c-panel:rgba(222,227,231,.96);--c-line:#7B8892;--c-ink:#0C1820;--c-dim:#3D4B56;--c-hi:#0B5AA6;--c-echo:#9A5A00;--c-ok:#0F7A3A;--c-bad:#C0281C;--c-warn:#8A5A00;
   --f-disp:"Nanum Gothic","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
   --hdr:50px;--qbw:72px;--rpw:300px;--r:6px;
   color-scheme:light;
 }
-[data-theme="dusk"]{--paper:#0D1419;--surface:#141E25;--ink:#E3EAEE;--muted:#93A2AD;--rule:#25333D;--soft:#1A262E;--navy:#0F2A3F;--navy-ink:#E3EAEE;--accent:#6FB2E6;--accent-bg:#17293A;--ok:#5BC47F;--ok-bg:#16291D;--bad:#FF8A80;--bad-bg:#3A1714;--warn:#F2B451;--warn-bg:#33260F;color-scheme:dark}
-[data-theme="night"]{--paper:#05090C;--surface:#0A1015;--ink:#9FB0BC;--muted:#66788A;--rule:#18232B;--soft:#0E161C;--navy:#07141F;--navy-ink:#9FB0BC;--accent:#4E86B3;--accent-bg:#0E1C28;--ok:#4E9C67;--ok-bg:#0F1F15;--bad:#D26A60;--bad-bg:#2A100E;--warn:#BF8F3E;--warn-bg:#24190A;
-  --c-bg:#03080B;--c-panel:rgba(6,12,17,.9);--c-line:#15222C;--c-ink:#8C9DAA;--c-dim:#56687A;--c-hi:#4F8FB3;--c-echo:#B57A1C;--c-ok:#3E8F5E;--c-bad:#B9544B;--c-warn:#A8822F;color-scheme:dark}
+[data-theme="dusk"]{--paper:#0A1A4F;--surface:#10246A;--ink:#F2F5FF;--muted:#B3C2EE;--rule:#2E4CA3;--soft:#163080;--navy:#061238;--navy-ink:#F2F5FF;--accent:#FFE14D;--accent-bg:#22377F;--ok:#6BF08F;--ok-bg:#123A3A;--bad:#FF8A80;--bad-bg:#4A1A2A;--warn:#FFD24A;--warn-bg:#3A3320;
+  --c-bg:#0C2068;--c-panel:rgba(14,36,108,.94);--c-line:#3F62C4;--c-ink:#F4F7FF;--c-dim:#AFC0EE;--c-hi:#FFE14D;--c-echo:#FFE14D;--c-ok:#6BF08F;--c-bad:#FF7A70;--c-warn:#FFD24A;color-scheme:dark}
+[data-theme="night"]{--paper:#000000;--surface:#05070A;--ink:#F0681E;--muted:#B5531D;--rule:#4F1F0A;--soft:#140803;--navy:#0A0402;--navy-ink:#F0681E;--accent:#FF8A3D;--accent-bg:#2A1006;--ok:#3FCB5A;--ok-bg:#0B200F;--bad:#FF3B2F;--bad-bg:#2E0A06;--warn:#FFB000;--warn-bg:#2A1C02;
+  --c-bg:#000000;--c-panel:rgba(6,6,8,.96);--c-line:#7A2E0E;--c-ink:#F26A1B;--c-dim:#B04C18;--c-hi:#FF9A4A;--c-echo:#3FCB5A;--c-ok:#3FCB5A;--c-bad:#FF3B2F;--c-warn:#FFB000;color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0;height:100%;background:var(--paper);color:var(--ink);font:14px/1.45 var(--f-body);-webkit-font-smoothing:antialiased;overflow:hidden}
@@ -54,8 +55,8 @@ button{cursor:pointer}
 .qb.on{background:var(--accent-bg);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
 .qb .qv{font-family:var(--f-mono);font-size:10.5px;color:var(--ink)}
 .qb.on .qv{color:var(--accent)}
-[data-theme="night"] .qb.on{background:#10263A;color:#86B9DE;border-color:#1F3E57}
-[data-theme="night"] .qb.on .qv{color:#86B9DE}
+[data-theme="night"] .qb.on{background:#2A1006;color:#FF9A4A;border-color:#7A2E0E}
+[data-theme="night"] .qb.on .qv{color:#FF9A4A}
 .qsep{height:1px;background:var(--rule);margin:4px 6px}
 
 /* PPI 영역 */
@@ -80,7 +81,7 @@ button{cursor:pointer}
 #bxMode{display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:240px}
 .ctl{display:grid;grid-template-columns:42px 1fr 30px;align-items:center;gap:8px;padding:3px 0;cursor:ns-resize;border-radius:4px}
 .ctl:hover{background:rgba(127,211,255,.06)}
-.ctl .bar{height:8px;border-radius:4px;background:#1B2C39;overflow:hidden;position:relative}
+.ctl .bar{height:8px;border-radius:4px;background:color-mix(in srgb,var(--c-line) 40%,transparent);overflow:hidden;position:relative}
 .ctl .bar i{position:absolute;inset:0 auto 0 0;background:var(--c-hi);border-radius:4px;width:0;transition:width .12s}
 .ctl .md{font-family:var(--f-mono);font-size:10px;color:var(--c-dim);text-align:right}
 .ctl.auto .bar i{background:var(--c-ok)}

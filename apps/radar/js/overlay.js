@@ -7,15 +7,19 @@ import { piLines } from './tools.js';
 /* PI 선 색: IALA A = 왼쪽 빨강·오른쪽 초록, B = 반대. offset < 0 이 왼쪽 */
 export const piColor = (offset, iala) => (Math.abs(offset) < 1e-9 ? null : (offset < 0) === (iala !== 'B') ? '#E0443A' : '#34B35A');
 export const COL = {
-  day: { scale: '#7E93A3', ring: 'rgba(140,170,190,.38)', hl: '#D6E2EA', tt: '#5BD68A', ais: '#7FD3FF', bad: '#FF6B5E', tool: '#F2D16B', map: 'rgba(160,190,210,.6)', route: '#E58CFF', cur: '#D6E2EA', trail: [61, 139, 255] },
-  night: { scale: '#4E6070', ring: 'rgba(90,115,135,.35)', hl: '#8C9DAA', tt: '#3E8F5E', ais: '#4F8FB3', bad: '#B9544B', tool: '#A8912F', map: 'rgba(90,115,135,.6)', route: '#9C62B0', cur: '#8C9DAA', trail: [34, 84, 160] },
+  /* 주간: 밝은 회색 콘솔(눈금은 어두운 남색), 원 안은 초록 거리환 */
+  day: { scale: '#12324A', ring: 'rgba(90,215,120,.55)', hl: '#F2F6F8', tt: '#5BD68A', ais: '#9FE4FF', bad: '#FF5A4C', tool: '#F2D16B', map: 'rgba(170,200,220,.7)', route: '#E58CFF', cur: '#F2F6F8', trail: [61, 139, 255] },
+  /* 박명: 남색 콘솔, 흰 눈금·흰 거리환 */
+  dusk: { scale: '#D7E1FF', ring: 'rgba(235,240,255,.45)', hl: '#FFFFFF', tt: '#6BF08F', ais: '#FFFFFF', bad: '#FF6A5E', tool: '#FFE14D', map: 'rgba(190,210,255,.6)', route: '#FF9CF0', cur: '#FFFFFF', trail: [80, 150, 255] },
+  /* 야간(실제 장비처럼): 검정 바탕에 주황 눈금·주황 거리환, 물표 기호는 초록·흰색, 측정 도구는 하늘색 */
+  night: { scale: '#E2621E', ring: 'rgba(226,98,30,.7)', hl: '#C8C8C8', tt: '#43D35C', ais: '#E2E2E2', bad: '#FF3B2F', tool: '#4FC3E8', map: 'rgba(210,95,35,.65)', route: '#C774E0', cur: '#E0E0E0', trail: [40, 90, 200] },
 };
 const SYM = { GRN: '#5BD68A', BLU: '#6FA8FF', CYA: '#7FD3FF', MAG: '#FF7FE1', WHT: '#E8EEF2' };
 
 export function drawOverlay(cv, ppi, V, M) {
   const od = window.devicePixelRatio || 1, g = cv.getContext('2d');
   g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, cv.height); g.setTransform(od, 0, 0, od, 0, 0);
-  const G = ppi.geom(), cx = G.cx / G.dpr, cy = G.cy / G.dpr, R = G.R / G.dpr, C = COL[V.palette === 'night' ? 'night' : 'day'];
+  const G = ppi.geom(), cx = G.cx / G.dpr, cy = G.cy / G.dpr, R = G.R / G.dpr, C = COL[V.palette] || COL.day;
   const sc = (b, r) => ppi.toScreen(b, r), O = sc(0, 0), k = R / V.rangeNM, up = ppi.upBrg();
   g.save(); g.beginPath(); g.arc(cx, cy, R, 0, Math.PI * 2); g.clip();
   g.lineWidth = 1; g.font = '11px "IBM Plex Mono", monospace';
