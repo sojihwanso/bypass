@@ -21,7 +21,7 @@ const MORSE = { A: '.-', B: '-...', C: '-.-.', D: '-..', G: '--.', K: '-.-', M: 
 export function raconCode(letter) { const out = []; let r = 0; for (const c of MORSE[letter] || '-') { const len = c === '-' ? 0.24 : 0.08; out.push([r, r + len]); r += len + 0.08; } return out; }
 
 const C_DB = 44; // 레이더 방정식 상수(교육용으로 물표를 6 dB 강하게): 100 m² 물표가 6 NM에서 약 33 dB
-const SEA_K = -3.5; // 해면 반사 세기 보정(교육용으로 약하게 했다가 사용자 요청으로 원래(0)와 중간)
+const SEA_K = -1.5; // 해면 반사 세기 보정(원래 0, 교육용 −7에서 사용자 요청으로 −1.5)
 const THR0 = 42; // 수신 문턱 = THR0 − 0.4·GAIN (원래 40과 교육용 44의 중간: 잡음이 조금 더 일찍 보임)
 const LAND_CELL = 0.03, LAND_HALF = 40; // 육지 격자(NM)
 const defaultRcs = (L) => 0.05 * L * L;
