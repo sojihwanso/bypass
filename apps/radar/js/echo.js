@@ -31,7 +31,7 @@ const cellSeed = (c) => c.seed ?? ((Math.round(c.rNM * 1000) * 31 + Math.round(c
 export function rainAt(cells, x, y, t = 0) {
   let rate = 0;
   for (const c of cells) {
-    const dx0 = x - c.x, dy0 = y - c.y; if (dx0 * dx0 + dy0 * dy0 > c.rNM * c.rNM * 4) continue;
+    const dx0 = x - c.x, dy0 = y - c.y; if (dx0 * dx0 + dy0 * dy0 > c.rNM * c.rNM * 10) continue; // 길쭉한 구름 끝(약 3배 반지름)까지 잘리지 않게
     const s = cellSeed(c), ang = (lat2(s, 1, 5) * Math.PI), ca = Math.cos(ang), sa = Math.sin(ang), stretch = 1.3 + 0.7 * lat2(s, 2, 5); // 구름마다 기울기·길쭉함이 다름
     const u = (dx0 * ca - dy0 * sa) / stretch, v = (dx0 * sa + dy0 * ca) * Math.min(1.15, stretch * 0.8), d = Math.hypot(u, v); if (d > c.rNM * 1.7) continue;
     const th = Math.atan2(u, v), drift = t / 900, n = fbm(Math.cos(th) * 2.4 + drift, Math.sin(th) * 2.4 - drift, s);

@@ -44,13 +44,14 @@ export async function openStart(o = {}) {
   if (!dlg) { dlg = document.createElement('dialog'); dlg.id = 'startDlg'; document.getElementById('app').append(dlg); }
   dlg.innerHTML = `<div class="dlg-h"><span>${en ? 'Scenarios' : '시나리오'}</span><button class="btn" type="button" data-close="1">${en ? 'Close' : '닫기'}</button></div><div class="dlg-b">${html}</div>`;
   if (!dlg.open) dlg.showModal();
-  R.setPaused(true);
+  const was = dlg.dataset.open === '1' ? dlg._was : (R.isPaused ? R.isPaused() : false); dlg._was = was; dlg.dataset.open = '1'; R.setPaused(true);
   let starting = false;
-  dlg.onclose = () => { if (!starting) R.setPaused(false); };
+  dlg.onclose = () => { dlg.dataset.open = ''; if (!starting) R.setPaused(was); }; // 닫기만 하면 열기 전 일시정지 상태로
   dlg.onclick = (e) => {
     if (e.target.closest('[data-close]')) { dlg.close(); return; }
     const lv = e.target.closest('[data-level]'); if (lv) { S.sim.level = lv.dataset.level; saveSettings(); dlg.querySelectorAll('[data-level]').forEach((b) => b.classList.toggle('on', b === lv)); return; }
     starting = true;
+    const tu = window.Tutor, tuSt = tu && tu.state && tu.state(); if ((e.target.closest('[data-scn]') || e.target.closest('[data-start="free"]')) && tuSt && tuSt.course !== 'R5') tu.stop(); // 교육 중(시나리오 과정 R5 밖)에 시나리오를 고르면 교육을 끝냄
     const c = e.target.closest('[data-scn]'); if (c && !c.disabled) { dlg.close(); startScenario(c.dataset.scn); return; }
     const b = e.target.closest('[data-start]'); if (!b) { starting = false; return; }
     if (b.dataset.start === 'edu') { dlg.close(); R.setPaused(false); window.Tutor && window.Tutor.menu(); return; }
@@ -93,17 +94,20 @@ async function prepare(scn, o) {
   return { def: { ...def, targets: [...def.targets, ...bg] }, weather, region, rnd, level: o.level ?? S.sim.level, route };
 }
 
-/* 해역(해안선)을 받는 동안: '해역 준비 중' 표시, 그 사이 다른 시작은 무시(시나리오 두 개가 함께 돌지 않게) */
-let preparing = false;
+/* 교육 과정 중에 연 시나리오는 이어 하기 저장·시나리오 기록을 건드리지 않음 */
+const eduOn = () => !!(window.RadarEdu && window.RadarEdu.active && window.RadarEdu.active());
+/* 해역(해안선)을 받는 동안: '해역 준비 중' 표시. 그 사이 들어온 시작은 버리지 않고 앞 시작이 끝난 뒤 차례로(시나리오 두 개가 함께 돌지 않게) */
+let preparing = false, queue = Promise.resolve();
 function loadNote(on) { let n = document.getElementById('loadNote'); if (!on) { if (n) n.remove(); return; } if (!n) { n = document.createElement('div'); n.id = 'loadNote'; n.className = 'load-note'; n.setAttribute('role', 'status'); document.getElementById('app').append(n); } n.textContent = lang() === 'en' ? 'Preparing the sea area…' : '해역 준비 중…'; }
-async function runScenario(scn, o = {}) {
-  if (preparing) return; preparing = true; loadNote(true);
+function runScenario(scn, o = {}) { loadNote(true); const p = queue.then(() => runScenario1(scn, o)); /* 누르자마자 '해역 준비 중' */ queue = p.catch(() => {}); return p; }
+async function runScenario1(scn, o = {}) {
+  preparing = true; loadNote(true);
   const R = window.Radar, en = lang() === 'en';
   let pr; try { pr = await prepare(scn, o); } finally { preparing = false; loadNote(false); }
   lastResult = null; current = scn;
   const def = pr.def; R.setPaused(false);
   const where = pr.region ? ` · ${tl(pr.region)}` : '';
-  R.startWorld({ name: (o.free ? (en ? 'Free navigation' : '자유 항해') : `${scn.id} · ${tl(scn)}`) + where, own: def.own, targets: def.targets, weather: pr.weather, aids: def.aids, marks: def.marks || [], needsCoast: !!scn.needsCoast, traffic: { level: pr.level }, route: pr.route, save: true, scnId: o.free ? null : scn.id });
+  R.startWorld({ name: (o.free ? (en ? 'Free navigation' : '자유 항해') : `${scn.id} · ${tl(scn)}`) + where, own: def.own, targets: def.targets, weather: pr.weather, aids: def.aids, marks: def.marks || [], needsCoast: !!scn.needsCoast, traffic: { level: pr.level }, route: pr.route, save: !eduOn(), scnId: o.free ? null : scn.id });
   R.setWeatherRun(createWeatherRun({ rnd: pr.rnd, enabled: S.sim.weatherOn, cap: WX_CAP[pr.level] || WX_CAP.hard }));
   R.setRadar('stby'); /* 어떻게 시작하든 STBY(송신 → 예열 5초) */
   S.ctrl.gain = 0; if (S.ctrl.ace) S.ctrl.ace = false; /* GAIN 0에서 시작: 송신 뒤 GAIN을 올리며 영상이 살아나는 것을 직접 보게 */
@@ -147,7 +151,7 @@ const REC_KEY = 'radar-results';
 function records() { try { return JSON.parse(localStorage.getItem(REC_KEY) || '{}') || {}; } catch (e) { return {}; } }
 function saveRecord(id, r, lv) { try { const all = records(), old = all[id] || {}, nm = r.minRange ? r.minRange.nm : null; all[id] = { pass: r.pass, nm, warnN: r.warnN || 0, lv, d: Date.now(), n: (old.n || 0) + 1, best: r.pass && nm != null ? Math.max(old.best || 0, nm) : old.best || null }; localStorage.setItem(REC_KEY, JSON.stringify(all)); } catch (e) {} }
 function finish(r) {
-  const R = window.Radar, en = lang() === 'en'; lastResult = r; if (current && current.id && current.id !== 'FREE') saveRecord(current.id, r, (R.world && R.world.def.traffic && R.world.def.traffic.level) || 'none'); R.setScenarioTick(null); R.setLog(null); R.setPaused(true); if (R.world) R.world.def.scnId = null; // 끝난 시나리오는 이어 하기에서 다시 평가하지 않음
+  const R = window.Radar, en = lang() === 'en'; lastResult = r; if (current && current.id && current.id !== 'FREE' && !eduOn()) saveRecord(current.id, r, (R.world && R.world.def.traffic && R.world.def.traffic.level) || 'none'); R.setScenarioTick(null); R.setLog(null); R.setPaused(true); if (R.world) R.world.def.scnId = null; // 끝난 시나리오는 이어 하기에서 다시 평가하지 않음
   const g = r.minRange && R.world.targets.find((x) => x.id === r.minRange.id), nm = g ? (g.name || (en ? 'fishing boat' : '어선')) : '-';
   const fa = r.firstAction;
   const html = `<div class="result ${r.pass ? 'ok' : 'ng'}"><b class="verdict">${r.pass ? (en ? 'PASS' : '합격') : en ? 'NOT PASSED' : '불합격'}${r.pass && r.warnN ? `<small class="vwarn">${en ? ' · rule check' : ' · 규칙 주의'}</small>` : ''}</b>

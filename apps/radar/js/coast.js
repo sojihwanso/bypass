@@ -3,7 +3,8 @@
    열 ci = floor((lon+180)/10), 타일 rj = floor((lat+90)/10), 좌표 = 타일 원점 + 정수/FULLQ (zigzag 차분). */
 export const FULLQ = 20000;
 const pad2 = (n) => String(n).padStart(2, '0');
-const defaultFetch = (ci) => fetch('../ecdis/coast/c' + pad2(ci) + '.txt').then((r) => (r.ok ? r.text() : Promise.reject(r.status)));
+/* 해안선 받기: 8초 안에 안 오면 포기(네트워크가 멈춰도 '해역 준비 중'이 영영 남지 않게) */
+const defaultFetch = (ci) => { const ac = typeof AbortController !== 'undefined' ? new AbortController() : null, tm = ac ? setTimeout(() => ac.abort(), 8000) : null; return fetch('../ecdis/coast/c' + pad2(ci) + '.txt', ac ? { signal: ac.signal } : undefined).then((r) => (r.ok ? r.text() : Promise.reject(r.status))).finally(() => tm && clearTimeout(tm)); };
 
 function reader(u8, start) {
   let p = start;

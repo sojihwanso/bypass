@@ -44,9 +44,14 @@ function segClear(rings, P, x0, y0, x1, y1, buf) {
   const cross = (ax, ay, bx, by, cx, cy) => (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
   for (const r of rings) {
     const bb = bboxOf(r); if (bb[2] < lonA || bb[0] > lonB || bb[3] < latA || bb[1] > latB) continue;
-    let px = P.x(r[r.length - 2]), py = P.y(r[r.length - 1]);
+    // 긴 해안선(본토)은 꼭짓점이 수만 개: 선분 상자 한쪽 바깥에 둘 다 있는 변은 투영도 하지 않고 건너뜀
+    const side = (lo, la) => (lo < lonA ? 1 : 0) | (lo > lonB ? 2 : 0) | (la < latA ? 4 : 0) | (la > latB ? 8 : 0);
+    let plo = r[r.length - 2], pla = r[r.length - 1], ps = side(plo, pla), px = NaN, py = NaN;
     for (let i = 0; i < r.length; i += 2) {
-      const qx = P.x(r[i]), qy = P.y(r[i + 1]);
+      const lo = r[i], la = r[i + 1], qs = side(lo, la);
+      if (ps & qs) { plo = lo; pla = la; ps = qs; px = NaN; continue; }
+      if (Number.isNaN(px)) { px = P.x(plo); py = P.y(pla); }
+      const qx = P.x(lo), qy = P.y(la); plo = lo; pla = la; ps = qs;
       if (buf > 0) { const u = Math.max(0, Math.min(1, ((qx - x0) * dx + (qy - y0) * dy) / L2)), ex = x0 + u * dx - qx, ey = y0 + u * dy - qy; if (ex * ex + ey * ey < b2) return false; }
       if (buf > 0) { const ex = qx - px, ey = qy - py, e2 = ex * ex + ey * ey || 1e-12; for (const [sx, sy] of [[x0, y0], [x1, y1]]) { const u = Math.max(0, Math.min(1, ((sx - px) * ex + (sy - py) * ey) / e2)), fx = px + u * ex - sx, fy = py + u * ey - sy; if (fx * fx + fy * fy < b2) return false; } } // 두 선분 사이 최소 거리 = 네 끝점-선분 거리 중 최소
       const d1 = cross(x0, y0, x1, y1, px, py), d2 = cross(x0, y0, x1, y1, qx, qy), d3 = cross(px, py, qx, qy, x0, y0), d4 = cross(px, py, qx, qy, x1, y1);

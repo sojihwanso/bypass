@@ -35,7 +35,7 @@ export function createTracker({ max = 100 } = {}) {
         lsVel(g);
         // 변침 감지: 필터 속도와 최소제곱 속도가 크게 다르면 최근 30 s만 남김
         if (g.k > 12 && Math.hypot(g.fvx - g.vx, g.fvy - g.vy) > MAN_KN) { while (g.meas.length > 2 && t - g.meas[0].t > 30) g.meas.shift(); lsVel(g); }
-      } else { g.x = px; g.y = py; if (g.k > 0) g.miss++; }
+      } else { g.x = px; g.y = py; if (g.k > 0 || t - g.t0 > 20) g.miss++; } // 빈 바다에 포착한 것도 20초 넘게 영상이 없으면 분실로
       if (g.k < 2) { g.vx = g.fvx; g.vy = g.fvy; }
       g.lastT = t;
       g.state = g.miss >= 3 ? 'lost' : t - g.t0 >= ACQ_SEC && g.k >= 3 ? 'track' : 'acq'; // 빠른 배속에서도 측정이 3번은 쌓여야 추적(속력 0 벡터로 거짓 경보가 나지 않게)
