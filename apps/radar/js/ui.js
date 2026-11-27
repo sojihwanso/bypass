@@ -243,13 +243,13 @@ export function initUI(root, actions) {
   rp.insertBefore($('#connSlot'), $('#pnAlert'));
   let mode = null;
   let shift = 0;
-  const qbar = $('#qbar'), QB_W = 72, QIN_R = 84, LBL = 36;
+  const qbar = $('#qbar'), QB_W = 72, QIN_R = 84, LBL = 36, SIDE_W = 184; // PPI 오른쪽 칸(GAIN·커서·Conning 같은 폭)에 남겨 둘 최소 폭
   let qIn = false, rmax = Infinity;
   function relayout() {
     /* 단추줄: PPI 영역 높이 560px 이상이면 PPI 영역 왼쪽 가장자리 세로줄(위 묶음 위, 아래 묶음 아래 — 실제 화면 배치)로 넣고, 760px 미만이면 작게.
        원은 단추줄·오른쪽 칸 사이(최대 15%까지 줄임). 아니면 왼쪽 막대. 오른쪽 칸 폭 = 150~300px */
     const r = wrap.getBoundingClientRect(), h = r.height, wIn = r.width + (qIn ? 0 : QB_W), full = h / 2 - LBL;
-    const RIn = Math.min(full, (wIn - QIN_R - 170) / 2 - LBL), wantIn = r.width > 0 && h >= 560 && RIn >= 0.85 * full;
+    const RIn = Math.min(full, (wIn - QIN_R - SIDE_W) / 2 - LBL), wantIn = r.width > 0 && h >= 560 && RIn >= 0.85 * full;
     if (wantIn !== qIn) { qIn = wantIn; document.documentElement.dataset.qb = qIn ? 'in' : 'out'; if (qIn) wrap.append(qbar); else main.prepend(qbar); }
     wrap.classList.toggle('compact', qIn && h < 900);
     /* 방위 눈금 글자가 모서리 상자에 가리지 않게: 상자와 원 사이 28px 이상이 되도록 원을 줄임 */
@@ -258,7 +258,7 @@ export function initUI(root, actions) {
     let colW, next;
     if (qIn) {
       let R = RIn, cx = 0;
-      for (let k = 0; k < 30; k++) { cx = Math.min(Math.max(wIn / 2, QIN_R + LBL + R), wIn - 170 - LBL - R); const room = roomFor(cx, h / 2); if (room >= R) break; R = Math.max(40, room); }
+      for (let k = 0; k < 30; k++) { cx = Math.min(Math.max(wIn / 2, QIN_R + LBL + R), wIn - SIDE_W - LBL - R); const room = roomFor(cx, h / 2); if (room >= R) break; R = Math.max(40, room); }
       colW = Math.min(300, wIn - 12 - (cx + R + LBL) - 8); shift = wIn / 2 - cx; rmax = R; next = 'rside';
     } else {
       const w = r.width, dia = Math.min(w, h) - 72, g = (w - dia) / 2; rmax = Infinity;
@@ -282,7 +282,7 @@ export function initUI(root, actions) {
   /* 오른쪽 칸 폭을 실제 원 크기(최종 shift·rmax)에서 다시 계산: 칸이 방위 눈금 글자를 덮지 않게 */
   function fitSide() {
     if (mode !== 'rside') return; const r = wrap.getBoundingClientRect(), R = Math.min(Math.min(r.width, r.height) / 2 - LBL, rmax), cx = r.width / 2 - shift;
-    wrap.style.setProperty('--sidew', Math.max(120, Math.min(300, r.width - 12 - (cx + R + LBL) - 10)) + 'px');
+    wrap.style.setProperty('--sidew', Math.max(SIDE_W - 12, Math.min(300, r.width - 12 - (cx + R + LBL) - 10)) + 'px');
   }
   relayout();
 

@@ -463,3 +463,7 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--rule);border
 }
 #hv_wx .wxc::before{content:' · '}
 [data-layout="rside"] .side .sethd{gap:2px}
+/* 폭 맞춤: GAIN·커서 상자 = PPI 옆 Conning 폭, PI = EBL 폭, TRIAL·ACQ ZONE = VRM 폭 */
+[data-layout="rside"] .tr{width:var(--sidew)}
+#bxPi{width:196px}
+#bxTgtTools{width:196px;justify-content:flex-end}
