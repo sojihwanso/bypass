@@ -1,7 +1,7 @@
 /* 시작 화면(시나리오 5개·자유 항해·이어 하기) · 시나리오 안내 · 결과 화면 */
 import { SCENARIOS, freeSetup, createLog, evaluate } from './scenarios.js';
 import { loadLand, pointInLand } from './coast.js';
-import { REGIONS, pickStart } from './place.js';
+import { REGIONS, pickStart, routeClear } from './place.js';
 import { makeTraffic, LEVELS } from './traffic.js';
 import { rollWeather, createWeatherRun, WX_CAP } from './weather.js';
 import { S, saveSettings } from './state.js';
@@ -74,13 +74,16 @@ async function prepare(scn, o) {
   const rnd = seeded((o.seed ?? Math.random() * 4294967295) >>> 0 || 1);
   let def = scn, region = null;
   if (o.place !== false && !scn.needsCoast) {
-    const cand = o.region ? REGIONS.find((r) => r.id === o.region) : REGIONS[Math.floor(rnd() * REGIONS.length)];
-    const L = await loadLand(around((cand.box.lat0 + cand.box.lat1) / 2, (cand.box.lon0 + cand.box.lon1) / 2), o.fetchText);
-    if (L.ok) { const p = pickStart({ def: scn, region: cand, rings: L.rings, rnd }); if (p.ok) { def = p.def; region = cand; } }
+    const first = o.region ? REGIONS.find((r) => r.id === o.region) : REGIONS[Math.floor(rnd() * REGIONS.length)];
+    // 고른 해역에서 육지로 가지 않는 침로를 못 찾으면 다른 해역도 차례로 시도
+    for (const cand of o.region ? [first] : [first, ...REGIONS.filter((r) => r !== first)]) {
+      const L = await loadLand(around((cand.box.lat0 + cand.box.lat1) / 2, (cand.box.lon0 + cand.box.lon1) / 2), o.fetchText);
+      if (L.ok) { const p = pickStart({ def: scn, region: cand, rings: L.rings, rnd }); if (p.ok) { def = p.def; region = cand; break; } }
+    }
   }
   const L2 = await loadLand(around(def.own.lat, def.own.lon), o.fetchText), P = makeProj(def.own.lat, def.own.lon);
   const onLand = (lat, lon) => L2.ok && pointInLand(L2.rings, lat, lon);
-  const bg = makeTraffic({ level: o.level ?? S.sim.level, own: { ...def.own, kn: def.own.kn ?? 14 }, rnd }).filter((g) => [0, 0.25, 0.5].every((h) => { const v = velXY(g.hdg, g.kn), x = P.x(g.lon) + v.vx * h, y = P.y(g.lat) + v.vy * h; return !onLand(P.lat(y), P.lon(x)); }));
+  const bg = makeTraffic({ level: o.level ?? S.sim.level, own: { ...def.own, kn: def.own.kn ?? 14 }, rnd }).filter((g) => !L2.ok || routeClear(L2.rings, g.lat, g.lon, g.hdg, g.kn, 60, 0.3)); // 주변 배도 1시간 동안 육지로 가지 않는 배만
   const wxOn = S.sim.weatherOn || scn.fixedWeather;
   const lvl = o.level ?? S.sim.level, weather = wxOn ? rollWeather(rnd, scn.fixedWeather ? def.weather : null, def.own, WX_CAP[lvl] || WX_CAP.hard) : { kind: 'clear', fog: false, visNM: 10, sea: 1, windFrom: Math.round(rnd() * 360), windMs: 3, rain: [], ducting: false, interference: false };
   if (def.weather && def.weather.current) weather.current = { ...def.weather.current };
@@ -95,6 +98,7 @@ async function runScenario(scn, o = {}) {
   R.startWorld({ name: (o.free ? (en ? 'Free navigation' : '자유 항해') : `${scn.id} · ${tl(scn)}`) + where, own: def.own, targets: def.targets, weather: pr.weather, aids: def.aids, marks: def.marks || [], needsCoast: !!scn.needsCoast, traffic: { level: pr.level }, save: true, scnId: o.free ? null : scn.id });
   R.setWeatherRun(createWeatherRun({ rnd: pr.rnd, enabled: S.sim.weatherOn, cap: WX_CAP[pr.level] || WX_CAP.hard }));
   R.setRadar('stby'); /* 어떻게 시작하든 STBY(송신 → 예열 5초) */
+  S.ctrl.gain = 0; if (S.ctrl.ace) S.ctrl.ace = false; /* GAIN 0에서 시작: 송신 뒤 GAIN을 올리며 영상이 살아나는 것을 직접 보게 */
   if (scn.message) R.ais().addMessage({ ...scn.message, t: 0 });
   if (o.free) { R.setLog(null); R.setScenarioTick(null); return; }
   attachEval(def);

@@ -38,14 +38,17 @@ function trackClear(rings, P, x0, y0, hdg, kn, min, buf) {
   for (let d = 0; d <= len + 1e-9; d += 0.5) if (!clear(rings, P, x0 + d * sb, y0 + d * cb, buf)) return false;
   return true;
 }
+/* 위경도 (lat,lon)에서 hdg로 kn 속력 min분 가는 길(둘레 buf NM 포함)이 바다로만 가는지 */
+export function routeClear(rings, lat, lon, hdg, kn, min, buf = 0) { const P = makeProj(lat, lon); return trackClear(rings, P, 0, 0, hdg, kn, min, buf); }
 function landWithin(rings, lat, lon, nm) {
   const P = makeProj(lat, lon);
   for (const r of rings) for (let i = 0; i < r.length; i += 2) if (Math.hypot(P.x(r[i]), P.y(r[i + 1])) < nm) return true;
   return false;
 }
 
-export function pickStart({ def, region, rings, rnd, tries = 40 }) {
-  const b = region.box, min = Math.min(def.durationMin || 30, 30);
+/* 자선은 시나리오 시간 내내(최소 30분, 자유 항해 60분) 1 NM 여유로 육지에 닿지 않는 침로, 상대선도 같은 시간 0.3 NM 여유 */
+export function pickStart({ def, region, rings, rnd, tries = 80 }) {
+  const b = region.box, min = Math.max(def.durationMin || 30, 30);
   for (let i = 0; i < tries; i++) {
     const lat = b.lat0 + rnd() * (b.lat1 - b.lat0), lon = b.lon0 + rnd() * (b.lon1 - b.lon0), dHdg = Math.floor(rnd() * 360);
     const d = rotatePlace(def, { lat, lon, dHdg }), P = makeProj(lat, lon);

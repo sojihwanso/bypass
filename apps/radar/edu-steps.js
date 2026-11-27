@@ -6,7 +6,7 @@
   const dist = (p, r) => Math.hypot(p.rng * Math.sin(p.brg * Math.PI / 180) - r.rng * Math.sin(r.brg * Math.PI / 180), p.rng * Math.cos(p.brg * Math.PI / 180) - r.rng * Math.cos(r.brg * Math.PI / 180));
   const tx = (key, o) => { E().ensure(key, o); E().setTx(); };
   /* 차례로 강조: 4초마다 다음 구역 */
-  const seq = (list) => () => q(list[Math.floor(Date.now() / 4000) % list.length]);
+  const seq = (list) => () => { const els = list.map(q).filter((e) => e && e.offsetWidth > 0); return els[Math.floor(Date.now() / 4000) % els.length]; }; // 보이는 구역만(좁은 화면은 PPI 옆 칸이 비어 있음)
   /* 단계별 화면(자선 북쪽 14 kn, 날씨 고정, 교통 없음) */
   const TWO = { targets: [{ id: 'a', brg: 40, rng: 4, hdg: 230, kn: 11 }, { id: 'b', brg: 300, rng: 5, hdg: 100, kn: 8 }] };
   const SEA = { targets: [{ id: 'boat', brg: 120, rng: 2, hdg: 10, kn: 4, L: 15, rcs: 5, h: 3, ais: false }, ...TWO.targets], weather: { sea: 5, windFrom: 30, windMs: 14 }, range: 3 };

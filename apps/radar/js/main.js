@@ -21,6 +21,7 @@ import { initHelp } from './help.js';
 import { COL, piColor } from './overlay.js';
 import { createWeatherRun, stepWeather, windDrift, speedLoss, weatherLabel, WX_CAP, rollWeather } from './weather.js';
 import { refillTraffic, steerTraffic, trafficRing } from './traffic.js';
+import { routeClear } from './place.js';
 
 const TEST = new URLSearchParams(location.search).has('test');
 loadSettings(); S.ctrl.pmMode = 'OFF'; // PM은 켤 때마다 새로(저장된 ON으로 시작하지 않음)
@@ -118,15 +119,22 @@ function weatherTick(run) {
   wxPend = wxPend.filter((p) => { if (W.t < p.t) return true; alerts.resolve(p.id); return false; });
 }
 /* 난이도 교통량 유지: 10초마다 주변 배 회피, 1분마다 지나간 배는 화면 밖(기본 20 NM)에서 지우고, 모자라면 화면 밖 고리에서 새 배를 들여보냄(육지 경로 제외) */
+/* 주변 배(bg) 육지 피하기: 앞 2 NM(0.3 NM 여유)에 육지가 있으면 바다로 가는 가장 작은 변침(우현 먼저)으로 기준 침로를 바꿈 */
+function landSteer() {
+  if (!W.land.ok) return;
+  for (const g of W.targets) { if (!String(g.id).startsWith('bg') || !g.want) continue; const kn = Math.max(g.want.kn, 4), min = (2 / kn) * 60;
+    if (routeClear(W.land.rings, g.lat, g.lon, g.want.hdg, kn, min, 0.3)) continue;
+    for (const d of [30, -30, 60, -60, 90, -90, 120, -120, 150, -150, 180]) { const h = wrap360(g.want.hdg + d); if (routeClear(W.land.rings, g.lat, g.lon, h, kn, min * 1.5, 0.3)) { g.want.hdg = h; g.base = { hdg: h, kn: g.want.kn }; break; } } }
+}
 function trafficTick(run) {
   const lv = W.def.traffic && W.def.traffic.level; if (!lv || lv === 'none') return;
-  steerAcc += run; if (steerAcc >= 10) { steerAcc = 0; steerTraffic(W.own, W.targets); } // 주변 배는 10초마다 자선 회피 판단
+  steerAcc += run; if (steerAcc >= 10) { steerAcc = 0; steerTraffic(W.own, W.targets); landSteer(); } // 주변 배는 10초마다 자선 회피·육지 피하기 판단
   trafAcc += run; if (trafAcc < 60) return; trafAcc = 0;
   const o = W.own, Po = makeProj(o.lat, o.lon), own = { lat: o.lat, lon: o.lon, hdg: o.cog, kn: o.sog };
   const ring = trafficRing(S.disp.rangeNM * (S.disp.motion === 'TM' || offCenter ? 1.75 : 1)); // 지금 화면에 보이는 반경 밖에서만 생기고 지워짐
   W.targets = W.targets.filter((g) => { if (!String(g.id).startsWith('bg')) return true; const x = Po.x(g.lon), y = Po.y(g.lat), v = velXY(g.cog, g.sog), ov = velXY(o.cog, o.sog); return Math.hypot(x, y) < ring.dDrop || x * (v.vx - ov.vx) + y * (v.vy - ov.vy) < 0; });
   const onLand = (lat, lon) => W.land.ok && pointInLand(W.land.rings, lat, lon);
-  const clear = (g) => [0, 0.25, 0.5].every((h) => { const v = velXY(g.hdg, g.kn), x = Po.x(g.lon) + v.vx * h, y = Po.y(g.lat) + v.vy * h; return !onLand(Po.lat(y), Po.lon(x)); });
+  const clear = (g) => !W.land.ok || routeClear(W.land.rings, g.lat, g.lon, g.hdg, g.kn, 60, 0.3); // 새 배는 1시간 동안 육지로 가지 않는 길만
   W.trafSeq = W.trafSeq || 1 + W.targets.reduce((m, g) => Math.max(m, /^bg\d+$/.test(g.id) ? +g.id.slice(2) : 0), 0);
   const add = refillTraffic({ level: lv, own, targets: W.targets, rnd, seq: W.trafSeq, clear, ring });
   W.trafSeq += add.length; for (const g of add) W.targets.push(createTarget(g));
@@ -524,6 +532,7 @@ requestAnimationFrame(frame);
 setTimeout(fit, 0); if (document.fonts) document.fonts.ready.then(fit); // 문구·글꼴이 채워진 뒤 단추줄 넘침·원 크기를 다시 계산
 /* 교육 과정 창구(edu-steps.js가 화면을 맞추고 판정을 읽음) */
 function eduSetup(o = {}, key = '') {
+  if (key !== 'r1' && S.ctrl.gain < 20) S.ctrl.gain = 65; // 시나리오가 GAIN 0으로 남겨도 교육 화면(영상 조정 단계 뒤)은 보이게
   const lat = o.lat ?? 33.45, lon = o.lon ?? 124.55, hdg = o.hdg ?? 0, kn = 14, Pq = makeProj(lat, lon);
   const at = (b, r) => ({ lat: Pq.lat(r * Math.cos(b * D)), lon: Pq.lon(r * Math.sin(b * D)) });
   const tg = (o.targets || []).map((x) => {
@@ -555,7 +564,7 @@ if (TEST) {
   window.RadarTest = {
     ready: true, S, ppi, emit, pauseParts: () => ({ paused, hiddenPause }), weatherRun: () => wxRun, scene: () => scene, colors: () => COL, piColor, selected: () => selected, menuPaths: () => MENU.flatMap((x) => x.items.map((i) => i.path)), menuOpts: (p) => (MENU.flatMap((x) => x.items).find((i) => i.path === p) || { opts: [] }).opts, setSpeed, speed: () => speed, proj: makeProj, view: () => V, setView: (o) => Object.assign(V, o), setRange: (r) => { S.disp.rangeNM = r; V.rangeNM = r; }, frames: () => frames, tick, frameAt, own, paused: () => paused || hiddenPause, setPaused: (p) => { paused = p; }, KEYMAP, keyHandlers,
     radar: { set: setRadar, toggle: toggleTx, get state() { return radar.state; }, get warmLeft() { return radar.warmLeft; } }, world: () => W, tracker: { targets: () => tracker.targets() },
-    newWorld: (o) => startWorld(freeDef(o)), tgtScreen: (id) => { const g = W.targets.find((x) => x.id === id), r = relOf(P.x(g.lon), P.y(g.lat)), p = ppi.toScreen(r.brg, r.rng); return { sx: p.x, sy: p.y }; },
+    newWorld: (o) => { if (S.ctrl.gain < 20) S.ctrl.gain = 65; startWorld(freeDef(o)); }, /* 점검용 세계는 영상이 보이게(시작 화면의 GAIN 0과 별개) */ tgtScreen: (id) => { const g = W.targets.find((x) => x.id === id), r = relOf(P.x(g.lon), P.y(g.lat)), p = ppi.toScreen(r.brg, r.rng); return { sx: p.x, sy: p.y }; },
     coastDebug: () => { if (!coastScreen || !W.land.rings.length) return null; let maxErr = 0, n = 0; const r = W.land.rings[0], step = Math.max(2, Math.floor(r.length / 2 / 400) * 2); coastScreen[0].forEach((p, j) => { const i = j * step, q = relOf(P.x(r[i]), P.y(r[i + 1])), t = ppi.toScreen(q.brg, q.rng); maxErr = Math.max(maxErr, Math.hypot(t.x - p.x, t.y - p.y)); n++; }); return { n, maxErr }; },
     cursorAct, menuAction, trails: () => trails, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,
     startScenario: (id, o) => starter.startScenario(id, o), resumeVoyage: () => starter.resumeVoyage(), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), finishNow: () => starter.finishNow(), shouldBeep, antenna: () => ant, relayout: () => { fit(); }, layoutMode: () => ui.layoutMode(), qbInside: () => ui.qbInside(), forceState: (o) => { if (o.az) { azZones = o.az; tracker.setZones(o.az); } if (o.speed) speed = o.speed; if (o.pi !== undefined) piOn = o.pi; }, uiState: () => ({ az: azZones.length > 0, speed, pi: piOn, off: !!offCenter }), tickSim, sim: { setAuto, setRudderOrder, setTelegraph }, menuItems: () => MENU.flatMap((m) => m.items.map((i) => (lang() === 'en' ? i.en : i.ko))),

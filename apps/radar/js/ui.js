@@ -236,7 +236,7 @@ export function initUI(root, actions) {
 
   applyLang(); applyTheme();
 
-  /* 배치: 물표 정보·TT·AIS 설정은 PPI 원 오른쪽 빈 공간(넉넉하면), 아니면 오른쪽 패널. 패널 순서: 자선 → 도움말 → Conning → 경보 */
+  /* 배치: Conning은 PPI 원 오른쪽 빈 공간(넉넉하면, 작은 판), 물표 정보·TT·AIS 설정은 오른쪽 패널. 좁으면 모두 오른쪽 패널(자선 → Conning → 경보 → 물표) */
   const SIDE_MIN = 140, main = root.querySelector('.main'), rp = $('#rp'), wrap = $('#ppiWrap');
   rp.insertBefore($('#connSlot'), $('#pnAlert'));
   let mode = null;
@@ -266,8 +266,9 @@ export function initUI(root, actions) {
     }
     if (next !== mode) {
       mode = next; document.documentElement.dataset.layout = mode;
-      if (mode === 'rside') $('#sideR').append($('#pnTgt'), $('#pnTT'));
-      else rp.append($('#pnTgt'), $('#pnTT'));
+      /* 넓은 화면: Conning(작게)은 PPI 오른쪽 빈 공간, 물표 정보·TT·AIS는 오른쪽 패널(Conning 자리). 좁으면 모두 오른쪽 패널 */
+      if (mode === 'rside') { $('#sideR').append($('#connSlot')); rp.insertBefore($('#pnTgt'), $('#pnAlert')); rp.insertBefore($('#pnTT'), $('#pnAlert')); }
+      else { rp.insertBefore($('#connSlot'), $('#pnAlert')); rp.append($('#pnTgt'), $('#pnTT')); }
     }
     if (mode === 'rside') wrap.style.setProperty('--sidew', colW + 'px');
     fitSide();
