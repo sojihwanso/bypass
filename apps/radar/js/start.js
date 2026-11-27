@@ -82,7 +82,7 @@ async function prepare(scn, o) {
   const wxOn = S.sim.weatherOn || scn.fixedWeather;
   const weather = wxOn ? rollWeather(rnd, scn.fixedWeather ? def.weather : null, def.own) : { kind: 'clear', fog: false, visNM: 10, sea: 1, windFrom: Math.round(rnd() * 360), windMs: 3, rain: [], ducting: false, interference: false };
   if (def.weather && def.weather.current) weather.current = { ...def.weather.current };
-  return { def: { ...def, targets: [...def.targets, ...bg] }, weather, region, rnd };
+  return { def: { ...def, targets: [...def.targets, ...bg] }, weather, region, rnd, level: o.level ?? S.sim.level };
 }
 
 async function runScenario(scn, o = {}) {
@@ -90,7 +90,7 @@ async function runScenario(scn, o = {}) {
   lastResult = null; current = scn;
   const pr = await prepare(scn, o), def = pr.def; R.setPaused(false);
   const where = pr.region ? ` · ${tl(pr.region)}` : '';
-  R.startWorld({ name: (o.free ? (en ? 'Free navigation' : '자유 항해') : `${scn.id} · ${tl(scn)}`) + where, own: def.own, targets: def.targets, weather: pr.weather, aids: def.aids, marks: def.marks || [], needsCoast: !!scn.needsCoast });
+  R.startWorld({ name: (o.free ? (en ? 'Free navigation' : '자유 항해') : `${scn.id} · ${tl(scn)}`) + where, own: def.own, targets: def.targets, weather: pr.weather, aids: def.aids, marks: def.marks || [], needsCoast: !!scn.needsCoast, traffic: { level: pr.level } });
   R.setWeatherRun(createWeatherRun({ rnd: pr.rnd, enabled: S.sim.weatherOn }));
   R.setRadar('stby'); /* 어떻게 시작하든 STBY(송신 → 예열 5초) */
   if (scn.message) R.ais().addMessage({ ...scn.message, t: 0 });

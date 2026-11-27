@@ -19,6 +19,7 @@ import { initStart } from './start.js';
 import { initHelp } from './help.js';
 import { COL, piColor } from './overlay.js';
 import { createWeatherRun, stepWeather, windDrift, speedLoss, weatherLabel } from './weather.js';
+import { refillTraffic } from './traffic.js';
 
 const TEST = new URLSearchParams(location.search).has('test');
 loadSettings();
@@ -40,7 +41,7 @@ const rnd = Math.random;
 const SPEEDS = [1, 2, 4, 8, 16, 32], MARKS = ['tri', 'circle', 'square', 'cross', 'anchor'], MARK_SYM = { tri: '▲', circle: '○', square: '□', cross: '✕', anchor: '⚓' };
 let lastClick = null, eduKey = '';
 let markShape = 0, tgtSort = 'rng', tgtTimer = null;
-let wxRun = null, wxPend = [], wxN = 0;
+let wxRun = null, wxPend = [], wxN = 0, trafAcc = 0;
 
 /* ---------- UI ---------- */
 const actions = {};
@@ -59,7 +60,7 @@ export function startWorld(def) {
   W = { def, name: def.name || '', own, targets: def.targets.map((g) => (g.want ? { ...g, legs: [...(g.legs || [])], want: { ...g.want } } : createTarget(g))), weather: { sea: 0, windFrom: 0, windMs: 0, rain: [], ducting: false, interference: false, current: { set: 0, drift: 0 }, ...(def.weather || {}) }, aids: def.aids || [], marks: def.marks || [], t: def.t || 0, land: { rings: [], ok: false, heightM: 100 }, needsCoast: !!def.needsCoast };
   P = makeProj(def.own.lat, def.own.lon);
   tracker = createTracker({ max: 100 }); ais = createAIS(); alerts = createAlerts(realNow, () => W.t); tools = createTools(); route = createRoute(); trails.reset(V.rangeNM, S.disp.trails.mode);
-  W.userMarks = []; selected = []; tmOff = { x: 0, y: 0 }; ruler = null; rulerA = null; uiMode = null; azZones = []; piOn = false; speed = 1; offCenter = null; prevScan = new Array(N_BRG); prevRaw = null; ppi.clear();
+  W.userMarks = []; trafAcc = 0; selected = []; tmOff = { x: 0, y: 0 }; ruler = null; rulerA = null; uiMode = null; azZones = []; piOn = false; speed = 1; offCenter = null; prevScan = new Array(N_BRG); prevRaw = null; ppi.clear();
   scene = buildScene({ own: ownScene(), targets: W.targets, weather: W.weather, aids: W.aids, band: S.ctrl.band, pulse: S.ctrl.pulse, seed: (Math.random() * 1e6) | 0 });
   trialSet = { course: own.hdg, speed: own.stw };
   const bb = { lat0: def.own.lat - 0.6, lat1: def.own.lat + 0.6, lon0: def.own.lon - 0.75, lon1: def.own.lon + 0.75 };
@@ -105,6 +106,18 @@ function weatherTick(run) {
   for (const e of ev) { const id = 'wx:' + (++wxN); alerts.raise(id, 'C', lang() === 'en' ? e.en : e.ko); wxPend.push({ id, t: W.t + 60 }); }
   wxPend = wxPend.filter((p) => { if (W.t < p.t) return true; alerts.resolve(p.id); return false; });
 }
+/* 난이도 교통량 유지: 1분마다 지나간 배는 20 NM 밖에서 지우고, 모자라면 화면 밖에서 새 배를 들여보냄(육지 경로 제외) */
+function trafficTick(run) {
+  const lv = W.def.traffic && W.def.traffic.level; if (!lv || lv === 'none') return;
+  trafAcc += run; if (trafAcc < 60) return; trafAcc = 0;
+  const o = W.own, Po = makeProj(o.lat, o.lon), own = { lat: o.lat, lon: o.lon, hdg: o.cog, kn: o.sog };
+  W.targets = W.targets.filter((g) => { if (!String(g.id).startsWith('bg')) return true; const x = Po.x(g.lon), y = Po.y(g.lat), v = velXY(g.cog, g.sog), ov = velXY(o.cog, o.sog); return Math.hypot(x, y) < 20 || x * (v.vx - ov.vx) + y * (v.vy - ov.vy) < 0; });
+  const onLand = (lat, lon) => W.land.ok && pointInLand(W.land.rings, lat, lon);
+  const clear = (g) => [0, 0.25, 0.5].every((h) => { const v = velXY(g.hdg, g.kn), x = Po.x(g.lon) + v.vx * h, y = Po.y(g.lat) + v.vy * h; return !onLand(Po.lat(y), Po.lon(x)); });
+  W.trafSeq = W.trafSeq || 1 + W.targets.reduce((m, g) => Math.max(m, /^bg\d+$/.test(g.id) ? +g.id.slice(2) : 0), 0);
+  const add = refillTraffic({ level: lv, own, targets: W.targets, rnd, seq: W.trafSeq, clear });
+  W.trafSeq += add.length; for (const g of add) W.targets.push(createTarget(g));
+}
 function freeDef(o = {}) {
   const lat = o.lat ?? 34.35, lon = o.lon ?? 125.6, Pq = makeProj(lat, lon), at = (b, r) => ({ lat: Pq.lat(r * Math.cos(b * D)), lon: Pq.lon(r * Math.sin(b * D)) });
   return { name: o.name || '', own: { lat, lon, hdg: o.hdg ?? 0, tele: o.tele }, targets: (o.targets || []).map((x, i) => ({ id: x.id || 't' + i, ...at(x.brg, x.rng), hdg: x.hdg, kn: x.kn, L: x.L ?? 120, rcs: x.rcs ?? null, h: x.h ?? null, ais: x.ais ?? true, name: x.name || 'SHIP ' + (i + 1), mmsi: x.mmsi, legs: x.legs || [] })), weather: o.weather || { sea: 2 }, aids: o.aids || [] };
@@ -126,7 +139,7 @@ function tick(dt) {
   // 물리: 0.2 s 이하로 나눠 적분
   const n = Math.ceil(run / 0.2), env = shipEnv();
   for (let i = 0; i < n; i++) { const h = run / n; W.t += h; stepShip(W.own, h, env); for (const g of W.targets) stepTarget(g, h, W.t); }
-  if (run > 0) weatherTick(run);
+  if (run > 0) { weatherTick(run); trafficTick(run); }
   if (run > 0 && onScenarioTick) onScenarioTick(W, run);
   if (run > 0 && logFn) logFn(W);
   V.hdg = W.own.hdg; V.rangeNM = S.disp.rangeNM; V.orient = S.disp.orient; V.motion = S.disp.motion; V.palette = S.disp.palette; V.videoColor = S.disp.videoColor; V.colorSet = S.disp.colorSet; V.rings = S.disp.rings;
@@ -428,7 +441,7 @@ addEventListener('pagehide', saveNow);
 window.Radar = { startWorld, freeDef, setRadar, get world() { return W; }, setLog(fn) { logFn = fn; }, setScenarioTick(fn) { onScenarioTick = fn; }, alerts: () => alerts, ais: () => ais, tracker: () => tracker, route: () => route, tools: () => tools, saveNow, resume, hasResume: () => { try { return !!localStorage.getItem(RESUME); } catch (e) { return false; } }, setPaused: (p) => { paused = p; }, pointInLand, setWeatherRun: (r) => { wxRun = r; wxPend = []; } };
 
 /* 빠른 진행(테스트·검증): 그리지 않고 물리·기록만 */
-function tickSim(sec) { if (!W) return; const n = Math.ceil(sec / 0.25); for (let i = 0; i < n; i++) { if (paused) return; const h = sec / n; W.t += h; stepShip(W.own, h, shipEnv()); weatherTick(h); for (const g of W.targets) stepTarget(g, h, W.t); if (onScenarioTick) onScenarioTick(W, h); if (logFn) logFn(W); } }
+function tickSim(sec) { if (!W) return; const n = Math.ceil(sec / 0.25); for (let i = 0; i < n; i++) { if (paused) return; const h = sec / n; W.t += h; stepShip(W.own, h, shipEnv()); weatherTick(h); trafficTick(h); for (const g of W.targets) stepTarget(g, h, W.t); if (onScenarioTick) onScenarioTick(W, h); if (logFn) logFn(W); } }
 
 /* 시작: 배경에 자유 항해를 띄우고 시나리오 화면을 연다 */
 startWorld(freeDef({ targets: [{ brg: 40, rng: 4, hdg: 230, kn: 11 }, { brg: 300, rng: 5, hdg: 100, kn: 8 }] }));
@@ -446,7 +459,7 @@ function eduSetup(o = {}, key = '') {
   });
   const wx = { kind: 'clear', sea: 1, windFrom: 0, windMs: 3, ...(o.weather || {}) }; wx.rain = (wx.rain || []).map((c) => (c.brg !== undefined ? { ...c, ...at(c.brg, c.rng) } : c));
   startWorld(freeDef({ lat, lon, hdg, targets: tg, weather: wx, aids: (o.aids || []).map((a) => ({ ...a, ...at(a.brg, a.rng) })) }));
-  W.weather.fixed = true; logFn = null; onScenarioTick = null; wxRun = null; paused = false; speed = 1;
+  W.weather.fixed = true; W.def.traffic = null; logFn = null; onScenarioTick = null; wxRun = null; paused = false; speed = 1;
   Object.assign(S.ctrl, { gain: 65, sea: { auto: false, val: 30 }, rain: { auto: false, val: 0 }, tune: { auto: true, val: 50 }, band: 'X', ir: 2, es: 0, eav: 0, ace: false, secondRej: false }, o.ctrl || {});
   if (o.tt) Object.assign(S.tt, o.tt);
   setRange(o.range || 6); setRadar(o.tx === false ? 'stby' : 'tx'); eduKey = key;
