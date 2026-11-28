@@ -108,7 +108,7 @@ export function evaluatePort(r) {
   if (r.collision) R(`충돌했어요(${COLLIDE_NM} NM 이내).`, `Collision (within ${COLLIDE_NM} NM).`);
   if (r.minRange && r.minRange.nm < PORT_PASS_NM) R(`상대선과 ${r.minRange.nm.toFixed(2)} NM까지 가까워졌어요(기준 ${PORT_PASS_NM} NM).`, `Came within ${r.minRange.nm.toFixed(2)} NM of the other vessel (limit ${PORT_PASS_NM} NM).`);
   if (r.offFail) R(`항로를 ${OFF_LIMIT_S}초 넘게 벗어났어요(가장 길게 ${mmss(r.off.longestS)}).`, `Left the channel for more than ${OFF_LIMIT_S} s (longest ${mmss(r.off.longestS)}).`);
-  if (!r.arrived) R(r.timeout ? '시간 안에 도착하지 못했어요.' : '아직 도착하지 않았어요.', r.timeout ? 'Did not arrive within the time limit.' : 'Not arrived yet.');
+  if (!r.arrived && !r.grounding && !r.collision) R(r.timeout ? '시간 안에 도착하지 못했어요.' : '아직 도착하지 않았어요.', r.timeout ? 'Did not arrive within the time limit.' : 'Not arrived yet.');
   if (r.rule9) notes.push({ ko: '규칙 주의(제9조): 좁은 수로에서 마주 오는 배가 있을 때 항로 왼쪽으로 붙었어요. 오른쪽에 붙어 가세요.', en: 'Rule check (Rule 9): you kept to the left of the channel with a vessel approaching. Keep to the starboard side of a narrow channel.', warn: true });
   if (r.near03 && r.near03.n) notes.push({ ko: `참고: 상대선이 0.3 NM 안으로 ${r.near03.n}번, 모두 ${mmss(r.near03.sec)} 들어왔어요.`, en: `Note: other vessels came within 0.3 NM ${r.near03.n} time(s), ${mmss(r.near03.sec)} in total.` });
   const pass = reasons.length === 0;
@@ -227,4 +227,10 @@ export function simulatePort(def, actions = [], { rings = [], dt = 1, watch = nu
     for (let k = 0; k < dt / 0.25; k++) { stepShip(own, 0.25, cur); for (const g of targets) stepTarget(g, 0.25, t + k * 0.25, cur); }
   }
   return { ...evaluatePort(log.result()), events };
+}
+
+/* 레이더 맵용 항로 경계선: 구간마다 좌우(반폭 위치) 선분 {leg, side:-1|1, a, b} */
+export function channelBounds(port) {
+  const out = []; for (let i = 0; i < port.wps.length - 1; i++) for (const side of [-1, 1]) out.push({ leg: i, side, a: legPoint(port.wps[i], port.wps[i + 1], 0, side * port.legHalfNM[i]), b: legPoint(port.wps[i], port.wps[i + 1], 1, side * port.legHalfNM[i]) });
+  return out;
 }

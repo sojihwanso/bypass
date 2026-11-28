@@ -12,7 +12,7 @@ export const DEFAULTS = {
     rangeNM: 6, wheelRange: false, orient: 'HU', motion: 'RM', rings: true, palette: 'day', videoColor: 'amber', colorSet: 'C1', iala: 'A',
     trails: { mode: 'REL', time: 180, grad: 'MULTI', level: 2, os: false, suppressOS: false },
     stern: false, osMark: 'SCALED', grid: false,
-    map: { on: true, coast: true, marks: true }, route: true,
+    map: { on: true, coast: true, marks: true, route: true }, route: true,
     eblRef: 'TRUE', vrmUnit: 'NM', vrmTTG: false, cursorBrg: 'TRUE',
     piMax: 3, piMode: 'PARALLEL', eblStab: 'GND', persistence: 2,
   },

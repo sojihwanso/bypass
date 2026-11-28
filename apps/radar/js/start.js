@@ -7,6 +7,8 @@ import { rollWeather, rollCurrent, createWeatherRun, WX_CAP } from './weather.js
 import { S, saveSettings } from './state.js';
 import { makeProj } from './geo.js';
 import { t, tl, lang } from './i18n.js';
+import { PORTS, portDef, createPortLog, evaluatePort, PORT_PASS_NM } from './port.js';
+import { applyPreset } from './menu.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const mmss = (s) => `${String((s / 60) | 0).padStart(2, '0')}:${String((s % 60) | 0).padStart(2, '0')}`;
@@ -22,7 +24,7 @@ function ownDlg(id, title, body, foot) {
   d.querySelector('.dlg-b').innerHTML = body; d.querySelector('.dlg-f').innerHTML = foot;
   if (!d.open) d.showModal(); return d;
 }
-export function initStart(uiRef) { ui = uiRef; window.RadarStart = openStart; window.RadarBrief = () => current && current.id !== 'FREE' && !lastResult && showBrief(current); return { openStart, startScenario, resumeVoyage, lastResult: () => lastResult, finishNow: () => curLog && !lastResult && finish(evaluate(curLog.result())) }; }
+export function initStart(uiRef) { ui = uiRef; window.RadarStart = openStart; window.RadarPortMenu = openPortMenu; window.RadarBrief = () => current && current.id !== 'FREE' && !lastResult && showBrief(current); return { openStart, startScenario, startPort, openPortMenu, resumeVoyage, lastResult: () => lastResult, finishNow: () => curLog && !lastResult && (current && current.portId ? finishPort(evaluatePort(curLog.result())) : finish(evaluate(curLog.result()))) }; }
 
 export async function openStart(o = {}) {
   const R = window.Radar, en = lang() === 'en';
@@ -73,6 +75,10 @@ const around = (lat, lon) => ({ lat0: lat - 0.6, lat1: lat + 0.6, lon0: lon - 0.
 /* 무작위 해역·침로 배치 + 난이도 교통량 + 날씨. o.place=false면 원래 위치, o.level로 난이도 덮어쓰기, o.seed로 재현 */
 async function prepare(scn, o) {
   const rnd = seeded((o.seed ?? Math.random() * 4294967295) >>> 0 || 1);
+  if (scn.portId) { /* 히든 시나리오: 위치·교통·조류는 항구 정의에서, 날씨는 맑음(날씨 변화를 켜 두면 진행 중 바뀜) */
+    const weather = { kind: 'clear', fog: false, visNM: 10, sea: 1 + (rnd() < 0.5 ? 0 : 1), windFrom: Math.round(rnd() * 360), windMs: 4, rain: [], ducting: false, interference: false, current: { ...scn.weather.current } };
+    return { def: scn, weather, region: null, rnd, level: scn.level, route: [] };
+  }
   let def = scn, region = null;
   const wxOn0 = S.sim.weatherOn || scn.fixedWeather, cur = scn.weather && scn.weather.current ? { ...scn.weather.current } : wxOn0 ? rollCurrent(rnd) : { set: 0, drift: 0 }; // 조류를 먼저 정해 항로 확인에 넣음
   if (o.place !== false && !scn.needsCoast) {
@@ -109,18 +115,21 @@ async function runScenario1(scn, o = {}, my = startGen, w0 = window.Radar.world)
   lastResult = null; current = scn;
   const def = pr.def; R.setPaused(false);
   const where = pr.region ? ` · ${tl(pr.region)}` : '';
-  R.startWorld({ name: (o.free ? (en ? 'Free navigation' : '자유 항해') : `${scn.id} · ${tl(scn)}`) + where, own: def.own, targets: def.targets, weather: pr.weather, aids: def.aids, marks: def.marks || [], needsCoast: !!scn.needsCoast, traffic: { level: pr.level }, route: pr.route, save: !eduOn(), scnId: o.free ? null : scn.id });
+  R.startWorld({ name: (o.free ? (en ? 'Free navigation' : '자유 항해') : scn.portId ? tl(scn) : `${scn.id} · ${tl(scn)}`) + where, own: def.own, targets: def.targets, weather: pr.weather, aids: def.aids, marks: def.marks || [], needsCoast: !!scn.needsCoast || !!scn.portId, traffic: { level: pr.level }, route: pr.route, save: !eduOn() && scn.save !== false, scnId: o.free ? null : scn.id, portId: def.portId, mode: def.mode, seed: def.seed, coastOverride: def.coastOverride, landFine: def.landFine, iala: def.iala });
   lastStarted = R.world; // 앞서 시작된 우리 시나리오는 '다른 세계'로 치지 않음
   R.setWeatherRun(createWeatherRun({ rnd: pr.rnd, enabled: S.sim.weatherOn, cap: WX_CAP[pr.level] || WX_CAP.hard }));
+  if (scn.portId) { applyPreset(S, 'HARBOR'); R.setRange(1.5); } /* 히든 시나리오: 맞춤 영상 HARBOR(GAIN 55) → 아래에서 GAIN 0으로 */
   R.setRadar('stby'); /* 어떻게 시작하든 STBY(송신 → 예열 5초) */
   S.ctrl.gain = 0; if (S.ctrl.ace) S.ctrl.ace = false; /* GAIN 0에서 시작: 송신 뒤 GAIN을 올리며 영상이 살아나는 것을 직접 보게 */
   if (scn.message) R.ais().addMessage({ ...scn.message, t: 0 });
   if (o.free) { curLog = null; R.setLog(null); R.setScenarioTick(null); return; } // 자유 항해: 지난 시나리오 기록을 끝내지 않게
+  if (scn.portId) { attachPortEval(def); if (!o.skipBrief) showPortBrief(scn); return; }
   attachEval(def);
   if (!o.skipBrief) showBrief(scn);
 }
 /* 브리핑(시작할 때, 헤더의 시나리오 이름을 눌러 다시 볼 때). 열려 있는 동안 정지 */
 function showBrief(scn) {
+  if (scn.portId) return showPortBrief(scn);
   const R = window.Radar, en = lang() === 'en', again = !!(R.world && R.world.t > 1), was = again && R.isPaused();
   {
     R.setPaused(true);
@@ -149,8 +158,8 @@ export function resumeVoyage() {
 }
 /* 시나리오별 지난 결과(시작 화면 카드에 표시). best = 합격한 것 중 가장 가까운 거리가 가장 큰 값 */
 const REC_KEY = 'radar-results';
-function records() { try { return JSON.parse(localStorage.getItem(REC_KEY) || '{}') || {}; } catch (e) { return {}; } }
-function saveRecord(id, r, lv) { try { const all = records(), old = all[id] || {}, nm = r.minRange ? r.minRange.nm : null; all[id] = { pass: r.pass, nm, warnN: r.warnN || 0, lv, d: Date.now(), n: (old.n || 0) + 1, best: r.pass && nm != null ? Math.max(old.best || 0, nm) : old.best || null }; localStorage.setItem(REC_KEY, JSON.stringify(all)); } catch (e) {} }
+export function records() { try { return JSON.parse(localStorage.getItem(REC_KEY) || '{}') || {}; } catch (e) { return {}; } }
+export function saveRecord(id, r, lv) { try { const all = records(), old = all[id] || {}, nm = r.minRange ? r.minRange.nm : null; all[id] = { pass: r.pass, nm, warnN: r.warnN || 0, lv, d: Date.now(), n: (old.n || 0) + 1, best: r.pass && nm != null ? Math.max(old.best || 0, nm) : old.best || null }; localStorage.setItem(REC_KEY, JSON.stringify(all)); } catch (e) {} }
 function finish(r) {
   const R = window.Radar, en = lang() === 'en'; lastResult = r; if (current && current.id && current.id !== 'FREE' && !eduOn()) saveRecord(current.id, r, (R.world && R.world.def.traffic && R.world.def.traffic.level) || 'none'); R.setScenarioTick(null); R.setLog(null); R.setPaused(true); if (R.world) R.world.def.scnId = null; // 끝난 시나리오는 이어 하기에서 다시 평가하지 않음
   const g = r.minRange && R.world.targets.find((x) => x.id === r.minRange.id), nm = g ? (g.name || (en ? 'fishing boat' : '어선')) : '-';
@@ -165,5 +174,66 @@ function finish(r) {
   const d = ownDlg('resDlg', en ? 'Result' : '결과', html, `<button class="btn" type="button" data-r="again">${en ? 'Try again' : '다시 하기'}</button><button class="btn" type="button" data-r="menu">${en ? 'Scenarios' : '시나리오 목록'}</button><button class="btn pri" type="button" data-r="cont">${en ? 'Keep sailing' : '계속 항해'}</button>`);
   let next = null;
   d.onclose = () => { if (next === 'again') runScenario(current); else if (next === 'menu') openStart(); else R.setPaused(false); next = null; };
+  d.onclick = (e) => { if (e.target.closest('[data-x]')) { d.close(); return; } const b = e.target.closest('[data-r]'); if (!b) return; next = b.dataset.r === 'cont' ? null : b.dataset.r; d.close(); };
+}
+
+/* ---- 히든 시나리오(이스터에그 → 부산 북항 입출항) ---- */
+const PORT_LV = ['easy', 'medium', 'hard'];
+let portLevel = 'medium';
+const ATTR = () => (lang() === 'en' ? 'Busan coastline & breakwaters: © OpenStreetMap contributors (ODbL). Some aids to navigation are a training layout, not for navigation.' : '부산항 해안선·방파제: © OpenStreetMap contributors (ODbL). 항로 표지 일부는 훈련용 가상 배치이며 항해용이 아님.');
+export function startPort(mode, level = portLevel, o = {}) {
+  const tu = window.Tutor; if (tu && tu.stop && window.RadarEdu && window.RadarEdu.active()) tu.stop(); /* 교육 중이면 교육을 끝내고 시작 */
+  const def = portDef('BUSAN', mode, level, o.seed ?? ((Math.random() * 1e9) >>> 0));
+  return runScenario(def, { ...o, level });
+}
+export function openPortMenu() {
+  const R = window.Radar, en = lang() === 'en', recs = records(), P = PORTS.BUSAN;
+  const LVn = (l) => (LVL[l] || LVL.medium)[en ? 1 : 0];
+  const rec = (id) => { const r = recs[id]; if (!r) return ''; return `<span class="rec ${r.pass ? 'ok' : 'ng'}">${r.pass ? (en ? '✓ PASS' : '✓ 합격') : en ? '✗ not passed' : '✗ 불합격'} · ${r.nm != null ? r.nm.toFixed(2) + ' NM' : '-'} · ${esc(LVn(r.lv))}</span>`; };
+  const card = (m) => `<button type="button" class="scard" data-port="${m}"><span class="sid">${m === 'IN' ? (en ? 'ARR' : '입항') : en ? 'DEP' : '출항'}</span><b>${esc(tl(P))} ${m === 'IN' ? (en ? 'arrival' : '입항') : en ? 'departure' : '출항'}</b><span class="sb">${m === 'IN' ? (en ? 'From WP.17 off Oryukdo through the breakwater entrance to the turning basin (stop at 3 kn or less).' : '오륙도 바깥 WP.17에서 방파제 입구를 지나 선회장까지(3 kn 이하로 정지).') : en ? 'From the turning basin out through the entrance, past the pilot station.' : '선회장에서 출발해 방파제 입구를 지나 도선점 바깥까지.'}</span>${rec('PORT-BUSAN-' + m)}</button>`;
+  const html = `<div class="start"><p class="lead">${en ? `Narrow-water radar practice at 0.75–1.5 NM. Pass: no grounding or collision, other vessels at ${PORT_PASS_NM} NM or more, never off the channel for over 30 s, and arrive within the time limit.` : `좁은 항내에서 0.75~1.5 NM 거리로 레이더를 쓰는 연습이에요. 합격: 좌초·충돌 없이, 상대선과 ${PORT_PASS_NM} NM 이상, 항로를 30초 넘게 벗어나지 않고, 제한 시간 안에 도착.`}</p>
+    <div class="lvl" role="group" aria-label="${en ? 'Difficulty' : '난이도'}"><b>${en ? 'Difficulty (traffic)' : '난이도(교통량)'}</b>${PORT_LV.map((l) => `<button type="button" class="btn${portLevel === l ? ' on' : ''}" data-plv="${l}">${LVn(l)}</button>`).join('')}</div>
+    <div class="scards">${card('IN')}${card('OUT')}</div><p class="small attr">${esc(ATTR())}</p></div>`;
+  const was = R.isPaused ? R.isPaused() : false; R.setPaused(true);
+  const d = ownDlg('portDlg', en ? 'Hidden scenario' : '히든 시나리오', html, ''); let starting = false;
+  d.onclose = () => { if (!starting) R.setPaused(was); };
+  d.onclick = (e) => {
+    if (e.target.closest('[data-x]')) { d.close(); return; }
+    const lv = e.target.closest('[data-plv]'); if (lv) { portLevel = lv.dataset.plv; d.querySelectorAll('[data-plv]').forEach((b) => b.classList.toggle('on', b === lv)); return; }
+    const c = e.target.closest('[data-port]'); if (c) { starting = true; d.close(); startPort(c.dataset.port, portLevel); }
+  };
+  return d;
+}
+function showPortBrief(def) {
+  const R = window.Radar, en = lang() === 'en', again = !!(R.world && R.world.t > 1), was = again && R.isPaused(); R.setPaused(true);
+  const body = `<p class="rule-chip">COLREG 9 · IALA B</p><p>${def.mode === 'IN' ? (en ? 'Arrival: WP.17 → 348° → pilot station → 287° → B/W → 305° → turning basin. Stop in the basin at 3 kn or less.' : '입항: WP.17 → 348° → 도선점 → 287° → B/W → 305° → 선회장. 선회장 원 안에서 3 kn 이하로 멈추면 끝이에요.') : en ? 'Departure: turning basin → 125° → B/W → 107° → pilot station → 168°. Ends 1 NM past the pilot station.' : '출항: 선회장 → 125° → B/W → 107° → 도선점 → 168°. 도선점을 지나 1 NM 가면 끝이에요.'}</p>
+    <p>${en ? 'Tips: true motion (TM) with North-up is easier here. Keep to the starboard side, use PI lines for the channel and VRM for the breakwaters. Entrance: red light (Middle B/W) and green light (Jodo B/W). Map: dashed channel limits and waypoints (MAP · CHANNEL).' : '도움말: 진운동(TM)·N.Up이 편해요. 항로 오른쪽으로 붙어 가고, PI 선으로 항로를, VRM으로 방파제 거리를 지켜보세요. 입구: 빨강 등(중앙 방파제)·초록 등(조도 방파제). 레이더 맵에 항로 경계(점선)와 변침점이 나와요(MAP · 항로).'}</p>
+    <p class="small">${en ? `Pass: no grounding/collision, other vessels ≥ ${PORT_PASS_NM} NM, never off the channel > 30 s, arrive within ${def.durationMin} min. PI line colours follow IALA B for this scenario.` : `합격: 좌초·충돌 없음, 상대선 ${PORT_PASS_NM} NM 이상, 항로 이탈 30초 이내, ${def.durationMin}분 안에 도착. 이 시나리오 동안 PI 선 색은 IALA B(한국)로 바꿔요.`}</p><p class="small attr">${esc(ATTR())}</p>`;
+  const d = ownDlg('briefDlg', tl(def), body, `<button class="btn pri" type="button" data-go="1">${en ? 'Start' : '시작'}</button>`);
+  d.onclick = (e) => { if (e.target.closest('[data-go]') || e.target.closest('[data-x]')) d.close(); };
+  d.onclose = () => R.setPaused(was);
+}
+function attachPortEval(def) {
+  const R = window.Radar, log = createPortLog(PORTS[def.portId], def.mode); curLog = log; let lastS = -1;
+  R.setLog((w) => { if (w.t - lastS >= 1) { lastS = w.t; log.sample(w); } }, null);
+  R.setScenarioTick(() => { if (lastResult) return; const r = log.result(); if (r.arrived || r.collision || r.grounding || r.timeout) finishPort(evaluatePort(r)); });
+}
+function finishPort(r) {
+  const R = window.Radar, en = lang() === 'en', def = current; lastResult = r;
+  if (def && !eduOn()) saveRecord(def.id, { pass: r.pass, minRange: r.minRange, warnN: r.warnN }, def.level);
+  R.setScenarioTick(null); R.setLog(null); R.setPaused(true); if (R.world) R.world.def.scnId = null;
+  const g = r.minRange && R.world.targets.find((x) => x.id === r.minRange.id), nm = g ? g.name || g.id : '-';
+  const html = `<div class="result ${r.pass ? 'ok' : 'ng'}"><b class="verdict">${r.pass ? (en ? 'PASS' : '합격') : en ? 'NOT PASSED' : '불합격'}${r.pass && r.warnN ? `<small class="vwarn">${en ? ' · rule check' : ' · 규칙 주의'}</small>` : ''}</b>
+    ${r.reasons.length ? `<ul class="notes">${r.reasons.map((x) => `<li class="warn">${esc(tl(x))}</li>`).join('')}</ul>` : ''}
+    <dl class="kv"><dt>${en ? 'Off the channel' : '항로 이탈'}</dt><dd>${r.off.n ? `${r.off.n}${en ? ' time(s)' : '회'} · ${en ? 'longest' : '가장 길게'} ${mmss(r.off.longestS)} · ${en ? 'max XTD' : '최대 XTD'} ${r.off.maxXtd.toFixed(2)} NM` : en ? 'none' : '없음'}</dd>
+    <dt>${en ? 'Closest other vessel' : '상대선과 가장 가까이'}</dt><dd>${r.minRange ? `${r.minRange.nm.toFixed(2)} NM · ${esc(nm)} · ${mmss(r.minRange.t)}` : '-'}</dd>
+    <dt>${en ? 'Within 0.3 NM (not graded)' : '0.3 NM 안 접근(참고)'}</dt><dd>${r.near03 && r.near03.n ? `${r.near03.n}${en ? ' time(s)' : '회'} · ${en ? 'total ' : '총 '}${mmss(r.near03.sec)}` : en ? 'none' : '없음'}</dd>
+    <dt>${en ? 'Max speed (recorded)' : '최대 속력(기록)'}</dt><dd>${r.maxSog.toFixed(1)} kn</dd>
+    <dt>${en ? 'Waypoints' : '변침점 통과'}</dt><dd>${r.wpTimes.map((w) => `${esc(w.name)} ${mmss(w.t)}`).join(' · ') || '-'}${r.arrived ? ` · ${en ? 'arrived' : '도착'} ${mmss(r.arriveT)}` : ''}</dd>
+    <dt>${en ? 'Collision / grounding' : '충돌 / 좌초'}</dt><dd>${r.collision ? (en ? 'collision' : '충돌') : '-'} / ${r.grounding ? (en ? 'grounded' : '좌초') : '-'}</dd></dl>
+    <ul class="notes">${r.notes.map((n) => `<li${n.warn ? ' class="warn"' : ''}>${esc(tl(n))}</li>`).join('')}</ul><p class="small attr">${esc(ATTR())}</p></div>`;
+  const d = ownDlg('resDlg', en ? 'Result' : '결과', html, `<button class="btn" type="button" data-r="again">${en ? 'Try again' : '다시 하기'}</button><button class="btn" type="button" data-r="menu">${en ? 'Hidden scenarios' : '히든 시나리오'}</button><button class="btn pri" type="button" data-r="cont">${en ? 'Keep sailing' : '계속 항해'}</button>`);
+  let next = null;
+  d.onclose = () => { if (next === 'again') startPort(def.mode, def.level); else if (next === 'menu') openPortMenu(); else R.setPaused(false); next = null; };
   d.onclick = (e) => { if (e.target.closest('[data-x]')) { d.close(); return; } const b = e.target.closest('[data-r]'); if (!b) return; next = b.dataset.r === 'cont' ? null : b.dataset.r; d.close(); };
 }

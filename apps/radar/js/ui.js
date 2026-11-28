@@ -259,9 +259,9 @@ export function initUI(root, actions) {
   function openEgg() {
     if (document.querySelector('.egg')) return;
     const o = document.createElement('div'); o.className = 'egg'; o.setAttribute('role', 'dialog'); o.setAttribute('aria-modal', 'true'); o.setAttribute('aria-label', 'Made by Bypass');
-    o.innerHTML = `<div class="egg-card">${window.EGG_IMG ? `<img src="${window.EGG_IMG}" alt="${esc(t('eggAlt'))}">` : ''}<div class="egg-ver">Ver.${VERSION}</div><div class="egg-by">Made by Bypass</div><button type="button" class="btn egg-patch" data-egg="patch">${esc(t('patch'))}</button><small>${esc(t('eggClose'))}</small></div>`;
+    o.innerHTML = `<div class="egg-card">${window.EGG_IMG ? `<img src="${window.EGG_IMG}" alt="${esc(t('eggAlt'))}">` : ''}<div class="egg-ver">Ver.${VERSION}</div><div class="egg-by">Made by Bypass</div><button type="button" class="btn egg-patch" data-egg="patch">${esc(t('patch'))}</button><button type="button" class="btn egg-patch egg-port" data-egg="port">${esc(t('hiddenScn'))}</button><small>${esc(t('eggClose'))}</small></div>`;
     const close = () => { o.remove(); document.removeEventListener('keydown', k, true); }, k = (e) => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
-    o.addEventListener('click', (e) => { if (e.target.closest('[data-egg="patch"]')) { e.stopPropagation(); close(); internal.patch(); return; } close(); });
+    o.addEventListener('click', (e) => { if (e.target.closest('[data-egg="patch"]')) { e.stopPropagation(); close(); internal.patch(); return; } if (e.target.closest('[data-egg="port"]')) { e.stopPropagation(); close(); if (window.RadarPortMenu) window.RadarPortMenu(); return; } close(); });
     document.addEventListener('keydown', k, true); document.body.appendChild(o); o.querySelector('.egg-patch').focus();
   }
   $('#verTop').addEventListener('click', eggTap); /* 이 앱은 하단 버전 표시 없음(사용자 결정) */

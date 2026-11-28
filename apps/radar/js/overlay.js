@@ -34,6 +34,10 @@ export function drawOverlay(cv, ppi, V, M) {
   // 레이더 맵: 해안선·마크
   if (M.coast) { g.strokeStyle = C.map; g.lineWidth = 1; for (const ring of M.coast) { g.beginPath(); ring.forEach((p, i) => (i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y))); g.closePath(); g.stroke(); } }
   if (M.marks) for (const m of M.marks) { const s = sc(m.brg, m.rng); g.strokeStyle = m.type === 'danger' ? C.bad : C.map; g.beginPath(); if (m.type === 'danger') { g.moveTo(s.x - 5, s.y - 5); g.lineTo(s.x + 5, s.y + 5); g.moveTo(s.x + 5, s.y - 5); g.lineTo(s.x - 5, s.y + 5); } else { g.moveTo(s.x, s.y - 6); g.lineTo(s.x + 4, s.y + 4); g.lineTo(s.x - 4, s.y + 4); g.closePath(); } g.stroke(); }
+  /* 히든 시나리오: 항로 경계(점선)·변침점(원+이름)·등화·부표(색 점) */
+  if (M.port) { const P0 = M.port; g.save(); g.strokeStyle = C.map; g.lineWidth = 1; g.setLineDash([6, 5]); for (const c of P0.bounds) { const a = sc(c.a.brg, c.a.rng), b = sc(c.b.brg, c.b.rng); g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); } g.setLineDash([]);
+    g.fillStyle = C.map; g.font = '11px system-ui, sans-serif'; for (const w of P0.wps) { const s = sc(w.brg, w.rng); g.beginPath(); g.arc(s.x, s.y, 4, 0, Math.PI * 2); g.stroke(); g.fillText(w.name, s.x + 6, s.y - 6); }
+    const AC = { R: '#E0443A', G: '#34B35A', Y: '#F2C94C', W: '#F2F6F8' }; for (const a of P0.aids) { const s = sc(a.brg, a.rng); g.fillStyle = AC[a.col] || C.map; g.beginPath(); g.arc(s.x, s.y, 3.5, 0, Math.PI * 2); g.fill(); g.strokeStyle = 'rgba(0,0,0,.6)'; g.stroke(); } g.restore(); }
   // 항로
   if (M.route && M.route.length) { g.strokeStyle = C.route; g.setLineDash([6, 4]); g.beginPath(); M.route.forEach((w, i) => { const s = sc(w.brg, w.rng); i ? g.lineTo(s.x, s.y) : g.moveTo(s.x, s.y); }); g.stroke(); g.setLineDash([]); M.route.forEach((w, i) => { if (i === 0 && M.routeStart) return; /* 시작점은 표시 안 함 */ const s = sc(w.brg, w.rng), no = M.routeStart ? i : i + 1; g.beginPath(); g.arc(s.x, s.y, 5, 0, 7); g.stroke(); if (no === M.routeNext) { g.beginPath(); g.arc(s.x, s.y, 9, 0, 7); g.stroke(); } g.fillStyle = C.route; g.fillText('WP' + no, s.x + 7, s.y - 6); }); }
   // 구역(표적 경보·포착)

@@ -22,6 +22,11 @@ import { COL, piColor } from './overlay.js';
 import { createWeatherRun, stepWeather, windDrift, speedLoss, weatherLabel, currentLabel, WX_CAP, rollWeather, rollCurrent } from './weather.js';
 import { refillTraffic, steerTraffic, trafficRing } from './traffic.js';
 import { routeClear } from './place.js';
+import { mergePortLand } from './portland.js';
+import { BUSAN_COAST } from './ports/busan-coast.js';
+import { PORTS, createPortState, portTick, vtsText, channelBounds } from './port.js';
+const PORT_COAST = { BUSAN: BUSAN_COAST }; /* 히든 시나리오 정밀 해안선 */
+let portSt = null, ialaPrev = null; /* 히든 시나리오 진행 상태, 시나리오 동안 바꾼 IALA의 원래 값 */
 
 const TEST = new URLSearchParams(location.search).has('test');
 loadSettings(); S.ctrl.pmMode = 'OFF'; S.ctrl.tx = false; // 처음엔 늘 STBY(저장된 TX로 영상이 나오지 않게) // PM은 켤 때마다 새로(저장된 ON으로 시작하지 않음)
@@ -57,6 +62,9 @@ document.documentElement.dataset.theme = S.disp.palette;
 /* ---------- 세계 ---------- */
 /* def: {name, own:{lat,lon,hdg,tele}, targets:[createTarget 인자], weather, aids, marks, needsCoast, durationMin, t?} */
 export function startWorld(def) {
+  if (ialaPrev !== null) { S.disp.iala = ialaPrev; ialaPrev = null; } /* 앞 세계가 히든 시나리오였으면 IALA를 원래대로 */
+  if (def.iala) { ialaPrev = S.disp.iala; S.disp.iala = def.iala; }
+  portSt = def.portId ? createPortState(def) : null;
   const own = createShip({ lat: def.own.lat, lon: def.own.lon, hdg: def.own.hdg, tele: def.own.tele ?? TELEGRAPH.findIndex((x) => x.k === 'FA') });
   own.antH = own.spec.antH;
   if (def.own.state) Object.assign(own, def.own.state, { spec: own.spec, auto: { ...def.own.state.auto } });
@@ -66,11 +74,11 @@ export function startWorld(def) {
   if (pmSave) pmOff(); // 새 세계(시나리오·교육·이어 하기)는 PM을 끄고 원래 설정으로, OFF CENTER는 아래에서 새로 비움
   tracker = createTracker({ max: 100 }); ais = createAIS(); alerts = createAlerts(realNow, () => W.t); tools = createTools(); route = createRoute(); if (def.route && def.route.length) { route.add(def.own.lat, def.own.lon); for (const w of def.route) route.add(w.lat, w.lon); route.next = Math.min(route.wpts.length - 1, Math.max(1, def.routeNext ?? 1)); route.start = true; } // 이어 하기면 지난 변침점부터 trails.reset(V.rangeNM, S.disp.trails.mode);
   W.userMarks = (def.userMarks || []).map((m) => ({ ...m })); trafAcc = 0; steerAcc = 0; selected = []; tmOff = { x: 0, y: 0 }; ruler = null; rulerA = null; uiMode = null; azZones = []; piOn = false; speed = 1; offCenter = null; prevScan = new Array(N_BRG); prevRaw = null; ppi.clear();
-  scene = buildScene({ own: ownScene(), targets: W.targets, weather: W.weather, aids: W.aids, band: S.ctrl.band, pulse: S.ctrl.pulse, seed: (Math.random() * 1e6) | 0 });
+  scene = buildScene({ own: ownScene(), targets: W.targets, weather: W.weather, aids: W.aids, band: S.ctrl.band, pulse: S.ctrl.pulse, seed: (Math.random() * 1e6) | 0, fine: def.landFine || null });
   trialSet = { course: own.hdg, speed: own.stw };
   const bb = { lat0: def.own.lat - 0.6, lat1: def.own.lat + 0.6, lon0: def.own.lon - 0.75, lon1: def.own.lon + 0.75 };
   const myW = W;
-  loadLand(bb).then((L) => { if (W !== myW) return; W.land = { rings: L.rings, ok: L.ok, tried: true, heightM: 100 }; if (L.ok) alerts.resolve('coastfail'); coastKey = ''; scene = buildScene({ own: ownScene(), targets: W.targets, land: W.land, weather: W.weather, aids: W.aids, band: S.ctrl.band, pulse: S.ctrl.pulse, seed: scene.seed }); if (!L.ok) alerts.raise('coastfail', 'C', lang() === 'en' ? 'Coastline data unavailable' : '해안선 데이터 없음'); });
+  loadLand(bb).then((L) => { if (W !== myW) return; const pc = def.coastOverride && PORT_COAST[def.coastOverride]; if (pc) L = { rings: mergePortLand(L.ok ? L.rings : [], pc), ok: true }; /* 히든 시나리오: 항구 구역은 정밀 해안선 */ W.land = { rings: L.rings, ok: L.ok, tried: true, heightM: 100 }; if (L.ok) alerts.resolve('coastfail'); coastKey = ''; scene = buildScene({ own: ownScene(), targets: W.targets, land: W.land, weather: W.weather, aids: W.aids, band: S.ctrl.band, pulse: S.ctrl.pulse, seed: scene.seed, fine: def.landFine || null }); if (!L.ok) alerts.raise('coastfail', 'C', lang() === 'en' ? 'Coastline data unavailable' : '해안선 데이터 없음'); });
   return W;
 }
 const ownScene = () => ({ lat: W.own.lat, lon: W.own.lon, hdg: W.own.hdg, antH: W.own.antH });
@@ -134,6 +142,7 @@ function landSteer() {
     for (const d of [30, -30, 60, -60, 90, -90, 120, -120, 150, -150, 180]) { const h = wrap360(g.want.hdg + d); if (routeClear(W.land.rings, g.lat, g.lon, h, kn, min * 1.5, 0.3, cur)) { g.want.hdg = h; g.base = { hdg: h, kn: (g.base && g.base.kn) || g.want.kn }; break; /* 자선 회피로 줄인 속력이 기준으로 굳지 않게 원래 속력 유지 */ } } }
 }
 function trafficTick(run) {
+  if (portSt && W.def.portId) { for (const e of portTick(W, portSt, run)) ais.addMessage({ from: lang() === 'en' ? 'Busan VTS' : '부산VTS', text: vtsText(e.key, W.def.mode, lang() === 'en', e.shipName), t: W.t }); return; } /* 히든 시나리오: 정해진 교통만(무작위 보충·회피 없음) */
   const lv = W.def.traffic && W.def.traffic.level; if (!lv || lv === 'none') return;
   steerAcc += run; if (steerAcc >= 10) { steerAcc = 0; steerTraffic(W.own, W.targets); landSteer(); } // 주변 배는 10초마다 자선 회피·육지 피하기 판단
   trafAcc += run; if (trafAcc < 60) return; trafAcc = 0;
@@ -256,7 +265,7 @@ function overlayModel() {
   let coast = null;
   if (S.disp.map.on && S.disp.map.coast && W.land.rings.length) {
     // 해안 점은 바다 좌표(NM)로 한 번만 바꿔 두고(땅이 바뀔 때만), 화면 좌표는 회전·축척 곱셈만(점마다 삼각함수 없이)
-    if (coastWorld.land !== W.land) coastWorld = { land: W.land, rings: W.land.rings.map((r) => { const step = Math.max(2, Math.floor(r.length / 2 / 400) * 2), a = []; for (let i = 0; i < r.length; i += step) a.push(P.x(r[i]), P.y(r[i + 1])); return Float64Array.from(a); }) };
+    if (coastWorld.land !== W.land) coastWorld = { land: W.land, rings: W.land.rings.map((r) => { const step = Math.max(2, Math.floor(r.length / 2 / (W.def.portId ? 3000 : 400)) * 2), a = []; for (let i = 0; i < r.length; i += step) a.push(P.x(r[i]), P.y(r[i + 1])); return Float64Array.from(a); }) };
     ppi.toScreen(0, 0); const G = ppi.geom(), u = ppi.upBrg() * D, cu = Math.cos(u), su = Math.sin(u), k = G.R / V.rangeNM, dp = G.dpr;
     const key = [G.R, G.ox, G.oy, u, oxy.x, oxy.y, V.rangeNM].join('|');
     if (key !== coastKey) { coastKey = key; coastScreen = coastWorld.rings.map((a) => { const pts = new Array(a.length / 2); for (let i = 0, j = 0; i < a.length; i += 2, j++) { const dx = a[i] - oxy.x, dy = a[i + 1] - oxy.y; pts[j] = { x: (G.ox + k * (dx * cu - dy * su)) / dp, y: (G.oy - k * (dy * cu + dx * su)) / dp }; } return pts; }); }
@@ -267,6 +276,7 @@ function overlayModel() {
     own: { L: o.spec.L, B: o.spec.B, scaled: S.disp.osMark === 'SCALED', vec: { course: o.cog, speed: o.sog }, vecMin: S.tt.vecMin }, stern: S.disp.stern,
     trails: S.disp.trails.time > 0 ? { cell: trails.cell, multi: S.disp.trails.grad === 'MULTI', cells: (fn) => trails.forEach(W.t, S.disp.trails.time, (x, y, a) => (trails.mode === 'REL' ? fn(x, y, a) : fn(x - oxy.x, y - oxy.y, a))) } : null,
     coast, marks: S.disp.map.on && S.disp.map.marks ? W.marks.map((m) => ({ ...m, ...toBR(m.lat, m.lon) })) : null,
+    port: W.def.portId && S.disp.map.on ? { bounds: S.disp.map.route ? channelBounds(PORTS[W.def.portId]).map((c) => ({ a: toBR(c.a.lat, c.a.lon), b: toBR(c.b.lat, c.b.lon) })) : [], wps: S.disp.map.route ? PORTS[W.def.portId].wps.map((q) => ({ ...toBR(q.lat, q.lon), name: q.name })) : [], aids: S.disp.map.marks ? W.aids.filter((a) => a.col).map((a) => ({ ...toBR(a.lat, a.lon), col: a.col })) : [] } : null,
     route: S.disp.route ? route.wpts.map((w) => toBR(w.lat, w.lon)) : null, routeStart: !!route.start, routeNext: route.wpts.length ? (route.start ? route.next : route.next + 1) : 0,
     zones: [...tools.zones.filter(Boolean).map((z) => ({ ...z, kind: 'ta' })), ...(azZones.map((z) => ({ ...z, kind: 'az' })))],
     pi: piOn ? { n: S.disp.piMax, brg: tools.pi.brg, interval: tools.pi.interval, mode: S.disp.piMode } : null,
@@ -531,7 +541,7 @@ setInterval(() => { if (W && !paused) saveNow(); }, 15000);
 addEventListener('pagehide', saveNow);
 
 /* ---------- 외부 모듈(시나리오·도움말)이 쓸 창구 ---------- */
-window.Radar = { startWorld, freeDef, setRadar, get world() { return W; }, setLog(fn, dump = null) { logFn = fn; logDump = fn ? dump : null; }, setScenarioTick(fn) { onScenarioTick = fn; }, alerts: () => alerts, ais: () => ais, tracker: () => tracker, route: () => route, tools: () => tools, saveNow, resume, hasResume: () => { try { return !!localStorage.getItem(RESUME); } catch (e) { return false; } }, setPaused: (p) => { paused = p; }, isPaused: () => paused, pointInLand, setWeatherRun: (r) => { wxRun = r; wxPend = []; } };
+window.Radar = { startWorld, freeDef, setRadar, setRange: (r) => setRange(r), get world() { return W; }, setLog(fn, dump = null) { logFn = fn; logDump = fn ? dump : null; }, setScenarioTick(fn) { onScenarioTick = fn; }, alerts: () => alerts, ais: () => ais, tracker: () => tracker, route: () => route, tools: () => tools, saveNow, resume, hasResume: () => { try { return !!localStorage.getItem(RESUME); } catch (e) { return false; } }, setPaused: (p) => { paused = p; }, isPaused: () => paused, pointInLand, setWeatherRun: (r) => { wxRun = r; wxPend = []; } };
 
 /* 빠른 진행(테스트·검증): 그리지 않고 물리·기록만 */
 function tickSim(sec) { if (!W) return; const n = Math.ceil(sec / 0.25); for (let i = 0; i < n; i++) { if (paused) return; const h = sec / n; W.t += h; stepShip(W.own, h, shipEnv()); weatherTick(h); trafficTick(h); for (const g of W.targets) stepTarget(g, h, W.t, tgtEnv(g)); if (onScenarioTick) onScenarioTick(W, h); if (logFn) logFn(W); } }
@@ -578,10 +588,10 @@ window.RadarEdu = {
 if (!TEST) starter.openStart();
 if (TEST) {
   window.RadarTest = {
-    ready: true, S, ppi, emit, pauseParts: () => ({ paused, hiddenPause }), weatherRun: () => wxRun, scene: () => scene, colors: () => COL, piColor, selected: () => selected, menuPaths: () => MENU.flatMap((x) => x.items.map((i) => i.path)), menuOpts: (p) => (MENU.flatMap((x) => x.items).find((i) => i.path === p) || { opts: [] }).opts, setSpeed, speed: () => speed, proj: makeProj, view: () => V, setView: (o) => Object.assign(V, o), setRange: (r) => { S.disp.rangeNM = r; V.rangeNM = r; }, frames: () => frames, tick, frameAt, own, paused: () => paused || hiddenPause, setPaused: (p) => { paused = p; }, KEYMAP, keyHandlers,
+    ready: true, S, ppi, emit, startPort: (m, lv, o) => starter.startPort(m, lv, o), mapModel: () => overlayModel(), setLang: (l) => { S.ui.lang = l; emit('settings', 'ui.lang'); }, pauseParts: () => ({ paused, hiddenPause }), weatherRun: () => wxRun, scene: () => scene, colors: () => COL, piColor, selected: () => selected, menuPaths: () => MENU.flatMap((x) => x.items.map((i) => i.path)), menuOpts: (p) => (MENU.flatMap((x) => x.items).find((i) => i.path === p) || { opts: [] }).opts, setSpeed, speed: () => speed, proj: makeProj, view: () => V, setView: (o) => Object.assign(V, o), setRange: (r) => { S.disp.rangeNM = r; V.rangeNM = r; }, frames: () => frames, tick, frameAt, own, paused: () => paused || hiddenPause, setPaused: (p) => { paused = p; }, KEYMAP, keyHandlers,
     radar: { set: setRadar, toggle: toggleTx, get state() { return radar.state; }, get warmLeft() { return radar.warmLeft; } }, world: () => W, tracker: { targets: () => tracker.targets() },
     newWorld: (o) => { if (S.ctrl.gain < 20) S.ctrl.gain = 65; startWorld(freeDef(o)); }, /* 점검용 세계는 영상이 보이게(시작 화면의 GAIN 0과 별개) */ tgtScreen: (id) => { const g = W.targets.find((x) => x.id === id), r = relOf(P.x(g.lon), P.y(g.lat)), p = ppi.toScreen(r.brg, r.rng); return { sx: p.x, sy: p.y }; },
-    coastDebug: () => { if (!coastScreen || !W.land.rings.length) return null; let maxErr = 0, n = 0; const r = W.land.rings[0], step = Math.max(2, Math.floor(r.length / 2 / 400) * 2); coastScreen[0].forEach((p, j) => { const i = j * step, q = relOf(P.x(r[i]), P.y(r[i + 1])), t = ppi.toScreen(q.brg, q.rng); maxErr = Math.max(maxErr, Math.hypot(t.x - p.x, t.y - p.y)); n++; }); return { n, maxErr }; },
+    coastDebug: () => { if (!coastScreen || !W.land.rings.length) return null; let maxErr = 0, n = 0; const r = W.land.rings[0], step = Math.max(2, Math.floor(r.length / 2 / (W.def.portId ? 3000 : 400)) * 2); coastScreen[0].forEach((p, j) => { const i = j * step, q = relOf(P.x(r[i]), P.y(r[i + 1])), t = ppi.toScreen(q.brg, q.rng); maxErr = Math.max(maxErr, Math.hypot(t.x - p.x, t.y - p.y)); n++; }); return { n, maxErr }; },
     ruler: () => ruler, conn: () => conn, onLand: (lat, lon) => !!(W && W.land.ok && pointInLand(W.land.rings, lat, lon)), cursorAct, menuAction, trails: () => trails, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,
     startScenario: (id, o) => starter.startScenario(id, o), resumeVoyage: () => starter.resumeVoyage(), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), finishNow: () => starter.finishNow(), shouldBeep, antenna: () => ant, relayout: () => { fit(); }, layoutMode: () => ui.layoutMode(), qbInside: () => ui.qbInside(), forceState: (o) => { if (o.az) { azZones = o.az; tracker.setZones(o.az); } if (o.speed) speed = o.speed; if (o.pi !== undefined) piOn = o.pi; }, uiState: () => ({ az: azZones.length > 0, speed, pi: piOn, off: !!offCenter }), tickSim, sim: { setAuto, setRudderOrder, setTelegraph }, menuItems: () => MENU.flatMap((m) => m.items.map((i) => (lang() === 'en' ? i.en : i.ko))),
   };
