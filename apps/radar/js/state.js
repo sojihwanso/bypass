@@ -61,7 +61,7 @@ function validate() {
   if (!RANGES.includes(S.disp.rangeNM)) S.disp.rangeNM = DEFAULTS.disp.rangeNM;
   if (!['HU', 'CU', 'NU'].includes(S.disp.orient)) S.disp.orient = DEFAULTS.disp.orient;
   if (!['RM', 'TM'].includes(S.disp.motion)) S.disp.motion = DEFAULTS.disp.motion;
-  if (!['none', 'easy', 'medium', 'hard'].includes(S.sim.level)) S.sim.level = DEFAULTS.sim.level;
+  if (!['none', 'easy', 'medium', 'hard', 'vhard'].includes(S.sim.level)) S.sim.level = DEFAULTS.sim.level;
   for (const k of ['gain']) S.ctrl[k] = Math.min(100, Math.max(0, S.ctrl[k]));
   for (const k of ['sea', 'rain', 'tune']) S.ctrl[k].val = Math.min(100, Math.max(0, S.ctrl[k].val));
 }

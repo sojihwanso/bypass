@@ -72,6 +72,7 @@ export function startWorld(def) {
   const own = createShip({ lat: def.own.lat, lon: def.own.lon, hdg: def.own.hdg, tele: def.own.tele ?? TELEGRAPH.findIndex((x) => x.k === 'FA') });
   own.antH = own.spec.antH;
   if (def.own.state) Object.assign(own, def.own.state, { spec: own.spec, auto: { ...own.auto, ...(def.own.state.auto || {}) } }); /* 시작 상태에 auto가 없으면 기본값(setHdg = 선수) 유지 */
+  if (def.traffic && def.traffic.level === 'vhard' && !def.portId) { own.tele = TELEGRAPH.findIndex((x) => x.k === 'FA'); own.teleLock = true; } /* 매우 어려움: 속력 조절 불가(Full ahead 고정) */
   W = { def, name: def.name || '', own, targets: def.targets.map((g) => (g.want ? { ...g, legs: [...(g.legs || [])], want: { ...g.want } } : createTarget(g))), weather: { sea: 0, windFrom: 0, windMs: 0, rain: [], ducting: false, interference: false, current: { set: 0, drift: 0 }, ...(def.weather || {}) }, aids: def.aids || [], marks: def.marks || [], t: def.t || 0, land: { rings: [], ok: false, heightM: 100 }, needsCoast: !!def.needsCoast };
   P = makeProj(def.own.lat, def.own.lon);
   eduKey = ''; // 다른 세계가 시작되면 교육 단계는 자기 화면을 다시 만듦

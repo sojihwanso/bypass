@@ -3,8 +3,9 @@
 import { makeProj, velXY } from './geo.js';
 
 export const LEVELS = ['none', 'easy', 'medium', 'hard'];
-export const NOAIS = { easy: 0.2, medium: 0.4, hard: 0.6 };
-const CLOSE = { easy: [1, 2], medium: [15, 20], hard: [45, 55] }, FAR = { easy: 2, medium: 8, hard: 15 };
+export const NOAIS = { easy: 0.2, medium: 0.4, hard: 0.6, vhard: 0.6 };
+/* vhard(매우 어려움, 이스터에그) = 어려움 교통량 ×3, 자선 기관은 Full ahead 고정 */
+const CLOSE = { easy: [1, 2], medium: [15, 20], hard: [45, 55], vhard: [135, 165] }, FAR = { easy: 2, medium: 8, hard: 15, vhard: 45 };
 
 /* 자선이 tc분 직진한 점에서 오른쪽 side NM 떨어진 곳에 tc분 뒤 오는 배의 시작 위치 */
 function meet(own, tcMin, hdg, kn, side) {
@@ -14,7 +15,7 @@ function meet(own, tcMin, hdg, kn, side) {
 }
 
 /* 시간이 지나도 난이도만큼: 12 NM 안에서 다가오거나 6 NM 안에 있는 배경 배 수를 이만큼 유지 */
-export const KEEP = { easy: 3, medium: 22, hard: 56 };
+export const KEEP = { easy: 3, medium: 22, hard: 56, vhard: 168 };
 const relOf = (own, g) => { const P = makeProj(own.lat, own.lon), x = P.x(g.lon), y = P.y(g.lat), ov = velXY(own.hdg, own.kn), tv = velXY(g.hdg, g.kn); /* 물 기준(조류 빼고) */ return { d: Math.hypot(x, y), closing: x * (tv.vx - ov.vx) + y * (tv.vy - ov.vy) < 0 }; };
 export function activeCount(own, targets, dMax = 12) { let n = 0; for (const g of targets) { if (!String(g.id).startsWith('bg')) continue; const r = relOf(own, g); if (r.d <= 6 || (r.d <= dMax && r.closing)) n++; } return n; }
 /* 새 배가 나오는 고리·지우는 거리: 지금 화면에 보이는 반경(vis NM)보다 바깥. 기본(6 NM 이하)은 6.5~12 NM, 20 NM 밖에서 지움 */

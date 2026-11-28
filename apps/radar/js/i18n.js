@@ -12,7 +12,7 @@ const D = {
     vector: '벡터', past: '과거 위치', cpaLim: 'CPA 한계', aisFilt: 'AIS 필터', ttN: 'TT', aisN: 'AIS',
     cm_acq: 'TT 포착', cm_cancel: 'TT 해제', cm_data: '물표 데이터', cm_ebl: 'EBL1을 여기로', cm_vrm: 'VRM1을 여기로', cm_off: '여기를 중심으로',
     cm_offEbl: 'EBL1 원점을 여기로', cm_drop: 'Drop mark', cm_anchor: '닻 위치로', cm_ruler: '두 점 거리 재기', cm_act: 'AIS 활성/휴면', cm_ref: '기준 물표로', cm_center: '중심 복귀',
-    pal_day: '주간', pal_dusk: '박명', pal_night: '야간', egg: '이스터에그', patch: '패치노트', hiddenScn: '히든 시나리오', eggAlt: '선교에서 레이더를 조작하는 주황색 새 캐릭터', eggClose: '아무 곳이나 누르면 닫힙니다', eggMsg: '선교 당직, 오늘도 수고 많았어요. 레이더는 눈을 대신할 뿐, 견시를 대신하지는 않아요.',
+    pal_day: '주간', pal_dusk: '박명', pal_night: '야간', egg: '이스터에그', patch: '패치노트', hiddenScn: '히든 시나리오', vhard: '난이도: 매우 어려움', vhardTip: '어려움보다 주변 교통량 3배, 자선 기관은 Full ahead 고정(속력 조절 불가)', teleLock: '매우 어려움: 기관 Full ahead 고정', eggAlt: '선교에서 레이더를 조작하는 주황색 새 캐릭터', eggClose: '아무 곳이나 누르면 닫힙니다', eggMsg: '선교 당직, 오늘도 수고 많았어요. 레이더는 눈을 대신할 뿐, 견시를 대신하지는 않아요.',
     rotate: '가로 화면을 권장해요', rotateSub: '휴대폰·태블릿을 가로로 돌리면 레이더 원과 단추가 넓게 보여요. 이 시뮬레이터는 가로 화면에 맞춰 만들었어요.', rotateOk: '세로로 계속하기', nextWpt: '다음 변침점', menuTitle: '메뉴', foot: '교육용 레이더 시뮬레이터 · 실제 항해에 쓰지 마세요',
   },
   en: {
@@ -26,7 +26,7 @@ const D = {
     vector: 'Vector', past: 'Past posn', cpaLim: 'CPA limit', aisFilt: 'AIS filter', ttN: 'TT', aisN: 'AIS',
     cm_acq: 'Acquire TT', cm_cancel: 'Cancel TT', cm_data: 'Target data', cm_ebl: 'EBL1 here', cm_vrm: 'VRM1 here', cm_off: 'Off-center here',
     cm_offEbl: 'EBL1 origin here', cm_drop: 'Drop mark', cm_anchor: 'Anchor position', cm_ruler: 'Range between points', cm_act: 'AIS activate/sleep', cm_ref: 'Set reference target', cm_center: 'Re-center',
-    pal_day: 'Day', pal_dusk: 'Dusk', pal_night: 'Night', egg: 'Easter egg', patch: 'Patch notes', hiddenScn: 'Hidden scenario', eggAlt: 'Orange bird character operating the radar on the bridge', eggClose: 'Tap anywhere to close', eggMsg: 'Thanks for standing your watch. Radar extends your eyes, it never replaces a proper lookout.',
+    pal_day: 'Day', pal_dusk: 'Dusk', pal_night: 'Night', egg: 'Easter egg', patch: 'Patch notes', hiddenScn: 'Hidden scenario', vhard: 'Difficulty: Very hard', vhardTip: '3× the traffic of Hard, engine locked at Full ahead (no speed control)', teleLock: 'Very hard: engine locked at Full ahead', eggAlt: 'Orange bird character operating the radar on the bridge', eggClose: 'Tap anywhere to close', eggMsg: 'Thanks for standing your watch. Radar extends your eyes, it never replaces a proper lookout.',
     rotate: 'Landscape recommended', rotateSub: 'Turn your phone or tablet sideways for a larger radar picture and buttons. This simulator is laid out for landscape.', rotateOk: 'Continue in portrait', nextWpt: 'Next WPT', menuTitle: 'Menu', foot: 'Training radar simulator · not for navigation',
   },
 };

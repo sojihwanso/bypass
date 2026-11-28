@@ -30,7 +30,7 @@ function rainBand(r, own, windFrom, dist0, dist1) {
 }
 
 /* 난이도별 날씨 상한(처음 하는 학생에게 강풍·안개까지 한꺼번에 주지 않게). 시나리오 고정 날씨(S5)는 그대로 */
-export const WX_CAP = { none: { sea: 3, fog: false }, easy: { sea: 3, fog: false }, medium: { sea: 5, fog: true }, hard: { sea: 8, fog: true } };
+export const WX_CAP = { none: { sea: 3, fog: false }, easy: { sea: 3, fog: false }, medium: { sea: 5, fog: true }, hard: { sea: 8, fog: true }, vhard: { sea: 8, fog: true } };
 /* 시작 날씨. base(시나리오 고정)가 있으면 그것을 씀. cap = WX_CAP[난이도] */
 /* 조류: 방향(흘러가는 쪽, SET) 0~359° 무작위, 세기(DRIFT) 0~4 kn 무작위 */
 export const rollCurrent = (rnd) => ({ set: Math.floor(rnd() * 360), drift: Math.round(rnd() * 40) / 10 });

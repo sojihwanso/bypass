@@ -47,7 +47,8 @@ export function initConning(root, getShip, extra = {}) {
     const ri = el.querySelector('#cnRotI'), rr = Math.max(-1, Math.min(1, s.rot / 60)); ri.style.left = rr < 0 ? 50 + rr * 50 + '%' : '50%'; ri.style.width = Math.abs(rr) * 50 + '%';
     const pos = (d) => 50 + (d / 35) * 50 + '%'; el.querySelector('#cnRudA').style.left = pos(s.rudder); el.querySelector('#cnRudO').style.left = pos(s.rudderOrder);
     el.querySelector('#cnRud').textContent = (s.rudder < -0.05 ? 'P ' : s.rudder > 0.05 ? 'S ' : '') + f(Math.abs(s.rudder)) + '°';
-    for (const b of el.querySelectorAll('[data-tele]')) b.classList.toggle('on', +b.dataset.tele === s.tele);
+    for (const b of el.querySelectorAll('[data-tele]')) { b.classList.toggle('on', +b.dataset.tele === s.tele); b.classList.toggle('lock', !!s.teleLock); b.setAttribute('aria-disabled', String(!!s.teleLock)); } /* disabled 대신(표시가 늦게 따라와도 잠금 풀린 뒤 누름이 막히지 않게, 잠금은 setTelegraph가) */
+    el.querySelector('.tele').title = s.teleLock ? t('teleLock') : '';
     el.querySelector('#cnRpm').textContent = f(s.rpm, 0); el.querySelector('#cnStw').textContent = f(s.stw) + ' kn'; el.querySelector('#cnSog').textContent = f(s.sog) + ' kn'; el.querySelector('#cnCog').textContent = hd(s.cog);
     const w = extra.wind ? extra.wind() : null; el.querySelector('#cnWind').textContent = w ? `${Math.round(w.dir).toString().padStart(3, '0')}° ${f(w.ms, 0)}m/s` : '-';
     for (const b of el.querySelectorAll('[data-ap]')) b.classList.toggle('on', (b.dataset.ap === '1') === s.auto.on);

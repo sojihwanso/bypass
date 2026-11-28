@@ -22,7 +22,7 @@ export function createShip({ lat, lon, hdg = 0, tele = TELEGRAPH.findIndex((t) =
   };
 }
 export function setRudderOrder(s, deg) { s.rudderOrder = clamp(deg, -s.spec.maxRudder, s.spec.maxRudder); }
-export function setTelegraph(s, idx) { s.tele = clamp(idx, 0, TELEGRAPH.length - 1); }
+export function setTelegraph(s, idx) { if (s.teleLock) return; s.tele = clamp(idx, 0, TELEGRAPH.length - 1); } /* 매우 어려움: 기관 명령 잠금 */
 export function setAuto(s, on, setHdg = s.hdg) { s.auto.on = !!on; s.auto.setHdg = wrap360(setHdg); }
 
 /* 위치 적분: 속도(kn) 성분을 위경도로 */

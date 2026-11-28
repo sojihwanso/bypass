@@ -217,6 +217,7 @@ dialog::backdrop{background:rgba(5,10,14,.55)}
 .tele{display:flex;flex-direction:column;gap:2px}
 .tele button{display:flex;justify-content:space-between;border:1px solid var(--rule);background:var(--paper);border-radius:4px;padding:0 7px;line-height:17px;font-family:var(--f-mono);font-size:11px}
 .tele button.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.tele button.lock:not(.on){opacity:.35;cursor:not-allowed}.tele button.lock.on{cursor:not-allowed}
 .ap{margin-top:8px;display:flex;flex-direction:column;gap:6px}
 .seg{display:inline-flex;border:1px solid var(--rule);border-radius:6px;overflow:hidden;align-self:flex-start}
 .seg button{border:0;background:var(--paper);padding:3px 12px;font-weight:600;font-size:12px}

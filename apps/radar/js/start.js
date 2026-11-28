@@ -34,7 +34,7 @@ export async function openStart(o = {}) {
   const html = `<div class="start">
     <p class="lead">${en ? 'Pick a collision-avoidance scenario. The radar starts in STANDBY: switch it on and wait for the warm-up.' : '충돌 회피 시나리오를 고르세요. 레이더는 대기(STBY)로 시작해요. 송신을 켜고 예열을 기다리세요.'}</p>
     <button type="button" class="edu-card" data-start="edu"><img src="../ecdis/edu/dodo_explain.webp" alt="" width="56" height="56"><span><b>${en ? 'Training course with Dodo (Korean)' : '도도와 함께하는 교육 과정'}</b><small>${en ? 'Five short courses, step by step.' : '처음이라면 여기부터! 레이더 켜기부터 충돌 회피까지 5과정 53단계를 하나씩 따라 해요.'}</small></span></button>
-    <div class="lvl" role="group" aria-label="${en ? 'Difficulty' : '난이도'}"><b>${en ? 'Difficulty (surrounding traffic)' : '난이도(주변 교통량)'}</b>${LEVELS.map((l) => `<button type="button" class="btn${S.sim.level === l ? ' on' : ''}" aria-pressed="${S.sim.level === l}" data-level="${l}">${LVL[l][en ? 1 : 0]}</button>`).join('')}<span class="small">${en ? 'Harder = more ships, and more of them without AIS.' : '어려울수록 배가 많고, AIS 없는 배도 많아져요.'}</span></div>
+    <div class="lvl" role="group" aria-label="${en ? 'Difficulty' : '난이도'}"><b>${en ? 'Difficulty (surrounding traffic)' : '난이도(주변 교통량)'}</b>${[...LEVELS, ...(S.sim.level === 'vhard' ? ['vhard'] : [])].map((l) => `<button type="button" class="btn${S.sim.level === l ? ' on' : ''}" aria-pressed="${S.sim.level === l}" data-level="${l}">${LVL[l][en ? 1 : 0]}</button>`).join('')}<span class="small">${en ? 'Harder = more ships, and more of them without AIS.' : '어려울수록 배가 많고, AIS 없는 배도 많아져요.'}</span></div>
     <div class="scards">${SCENARIOS.map(card).join('')}</div>
     <div class="free"><b>${en ? 'Free navigation' : '자유 항해'}</b>
       <label>${en ? 'Ships' : '선박 수'} <select id="fN">${[0, 2, 4, 6, 8].map((v) => `<option${v === 4 ? ' selected' : ''}>${v}</option>`).join('')}</select></label>
@@ -69,7 +69,7 @@ export async function openStart(o = {}) {
 
 export function startScenario(id, o = {}) { const s = SCENARIOS.find((x) => x.id === id); return runScenario(s, o); }
 
-const LVL = { none: ['없음', 'None'], easy: ['쉬움', 'Easy'], medium: ['중간', 'Medium'], hard: ['어려움', 'Hard'] };
+const LVL = { none: ['없음', 'None'], easy: ['쉬움', 'Easy'], medium: ['중간', 'Medium'], hard: ['어려움', 'Hard'], vhard: ['매우 어려움', 'Very hard'] };
 const seeded = (s) => () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
 const around = (lat, lon) => ({ lat0: lat - 0.6, lat1: lat + 0.6, lon0: lon - 0.75, lon1: lon + 0.75 });
 /* 무작위 해역·침로 배치 + 난이도 교통량 + 날씨. o.place=false면 원래 위치, o.level로 난이도 덮어쓰기, o.seed로 재현 */
