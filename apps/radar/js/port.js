@@ -158,7 +158,7 @@ export function portTraffic(port, mode, level = 'medium', rnd = Math.random) {
 const seeded = (s) => () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
 export function portDef(id, mode, level = 'medium', seed = 1) {
   const port = PORTS[id], rnd = seeded((seed >>> 0) || 1), path = pathOf(port, mode), tk = (k) => TELEGRAPH.findIndex((x) => x.k === k);
-  const own = mode === 'IN' ? { lat: path.wps[0].lat, lon: path.wps[0].lon, hdg: 348, tele: tk('HA') } : { lat: port.basin.lat, lon: port.basin.lon, hdg: 125, tele: tk('SA'), state: { stw: 0, sog: 0 } };
+  const own = mode === 'IN' ? { lat: path.wps[0].lat, lon: path.wps[0].lon, hdg: 348, tele: tk('HA') } : { lat: port.basin.lat, lon: port.basin.lon, hdg: 125, tele: tk('SA'), state: { stw: 0, sog: 0, auto: { on: false, setHdg: 125 } } };
   const aids = [...port.lights.map((l) => ({ type: 'light', lat: l.lat, lon: l.lon, col: l.col, ko: l.ko, en: l.en })), ...port.buoys.map((b) => (b.racon ? { type: 'racon', letter: b.racon, lat: b.lat, lon: b.lon, col: b.col, ko: b.ko, en: b.en } : { type: 'buoy', lat: b.lat, lon: b.lon, col: b.col, ko: b.ko, en: b.en }))];
   return {
     id: `PORT-${id}-${mode}`, ko: `${port.ko} ${mode === 'IN' ? '입항' : '출항'}`, en: `${port.en} ${mode === 'IN' ? 'arrival' : 'departure'}`, portId: id, mode, level, seed,

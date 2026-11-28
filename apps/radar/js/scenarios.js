@@ -5,8 +5,18 @@ import { makeProj, velXY, cpaTcpa, brgRng, angDiff, wrap360 } from './geo.js';
 import { createShip, createTarget, stepShip, stepTarget, TELEGRAPH } from './sim.js';
 import { steerTraffic } from './traffic.js';
 import { pointInLand } from './coast.js';
+import { windDrift, speedLoss } from './weather.js';
 
 export const PASS_NM = 0.3;
+/* 충돌 회피 시나리오(S1~S5) 중: 자선과 시나리오 상대선은 같은 흐름(조류 + 자선 선수 방위 기준 바람 표류), 속력 손실 없음 —
+   날씨가 있어도 처음 배치한 충돌 침로가 유지되게(사용자 결정 v1.1.1). 주변 배(bg)는 worldEnv 그대로 */
+export function scenarioEnv(wx, ownHdg, wxOn) { const e = worldEnv(wx, ownHdg, wxOn, false); return { set: e.set, drift: e.drift, loss: 0 }; }
+/* 배가 받는 바깥 흐름(앱과 시뮬레이션 공통): 조류 + (날씨 켬) 그 배 선수 방위에 따른 바람 표류, 자선은 높은 파도 속력 손실 */
+export function worldEnv(wx, hdg, wxOn, own = false) {
+  const c = wx.current || { set: 0, drift: 0 }; if (!wxOn || !wx.windMs) return { set: c.set, drift: c.drift, loss: own && wxOn ? speedLoss(wx.sea || 0) : 0 };
+  const w = windDrift(wx.windFrom || 0, wx.windMs || 0, hdg), D2 = Math.PI / 180, vx = c.drift * Math.sin(c.set * D2) + w.drift * Math.sin(w.set * D2), vy = c.drift * Math.cos(c.set * D2) + w.drift * Math.cos(w.set * D2);
+  return { set: wrap360(Math.atan2(vx, vy) / D2), drift: Math.hypot(vx, vy), loss: own ? speedLoss(wx.sea || 0) : 0 };
+}
 export const COLLIDE_NM = 0.03, NEAR_NM = 0.3; /* 충돌 거리(모든 시나리오), 접근 기록 거리 */
 /* 0.3 NM 안 접근: 밖→안 들어올 때마다 n+1, 안에 있던 시간(표본 시각 차이, 배속 무관)을 sec에 누적 */
 export function nearTrack(st, d, t) {
@@ -129,7 +139,7 @@ export function evaluate(r) {
 }
 
 /* 시뮬레이션(테스트·검증용): actions = [{t, fn(own)}] 또는 [{when(world,{t:{rng}}), fn(own)}] 한 번씩 */
-export function simulate(scn, actions = [], { rings = [], dt = 1, traffic = false } = {}) {
+export function simulate(scn, actions = [], { rings = [], dt = 1, traffic = false, weather = null } = {}) {
   const own = createShip({ lat: scn.own.lat, lon: scn.own.lon, hdg: scn.own.hdg, tele: scn.own.tele });
   const targets = scn.targets.map((g) => createTarget(g)), w = { t: 0, own, targets, land: { rings } }, log = createLog(scn), done = new Set();
   for (let t = 0; t <= scn.durationMin * 60; t += dt) {
@@ -138,7 +148,7 @@ export function simulate(scn, actions = [], { rings = [], dt = 1, traffic = fals
     actions.forEach((a, i) => { if (done.has(i)) return; if ((a.t !== undefined && t >= a.t) || (a.when && a.when(w, { t: near }))) { a.fn(own); done.add(i); } });
     log.sample(w);
     if (traffic && t % 10 === 0) steerTraffic(own, targets);
-    for (let k = 0; k < dt / 0.25; k++) { stepShip(own, 0.25); for (const g of targets) stepTarget(g, 0.25, t + k * 0.25); }
+    for (let k = 0; k < dt / 0.25; k++) { if (weather) { const e = scenarioEnv(weather, own.hdg, true); stepShip(own, 0.25, e); for (const g of targets) stepTarget(g, 0.25, t + k * 0.25, String(g.id).startsWith('bg') ? worldEnv(weather, g.hdg, true) : e); } else { stepShip(own, 0.25); for (const g of targets) stepTarget(g, 0.25, t + k * 0.25); } } /* weather: 앱과 같은 흐름 */
   }
   return evaluate(log.result());
 }

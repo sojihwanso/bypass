@@ -17,6 +17,7 @@ import { initKeys, KEYMAP } from './keys.js';
 import { drawOverlay } from './overlay.js';
 import { t, tl, lang } from './i18n.js';
 import { initStart } from './start.js';
+import { worldEnv, scenarioEnv } from './scenarios.js';
 import { initHelp } from './help.js';
 import { COL, piColor } from './overlay.js';
 import { createWeatherRun, stepWeather, windDrift, speedLoss, weatherLabel, currentLabel, WX_CAP, rollWeather, rollCurrent } from './weather.js';
@@ -64,12 +65,13 @@ document.documentElement.dataset.theme = S.disp.palette;
 /* ---------- 세계 ---------- */
 /* def: {name, own:{lat,lon,hdg,tele}, targets:[createTarget 인자], weather, aids, marks, needsCoast, durationMin, t?} */
 export function startWorld(def) {
+  if (pmSave) pmOff(); /* PM을 먼저 끄고(PM 고정값이 시작 전 설정으로 찍히거나, 복원 뒤 덮어쓰지 않게) */
   const restored = restorePortPrev(); /* 앞 세계가 히든 시나리오였으면 사용자 설정을 원래대로 */
   if (def.portId) { portPrev = { iala: S.disp.iala, rangeNM: S.disp.rangeNM, ctrl: clone(S.ctrl) }; if (def.iala) S.disp.iala = def.iala; }
   portSt = def.portId ? createPortState(def) : null;
   const own = createShip({ lat: def.own.lat, lon: def.own.lon, hdg: def.own.hdg, tele: def.own.tele ?? TELEGRAPH.findIndex((x) => x.k === 'FA') });
   own.antH = own.spec.antH;
-  if (def.own.state) Object.assign(own, def.own.state, { spec: own.spec, auto: { ...def.own.state.auto } });
+  if (def.own.state) Object.assign(own, def.own.state, { spec: own.spec, auto: { ...own.auto, ...(def.own.state.auto || {}) } }); /* 시작 상태에 auto가 없으면 기본값(setHdg = 선수) 유지 */
   W = { def, name: def.name || '', own, targets: def.targets.map((g) => (g.want ? { ...g, legs: [...(g.legs || [])], want: { ...g.want } } : createTarget(g))), weather: { sea: 0, windFrom: 0, windMs: 0, rain: [], ducting: false, interference: false, current: { set: 0, drift: 0 }, ...(def.weather || {}) }, aids: def.aids || [], marks: def.marks || [], t: def.t || 0, land: { rings: [], ok: false, heightM: 100 }, needsCoast: !!def.needsCoast };
   P = makeProj(def.own.lat, def.own.lon);
   eduKey = ''; // 다른 세계가 시작되면 교육 단계는 자기 화면을 다시 만듦
@@ -89,14 +91,10 @@ const ownXY = () => ({ x: P.x(W.own.lon), y: P.y(W.own.lat) });
 function setSpeed(n) { if (SPEEDS.includes(n)) speed = n; }
 /* 배에 미치는 바깥 힘: 조류 + (날씨 켬 또는 시나리오 고정 날씨일 때) 바람 표류·높은 파도 속력 손실 */
 /* 상대선이 받는 흐름: 조류 + 그 배 침로에 따른 바람 표류(자선과 같은 계산). 날씨가 꺼져 있으면 조류만 */
-function tgtEnv(g) { const c = W.weather.current || { set: 0, drift: 0 }; if (!(S.sim.weatherOn || W.weather.fixed) || !W.weather.windMs) return c; const w = windDrift(W.weather.windFrom || 0, W.weather.windMs || 0, g.hdg), D2 = Math.PI / 180, vx = c.drift * Math.sin(c.set * D2) + w.drift * Math.sin(w.set * D2), vy = c.drift * Math.cos(c.set * D2) + w.drift * Math.cos(w.set * D2); return { set: wrap360(Math.atan2(vx, vy) / D2), drift: Math.hypot(vx, vy) }; }
-function shipEnv() {
-  const c = W.weather.current || { set: 0, drift: 0 }, wxOn = S.sim.weatherOn || W.weather.fixed;
-  if (!wxOn) return { set: c.set, drift: c.drift, loss: 0 };
-  const w = windDrift(W.weather.windFrom || 0, W.weather.windMs || 0, W.own.hdg), D2 = Math.PI / 180;
-  const vx = c.drift * Math.sin(c.set * D2) + w.drift * Math.sin(w.set * D2), vy = c.drift * Math.cos(c.set * D2) + w.drift * Math.cos(w.set * D2);
-  return { set: wrap360(Math.atan2(vx, vy) / D2), drift: Math.hypot(vx, vy), loss: speedLoss(W.weather.sea || 0) };
-}
+const inScn = () => !!(W.def.scnId && /^S\d/.test(W.def.scnId)); /* 충돌 회피 시나리오 진행 중(끝나면 scnId = null) */
+function tgtEnv(g) { const wxOn = !!(S.sim.weatherOn || W.weather.fixed); if (inScn() && !String(g.id).startsWith('bg')) return scenarioEnv(W.weather, W.own.hdg, wxOn); const e = worldEnv(W.weather, g.hdg, wxOn); return { set: e.set, drift: e.drift }; }
+function shipEnv() { const wxOn = !!(S.sim.weatherOn || W.weather.fixed); return inScn() ? scenarioEnv(W.weather, W.own.hdg, wxOn) : worldEnv(W.weather, W.own.hdg, wxOn, true); }
+
 /* 날씨 변화 켬/끔(헤더·메뉴 공통): 끄면 시나리오 고정 날씨가 아닌 한 바로 잔잔하게 */
 /* 날씨 켜기: 켤 때마다 새 날씨를 무작위로(난이도 상한 안에서, 그냥 맑음만 나오지 않게 다시 뽑음). 끄면 잔잔한 맑음 */
 function rerollWeather() {
@@ -467,7 +465,7 @@ function menuAction(id) {
   const en = lang() === 'en';
   if (id === 'save') { saveSettings(); try { localStorage.setItem('radar-presets', JSON.stringify(savedPresets())); } catch (e) {} ui.dialog(en ? 'Settings' : '설정', `<p>${en ? 'Saved.' : '저장했습니다.'}</p>`); }
   if (id === 'load' || id === 'reset') { // 송신 상태는 설정이 아니라 지금 레이더 상태를 따름(불러오기·초기화로 영상이 꺼지지 않게)
-    pmSave = null; if (id === 'load') loadSettings(); else { resetSettings(); saveSettings(); } S.ctrl.pmMode = 'OFF'; if (conn && conn.sync) conn.sync(); if (wxRun) wxRun.enabled = S.sim.weatherOn; else if (W && !S.sim.weatherOn) applyWeatherOn();
+    pmSave = null; portPrev = null; /* 불러오기·초기화한 설정이 히든 시나리오 끝에 덮이지 않게 */ if (id === 'load') loadSettings(); else { resetSettings(); saveSettings(); } S.ctrl.pmMode = 'OFF'; if (conn && conn.sync) conn.sync(); if (wxRun) wxRun.enabled = S.sim.weatherOn; else if (W && !S.sim.weatherOn) applyWeatherOn();
     S.ctrl.tx = radar.state === 'tx'; setRange(S.disp.rangeNM); ui.applyLang(); ui.applyTheme(); ui.renderMenu(); }
   if (id === 'ttCancelAll') { tracker.cancelAll(); selected = selected.filter((x) => x.startsWith('A:')); for (const a of alerts.list()) if (/^(cpa|lost):/.test(a.id)) { alerts.resolve(a.id); alerts.ack(a.id); } }
   if (id === 'sleepAll') ais.sleepAll();
@@ -559,8 +557,8 @@ requestAnimationFrame(frame);
 setTimeout(fit, 0); if (document.fonts) document.fonts.ready.then(fit); // 문구·글꼴이 채워진 뒤 단추줄 넘침·원 크기를 다시 계산
 /* 교육 과정 창구(edu-steps.js가 화면을 맞추고 판정을 읽음) */
 function eduSetup(o = {}, key = '') {
-  if (restorePortPrev()) setRange(S.disp.rangeNM); /* 히든 시나리오 설정이 교육 전 설정으로 찍히지 않게 먼저 되돌림 */
-  if (pmSave) pmOff(); // PM 값이 교육 전 설정으로 찍히지 않게 먼저 끔
+  if (pmSave) pmOff(); // PM 값이 교육 전 설정으로 찍히지 않게 먼저 끔(히든 시나리오 복원보다 먼저)
+  if (restorePortPrev()) setRange(S.disp.rangeNM); /* 히든 시나리오 설정이 교육 전 설정으로 찍히지 않게 되돌림 */
   if (!eduSaved) eduSaved = JSON.parse(JSON.stringify({ ctrl: S.ctrl, disp: S.disp, tt: S.tt })); // 교육이 끝나면 되돌릴 사용자 설정
   if (key !== 'r1' && S.ctrl.gain < 20) S.ctrl.gain = 65; // 시나리오가 GAIN 0으로 남겨도 교육 화면(영상 조정 단계 뒤)은 보이게
   const lat = o.lat ?? 33.45, lon = o.lon ?? 124.55, hdg = o.hdg ?? 0, kn = 14, Pq = makeProj(lat, lon);
