@@ -21,7 +21,7 @@ function legPoint(A, B, u, off) { const P = makeProj(A.lat, A.lon), bx = P.x(B.l
 export const PORTS = {
   BUSAN: {
     id: 'BUSAN', ko: '부산 북항', en: 'Busan North Port',
-    wps: WPS, legHalfNM: [0.30, 0.25, 0.15],
+    wps: WPS, legHalfNM: [0.30, 0.25, 0.11], /* 입구 구간: 방파제 끝이 중심선에서 우현 0.128·좌현 0.142 NM이라 0.11(점선 안은 늘 바다, 검토 반영) */
     basin: { lat: 35.09100, lon: 129.09000, rNM: 0.25 },
     timeMin: { IN: 60, OUT: 45 },
     lights: [ /* 실제 위치(OSM)·색 */
@@ -54,10 +54,12 @@ export function crossTrack(path, lat, lon) {
     const c = { leg: i, xtdNM: xtd, alongNM: along, lenNM: L, halfNM: path.half[i] }; all.push(c);
     if (along >= 0 && along <= L && (!best || Math.abs(xtd) <= Math.abs(best.xtdNM))) best = c;
   }
-  if (!best) best = all[0].alongNM < 0 ? all[0] : all[n - 1];
+  if (!best) { /* 변침점 바깥 쐐기 등 어느 구간에도 안 걸치면: 잘린 선분까지 거리가 가장 가까운 구간, XTD = 그 거리(부호는 그 구간 기준) */
+    let bd = Infinity; for (const c of all) { const u = Math.max(0, Math.min(c.lenNM, c.alongNM)), d = Math.hypot(c.alongNM - u, c.xtdNM); if (d < bd) { bd = d; best = { ...c, xtdNM: Math.sign(c.xtdNM || 1) * d }; } }
+  }
   return best;
 }
-export function inChannel(path, lat, lon) { const c = crossTrack(path, lat, lon); return Math.abs(c.xtdNM) <= c.halfNM; }
+export function inChannel(path, lat, lon, basin = null) { const c = crossTrack(path, lat, lon); return Math.abs(c.xtdNM) <= c.halfNM || (!!basin && dist(basin, lat, lon) <= basin.rNM); } /* 선회장 원 안은 항로로 봄 */
 const dist = (a, lat, lon) => { const P = makeProj(a.lat, a.lon); return Math.hypot(P.x(lon), P.y(lat)); };
 
 /* 기록: w = {t, own:{lat,lon,sog,hdg}, targets, land:{rings}} 를 표본마다 */
@@ -74,7 +76,7 @@ export function createPortLog(port, mode) {
       if (o.sog > maxSog) maxSog = o.sog;
       const c = crossTrack(path, o.lat, o.lon);
       if (c.leg >= maxLeg && c.alongNM >= 0 && !seen.has(c.leg)) { for (let i = maxLeg; i <= c.leg; i++) if (!seen.has(i)) { seen.add(i); wpTimes.push({ name: path.wps[i].name, t }); } maxLeg = c.leg; }
-      const off = Math.abs(c.xtdNM) > c.halfNM;
+      const off = Math.abs(c.xtdNM) > c.halfNM && dist(port.basin, o.lat, o.lon) > port.basin.rNM; /* 선회장 원 안은 항로로 봄 */
       if (off) { if (offStart === null) { offStart = t; offN++; } if (Math.abs(c.xtdNM) > maxXtd) maxXtd = Math.abs(c.xtdNM); if (t - offStart > OFF_LIMIT_S) offFail = true; } else closeOff(t);
       for (const g of w.targets) {
         const d = dist(o, g.lat, g.lon);

@@ -26,7 +26,9 @@ import { mergePortLand } from './portland.js';
 import { BUSAN_COAST } from './ports/busan-coast.js';
 import { PORTS, createPortState, portTick, vtsText, channelBounds } from './port.js';
 const PORT_COAST = { BUSAN: BUSAN_COAST }; /* 히든 시나리오 정밀 해안선 */
-let portSt = null, ialaPrev = null; /* 히든 시나리오 진행 상태, 시나리오 동안 바꾼 IALA의 원래 값 */
+let portSt = null, portPrev = null; /* 히든 시나리오 진행 상태, 시작 전 사용자 설정(IALA·거리 범위·영상 설정) — 저장·다음 세계에는 이 값을 씀 */
+const clone = (o) => JSON.parse(JSON.stringify(o));
+function restorePortPrev() { if (!portPrev) return false; const p = portPrev; portPrev = null; S.disp.iala = p.iala; S.disp.rangeNM = p.rangeNM; Object.assign(S.ctrl, p.ctrl, { tx: S.ctrl.tx }); return true; }
 
 const TEST = new URLSearchParams(location.search).has('test');
 loadSettings(); S.ctrl.pmMode = 'OFF'; S.ctrl.tx = false; // 처음엔 늘 STBY(저장된 TX로 영상이 나오지 않게) // PM은 켤 때마다 새로(저장된 ON으로 시작하지 않음)
@@ -62,8 +64,8 @@ document.documentElement.dataset.theme = S.disp.palette;
 /* ---------- 세계 ---------- */
 /* def: {name, own:{lat,lon,hdg,tele}, targets:[createTarget 인자], weather, aids, marks, needsCoast, durationMin, t?} */
 export function startWorld(def) {
-  if (ialaPrev !== null) { S.disp.iala = ialaPrev; ialaPrev = null; } /* 앞 세계가 히든 시나리오였으면 IALA를 원래대로 */
-  if (def.iala) { ialaPrev = S.disp.iala; S.disp.iala = def.iala; }
+  const restored = restorePortPrev(); /* 앞 세계가 히든 시나리오였으면 사용자 설정을 원래대로 */
+  if (def.portId) { portPrev = { iala: S.disp.iala, rangeNM: S.disp.rangeNM, ctrl: clone(S.ctrl) }; if (def.iala) S.disp.iala = def.iala; }
   portSt = def.portId ? createPortState(def) : null;
   const own = createShip({ lat: def.own.lat, lon: def.own.lon, hdg: def.own.hdg, tele: def.own.tele ?? TELEGRAPH.findIndex((x) => x.k === 'FA') });
   own.antH = own.spec.antH;
@@ -78,6 +80,7 @@ export function startWorld(def) {
   trialSet = { course: own.hdg, speed: own.stw };
   const bb = { lat0: def.own.lat - 0.6, lat1: def.own.lat + 0.6, lon0: def.own.lon - 0.75, lon1: def.own.lon + 0.75 };
   const myW = W;
+  if (restored && !def.portId) setRange(S.disp.rangeNM);
   loadLand(bb).then((L) => { if (W !== myW) return; const pc = def.coastOverride && PORT_COAST[def.coastOverride]; if (pc) L = { rings: mergePortLand(L.ok ? L.rings : [], pc), ok: true }; /* 히든 시나리오: 항구 구역은 정밀 해안선 */ W.land = { rings: L.rings, ok: L.ok, tried: true, heightM: 100 }; if (L.ok) alerts.resolve('coastfail'); coastKey = ''; scene = buildScene({ own: ownScene(), targets: W.targets, land: W.land, weather: W.weather, aids: W.aids, band: S.ctrl.band, pulse: S.ctrl.pulse, seed: scene.seed, fine: def.landFine || null }); if (!L.ok) alerts.raise('coastfail', 'C', lang() === 'en' ? 'Coastline data unavailable' : '해안선 데이터 없음'); });
   return W;
 }
@@ -347,7 +350,8 @@ var pmSave = null; // 켜기 전 설정(끄면 되돌림). null이면 PM 꺼짐
 const PM_FIX = { sea: { auto: false, val: 0 }, rain: { auto: false, val: 0 }, tune: { auto: true }, ace: false, es: 0, eav: 0, ir: 2, noiseRej: false, secondRej: false, wiper: 0, pulse: 'L' };
 function pmLock() { const c = S.ctrl; c.sea = { ...PM_FIX.sea }; c.rain = { ...PM_FIX.rain }; c.tune.auto = true; for (const k of ['ace', 'es', 'eav', 'ir', 'noiseRej', 'secondRej', 'wiper', 'pulse']) c[k] = PM_FIX[k]; }
 /* PM 중에 설정이 저장되면 PM 값 대신 켜기 전 값을 저장(창을 닫아도 원래 설정이 남게) */
-setSaveFilter((o) => { if (eduSaved) { o.ctrl = JSON.parse(JSON.stringify(eduSaved.ctrl)); o.disp = JSON.parse(JSON.stringify(eduSaved.disp)); o.tt = JSON.parse(JSON.stringify(eduSaved.tt)); return o; } /* 교육 중에는 교육 전 설정을 저장 */ if (!pmSave) return o; Object.assign(o.ctrl, JSON.parse(JSON.stringify(pmSave.ctrl)), { pmMode: 'OFF' }); o.disp.rangeNM = pmSave.range; o.disp.motion = pmSave.motion; return o; });
+const portSave = (o) => { if (portPrev) { o.disp.iala = portPrev.iala; o.disp.rangeNM = portPrev.rangeNM; o.ctrl = { ...clone(portPrev.ctrl), tx: false }; } return o; }; /* 히든 시나리오 중에는 시작 전 설정을 저장 */
+setSaveFilter((o) => { if (eduSaved) { o.ctrl = JSON.parse(JSON.stringify(eduSaved.ctrl)); o.disp = JSON.parse(JSON.stringify(eduSaved.disp)); o.tt = JSON.parse(JSON.stringify(eduSaved.tt)); return o; } /* 교육 중에는 교육 전 설정을 저장 */ if (!pmSave) return portSave(o); Object.assign(o.ctrl, JSON.parse(JSON.stringify(pmSave.ctrl)), { pmMode: 'OFF' }); o.disp.rangeNM = pmSave.range; o.disp.motion = pmSave.motion; return portSave(o); });
 function pmOn() {
   if (pmSave) return true;
   if (radar.state !== 'tx') { S.ctrl.pmMode = 'OFF'; ui.dialog('PM', `<p>${lang() === 'en' ? 'Set the radar to TX first. The performance monitor works only while transmitting.' : '먼저 송신(TX)으로 바꾸세요. 성능 감시는 송신 중에만 켜져요.'}</p>`); return false; }
@@ -555,6 +559,7 @@ requestAnimationFrame(frame);
 setTimeout(fit, 0); if (document.fonts) document.fonts.ready.then(fit); // 문구·글꼴이 채워진 뒤 단추줄 넘침·원 크기를 다시 계산
 /* 교육 과정 창구(edu-steps.js가 화면을 맞추고 판정을 읽음) */
 function eduSetup(o = {}, key = '') {
+  if (restorePortPrev()) setRange(S.disp.rangeNM); /* 히든 시나리오 설정이 교육 전 설정으로 찍히지 않게 먼저 되돌림 */
   if (pmSave) pmOff(); // PM 값이 교육 전 설정으로 찍히지 않게 먼저 끔
   if (!eduSaved) eduSaved = JSON.parse(JSON.stringify({ ctrl: S.ctrl, disp: S.disp, tt: S.tt })); // 교육이 끝나면 되돌릴 사용자 설정
   if (key !== 'r1' && S.ctrl.gain < 20) S.ctrl.gain = 65; // 시나리오가 GAIN 0으로 남겨도 교육 화면(영상 조정 단계 뒤)은 보이게
