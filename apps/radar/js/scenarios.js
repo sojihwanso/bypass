@@ -1,5 +1,5 @@
 /* 충돌 회피 시나리오 5개 + 자유 항해, 기록·평가(순수 계산)
-   합격 = 시나리오 상대선과의 실제 최소 거리 ≥ 0.3 NM, 충돌·좌초 없음. 주변 배(bg*, 난이도 교통량)는 거리 판정에서 빼고 참고로만 알림(충돌은 포함). TCPA·조치 시점은 기록만(사용자 결정).
+   합격 = 30분(시뮬레이션 시간) 동안 충돌(0.03 NM 이내)·좌초 없음(사용자 결정 2026-11-28). 최소 거리·0.3 NM 안 접근 횟수·시간은 기록만. 주변 배(bg*)는 충돌만 판정에 넣음. TCPA·조치 시점은 기록만.
    상대선 위치는 '자선이 그대로 가면 tc분 뒤 부딪히는 점'에서 거꾸로 계산한다. */
 import { makeProj, velXY, cpaTcpa, brgRng, angDiff, wrap360 } from './geo.js';
 import { createShip, createTarget, stepShip, stepTarget, TELEGRAPH } from './sim.js';
@@ -32,7 +32,7 @@ const O4 = { lat: 33.4, lon: 124.65, hdg: 0, kn: 14 };
 const O5 = { lat: 34.52, lon: 125.29, hdg: 0, kn: 11 };
 
 export const SCENARIOS = [
-  { id: 'S1', ko: '마주치는 상태', en: 'Head-on situation', rule: '14', durationMin: 25,
+  { id: 'S1', ko: '마주치는 상태', en: 'Head-on situation', rule: '14', durationMin: 30,
     brief: { ko: '넓은 바다입니다. 정선수 쪽에서 큰 배 한 척이 거의 반대 침로로 다가와요. 상대선은 피하지 않습니다. 레이더를 켜고 EBL·VRM과 TT로 위험을 확인한 뒤, 제14조에 따라 우현으로 피하세요.', en: 'Open sea. A large vessel approaches nearly reciprocal, dead ahead, and will not give way. Switch on the radar, confirm risk with EBL/VRM and TT, then alter to starboard under Rule 14.' },
     own: { ...O1, tele: tele('FA') }, weather: { sea: 2, windFrom: 30, windMs: 6, rain: [] }, aids: [],
     targets: [T(O1, 'h1', { name: 'OCEAN PIONEER', mmsi: 440211000, tcMin: 18, hdg: 181, kn: 12, L: 200 }), T(O1, 'n1', { name: '', tcMin: 14, hdg: 120, kn: 4, L: 14, rcs: 5, h: 3, ais: false, side: -2.6 })] },
@@ -44,11 +44,11 @@ export const SCENARIOS = [
     brief: { ko: '좌현 앞쪽에서 배가 횡단해 옵니다. 본선은 유지선이라 침로·속력을 지켜야 해요. 그런데 상대선이 피하지 않습니다. 언제 혼자서 피해야 할지(제17조) 판단하고, 이때 좌현으로 돌리지 마세요.', en: 'A vessel crosses from your port bow; you are the stand-on vessel and must keep course and speed. It does not give way. Decide when to act alone under Rule 17, and do not turn to port.' },
     own: { ...O3, tele: tele('FA') }, weather: { sea: 2, windFrom: 0, windMs: 5, rain: [] }, aids: [],
     targets: [T(O3, 'p1', { name: 'JINDO CARRIER', mmsi: 440433000, tcMin: 20, hdg: 30, kn: 12, L: 140 }), T(O3, 'n1', { name: '', tcMin: 12, hdg: 260, kn: 4, L: 12, rcs: 4, h: 3, ais: false, side: -2.8 })] },
-  { id: 'S4', ko: '추월 · 여러 척', en: 'Overtaking · multiple ships', rule: '13', durationMin: 35,
+  { id: 'S4', ko: '추월 · 여러 척', en: 'Overtaking · multiple ships', rule: '13', durationMin: 30,
     brief: { ko: '앞에 같은 방향으로 가는 느린 배를 추월하는 중이에요(본선이 추월선). 앞쪽에서 마주 오는 배와 우현에서 횡단하는 배도 있어요. 물표를 모두 포착하고, 진·상대 벡터를 바꿔 보며 누구를 먼저 피할지 정하세요.', en: 'You are overtaking a slower ship ahead. Another vessel approaches from ahead and a third crosses from starboard. Acquire all, switch between true and relative vectors, and decide your plan.' },
     own: { ...O4, tele: tele('FA') }, weather: { sea: 3, windFrom: 200, windMs: 8, rain: [] }, aids: [],
     targets: [T(O4, 'o1', { name: 'SLOW TRADER', mmsi: 440544000, tcMin: 26, hdg: 0, kn: 7, L: 120, side: 0.05 }), T(O4, 'o2', { name: 'NORTH WIND', mmsi: 440555000, tcMin: 16, hdg: 182, kn: 13, L: 180, side: -0.7 }), T(O4, 'o3', { name: 'SEA ROSE', mmsi: 440566000, tcMin: 22, hdg: 290, kn: 11, L: 110, side: 0.2 }), T(O4, 'n1', { name: '', tcMin: 18, hdg: 90, kn: 5, L: 15, rcs: 5, h: 3, ais: false, side: -2.8 })] },
-  { id: 'S5', ko: '제한 시계 · 홍도 인근', en: 'Restricted visibility · off Hongdo', rule: '19', durationMin: 35, needsCoast: true, fixedWeather: true,
+  { id: 'S5', ko: '제한 시계 · 홍도 인근', en: 'Restricted visibility · off Hongdo', rule: '19', durationMin: 30, needsCoast: true, fixedWeather: true,
     brief: { ko: '홍도 동쪽 해역, 안개와 비로 눈으로는 아무것도 보이지 않아요. 레이더만으로 판단해야 합니다. Gain·Sea·Rain을 맞춰 반사가 약한 어선을 찾고, 정횡 앞쪽 배에 대해서는 좌현 변침을 피하세요(제19조). 안전한 속력도 생각하세요.', en: 'East of Hongdo in fog and rain; nothing is visible by eye. Tune gain, sea and rain to find a weak fishing boat, avoid turning to port for vessels forward of the beam (Rule 19), and keep a safe speed.' },
     own: { ...O5, tele: tele('HA') }, weather: { kind: 'showers', fog: true, visNM: 0.5, sea: 3, windFrom: 220, windMs: 11, interference: true, rain: [{ lat: 34.62, lon: 125.36, rNM: 1.6, rate: 8 }, { lat: 34.70, lon: 125.27, rNM: 1.2, rate: 5 }] },
     aids: [{ type: 'racon', letter: 'K', lat: 34.6455, lon: 125.2235 }],
@@ -68,17 +68,18 @@ export function freeSetup({ lat = 33.5, lon = 124.6, nTargets = 4, sea = 2, rain
 /* 기록: 1초마다 표본 */
 export function createLog(scn, init = null) {
   const isBg = (g) => String(g.id).startsWith('bg'), I = init || {}, min = { ...(I.min || {}) };
-  let port = I.port ?? 0, cum = I.cum ?? 0, prevH = I.prevH ?? null, stbdMax = I.stbdMax ?? 0, portBack = I.portBack ?? false, crossT = I.crossT ?? null, bgMin = I.bgMin ?? null, collisionBg = I.collisionBg ?? null, collision = !!I.collision, grounding = !!I.grounding, first = I.first ?? null, own0 = I.own0 ?? null, t0Act = I.t0Act ?? null;
+  let port = I.port ?? 0, cum = I.cum ?? 0, prevH = I.prevH ?? null, stbdMax = I.stbdMax ?? 0, portBack = I.portBack ?? false, crossT = I.crossT ?? null, bgMin = I.bgMin ?? null, collisionBg = I.collisionBg ?? null, collision = !!I.collision, grounding = !!I.grounding, first = I.first ?? null, own0 = I.own0 ?? null, t0Act = I.t0Act ?? null, nearM = { ...(I.near || {}) };
   return {
-    dump() { return JSON.parse(JSON.stringify({ port, cum, prevH, stbdMax, portBack, crossT, min, bgMin, collisionBg, collision, grounding, first, own0, t0Act })); }, // 이어 하기 저장용
+    dump() { return JSON.parse(JSON.stringify({ port, cum, prevH, stbdMax, portBack, crossT, min, bgMin, collisionBg, collision, grounding, first, own0, t0Act, near: nearM })); }, // 이어 하기 저장용
     sample(w) {
       const o = w.own, P = makeProj(o.lat, o.lon), ov = velXY(o.cog ?? o.hdg, o.sog ?? o.stw);
       if (!own0) own0 = { hdg: o.hdg, tele: o.tele };
       let near = null, meeting = false;
       for (const g of w.targets) {
         const x = P.x(g.lon), y = P.y(g.lat), d = Math.hypot(x, y);
-        if (d * 1852 < ((o.spec?.L ?? 190) + (g.L ?? 100)) / 2) { collision = true; if (isBg(g)) collisionBg = g.name || g.id; }
+        if (d <= COLLIDE_NM) { collision = true; if (isBg(g)) collisionBg = g.name || g.id; }
         if (isBg(g)) { if (!bgMin || d < bgMin.nm) bgMin = { id: g.id, name: g.name || '', nm: d, t: w.t }; continue; }
+        nearM[g.id] = nearTrack(nearM[g.id], d, w.t);
         if (!min[g.id] || d < min[g.id].nm) min[g.id] = { id: g.id, nm: d, t: w.t, ahead: Math.abs(angDiff(wrap360(Math.atan2(-x, -y) * 180 / Math.PI), g.hdg ?? 0)) < 90 }; // ahead: 최근접 때 자선이 상대선 정횡 앞(선수 쪽)
         const c = cpaTcpa({ x: 0, y: 0 }, ov, { x, y }, velXY(g.cog ?? g.hdg, g.sog ?? g.kn));
         if (c.tcpa >= 0 && (!near || c.cpa < near.cpa)) near = { id: g.id, cpa: c.cpa, tcpa: c.tcpa, rng: d };
@@ -92,20 +93,21 @@ export function createLog(scn, init = null) {
       if (meeting && cum < port) { port = cum; portBack = cum >= -30 && (portBack || (crossT !== null && w.t - crossT <= 300)); } // '지나침'은 되돌아온 지 5분 안(타를 풀어도 한동안 계속 돎), 30° 이내만(그 밖은 진짜 좌현 변침) // 상대선이 다가오는 동안 좌현으로 가장 많이 돈 각, 그 전에 우현으로 피했는지(되돌아오다 지나침)
       if (first && w.t - t0Act.t <= 300) { const dh = cum; if (Math.abs(dh) > Math.abs(first.dHdg)) first.dHdg = dh; first.dSpd = o.stw - (scnKn(scn) ?? o.stw); }
     },
-    result() { const m = Object.values(min).sort((a, b) => a.nm - b.nm)[0] || null; return { minRange: m, byId: { ...min }, portMax: port, portBack, bgMin, collisionBg, collision, grounding, firstAction: first, scn }; },
+    result() { const m = Object.values(min).sort((a, b) => a.nm - b.nm)[0] || null; const nr = Object.values(nearM).reduce((a, x) => ({ n: a.n + x.n, sec: a.sec + x.sec }), { n: 0, sec: 0 }); return { minRange: m, byId: { ...min }, near03: nr, portMax: port, portBack, bgMin, collisionBg, collision, grounding, firstAction: first, scn }; },
   };
 }
 const scnKn = (scn) => (scn && scn.own ? TELEGRAPH[scn.own.tele]?.kn : null);
 
 /* 평가: 합격 여부 + 해설(한국어/영어) */
 export function evaluate(r) {
-  const pass = !!r.minRange && r.minRange.nm >= PASS_NM && !r.collision && !r.grounding;
+  const pass = !r.collision && !r.grounding;
   const s = r.scn || {}, notes = [];
   const fa = r.firstAction;
   if (r.collision && r.collisionBg) notes.push({ ko: '주변 배와 충돌했어요. 주변 배는 자선을 피하려고 하지만, 가까이 오는 배는 모두 레이더로 지켜봐야 해요.', en: 'Collision with a surrounding ship. They try to keep clear, but every approaching ship still needs watching.' });
   else if (r.bgMin && r.bgMin.nm < PASS_NM) notes.push({ ko: `참고: 주변 배와 ${r.bgMin.nm.toFixed(2)} NM까지 가까워졌어요. 합격 판정에는 넣지 않지만, 실제 바다라면 너무 가까운 거리예요.`, en: `Note: a surrounding ship came within ${r.bgMin.nm.toFixed(2)} NM. Not graded, but far too close at sea.` });
   if (r.collision) notes.push({ ko: '충돌했어요. 상대선의 방위가 거의 변하지 않으면(같은 방위·거리 감소) 충돌 위험이 있어요(제7조).', en: 'Collision. A steady bearing with decreasing range means risk of collision (Rule 7).' });
   if (r.grounding) notes.push({ ko: '좌초했어요. 피항할 때도 주변 수심과 육지를 같이 봐야 해요.', en: 'Grounded. Check the surrounding land and depths when manoeuvring.' });
+  if (r.near03 && r.near03.n) { const ms = `${Math.floor(r.near03.sec / 60)}:${String(Math.round(r.near03.sec % 60)).padStart(2, '0')}`; notes.push({ ko: `참고: 상대선이 0.3 NM 안으로 ${r.near03.n}번, 모두 ${ms} 들어왔어요. 합격 판정에는 넣지 않지만 실제 바다라면 가까운 거리예요.`, en: `Note: scenario ships came within 0.3 NM ${r.near03.n} time(s), ${ms} in total. Not graded, but close at sea.` }); }
   const W = (ko, en) => notes.push({ ko, en, warn: true }), main = s.targets && s.targets[0] && r.byId && r.byId[s.targets[0].id], portDeg = Math.min(fa ? fa.dHdg : 0, r.portMax ?? 0), back = !!r.portBack && (fa ? fa.dHdg >= -5 : true), toPort = portDeg < -5 && !back;
   /* 우현으로 피했다가 손으로 되돌아오며 처음 침로를 좌현으로 지나친 경우: 실제로 좌현으로 돈 것이라 지적하되, 문구를 구분 */
   if (back && portDeg < -5 && s.rule && s.rule !== '-') W(`규칙 주의: 되돌아올 때 처음 침로를 좌현으로 ${Math.round(-portDeg)}° 지나쳤어요. 상대선이 아직 다가오는 중이면 좌현 변침이 돼요. 타를 일찍 풀거나 오토파일럿(AUTO)으로 침로를 맞추세요.`, `Rule check: returning to course you overshot ${Math.round(-portDeg)}° to port of your original heading while the other vessel was still approaching. Ease the rudder earlier or use AUTO to steady on course.`);

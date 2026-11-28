@@ -5,7 +5,7 @@ import { REGIONS, pickStart, routeClear, makeRoute } from './place.js';
 import { makeTraffic, LEVELS } from './traffic.js';
 import { rollWeather, rollCurrent, createWeatherRun, WX_CAP } from './weather.js';
 import { S, saveSettings } from './state.js';
-import { makeProj, velXY, cpaTcpa } from './geo.js';
+import { makeProj } from './geo.js';
 import { t, tl, lang } from './i18n.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -124,7 +124,7 @@ function showBrief(scn) {
   const R = window.Radar, en = lang() === 'en', again = !!(R.world && R.world.t > 1), was = again && R.isPaused();
   {
     R.setPaused(true);
-    const d = ownDlg('briefDlg', `${scn.id} · ${tl(scn)}`, `<p class="rule-chip">COLREG ${scn.rule}</p><p>${esc(tl(scn.brief))}</p><p class="small">${en ? 'Pass: every scenario ship passes at 0.3 NM or more, no collision, no grounding. Surrounding traffic keeps clear of you on its own and is not graded for distance.' : '합격: 시나리오 상대선과 모두 0.3 NM 이상 떨어져 지나가고, 충돌·좌초가 없으면 돼요. 주변 배(난이도)는 자선을 알아서 피하고, 거리는 합격 판정에 넣지 않아요.'}</p>`, `<button class="btn pri" type="button" data-go="1">${again ? (en ? 'Continue' : '계속') : en ? 'Start' : '시작'}</button>`);
+    const d = ownDlg('briefDlg', `${scn.id} · ${tl(scn)}`, `<p class="rule-chip">COLREG ${scn.rule}</p><p>${esc(tl(scn.brief))}</p><p class="small">${en ? 'Pass: no collision (within 0.03 NM) and no grounding during the 30-minute scenario. The closest distance and how often and how long scenario ships came within 0.3 NM are shown in the result but not graded. Surrounding traffic keeps clear of you on its own.' : '합격: 30분 동안 충돌(0.03 NM 이내)·좌초가 없으면 돼요. 가장 가까운 거리와 상대선이 0.3 NM 안에 들어온 횟수·시간은 결과에 보여 주지만 합격 판정에는 넣지 않아요. 주변 배(난이도)는 자선을 알아서 피해요.'}</p>`, `<button class="btn pri" type="button" data-go="1">${again ? (en ? 'Continue' : '계속') : en ? 'Start' : '시작'}</button>`);
     d.onclick = (e) => { if (e.target.closest('[data-go]') || e.target.closest('[data-x]')) d.close(); };
     d.onclose = () => R.setPaused(was); // 다시 볼 때 미리 일시정지해 두었으면 그대로
   }
@@ -136,9 +136,7 @@ function attachEval(def, init = null) {
   R.setLog((w) => { if (w.t - lastS >= 1) { lastS = w.t; log.sample(w); } }, () => log.dump());
   R.setScenarioTick((w) => {
     if (lastResult) return; const r = log.result();
-    const P = makeProj(w.own.lat, w.own.lon), ov = velXY(w.own.cog, w.own.sog);
-    const clear = w.t > 300 && w.targets.filter((g) => !String(g.id).startsWith('bg')).every((g) => { const x = P.x(g.lon), y = P.y(g.lat); return Math.hypot(x, y) > 2 && cpaTcpa({ x: 0, y: 0 }, ov, { x, y }, velXY(g.cog, g.sog)).tcpa < 0; });
-    if (r.collision || r.grounding || clear || w.t >= def.durationMin * 60) finish(evaluate(r));
+    if (r.collision || r.grounding || w.t >= def.durationMin * 60) finish(evaluate(r)); /* 30분까지 진행(상대선이 지나가도 일찍 끝내지 않음, 사용자 결정) */
   });
 }
 /* 이전 항해 이어 하기: 시나리오 도중이었으면 평가를 이어서 붙임 */
@@ -161,6 +159,7 @@ function finish(r) {
     <dl class="kv"><dt>${en ? 'Closest approach' : '가장 가까이 지난 거리'}</dt><dd>${r.minRange ? r.minRange.nm.toFixed(2) + ' NM' : '-'} · ${esc(nm)} · ${r.minRange ? mmss(r.minRange.t) : ''}</dd>
     ${r.bgMin ? `<dt>${en ? 'Closest surrounding ship (not graded)' : '주변 배와 가장 가까이(참고)'}</dt><dd>${r.bgMin.nm.toFixed(2)} NM · ${esc(r.bgMin.name || (en ? 'no AIS' : 'AIS 없는 배'))} · ${mmss(r.bgMin.t)}</dd>` : ''}
     <dt>${en ? 'First action' : '첫 조치'}</dt><dd>${fa ? `${mmss(fa.t)} · TCPA ${fa.tcpa != null ? fa.tcpa.toFixed(1) + ' min' : '-'} · ${fa.rng != null ? fa.rng.toFixed(2) + ' NM' : ''} · ${fa.dHdg >= 0 ? (en ? 'stbd ' : '우현 ') : en ? 'port ' : '좌현 '}${Math.abs(fa.dHdg).toFixed(0)}°${fa.dSpd < -0.5 ? ` · ${fa.dSpd.toFixed(1)} kn` : ''}` : en ? 'none' : '없음'}</dd>
+    <dt>${en ? 'Within 0.3 NM (not graded)' : '0.3 NM 안 접근(참고)'}</dt><dd>${r.near03 && r.near03.n ? `${r.near03.n}${en ? ' time(s)' : '회'} · ${en ? 'total ' : '총 '}${mmss(r.near03.sec)}` : en ? 'none' : '없음'}</dd>
     <dt>${en ? 'Collision / grounding' : '충돌 / 좌초'}</dt><dd>${r.collision ? (en ? 'collision' : '충돌') : '-'} / ${r.grounding ? (en ? 'grounded' : '좌초') : '-'}</dd></dl>
     <ul class="notes">${r.notes.map((n) => `<li${n.warn ? ' class="warn"' : ''}>${esc(tl(n))}</li>`).join('')}</ul></div>`;
   const d = ownDlg('resDlg', en ? 'Result' : '결과', html, `<button class="btn" type="button" data-r="again">${en ? 'Try again' : '다시 하기'}</button><button class="btn" type="button" data-r="menu">${en ? 'Scenarios' : '시나리오 목록'}</button><button class="btn pri" type="button" data-r="cont">${en ? 'Keep sailing' : '계속 항해'}</button>`);
