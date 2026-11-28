@@ -120,6 +120,8 @@ export function evaluatePort(r) {
 /* ---- 경로 위치(s = 경로 처음부터 간 거리 NM) ---- */
 function cumOf(path) { const c = [0]; for (let i = 0; i < path.wps.length - 1; i++) { const A = path.wps[i], B = path.wps[i + 1], P = makeProj(A.lat, A.lon); c.push(c[i] + Math.hypot(P.x(B.lon), P.y(B.lat))); } return c; }
 export function sOf(path, lat, lon) { const c = crossTrack(path, lat, lon), cum = path.cum || (path.cum = cumOf(path)); return cum[c.leg] + c.alongNM; }
+/* s가 속한 구간 번호(처음 앞이면 0, 끝을 지나면 마지막 구간) */
+export function legAt(path, s) { const cum = path.cum || (path.cum = cumOf(path)), n = path.wps.length - 1; if (s <= 0) return 0; for (let i = 0; i < n; i++) if (s < cum[i + 1]) return i; return n - 1; }
 export function pointAt(path, s, off = 0) {
   const cum = path.cum || (path.cum = cumOf(path)), n = path.wps.length - 1; let i = 0; while (i < n - 1 && s > cum[i + 1]) i++;
   return legPoint(path.wps[i], path.wps[i + 1], (s - cum[i]) / (cum[i + 1] - cum[i]), off);
@@ -142,8 +144,9 @@ export function portTraffic(port, mode, level = 'medium', rnd = Math.random) {
     let s0, kn, hold;
     if (mode === 'IN') { /* 출항선: 자선이 WP.17~P/S 구간 가운데에 올 때 마주침 */
       const own = pathOf(port, 'IN'), meetOwn = cumOf(own)[1] / 2, tMeet = meetOwn / OWN_IN_KN; s0 = tot - meetOwn - COUNTER_KN * tMeet - 1.2 * k; kn = COUNTER_KN; hold = null;
-    } else { s0 = -1.2 * k; kn = 0; hold = 'release'; } /* 입항선: WP.17 밖에서 기다리다 자선이 B/W를 지나면 출발 */
-    const p = pointAt(cp, s0, 0.6 * cp.half[Math.max(0, Math.min(cp.half.length - 1, cum.findIndex((c) => c > s0) - 1))]), hdg = steerOnPath(cp, p.lat, p.lon, 0.4, 0);
+    } else if (k === 0) { s0 = 0; kn = 0; hold = 'release'; } /* 입항선: WP.17에서 기다리다 자선이 B/W를 지나면 출발(입구 밖 넓은 구간에서 마주침) */
+    else { s0 = cum[1] + 0.16; kn = COUNTER_KN; hold = null; } /* 어려움 2번째 입항선: 바로 출발해 자선이 입구에 있는 동안 입구 밖에서 대기(입구 한 척 규칙) */
+    cp.cum = cum; const p = pointAt(cp, s0, 0.6 * cp.half[legAt(cp, s0)]), hdg = steerOnPath(cp, p.lat, p.lon, 0.4, 0);
     out.push({ id: 'p' + (k + 1), name: NAMES[k][0], mmsi: NAMES[k][1], L: 170 + 20 * k, ais: true, lat: p.lat, lon: p.lon, hdg, kn, meta: { kind: 'counter', path: cp.mode, hold } });
   }
   for (let k = 0; k < nT; k++) out.push({ id: 'bgTug' + (k + 1), name: '', L: 32, ais: false, rcs: 60, ...TUG[0], hdg: brgTo(TUG[0].lat, TUG[0].lon, TUG[1]), kn: 5, meta: { kind: 'tug' } });
@@ -181,16 +184,17 @@ export function portTick(w, st, dt) {
   const Po = makeProj(o.lat, o.lon), ov = velXY(o.cog ?? o.hdg, o.sog ?? 0);
   for (const g of w.targets) {
     const m = st.ships[g.id]; if (!m || !g.want) continue;
-    if (m.kind === 'anc') { g.want.kn = 0; continue; }
+    if (m.kind === 'anc') { g.want.kn = 0; if (!m.pos) m.pos = { lat: g.lat, lon: g.lon }; else { g.lat = m.pos.lat; g.lon = m.pos.lon; } continue; } /* 묘박: 조류에 밀리지 않음 */
     if (m.kind === 'counter') {
       const cp = st.paths[m.path], sc = sOf(cp, g.lat, g.lon), [e0, e1] = st.ent(cp), tot = cp.cum[cp.cum.length - 1];
       if (!m.released && st.mode === 'OUT' && so >= st.own.cum[1]) m.released = true; /* 출항: 자선이 B/W를 지나면 입항선 출발 */
-      const nearEnt = sc < e0 && e0 - sc < 0.5;
+      const nearEnt = sc < e0 && e0 - sc < 0.8; /* 정지 거리(10 kn→0 약 0.28 NM)+여유: 입구 0.5 NM 밖에서 멈춤 */
       if (m.released && nearEnt && busy && !m.waiting) { m.waiting = true; if (!m.waitSaid) { m.waitSaid = true; ev.push({ kind: 'vts', key: 'wait', shipName: g.name }); } }
       if (m.waiting && !busy) m.waiting = false;
       const stop = !m.released || m.waiting || (cp.mode === 'IN' && sc >= tot - 0.3);
       g.want.kn = stop ? 0 : COUNTER_KN;
-      const leg = Math.max(0, Math.min(cp.half.length - 1, cp.cum.findIndex((c) => c > sc) - 1));
+      if (stop && g.kn < 0.5) { if (!m.holdPos) m.holdPos = { lat: g.lat, lon: g.lon }; else { g.lat = m.holdPos.lat; g.lon = m.holdPos.lon; } } else m.holdPos = null; /* 대기 중에는 기관으로 제자리 유지(조류에 밀려 항로로 들어오지 않게) */
+      const leg = legAt(cp, sc);
       if (!stop) g.want.hdg = steerOnPath(cp, g.lat, g.lon, 0.4, 0.6 * cp.half[leg]);
       continue;
     }

@@ -47,14 +47,14 @@ export const SCENARIOS = [
   { id: 'S4', ko: '추월 · 여러 척', en: 'Overtaking · multiple ships', rule: '13', durationMin: 30,
     brief: { ko: '앞에 같은 방향으로 가는 느린 배를 추월하는 중이에요(본선이 추월선). 앞쪽에서 마주 오는 배와 우현에서 횡단하는 배도 있어요. 물표를 모두 포착하고, 진·상대 벡터를 바꿔 보며 누구를 먼저 피할지 정하세요.', en: 'You are overtaking a slower ship ahead. Another vessel approaches from ahead and a third crosses from starboard. Acquire all, switch between true and relative vectors, and decide your plan.' },
     own: { ...O4, tele: tele('FA') }, weather: { sea: 3, windFrom: 200, windMs: 8, rain: [] }, aids: [],
-    targets: [T(O4, 'o1', { name: 'SLOW TRADER', mmsi: 440544000, tcMin: 26, hdg: 0, kn: 7, L: 120, side: 0.05 }), T(O4, 'o2', { name: 'NORTH WIND', mmsi: 440555000, tcMin: 16, hdg: 182, kn: 13, L: 180, side: -0.7 }), T(O4, 'o3', { name: 'SEA ROSE', mmsi: 440566000, tcMin: 22, hdg: 290, kn: 11, L: 110, side: 0.2 }), T(O4, 'n1', { name: '', tcMin: 18, hdg: 90, kn: 5, L: 15, rcs: 5, h: 3, ais: false, side: -2.8 })] },
+    targets: [T(O4, 'o1', { name: 'SLOW TRADER', mmsi: 440544000, tcMin: 26, hdg: 0, kn: 7, L: 120, side: 0 }) /* 피추월선(유지선): 정확히 충돌 침로 — 추월선(본선)이 피해야 함(제13·17조) */, T(O4, 'o2', { name: 'NORTH WIND', mmsi: 440555000, tcMin: 16, hdg: 182, kn: 13, L: 180, side: -0.7 }), T(O4, 'o3', { name: 'SEA ROSE', mmsi: 440566000, tcMin: 22, hdg: 290, kn: 11, L: 110, side: 0.2 }), T(O4, 'n1', { name: '', tcMin: 18, hdg: 90, kn: 5, L: 15, rcs: 5, h: 3, ais: false, side: -2.8 })] },
   { id: 'S5', ko: '제한 시계 · 홍도 인근', en: 'Restricted visibility · off Hongdo', rule: '19', durationMin: 30, needsCoast: true, fixedWeather: true,
     brief: { ko: '홍도 동쪽 해역, 안개와 비로 눈으로는 아무것도 보이지 않아요. 레이더만으로 판단해야 합니다. Gain·Sea·Rain을 맞춰 반사가 약한 어선을 찾고, 정횡 앞쪽 배에 대해서는 좌현 변침을 피하세요(제19조). 안전한 속력도 생각하세요.', en: 'East of Hongdo in fog and rain; nothing is visible by eye. Tune gain, sea and rain to find a weak fishing boat, avoid turning to port for vessels forward of the beam (Rule 19), and keep a safe speed.' },
     own: { ...O5, tele: tele('HA') }, weather: { kind: 'showers', fog: true, visNM: 0.5, sea: 3, windFrom: 220, windMs: 11, interference: true, rain: [{ lat: 34.62, lon: 125.36, rNM: 1.6, rate: 8 }, { lat: 34.70, lon: 125.27, rNM: 1.2, rate: 5 }] },
     aids: [{ type: 'racon', letter: 'K', lat: 34.6455, lon: 125.2235 }],
     marks: [{ type: 'buoy', lat: 34.6455, lon: 125.2235, name: 'RACON K' }],
     message: { from: 440700001, text: 'SECURITE · 홍도 동방 어구 설치 해역, 소형 어선 조업 중 / fishing gear and small fishing boats east of Hongdo' },
-    targets: [T(O5, 'f1', { name: '', tcMin: 14, hdg: 265, kn: 3, L: 18, rcs: 6, h: 3, ais: false, side: 0.05 }), T(O5, 'x1', { name: 'GAGEO EXPRESS', mmsi: 440777000, tcMin: 24, hdg: 245, kn: 12, L: 150, side: 0.1 })] },
+    targets: [T(O5, 'f1', { name: '', tcMin: 14, hdg: 265, kn: 3, L: 18, rcs: 6, h: 3, ais: false, side: 0 }) /* 제한 시계: 레이더로만 탐지한 어선, 본선이 피해야 함(제19조) — 정확히 충돌 침로 */, T(O5, 'x1', { name: 'GAGEO EXPRESS', mmsi: 440777000, tcMin: 24, hdg: 245, kn: 12, L: 150, side: 0.1 })] },
 ];
 
 /* 자유 항해: 시드로 같은 배치를 다시 만듦 */

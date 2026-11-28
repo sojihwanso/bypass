@@ -34,7 +34,7 @@ export async function openStart(o = {}) {
   const html = `<div class="start">
     <p class="lead">${en ? 'Pick a collision-avoidance scenario. The radar starts in STANDBY: switch it on and wait for the warm-up.' : '충돌 회피 시나리오를 고르세요. 레이더는 대기(STBY)로 시작해요. 송신을 켜고 예열을 기다리세요.'}</p>
     <button type="button" class="edu-card" data-start="edu"><img src="../ecdis/edu/dodo_explain.webp" alt="" width="56" height="56"><span><b>${en ? 'Training course with Dodo (Korean)' : '도도와 함께하는 교육 과정'}</b><small>${en ? 'Five short courses, step by step.' : '처음이라면 여기부터! 레이더 켜기부터 충돌 회피까지 5과정 53단계를 하나씩 따라 해요.'}</small></span></button>
-    <div class="lvl" role="group" aria-label="${en ? 'Difficulty' : '난이도'}"><b>${en ? 'Difficulty (surrounding traffic)' : '난이도(주변 교통량)'}</b>${LEVELS.map((l) => `<button type="button" class="btn${S.sim.level === l ? ' on' : ''}" data-level="${l}">${LVL[l][en ? 1 : 0]}</button>`).join('')}<span class="small">${en ? 'Harder = more ships, and more of them without AIS.' : '어려울수록 배가 많고, AIS 없는 배도 많아져요.'}</span></div>
+    <div class="lvl" role="group" aria-label="${en ? 'Difficulty' : '난이도'}"><b>${en ? 'Difficulty (surrounding traffic)' : '난이도(주변 교통량)'}</b>${LEVELS.map((l) => `<button type="button" class="btn${S.sim.level === l ? ' on' : ''}" aria-pressed="${S.sim.level === l}" data-level="${l}">${LVL[l][en ? 1 : 0]}</button>`).join('')}<span class="small">${en ? 'Harder = more ships, and more of them without AIS.' : '어려울수록 배가 많고, AIS 없는 배도 많아져요.'}</span></div>
     <div class="scards">${SCENARIOS.map(card).join('')}</div>
     <div class="free"><b>${en ? 'Free navigation' : '자유 항해'}</b>
       <label>${en ? 'Ships' : '선박 수'} <select id="fN">${[0, 2, 4, 6, 8].map((v) => `<option${v === 4 ? ' selected' : ''}>${v}</option>`).join('')}</select></label>
@@ -46,12 +46,12 @@ export async function openStart(o = {}) {
   if (!dlg) { dlg = document.createElement('dialog'); dlg.id = 'startDlg'; document.getElementById('app').append(dlg); }
   dlg.innerHTML = `<div class="dlg-h"><span>${en ? 'Scenarios' : '시나리오'}</span><button class="btn" type="button" data-close="1">${en ? 'Close' : '닫기'}</button></div><div class="dlg-b">${html}</div>`;
   if (!dlg.open) dlg.showModal();
-  const was = dlg.dataset.open === '1' ? dlg._was : (R.isPaused ? R.isPaused() : false); dlg._was = was; dlg.dataset.open = '1'; R.setPaused(true);
+  const was = o.was ?? (dlg.dataset.open === '1' ? dlg._was : (R.isPaused ? R.isPaused() : false)); dlg._was = was; dlg.dataset.open = '1'; R.setPaused(true);
   let starting = false;
   dlg.onclose = () => { dlg.dataset.open = ''; if (!starting) R.setPaused(was); }; // 닫기만 하면 열기 전 일시정지 상태로
   dlg.onclick = (e) => {
     if (e.target.closest('[data-close]')) { dlg.close(); return; }
-    const lv = e.target.closest('[data-level]'); if (lv) { S.sim.level = lv.dataset.level; saveSettings(); dlg.querySelectorAll('[data-level]').forEach((b) => b.classList.toggle('on', b === lv)); return; }
+    const lv = e.target.closest('[data-level]'); if (lv) { S.sim.level = lv.dataset.level; saveSettings(); dlg.querySelectorAll('[data-level]').forEach((b) => { b.classList.toggle('on', b === lv); b.setAttribute('aria-pressed', String(b === lv)); }); return; }
     starting = true;
     const tu = window.Tutor, tuSt = tu && tu.state && tu.state(); if ((e.target.closest('[data-scn]') || e.target.closest('[data-start="free"]') || e.target.closest('[data-start="resume"]')) && tu && tu.stop && !(tuSt && tuSt.course === 'R5')) tu.stop(); // 교육 중(과정 목록·완료 창 포함, 시나리오 과정 R5 밖)에 다른 항해를 고르면 교육을 끝냄 // 교육 중(시나리오 과정 R5 밖)에 시나리오를 고르면 교육을 끝냄
     const c = e.target.closest('[data-scn]'); if (c && !c.disabled) { dlg.close(); startScenario(c.dataset.scn); return; }
@@ -115,7 +115,8 @@ async function runScenario1(scn, o = {}, my = startGen, w0 = window.Radar.world)
   lastResult = null; current = scn;
   const def = pr.def; R.setPaused(false);
   const where = pr.region ? ` · ${tl(pr.region)}` : '';
-  R.startWorld({ name: (o.free ? (en ? 'Free navigation' : '자유 항해') : scn.portId ? tl(scn) : `${scn.id} · ${tl(scn)}`) + where, own: def.own, targets: def.targets, weather: pr.weather, aids: def.aids, marks: def.marks || [], needsCoast: !!scn.needsCoast || !!scn.portId, traffic: { level: pr.level }, route: pr.route, save: !eduOn() && scn.save !== false, scnId: o.free ? null : scn.id, portId: def.portId, mode: def.mode, seed: def.seed, coastOverride: def.coastOverride, landFine: def.landFine, iala: def.iala });
+  const nm = (L) => (o.free ? (L === 'en' ? 'Free navigation' : '자유 항해') : scn.portId ? scn[L] : `${scn.id} · ${scn[L]}`) + (pr.region ? ` · ${pr.region[L] ?? pr.region.ko}` : ''); /* 헤더 이름: 언어를 바꾸면 따라 바뀜 */
+  R.startWorld({ name: (o.free ? (en ? 'Free navigation' : '자유 항해') : scn.portId ? tl(scn) : `${scn.id} · ${tl(scn)}`) + where, nameL: { ko: nm('ko'), en: nm('en') }, own: def.own, targets: def.targets, weather: pr.weather, aids: def.aids, marks: def.marks || [], needsCoast: !!scn.needsCoast || !!scn.portId, traffic: { level: pr.level }, route: pr.route, save: !eduOn() && scn.save !== false, scnId: o.free ? null : scn.id, portId: def.portId, mode: def.mode, seed: def.seed, coastOverride: def.coastOverride, landFine: def.landFine, iala: def.iala });
   lastStarted = R.world; // 앞서 시작된 우리 시나리오는 '다른 세계'로 치지 않음
   R.setWeatherRun(createWeatherRun({ rnd: pr.rnd, enabled: S.sim.weatherOn, cap: WX_CAP[pr.level] || WX_CAP.hard }));
   if (scn.portId) { applyPreset(S, 'HARBOR'); R.setRange(1.5); } /* 히든 시나리오: 맞춤 영상 HARBOR(GAIN 55) → 아래에서 GAIN 0으로 */
@@ -153,7 +154,7 @@ export function resumeVoyage() {
   const R = window.Radar; lastResult = null; curLog = null; current = null;
   const s = R.resume(); if (!s) return false;
   const scn = s.scn && SCENARIOS.find((x) => x.id === s.scn);
-  if (scn) { current = scn; attachEval({ ...scn, ...R.world.def, rule: scn.rule, durationMin: scn.durationMin, own: scn.own }, s.log); }
+  if (scn) { current = scn; attachEval({ ...scn, ...R.world.def, rule: scn.rule, durationMin: Math.max(scn.durationMin, Math.ceil((R.world.t || 0) / 60) + 1), own: scn.own }, s.log); } /* 예전 저장본(35분 시나리오)이 30분을 넘겼으면 1분 더 보여 준 뒤 결과 */
   return true;
 }
 /* 시나리오별 지난 결과(시작 화면 카드에 표시). best = 합격한 것 중 가장 가까운 거리가 가장 큰 값 */
@@ -173,7 +174,7 @@ function finish(r) {
     <ul class="notes">${r.notes.map((n) => `<li${n.warn ? ' class="warn"' : ''}>${esc(tl(n))}</li>`).join('')}</ul></div>`;
   const d = ownDlg('resDlg', en ? 'Result' : '결과', html, `<button class="btn" type="button" data-r="again">${en ? 'Try again' : '다시 하기'}</button><button class="btn" type="button" data-r="menu">${en ? 'Scenarios' : '시나리오 목록'}</button><button class="btn pri" type="button" data-r="cont">${en ? 'Keep sailing' : '계속 항해'}</button>`);
   let next = null;
-  d.onclose = () => { if (next === 'again') runScenario(current); else if (next === 'menu') openStart(); else R.setPaused(false); next = null; };
+  d.onclose = () => { if (next === 'again') runScenario(current); else if (next === 'menu') openStart({ was: false }); else R.setPaused(false); next = null; };
   d.onclick = (e) => { if (e.target.closest('[data-x]')) { d.close(); return; } const b = e.target.closest('[data-r]'); if (!b) return; next = b.dataset.r === 'cont' ? null : b.dataset.r; d.close(); };
 }
 
@@ -182,24 +183,24 @@ const PORT_LV = ['easy', 'medium', 'hard'];
 let portLevel = 'medium';
 const ATTR = () => (lang() === 'en' ? 'Busan coastline & breakwaters: © OpenStreetMap contributors (ODbL). Some aids to navigation are a training layout, not for navigation.' : '부산항 해안선·방파제: © OpenStreetMap contributors (ODbL). 항로 표지 일부는 훈련용 가상 배치이며 항해용이 아님.');
 export function startPort(mode, level = portLevel, o = {}) {
-  const tu = window.Tutor; if (tu && tu.stop && window.RadarEdu && window.RadarEdu.active()) tu.stop(); /* 교육 중이면 교육을 끝내고 시작 */
+  const tu = window.Tutor; if (tu && tu.stop) tu.stop(); /* 교육(과정 목록만 열린 경우 포함)을 끝내고 시작 */
   const def = portDef('BUSAN', mode, level, o.seed ?? ((Math.random() * 1e9) >>> 0));
   return runScenario(def, { ...o, level });
 }
-export function openPortMenu() {
+export function openPortMenu(o = {}) {
   const R = window.Radar, en = lang() === 'en', recs = records(), P = PORTS.BUSAN;
   const LVn = (l) => (LVL[l] || LVL.medium)[en ? 1 : 0];
   const rec = (id) => { const r = recs[id]; if (!r) return ''; return `<span class="rec ${r.pass ? 'ok' : 'ng'}">${r.pass ? (en ? '✓ PASS' : '✓ 합격') : en ? '✗ not passed' : '✗ 불합격'} · ${r.nm != null ? r.nm.toFixed(2) + ' NM' : '-'} · ${esc(LVn(r.lv))}</span>`; };
   const card = (m) => `<button type="button" class="scard" data-port="${m}"><span class="sid">${m === 'IN' ? (en ? 'ARR' : '입항') : en ? 'DEP' : '출항'}</span><b>${esc(tl(P))} ${m === 'IN' ? (en ? 'arrival' : '입항') : en ? 'departure' : '출항'}</b><span class="sb">${m === 'IN' ? (en ? 'From WP.17 off Oryukdo through the breakwater entrance to the turning basin (stop at 3 kn or less).' : '오륙도 바깥 WP.17에서 방파제 입구를 지나 선회장까지(3 kn 이하로 정지).') : en ? 'From the turning basin out through the entrance, past the pilot station.' : '선회장에서 출발해 방파제 입구를 지나 도선점 바깥까지.'}</span>${rec('PORT-BUSAN-' + m)}</button>`;
   const html = `<div class="start"><p class="lead">${en ? `Narrow-water radar practice at 0.75–1.5 NM. Pass: no grounding or collision, other vessels at ${PORT_PASS_NM} NM or more, never off the channel for over 30 s, and arrive within the time limit.` : `좁은 항내에서 0.75~1.5 NM 거리로 레이더를 쓰는 연습이에요. 합격: 좌초·충돌 없이, 상대선과 ${PORT_PASS_NM} NM 이상, 항로를 30초 넘게 벗어나지 않고, 제한 시간 안에 도착.`}</p>
-    <div class="lvl" role="group" aria-label="${en ? 'Difficulty' : '난이도'}"><b>${en ? 'Difficulty (traffic)' : '난이도(교통량)'}</b>${PORT_LV.map((l) => `<button type="button" class="btn${portLevel === l ? ' on' : ''}" data-plv="${l}">${LVn(l)}</button>`).join('')}</div>
+    <div class="lvl" role="group" aria-label="${en ? 'Difficulty' : '난이도'}"><b>${en ? 'Difficulty (traffic)' : '난이도(교통량)'}</b>${PORT_LV.map((l) => `<button type="button" class="btn${portLevel === l ? ' on' : ''}" aria-pressed="${portLevel === l}" data-plv="${l}">${LVn(l)}</button>`).join('')}</div>
     <div class="scards">${card('IN')}${card('OUT')}</div><p class="small attr">${esc(ATTR())}</p></div>`;
-  const was = R.isPaused ? R.isPaused() : false; R.setPaused(true);
+  const was = o.was ?? (R.isPaused ? R.isPaused() : false); R.setPaused(true); /* 결과 창에서 왔으면 닫을 때 진행(결과 창의 정지를 물려받지 않음) */
   const d = ownDlg('portDlg', en ? 'Hidden scenario' : '히든 시나리오', html, ''); let starting = false;
   d.onclose = () => { if (!starting) R.setPaused(was); };
   d.onclick = (e) => {
     if (e.target.closest('[data-x]')) { d.close(); return; }
-    const lv = e.target.closest('[data-plv]'); if (lv) { portLevel = lv.dataset.plv; d.querySelectorAll('[data-plv]').forEach((b) => b.classList.toggle('on', b === lv)); return; }
+    const lv = e.target.closest('[data-plv]'); if (lv) { portLevel = lv.dataset.plv; d.querySelectorAll('[data-plv]').forEach((b) => { b.classList.toggle('on', b === lv); b.setAttribute('aria-pressed', String(b === lv)); }); return; }
     const c = e.target.closest('[data-port]'); if (c) { starting = true; d.close(); startPort(c.dataset.port, portLevel); }
   };
   return d;
@@ -207,9 +208,9 @@ export function openPortMenu() {
 function showPortBrief(def) {
   const R = window.Radar, en = lang() === 'en', again = !!(R.world && R.world.t > 1), was = again && R.isPaused(); R.setPaused(true);
   const body = `<p class="rule-chip">COLREG 9 · IALA B</p><p>${def.mode === 'IN' ? (en ? 'Arrival: WP.17 → 348° → pilot station → 287° → B/W → 305° → turning basin. Stop in the basin at 3 kn or less.' : '입항: WP.17 → 348° → 도선점 → 287° → B/W → 305° → 선회장. 선회장 원 안에서 3 kn 이하로 멈추면 끝이에요.') : en ? 'Departure: turning basin → 125° → B/W → 107° → pilot station → 168°. Ends 1 NM past the pilot station.' : '출항: 선회장 → 125° → B/W → 107° → 도선점 → 168°. 도선점을 지나 1 NM 가면 끝이에요.'}</p>
-    <p>${en ? 'Tips: true motion (TM) with North-up is easier here. Keep to the starboard side, use PI lines for the channel and VRM for the breakwaters. Entrance: red light (Middle B/W) and green light (Jodo B/W). Map: dashed channel limits and waypoints (MAP · CHANNEL).' : '도움말: 진운동(TM)·N.Up이 편해요. 항로 오른쪽으로 붙어 가고, PI 선으로 항로를, VRM으로 방파제 거리를 지켜보세요. 입구: 빨강 등(중앙 방파제)·초록 등(조도 방파제). 레이더 맵에 항로 경계(점선)와 변침점이 나와요(MAP · 항로).'}</p>
+    <p>${en ? 'Tips: true motion (TM) with North-up is easier here. Keep to the starboard side, use PI lines for the channel and VRM for the breakwaters. Entrance: red light (Middle B/W) and green light (Jodo B/W). Map: dashed channel limits and waypoints (MAP: CHANNEL).' : '도움말: 진운동(TM)·N.Up이 편해요. 항로 오른쪽으로 붙어 가고, PI 선으로 항로를, VRM으로 방파제 거리를 지켜보세요. 입구: 빨강 등(중앙 방파제)·초록 등(조도 방파제). 레이더 맵에 항로 경계(점선)와 변침점이 나와요(메뉴 「맵: 항로」).'}</p>
     <p class="small">${en ? `Pass: no grounding/collision, other vessels ≥ ${PORT_PASS_NM} NM, never off the channel > 30 s, arrive within ${def.durationMin} min. PI line colours follow IALA B for this scenario.` : `합격: 좌초·충돌 없음, 상대선 ${PORT_PASS_NM} NM 이상, 항로 이탈 30초 이내, ${def.durationMin}분 안에 도착. 이 시나리오 동안 PI 선 색은 IALA B(한국)로 바꿔요.`}</p><p class="small attr">${esc(ATTR())}</p>`;
-  const d = ownDlg('briefDlg', tl(def), body, `<button class="btn pri" type="button" data-go="1">${en ? 'Start' : '시작'}</button>`);
+  const d = ownDlg('briefDlg', tl(def), body, `<button class="btn pri" type="button" data-go="1">${again ? (en ? 'Continue' : '계속') : en ? 'Start' : '시작'}</button>`);
   d.onclick = (e) => { if (e.target.closest('[data-go]') || e.target.closest('[data-x]')) d.close(); };
   d.onclose = () => R.setPaused(was);
 }
@@ -234,6 +235,6 @@ function finishPort(r) {
     <ul class="notes">${r.notes.map((n) => `<li${n.warn ? ' class="warn"' : ''}>${esc(tl(n))}</li>`).join('')}</ul><p class="small attr">${esc(ATTR())}</p></div>`;
   const d = ownDlg('resDlg', en ? 'Result' : '결과', html, `<button class="btn" type="button" data-r="again">${en ? 'Try again' : '다시 하기'}</button><button class="btn" type="button" data-r="menu">${en ? 'Hidden scenarios' : '히든 시나리오'}</button><button class="btn pri" type="button" data-r="cont">${en ? 'Keep sailing' : '계속 항해'}</button>`);
   let next = null;
-  d.onclose = () => { if (next === 'again') startPort(def.mode, def.level); else if (next === 'menu') openPortMenu(); else R.setPaused(false); next = null; };
+  d.onclose = () => { if (next === 'again') startPort(def.mode, def.level); else if (next === 'menu') openPortMenu({ was: false }); else R.setPaused(false); next = null; };
   d.onclick = (e) => { if (e.target.closest('[data-x]')) { d.close(); return; } const b = e.target.closest('[data-r]'); if (!b) return; next = b.dataset.r === 'cont' ? null : b.dataset.r; d.close(); };
 }

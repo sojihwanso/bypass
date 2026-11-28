@@ -15,14 +15,14 @@ import { initUI } from './ui.js';
 import { initConning } from './conning.js';
 import { initKeys, KEYMAP } from './keys.js';
 import { drawOverlay } from './overlay.js';
-import { t, lang } from './i18n.js';
+import { t, tl, lang } from './i18n.js';
 import { initStart } from './start.js';
 import { initHelp } from './help.js';
 import { COL, piColor } from './overlay.js';
 import { createWeatherRun, stepWeather, windDrift, speedLoss, weatherLabel, currentLabel, WX_CAP, rollWeather, rollCurrent } from './weather.js';
 import { refillTraffic, steerTraffic, trafficRing } from './traffic.js';
 import { routeClear } from './place.js';
-import { mergePortLand } from './portland.js';
+import { mergePortLand, decodePortCoast } from './portland.js';
 import { BUSAN_COAST } from './ports/busan-coast.js';
 import { PORTS, createPortState, portTick, vtsText, channelBounds } from './port.js';
 const PORT_COAST = { BUSAN: BUSAN_COAST }; /* 히든 시나리오 정밀 해안선 */
@@ -81,7 +81,7 @@ export function startWorld(def) {
   const bb = { lat0: def.own.lat - 0.6, lat1: def.own.lat + 0.6, lon0: def.own.lon - 0.75, lon1: def.own.lon + 0.75 };
   const myW = W;
   if (restored && !def.portId) setRange(S.disp.rangeNM);
-  loadLand(bb).then((L) => { if (W !== myW) return; const pc = def.coastOverride && PORT_COAST[def.coastOverride]; if (pc) L = { rings: mergePortLand(L.ok ? L.rings : [], pc), ok: true }; /* 히든 시나리오: 항구 구역은 정밀 해안선 */ W.land = { rings: L.rings, ok: L.ok, tried: true, heightM: 100 }; if (L.ok) alerts.resolve('coastfail'); coastKey = ''; scene = buildScene({ own: ownScene(), targets: W.targets, land: W.land, weather: W.weather, aids: W.aids, band: S.ctrl.band, pulse: S.ctrl.pulse, seed: scene.seed, fine: def.landFine || null }); if (!L.ok) alerts.raise('coastfail', 'C', lang() === 'en' ? 'Coastline data unavailable' : '해안선 데이터 없음'); });
+  loadLand(bb).then((L) => { if (W !== myW) return; const pc = def.coastOverride && PORT_COAST[def.coastOverride]; let portFrom; if (pc) { const m = mergePortLand(L.ok ? L.rings : [], pc), nP = decodePortCoast(pc).length; portFrom = m.length - nP; L = { rings: m, ok: true }; } /* 히든 시나리오: 항구 구역은 정밀 해안선(뒤쪽 portFrom번째부터) */ W.land = { rings: L.rings, ok: L.ok, tried: true, heightM: 100, portFrom }; if (L.ok) alerts.resolve('coastfail'); coastKey = ''; scene = buildScene({ own: ownScene(), targets: W.targets, land: W.land, weather: W.weather, aids: W.aids, band: S.ctrl.band, pulse: S.ctrl.pulse, seed: scene.seed, fine: def.landFine || null }); if (!L.ok) alerts.raise('coastfail', 'C', lang() === 'en' ? 'Coastline data unavailable' : '해안선 데이터 없음'); });
   return W;
 }
 const ownScene = () => ({ lat: W.own.lat, lon: W.own.lon, hdg: W.own.hdg, antH: W.own.antH });
@@ -268,7 +268,7 @@ function overlayModel() {
   let coast = null;
   if (S.disp.map.on && S.disp.map.coast && W.land.rings.length) {
     // 해안 점은 바다 좌표(NM)로 한 번만 바꿔 두고(땅이 바뀔 때만), 화면 좌표는 회전·축척 곱셈만(점마다 삼각함수 없이)
-    if (coastWorld.land !== W.land) coastWorld = { land: W.land, rings: W.land.rings.map((r) => { const step = Math.max(2, Math.floor(r.length / 2 / (W.def.portId ? 3000 : 400)) * 2), a = []; for (let i = 0; i < r.length; i += step) a.push(P.x(r[i]), P.y(r[i + 1])); return Float64Array.from(a); }) };
+    if (coastWorld.land !== W.land) coastWorld = { land: W.land, rings: W.land.rings.map((r, ri) => { const step = Math.max(2, Math.floor(r.length / 2 / (W.land.portFrom != null && ri >= W.land.portFrom ? 3000 : 400)) * 2), a = []; /* 정밀(항구) 고리만 점 3000개까지 */ for (let i = 0; i < r.length; i += step) a.push(P.x(r[i]), P.y(r[i + 1])); return Float64Array.from(a); }) };
     ppi.toScreen(0, 0); const G = ppi.geom(), u = ppi.upBrg() * D, cu = Math.cos(u), su = Math.sin(u), k = G.R / V.rangeNM, dp = G.dpr;
     const key = [G.R, G.ox, G.oy, u, oxy.x, oxy.y, V.rangeNM].join('|');
     if (key !== coastKey) { coastKey = key; coastScreen = coastWorld.rings.map((a) => { const pts = new Array(a.length / 2); for (let i = 0, j = 0; i < a.length; i += 2, j++) { const dx = a[i] - oxy.x, dy = a[i + 1] - oxy.y; pts[j] = { x: (G.ox + k * (dx * cu - dy * su)) / dp, y: (G.oy - k * (dy * cu + dx * su)) / dp }; } return pts; }); }
@@ -324,7 +324,7 @@ function refreshUI() {
     cursor: cur, ebl: tools.ebl.map((e, i) => ({ on: e.on, brg: S.disp.eblRef === 'REL' ? wrap360(tools.eblTrue(i, o.hdg) - o.hdg) : tools.eblTrue(i, o.hdg) })),
     vrm: tools.vrm.map((v) => ({ on: v.on, rng: toUnit(v.rng, S.disp.vrmUnit), ttg: S.disp.vrmTTG && v.on ? vrmTTG(v.rng, o.sog) : null })),
     tgt: (syncLetters(), [...selected].sort((p, q) => (letterOf.get(p) || 'Z').localeCompare(letterOf.get(q) || 'Z')).map(slot).filter(Boolean)), ttN: tracker.targets().filter((g) => g.state !== 'lost').length, aisN: ais.list().filter((a) => a.status !== 'lost').length,
-    alertTop: top ? { ...top, time: `${pad(((top.tSim % 86400) / 3600) | 0)}:${pad(((top.tSim % 3600) / 60) | 0)}:${pad((top.tSim % 60) | 0)}` } : null, alertN: alerts.list().length, scnName: W.name, free: !W.def.scnId && !/^S\d/.test(W.name), msgN: ais.messages().length, ref: refPt, pi: { brg: `${tools.pi.brg.toFixed(1).padStart(5, '0')}°`, int: `${tools.pi.interval.toFixed(2)} NM` }, watchLeft: S.alert.watch ? (() => { const s = Math.max(0, S.alert.watch * 60 - (performance.now() - lastUser) / 1000); return `${pad((s / 60) | 0)}:${pad((s % 60) | 0)}`; })() : '',
+    alertTop: top ? { ...top, time: `${pad(((top.tSim % 86400) / 3600) | 0)}:${pad(((top.tSim % 3600) / 60) | 0)}:${pad((top.tSim % 60) | 0)}` } : null, alertN: alerts.list().length, scnName: W.def.nameL ? tl(W.def.nameL) : W.name, free: !W.def.scnId && !/^S\d/.test(W.name), msgN: ais.messages().length, ref: refPt, pi: { brg: `${tools.pi.brg.toFixed(1).padStart(5, '0')}°`, int: `${tools.pi.interval.toFixed(2)} NM` }, watchLeft: S.alert.watch ? (() => { const s = Math.max(0, S.alert.watch * 60 - (performance.now() - lastUser) / 1000); return `${pad((s / 60) | 0)}:${pad((s % 60) | 0)}`; })() : '',
   });
   conn && conn.refresh();
   const tb = document.getElementById('bxTrial'); if (tb) { tb.hidden = S.tt.trialMode === 'OFF'; tb.querySelector('#trC').textContent = trialSet.course.toFixed(0).padStart(3, '0') + '°'; tb.querySelector('#trS').textContent = trialSet.speed.toFixed(1) + ' kn'; tb.querySelector('#trD').textContent = S.tt.trialDelay + ' min'; }
@@ -593,10 +593,10 @@ window.RadarEdu = {
 if (!TEST) starter.openStart();
 if (TEST) {
   window.RadarTest = {
-    ready: true, S, ppi, emit, startPort: (m, lv, o) => starter.startPort(m, lv, o), mapModel: () => overlayModel(), setLang: (l) => { S.ui.lang = l; emit('settings', 'ui.lang'); }, pauseParts: () => ({ paused, hiddenPause }), weatherRun: () => wxRun, scene: () => scene, colors: () => COL, piColor, selected: () => selected, menuPaths: () => MENU.flatMap((x) => x.items.map((i) => i.path)), menuOpts: (p) => (MENU.flatMap((x) => x.items).find((i) => i.path === p) || { opts: [] }).opts, setSpeed, speed: () => speed, proj: makeProj, view: () => V, setView: (o) => Object.assign(V, o), setRange: (r) => { S.disp.rangeNM = r; V.rangeNM = r; }, frames: () => frames, tick, frameAt, own, paused: () => paused || hiddenPause, setPaused: (p) => { paused = p; }, KEYMAP, keyHandlers,
+    ready: true, S, ppi, emit, startPort: (m, lv, o) => starter.startPort(m, lv, o), mapModel: () => overlayModel(), setLang: (l) => { S.ui.lang = l; ui.applyLang(); emit('settings', 'ui.lang'); }, coastCaps: () => { if (!coastWorld.rings || !W.land.rings.length) return null; const pf = W.land.portFrom ?? W.land.rings.length; let ecdisMax = 0, portAny = false; coastWorld.rings.forEach((a, i) => { if (i < pf) ecdisMax = Math.max(ecdisMax, a.length / 2); else portAny = true; }); return { ecdisMax, portAny, pf }; }, pauseParts: () => ({ paused, hiddenPause }), weatherRun: () => wxRun, scene: () => scene, colors: () => COL, piColor, selected: () => selected, menuPaths: () => MENU.flatMap((x) => x.items.map((i) => i.path)), menuOpts: (p) => (MENU.flatMap((x) => x.items).find((i) => i.path === p) || { opts: [] }).opts, setSpeed, speed: () => speed, proj: makeProj, view: () => V, setView: (o) => Object.assign(V, o), setRange: (r) => { S.disp.rangeNM = r; V.rangeNM = r; }, frames: () => frames, tick, frameAt, own, paused: () => paused || hiddenPause, setPaused: (p) => { paused = p; }, KEYMAP, keyHandlers,
     radar: { set: setRadar, toggle: toggleTx, get state() { return radar.state; }, get warmLeft() { return radar.warmLeft; } }, world: () => W, tracker: { targets: () => tracker.targets() },
     newWorld: (o) => { if (S.ctrl.gain < 20) S.ctrl.gain = 65; startWorld(freeDef(o)); }, /* 점검용 세계는 영상이 보이게(시작 화면의 GAIN 0과 별개) */ tgtScreen: (id) => { const g = W.targets.find((x) => x.id === id), r = relOf(P.x(g.lon), P.y(g.lat)), p = ppi.toScreen(r.brg, r.rng); return { sx: p.x, sy: p.y }; },
-    coastDebug: () => { if (!coastScreen || !W.land.rings.length) return null; let maxErr = 0, n = 0; const r = W.land.rings[0], step = Math.max(2, Math.floor(r.length / 2 / (W.def.portId ? 3000 : 400)) * 2); coastScreen[0].forEach((p, j) => { const i = j * step, q = relOf(P.x(r[i]), P.y(r[i + 1])), t = ppi.toScreen(q.brg, q.rng); maxErr = Math.max(maxErr, Math.hypot(t.x - p.x, t.y - p.y)); n++; }); return { n, maxErr }; },
+    coastDebug: () => { if (!coastScreen || !W.land.rings.length) return null; let maxErr = 0, n = 0; const r = W.land.rings[0], step = Math.max(2, Math.floor(r.length / 2 / (W.land.portFrom === 0 ? 3000 : 400)) * 2); coastScreen[0].forEach((p, j) => { const i = j * step, q = relOf(P.x(r[i]), P.y(r[i + 1])), t = ppi.toScreen(q.brg, q.rng); maxErr = Math.max(maxErr, Math.hypot(t.x - p.x, t.y - p.y)); n++; }); return { n, maxErr }; },
     ruler: () => ruler, conn: () => conn, onLand: (lat, lon) => !!(W && W.land.ok && pointInLand(W.land.rings, lat, lon)), cursorAct, menuAction, trails: () => trails, select, refreshUI, onHidden: setHidden, saveNow, resume, alerts: () => alerts,
     startScenario: (id, o) => starter.startScenario(id, o), resumeVoyage: () => starter.resumeVoyage(), lastResult: () => starter.lastResult(), openStart: (o) => starter.openStart(o), finishNow: () => starter.finishNow(), shouldBeep, antenna: () => ant, relayout: () => { fit(); }, layoutMode: () => ui.layoutMode(), qbInside: () => ui.qbInside(), forceState: (o) => { if (o.az) { azZones = o.az; tracker.setZones(o.az); } if (o.speed) speed = o.speed; if (o.pi !== undefined) piOn = o.pi; }, uiState: () => ({ az: azZones.length > 0, speed, pi: piOn, off: !!offCenter }), tickSim, sim: { setAuto, setRudderOrder, setTelegraph }, menuItems: () => MENU.flatMap((m) => m.items.map((i) => (lang() === 'en' ? i.en : i.ko))),
   };

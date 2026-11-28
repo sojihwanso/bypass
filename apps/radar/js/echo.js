@@ -291,7 +291,7 @@ export function detect(sc, c, rnd = Math.random) {
         if (rdb - k - stc > thr && db - att - rdb < 10) continue;
       } else if (db - att - stc <= thr) continue;
     }
-    if (hasLand(sc)) { const sb = Math.sin(t.brg * D2R), cb = Math.cos(t.brg * D2R); let hid = false; for (let r = 0.05; r < t.R; r += 0.03) if (landAtSc(sc, sc.ox + r * sb, sc.oy + r * cb)) { hid = true; break; } if (hid) continue; }
+    if (hasLand(sc)) { const sb = Math.sin(t.brg * D2R), cb = Math.cos(t.brg * D2R); let hid = false; const st = sc.fine && t.R < sc.fine.half ? sc.fine.cell : 0.03; /* 정밀 격자 안은 칸 크기로 걸어 얇은 방파제도 가림 */ for (let r = 0.05; r < t.R; r += st) if (landAtSc(sc, sc.ox + r * sb, sc.oy + r * cb)) { hid = true; break; } if (hid) continue; }
     const R = t.R + g() * (rangeResM(pulseUs) / 2 / NM_M), b = (t.brg + g() * (band.beamDeg / 6)) * D2R;
     out.push({ x: R * Math.sin(b), y: R * Math.cos(b), strength: db - thr });
   }
