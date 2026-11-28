@@ -56,13 +56,13 @@ const NOISE_DB = new Float32Array(4096);
 const hash = (a, b) => { let h = Math.imul(a ^ 0x9e3779b9, 0x85ebca6b) ^ Math.imul((b + 0x7f4a7c15) | 0, 0xc2b2ae35); h ^= h >>> 16; h = Math.imul(h, 0x7feb352d); h ^= h >>> 15; h = Math.imul(h, 0x846ca68b); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
 
 /* ---- 육지 격자(스캔라인 채움) ---- */
-function buildLandGrid(rings, proj, ox, oy) {
-  const x0 = ox - LAND_HALF, y0 = oy - LAND_HALF, n = Math.ceil((2 * LAND_HALF) / LAND_CELL);
-  const g = { x0, y0, cell: LAND_CELL, n, data: new Uint8Array(n * n), any: false };
+function buildLandGrid(rings, proj, ox, oy, CELL = LAND_CELL, HALF = LAND_HALF) {
+  const x0 = ox - HALF, y0 = oy - HALF, n = Math.ceil((2 * HALF) / CELL);
+  const g = { x0, y0, cell: CELL, half: HALF, n, data: new Uint8Array(n * n), any: false };
   for (const r of rings) {
     const m = r.length / 2, xs = new Float64Array(m), ys = new Float64Array(m);
     let ymin = 1e9, ymax = -1e9;
-    for (let i = 0; i < m; i++) { xs[i] = (proj.x(r[i * 2]) - x0) / LAND_CELL; ys[i] = (proj.y(r[i * 2 + 1]) - y0) / LAND_CELL; if (ys[i] < ymin) ymin = ys[i]; if (ys[i] > ymax) ymax = ys[i]; }
+    for (let i = 0; i < m; i++) { xs[i] = (proj.x(r[i * 2]) - x0) / CELL; ys[i] = (proj.y(r[i * 2 + 1]) - y0) / CELL; if (ys[i] < ymin) ymin = ys[i]; if (ys[i] > ymax) ymax = ys[i]; }
     const r0 = Math.max(0, Math.floor(ymin)), r1 = Math.min(n - 1, Math.ceil(ymax));
     if (r1 < r0) continue;
     const rows = Array.from({ length: r1 - r0 + 1 }, () => []);
@@ -79,13 +79,17 @@ function buildLandGrid(rings, proj, ox, oy) {
   return g;
 }
 const landAt = (g, x, y) => { const c = Math.floor((x - g.x0) / g.cell), r = Math.floor((y - g.y0) / g.cell); return c >= 0 && r >= 0 && c < g.n && r < g.n ? g.data[r * g.n + c] : 0; };
+const hasLand = (sc) => !!((sc.grid && sc.grid.any) || (sc.fine && sc.fine.any));
+/* 정밀 격자(히든 시나리오)가 있고 그 범위 안이면 정밀 격자, 아니면 거친 격자 */
+const landAtSc = (sc, x, y) => { const f = sc.fine; if (f && x >= f.x0 && y >= f.y0 && x < f.x0 + f.n * f.cell && y < f.y0 + f.n * f.cell) return landAt(f, x, y); return landAt(sc.grid, x, y); };
 const landDb = (R) => 64 - 30 * Math.log10(R + 0.5);
 
 /* ---- 장면 ---- */
-export function buildScene({ own, targets = [], land = { rings: [], heightM: 100 }, weather = {}, aids = [], band = 'X', pulse = 'M1', seed = 1 }) {
+export function buildScene({ own, targets = [], land = { rings: [], heightM: 100 }, weather = {}, aids = [], band = 'X', pulse = 'M1', seed = 1, fine = null }) {
   const sc = { band, pulse, seed, land, weather: { sea: 0, windFrom: 0, rain: [], ducting: false, interference: false, ...weather }, aids, scan: 0, t: 0, cache: {} };
   sc.proj = makeProj(own.lat, own.lon);
   sc.grid = land.rings && land.rings.length ? buildLandGrid(land.rings, sc.proj, 0, 0) : null;
+  if (fine && sc.grid) { sc.fineOpt = fine; sc.fine = buildLandGrid(land.rings, sc.proj, sc.proj.x(own.lon), sc.proj.y(own.lat), fine.cell, fine.half); }
   updateScene(sc, own, targets, 0);
   return sc;
 }
@@ -94,6 +98,7 @@ export function updateScene(sc, own, targets, t) {
   sc.own = own; sc.t = t; sc.scan = Math.floor(t / 2.5);
   sc.ox = sc.proj.x(own.lon); sc.oy = sc.proj.y(own.lat);
   if (sc.grid && Math.hypot(sc.ox - sc.grid.x0 - LAND_HALF, sc.oy - sc.grid.y0 - LAND_HALF) > 15) sc.grid = buildLandGrid(sc.land.rings, sc.proj, sc.ox, sc.oy);
+  if (sc.fine && Math.hypot(sc.ox - sc.fine.x0 - sc.fine.half, sc.oy - sc.fine.y0 - sc.fine.half) > 3) sc.fine = buildLandGrid(sc.land.rings, sc.proj, sc.ox, sc.oy, sc.fineOpt.cell, sc.fineOpt.half);
   const hz = (h) => radarHorizonNM(own.antH ?? 25, h) * (sc.weather.ducting ? 2.5 : 1);
   sc.tg = targets.map((g) => {
     const x = sc.proj.x(g.lon) - sc.ox, y = sc.proj.y(g.lat) - sc.oy, R = Math.hypot(x, y), brg = wrap360(Math.atan2(x, y) / D2R);
@@ -132,7 +137,7 @@ function landLine(sc, cb, bi, nBins, maxRng, offset) {
   for (let i = 0; i < nBins; i++) {
     const R = cb.R[i] + offset;
     if (R > hz) { if (seen) L[i] = -1; continue; }
-    const isL = landAt(g, sc.ox + R * sb, sc.oy + R * cbb);
+    const isL = landAtSc(sc, sc.ox + R * sb, sc.oy + R * cbb);
     if (isL) { const front = inLand < 0.15; L[i] = landDb(R) - (front ? 0 : 6) - (seen && !inLand ? 6 : 0) + 4 * (hash(i + bi * 7, 3) - 0.5); inLand += cb.dr; seen = true; }
     else { inLand = 0; if (seen) L[i] = -1; }
   }
@@ -156,7 +161,7 @@ export function rawLine(sc, brgIdx, nBins, maxRng) {
   const nr = () => { rs ^= rs << 13; rs ^= rs >>> 17; rs ^= rs << 5; return (rs >>> 0) / 4294967296; };
   for (let i = 0; i < nBins; i++) { rs ^= rs << 13; rs ^= rs >>> 17; rs ^= rs << 5; out[i] = NOISE_DB[(rs >>> 20) & 4095]; }
   // 육지
-  const land = sc.grid && sc.grid.any ? landLine(sc, cb, brgIdx, nBins, maxRng, 0) : null;
+  const land = hasLand(sc) ? landLine(sc, cb, brgIdx, nBins, maxRng, 0) : null;
   // 해면 클러터
   if (W.sea > 0) {
     // 해면 반사: 방위마다 퍼지는 거리가 들쭉날쭉하고(바람 쪽이 더 멂), 파도 무리처럼 뭉친 얼룩(세계 좌표 잡음이라 바람 따라 천천히 흐름)
@@ -207,12 +212,13 @@ export function rawLine(sc, brgIdx, nBins, maxRng) {
     const off = Math.abs(angDiff(brg, a.brg));
     if (a.type === 'sart' && sc.band === 'X' && a.R < 8 && (off <= half || (a.R < 1 && off < 15))) for (const d of sartDots(a.R)) put(d, d + 0.05, 30);
     if (a.type === 'racon' && a.R < 12 && off <= half) for (const [s, e] of raconCode(a.letter)) put(a.R + 0.05 + s, a.R + 0.05 + e, 30);
+    if ((a.type === 'light' || a.type === 'buoy') && a.R < (a.type === 'light' ? 4 : 2) && off <= half) put(a.R, a.R + pulseNM, (a.type === 'light' ? 34 : 30) - 20 * Math.log10(Math.max(a.R, 0.1))); /* 방파제 등대·부표: 작은 점 반사(표적 목록과 따로) */
   }
   // 간섭(다른 선박 레이더): 이 스캔에 걸린 방위 줄에 무작위 점
   if (W.interference && (brgIdx & 1) === 0 && hash(brgIdx, sc.scan + 99) < 0.04) for (let i = 0; i < nBins; i++) if (hash(i, brgIdx + sc.scan * 4099) < 0.15) out[i] = Math.max(out[i], 25);
   // 2차 소인(덕팅 때 최대 탐지 거리 너머 육지)
   out.second = null;
-  if (W.ducting && sc.grid && sc.grid.any) {
+  if (W.ducting && hasLand(sc)) {
     const Ru = unambNM(PRF_BY_PULSE[sc.pulse] || 1500), L2 = landLine(sc, cb, brgIdx, nBins, maxRng, Ru);
     let s = null; for (let i = 0; i < nBins; i++) if (L2[i] > 0) { (s ||= new Float32Array(nBins))[i] = L2[i] + 8; }
     out.second = s;
@@ -285,7 +291,7 @@ export function detect(sc, c, rnd = Math.random) {
         if (rdb - k - stc > thr && db - att - rdb < 10) continue;
       } else if (db - att - stc <= thr) continue;
     }
-    if (sc.grid && sc.grid.any) { const sb = Math.sin(t.brg * D2R), cb = Math.cos(t.brg * D2R); let hid = false; for (let r = 0.05; r < t.R; r += 0.03) if (landAt(sc.grid, sc.ox + r * sb, sc.oy + r * cb)) { hid = true; break; } if (hid) continue; }
+    if (hasLand(sc)) { const sb = Math.sin(t.brg * D2R), cb = Math.cos(t.brg * D2R); let hid = false; for (let r = 0.05; r < t.R; r += 0.03) if (landAtSc(sc, sc.ox + r * sb, sc.oy + r * cb)) { hid = true; break; } if (hid) continue; }
     const R = t.R + g() * (rangeResM(pulseUs) / 2 / NM_M), b = (t.brg + g() * (band.beamDeg / 6)) * D2R;
     out.push({ x: R * Math.sin(b), y: R * Math.cos(b), strength: db - thr });
   }
