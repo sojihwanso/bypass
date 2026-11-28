@@ -19,7 +19,7 @@ function defaultFetch(ci) {
   }).finally(() => clearTimeout(tm));
 }
 
-function reader(u8, start) {
+export function reader(u8, start) {
   let p = start;
   const rv = () => { let v = 0, s = 0, b; do { b = u8[p++]; v += (b & 127) * Math.pow(2, s); s += 7; } while (b & 128); return v; };
   const zz = (v) => (v % 2 ? -(v + 1) / 2 : v / 2);
