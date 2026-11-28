@@ -7,6 +7,14 @@ import { steerTraffic } from './traffic.js';
 import { pointInLand } from './coast.js';
 
 export const PASS_NM = 0.3;
+export const COLLIDE_NM = 0.03, NEAR_NM = 0.3; /* 충돌 거리(모든 시나리오), 접근 기록 거리 */
+/* 0.3 NM 안 접근: 밖→안 들어올 때마다 n+1, 안에 있던 시간(표본 시각 차이, 배속 무관)을 sec에 누적 */
+export function nearTrack(st, d, t) {
+  st = st || { in: false, n: 0, sec: 0, t: null };
+  if (st.in) st.sec += t - st.t;
+  if (d < NEAR_NM) { if (!st.in) st.n++; st.in = true; } else st.in = false;
+  st.t = t; return st;
+}
 const tele = (k) => TELEGRAPH.findIndex((x) => x.k === k);
 /* 자선 (lat,lon,hdg,kn)이 tc분 동안 직진한 점 + 오프셋(오른쪽 +NM)에 tc분 뒤 도착하는 상대선의 시작 위치 */
 function collide(own, { tcMin, hdg, kn, side = 0 }) {
